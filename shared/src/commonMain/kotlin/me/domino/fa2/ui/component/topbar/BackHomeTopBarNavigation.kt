@@ -8,26 +8,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 
-/**
- * TopBar 左侧 Back + Home 导航区。
- */
+/** TopBar 左侧 Back + Home 导航区。 */
 @Composable
-fun BackHomeTopBarNavigation(
-    onBack: () -> Unit,
-    onGoHome: () -> Unit,
-) {
-    Row {
-        IconButton(onClick = onBack) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "返回",
-            )
-        }
-        IconButton(onClick = onGoHome) {
-            Icon(
-                imageVector = Icons.Filled.Home,
-                contentDescription = "回到首页",
-            )
-        }
+fun BackHomeTopBarNavigation(onBack: () -> Unit, onGoHome: () -> Unit) {
+  Row {
+    IconButton(onClick = onBack) {
+      Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
     }
+    IconButton(onClick = onGoHome) {
+      Icon(imageVector = Icons.Filled.Home, contentDescription = "回到首页")
+    }
+  }
 }

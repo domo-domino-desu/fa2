@@ -8,19 +8,11 @@ import me.domino.fa2.app.challenge.CfChallengeController
 import me.domino.fa2.app.challenge.CfChallengeUiState
 import org.koin.compose.koinInject
 
-/**
- * 全局 challenge 覆盖层宿主。
- */
+/** 全局 challenge 覆盖层宿主。 */
 @Composable
-fun CfChallengeOverlayHost(
-    modifier: Modifier = Modifier,
-) {
-    val coordinator = koinInject<CfChallengeController>()
-    val challengeState by coordinator.state.collectAsState()
-    val activeState = challengeState as? CfChallengeUiState.Active ?: return
-    CfChallengeOverlay(
-        state = activeState,
-        controller = coordinator,
-        modifier = modifier,
-    )
+fun CfChallengeOverlayHost(modifier: Modifier = Modifier) {
+  val coordinator = koinInject<CfChallengeController>()
+  val challengeState by coordinator.state.collectAsState()
+  val activeState = challengeState as? CfChallengeUiState.Active ?: return
+  CfChallengeOverlay(state = activeState, controller = coordinator, modifier = modifier)
 }

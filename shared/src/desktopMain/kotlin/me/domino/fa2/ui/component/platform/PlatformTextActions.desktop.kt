@@ -7,20 +7,17 @@ import java.awt.datatransfer.StringSelection
 
 @Composable
 actual fun rememberPlatformTextCopier(): (String) -> Boolean {
-    return remember {
-        { text ->
-            runCatching {
-                Toolkit.getDefaultToolkit()
-                    .systemClipboard
-                    .setContents(StringSelection(text), null)
-            }.isSuccess
+  return remember {
+    { text ->
+      runCatching {
+          Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(text), null)
         }
+        .isSuccess
     }
+  }
 }
 
 @Composable
 actual fun rememberPlatformTextSharer(): (String) -> Boolean {
-    return remember {
-        { _ -> false }
-    }
+  return remember { { _ -> false } }
 }

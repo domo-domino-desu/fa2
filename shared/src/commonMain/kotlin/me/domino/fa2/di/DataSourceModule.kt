@@ -21,34 +21,26 @@ import me.domino.fa2.data.parser.WatchlistParser
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
-/**
- * DataSource 依赖模块。
- */
+/** DataSource 依赖模块。 */
 fun dataSourceModule(): Module = module {
-    single { FeedParser() }
-    single { SubmissionParser() }
-    single { UserParser() }
-    single { GalleryParser() }
-    single { JournalsParser() }
-    single { JournalParser() }
-    single { WatchlistParser() }
+  single { FeedParser() }
+  single { SubmissionParser() }
+  single { UserParser() }
+  single { GalleryParser() }
+  single { JournalsParser() }
+  single { JournalParser() }
+  single { WatchlistParser() }
 
-    single {
-        AuthDataSource(
-            homeEndpoint = get(),
-            cookiesStorage = get(),
-            userAgentStorage = get(),
-        )
-    }
+  single { AuthDataSource(homeEndpoint = get(), cookiesStorage = get(), userAgentStorage = get()) }
 
-    single { FeedDataSource(get(), get()) }
-    single { SubmissionDataSource(get(), get()) }
-    single { UserDataSource(get(), get()) }
-    single { GalleryDataSource(get(), get()) }
-    single { FavoritesDataSource(get(), get()) }
-    single { BrowseDataSource(get(), get()) }
-    single { SearchDataSource(get(), get()) }
-    single { JournalsDataSource(get(), get()) }
-    single { JournalDataSource(get(), get()) }
-    single { WatchlistDataSource(get(), get()) }
+  single { FeedDataSource(get(), get()) }
+  single { SubmissionDataSource(get(), get()) }
+  single { UserDataSource(get(), get()) }
+  single { GalleryDataSource(get(), get()) }
+  single { FavoritesDataSource(get(), get()) }
+  single { BrowseDataSource(get(), get()) }
+  single { SearchDataSource(get(), get()) }
+  single { JournalsDataSource(get(), get()) }
+  single { JournalDataSource(get(), get()) }
+  single { WatchlistDataSource(get(), get()) }
 }

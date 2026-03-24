@@ -5,18 +5,19 @@ import androidx.compose.runtime.staticCompositionLocalOf
 
 internal val LocalUserHeaderContent = staticCompositionLocalOf<(@Composable () -> Unit)?> { null }
 internal val LocalUserHeaderRefreshAction = staticCompositionLocalOf<(() -> Unit)?> { null }
-internal val LocalUserSubmissionFolderResolver = staticCompositionLocalOf<(UserChildRoute) -> String?> { { null } }
+internal val LocalUserSubmissionFolderResolver =
+  staticCompositionLocalOf<(UserChildRoute) -> String?> { { null } }
 internal val LocalUserSubmissionFolderUpdater =
-    staticCompositionLocalOf<(UserChildRoute, String) -> Unit> { { _, _ -> } }
+  staticCompositionLocalOf<(UserChildRoute, String) -> Unit> { { _, _ -> } }
 internal val LocalUserSharedTopScrollStateResolver =
-    staticCompositionLocalOf<() -> UserSharedTopScrollState> { { UserSharedTopScrollState.Inline() } }
+  staticCompositionLocalOf<() -> UserSharedTopScrollState> { { UserSharedTopScrollState.Inline() } }
 internal val LocalUserSharedTopScrollStateUpdater =
-    staticCompositionLocalOf<(UserSharedTopScrollState) -> Unit> { { _ -> } }
+  staticCompositionLocalOf<(UserSharedTopScrollState) -> Unit> { { _ -> } }
 internal val LocalUserBodyScrollPositionResolver =
-    staticCompositionLocalOf<(String) -> UserBodyScrollPosition?> { { null } }
+  staticCompositionLocalOf<(String) -> UserBodyScrollPosition?> { { null } }
 internal val LocalUserBodyScrollPositionUpdater =
-    staticCompositionLocalOf<(String, UserBodyScrollPosition) -> Unit> { { _, _ -> } }
+  staticCompositionLocalOf<(String, UserBodyScrollPosition) -> Unit> { { _, _ -> } }
 internal val LocalUserSubmissionSnapshotResolver =
-    staticCompositionLocalOf<(String) -> UserSubmissionSectionUiState?> { { null } }
+  staticCompositionLocalOf<(String) -> UserSubmissionSectionUiState?> { { null } }
 internal val LocalUserSubmissionSnapshotUpdater =
-    staticCompositionLocalOf<(String, UserSubmissionSectionUiState) -> Unit> { { _, _ -> } }
+  staticCompositionLocalOf<(String, UserSubmissionSectionUiState) -> Unit> { { _, _ -> } }

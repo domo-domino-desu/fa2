@@ -5,7 +5,5 @@ import androidx.compose.runtime.remember
 
 @Composable
 actual fun rememberPlatformUrlDownloader(): suspend (String) -> Boolean {
-    return remember {
-        { _ -> false }
-    }
+  return remember { { _ -> false } }
 }

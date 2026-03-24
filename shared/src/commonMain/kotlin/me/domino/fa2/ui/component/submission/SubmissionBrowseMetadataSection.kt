@@ -18,87 +18,80 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun SubmissionBrowseMetadataSection(
-    rating: String,
-    category: String,
-    type: String,
-    species: String,
-    browseFilter: SubmissionBrowseFilter,
-    onOpenBrowseFilter: (category: Int, type: Int, species: Int) -> Unit,
+  rating: String,
+  category: String,
+  type: String,
+  species: String,
+  browseFilter: SubmissionBrowseFilter,
+  onOpenBrowseFilter: (category: Int, type: Int, species: Int) -> Unit,
 ) {
-    val normalizedRating = rating.trim()
-    val normalizedCategory = category.trim()
-    val normalizedType = type.trim()
-    val normalizedSpecies = species.trim()
-    if (
-        normalizedRating.isBlank() &&
-        normalizedCategory.isBlank() &&
-        normalizedType.isBlank() &&
-        normalizedSpecies.isBlank()
-    ) {
-        return
-    }
+  val normalizedRating = rating.trim()
+  val normalizedCategory = category.trim()
+  val normalizedType = type.trim()
+  val normalizedSpecies = species.trim()
+  if (
+    normalizedRating.isBlank() &&
+      normalizedCategory.isBlank() &&
+      normalizedType.isBlank() &&
+      normalizedSpecies.isBlank()
+  ) {
+    return
+  }
 
-    FlowRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        SubmissionBrowseMetadataField(
-            label = "Rating",
-            value = normalizedRating,
-            onClick = null,
-        )
-        SubmissionBrowseMetadataField(
-            label = "Category",
-            value = normalizedCategory,
-            onClick = if (browseFilter.category != null) {
-                { onOpenBrowseFilter(browseFilter.category, 1, 1) }
-            } else {
-                null
-            },
-        )
-        SubmissionBrowseMetadataField(
-            label = "Type",
-            value = normalizedType,
-            onClick = if (browseFilter.type != null) {
-                { onOpenBrowseFilter(1, browseFilter.type, 1) }
-            } else {
-                null
-            },
-        )
-        SubmissionBrowseMetadataField(
-            label = "Species",
-            value = normalizedSpecies,
-            onClick = if (browseFilter.species != null) {
-                { onOpenBrowseFilter(1, 1, browseFilter.species) }
-            } else {
-                null
-            },
-        )
-    }
+  FlowRow(
+    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp),
+  ) {
+    SubmissionBrowseMetadataField(label = "Rating", value = normalizedRating, onClick = null)
+    SubmissionBrowseMetadataField(
+      label = "Category",
+      value = normalizedCategory,
+      onClick =
+        if (browseFilter.category != null) {
+          { onOpenBrowseFilter(browseFilter.category, 1, 1) }
+        } else {
+          null
+        },
+    )
+    SubmissionBrowseMetadataField(
+      label = "Type",
+      value = normalizedType,
+      onClick =
+        if (browseFilter.type != null) {
+          { onOpenBrowseFilter(1, browseFilter.type, 1) }
+        } else {
+          null
+        },
+    )
+    SubmissionBrowseMetadataField(
+      label = "Species",
+      value = normalizedSpecies,
+      onClick =
+        if (browseFilter.species != null) {
+          { onOpenBrowseFilter(1, 1, browseFilter.species) }
+        } else {
+          null
+        },
+    )
+  }
 }
 
 @Composable
-private fun SubmissionBrowseMetadataField(
-    label: String,
-    value: String,
-    onClick: (() -> Unit)?,
-) {
-    if (value.isBlank()) return
-    Surface(
-        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.72f),
-        shape = RoundedCornerShape(999.dp),
-        modifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier,
-    ) {
-        Text(
-            text = "$label: $value",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-        )
-    }
+private fun SubmissionBrowseMetadataField(label: String, value: String, onClick: (() -> Unit)?) {
+  if (value.isBlank()) return
+  Surface(
+    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.72f),
+    shape = RoundedCornerShape(999.dp),
+    modifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier,
+  ) {
+    Text(
+      text = "$label: $value",
+      style = MaterialTheme.typography.labelMedium,
+      color = MaterialTheme.colorScheme.onSecondaryContainer,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+      modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+    )
+  }
 }

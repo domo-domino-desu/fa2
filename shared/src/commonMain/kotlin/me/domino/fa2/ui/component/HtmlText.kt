@@ -10,32 +10,25 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import be.digitalia.compose.htmlconverter.htmlToAnnotatedString
 
-/**
- * HTML 文本渲染组件（基于 HtmlConverterCompose）。
- */
+/** HTML 文本渲染组件（基于 HtmlConverterCompose）。 */
 @Composable
 fun HtmlText(
-    html: String,
-    modifier: Modifier = Modifier,
-    style: TextStyle = LocalTextStyle.current,
-    color: Color = Color.Unspecified,
-    maxLines: Int = Int.MAX_VALUE,
-    overflow: TextOverflow = TextOverflow.Clip,
-    compactMode: Boolean = true,
+  html: String,
+  modifier: Modifier = Modifier,
+  style: TextStyle = LocalTextStyle.current,
+  color: Color = Color.Unspecified,
+  maxLines: Int = Int.MAX_VALUE,
+  overflow: TextOverflow = TextOverflow.Clip,
+  compactMode: Boolean = true,
 ) {
-    val rendered = remember(html, compactMode) {
-        htmlToAnnotatedString(
-            html = html,
-            compactMode = compactMode,
-        )
-    }
-    Text(
-        text = rendered,
-        modifier = modifier,
-        style = style,
-        color = color,
-        maxLines = maxLines,
-        overflow = overflow,
-    )
+  val rendered =
+    remember(html, compactMode) { htmlToAnnotatedString(html = html, compactMode = compactMode) }
+  Text(
+    text = rendered,
+    modifier = modifier,
+    style = style,
+    color = color,
+    maxLines = maxLines,
+    overflow = overflow,
+  )
 }
-

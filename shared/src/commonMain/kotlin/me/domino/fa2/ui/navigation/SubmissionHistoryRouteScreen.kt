@@ -28,87 +28,76 @@ import me.domino.fa2.ui.component.topbar.SubmissionHistoryRouteTopBar
 import me.domino.fa2.ui.screen.feed.SubmissionRouteScreen
 import org.koin.compose.koinInject
 
-/**
- * 投稿浏览历史页面（瀑布流）。
- */
+/** 投稿浏览历史页面（瀑布流）。 */
 class SubmissionHistoryRouteScreen : Screen {
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
-        val rootNavigator = navigator.rootNavigator()
-        val historyRepository = koinInject<ActivityHistoryRepository>()
-        val settingsService = koinInject<AppSettingsService>()
-        val settings by settingsService.settings.collectAsState()
-        val waterfallState = rememberLazyStaggeredGridState()
-        var loading by remember { mutableStateOf(true) }
-        var submissions by remember { mutableStateOf<List<SubmissionThumbnail>>(emptyList()) }
-        val holderTag = "submission-list-holder:history"
-        val submissionListHolder = rootNavigator.rememberNavigatorScreenModel<SubmissionListHolder>(
-            tag = holderTag,
-        ) {
-            SubmissionListHolder()
-        }
+  @OptIn(ExperimentalMaterial3Api::class)
+  @Composable
+  override fun Content() {
+    val navigator = LocalNavigator.currentOrThrow
+    val rootNavigator = navigator.rootNavigator()
+    val historyRepository = koinInject<ActivityHistoryRepository>()
+    val settingsService = koinInject<AppSettingsService>()
+    val settings by settingsService.settings.collectAsState()
+    val waterfallState = rememberLazyStaggeredGridState()
+    var loading by remember { mutableStateOf(true) }
+    var submissions by remember { mutableStateOf<List<SubmissionThumbnail>>(emptyList()) }
+    val holderTag = "submission-list-holder:history"
+    val submissionListHolder =
+      rootNavigator.rememberNavigatorScreenModel<SubmissionListHolder>(tag = holderTag) {
+        SubmissionListHolder()
+      }
 
-        LaunchedEffect(Unit) {
-            submissions = historyRepository.loadSubmissionHistory()
-            loading = false
-        }
-
-        LaunchedEffect(submissions) {
-            submissionListHolder.replace(
-                submissions = submissions,
-                nextPageUrl = null,
-            )
-        }
-
-        Column(modifier = Modifier.fillMaxSize()) {
-            SubmissionHistoryRouteTopBar(
-                onBack = { navigator.pop() },
-                onGoHome = { navigator.goBackHome() },
-            )
-
-            when {
-                loading -> {
-                    Text(
-                        text = "正在加载浏览记录...",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                    )
-                }
-
-                submissions.isEmpty() -> {
-                    Text(
-                        text = "暂无浏览记录。",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                    )
-                }
-
-                else -> {
-                    SubmissionWaterfall(
-                        items = submissions,
-                        onItemClick = { item ->
-                            submissionListHolder.setCurrentBySid(item.id)
-                            navigator.push(
-                                SubmissionRouteScreen(
-                                    initialSid = item.id,
-                                    holderTag = holderTag,
-                                ),
-                            )
-                        },
-                        onLastVisibleIndexChanged = {},
-                        canLoadMore = false,
-                        loadingMore = false,
-                        appendErrorMessage = null,
-                        onRetryLoadMore = {},
-                        state = waterfallState,
-                        minCardWidthDp = settings.waterfallMinCardWidthDp,
-                        blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
-                    )
-                }
-            }
-        }
+    LaunchedEffect(Unit) {
+      submissions = historyRepository.loadSubmissionHistory()
+      loading = false
     }
+
+    LaunchedEffect(submissions) {
+      submissionListHolder.replace(submissions = submissions, nextPageUrl = null)
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+      SubmissionHistoryRouteTopBar(
+        onBack = { navigator.pop() },
+        onGoHome = { navigator.goBackHome() },
+      )
+
+      when {
+        loading -> {
+          Text(
+            text = "正在加载浏览记录...",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+          )
+        }
+
+        submissions.isEmpty() -> {
+          Text(
+            text = "暂无浏览记录。",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+          )
+        }
+
+        else -> {
+          SubmissionWaterfall(
+            items = submissions,
+            onItemClick = { item ->
+              submissionListHolder.setCurrentBySid(item.id)
+              navigator.push(SubmissionRouteScreen(initialSid = item.id, holderTag = holderTag))
+            },
+            onLastVisibleIndexChanged = {},
+            canLoadMore = false,
+            loadingMore = false,
+            appendErrorMessage = null,
+            onRetryLoadMore = {},
+            state = waterfallState,
+            minCardWidthDp = settings.waterfallMinCardWidthDp,
+            blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
+          )
+        }
+      }
+    }
+  }
 }

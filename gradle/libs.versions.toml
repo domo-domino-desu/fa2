@@ -24,6 +24,7 @@ kotlinx-serialization = "1.8.1"
 ksoup = "0.2.6"
 kSafe = "1.7.1"
 ksp = "2.3.6"
+ktfmt = "0.26.0"
 ktor = "3.0.0"
 lifecycle = "2.9.2"
 materialyou = "0.2.9"
@@ -96,4 +97,5 @@ buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig"
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmt" }
 room = { id = "androidx.room", version.ref = "room" }

@@ -35,134 +35,134 @@ import me.domino.fa2.ui.state.rememberSubmissionDescriptionTranslationState
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun SubmissionDescriptionCard(
-    descriptionHtml: String,
-    translationService: SubmissionDescriptionTranslationService,
-    requestPagerFocus: () -> Unit,
+  descriptionHtml: String,
+  translationService: SubmissionDescriptionTranslationService,
+  requestPagerFocus: () -> Unit,
 ) {
-    val translationController = rememberSubmissionDescriptionTranslationState(
-        descriptionHtml = descriptionHtml,
-        service = translationService,
+  val translationController =
+    rememberSubmissionDescriptionTranslationState(
+      descriptionHtml = descriptionHtml,
+      service = translationService,
     )
-    Surface(
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(14.dp),
-        border = BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+  Surface(
+    color = MaterialTheme.colorScheme.surface,
+    shape = RoundedCornerShape(14.dp),
+    border =
+      BorderStroke(
+        width = 1.dp,
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+      ),
+    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+  ) {
+    Column(
+      modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Text(
+          text = "描述",
+          style = MaterialTheme.typography.titleMedium,
+          fontWeight = FontWeight.SemiBold,
+        )
+        Text(
+          text = "·",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.padding(start = 4.dp),
+        )
+        Box(
+          modifier =
+            Modifier.padding(start = 3.dp)
+              .clip(CircleShape)
+              .clickable(enabled = !translationController.translating) {
+                translationController.translate()
+                requestPagerFocus()
+              }
+              .padding(1.dp)
+              .focusProperties { canFocus = false }
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "描述",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    text = "·",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 4.dp),
-                )
-                Box(
-                    modifier = Modifier
-                        .padding(start = 3.dp)
-                        .clip(CircleShape)
-                        .clickable(enabled = !translationController.translating) {
-                            translationController.translate()
-                            requestPagerFocus()
-                        }
-                        .padding(1.dp)
-                        .focusProperties { canFocus = false },
-                ) {
-                    if (translationController.translating) {
-                        LoadingIndicator(
-                            modifier = Modifier.size(14.dp),
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Outlined.Translate,
-                            contentDescription = "翻译描述",
-                            modifier = Modifier.size(17.dp),
-                        )
-                    }
-                }
-            }
-            if (translationController.blocks.isEmpty()) {
-                Text(
-                    text = "暂无描述",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                return@Column
-            }
-
-            translationController.blocks.forEachIndexed { index, block ->
-                HtmlText(
-                    html = block.originalHtml,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-
-                when (block.status) {
-                    SubmissionDescriptionTranslationStatus.IDLE -> Unit
-                    SubmissionDescriptionTranslationStatus.PENDING -> {
-                        Text(
-                            text = "……",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-
-                    SubmissionDescriptionTranslationStatus.SUCCESS -> {
-                        val translated = block.translated.orEmpty()
-                        if (translated.isNotBlank()) {
-                            Text(
-                                text = translated,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                        }
-                    }
-
-                    SubmissionDescriptionTranslationStatus.EMPTY -> {
-                        Text(
-                            text = "翻译结果为空",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-
-                    SubmissionDescriptionTranslationStatus.FAILURE -> {
-                        Text(
-                            text = "翻译失败",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                }
-
-                if (
-                    block.status != SubmissionDescriptionTranslationStatus.IDLE &&
-                    index != translationController.blocks.lastIndex
-                ) {
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f),
-                    )
-                }
-            }
+          if (translationController.translating) {
+            LoadingIndicator(
+              modifier = Modifier.size(14.dp),
+              color = MaterialTheme.colorScheme.primary,
+            )
+          } else {
+            Icon(
+              imageVector = Icons.Outlined.Translate,
+              contentDescription = "翻译描述",
+              modifier = Modifier.size(17.dp),
+            )
+          }
         }
+      }
+      if (translationController.blocks.isEmpty()) {
+        Text(
+          text = "暂无描述",
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        return@Column
+      }
+
+      translationController.blocks.forEachIndexed { index, block ->
+        HtmlText(
+          html = block.originalHtml,
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        when (block.status) {
+          SubmissionDescriptionTranslationStatus.IDLE -> Unit
+          SubmissionDescriptionTranslationStatus.PENDING -> {
+            Text(
+              text = "……",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+
+          SubmissionDescriptionTranslationStatus.SUCCESS -> {
+            val translated = block.translated.orEmpty()
+            if (translated.isNotBlank()) {
+              Text(
+                text = translated,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+              )
+            }
+          }
+
+          SubmissionDescriptionTranslationStatus.EMPTY -> {
+            Text(
+              text = "翻译结果为空",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+
+          SubmissionDescriptionTranslationStatus.FAILURE -> {
+            Text(
+              text = "翻译失败",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.error,
+            )
+          }
+        }
+
+        if (
+          block.status != SubmissionDescriptionTranslationStatus.IDLE &&
+            index != translationController.blocks.lastIndex
+        ) {
+          HorizontalDivider(
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f),
+          )
+        }
+      }
     }
+  }
 }

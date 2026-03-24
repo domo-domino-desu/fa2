@@ -28,130 +28,108 @@ import me.domino.fa2.ui.screen.search.util.epochMillisToIsoDate
 import me.domino.fa2.ui.screen.search.util.isoDateToEpochMillisOrNull
 
 private enum class ManualDateFieldTarget {
-    From,
-    To,
+  From,
+  To,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ManualDateRangeSection(
-    rangeFrom: String,
-    rangeTo: String,
-    onUpdateRangeFrom: (String) -> Unit,
-    onUpdateRangeTo: (String) -> Unit,
+  rangeFrom: String,
+  rangeTo: String,
+  onUpdateRangeFrom: (String) -> Unit,
+  onUpdateRangeTo: (String) -> Unit,
 ) {
-    var pickerTarget by remember { mutableStateOf<ManualDateFieldTarget?>(null) }
-    val activeTarget = pickerTarget
-    if (activeTarget != null) {
-        val initialValue = when (activeTarget) {
-            ManualDateFieldTarget.From -> rangeFrom
-            ManualDateFieldTarget.To -> rangeTo
-        }
-        val datePickerState = androidx.compose.material3.rememberDatePickerState(
-            initialSelectedDateMillis = isoDateToEpochMillisOrNull(initialValue),
-        )
-        DatePickerDialog(
-            onDismissRequest = { pickerTarget = null },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        val selected = datePickerState.selectedDateMillis?.let { millis ->
-                            epochMillisToIsoDate(millis)
-                        }
-                        if (!selected.isNullOrBlank()) {
-                            when (activeTarget) {
-                                ManualDateFieldTarget.From -> onUpdateRangeFrom(selected)
-                                ManualDateFieldTarget.To -> onUpdateRangeTo(selected)
-                            }
-                        }
-                        pickerTarget = null
-                    },
-                ) {
-                    Text("确定")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { pickerTarget = null }) {
-                    Text("取消")
-                }
-            },
+  var pickerTarget by remember { mutableStateOf<ManualDateFieldTarget?>(null) }
+  val activeTarget = pickerTarget
+  if (activeTarget != null) {
+    val initialValue =
+      when (activeTarget) {
+        ManualDateFieldTarget.From -> rangeFrom
+        ManualDateFieldTarget.To -> rangeTo
+      }
+    val datePickerState =
+      androidx.compose.material3.rememberDatePickerState(
+        initialSelectedDateMillis = isoDateToEpochMillisOrNull(initialValue)
+      )
+    DatePickerDialog(
+      onDismissRequest = { pickerTarget = null },
+      confirmButton = {
+        TextButton(
+          onClick = {
+            val selected =
+              datePickerState.selectedDateMillis?.let { millis -> epochMillisToIsoDate(millis) }
+            if (!selected.isNullOrBlank()) {
+              when (activeTarget) {
+                ManualDateFieldTarget.From -> onUpdateRangeFrom(selected)
+                ManualDateFieldTarget.To -> onUpdateRangeTo(selected)
+              }
+            }
+            pickerTarget = null
+          }
         ) {
-            DatePicker(
-                state = datePickerState,
-                showModeToggle = false,
-            )
+          Text("确定")
         }
+      },
+      dismissButton = { TextButton(onClick = { pickerTarget = null }) { Text("取消") } },
+    ) {
+      DatePicker(state = datePickerState, showModeToggle = false)
     }
+  }
 
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val singleColumn = maxWidth < 560.dp
-        if (singleColumn) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                ManualDateField(
-                    value = rangeFrom,
-                    label = "From (YYYY-MM-DD)",
-                    onClick = { pickerTarget = ManualDateFieldTarget.From },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                ManualDateField(
-                    value = rangeTo,
-                    label = "To (YYYY-MM-DD)",
-                    onClick = { pickerTarget = ManualDateFieldTarget.To },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-        } else {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                ManualDateField(
-                    value = rangeFrom,
-                    label = "From (YYYY-MM-DD)",
-                    onClick = { pickerTarget = ManualDateFieldTarget.From },
-                    modifier = Modifier.weight(1f),
-                )
-                ManualDateField(
-                    value = rangeTo,
-                    label = "To (YYYY-MM-DD)",
-                    onClick = { pickerTarget = ManualDateFieldTarget.To },
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        }
+  BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+    val singleColumn = maxWidth < 560.dp
+    if (singleColumn) {
+      Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+        ManualDateField(
+          value = rangeFrom,
+          label = "From (YYYY-MM-DD)",
+          onClick = { pickerTarget = ManualDateFieldTarget.From },
+          modifier = Modifier.fillMaxWidth(),
+        )
+        ManualDateField(
+          value = rangeTo,
+          label = "To (YYYY-MM-DD)",
+          onClick = { pickerTarget = ManualDateFieldTarget.To },
+          modifier = Modifier.fillMaxWidth(),
+        )
+      }
+    } else {
+      Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+        ManualDateField(
+          value = rangeFrom,
+          label = "From (YYYY-MM-DD)",
+          onClick = { pickerTarget = ManualDateFieldTarget.From },
+          modifier = Modifier.weight(1f),
+        )
+        ManualDateField(
+          value = rangeTo,
+          label = "To (YYYY-MM-DD)",
+          onClick = { pickerTarget = ManualDateFieldTarget.To },
+          modifier = Modifier.weight(1f),
+        )
+      }
     }
+  }
 }
 
 @Composable
 private fun ManualDateField(
-    value: String,
-    label: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+  value: String,
+  label: String,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(label) },
-            placeholder = { Text("YYYY-MM-DD") },
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Outlined.DateRange,
-                    contentDescription = "选择日期",
-                )
-            },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .clickable(onClick = onClick),
-        )
-    }
+  Box(modifier = modifier) {
+    OutlinedTextField(
+      value = value,
+      onValueChange = {},
+      readOnly = true,
+      label = { Text(label) },
+      placeholder = { Text("YYYY-MM-DD") },
+      trailingIcon = { Icon(imageVector = Icons.Outlined.DateRange, contentDescription = "选择日期") },
+      modifier = Modifier.fillMaxWidth(),
+    )
+    Box(modifier = Modifier.fillMaxWidth().height(56.dp).clickable(onClick = onClick))
+  }
 }

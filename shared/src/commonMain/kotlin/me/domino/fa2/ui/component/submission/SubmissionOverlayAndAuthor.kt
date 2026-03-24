@@ -32,112 +32,97 @@ import me.domino.fa2.ui.component.NetworkImage
 import me.domino.fa2.util.isGifUrl
 
 @Composable
-internal fun SubmissionZoomImageOverlay(
-    imageUrl: String,
-    onDismiss: () -> Unit,
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.95f)),
-    ) {
-        val normalizedUrl = imageUrl.trim()
-        if (isGifUrl(normalizedUrl)) {
-            NetworkImage(
-                url = normalizedUrl,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(12.dp)
-                    .clickable { onDismiss() },
-                contentScale = ContentScale.Fit,
-                showLoadingPlaceholder = false,
-            )
-        } else {
-            CoilZoomAsyncImage(
-                model = normalizedUrl,
-                contentDescription = "查看原图",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(12.dp),
-                contentScale = ContentScale.Fit,
-                filterQuality = FilterQuality.High,
-                onTap = { onDismiss() },
-            )
-        }
-        IconButton(
-            onClick = onDismiss,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(12.dp)
-                .focusProperties { canFocus = false },
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Close,
-                contentDescription = "关闭预览",
-                tint = MaterialTheme.colorScheme.onSurface,
-            )
-        }
+internal fun SubmissionZoomImageOverlay(imageUrl: String, onDismiss: () -> Unit) {
+  Box(
+    modifier =
+      Modifier.fillMaxSize().background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.95f))
+  ) {
+    val normalizedUrl = imageUrl.trim()
+    if (isGifUrl(normalizedUrl)) {
+      NetworkImage(
+        url = normalizedUrl,
+        modifier = Modifier.fillMaxSize().padding(12.dp).clickable { onDismiss() },
+        contentScale = ContentScale.Fit,
+        showLoadingPlaceholder = false,
+      )
+    } else {
+      CoilZoomAsyncImage(
+        model = normalizedUrl,
+        contentDescription = "查看原图",
+        modifier = Modifier.fillMaxSize().padding(12.dp),
+        contentScale = ContentScale.Fit,
+        filterQuality = FilterQuality.High,
+        onTap = { onDismiss() },
+      )
     }
+    IconButton(
+      onClick = onDismiss,
+      modifier =
+        Modifier.align(Alignment.TopEnd).padding(12.dp).focusProperties { canFocus = false },
+    ) {
+      Icon(
+        imageVector = Icons.Filled.Close,
+        contentDescription = "关闭预览",
+        tint = MaterialTheme.colorScheme.onSurface,
+      )
+    }
+  }
 }
 
 @Composable
 internal fun SubmissionAuthorRow(
-    authorDisplayName: String,
-    author: String,
-    authorAvatarUrl: String,
-    timestamp: String,
-    onOpenAuthor: (String) -> Unit,
+  authorDisplayName: String,
+  author: String,
+  authorAvatarUrl: String,
+  timestamp: String,
+  onOpenAuthor: (String) -> Unit,
 ) {
-    val normalizedAuthor = author.trim()
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .then(
-                if (normalizedAuthor.isNotBlank()) {
-                    Modifier.clickable { onOpenAuthor(normalizedAuthor) }
-                } else {
-                    Modifier
-                },
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+  val normalizedAuthor = author.trim()
+  Row(
+    modifier =
+      Modifier.fillMaxWidth()
+        .padding(horizontal = 16.dp)
+        .then(
+          if (normalizedAuthor.isNotBlank()) {
+            Modifier.clickable { onOpenAuthor(normalizedAuthor) }
+          } else {
+            Modifier
+          }
+        ),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(10.dp),
+  ) {
+    Surface(
+      shape = CircleShape,
+      color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.78f),
     ) {
-        Surface(
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.78f),
-        ) {
-            if (authorAvatarUrl.isNotBlank()) {
-                NetworkImage(
-                    url = authorAvatarUrl,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop,
-                    showLoadingPlaceholder = false,
-                )
-            } else {
-                Text(
-                    text = authorDisplayName.firstOrNull()?.uppercase() ?: "?",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                )
-            }
-        }
-        Column(
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            Text(
-                text = authorDisplayName,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Text(
-                text = timestamp,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+      if (authorAvatarUrl.isNotBlank()) {
+        NetworkImage(
+          url = authorAvatarUrl,
+          modifier = Modifier.size(40.dp).clip(CircleShape),
+          contentScale = ContentScale.Crop,
+          showLoadingPlaceholder = false,
+        )
+      } else {
+        Text(
+          text = authorDisplayName.firstOrNull()?.uppercase() ?: "?",
+          style = MaterialTheme.typography.titleMedium,
+          color = MaterialTheme.colorScheme.onSecondaryContainer,
+          modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+        )
+      }
     }
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+      Text(
+        text = authorDisplayName,
+        style = MaterialTheme.typography.bodyLarge,
+        fontWeight = FontWeight.SemiBold,
+      )
+      Text(
+        text = timestamp,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+    }
+  }
 }

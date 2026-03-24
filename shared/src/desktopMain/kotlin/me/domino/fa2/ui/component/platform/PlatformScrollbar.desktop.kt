@@ -7,13 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-actual fun PlatformVerticalScrollbar(
-    scrollState: ScrollState,
-    modifier: Modifier,
-) {
-    @Suppress("DEPRECATION")
-    VerticalScrollbar(
-        adapter = rememberScrollbarAdapter(scrollState),
-        modifier = modifier,
-    )
+actual fun PlatformVerticalScrollbar(scrollState: ScrollState, modifier: Modifier) {
+  @Suppress("DEPRECATION")
+  VerticalScrollbar(adapter = rememberScrollbarAdapter(scrollState), modifier = modifier)
 }

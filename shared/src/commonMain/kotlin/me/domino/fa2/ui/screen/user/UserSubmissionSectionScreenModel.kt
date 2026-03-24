@@ -5,9 +5,9 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.GalleryFolderGroup
+import me.domino.fa2.data.model.GalleryPage
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.data.model.GalleryPage
 import me.domino.fa2.data.repository.FavoritesRepository
 import me.domino.fa2.data.repository.GalleryRepository
 import me.domino.fa2.ui.navigation.SubmissionListHolder
@@ -19,275 +19,264 @@ import me.domino.fa2.util.logging.summarizeUrl
 
 private const val userAutoLoadThreshold = 10
 
-/**
- * User 投稿子页状态。
- */
+/** User 投稿子页状态。 */
 data class UserSubmissionSectionUiState(
-    /** 当前列表。 */
-    val submissions: List<SubmissionThumbnail> = emptyList(),
-    /** 下一页 URL。 */
-    val nextPageUrl: String? = null,
-    /** 是否加载中。 */
-    val loading: Boolean = false,
-    /** 是否刷新中。 */
-    val refreshing: Boolean = false,
-    /** 是否正在加载更多。 */
-    val isLoadingMore: Boolean = false,
-    /** 错误文案。 */
-    val errorMessage: String? = null,
-    /** 追加错误文案。 */
-    val appendErrorMessage: String? = null,
-    /** 文件夹分组。 */
-    val folderGroups: List<GalleryFolderGroup> = emptyList(),
+  /** 当前列表。 */
+  val submissions: List<SubmissionThumbnail> = emptyList(),
+  /** 下一页 URL。 */
+  val nextPageUrl: String? = null,
+  /** 是否加载中。 */
+  val loading: Boolean = false,
+  /** 是否刷新中。 */
+  val refreshing: Boolean = false,
+  /** 是否正在加载更多。 */
+  val isLoadingMore: Boolean = false,
+  /** 错误文案。 */
+  val errorMessage: String? = null,
+  /** 追加错误文案。 */
+  val appendErrorMessage: String? = null,
+  /** 文件夹分组。 */
+  val folderGroups: List<GalleryFolderGroup> = emptyList(),
 ) {
-    /** 是否有下一页。 */
-    val hasMore: Boolean
-        get() = !nextPageUrl.isNullOrBlank()
+  /** 是否有下一页。 */
+  val hasMore: Boolean
+    get() = !nextPageUrl.isNullOrBlank()
 }
 
-/**
- * User 投稿子页状态模型（Gallery/Favorites/Scraps）。
- */
+/** User 投稿子页状态模型（Gallery/Favorites/Scraps）。 */
 class UserSubmissionSectionScreenModel(
-    /** 用户名。 */
-    private val username: String,
-    /** 子路由。 */
-    private val route: UserChildRoute,
-    /** Gallery 仓储。 */
-    private val galleryRepository: GalleryRepository,
-    /** Favorites 仓储。 */
-    private val favoritesRepository: FavoritesRepository,
-    /** 投稿共享持有器。 */
-    private val submissionListHolder: SubmissionListHolder,
-    /** 初始文件夹 URL（可选）。 */
-    initialFolderUrl: String? = null,
-    /** 初始快照（可选）。 */
-    initialSnapshot: UserSubmissionSectionUiState? = null,
-) : StateScreenModel<UserSubmissionSectionUiState>(
+  /** 用户名。 */
+  private val username: String,
+  /** 子路由。 */
+  private val route: UserChildRoute,
+  /** Gallery 仓储。 */
+  private val galleryRepository: GalleryRepository,
+  /** Favorites 仓储。 */
+  private val favoritesRepository: FavoritesRepository,
+  /** 投稿共享持有器。 */
+  private val submissionListHolder: SubmissionListHolder,
+  /** 初始文件夹 URL（可选）。 */
+  initialFolderUrl: String? = null,
+  /** 初始快照（可选）。 */
+  initialSnapshot: UserSubmissionSectionUiState? = null,
+) :
+  StateScreenModel<UserSubmissionSectionUiState>(
     initialSnapshot?.copy(
-        loading = false,
-        refreshing = false,
-        isLoadingMore = false,
-        errorMessage = null,
-        appendErrorMessage = null,
-    ) ?: UserSubmissionSectionUiState(),
-) {
-    private val log = FaLog.withTag("UserSubmissionSectionScreenModel")
-    private val paginationStateMachine = PaginationStateMachine<SubmissionThumbnail, Int>(keyOf = { item -> item.id })
-    private var loadJob: Job? = null
-    private var appendJob: Job? = null
-    private var basePageUrlOverride: String? = initialFolderUrl?.trim()?.takeIf { it.isNotBlank() }
+      loading = false,
+      refreshing = false,
+      isLoadingMore = false,
+      errorMessage = null,
+      appendErrorMessage = null,
+    ) ?: UserSubmissionSectionUiState()
+  ) {
+  private val log = FaLog.withTag("UserSubmissionSectionScreenModel")
+  private val paginationStateMachine =
+    PaginationStateMachine<SubmissionThumbnail, Int>(keyOf = { item -> item.id })
+  private var loadJob: Job? = null
+  private var appendJob: Job? = null
+  private var basePageUrlOverride: String? = initialFolderUrl?.trim()?.takeIf { it.isNotBlank() }
 
-    init {
-        if (state.value.submissions.isNotEmpty()) {
-            syncSubmissionListHolder(state.value)
+  init {
+    if (state.value.submissions.isNotEmpty()) {
+      syncSubmissionListHolder(state.value)
+    } else {
+      load()
+    }
+  }
+
+  /** 加载首页。 */
+  fun load(forceRefresh: Boolean = false, clearExisting: Boolean = false) {
+    log.i {
+      "加载用户投稿分区 -> 开始(user=$username,route=$route,forceRefresh=$forceRefresh,clearExisting=$clearExisting)"
+    }
+    if (loadJob?.isActive == true && !forceRefresh) {
+      log.d { "加载用户投稿分区 -> 跳过(已有任务)" }
+      return
+    }
+    loadJob?.cancel()
+    val snapshot = state.value
+    if (!forceRefresh && !clearExisting && snapshot.submissions.isNotEmpty()) {
+      log.d { "加载用户投稿分区 -> 跳过(已有数据)" }
+      return
+    }
+
+    val basePageUrl = basePageUrlOverride
+    val effectiveSnapshot =
+      if (clearExisting) {
+        snapshot.copy(submissions = emptyList(), nextPageUrl = null, folderGroups = emptyList())
+      } else {
+        snapshot
+      }
+
+    mutableState.value =
+      effectiveSnapshot.applyPagination(
+        paginationStateMachine.beginLoad(
+          snapshot = effectiveSnapshot.toPaginationSnapshot(),
+          forceRefresh = forceRefresh,
+        )
+      )
+
+    loadJob = screenModelScope.launch {
+      val firstPageState =
+        if (forceRefresh) {
+          loadFirstPage(basePageUrl = basePageUrl)
         } else {
-            load()
+          loadPage(nextPageUrl = basePageUrl)
         }
+      val reduced =
+        paginationStateMachine.reduceFirstPage(
+          snapshot = state.value.toPaginationSnapshot(),
+          result = firstPageState,
+          itemsOf = { page -> page.submissions },
+          nextPageUrlOf = { page -> page.nextPageUrl },
+        )
+      var updated = state.value.applyPagination(reduced)
+      if (firstPageState is PageState.Success) {
+        updated = updated.copy(folderGroups = firstPageState.data.folderGroups)
+      }
+      mutableState.value = updated
+      when (val next = firstPageState) {
+        is PageState.Success -> {
+          syncSubmissionListHolder(updated)
+          log.i { "加载用户投稿分区 -> ${summarizePageState(next)}(count=${updated.submissions.size})" }
+        }
+
+        PageState.CfChallenge -> log.w { "加载用户投稿分区 -> Cloudflare验证" }
+        is PageState.MatureBlocked -> log.w { "加载用户投稿分区 -> 受限(${next.reason})" }
+        is PageState.Error -> log.e(next.exception) { "加载用户投稿分区 -> 失败" }
+        PageState.Loading -> log.d { "加载用户投稿分区 -> 加载中" }
+      }
     }
+  }
 
-    /**
-     * 加载首页。
-     */
-    fun load(
-        forceRefresh: Boolean = false,
-        clearExisting: Boolean = false,
-    ) {
-        log.i {
-            "加载用户投稿分区 -> 开始(user=$username,route=$route,forceRefresh=$forceRefresh,clearExisting=$clearExisting)"
-        }
-        if (loadJob?.isActive == true && !forceRefresh) {
-            log.d { "加载用户投稿分区 -> 跳过(已有任务)" }
-            return
-        }
-        loadJob?.cancel()
-        val snapshot = state.value
-        if (!forceRefresh && !clearExisting && snapshot.submissions.isNotEmpty()) {
-            log.d { "加载用户投稿分区 -> 跳过(已有数据)" }
-            return
+  /** 触底回调。 */
+  fun onLastVisibleIndexChanged(lastVisibleIndex: Int) {
+    val snapshot = state.value
+    if (snapshot.submissions.isEmpty()) return
+    log.d {
+      "自动加载用户投稿分区 -> 触发检查(route=$route,last=$lastVisibleIndex,total=${snapshot.submissions.size})"
+    }
+    if (lastVisibleIndex > snapshot.submissions.lastIndex - userAutoLoadThreshold) {
+      loadMore(force = false)
+    }
+  }
+
+  /** 手动重试加载更多。 */
+  fun retryLoadMore() {
+    loadMore(force = true)
+  }
+
+  /** 设置当前投稿。 */
+  fun setCurrentSubmission(sid: Int) {
+    submissionListHolder.setCurrentBySid(sid)
+  }
+
+  /** 打开指定文件夹。 */
+  fun openFolder(folderUrl: String) {
+    val normalized =
+      folderUrl.trim().ifBlank {
+        return
+      }
+    log.i { "打开文件夹 -> 开始(route=$route,url=${summarizeUrl(normalized)})" }
+    basePageUrlOverride = normalized
+    load(forceRefresh = true, clearExisting = true)
+  }
+
+  private fun loadMore(force: Boolean) {
+    val snapshot = state.value
+    val nextUrl = snapshot.nextPageUrl ?: return
+    if (appendJob?.isActive == true) {
+      log.d { "自动加载用户投稿分区 -> 跳过(已有追加任务)" }
+      return
+    }
+    if (!paginationStateMachine.canLoadMore(snapshot.toPaginationSnapshot(), force = force)) {
+      log.d { "自动加载用户投稿分区 -> 跳过(条件未满足)" }
+      return
+    }
+    log.d { "自动加载用户投稿分区 -> 开始(route=$route,force=$force)" }
+
+    mutableState.value =
+      snapshot.applyPagination(paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot()))
+
+    appendJob = screenModelScope.launch {
+      val next = loadPage(nextPageUrl = nextUrl)
+      val reduced =
+        paginationStateMachine.reduceAppend(
+          snapshot = state.value.toPaginationSnapshot(),
+          result = next,
+          itemsOf = { page -> page.submissions },
+          nextPageUrlOf = { page -> page.nextPageUrl },
+        )
+      val updated = state.value.applyPagination(reduced)
+      mutableState.value = updated
+      when (next) {
+        is PageState.Success -> {
+          syncSubmissionListHolder(updated)
+          log.d { "自动加载用户投稿分区 -> ${summarizePageState(next)}(count=${updated.submissions.size})" }
         }
 
-        val basePageUrl = basePageUrlOverride
-        val effectiveSnapshot = if (clearExisting) {
-            snapshot.copy(
-                submissions = emptyList(),
-                nextPageUrl = null,
-                folderGroups = emptyList(),
-            )
-        } else {
-            snapshot
-        }
+        PageState.CfChallenge -> log.w { "自动加载用户投稿分区 -> Cloudflare验证" }
+        is PageState.MatureBlocked -> log.w { "自动加载用户投稿分区 -> 受限(${next.reason})" }
+        is PageState.Error -> log.e(next.exception) { "自动加载用户投稿分区 -> 失败" }
+        PageState.Loading -> log.d { "自动加载用户投稿分区 -> 加载中" }
+      }
+    }
+  }
 
-        mutableState.value = effectiveSnapshot.applyPagination(
-            paginationStateMachine.beginLoad(
-                snapshot = effectiveSnapshot.toPaginationSnapshot(),
-                forceRefresh = forceRefresh,
-            ),
+  private suspend fun loadPage(nextPageUrl: String?): PageState<GalleryPage> {
+    return when (route) {
+      UserChildRoute.Gallery -> galleryRepository.loadGalleryPage(username, nextPageUrl)
+      UserChildRoute.Favorites -> favoritesRepository.loadFavoritesPage(username, nextPageUrl)
+      UserChildRoute.Journals ->
+        PageState.Error(IllegalStateException("Invalid route for submissions: $route"))
+    }
+  }
+
+  private suspend fun loadFirstPage(basePageUrl: String?): PageState<GalleryPage> {
+    return when (route) {
+      UserChildRoute.Gallery ->
+        galleryRepository.refreshGalleryFirstPage(
+          username = username,
+          firstPageUrlOverride = basePageUrl,
         )
 
-        loadJob = screenModelScope.launch {
-            val firstPageState = if (forceRefresh) {
-                loadFirstPage(basePageUrl = basePageUrl)
-            } else {
-                loadPage(nextPageUrl = basePageUrl)
-            }
-            val reduced = paginationStateMachine.reduceFirstPage(
-                snapshot = state.value.toPaginationSnapshot(),
-                result = firstPageState,
-                itemsOf = { page -> page.submissions },
-                nextPageUrlOf = { page -> page.nextPageUrl },
-            )
-            var updated = state.value.applyPagination(reduced)
-            if (firstPageState is PageState.Success) {
-                updated = updated.copy(folderGroups = firstPageState.data.folderGroups)
-            }
-            mutableState.value = updated
-            when (val next = firstPageState) {
-                is PageState.Success -> {
-                    syncSubmissionListHolder(updated)
-                    log.i { "加载用户投稿分区 -> ${summarizePageState(next)}(count=${updated.submissions.size})" }
-                }
-
-                PageState.CfChallenge -> log.w { "加载用户投稿分区 -> Cloudflare验证" }
-                is PageState.MatureBlocked -> log.w { "加载用户投稿分区 -> 受限(${next.reason})" }
-                is PageState.Error -> log.e(next.exception) { "加载用户投稿分区 -> 失败" }
-                PageState.Loading -> log.d { "加载用户投稿分区 -> 加载中" }
-            }
-        }
-    }
-
-    /**
-     * 触底回调。
-     */
-    fun onLastVisibleIndexChanged(lastVisibleIndex: Int) {
-        val snapshot = state.value
-        if (snapshot.submissions.isEmpty()) return
-        log.d {
-            "自动加载用户投稿分区 -> 触发检查(route=$route,last=$lastVisibleIndex,total=${snapshot.submissions.size})"
-        }
-        if (lastVisibleIndex > snapshot.submissions.lastIndex - userAutoLoadThreshold) {
-            loadMore(force = false)
-        }
-    }
-
-    /**
-     * 手动重试加载更多。
-     */
-    fun retryLoadMore() {
-        loadMore(force = true)
-    }
-
-    /**
-     * 设置当前投稿。
-     */
-    fun setCurrentSubmission(sid: Int) {
-        submissionListHolder.setCurrentBySid(sid)
-    }
-
-    /**
-     * 打开指定文件夹。
-     */
-    fun openFolder(folderUrl: String) {
-        val normalized = folderUrl.trim().ifBlank { return }
-        log.i { "打开文件夹 -> 开始(route=$route,url=${summarizeUrl(normalized)})" }
-        basePageUrlOverride = normalized
-        load(forceRefresh = true, clearExisting = true)
-    }
-
-    private fun loadMore(force: Boolean) {
-        val snapshot = state.value
-        val nextUrl = snapshot.nextPageUrl ?: return
-        if (appendJob?.isActive == true) {
-            log.d { "自动加载用户投稿分区 -> 跳过(已有追加任务)" }
-            return
-        }
-        if (!paginationStateMachine.canLoadMore(snapshot.toPaginationSnapshot(), force = force)) {
-            log.d { "自动加载用户投稿分区 -> 跳过(条件未满足)" }
-            return
-        }
-        log.d { "自动加载用户投稿分区 -> 开始(route=$route,force=$force)" }
-
-        mutableState.value = snapshot.applyPagination(
-            paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot()),
+      UserChildRoute.Favorites ->
+        favoritesRepository.refreshFavoritesFirstPage(
+          username = username,
+          firstPageUrlOverride = basePageUrl,
         )
 
-        appendJob = screenModelScope.launch {
-            val next = loadPage(nextPageUrl = nextUrl)
-            val reduced = paginationStateMachine.reduceAppend(
-                snapshot = state.value.toPaginationSnapshot(),
-                result = next,
-                itemsOf = { page -> page.submissions },
-                nextPageUrlOf = { page -> page.nextPageUrl },
-            )
-            val updated = state.value.applyPagination(reduced)
-            mutableState.value = updated
-            when (next) {
-                is PageState.Success -> {
-                    syncSubmissionListHolder(updated)
-                    log.d { "自动加载用户投稿分区 -> ${summarizePageState(next)}(count=${updated.submissions.size})" }
-                }
-
-                PageState.CfChallenge -> log.w { "自动加载用户投稿分区 -> Cloudflare验证" }
-                is PageState.MatureBlocked -> log.w { "自动加载用户投稿分区 -> 受限(${next.reason})" }
-                is PageState.Error -> log.e(next.exception) { "自动加载用户投稿分区 -> 失败" }
-                PageState.Loading -> log.d { "自动加载用户投稿分区 -> 加载中" }
-            }
-        }
+      UserChildRoute.Journals ->
+        PageState.Error(IllegalStateException("Invalid route for submissions: $route"))
     }
+  }
 
-    private suspend fun loadPage(nextPageUrl: String?): PageState<GalleryPage> {
-        return when (route) {
-            UserChildRoute.Gallery -> galleryRepository.loadGalleryPage(username, nextPageUrl)
-            UserChildRoute.Favorites -> favoritesRepository.loadFavoritesPage(username, nextPageUrl)
-            UserChildRoute.Journals -> PageState.Error(IllegalStateException("Invalid route for submissions: $route"))
-        }
-    }
-
-    private suspend fun loadFirstPage(basePageUrl: String?): PageState<GalleryPage> {
-        return when (route) {
-            UserChildRoute.Gallery -> galleryRepository.refreshGalleryFirstPage(
-                username = username,
-                firstPageUrlOverride = basePageUrl,
-            )
-
-            UserChildRoute.Favorites -> favoritesRepository.refreshFavoritesFirstPage(
-                username = username,
-                firstPageUrlOverride = basePageUrl,
-            )
-
-            UserChildRoute.Journals -> PageState.Error(IllegalStateException("Invalid route for submissions: $route"))
-        }
-    }
-
-    private fun syncSubmissionListHolder(state: UserSubmissionSectionUiState) {
-        submissionListHolder.replace(
-            submissions = state.submissions,
-            nextPageUrl = state.nextPageUrl,
-        )
-    }
-
+  private fun syncSubmissionListHolder(state: UserSubmissionSectionUiState) {
+    submissionListHolder.replace(submissions = state.submissions, nextPageUrl = state.nextPageUrl)
+  }
 }
 
-private fun UserSubmissionSectionUiState.toPaginationSnapshot(): PaginationSnapshot<SubmissionThumbnail> =
-    PaginationSnapshot(
-        items = submissions,
-        nextPageUrl = nextPageUrl,
-        loading = loading,
-        refreshing = refreshing,
-        isLoadingMore = isLoadingMore,
-        errorMessage = errorMessage,
-        appendErrorMessage = appendErrorMessage,
-    )
+private fun UserSubmissionSectionUiState.toPaginationSnapshot():
+  PaginationSnapshot<SubmissionThumbnail> =
+  PaginationSnapshot(
+    items = submissions,
+    nextPageUrl = nextPageUrl,
+    loading = loading,
+    refreshing = refreshing,
+    isLoadingMore = isLoadingMore,
+    errorMessage = errorMessage,
+    appendErrorMessage = appendErrorMessage,
+  )
 
 private fun UserSubmissionSectionUiState.applyPagination(
-    snapshot: PaginationSnapshot<SubmissionThumbnail>,
+  snapshot: PaginationSnapshot<SubmissionThumbnail>
 ): UserSubmissionSectionUiState =
-    copy(
-        submissions = snapshot.items,
-        nextPageUrl = snapshot.nextPageUrl,
-        loading = snapshot.loading,
-        refreshing = snapshot.refreshing,
-        isLoadingMore = snapshot.isLoadingMore,
-        errorMessage = snapshot.errorMessage,
-        appendErrorMessage = snapshot.appendErrorMessage,
-    )
+  copy(
+    submissions = snapshot.items,
+    nextPageUrl = snapshot.nextPageUrl,
+    loading = snapshot.loading,
+    refreshing = snapshot.refreshing,
+    isLoadingMore = snapshot.isLoadingMore,
+    errorMessage = snapshot.errorMessage,
+    appendErrorMessage = snapshot.appendErrorMessage,
+  )

@@ -7,54 +7,41 @@ import me.domino.fa2.data.repository.FeedRepository
 import me.domino.fa2.data.repository.SubmissionRepository
 
 interface SubmissionPagerFeedSource {
-    suspend fun loadPageByNextUrl(nextPageUrl: String): PageState<FeedPage>
+  suspend fun loadPageByNextUrl(nextPageUrl: String): PageState<FeedPage>
 }
 
 interface SubmissionPagerDetailSource {
-    suspend fun loadBySid(sid: Int): PageState<Submission>
+  suspend fun loadBySid(sid: Int): PageState<Submission>
 
-    suspend fun loadByUrl(url: String): PageState<Submission>
+  suspend fun loadByUrl(url: String): PageState<Submission>
 
-    suspend fun toggleFavorite(
-        sid: Int,
-        actionUrl: String,
-    ): PageState<Unit>
+  suspend fun toggleFavorite(sid: Int, actionUrl: String): PageState<Unit>
 
-    suspend fun blockTag(
-        sid: Int,
-        tagName: String,
-        nonce: String,
-        toAdd: Boolean,
-    ): PageState<Unit>
+  suspend fun blockTag(sid: Int, tagName: String, nonce: String, toAdd: Boolean): PageState<Unit>
 }
 
-class SubmissionPagerFeedSourceImpl(
-    private val repository: FeedRepository,
-) : SubmissionPagerFeedSource {
-    override suspend fun loadPageByNextUrl(nextPageUrl: String): PageState<FeedPage> =
-        repository.loadPageByNextUrl(nextPageUrl)
+class SubmissionPagerFeedSourceImpl(private val repository: FeedRepository) :
+  SubmissionPagerFeedSource {
+  override suspend fun loadPageByNextUrl(nextPageUrl: String): PageState<FeedPage> =
+    repository.loadPageByNextUrl(nextPageUrl)
 }
 
-class SubmissionPagerDetailSourceImpl(
-    private val repository: SubmissionRepository,
-) : SubmissionPagerDetailSource {
-    override suspend fun loadBySid(sid: Int): PageState<Submission> =
-        repository.loadSubmissionDetailBySid(sid)
+class SubmissionPagerDetailSourceImpl(private val repository: SubmissionRepository) :
+  SubmissionPagerDetailSource {
+  override suspend fun loadBySid(sid: Int): PageState<Submission> =
+    repository.loadSubmissionDetailBySid(sid)
 
-    override suspend fun loadByUrl(url: String): PageState<Submission> =
-        repository.loadSubmissionDetailByUrl(url)
+  override suspend fun loadByUrl(url: String): PageState<Submission> =
+    repository.loadSubmissionDetailByUrl(url)
 
-    override suspend fun toggleFavorite(
-        sid: Int,
-        actionUrl: String,
-    ): PageState<Unit> =
-        repository.toggleFavorite(sid = sid, actionUrl = actionUrl)
+  override suspend fun toggleFavorite(sid: Int, actionUrl: String): PageState<Unit> =
+    repository.toggleFavorite(sid = sid, actionUrl = actionUrl)
 
-    override suspend fun blockTag(
-        sid: Int,
-        tagName: String,
-        nonce: String,
-        toAdd: Boolean,
-    ): PageState<Unit> =
-        repository.blockTag(sid = sid, tagName = tagName, nonce = nonce, toAdd = toAdd)
+  override suspend fun blockTag(
+    sid: Int,
+    tagName: String,
+    nonce: String,
+    toAdd: Boolean,
+  ): PageState<Unit> =
+    repository.blockTag(sid = sid, tagName = tagName, nonce = nonce, toAdd = toAdd)
 }

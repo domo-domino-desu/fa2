@@ -7,6 +7,6 @@ import dev.zwander.compose.rememberThemeInfo
 
 @Composable
 internal actual fun rememberPlatformColorScheme(forceDarkMode: Boolean?): ColorScheme {
-    val isDarkMode = forceDarkMode ?: isSystemInDarkTheme()
-    return rememberThemeInfo(isDarkMode = isDarkMode).colors
+  val isDarkMode = forceDarkMode ?: isSystemInDarkTheme()
+  return rememberThemeInfo(isDarkMode = isDarkMode).colors
 }

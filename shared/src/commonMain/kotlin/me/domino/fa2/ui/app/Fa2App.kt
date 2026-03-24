@@ -16,28 +16,20 @@ import me.domino.fa2.ui.navigation.AppNavigator
 import me.domino.fa2.ui.theme.Fa2Theme
 import org.koin.compose.koinInject
 
-/**
- * 应用根入口：负责主题、全局反馈与导航编排。
- */
+/** 应用根入口：负责主题、全局反馈与导航编排。 */
 @Composable
-fun Fa2App(
-    externalFaLinkEvents: Flow<String> = emptyFlow(),
-) {
-    val settingsService = koinInject<AppSettingsService>()
-    val settings by settingsService.settings.collectAsState()
+fun Fa2App(externalFaLinkEvents: Flow<String> = emptyFlow()) {
+  val settingsService = koinInject<AppSettingsService>()
+  val settings by settingsService.settings.collectAsState()
 
-    LaunchedEffect(settingsService) {
-        settingsService.ensureLoaded()
-    }
+  LaunchedEffect(settingsService) { settingsService.ensureLoaded() }
 
-    Fa2Theme(themeMode = settings.themeMode) {
-        AppFeedbackHost {
-            Box(modifier = Modifier.fillMaxSize()) {
-                AppNavigator(externalFaLinkEvents = externalFaLinkEvents)
-                CfChallengeOverlayHost(
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
-        }
+  Fa2Theme(themeMode = settings.themeMode) {
+    AppFeedbackHost {
+      Box(modifier = Modifier.fillMaxSize()) {
+        AppNavigator(externalFaLinkEvents = externalFaLinkEvents)
+        CfChallengeOverlayHost(modifier = Modifier.fillMaxSize())
+      }
     }
+  }
 }
