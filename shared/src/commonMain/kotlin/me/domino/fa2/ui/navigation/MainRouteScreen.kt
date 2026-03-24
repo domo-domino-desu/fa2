@@ -70,6 +70,9 @@ class MainRouteScreen(
     val searchScreenModel =
         koinScreenModel<SearchScreenModel> { parametersOf(searchSubmissionListHolder) }
     val moreScreenModel = koinScreenModel<MoreScreenModel> { parametersOf(username) }
+    val feedState by feedScreenModel.state.collectAsState()
+    val browseState by browseScreenModel.state.collectAsState()
+    val searchState by searchScreenModel.state.collectAsState()
     val feedPageState by feedScreenModel.pageState.collectAsState()
     val browsePageState by browseScreenModel.pageState.collectAsState()
     val searchPageState by searchScreenModel.pageState.collectAsState()
@@ -144,7 +147,7 @@ class MainRouteScreen(
           PageStateWrapper(
               state = feedPageState,
               onRetry = { feedScreenModel.load(forceRefresh = true) },
-          ) { feedState ->
+          ) {
             FeedScreen(
                 state = feedState,
                 onRetry = { feedScreenModel.load(forceRefresh = true) },
@@ -169,7 +172,7 @@ class MainRouteScreen(
           PageStateWrapper(
               state = browsePageState,
               onRetry = browseScreenModel::refresh,
-          ) { browseState ->
+          ) {
             BrowseScreen(
                 state = browseState,
                 onUpdateCategory = browseScreenModel::updateCategory,
@@ -202,7 +205,7 @@ class MainRouteScreen(
           PageStateWrapper(
               state = searchPageState,
               onRetry = searchScreenModel::refresh,
-          ) { searchState ->
+          ) {
             SearchScreen(
                 state = searchState,
                 actions =

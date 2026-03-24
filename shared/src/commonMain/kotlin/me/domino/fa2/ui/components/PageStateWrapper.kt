@@ -22,12 +22,12 @@ fun <T> PageStateWrapper(
     state: PageState<T>,
     /** 重试回调。 */
     onRetry: () -> Unit,
-    /** 成功态内容渲染器。 */
-    content: @Composable (T) -> Unit,
+    /** 页面内容渲染器。 */
+    content: @Composable () -> Unit,
 ) {
   when (state) {
     PageState.Loading -> {
-      StatusCard(title = "正在加载", body = "正在同步最新列表。", onRetry = null)
+      content()
     }
 
     PageState.CfChallenge -> {
@@ -51,7 +51,7 @@ fun <T> PageStateWrapper(
     }
 
     is PageState.Success -> {
-      content(state.data)
+      content()
     }
   }
 }

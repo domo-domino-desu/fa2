@@ -35,6 +35,7 @@ class SearchRouteScreen(private val initialQuery: String) : Screen {
           SubmissionListHolder()
         }
     val screenModel = koinScreenModel<SearchScreenModel> { parametersOf(submissionListHolder) }
+    val state by screenModel.state.collectAsState()
     val pageState by screenModel.pageState.collectAsState()
     val waterfallState = rememberLazyStaggeredGridState()
 
@@ -49,7 +50,7 @@ class SearchRouteScreen(private val initialQuery: String) : Screen {
     Column(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
       SearchRouteTopBar(onBack = { navigator.pop() }, onGoHome = { navigator.goBackHome() })
 
-      PageStateWrapper(state = pageState, onRetry = screenModel::refresh) { state ->
+      PageStateWrapper(state = pageState, onRetry = screenModel::refresh) {
         SearchScreen(
             state = state,
             actions =

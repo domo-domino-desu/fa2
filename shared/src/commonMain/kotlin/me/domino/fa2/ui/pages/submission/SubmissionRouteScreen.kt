@@ -179,8 +179,8 @@ class SubmissionRouteScreen(
             },
         )
       }
-      PageStateWrapper(state = pageState, onRetry = screenModel::retryCurrentDetail) { snapshot ->
-        when (snapshot) {
+      PageStateWrapper(state = pageState, onRetry = screenModel::retryCurrentDetail) {
+        when (val snapshot = state) {
           SubmissionPagerUiState.Empty -> {
             Text(
                 text = "当前没有可浏览内容。",

@@ -35,6 +35,7 @@ class BrowseRouteScreen(private val initialFilter: BrowseFilterState) : Screen {
           SubmissionListHolder()
         }
     val screenModel = koinScreenModel<BrowseScreenModel> { parametersOf(submissionListHolder) }
+    val state by screenModel.state.collectAsState()
     val pageState by screenModel.pageState.collectAsState()
     val waterfallState = rememberLazyStaggeredGridState()
 
@@ -43,7 +44,7 @@ class BrowseRouteScreen(private val initialFilter: BrowseFilterState) : Screen {
     Column(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
       BrowseRouteTopBar(onBack = { navigator.pop() }, onGoHome = { navigator.goBackHome() })
 
-      PageStateWrapper(state = pageState, onRetry = screenModel::refresh) { state ->
+      PageStateWrapper(state = pageState, onRetry = screenModel::refresh) {
         BrowseScreen(
             state = state,
             onUpdateCategory = screenModel::updateCategory,

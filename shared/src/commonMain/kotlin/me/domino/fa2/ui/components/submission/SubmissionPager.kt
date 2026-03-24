@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.platform.PlatformVerticalScrollbar
 import me.domino.fa2.ui.pages.submission.SubmissionDetailUiState
 
@@ -88,6 +89,7 @@ fun SubmissionPager(
   LaunchedEffect(zoomOverlayImageUrl) {
     onZoomOverlayVisibilityChanged(!zoomOverlayImageUrl.isNullOrBlank())
   }
+  PlatformBackHandler(enabled = !zoomOverlayImageUrl.isNullOrBlank()) { zoomOverlayImageUrl = null }
   val blockedMediaRevealState = remember { mutableStateMapOf<Int, Boolean>() }
 
   Box(modifier = Modifier.fillMaxSize()) {

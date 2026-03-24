@@ -28,13 +28,13 @@ class FeedRouteScreen : Screen {
           SubmissionListHolder()
         }
     val screenModel = koinScreenModel<FeedScreenModel> { parametersOf(submissionListHolder) }
+    val state by screenModel.state.collectAsState()
     val pageState by screenModel.pageState.collectAsState()
     val waterfallState = rememberLazyStaggeredGridState()
 
     LaunchedEffect(Unit) { screenModel.load() }
 
-    PageStateWrapper(state = pageState, onRetry = { screenModel.load(forceRefresh = true) }) { state
-      ->
+    PageStateWrapper(state = pageState, onRetry = { screenModel.load(forceRefresh = true) }) {
       FeedScreen(
           state = state,
           onRetry = { screenModel.load(forceRefresh = true) },
