@@ -9,7 +9,7 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "me.domino.fa2.shared"
         compileSdk = 36
         minSdk = 24
@@ -27,7 +27,7 @@ kotlin {
                 implementation(libs.compose.material3)
                 implementation(libs.compose.material.icons.extended)
                 implementation(libs.compose.ui)
-                implementation(compose.components.resources)
+                implementation(libs.compose.components.resources)
                 implementation(libs.compose.native.webview)
                 implementation(libs.ktor.client.core)
                 implementation(libs.ksoup)
