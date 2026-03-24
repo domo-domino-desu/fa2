@@ -71,6 +71,44 @@ class SubmissionParserTest {
   }
 
   @Test
+  fun fallsBackToPreviewWhenFullImageUrlMissing() {
+    val html = TestFixtures.read("www.furaffinity.net:view:49338772-nocomment.html")
+    val parser = SubmissionParser()
+    val mutated =
+        html.replace(Regex("""(?s)(<img[^>]*id="submissionImg"[^>]*)(>)""")) { match ->
+          match.groupValues[1]
+              .replace(Regex("""\sdata-fullview-src="[^"]*"""), "")
+              .replace(
+                  Regex("""\ssrc="[^"]*"""),
+                  """ src="//t.furaffinity.net/49338772@600-1665402309.jpg"""",
+              ) + match.groupValues[2]
+        }
+
+    val detail = parser.parse(html = mutated, url = FaUrls.submission(49338772))
+
+    assertTrue(detail.previewImageUrl.startsWith("https://"))
+    assertEquals("https://t.furaffinity.net/49338772@600-1665402309.jpg", detail.fullImageUrl)
+  }
+
+  @Test
+  fun fallsBackToOgImageWhenSubmissionImgHasNoUsableUrls() {
+    val html = TestFixtures.read("www.furaffinity.net:view:49338772-nocomment.html")
+    val parser = SubmissionParser()
+    val mutated =
+        html.replace(Regex("""(?s)(<img[^>]*id="submissionImg"[^>]*)(>)""")) { match ->
+          match.groupValues[1]
+              .replace(Regex("""\sdata-fullview-src="[^"]*"""), "")
+              .replace(Regex("""\sdata-preview-src="[^"]*"""), "")
+              .replace(Regex("""\ssrc="[^"]*"""), "") + match.groupValues[2]
+        }
+
+    val detail = parser.parse(html = mutated, url = FaUrls.submission(49338772))
+
+    assertTrue(detail.previewImageUrl.isBlank())
+    assertEquals("https://t.furaffinity.net/49338772@600-1665402309.jpg", detail.fullImageUrl)
+  }
+
+  @Test
   fun failsOnMalformedHtml() {
     val parser = SubmissionParser()
     assertFailsWith<IllegalStateException> {

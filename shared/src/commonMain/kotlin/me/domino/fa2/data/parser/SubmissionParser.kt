@@ -30,7 +30,7 @@ class SubmissionParser {
         root.selectFirst("div.submission-content")
             ?: throw IllegalStateException("Submission content missing")
 
-    val media = parseMedia(content = content, pageUrl = url)
+    val media = parseMedia(document = document, content = content, pageUrl = url)
     val metadata =
         parseMetadata(document = document, sidebar = sidebar, content = content, pageUrl = url)
     val comments = parseComments(document = document, pageUrl = url)
@@ -160,15 +160,20 @@ class SubmissionParser {
     return CommentPostingState(enabled = hasCommentForm)
   }
 
-  private fun parseMedia(content: Element, pageUrl: String): ParsedMedia {
+  private fun parseMedia(document: Document, content: Element, pageUrl: String): ParsedMedia {
     val imageNode =
         content.selectFirst("div.submission-area img#submissionImg")
-            ?: throw IllegalStateException("Submission media image missing")
-    val previewRaw = imageNode.attr("data-preview-src").ifBlank { imageNode.attr("src") }.trim()
-    val fullRaw = imageNode.attr("data-fullview-src").ifBlank { imageNode.attr("src") }.trim()
-    if (previewRaw.isBlank() || fullRaw.isBlank()) {
-      throw IllegalStateException("Submission media URLs missing")
-    }
+            ?: content.selectFirst(
+                "div.submission-area img[data-fullview-src], div.submission-area img[data-preview-src], div.submission-area img[src]"
+            )
+
+    val imageSrcRaw = imageNode?.attr("src")?.trim().orEmpty()
+    val previewRaw = imageNode?.attr("data-preview-src")?.trim().orEmpty().ifBlank { imageSrcRaw }
+    val fullRaw =
+        imageNode?.attr("data-fullview-src")?.trim().orEmpty().ifBlank {
+          document.selectFirst("meta[property='og:image']")?.attr("content")?.trim().orEmpty()
+        }
+
     return ParsedMedia(
         previewImageUrl = ParserUtils.toAbsoluteUrl(pageUrl, previewRaw),
         fullImageUrl = ParserUtils.toAbsoluteUrl(pageUrl, fullRaw),
