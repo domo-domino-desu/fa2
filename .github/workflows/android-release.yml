@@ -1,0 +1,118 @@
+name: Android Build and Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK components
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-36" \
+            "build-tools;36.0.0"
+
+      - name: Install native icon toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            librsvg2-bin \
+            imagemagick \
+            icnsutils
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Verify tag matches app version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          app_version="$(awk -F= '/^APP_VERSION_NAME=/{print $2; exit}' gradle.properties)"
+          if [[ -z "${app_version}" ]]; then
+            echo "APP_VERSION_NAME not found in gradle.properties" >&2
+            exit 1
+          fi
+
+          tag_version="${GITHUB_REF_NAME#v}"
+          if [[ "${tag_version}" != "${app_version}" ]]; then
+            echo "Tag version (${tag_version}) does not match APP_VERSION_NAME (${app_version})" >&2
+            exit 1
+          fi
+
+      - name: Build Android release artifacts
+        run: ./gradlew --stacktrace :androidApp:assembleRelease :androidApp:bundleRelease
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-artifacts
+          path: |
+            androidApp/build/outputs/apk/release/*.apk
+            androidApp/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+
+      - name: Publish pre-release for push
+        if: github.ref == 'refs/heads/main'
+        uses: ncipollo/release-action@v1
+        with:
+          tag: pre-main
+          name: Pre Release (main)
+          body: |
+            Automated pre-release build from main.
+            Commit: ${{ github.sha }}
+          prerelease: true
+          allowUpdates: true
+          removeArtifacts: true
+          replacesArtifacts: true
+          commit: ${{ github.sha }}
+          artifacts: |
+            androidApp/build/outputs/apk/release/*.apk
+            androidApp/build/outputs/bundle/release/*.aab
+
+      - name: Publish versioned release for tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          generateReleaseNotes: true
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          allowUpdates: true
+          replacesArtifacts: true
+          artifacts: |
+            androidApp/build/outputs/apk/release/*.apk
+            androidApp/build/outputs/bundle/release/*.aab
