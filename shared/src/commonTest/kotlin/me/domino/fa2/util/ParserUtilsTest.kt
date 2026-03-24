@@ -19,11 +19,11 @@ class ParserUtilsTest {
   @Test
   fun derivesThumbnailUrlFromFullImageUrl() {
     val result =
-      ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
-        sid = 49338772,
-        fullImageUrl =
-          "https://d.furaffinity.net/art/annetpeas/1665402309/1665402309.annetpeas_the_hookah_fa.png",
-      )
+        ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
+            sid = 49338772,
+            fullImageUrl =
+                "https://d.furaffinity.net/art/annetpeas/1665402309/1665402309.annetpeas_the_hookah_fa.png",
+        )
 
     assertEquals("https://t.furaffinity.net/49338772@600-1665402309.jpg", result)
   }
@@ -31,10 +31,11 @@ class ParserUtilsTest {
   @Test
   fun derivesThumbnailUrlFromLegacyFacdnHost() {
     val result =
-      ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
-        sid = 14977134,
-        fullImageUrl = "http://d.facdn.net/art/waccoon/1411105444/1411105444.waccoon_my_picture.jpg",
-      )
+        ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
+            sid = 14977134,
+            fullImageUrl =
+                "http://d.facdn.net/art/waccoon/1411105444/1411105444.waccoon_my_picture.jpg",
+        )
 
     assertEquals("https://t.furaffinity.net/14977134@600-1411105444.jpg", result)
   }
@@ -42,11 +43,11 @@ class ParserUtilsTest {
   @Test
   fun derivesThumbnailUrlWhenFullUrlContainsQuery() {
     val result =
-      ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
-        sid = 52209828,
-        fullImageUrl =
-          "https://d.furaffinity.net/art/minmohere/1684537865/1684537865.minmohere_5-18-23blupee.png?token=abc",
-      )
+        ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
+            sid = 52209828,
+            fullImageUrl =
+                "https://d.furaffinity.net/art/minmohere/1684537865/1684537865.minmohere_5-18-23blupee.png?token=abc",
+        )
 
     assertEquals("https://t.furaffinity.net/52209828@600-1684537865.jpg", result)
   }
@@ -54,10 +55,10 @@ class ParserUtilsTest {
   @Test
   fun returnsNullWhenFullImageUrlDoesNotMatchPattern() {
     val result =
-      ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
-        sid = 49338772,
-        fullImageUrl = "https://example.com/image.png",
-      )
+        ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
+            sid = 49338772,
+            fullImageUrl = "https://example.com/image.png",
+        )
 
     assertNull(result)
   }
@@ -65,10 +66,10 @@ class ParserUtilsTest {
   @Test
   fun returnsNullForNonFaHostEvenIfPathLooksSimilar() {
     val result =
-      ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
-        sid = 123456,
-        fullImageUrl = "https://example.com/art/user/1665402309/1665402309.file.png",
-      )
+        ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
+            sid = 123456,
+            fullImageUrl = "https://example.com/art/user/1665402309/1665402309.file.png",
+        )
 
     assertNull(result)
   }

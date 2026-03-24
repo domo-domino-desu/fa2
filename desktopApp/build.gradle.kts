@@ -8,8 +8,8 @@ plugins {
 
 val appVersionName = providers.gradleProperty("APP_VERSION_NAME").get()
 val desktopPackageVersion =
-  Regex("""^(\d+\.\d+\.\d+)(?:[-+].*)?$""").matchEntire(appVersionName)?.groupValues?.get(1)
-    ?: error("APP_VERSION_NAME must be SemVer (e.g. 1.2.3 or 1.2.3-alpha1)")
+    Regex("""^(\d+\.\d+\.\d+)(?:[-+].*)?$""").matchEntire(appVersionName)?.groupValues?.get(1)
+        ?: error("APP_VERSION_NAME must be SemVer (e.g. 1.2.3 or 1.2.3-alpha1)")
 
 kotlin {
   jvm("desktop")
@@ -52,12 +52,15 @@ compose.desktop {
 }
 
 val shouldGenerateAppIcons =
-  providers.gradleProperty("skipGenerateAppIcons").map { value -> !value.toBoolean() }.orElse(true)
+    providers
+        .gradleProperty("skipGenerateAppIcons")
+        .map { value -> !value.toBoolean() }
+        .orElse(true)
 
 tasks
-  .matching { it.name in setOf("desktopProcessResources", "processResources") }
-  .configureEach {
-    if (shouldGenerateAppIcons.get()) {
-      dependsOn(rootProject.tasks.named("generateAppIcons"))
+    .matching { it.name in setOf("desktopProcessResources", "processResources") }
+    .configureEach {
+      if (shouldGenerateAppIcons.get()) {
+        dependsOn(rootProject.tasks.named("generateAppIcons"))
+      }
     }
-  }

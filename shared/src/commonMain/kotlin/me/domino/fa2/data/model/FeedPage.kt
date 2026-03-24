@@ -10,8 +10,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class FeedPage(
-  /** 当前页投稿卡片集合。 */
-  val submissions: List<SubmissionThumbnail>,
-  /** 下一页地址；为空表示已经是末页。 */
-  val nextPageUrl: String?,
+    /** 当前页投稿卡片集合。 */
+    val submissions: List<SubmissionThumbnail>,
+    /** 下一页地址；为空表示已经是末页。 */
+    val nextPageUrl: String?,
 )

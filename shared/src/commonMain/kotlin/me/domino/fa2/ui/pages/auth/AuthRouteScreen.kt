@@ -36,11 +36,11 @@ class AuthRouteScreen : Screen {
 
       is AuthUiState.AuthInvalid -> {
         AuthScreen(
-          state = snapshot,
-          cookieDraft = cookieDraft,
-          onCookieDraftChange = screenModel::updateCookieDraft,
-          onSubmit = screenModel::submitCookie,
-          onRetry = screenModel::retryProbe,
+            state = snapshot,
+            cookieDraft = cookieDraft,
+            onCookieDraftChange = screenModel::updateCookieDraft,
+            onSubmit = screenModel::submitCookie,
+            onRetry = screenModel::retryProbe,
         )
       }
 

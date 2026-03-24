@@ -14,21 +14,21 @@ internal val searchTypeOptionGroups = FaBrowseTaxonomyOptions.typeOptionGroups
 internal val searchSpeciesOptionGroups = FaBrowseTaxonomyOptions.speciesOptionGroups
 
 internal val orderByOptions =
-  listOf(
-    FilterOption("relevancy", "Relevancy"),
-    FilterOption("date", "Date"),
-    FilterOption("popularity", "Popularity"),
-  )
+    listOf(
+        FilterOption("relevancy", "Relevancy"),
+        FilterOption("date", "Date"),
+        FilterOption("popularity", "Popularity"),
+    )
 
 internal val orderDirectionOptions =
-  listOf(FilterOption("desc", "Descending"), FilterOption("asc", "Ascending"))
+    listOf(FilterOption("desc", "Descending"), FilterOption("asc", "Ascending"))
 
 internal val rangeOptions =
-  listOf(
-    FilterOption("all", "All Time"),
-    FilterOption("1day", "Last 24 Hours"),
-    FilterOption("3days", "Last 3 Days"),
-    FilterOption("7days", "Last 7 Days"),
-    FilterOption("30days", "Last 30 Days"),
-    FilterOption("manual", "Manual"),
-  )
+    listOf(
+        FilterOption("all", "All Time"),
+        FilterOption("1day", "Last 24 Hours"),
+        FilterOption("3days", "Last 3 Days"),
+        FilterOption("7days", "Last 7 Days"),
+        FilterOption("30days", "Last 30 Days"),
+        FilterOption("manual", "Manual"),
+    )

@@ -11,8 +11,8 @@ private const val fallbackDetailAspectRatio = 1f
 
 /** 规范化详情图宽高比。 */
 internal fun sanitizeDetailAspectRatio(
-  /** 原始宽高比。 */
-  rawRatio: Float
+    /** 原始宽高比。 */
+    rawRatio: Float
 ): Float {
   if (!rawRatio.isFinite() || rawRatio <= 0f) {
     return fallbackDetailAspectRatio

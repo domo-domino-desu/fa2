@@ -6,8 +6,8 @@ import me.domino.fa2.util.FaUrls
 
 /** User 页面端点。 */
 class UserEndpoint(
-  /** HTML 数据源。 */
-  private val dataSource: FaHtmlDataSource
+    /** HTML 数据源。 */
+    private val dataSource: FaHtmlDataSource
 ) {
   /** 拉取用户主页。 */
   suspend fun fetch(username: String): HtmlResponseResult = dataSource.get(FaUrls.user(username))

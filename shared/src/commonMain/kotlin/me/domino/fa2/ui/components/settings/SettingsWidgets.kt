@@ -32,48 +32,48 @@ import androidx.compose.ui.unit.dp
 /** More 页顶部账号头。 */
 @Composable
 fun SettingsAccountHeader(
-  /** 标题（通常为用户名）。 */
-  title: String,
-  /** 副标题。 */
-  subtitle: String,
-  /** 点击回调。 */
-  onClick: () -> Unit,
-  /** 修饰符。 */
-  modifier: Modifier = Modifier,
+    /** 标题（通常为用户名）。 */
+    title: String,
+    /** 副标题。 */
+    subtitle: String,
+    /** 点击回调。 */
+    onClick: () -> Unit,
+    /** 修饰符。 */
+    modifier: Modifier = Modifier,
 ) {
   Surface(
-    modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
-    color = MaterialTheme.colorScheme.surface,
+      modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
+      color = MaterialTheme.colorScheme.surface,
   ) {
     Row(
-      modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
-      horizontalArrangement = Arrangement.spacedBy(12.dp),
-      verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
       Surface(
-        modifier = Modifier.size(44.dp),
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.primaryContainer,
+          modifier = Modifier.size(44.dp),
+          shape = CircleShape,
+          color = MaterialTheme.colorScheme.primaryContainer,
       ) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
           Text(
-            text = title.take(1).uppercase(),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
+              text = title.take(1).uppercase(),
+              style = MaterialTheme.typography.titleMedium,
+              fontWeight = FontWeight.Bold,
+              color = MaterialTheme.colorScheme.onPrimaryContainer,
           )
         }
       }
       Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
-          text = title,
-          style = MaterialTheme.typography.titleMedium,
-          fontWeight = FontWeight.SemiBold,
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
         )
         Text(
-          text = subtitle,
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
+            text = subtitle,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
       }
     }
@@ -83,42 +83,42 @@ fun SettingsAccountHeader(
 /** More 页分组容器。 */
 @Composable
 fun SettingsGroup(
-  /** 分组标题。 */
-  title: String? = null,
-  /** 是否展示容器外框。 */
-  framed: Boolean = true,
-  /** 标题左右边距。 */
-  titleHorizontalPadding: Dp = 18.dp,
-  /** 外层容器左右边距。 */
-  containerHorizontalPadding: Dp = 8.dp,
-  /** 分组内容。 */
-  content: @Composable ColumnScope.() -> Unit,
+    /** 分组标题。 */
+    title: String? = null,
+    /** 是否展示容器外框。 */
+    framed: Boolean = true,
+    /** 标题左右边距。 */
+    titleHorizontalPadding: Dp = 18.dp,
+    /** 外层容器左右边距。 */
+    containerHorizontalPadding: Dp = 8.dp,
+    /** 分组内容。 */
+    content: @Composable ColumnScope.() -> Unit,
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
     if (!title.isNullOrBlank()) {
       Text(
-        text = title,
-        modifier = Modifier.padding(horizontal = titleHorizontalPadding),
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
+          text = title,
+          modifier = Modifier.padding(horizontal = titleHorizontalPadding),
+          style = MaterialTheme.typography.labelLarge,
+          color = MaterialTheme.colorScheme.primary,
       )
     }
     if (framed) {
       Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = containerHorizontalPadding),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border =
-          BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-          ),
+          modifier = Modifier.fillMaxWidth().padding(horizontal = containerHorizontalPadding),
+          colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+          border =
+              BorderStroke(
+                  width = 1.dp,
+                  color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+              ),
       ) {
         Column(content = content)
       }
     } else {
       Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = containerHorizontalPadding),
-        content = content,
+          modifier = Modifier.fillMaxWidth().padding(horizontal = containerHorizontalPadding),
+          content = content,
       )
     }
   }
@@ -127,64 +127,67 @@ fun SettingsGroup(
 /** More 页列表项。 */
 @Composable
 fun SettingsListItem(
-  /** 左侧图标。 */
-  icon: ImageVector,
-  /** 主标题。 */
-  title: String,
-  /** 副标题。 */
-  subtitle: String,
-  /** 点击回调。 */
-  onClick: () -> Unit,
-  /** 是否展示底部分割线。 */
-  showDivider: Boolean = true,
-  /** 修饰符。 */
-  modifier: Modifier = Modifier,
+    /** 左侧图标。 */
+    icon: ImageVector,
+    /** 主标题。 */
+    title: String,
+    /** 副标题。 */
+    subtitle: String,
+    /** 点击回调。 */
+    onClick: () -> Unit,
+    /** 是否展示底部分割线。 */
+    showDivider: Boolean = true,
+    /** 修饰符。 */
+    modifier: Modifier = Modifier,
 ) {
   Column {
     Row(
-      modifier =
-        modifier
-          .fillMaxWidth()
-          .clickable(onClick = onClick)
-          .padding(horizontal = 14.dp, vertical = 14.dp),
-      horizontalArrangement = Arrangement.spacedBy(12.dp),
-      verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(horizontal = 14.dp, vertical = 14.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
       Surface(
-        modifier = Modifier.size(34.dp),
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.secondaryContainer,
+          modifier = Modifier.size(34.dp),
+          shape = CircleShape,
+          color = MaterialTheme.colorScheme.secondaryContainer,
       ) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
           Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+              imageVector = icon,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.onSecondaryContainer,
           )
         }
       }
-      Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+      Column(
+          modifier = Modifier.weight(1f),
+          verticalArrangement = Arrangement.spacedBy(2.dp),
+      ) {
         Text(
-          text = title,
-          style = MaterialTheme.typography.bodyLarge,
-          fontWeight = FontWeight.Medium,
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
         )
         Text(
-          text = subtitle,
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
+            text = subtitle,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
       }
       Icon(
-        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-        contentDescription = null,
-        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+          imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.onSurfaceVariant,
       )
     }
     if (showDivider) {
       HorizontalDivider(
-        modifier = Modifier.padding(start = 60.dp),
-        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
+          modifier = Modifier.padding(start = 60.dp),
+          color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
       )
     }
   }

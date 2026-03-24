@@ -23,22 +23,22 @@ sealed interface SubmissionPagerUiState {
    * @property appendErrorMessage 追加错误。
    */
   data class Data(
-    /** 当前可浏览列表。 */
-    val submissions: List<SubmissionThumbnail>,
-    /** 详情状态映射。 */
-    val detailBySid: Map<Int, SubmissionDetailUiState>,
-    /** 当前索引。 */
-    val currentIndex: Int,
-    /** 是否可上一条。 */
-    val hasPrevious: Boolean,
-    /** 是否可下一条。 */
-    val hasNext: Boolean,
-    /** 是否存在下一页。 */
-    val hasMore: Boolean,
-    /** 是否正在加载下一页。 */
-    val isLoadingMore: Boolean,
-    /** 下一页加载错误。 */
-    val appendErrorMessage: String?,
+      /** 当前可浏览列表。 */
+      val submissions: List<SubmissionThumbnail>,
+      /** 详情状态映射。 */
+      val detailBySid: Map<Int, SubmissionDetailUiState>,
+      /** 当前索引。 */
+      val currentIndex: Int,
+      /** 是否可上一条。 */
+      val hasPrevious: Boolean,
+      /** 是否可下一条。 */
+      val hasNext: Boolean,
+      /** 是否存在下一页。 */
+      val hasMore: Boolean,
+      /** 是否正在加载下一页。 */
+      val isLoadingMore: Boolean,
+      /** 下一页加载错误。 */
+      val appendErrorMessage: String?,
   ) : SubmissionPagerUiState
 }
 

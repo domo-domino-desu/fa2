@@ -38,80 +38,80 @@ import me.domino.fa2.ui.pages.search.searchTypeOptions
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 internal fun SearchOverlayContent(
-  form: SearchFormState,
-  actions: SearchScreenActions,
-  canSearch: Boolean,
-  modifier: Modifier = Modifier,
+    form: SearchFormState,
+    actions: SearchScreenActions,
+    canSearch: Boolean,
+    modifier: Modifier = Modifier,
 ) {
   Surface(
-    modifier = modifier.background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.24f)),
-    color = MaterialTheme.colorScheme.surface,
+      modifier = modifier.background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.24f)),
+      color = MaterialTheme.colorScheme.surface,
   ) {
     Column(modifier = Modifier.fillMaxSize()) {
       SearchOverlayTopBar(
-        onClose = actions.onCloseOverlay,
-        onApplySearch = actions.onApplySearch,
-        canSearch = canSearch,
+          onClose = actions.onCloseOverlay,
+          onApplySearch = actions.onApplySearch,
+          canSearch = canSearch,
       )
 
       Column(
-        modifier = Modifier.fillMaxSize().padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+          modifier = Modifier.fillMaxSize().padding(12.dp),
+          verticalArrangement = Arrangement.spacedBy(10.dp),
       ) {
         OutlinedTextField(
-          value = form.query,
-          onValueChange = actions.onUpdateQuery,
-          label = { Text("Query") },
-          placeholder = { Text("wolf @keywords female trans_female") },
-          modifier = Modifier.fillMaxWidth(),
+            value = form.query,
+            onValueChange = actions.onUpdateQuery,
+            label = { Text("Query") },
+            placeholder = { Text("wolf @keywords female trans_female") },
+            modifier = Modifier.fillMaxWidth(),
         )
 
         SearchTopFilterGrid(
-          form = form,
-          onUpdateCategory = actions.onUpdateCategory,
-          onUpdateType = actions.onUpdateType,
-          onUpdateSpecies = actions.onUpdateSpecies,
-          onUpdateOrderBy = actions.onUpdateOrderBy,
-          onUpdateOrderDirection = actions.onUpdateOrderDirection,
-          onUpdateRange = actions.onUpdateRange,
+            form = form,
+            onUpdateCategory = actions.onUpdateCategory,
+            onUpdateType = actions.onUpdateType,
+            onUpdateSpecies = actions.onUpdateSpecies,
+            onUpdateOrderBy = actions.onUpdateOrderBy,
+            onUpdateOrderDirection = actions.onUpdateOrderDirection,
+            onUpdateRange = actions.onUpdateRange,
         )
 
         if (form.range == "manual") {
           ManualDateRangeSection(
-            rangeFrom = form.rangeFrom,
-            rangeTo = form.rangeTo,
-            onUpdateRangeFrom = actions.onUpdateRangeFrom,
-            onUpdateRangeTo = actions.onUpdateRangeTo,
+              rangeFrom = form.rangeFrom,
+              rangeTo = form.rangeTo,
+              onUpdateRangeFrom = actions.onUpdateRangeFrom,
+              onUpdateRangeTo = actions.onUpdateRangeTo,
           )
         }
 
         GenderKeywordsSection(
-          selectedGenders = form.selectedGenders,
-          onToggleGender = actions.onToggleGender,
+            selectedGenders = form.selectedGenders,
+            onToggleGender = actions.onToggleGender,
         )
 
         RatingsSection(
-          general = form.ratingGeneral,
-          mature = form.ratingMature,
-          adult = form.ratingAdult,
-          onSetGeneral = actions.onSetRatingGeneral,
-          onSetMature = actions.onSetRatingMature,
-          onSetAdult = actions.onSetRatingAdult,
+            general = form.ratingGeneral,
+            mature = form.ratingMature,
+            adult = form.ratingAdult,
+            onSetGeneral = actions.onSetRatingGeneral,
+            onSetMature = actions.onSetRatingMature,
+            onSetAdult = actions.onSetRatingAdult,
         )
 
         SubmissionTypeSection(
-          typeArt = form.typeArt,
-          typeMusic = form.typeMusic,
-          typeFlash = form.typeFlash,
-          typeStory = form.typeStory,
-          typePhoto = form.typePhoto,
-          typePoetry = form.typePoetry,
-          onSetTypeArt = actions.onSetTypeArt,
-          onSetTypeMusic = actions.onSetTypeMusic,
-          onSetTypeFlash = actions.onSetTypeFlash,
-          onSetTypeStory = actions.onSetTypeStory,
-          onSetTypePhoto = actions.onSetTypePhoto,
-          onSetTypePoetry = actions.onSetTypePoetry,
+            typeArt = form.typeArt,
+            typeMusic = form.typeMusic,
+            typeFlash = form.typeFlash,
+            typeStory = form.typeStory,
+            typePhoto = form.typePhoto,
+            typePoetry = form.typePoetry,
+            onSetTypeArt = actions.onSetTypeArt,
+            onSetTypeMusic = actions.onSetTypeMusic,
+            onSetTypeFlash = actions.onSetTypeFlash,
+            onSetTypeStory = actions.onSetTypeStory,
+            onSetTypePhoto = actions.onSetTypePhoto,
+            onSetTypePoetry = actions.onSetTypePoetry,
         )
       }
     }
@@ -120,123 +120,129 @@ internal fun SearchOverlayContent(
 
 @Composable
 private fun SearchTopFilterGrid(
-  form: SearchFormState,
-  onUpdateCategory: (Int) -> Unit,
-  onUpdateType: (Int) -> Unit,
-  onUpdateSpecies: (Int) -> Unit,
-  onUpdateOrderBy: (String) -> Unit,
-  onUpdateOrderDirection: (String) -> Unit,
-  onUpdateRange: (String) -> Unit,
+    form: SearchFormState,
+    onUpdateCategory: (Int) -> Unit,
+    onUpdateType: (Int) -> Unit,
+    onUpdateSpecies: (Int) -> Unit,
+    onUpdateOrderBy: (String) -> Unit,
+    onUpdateOrderDirection: (String) -> Unit,
+    onUpdateRange: (String) -> Unit,
 ) {
   var typePickerVisible by remember { mutableStateOf(false) }
   var speciesPickerVisible by remember { mutableStateOf(false) }
   val selectedTypeLabel =
-    searchTypeOptions.firstOrNull { option -> option.value == form.type }?.label
-      ?: form.type.toString()
+      searchTypeOptions.firstOrNull { option -> option.value == form.type }?.label
+          ?: form.type.toString()
   val selectedSpeciesLabel =
-    searchSpeciesOptions.firstOrNull { option -> option.value == form.species }?.label
-      ?: form.species.toString()
+      searchSpeciesOptions.firstOrNull { option -> option.value == form.species }?.label
+          ?: form.species.toString()
 
   BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
     val singleColumn = maxWidth < 560.dp
     if (singleColumn) {
-      Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+      Column(
+          modifier = Modifier.fillMaxWidth(),
+          verticalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
         FilterDropdownField(
-          label = "Category",
-          options = searchCategoryOptions,
-          selected = form.category,
-          onSelected = onUpdateCategory,
-          modifier = Modifier.fillMaxWidth(),
-        )
-        FilterDialogTriggerField(
-          label = "Type",
-          valueLabel = selectedTypeLabel,
-          onOpenPicker = { typePickerVisible = true },
-          modifier = Modifier.fillMaxWidth(),
-        )
-        FilterDialogTriggerField(
-          label = "Species",
-          valueLabel = selectedSpeciesLabel,
-          onOpenPicker = { speciesPickerVisible = true },
-          modifier = Modifier.fillMaxWidth(),
-        )
-        FilterDropdownField(
-          label = "Sort Criteria",
-          options = orderByOptions,
-          selected = form.orderBy,
-          onSelected = onUpdateOrderBy,
-          modifier = Modifier.fillMaxWidth(),
-        )
-        FilterDropdownField(
-          label = "Sort Direction",
-          options = orderDirectionOptions,
-          selected = form.orderDirection,
-          onSelected = onUpdateOrderDirection,
-          modifier = Modifier.fillMaxWidth(),
-        )
-        FilterDropdownField(
-          label = "Date Filter",
-          options = rangeOptions,
-          selected = form.range,
-          onSelected = onUpdateRange,
-          modifier = Modifier.fillMaxWidth(),
-        )
-      }
-    } else {
-      Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-          modifier = Modifier.fillMaxWidth(),
-        ) {
-          FilterDropdownField(
             label = "Category",
             options = searchCategoryOptions,
             selected = form.category,
             onSelected = onUpdateCategory,
-            modifier = Modifier.weight(1f),
-          )
-          FilterDialogTriggerField(
+            modifier = Modifier.fillMaxWidth(),
+        )
+        FilterDialogTriggerField(
             label = "Type",
             valueLabel = selectedTypeLabel,
             onOpenPicker = { typePickerVisible = true },
-            modifier = Modifier.weight(1f),
-          )
-        }
-        Row(
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-          modifier = Modifier.fillMaxWidth(),
-        ) {
-          FilterDialogTriggerField(
+            modifier = Modifier.fillMaxWidth(),
+        )
+        FilterDialogTriggerField(
             label = "Species",
             valueLabel = selectedSpeciesLabel,
             onOpenPicker = { speciesPickerVisible = true },
-            modifier = Modifier.weight(1f),
-          )
-          FilterDropdownField(
+            modifier = Modifier.fillMaxWidth(),
+        )
+        FilterDropdownField(
             label = "Sort Criteria",
             options = orderByOptions,
             selected = form.orderBy,
             onSelected = onUpdateOrderBy,
-            modifier = Modifier.weight(1f),
-          )
-        }
-        Row(
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-          modifier = Modifier.fillMaxWidth(),
-        ) {
-          FilterDropdownField(
+            modifier = Modifier.fillMaxWidth(),
+        )
+        FilterDropdownField(
             label = "Sort Direction",
             options = orderDirectionOptions,
             selected = form.orderDirection,
             onSelected = onUpdateOrderDirection,
-            modifier = Modifier.weight(1f),
-          )
-          FilterDropdownField(
+            modifier = Modifier.fillMaxWidth(),
+        )
+        FilterDropdownField(
             label = "Date Filter",
             options = rangeOptions,
             selected = form.range,
             onSelected = onUpdateRange,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxWidth(),
+        )
+      }
+    } else {
+      Column(
+          modifier = Modifier.fillMaxWidth(),
+          verticalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+          FilterDropdownField(
+              label = "Category",
+              options = searchCategoryOptions,
+              selected = form.category,
+              onSelected = onUpdateCategory,
+              modifier = Modifier.weight(1f),
+          )
+          FilterDialogTriggerField(
+              label = "Type",
+              valueLabel = selectedTypeLabel,
+              onOpenPicker = { typePickerVisible = true },
+              modifier = Modifier.weight(1f),
+          )
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+          FilterDialogTriggerField(
+              label = "Species",
+              valueLabel = selectedSpeciesLabel,
+              onOpenPicker = { speciesPickerVisible = true },
+              modifier = Modifier.weight(1f),
+          )
+          FilterDropdownField(
+              label = "Sort Criteria",
+              options = orderByOptions,
+              selected = form.orderBy,
+              onSelected = onUpdateOrderBy,
+              modifier = Modifier.weight(1f),
+          )
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+          FilterDropdownField(
+              label = "Sort Direction",
+              options = orderDirectionOptions,
+              selected = form.orderDirection,
+              onSelected = onUpdateOrderDirection,
+              modifier = Modifier.weight(1f),
+          )
+          FilterDropdownField(
+              label = "Date Filter",
+              options = rangeOptions,
+              selected = form.range,
+              onSelected = onUpdateRange,
+              modifier = Modifier.weight(1f),
           )
         }
       }
@@ -245,21 +251,21 @@ private fun SearchTopFilterGrid(
 
   if (typePickerVisible) {
     GroupedTextPickerDialog(
-      title = "Type",
-      groups = searchTypeOptionGroups,
-      selected = form.type,
-      onSelected = onUpdateType,
-      onDismissRequest = { typePickerVisible = false },
+        title = "Type",
+        groups = searchTypeOptionGroups,
+        selected = form.type,
+        onSelected = onUpdateType,
+        onDismissRequest = { typePickerVisible = false },
     )
   }
 
   if (speciesPickerVisible) {
     GroupedTextPickerDialog(
-      title = "Species",
-      groups = searchSpeciesOptionGroups,
-      selected = form.species,
-      onSelected = onUpdateSpecies,
-      onDismissRequest = { speciesPickerVisible = false },
+        title = "Species",
+        groups = searchSpeciesOptionGroups,
+        selected = form.species,
+        onSelected = onUpdateSpecies,
+        onDismissRequest = { speciesPickerVisible = false },
     )
   }
 }

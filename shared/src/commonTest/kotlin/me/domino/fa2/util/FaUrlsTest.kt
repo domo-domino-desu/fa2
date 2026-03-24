@@ -9,20 +9,20 @@ class FaUrlsTest {
   @Test
   fun buildsBrowseUrlWithExplicitParams() {
     val url =
-      FaUrls.browse(
-        cat = 1,
-        atype = 1,
-        species = 1,
-        gender = "",
-        perpage = 72,
-        page = 1,
-        ratingGeneral = true,
-        ratingMature = true,
-        ratingAdult = true,
-      )
+        FaUrls.browse(
+            cat = 1,
+            atype = 1,
+            species = 1,
+            gender = "",
+            perpage = 72,
+            page = 1,
+            ratingGeneral = true,
+            ratingMature = true,
+            ratingAdult = true,
+        )
     assertEquals(
-      "https://www.furaffinity.net/browse/?cat=1&atype=1&species=1&gender=&perpage=72&page=1&rating_general=1&rating_mature=1&rating_adult=1&go=Apply",
-      url,
+        "https://www.furaffinity.net/browse/?cat=1&atype=1&species=1&gender=&perpage=72&page=1&rating_general=1&rating_mature=1&rating_adult=1&go=Apply",
+        url,
     )
   }
 
@@ -44,14 +44,14 @@ class FaUrlsTest {
   @Test
   fun buildsSearchUrlWithManualRange() {
     val url =
-      FaUrls.search(
-        FaUrls.SearchParams(
-          q = "wolf",
-          range = "manual",
-          rangeFrom = "2026-01-01",
-          rangeTo = "2026-02-01",
+        FaUrls.search(
+            FaUrls.SearchParams(
+                q = "wolf",
+                range = "manual",
+                rangeFrom = "2026-01-01",
+                rangeTo = "2026-02-01",
+            )
         )
-      )
     assertTrue(url.contains("range=manual"))
     assertTrue(url.contains("range_from=2026-01-01"))
     assertTrue(url.contains("range_to=2026-02-01"))

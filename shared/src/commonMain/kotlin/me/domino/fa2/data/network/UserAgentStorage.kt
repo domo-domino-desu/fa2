@@ -6,10 +6,10 @@ import me.domino.fa2.data.local.KeyValueStorage
 
 /** User-Agent 存储。 提供默认值、KV 持久化与运行时覆盖。 */
 class UserAgentStorage(
-  /** KV 存储。 */
-  private val keyValueStore: KeyValueStorage,
-  /** 默认 UA。 */
-  private val defaultUserAgent: String = DEFAULT_USER_AGENT,
+    /** KV 存储。 */
+    private val keyValueStore: KeyValueStorage,
+    /** 默认 UA。 */
+    private val defaultUserAgent: String = DEFAULT_USER_AGENT,
 ) {
   /** 并发保护锁。 */
   private val mutex = Mutex()
@@ -26,7 +26,9 @@ class UserAgentStorage(
     mutex.withLock {
       if (loaded) return
       runtimeOverride =
-        keyValueStore.load(KeyValueStorage.KEY_HTTP_USER_AGENT)?.trim()?.takeIf { it.isNotBlank() }
+          keyValueStore.load(KeyValueStorage.KEY_HTTP_USER_AGENT)?.trim()?.takeIf {
+            it.isNotBlank()
+          }
       loaded = true
     }
   }
@@ -64,6 +66,6 @@ class UserAgentStorage(
   companion object {
     /** 默认浏览器 UA。 */
     const val DEFAULT_USER_AGENT: String =
-      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
   }
 }

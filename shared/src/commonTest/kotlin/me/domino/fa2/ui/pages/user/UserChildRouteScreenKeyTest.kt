@@ -31,17 +31,17 @@ class UserChildRouteScreenKeyTest {
   @Test
   fun userRouteKeyDiffersByInitialFolder() {
     val first =
-      UserRouteScreen(
-        username = "alpha",
-        initialChildRoute = UserChildRoute.Gallery,
-        initialFolderUrl = "https://www.furaffinity.net/gallery/alpha/folder/1/demo",
-      )
+        UserRouteScreen(
+            username = "alpha",
+            initialChildRoute = UserChildRoute.Gallery,
+            initialFolderUrl = "https://www.furaffinity.net/gallery/alpha/folder/1/demo",
+        )
     val second =
-      UserRouteScreen(
-        username = "alpha",
-        initialChildRoute = UserChildRoute.Gallery,
-        initialFolderUrl = "https://www.furaffinity.net/gallery/alpha/folder/2/demo",
-      )
+        UserRouteScreen(
+            username = "alpha",
+            initialChildRoute = UserChildRoute.Gallery,
+            initialFolderUrl = "https://www.furaffinity.net/gallery/alpha/folder/2/demo",
+        )
 
     assertNotEquals(first.key, second.key)
   }

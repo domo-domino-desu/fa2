@@ -20,23 +20,23 @@ fun AppFeedbackHost(content: @Composable () -> Unit) {
   val snackbarHostState = remember { SnackbarHostState() }
   val coroutineScope = rememberCoroutineScope()
   val showToast =
-    remember(snackbarHostState, coroutineScope) {
-      { message: String ->
-        val normalized = message.trim()
-        if (normalized.isNotBlank()) {
-          coroutineScope.launch {
-            snackbarHostState.currentSnackbarData?.dismiss()
-            snackbarHostState.showSnackbar(normalized)
+      remember(snackbarHostState, coroutineScope) {
+        { message: String ->
+          val normalized = message.trim()
+          if (normalized.isNotBlank()) {
+            coroutineScope.launch {
+              snackbarHostState.currentSnackbarData?.dismiss()
+              snackbarHostState.showSnackbar(normalized)
+            }
           }
         }
       }
-    }
   CompositionLocalProvider(LocalShowToast provides showToast) {
     Box(modifier = Modifier.fillMaxSize()) {
       content()
       SnackbarHost(
-        hostState = snackbarHostState,
-        modifier = Modifier.align(Alignment.BottomCenter).padding(12.dp),
+          hostState = snackbarHostState,
+          modifier = Modifier.align(Alignment.BottomCenter).padding(12.dp),
       )
     }
   }

@@ -18,39 +18,39 @@ import androidx.compose.ui.Modifier
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> SettingsDropdownField(
-  label: String,
-  selected: T,
-  options: List<T>,
-  optionLabel: (T) -> String,
-  onSelect: (T) -> Unit,
-  modifier: Modifier = Modifier,
+    label: String,
+    selected: T,
+    options: List<T>,
+    optionLabel: (T) -> String,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   var expanded by remember { mutableStateOf(false) }
 
   ExposedDropdownMenuBox(
-    expanded = expanded,
-    onExpandedChange = { expanded = !expanded },
-    modifier = modifier.fillMaxWidth(),
+      expanded = expanded,
+      onExpandedChange = { expanded = !expanded },
+      modifier = modifier.fillMaxWidth(),
   ) {
     OutlinedTextField(
-      value = optionLabel(selected),
-      onValueChange = {},
-      readOnly = true,
-      label = { Text(label) },
-      trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-      colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-      modifier =
-        Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+        value = optionLabel(selected),
+        onValueChange = {},
+        readOnly = true,
+        label = { Text(label) },
+        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+        modifier =
+            Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
     )
 
     ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
       options.forEach { candidate ->
         DropdownMenuItem(
-          text = { Text(optionLabel(candidate)) },
-          onClick = {
-            onSelect(candidate)
-            expanded = false
-          },
+            text = { Text(optionLabel(candidate)) },
+            onClick = {
+              onSelect(candidate)
+              expanded = false
+            },
         )
       }
     }

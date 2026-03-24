@@ -14,15 +14,15 @@ android {
   val appVersionCode = providers.gradleProperty("APP_VERSION_CODE").map(String::toInt).get()
 
   val signingStoreFilePath =
-    providers
-      .gradleProperty("ANDROID_SIGNING_STORE_FILE")
-      .orElse(rootProject.file("dummy.keystore").absolutePath)
-      .get()
+      providers
+          .gradleProperty("ANDROID_SIGNING_STORE_FILE")
+          .orElse(rootProject.file("dummy.keystore").absolutePath)
+          .get()
   val signingStorePassword =
-    providers.gradleProperty("ANDROID_SIGNING_STORE_PASSWORD").orElse("123456").get()
+      providers.gradleProperty("ANDROID_SIGNING_STORE_PASSWORD").orElse("123456").get()
   val signingKeyAlias = providers.gradleProperty("ANDROID_SIGNING_KEY_ALIAS").orElse("dummy").get()
   val signingKeyPassword =
-    providers.gradleProperty("ANDROID_SIGNING_KEY_PASSWORD").orElse("123456").get()
+      providers.gradleProperty("ANDROID_SIGNING_KEY_PASSWORD").orElse("123456").get()
 
   defaultConfig {
     applicationId = "me.domino.fa2.android"
@@ -62,7 +62,7 @@ android {
   sourceSets {
     getByName("main") {
       assets.directories.add(
-        layout.buildDirectory.dir("generated/aboutlibrariesAssets").get().asFile.path
+          layout.buildDirectory.dir("generated/aboutlibrariesAssets").get().asFile.path
       )
     }
   }
@@ -91,15 +91,15 @@ dependencies {
 }
 
 val copyAboutLibrariesJsonToAssets by
-  tasks.registering(Copy::class) {
-    from(
-      project(":shared")
-        .layout
-        .projectDirectory
-        .file("src/commonMain/composeResources/files/aboutlibraries.json")
-    )
-    into(layout.buildDirectory.dir("generated/aboutlibrariesAssets"))
-  }
+    tasks.registering(Copy::class) {
+      from(
+          project(":shared")
+              .layout
+              .projectDirectory
+              .file("src/commonMain/composeResources/files/aboutlibraries.json")
+      )
+      into(layout.buildDirectory.dir("generated/aboutlibrariesAssets"))
+    }
 
 tasks.named("preBuild").configure {
   dependsOn(copyAboutLibrariesJsonToAssets)

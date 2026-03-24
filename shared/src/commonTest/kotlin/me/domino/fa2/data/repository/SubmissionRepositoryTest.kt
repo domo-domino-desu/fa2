@@ -30,12 +30,12 @@ class SubmissionRepositoryTest {
     val repository = buildRepository(source)
     val targetSid = 49338772
     source.enqueue(
-      url = FaUrls.submission(targetSid),
-      response =
-        HtmlResponseResult.Success(
-          body = TestFixtures.read("www.furaffinity.net:view:49338772-nocomment.html"),
-          url = FaUrls.submission(targetSid),
-        ),
+        url = FaUrls.submission(targetSid),
+        response =
+            HtmlResponseResult.Success(
+                body = TestFixtures.read("www.furaffinity.net:view:49338772-nocomment.html"),
+                url = FaUrls.submission(targetSid),
+            ),
     )
 
     val state = repository.loadSubmissionDetailBySid(targetSid)
@@ -56,12 +56,12 @@ class SubmissionRepositoryTest {
     val repository = buildRepository(source)
     val targetSid = 48519387
     source.enqueue(
-      url = FaUrls.submission(targetSid),
-      response =
-        HtmlResponseResult.Success(
-          body = TestFixtures.read("www.furaffinity.net:view:48519387-comments.html"),
-          url = FaUrls.submission(targetSid),
-        ),
+        url = FaUrls.submission(targetSid),
+        response =
+            HtmlResponseResult.Success(
+                body = TestFixtures.read("www.furaffinity.net:view:48519387-comments.html"),
+                url = FaUrls.submission(targetSid),
+            ),
     )
 
     val state = repository.loadSubmissionDetailByUrl(FaUrls.submission(targetSid))
@@ -72,23 +72,29 @@ class SubmissionRepositoryTest {
   private fun buildRepository(source: FaHtmlDataSource): SubmissionRepository {
     val pageCacheDao = InMemoryPageCacheDao()
     val store =
-      SubmissionStore(
-        dataSource =
-          SubmissionDataSource(endpoint = SubmissionEndpoint(source), parser = SubmissionParser()),
-        pageCacheDao = pageCacheDao,
-      )
+        SubmissionStore(
+            dataSource =
+                SubmissionDataSource(
+                    endpoint = SubmissionEndpoint(source),
+                    parser = SubmissionParser(),
+                ),
+            pageCacheDao = pageCacheDao,
+        )
     val galleryStore =
-      GalleryStore(
-        galleryDataSource =
-          GalleryDataSource(endpoint = GalleryEndpoint(source), parser = GalleryParser()),
-        favoritesDataSource =
-          FavoritesDataSource(endpoint = FavoriteEndpoint(source), parser = GalleryParser()),
-        pageCacheDao = pageCacheDao,
-      )
+        GalleryStore(
+            galleryDataSource =
+                GalleryDataSource(endpoint = GalleryEndpoint(source), parser = GalleryParser()),
+            favoritesDataSource =
+                FavoritesDataSource(
+                    endpoint = FavoriteEndpoint(source),
+                    parser = GalleryParser(),
+                ),
+            pageCacheDao = pageCacheDao,
+        )
     return SubmissionRepository(
-      submissionStore = store,
-      socialActionEndpoint = SocialActionEndpoint(source),
-      galleryStore = galleryStore,
+        submissionStore = store,
+        socialActionEndpoint = SocialActionEndpoint(source),
+        galleryStore = galleryStore,
     )
   }
 }
@@ -104,7 +110,10 @@ private class SubmissionScriptedHtmlDataSource : FaHtmlDataSource {
   override suspend fun get(url: String): HtmlResponseResult {
     val queue = queueByUrl[url]
     if (queue == null || queue.isEmpty()) {
-      return HtmlResponseResult.Error(statusCode = 500, message = "No scripted response for $url")
+      return HtmlResponseResult.Error(
+          statusCode = 500,
+          message = "No scripted response for $url",
+      )
     }
     return queue.removeFirst()
   }

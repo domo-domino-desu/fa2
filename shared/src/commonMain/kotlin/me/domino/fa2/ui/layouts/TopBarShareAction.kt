@@ -17,14 +17,14 @@ fun TopBarShareAction(url: String) {
   val showToast = LocalShowToast.current
   val normalizedUrl = url.trim()
   IconButton(
-    onClick = {
-      if (normalizedUrl.isBlank()) return@IconButton
-      if (shareText(normalizedUrl)) return@IconButton
-      if (copyTextToClipboard(normalizedUrl)) {
-        showToast("链接已复制")
-      }
-    },
-    enabled = normalizedUrl.isNotBlank(),
+      onClick = {
+        if (normalizedUrl.isBlank()) return@IconButton
+        if (shareText(normalizedUrl)) return@IconButton
+        if (copyTextToClipboard(normalizedUrl)) {
+          showToast("链接已复制")
+        }
+      },
+      enabled = normalizedUrl.isNotBlank(),
   ) {
     Icon(imageVector = Icons.Outlined.Share, contentDescription = "分享链接")
   }

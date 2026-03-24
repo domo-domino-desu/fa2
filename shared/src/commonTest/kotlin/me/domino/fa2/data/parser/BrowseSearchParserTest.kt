@@ -24,7 +24,7 @@ class BrowseSearchParserTest {
   @Test
   fun parsesSearchListingAndAnchorNextPage() {
     val html =
-      TestFixtures.read("www.furaffinity.net:search:wolf-keywords-female-trans_female.html")
+        TestFixtures.read("www.furaffinity.net:search:wolf-keywords-female-trans_female.html")
     val parser = GalleryParser()
     val searchUrl = FaUrls.search(FaUrls.SearchParams(q = "wolf @keywords female trans_female"))
 

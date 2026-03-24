@@ -22,9 +22,11 @@ class FeedRouteScreen : Screen {
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
     val submissionListHolder =
-      navigator.rememberNavigatorScreenModel<SubmissionListHolder>(tag = "submission-list-holder") {
-        SubmissionListHolder()
-      }
+        navigator.rememberNavigatorScreenModel<SubmissionListHolder>(
+            tag = "submission-list-holder"
+        ) {
+          SubmissionListHolder()
+        }
     val screenModel = koinScreenModel<FeedScreenModel> { parametersOf(submissionListHolder) }
     val pageState by screenModel.pageState.collectAsState()
     val waterfallState = rememberLazyStaggeredGridState()
@@ -34,16 +36,16 @@ class FeedRouteScreen : Screen {
     PageStateWrapper(state = pageState, onRetry = { screenModel.load(forceRefresh = true) }) { state
       ->
       FeedScreen(
-        state = state,
-        onRetry = { screenModel.load(forceRefresh = true) },
-        onRefresh = screenModel::refresh,
-        onOpenSubmission = { item ->
-          screenModel.setCurrentSubmission(item.id)
-          navigator.push(SubmissionRouteScreen(initialSid = item.id))
-        },
-        onLastVisibleIndexChanged = screenModel::onLastVisibleIndexChanged,
-        onRetryLoadMore = screenModel::retryLoadMore,
-        waterfallState = waterfallState,
+          state = state,
+          onRetry = { screenModel.load(forceRefresh = true) },
+          onRefresh = screenModel::refresh,
+          onOpenSubmission = { item ->
+            screenModel.setCurrentSubmission(item.id)
+            navigator.push(SubmissionRouteScreen(initialSid = item.id))
+          },
+          onLastVisibleIndexChanged = screenModel::onLastVisibleIndexChanged,
+          onRetryLoadMore = screenModel::retryLoadMore,
+          waterfallState = waterfallState,
       )
     }
   }

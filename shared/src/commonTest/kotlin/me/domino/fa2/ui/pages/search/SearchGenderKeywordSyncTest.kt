@@ -17,10 +17,10 @@ class SearchGenderKeywordSyncTest {
   @Test
   fun rewritesKeywordsWhenGenderSelectionChanges() {
     val rewritten =
-      rewriteQueryWithGenders(
-        query = "wolf @keywords female cute",
-        genders = setOf(SearchGender.TransFemale),
-      )
+        rewriteQueryWithGenders(
+            query = "wolf @keywords female cute",
+            genders = setOf(SearchGender.TransFemale),
+        )
     assertEquals("wolf @keywords cute trans_female", rewritten)
   }
 }

@@ -13,8 +13,8 @@ class JournalsRepository(private val journalsStore: JournalsStore) {
 
   /** 加载 journals 分页。 */
   suspend fun loadJournalsPage(
-    username: String,
-    nextPageUrl: String? = null,
+      username: String,
+      nextPageUrl: String? = null,
   ): PageState<JournalPage> {
     log.d { "加载Journals -> user=$username,cursor=${nextPageUrl?.let(::summarizeUrl) ?: "first"}" }
     val state = journalsStore.loadPageOnce(username = username, nextPageUrl = nextPageUrl)

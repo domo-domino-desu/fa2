@@ -18,12 +18,12 @@ import me.domino.fa2.data.model.PageState
 /** 统一渲染 `PageState` 的基础组件。 */
 @Composable
 fun <T> PageStateWrapper(
-  /** 当前页面状态。 */
-  state: PageState<T>,
-  /** 重试回调。 */
-  onRetry: () -> Unit,
-  /** 成功态内容渲染器。 */
-  content: @Composable (T) -> Unit,
+    /** 当前页面状态。 */
+    state: PageState<T>,
+    /** 重试回调。 */
+    onRetry: () -> Unit,
+    /** 成功态内容渲染器。 */
+    content: @Composable (T) -> Unit,
 ) {
   when (state) {
     PageState.Loading -> {
@@ -32,9 +32,9 @@ fun <T> PageStateWrapper(
 
     PageState.CfChallenge -> {
       StatusCard(
-        title = "需要 Cloudflare 验证",
-        body = "请先完成挑战并更新 cookie（含 cf_clearance）。",
-        onRetry = onRetry,
+          title = "需要 Cloudflare 验证",
+          body = "请先完成挑战并更新 cookie（含 cf_clearance）。",
+          onRetry = onRetry,
       )
     }
 
@@ -44,9 +44,9 @@ fun <T> PageStateWrapper(
 
     is PageState.Error -> {
       StatusCard(
-        title = "加载失败",
-        body = state.exception.message ?: state.exception::class.simpleName ?: "未知错误",
-        onRetry = onRetry,
+          title = "加载失败",
+          body = state.exception.message ?: state.exception::class.simpleName ?: "未知错误",
+          onRetry = onRetry,
       )
     }
 
@@ -59,32 +59,32 @@ fun <T> PageStateWrapper(
 /** 状态消息卡片。 */
 @Composable
 private fun StatusCard(
-  /** 标题。 */
-  title: String,
-  /** 正文。 */
-  body: String,
-  /** 重试回调。 */
-  onRetry: (() -> Unit)?,
+    /** 标题。 */
+    title: String,
+    /** 正文。 */
+    body: String,
+    /** 重试回调。 */
+    onRetry: (() -> Unit)?,
 ) {
   Surface(
-    color = MaterialTheme.colorScheme.surface,
-    shape = RoundedCornerShape(14.dp),
-    border =
-      BorderStroke(
-        width = 1.dp,
-        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
-      ),
-    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+      color = MaterialTheme.colorScheme.surface,
+      shape = RoundedCornerShape(14.dp),
+      border =
+          BorderStroke(
+              width = 1.dp,
+              color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+          ),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
   ) {
     Column(
-      modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       Text(text = title, style = MaterialTheme.typography.titleMedium)
       Text(
-        text = body,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+          text = body,
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
       if (onRetry != null) {
         Button(onClick = onRetry) { Text("重试") }

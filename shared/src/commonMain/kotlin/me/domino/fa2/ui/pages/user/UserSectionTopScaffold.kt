@@ -27,106 +27,108 @@ internal data class UserScrollLayout(val hasHeader: Boolean, val bodyStartIndex:
 }
 
 internal sealed interface UserSharedTopScrollState {
-  data class Inline(val firstVisibleItemIndex: Int = 0, val firstVisibleItemScrollOffset: Int = 0) :
-    UserSharedTopScrollState
+  data class Inline(
+      val firstVisibleItemIndex: Int = 0,
+      val firstVisibleItemScrollOffset: Int = 0,
+  ) : UserSharedTopScrollState
 
   data object Sticky : UserSharedTopScrollState
 }
 
 internal data class UserBodyScrollPosition(
-  val firstVisibleItemIndex: Int = 0,
-  val firstVisibleItemScrollOffset: Int = 0,
+    val firstVisibleItemIndex: Int = 0,
+    val firstVisibleItemScrollOffset: Int = 0,
 ) {
   val isAtStart: Boolean
     get() = firstVisibleItemIndex == 0 && firstVisibleItemScrollOffset == 0
 }
 
 internal data class UserResolvedScrollPosition(
-  val firstVisibleItemIndex: Int,
-  val firstVisibleItemScrollOffset: Int,
-  val deferredBodyScrollPosition: UserBodyScrollPosition? = null,
+    val firstVisibleItemIndex: Int,
+    val firstVisibleItemScrollOffset: Int,
+    val deferredBodyScrollPosition: UserBodyScrollPosition? = null,
 )
 
 internal fun userJournalsScrollLayout(hasHeader: Boolean): UserScrollLayout =
-  UserScrollLayout(hasHeader = hasHeader, bodyStartIndex = if (hasHeader) 2 else 1)
+    UserScrollLayout(hasHeader = hasHeader, bodyStartIndex = if (hasHeader) 2 else 1)
 
 internal fun userSubmissionSectionScrollLayout(hasHeader: Boolean): UserScrollLayout =
-  UserScrollLayout(hasHeader = hasHeader, bodyStartIndex = if (hasHeader) 2 else 1)
+    UserScrollLayout(hasHeader = hasHeader, bodyStartIndex = if (hasHeader) 2 else 1)
 
 internal fun shouldStickUserSectionTabs(
-  firstVisibleItemIndex: Int,
-  firstVisibleItemScrollOffset: Int,
-  hasHeader: Boolean,
+    firstVisibleItemIndex: Int,
+    firstVisibleItemScrollOffset: Int,
+    hasHeader: Boolean,
 ): Boolean {
   val tabsInlineIndex = if (hasHeader) 1 else 0
   return firstVisibleItemIndex > tabsInlineIndex ||
-    (firstVisibleItemIndex == tabsInlineIndex && firstVisibleItemScrollOffset > 0)
+      (firstVisibleItemIndex == tabsInlineIndex && firstVisibleItemScrollOffset > 0)
 }
 
 internal fun resolveUserSharedTopScrollState(
-  firstVisibleItemIndex: Int,
-  firstVisibleItemScrollOffset: Int,
-  layout: UserScrollLayout,
+    firstVisibleItemIndex: Int,
+    firstVisibleItemScrollOffset: Int,
+    layout: UserScrollLayout,
 ): UserSharedTopScrollState =
-  if (
-    shouldStickUserSectionTabs(
-      firstVisibleItemIndex = firstVisibleItemIndex,
-      firstVisibleItemScrollOffset = firstVisibleItemScrollOffset,
-      hasHeader = layout.hasHeader,
-    )
-  ) {
-    UserSharedTopScrollState.Sticky
-  } else {
-    UserSharedTopScrollState.Inline(
-      firstVisibleItemIndex = firstVisibleItemIndex,
-      firstVisibleItemScrollOffset = firstVisibleItemScrollOffset,
-    )
-  }
+    if (
+        shouldStickUserSectionTabs(
+            firstVisibleItemIndex = firstVisibleItemIndex,
+            firstVisibleItemScrollOffset = firstVisibleItemScrollOffset,
+            hasHeader = layout.hasHeader,
+        )
+    ) {
+      UserSharedTopScrollState.Sticky
+    } else {
+      UserSharedTopScrollState.Inline(
+          firstVisibleItemIndex = firstVisibleItemIndex,
+          firstVisibleItemScrollOffset = firstVisibleItemScrollOffset,
+      )
+    }
 
 internal fun resolveUserBodyScrollPosition(
-  firstVisibleItemIndex: Int,
-  firstVisibleItemScrollOffset: Int,
-  layout: UserScrollLayout,
+    firstVisibleItemIndex: Int,
+    firstVisibleItemScrollOffset: Int,
+    layout: UserScrollLayout,
 ): UserBodyScrollPosition {
   val relativeIndex = max(firstVisibleItemIndex - layout.bodyStartIndex, 0)
   val relativeOffset =
-    if (firstVisibleItemIndex < layout.bodyStartIndex) 0 else firstVisibleItemScrollOffset
+      if (firstVisibleItemIndex < layout.bodyStartIndex) 0 else firstVisibleItemScrollOffset
   return UserBodyScrollPosition(
-    firstVisibleItemIndex = relativeIndex,
-    firstVisibleItemScrollOffset = relativeOffset,
+      firstVisibleItemIndex = relativeIndex,
+      firstVisibleItemScrollOffset = relativeOffset,
   )
 }
 
 internal fun resolveInitialUserScrollPosition(
-  sharedTopScrollState: UserSharedTopScrollState,
-  bodyScrollPosition: UserBodyScrollPosition?,
-  layout: UserScrollLayout,
+    sharedTopScrollState: UserSharedTopScrollState,
+    bodyScrollPosition: UserBodyScrollPosition?,
+    layout: UserScrollLayout,
 ): UserResolvedScrollPosition =
-  when (sharedTopScrollState) {
-    is UserSharedTopScrollState.Inline ->
-      UserResolvedScrollPosition(
-        firstVisibleItemIndex = sharedTopScrollState.firstVisibleItemIndex,
-        firstVisibleItemScrollOffset = sharedTopScrollState.firstVisibleItemScrollOffset,
-        deferredBodyScrollPosition = bodyScrollPosition?.takeUnless { it.isAtStart },
-      )
+    when (sharedTopScrollState) {
+      is UserSharedTopScrollState.Inline ->
+          UserResolvedScrollPosition(
+              firstVisibleItemIndex = sharedTopScrollState.firstVisibleItemIndex,
+              firstVisibleItemScrollOffset = sharedTopScrollState.firstVisibleItemScrollOffset,
+              deferredBodyScrollPosition = bodyScrollPosition?.takeUnless { it.isAtStart },
+          )
 
-    UserSharedTopScrollState.Sticky -> {
-      // Keep sticky tabs snapped with a tiny top inset so we don't jump under the row.
-      val offsetPixels = 3
-      val targetBodyScrollPosition = bodyScrollPosition ?: UserBodyScrollPosition()
-      if (targetBodyScrollPosition.isAtStart) {
-        return UserResolvedScrollPosition(
-          firstVisibleItemIndex = layout.tabsInlineIndex,
-          firstVisibleItemScrollOffset = offsetPixels,
+      UserSharedTopScrollState.Sticky -> {
+        // Keep sticky tabs snapped with a tiny top inset so we don't jump under the row.
+        val offsetPixels = 3
+        val targetBodyScrollPosition = bodyScrollPosition ?: UserBodyScrollPosition()
+        if (targetBodyScrollPosition.isAtStart) {
+          return UserResolvedScrollPosition(
+              firstVisibleItemIndex = layout.tabsInlineIndex,
+              firstVisibleItemScrollOffset = offsetPixels,
+          )
+        }
+        UserResolvedScrollPosition(
+            firstVisibleItemIndex =
+                layout.bodyStartIndex + targetBodyScrollPosition.firstVisibleItemIndex,
+            firstVisibleItemScrollOffset = targetBodyScrollPosition.firstVisibleItemScrollOffset,
         )
       }
-      UserResolvedScrollPosition(
-        firstVisibleItemIndex =
-          layout.bodyStartIndex + targetBodyScrollPosition.firstVisibleItemIndex,
-        firstVisibleItemScrollOffset = targetBodyScrollPosition.firstVisibleItemScrollOffset,
-      )
     }
-  }
 
 internal enum class UserSectionTabSelectionAction {
   SelectRoute,
@@ -135,30 +137,30 @@ internal enum class UserSectionTabSelectionAction {
 }
 
 internal fun resolveUserSectionTabSelectionAction(
-  targetRoute: UserChildRoute,
-  currentRoute: UserChildRoute,
-  isAtTop: Boolean,
+    targetRoute: UserChildRoute,
+    currentRoute: UserChildRoute,
+    isAtTop: Boolean,
 ): UserSectionTabSelectionAction =
-  when {
-    targetRoute != currentRoute -> UserSectionTabSelectionAction.SelectRoute
-    isAtTop -> UserSectionTabSelectionAction.RefreshCurrentRoute
-    else -> UserSectionTabSelectionAction.ScrollCurrentRouteToTop
-  }
+    when {
+      targetRoute != currentRoute -> UserSectionTabSelectionAction.SelectRoute
+      isAtTop -> UserSectionTabSelectionAction.RefreshCurrentRoute
+      else -> UserSectionTabSelectionAction.ScrollCurrentRouteToTop
+    }
 
 internal fun handleUserSectionTabSelection(
-  targetRoute: UserChildRoute,
-  currentRoute: UserChildRoute,
-  isAtTop: Boolean,
-  onSelectRoute: (UserChildRoute) -> Unit,
-  onRefreshCurrentRoute: () -> Unit,
-  onScrollCurrentRouteToTop: () -> Unit,
+    targetRoute: UserChildRoute,
+    currentRoute: UserChildRoute,
+    isAtTop: Boolean,
+    onSelectRoute: (UserChildRoute) -> Unit,
+    onRefreshCurrentRoute: () -> Unit,
+    onScrollCurrentRouteToTop: () -> Unit,
 ) {
   when (
-    resolveUserSectionTabSelectionAction(
-      targetRoute = targetRoute,
-      currentRoute = currentRoute,
-      isAtTop = isAtTop,
-    )
+      resolveUserSectionTabSelectionAction(
+          targetRoute = targetRoute,
+          currentRoute = currentRoute,
+          isAtTop = isAtTop,
+      )
   ) {
     UserSectionTabSelectionAction.SelectRoute -> onSelectRoute(targetRoute)
     UserSectionTabSelectionAction.RefreshCurrentRoute -> onRefreshCurrentRoute()
@@ -169,21 +171,24 @@ internal fun handleUserSectionTabSelection(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun UserChildRouteTabs(
-  currentRoute: UserChildRoute,
-  onSelectRoute: (UserChildRoute) -> Unit,
-  horizontalPadding: Dp = UserSectionTopDefaults.tabsHorizontalPaddingInList,
-  modifier: Modifier = Modifier,
+    currentRoute: UserChildRoute,
+    onSelectRoute: (UserChildRoute) -> Unit,
+    horizontalPadding: Dp = UserSectionTopDefaults.tabsHorizontalPaddingInList,
+    modifier: Modifier = Modifier,
 ) {
   Surface(modifier = modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
     SingleChoiceSegmentedButtonRow(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = horizontalPadding, vertical = 6.dp)
+        modifier = Modifier.fillMaxWidth().padding(horizontal = horizontalPadding, vertical = 6.dp)
     ) {
       UserChildRoute.entries.forEachIndexed { index, route ->
         SegmentedButton(
-          selected = route == currentRoute,
-          onClick = { onSelectRoute(route) },
-          shape =
-            SegmentedButtonDefaults.itemShape(index = index, count = UserChildRoute.entries.size),
+            selected = route == currentRoute,
+            onClick = { onSelectRoute(route) },
+            shape =
+                SegmentedButtonDefaults.itemShape(
+                    index = index,
+                    count = UserChildRoute.entries.size,
+                ),
         ) {
           Text(route.title)
         }

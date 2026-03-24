@@ -21,46 +21,46 @@ import me.domino.fa2.util.sanitizeDetailAspectRatio
 
 @Composable
 internal fun SubmissionDetailLoadingContent(
-  item: SubmissionThumbnail,
-  isBlockedByTag: Boolean,
-  blockedSubmissionMode: BlockedSubmissionPagerMode,
-  isBlockedMediaRevealed: Boolean,
+    item: SubmissionThumbnail,
+    isBlockedByTag: Boolean,
+    blockedSubmissionMode: BlockedSubmissionPagerMode,
+    isBlockedMediaRevealed: Boolean,
 ) {
   val shouldBlurBlockedMedia =
-    isBlockedByTag &&
-      blockedSubmissionMode == BlockedSubmissionPagerMode.BLUR_THEN_OPEN &&
-      !isBlockedMediaRevealed
+      isBlockedByTag &&
+          blockedSubmissionMode == BlockedSubmissionPagerMode.BLUR_THEN_OPEN &&
+          !isBlockedMediaRevealed
   val mediaAspectRatio = sanitizeDetailAspectRatio(item.thumbnailAspectRatio)
   Column(
-    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-    verticalArrangement = Arrangement.spacedBy(12.dp),
+      modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+      verticalArrangement = Arrangement.spacedBy(12.dp),
   ) {
     Box(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).aspectRatio(mediaAspectRatio)
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).aspectRatio(mediaAspectRatio)
     ) {
       if (item.thumbnailUrl.isBlank()) {
         SkeletonBlock(modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(0.dp))
       } else {
         ThumbnailImage(
-          url = item.thumbnailUrl,
-          modifier =
-            Modifier.fillMaxSize()
-              .then(if (shouldBlurBlockedMedia) Modifier.blur(26.dp) else Modifier),
-          showLoadingPlaceholder = false,
+            url = item.thumbnailUrl,
+            modifier =
+                Modifier.fillMaxSize()
+                    .then(if (shouldBlurBlockedMedia) Modifier.blur(26.dp) else Modifier),
+            showLoadingPlaceholder = false,
         )
       }
     }
     SkeletonBlock(
-      shape = RoundedCornerShape(14.dp),
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(92.dp),
+        shape = RoundedCornerShape(14.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(92.dp),
     )
     SkeletonBlock(
-      shape = RoundedCornerShape(14.dp),
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(54.dp),
+        shape = RoundedCornerShape(14.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(54.dp),
     )
     SkeletonBlock(
-      shape = RoundedCornerShape(14.dp),
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(180.dp),
+        shape = RoundedCornerShape(14.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(180.dp),
     )
   }
 }

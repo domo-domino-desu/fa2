@@ -9,12 +9,12 @@ import me.domino.fa2.util.isCloudflareCookieName
 
 /** 登录态数据源。 */
 class AuthDataSource(
-  /** 首页端点，用于登录态探测。 */
-  private val homeEndpoint: HomeEndpoint,
-  /** Cookie 存储。 */
-  private val cookiesStorage: FaCookiesStorage,
-  /** UA 存储。 */
-  private val userAgentStorage: UserAgentStorage,
+    /** 首页端点，用于登录态探测。 */
+    private val homeEndpoint: HomeEndpoint,
+    /** Cookie 存储。 */
+    private val cookiesStorage: FaCookiesStorage,
+    /** UA 存储。 */
+    private val userAgentStorage: UserAgentStorage,
 ) {
   /**
    * 启动时恢复会话持久化数据。
@@ -36,9 +36,9 @@ class AuthDataSource(
   suspend fun submitCookie(rawCookieHeader: String) {
     // 手动输入仅接收 auth 相关 cookie；Cloudflare cookie 只能来自内置 WebView。
     cookiesStorage.replaceRawCookieHeader(
-      raw = rawCookieHeader,
-      preserveExisting = ::isCloudflareCookieName,
-      acceptIncoming = { cookieName -> !isCloudflareCookieName(cookieName) },
+        raw = rawCookieHeader,
+        preserveExisting = ::isCloudflareCookieName,
+        acceptIncoming = { cookieName -> !isCloudflareCookieName(cookieName) },
     )
   }
 
@@ -57,8 +57,8 @@ class AuthDataSource(
    */
   suspend fun mergeChallengeCookie(rawCookieHeader: String) {
     cookiesStorage.mergeRawCookieHeader(
-      raw = rawCookieHeader,
-      shouldMerge = ::isCloudflareCookieName,
+        raw = rawCookieHeader,
+        shouldMerge = ::isCloudflareCookieName,
     )
   }
 
@@ -112,5 +112,7 @@ class AuthDataSource(
    * @param body 页面 HTML。
    */
   private fun extractUsername(body: String): String? =
-    Regex("""/user/([^/\"']+)""").find(body)?.groupValues?.getOrNull(1)?.takeIf { it.isNotBlank() }
+      Regex("""/user/([^/\"']+)""").find(body)?.groupValues?.getOrNull(1)?.takeIf {
+        it.isNotBlank()
+      }
 }

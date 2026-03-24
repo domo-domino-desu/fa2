@@ -24,12 +24,12 @@ class FeedRepositoryPaginationTest {
     val repository = buildRepository(source)
 
     source.enqueue(
-      url = FaUrls.submissions(),
-      response =
-        HtmlResponseResult.Success(
-          body = TestFixtures.read("www.furaffinity.net:msg:submissions-firstpage.html"),
-          url = FaUrls.submissions(),
-        ),
+        url = FaUrls.submissions(),
+        response =
+            HtmlResponseResult.Success(
+                body = TestFixtures.read("www.furaffinity.net:msg:submissions-firstpage.html"),
+                url = FaUrls.submissions(),
+            ),
     )
 
     val first = repository.loadFirstPage()
@@ -38,12 +38,12 @@ class FeedRepositoryPaginationTest {
     assertNotNull(firstPage.nextPageUrl)
 
     source.enqueue(
-      url = firstPage.nextPageUrl,
-      response =
-        HtmlResponseResult.Success(
-          body = TestFixtures.read("www.furaffinity.net:msg:submissions-middlepage.html"),
-          url = firstPage.nextPageUrl,
-        ),
+        url = firstPage.nextPageUrl,
+        response =
+            HtmlResponseResult.Success(
+                body = TestFixtures.read("www.furaffinity.net:msg:submissions-middlepage.html"),
+                url = firstPage.nextPageUrl,
+            ),
     )
     val middle = repository.loadPageByNextUrl(firstPage.nextPageUrl)
     assertTrue(middle is PageState.Success)
@@ -51,19 +51,19 @@ class FeedRepositoryPaginationTest {
     assertNotNull(middlePage.nextPageUrl)
 
     source.enqueue(
-      url = middlePage.nextPageUrl,
-      response = HtmlResponseResult.Error(statusCode = 503, message = "temporary unavailable"),
+        url = middlePage.nextPageUrl,
+        response = HtmlResponseResult.Error(statusCode = 503, message = "temporary unavailable"),
     )
     val failedAppend = repository.loadPageByNextUrl(middlePage.nextPageUrl)
     assertTrue(failedAppend is PageState.Error)
 
     source.enqueue(
-      url = middlePage.nextPageUrl,
-      response =
-        HtmlResponseResult.Success(
-          body = TestFixtures.read("www.furaffinity.net:msg:submissions-lastpage.html"),
-          url = middlePage.nextPageUrl,
-        ),
+        url = middlePage.nextPageUrl,
+        response =
+            HtmlResponseResult.Success(
+                body = TestFixtures.read("www.furaffinity.net:msg:submissions-lastpage.html"),
+                url = middlePage.nextPageUrl,
+            ),
     )
     val retriedAppend = repository.loadPageByNextUrl(middlePage.nextPageUrl)
     assertTrue(retriedAppend is PageState.Success)
@@ -79,10 +79,10 @@ class FeedRepositoryPaginationTest {
 
   private fun buildRepository(source: FaHtmlDataSource): FeedRepository {
     val feedStore =
-      FeedStore(
-        dataSource = FeedDataSource(endpoint = FeedEndpoint(source), parser = FeedParser()),
-        pageCacheDao = InMemoryPageCacheDao(),
-      )
+        FeedStore(
+            dataSource = FeedDataSource(endpoint = FeedEndpoint(source), parser = FeedParser()),
+            pageCacheDao = InMemoryPageCacheDao(),
+        )
     return FeedRepository(feedStore)
   }
 }
@@ -99,7 +99,10 @@ private class FeedScriptedHtmlDataSource : FaHtmlDataSource {
   override suspend fun get(url: String): HtmlResponseResult {
     val queue = queueByUrl[url]
     if (queue == null || queue.isEmpty()) {
-      return HtmlResponseResult.Error(statusCode = 500, message = "No scripted response for $url")
+      return HtmlResponseResult.Error(
+          statusCode = 500,
+          message = "No scripted response for $url",
+      )
     }
     return queue.removeFirst()
   }

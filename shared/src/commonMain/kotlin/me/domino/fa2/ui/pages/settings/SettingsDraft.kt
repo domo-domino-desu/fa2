@@ -8,17 +8,17 @@ import me.domino.fa2.data.settings.ThemeMode
 import me.domino.fa2.data.settings.TranslationProvider
 
 internal data class SettingsDraft(
-  val translationProvider: TranslationProvider,
-  val themeMode: ThemeMode,
-  val blockedSubmissionWaterfallMode: BlockedSubmissionWaterfallMode,
-  val blockedSubmissionPagerMode: BlockedSubmissionPagerMode,
-  val chunkWordLimitInput: String,
-  val maxConcurrencyInput: String,
-  val waterfallMinCardWidthInput: String,
-  val openAiBaseUrl: String,
-  val openAiApiKey: String,
-  val openAiModel: String,
-  val openAiPromptTemplate: String,
+    val translationProvider: TranslationProvider,
+    val themeMode: ThemeMode,
+    val blockedSubmissionWaterfallMode: BlockedSubmissionWaterfallMode,
+    val blockedSubmissionPagerMode: BlockedSubmissionPagerMode,
+    val chunkWordLimitInput: String,
+    val maxConcurrencyInput: String,
+    val waterfallMinCardWidthInput: String,
+    val openAiBaseUrl: String,
+    val openAiApiKey: String,
+    val openAiModel: String,
+    val openAiPromptTemplate: String,
 ) {
   fun toAppSettingsOrNull(): AppSettings? {
     val chunkWordLimit = chunkWordLimitInput.toIntOrNull() ?: return null
@@ -26,20 +26,20 @@ internal data class SettingsDraft(
     val waterfallWidth = waterfallMinCardWidthInput.toIntOrNull() ?: return null
 
     return AppSettings(
-      translationProvider = translationProvider,
-      themeMode = themeMode,
-      blockedSubmissionWaterfallMode = blockedSubmissionWaterfallMode,
-      blockedSubmissionPagerMode = blockedSubmissionPagerMode,
-      translationChunkWordLimit = chunkWordLimit,
-      translationMaxConcurrency = maxConcurrency,
-      waterfallMinCardWidthDp = waterfallWidth,
-      openAiTranslationConfig =
-        OpenAiTranslationConfig(
-          baseUrl = openAiBaseUrl,
-          apiKey = openAiApiKey,
-          model = openAiModel,
-          promptTemplate = openAiPromptTemplate,
-        ),
+        translationProvider = translationProvider,
+        themeMode = themeMode,
+        blockedSubmissionWaterfallMode = blockedSubmissionWaterfallMode,
+        blockedSubmissionPagerMode = blockedSubmissionPagerMode,
+        translationChunkWordLimit = chunkWordLimit,
+        translationMaxConcurrency = maxConcurrency,
+        waterfallMinCardWidthDp = waterfallWidth,
+        openAiTranslationConfig =
+            OpenAiTranslationConfig(
+                baseUrl = openAiBaseUrl,
+                apiKey = openAiApiKey,
+                model = openAiModel,
+                promptTemplate = openAiPromptTemplate,
+            ),
     )
   }
 
@@ -64,22 +64,22 @@ internal data class SettingsDraft(
     }
 
     if (
-      chunkWordLimit !in
-        AppSettings.minTranslationChunkWordLimit..AppSettings.maxTranslationChunkWordLimit
+        chunkWordLimit !in
+            AppSettings.minTranslationChunkWordLimit..AppSettings.maxTranslationChunkWordLimit
     ) {
       return "Chunk Word Limit 需在 ${AppSettings.minTranslationChunkWordLimit}-${AppSettings.maxTranslationChunkWordLimit}"
     }
 
     if (
-      maxConcurrency !in
-        AppSettings.minTranslationMaxConcurrency..AppSettings.maxTranslationMaxConcurrency
+        maxConcurrency !in
+            AppSettings.minTranslationMaxConcurrency..AppSettings.maxTranslationMaxConcurrency
     ) {
       return "Max Concurrency 需在 ${AppSettings.minTranslationMaxConcurrency}-${AppSettings.maxTranslationMaxConcurrency}"
     }
 
     if (
-      waterfallWidth !in
-        AppSettings.minWaterfallMinCardWidthDp..AppSettings.maxWaterfallMinCardWidthDp
+        waterfallWidth !in
+            AppSettings.minWaterfallMinCardWidthDp..AppSettings.maxWaterfallMinCardWidthDp
     ) {
       return "瀑布流最小列宽需在 ${AppSettings.minWaterfallMinCardWidthDp}-${AppSettings.maxWaterfallMinCardWidthDp} dp"
     }
@@ -100,18 +100,18 @@ internal data class SettingsDraft(
 
   companion object {
     fun fromSettings(settings: AppSettings): SettingsDraft =
-      SettingsDraft(
-        translationProvider = settings.translationProvider,
-        themeMode = settings.themeMode,
-        blockedSubmissionWaterfallMode = settings.blockedSubmissionWaterfallMode,
-        blockedSubmissionPagerMode = settings.blockedSubmissionPagerMode,
-        chunkWordLimitInput = settings.translationChunkWordLimit.toString(),
-        maxConcurrencyInput = settings.translationMaxConcurrency.toString(),
-        waterfallMinCardWidthInput = settings.waterfallMinCardWidthDp.toString(),
-        openAiBaseUrl = settings.openAiTranslationConfig.baseUrl,
-        openAiApiKey = settings.openAiTranslationConfig.apiKey,
-        openAiModel = settings.openAiTranslationConfig.model,
-        openAiPromptTemplate = settings.openAiTranslationConfig.promptTemplate,
-      )
+        SettingsDraft(
+            translationProvider = settings.translationProvider,
+            themeMode = settings.themeMode,
+            blockedSubmissionWaterfallMode = settings.blockedSubmissionWaterfallMode,
+            blockedSubmissionPagerMode = settings.blockedSubmissionPagerMode,
+            chunkWordLimitInput = settings.translationChunkWordLimit.toString(),
+            maxConcurrencyInput = settings.translationMaxConcurrency.toString(),
+            waterfallMinCardWidthInput = settings.waterfallMinCardWidthDp.toString(),
+            openAiBaseUrl = settings.openAiTranslationConfig.baseUrl,
+            openAiApiKey = settings.openAiTranslationConfig.apiKey,
+            openAiModel = settings.openAiTranslationConfig.model,
+            openAiPromptTemplate = settings.openAiTranslationConfig.promptTemplate,
+        )
   }
 }

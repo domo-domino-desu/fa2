@@ -21,9 +21,9 @@ import org.mobilenativefoundation.store.store5.StoreReadRequest
 
 /** Gallery/Favorites/Scraps 存储层。 */
 class GalleryStore(
-  private val galleryDataSource: GalleryDataSource,
-  private val favoritesDataSource: FavoritesDataSource,
-  private val pageCacheDao: PageCacheDao,
+    private val galleryDataSource: GalleryDataSource,
+    private val favoritesDataSource: FavoritesDataSource,
+    private val pageCacheDao: PageCacheDao,
 ) {
   private val store: Store<SectionPageKey, GalleryPage> = buildStore()
 
@@ -35,29 +35,29 @@ class GalleryStore(
 
   /** 读取分页流。 */
   fun stream(
-    section: Section,
-    username: String,
-    nextPageUrl: String?,
+      section: Section,
+      username: String,
+      nextPageUrl: String?,
   ): Flow<PageState<GalleryPage>> {
     val key =
-      SectionPageKey(
-        section = section,
-        username = normalizeUsername(username),
-        nextPageUrl = nextPageUrl?.trim()?.takeIf { it.isNotBlank() },
-      )
+        SectionPageKey(
+            section = section,
+            username = normalizeUsername(username),
+            nextPageUrl = nextPageUrl?.trim()?.takeIf { it.isNotBlank() },
+        )
     return store
-      .stream(StoreReadRequest.cached(key, true))
-      .map(::toPageState)
-      .flowWithInitialLoading()
+        .stream(StoreReadRequest.cached(key, true))
+        .map(::toPageState)
+        .flowWithInitialLoading()
   }
 
   /** 单次读取分页。 */
   suspend fun loadPageOnce(
-    section: Section,
-    username: String,
-    nextPageUrl: String?,
+      section: Section,
+      username: String,
+      nextPageUrl: String?,
   ): PageState<GalleryPage> =
-    stream(section, username, nextPageUrl).first { state -> state !is PageState.Loading }
+      stream(section, username, nextPageUrl).first { state -> state !is PageState.Loading }
 
   /** 失效指定分区的全部缓存（含 Store 内存层）。 */
   suspend fun invalidateSection(section: Section) {
@@ -74,43 +74,43 @@ class GalleryStore(
 
   private fun buildStore(): Store<SectionPageKey, GalleryPage> {
     val fetcher =
-      Fetcher.of<SectionPageKey, GalleryPage>(name = "gallery-sections-fetcher") { key ->
-        when (key.section) {
-          Section.Gallery -> galleryDataSource.fetchPage(key.username, key.nextPageUrl)
-          Section.Favorites -> favoritesDataSource.fetchPage(key.username, key.nextPageUrl)
-        }.requireStoreValue()
-      }
+        Fetcher.of<SectionPageKey, GalleryPage>(name = "gallery-sections-fetcher") { key ->
+          when (key.section) {
+            Section.Gallery -> galleryDataSource.fetchPage(key.username, key.nextPageUrl)
+            Section.Favorites -> favoritesDataSource.fetchPage(key.username, key.nextPageUrl)
+          }.requireStoreValue()
+        }
 
     val sourceOfTruth =
-      SourceOfTruth.of<SectionPageKey, GalleryPage, GalleryPage>(
-        reader = { key ->
-          pageCacheDao.observeByKey(cacheKeyFor(key)).map { entity ->
-            readCacheIfValid(
-              entity = entity,
-              expectedPageType = key.section.pageType,
-              decode = ::decodePage,
-            )
-          }
-        },
-        writer = { key, page ->
-          pageCacheDao.upsert(
-            PageCacheEntity(
-              cacheKey = cacheKeyFor(key),
-              pageType = key.section.pageType,
-              dataJson = storeJson.encodeToString(page),
-              cachedAtMs = Clock.System.now().toEpochMilliseconds(),
-            )
-          )
-        },
-        delete = { key -> pageCacheDao.delete(cacheKeyFor(key)) },
-        deleteAll = { pageCacheDao.deleteAll() },
-      )
+        SourceOfTruth.of<SectionPageKey, GalleryPage, GalleryPage>(
+            reader = { key ->
+              pageCacheDao.observeByKey(cacheKeyFor(key)).map { entity ->
+                readCacheIfValid(
+                    entity = entity,
+                    expectedPageType = key.section.pageType,
+                    decode = ::decodePage,
+                )
+              }
+            },
+            writer = { key, page ->
+              pageCacheDao.upsert(
+                  PageCacheEntity(
+                      cacheKey = cacheKeyFor(key),
+                      pageType = key.section.pageType,
+                      dataJson = storeJson.encodeToString(page),
+                      cachedAtMs = Clock.System.now().toEpochMilliseconds(),
+                  )
+              )
+            },
+            delete = { key -> pageCacheDao.delete(cacheKeyFor(key)) },
+            deleteAll = { pageCacheDao.deleteAll() },
+        )
 
     return StoreBuilder.from(fetcher = fetcher, sourceOfTruth = sourceOfTruth).build()
   }
 
   private fun decodePage(entity: PageCacheEntity): GalleryPage? =
-    runCatching { storeJson.decodeFromString<GalleryPage>(entity.dataJson) }.getOrNull()
+      runCatching { storeJson.decodeFromString<GalleryPage>(entity.dataJson) }.getOrNull()
 
   private fun cacheKeyFor(key: SectionPageKey): String {
     val cursor = key.nextPageUrl?.ifBlank { null } ?: "first"
@@ -128,23 +128,23 @@ class GalleryStore(
     val cursorRaw = cacheKey.substring(markerIndex + marker.length)
     val nextPageUrl = cursorRaw.takeUnless { it == "first" }
     return SectionPageKey(
-      section = section,
-      username = normalizeUsername(username),
-      nextPageUrl = nextPageUrl,
+        section = section,
+        username = normalizeUsername(username),
+        nextPageUrl = nextPageUrl,
     )
   }
 
   private fun normalizeUsername(username: String): String = username.trim().lowercase()
 
   private data class SectionPageKey(
-    val section: Section,
-    val username: String,
-    val nextPageUrl: String?,
+      val section: Section,
+      val username: String,
+      val nextPageUrl: String?,
   )
 }
 
 private fun Flow<PageState<GalleryPage>?>.flowWithInitialLoading(): Flow<PageState<GalleryPage>> =
-  flow {
-    emit(PageState.Loading)
-    collect { state -> if (state != null) emit(state) }
-  }
+    flow {
+      emit(PageState.Loading)
+      collect { state -> if (state != null) emit(state) }
+    }

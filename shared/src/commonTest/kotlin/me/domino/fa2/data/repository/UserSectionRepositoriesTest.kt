@@ -33,24 +33,24 @@ class UserSectionRepositoriesTest {
     val stores = buildStores(source)
 
     source.enqueue(
-      url = FaUrls.gallery("tiaamaito"),
-      response =
-        HtmlResponseResult.Success(
-          body = TestFixtures.read("www.furaffinity.net:gallery:tiaamaito:.html"),
-          url = FaUrls.gallery("tiaamaito"),
-        ),
+        url = FaUrls.gallery("tiaamaito"),
+        response =
+            HtmlResponseResult.Success(
+                body = TestFixtures.read("www.furaffinity.net:gallery:tiaamaito:.html"),
+                url = FaUrls.gallery("tiaamaito"),
+            ),
     )
     val galleryState = stores.galleryRepository.loadGalleryPage("tiaamaito")
     assertTrue(galleryState is PageState.Success)
     assertTrue(galleryState.data.submissions.isNotEmpty())
 
     source.enqueue(
-      url = FaUrls.favorites("tiaamaito"),
-      response =
-        HtmlResponseResult.Success(
-          body = TestFixtures.read("www.furaffinity.net:favorites:tiaamaito:.html"),
-          url = FaUrls.favorites("tiaamaito"),
-        ),
+        url = FaUrls.favorites("tiaamaito"),
+        response =
+            HtmlResponseResult.Success(
+                body = TestFixtures.read("www.furaffinity.net:favorites:tiaamaito:.html"),
+                url = FaUrls.favorites("tiaamaito"),
+            ),
     )
     val favoritesState = stores.favoritesRepository.loadFavoritesPage("tiaamaito")
     assertTrue(favoritesState is PageState.Success)
@@ -63,24 +63,24 @@ class UserSectionRepositoriesTest {
     val stores = buildStores(source)
 
     source.enqueue(
-      url = FaUrls.journals("tiaamaito"),
-      response =
-        HtmlResponseResult.Success(
-          body = TestFixtures.read("www.furaffinity.net:journals:tiaamaito:.html"),
-          url = FaUrls.journals("tiaamaito"),
-        ),
+        url = FaUrls.journals("tiaamaito"),
+        response =
+            HtmlResponseResult.Success(
+                body = TestFixtures.read("www.furaffinity.net:journals:tiaamaito:.html"),
+                url = FaUrls.journals("tiaamaito"),
+            ),
     )
     val journalsState = stores.journalsRepository.loadJournalsPage("tiaamaito")
     assertTrue(journalsState is PageState.Success)
     assertTrue(journalsState.data.journals.isNotEmpty())
 
     source.enqueue(
-      url = FaUrls.journal(10516170),
-      response =
-        HtmlResponseResult.Success(
-          body = TestFixtures.read("www.furaffinity.net:journal:10516170-withcomments.html"),
-          url = FaUrls.journal(10516170),
-        ),
+        url = FaUrls.journal(10516170),
+        response =
+            HtmlResponseResult.Success(
+                body = TestFixtures.read("www.furaffinity.net:journal:10516170-withcomments.html"),
+                url = FaUrls.journal(10516170),
+            ),
     )
     val detailState = stores.journalRepository.loadJournalDetail(10516170)
     assertTrue(detailState is PageState.Success)
@@ -90,40 +90,46 @@ class UserSectionRepositoriesTest {
   private fun buildStores(source: FaHtmlDataSource): StoreBundle {
     val pageCacheDao = InMemoryPageCacheDao()
     val galleryStore =
-      GalleryStore(
-        galleryDataSource =
-          GalleryDataSource(endpoint = GalleryEndpoint(source), parser = GalleryParser()),
-        favoritesDataSource =
-          FavoritesDataSource(endpoint = FavoriteEndpoint(source), parser = GalleryParser()),
-        pageCacheDao = pageCacheDao,
-      )
+        GalleryStore(
+            galleryDataSource =
+                GalleryDataSource(endpoint = GalleryEndpoint(source), parser = GalleryParser()),
+            favoritesDataSource =
+                FavoritesDataSource(
+                    endpoint = FavoriteEndpoint(source),
+                    parser = GalleryParser(),
+                ),
+            pageCacheDao = pageCacheDao,
+        )
     val journalsStore =
-      JournalsStore(
-        dataSource =
-          JournalsDataSource(endpoint = JournalsEndpoint(source), parser = JournalsParser()),
-        pageCacheDao = pageCacheDao,
-      )
+        JournalsStore(
+            dataSource =
+                JournalsDataSource(
+                    endpoint = JournalsEndpoint(source),
+                    parser = JournalsParser(),
+                ),
+            pageCacheDao = pageCacheDao,
+        )
     val journalStore =
-      JournalStore(
-        dataSource =
-          JournalDataSource(endpoint = JournalEndpoint(source), parser = JournalParser()),
-        pageCacheDao = pageCacheDao,
-      )
+        JournalStore(
+            dataSource =
+                JournalDataSource(endpoint = JournalEndpoint(source), parser = JournalParser()),
+            pageCacheDao = pageCacheDao,
+        )
 
     return StoreBundle(
-      galleryRepository = GalleryRepository(galleryStore),
-      favoritesRepository = FavoritesRepository(galleryStore),
-      journalsRepository = JournalsRepository(journalsStore),
-      journalRepository = JournalRepository(journalStore),
+        galleryRepository = GalleryRepository(galleryStore),
+        favoritesRepository = FavoritesRepository(galleryStore),
+        journalsRepository = JournalsRepository(journalsStore),
+        journalRepository = JournalRepository(journalStore),
     )
   }
 }
 
 private data class StoreBundle(
-  val galleryRepository: GalleryRepository,
-  val favoritesRepository: FavoritesRepository,
-  val journalsRepository: JournalsRepository,
-  val journalRepository: JournalRepository,
+    val galleryRepository: GalleryRepository,
+    val favoritesRepository: FavoritesRepository,
+    val journalsRepository: JournalsRepository,
+    val journalRepository: JournalRepository,
 )
 
 /** 脚本化 HTML 数据源，用于控制请求返回。 */
@@ -137,7 +143,10 @@ private class UserSectionScriptedHtmlDataSource : FaHtmlDataSource {
   override suspend fun get(url: String): HtmlResponseResult {
     val queue = queueByUrl[url]
     if (queue == null || queue.isEmpty()) {
-      return HtmlResponseResult.Error(statusCode = 500, message = "No scripted response for $url")
+      return HtmlResponseResult.Error(
+          statusCode = 500,
+          message = "No scripted response for $url",
+      )
     }
     return queue.removeFirst()
   }

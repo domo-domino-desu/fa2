@@ -22,7 +22,7 @@ class UserParserTest {
     assertTrue(header.profileHtml.contains("bbcode"))
     assertTrue(header.isWatching)
     assertTrue(
-      header.watchActionUrl.contains("/watch/") || header.watchActionUrl.contains("/unwatch/")
+        header.watchActionUrl.contains("/watch/") || header.watchActionUrl.contains("/unwatch/")
     )
     assertEquals(2257, header.watchedByCount)
     assertEquals(120, header.watchingCount)
@@ -36,9 +36,9 @@ class UserParserTest {
     val parser = UserParser()
 
     val error =
-      assertFailsWith<IllegalStateException> {
-        parser.parse(html = html, url = FaUrls.user("unknown"))
-      }
+        assertFailsWith<IllegalStateException> {
+          parser.parse(html = html, url = FaUrls.user("unknown"))
+        }
     assertTrue(error.message.orEmpty().contains("cannot be found", ignoreCase = true))
   }
 
@@ -48,9 +48,9 @@ class UserParserTest {
     val parser = UserParser()
 
     val error =
-      assertFailsWith<IllegalStateException> {
-        parser.parse(html = html, url = FaUrls.user("disabled"))
-      }
+        assertFailsWith<IllegalStateException> {
+          parser.parse(html = html, url = FaUrls.user("disabled"))
+        }
     assertTrue(error.message.orEmpty().contains("disabled", ignoreCase = true))
   }
 
@@ -60,9 +60,9 @@ class UserParserTest {
     val parser = UserParser()
 
     val error =
-      assertFailsWith<IllegalStateException> {
-        parser.parse(html = html, url = FaUrls.user("pending"))
-      }
+        assertFailsWith<IllegalStateException> {
+          parser.parse(html = html, url = FaUrls.user("pending"))
+        }
     assertTrue(error.message.orEmpty().contains("pending deletion", ignoreCase = true))
   }
 

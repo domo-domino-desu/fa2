@@ -5,11 +5,11 @@ import me.domino.fa2.data.settings.TranslationProvider
 
 /** 翻译请求。 */
 data class TranslationRequest(
-  val provider: TranslationProvider,
-  val sourceText: String,
-  val sourceLanguageCode: String = defaultSourceLanguageCode,
-  val targetLanguageCode: String = defaultTargetLanguageCode,
-  val openAiConfig: OpenAiTranslationConfig? = null,
+    val provider: TranslationProvider,
+    val sourceText: String,
+    val sourceLanguageCode: String = defaultSourceLanguageCode,
+    val targetLanguageCode: String = defaultTargetLanguageCode,
+    val openAiConfig: OpenAiTranslationConfig? = null,
 ) {
   init {
     require(sourceText.isNotBlank()) { "Translation source text must not be blank." }
@@ -25,10 +25,10 @@ data class TranslationRequest(
   }
 
   fun normalized(): TranslationRequest =
-    copy(
-      sourceLanguageCode = sourceLanguageCode.trim(),
-      targetLanguageCode = targetLanguageCode.trim(),
-    )
+      copy(
+          sourceLanguageCode = sourceLanguageCode.trim(),
+          targetLanguageCode = targetLanguageCode.trim(),
+      )
 
   companion object {
     const val defaultSourceLanguageCode: String = "auto"

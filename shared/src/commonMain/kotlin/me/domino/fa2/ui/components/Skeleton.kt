@@ -36,28 +36,28 @@ private const val SKELETON_BRUSH_END_Y_OFFSET = 220f
 fun SkeletonBlock(modifier: Modifier = Modifier, shape: Shape = RoundedCornerShape(10.dp)) {
   val transition = rememberInfiniteTransition(label = "skeleton")
   val shift by
-    transition.animateFloat(
-      initialValue = SKELETON_SHIFT_START,
-      targetValue = SKELETON_SHIFT_END,
-      animationSpec =
-        infiniteRepeatable(
-          animation = tween(durationMillis = SKELETON_ANIMATION_MS, easing = LinearEasing),
-          repeatMode = RepeatMode.Restart,
-        ),
-      label = "skeleton-shift",
-    )
+      transition.animateFloat(
+          initialValue = SKELETON_SHIFT_START,
+          targetValue = SKELETON_SHIFT_END,
+          animationSpec =
+              infiniteRepeatable(
+                  animation = tween(durationMillis = SKELETON_ANIMATION_MS, easing = LinearEasing),
+                  repeatMode = RepeatMode.Restart,
+              ),
+          label = "skeleton-shift",
+      )
   val base = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = SKELETON_BASE_ALPHA)
   val highlight = MaterialTheme.colorScheme.onSurface.copy(alpha = SKELETON_HIGHLIGHT_ALPHA)
   val brush =
-    Brush.linearGradient(
-      colors = listOf(base, highlight, base),
-      start = Offset(x = shift * SKELETON_BRUSH_START_X, y = shift * SKELETON_BRUSH_START_Y),
-      end =
-        Offset(
-          x = shift * SKELETON_BRUSH_END_X + SKELETON_BRUSH_END_X_OFFSET,
-          y = shift * SKELETON_BRUSH_END_Y + SKELETON_BRUSH_END_Y_OFFSET,
-        ),
-    )
+      Brush.linearGradient(
+          colors = listOf(base, highlight, base),
+          start = Offset(x = shift * SKELETON_BRUSH_START_X, y = shift * SKELETON_BRUSH_START_Y),
+          end =
+              Offset(
+                  x = shift * SKELETON_BRUSH_END_X + SKELETON_BRUSH_END_X_OFFSET,
+                  y = shift * SKELETON_BRUSH_END_Y + SKELETON_BRUSH_END_Y_OFFSET,
+              ),
+      )
 
   Box(modifier = modifier.clip(shape).background(brush = brush))
 }

@@ -22,15 +22,15 @@ import org.koin.core.parameter.parametersOf
 
 /** User 子路由 screen。 */
 class UserChildRouteScreen(
-  /** 用户名。 */
-  private val username: String,
-  /** 当前子路由。 */
-  val route: UserChildRoute,
-  /** 初始文件夹 URL（仅首次创建时生效）。 */
-  private val initialFolderUrl: String? = null,
+    /** 用户名。 */
+    private val username: String,
+    /** 当前子路由。 */
+    val route: UserChildRoute,
+    /** 初始文件夹 URL（仅首次创建时生效）。 */
+    private val initialFolderUrl: String? = null,
 ) : Screen {
   override val key: String =
-    "user-child:${username.lowercase()}:${route.routeKey}:${initialFolderUrl.orEmpty()}"
+      "user-child:${username.lowercase()}:${route.routeKey}:${initialFolderUrl.orEmpty()}"
 
   @Composable
   override fun Content() {
@@ -54,58 +54,65 @@ class UserChildRouteScreen(
         val scrollKey = remember(username) { buildUserJournalsScrollKey(username) }
         key(scrollKey) {
           val layout =
-            remember(headerContent) { userJournalsScrollLayout(hasHeader = headerContent != null) }
+              remember(headerContent) {
+                userJournalsScrollLayout(hasHeader = headerContent != null)
+              }
           val initialScrollPosition =
-            remember(scrollKey, headerContent) {
-              resolveInitialUserScrollPosition(
-                sharedTopScrollState = resolveSharedTopScrollState(),
-                bodyScrollPosition = resolveBodyScrollPosition(scrollKey),
-                layout = layout,
-              )
-            }
-          val listState =
-            rememberLazyListState(
-              initialFirstVisibleItemIndex = initialScrollPosition.firstVisibleItemIndex,
-              initialFirstVisibleItemScrollOffset =
-                initialScrollPosition.firstVisibleItemScrollOffset,
-            )
-          var deferredBodyScrollPosition by
-            remember(scrollKey) { mutableStateOf(initialScrollPosition.deferredBodyScrollPosition) }
-
-          UserJournalsScreen(
-            state = state,
-            onOpenJournal = { item ->
-              rootNavigator.push(
-                JournalDetailRouteScreen(journalId = item.id, journalUrl = item.journalUrl)
-              )
-            },
-            onRetry = { screenModel.load(forceRefresh = true) },
-            onRefresh = {
-              refreshHeader?.invoke()
-              screenModel.load(forceRefresh = true)
-            },
-            onLastVisibleIndexChanged = screenModel::onLastVisibleIndexChanged,
-            onRetryLoadMore = screenModel::retryLoadMore,
-            currentRoute = route,
-            onSelectRoute = { target ->
-              if (target != route) {
-                localNavigator.replaceAll(
-                  UserChildRouteScreen(
-                    username = username,
-                    route = target,
-                    initialFolderUrl = resolveFolderUrl(target),
-                  )
+              remember(scrollKey, headerContent) {
+                resolveInitialUserScrollPosition(
+                    sharedTopScrollState = resolveSharedTopScrollState(),
+                    bodyScrollPosition = resolveBodyScrollPosition(scrollKey),
+                    layout = layout,
                 )
               }
-            },
-            listState = listState,
-            deferredBodyScrollPosition = deferredBodyScrollPosition,
-            onDeferredBodyScrollPositionConsumed = { deferredBodyScrollPosition = null },
-            onSharedTopScrollChanged = updateSharedTopScrollState,
-            onBodyScrollPositionChanged = { position ->
-              updateBodyScrollPosition(scrollKey, position)
-            },
-            headerContent = headerContent,
+          val listState =
+              rememberLazyListState(
+                  initialFirstVisibleItemIndex = initialScrollPosition.firstVisibleItemIndex,
+                  initialFirstVisibleItemScrollOffset =
+                      initialScrollPosition.firstVisibleItemScrollOffset,
+              )
+          var deferredBodyScrollPosition by
+              remember(scrollKey) {
+                mutableStateOf(initialScrollPosition.deferredBodyScrollPosition)
+              }
+
+          UserJournalsScreen(
+              state = state,
+              onOpenJournal = { item ->
+                rootNavigator.push(
+                    JournalDetailRouteScreen(
+                        journalId = item.id,
+                        journalUrl = item.journalUrl,
+                    )
+                )
+              },
+              onRetry = { screenModel.load(forceRefresh = true) },
+              onRefresh = {
+                refreshHeader?.invoke()
+                screenModel.load(forceRefresh = true)
+              },
+              onLastVisibleIndexChanged = screenModel::onLastVisibleIndexChanged,
+              onRetryLoadMore = screenModel::retryLoadMore,
+              currentRoute = route,
+              onSelectRoute = { target ->
+                if (target != route) {
+                  localNavigator.replaceAll(
+                      UserChildRouteScreen(
+                          username = username,
+                          route = target,
+                          initialFolderUrl = resolveFolderUrl(target),
+                      )
+                  )
+                }
+              },
+              listState = listState,
+              deferredBodyScrollPosition = deferredBodyScrollPosition,
+              onDeferredBodyScrollPositionConsumed = { deferredBodyScrollPosition = null },
+              onSharedTopScrollChanged = updateSharedTopScrollState,
+              onBodyScrollPositionChanged = { position ->
+                updateBodyScrollPosition(scrollKey, position)
+              },
+              headerContent = headerContent,
           )
         }
       }
@@ -115,91 +122,100 @@ class UserChildRouteScreen(
         val rootNavigator = localNavigator.rootNavigator()
         val holderTag = "user-submission-holder:${username.lowercase()}:${route.routeKey}"
         val submissionListHolder =
-          rootNavigator.rememberNavigatorScreenModel<SubmissionListHolder>(tag = holderTag) {
-            SubmissionListHolder()
-          }
+            rootNavigator.rememberNavigatorScreenModel<SubmissionListHolder>(tag = holderTag) {
+              SubmissionListHolder()
+            }
         val scrollKey =
-          remember(username, route, routeInitialFolderUrl) {
-            buildUserSubmissionScrollKey(
-              username = username,
-              route = route,
-              folderUrl = routeInitialFolderUrl,
-            )
-          }
+            remember(username, route, routeInitialFolderUrl) {
+              buildUserSubmissionScrollKey(
+                  username = username,
+                  route = route,
+                  folderUrl = routeInitialFolderUrl,
+              )
+            }
         val initialSnapshot = remember(scrollKey) { resolveSubmissionSnapshot(scrollKey) }
         val screenModel =
-          koinScreenModel<UserSubmissionSectionScreenModel> {
-            parametersOf(
-              username,
-              route,
-              submissionListHolder,
-              routeInitialFolderUrl,
-              initialSnapshot,
-            )
-          }
+            koinScreenModel<UserSubmissionSectionScreenModel> {
+              parametersOf(
+                  username,
+                  route,
+                  submissionListHolder,
+                  routeInitialFolderUrl,
+                  initialSnapshot,
+              )
+            }
         val state by screenModel.state.collectAsState()
-        LaunchedEffect(scrollKey, state.submissions, state.nextPageUrl, state.folderGroups) {
+        LaunchedEffect(
+            scrollKey,
+            state.submissions,
+            state.nextPageUrl,
+            state.folderGroups,
+        ) {
           updateSubmissionSnapshot(scrollKey, state)
         }
         key(scrollKey) {
           val layout =
-            remember(headerContent) {
-              userSubmissionSectionScrollLayout(hasHeader = headerContent != null)
-            }
+              remember(headerContent) {
+                userSubmissionSectionScrollLayout(hasHeader = headerContent != null)
+              }
           val initialScrollPosition =
-            remember(scrollKey, headerContent) {
-              resolveInitialUserScrollPosition(
-                sharedTopScrollState = resolveSharedTopScrollState(),
-                bodyScrollPosition = resolveBodyScrollPosition(scrollKey),
-                layout = layout,
-              )
-            }
-          val waterfallState =
-            rememberLazyStaggeredGridState(
-              initialFirstVisibleItemIndex = initialScrollPosition.firstVisibleItemIndex,
-              initialFirstVisibleItemScrollOffset =
-                initialScrollPosition.firstVisibleItemScrollOffset,
-            )
-          var deferredBodyScrollPosition by
-            remember(scrollKey) { mutableStateOf(initialScrollPosition.deferredBodyScrollPosition) }
-
-          UserSubmissionSectionScreen(
-            route = route,
-            state = state,
-            onRetry = { screenModel.load(forceRefresh = true) },
-            onRefresh = {
-              refreshHeader?.invoke()
-              screenModel.load(forceRefresh = true)
-            },
-            onOpenSubmission = { item ->
-              screenModel.setCurrentSubmission(item.id)
-              rootNavigator.push(SubmissionRouteScreen(initialSid = item.id, holderTag = holderTag))
-            },
-            onOpenFolder = { folderUrl ->
-              updateFolderUrl(route, folderUrl)
-              screenModel.openFolder(folderUrl)
-            },
-            onLastVisibleIndexChanged = screenModel::onLastVisibleIndexChanged,
-            onRetryLoadMore = screenModel::retryLoadMore,
-            onSelectRoute = { target ->
-              if (target != route) {
-                localNavigator.replaceAll(
-                  UserChildRouteScreen(
-                    username = username,
-                    route = target,
-                    initialFolderUrl = resolveFolderUrl(target),
-                  )
+              remember(scrollKey, headerContent) {
+                resolveInitialUserScrollPosition(
+                    sharedTopScrollState = resolveSharedTopScrollState(),
+                    bodyScrollPosition = resolveBodyScrollPosition(scrollKey),
+                    layout = layout,
                 )
               }
-            },
-            headerContent = headerContent,
-            waterfallState = waterfallState,
-            deferredBodyScrollPosition = deferredBodyScrollPosition,
-            onDeferredBodyScrollPositionConsumed = { deferredBodyScrollPosition = null },
-            onSharedTopScrollChanged = updateSharedTopScrollState,
-            onBodyScrollPositionChanged = { position ->
-              updateBodyScrollPosition(scrollKey, position)
-            },
+          val waterfallState =
+              rememberLazyStaggeredGridState(
+                  initialFirstVisibleItemIndex = initialScrollPosition.firstVisibleItemIndex,
+                  initialFirstVisibleItemScrollOffset =
+                      initialScrollPosition.firstVisibleItemScrollOffset,
+              )
+          var deferredBodyScrollPosition by
+              remember(scrollKey) {
+                mutableStateOf(initialScrollPosition.deferredBodyScrollPosition)
+              }
+
+          UserSubmissionSectionScreen(
+              route = route,
+              state = state,
+              onRetry = { screenModel.load(forceRefresh = true) },
+              onRefresh = {
+                refreshHeader?.invoke()
+                screenModel.load(forceRefresh = true)
+              },
+              onOpenSubmission = { item ->
+                screenModel.setCurrentSubmission(item.id)
+                rootNavigator.push(
+                    SubmissionRouteScreen(initialSid = item.id, holderTag = holderTag)
+                )
+              },
+              onOpenFolder = { folderUrl ->
+                updateFolderUrl(route, folderUrl)
+                screenModel.openFolder(folderUrl)
+              },
+              onLastVisibleIndexChanged = screenModel::onLastVisibleIndexChanged,
+              onRetryLoadMore = screenModel::retryLoadMore,
+              onSelectRoute = { target ->
+                if (target != route) {
+                  localNavigator.replaceAll(
+                      UserChildRouteScreen(
+                          username = username,
+                          route = target,
+                          initialFolderUrl = resolveFolderUrl(target),
+                      )
+                  )
+                }
+              },
+              headerContent = headerContent,
+              waterfallState = waterfallState,
+              deferredBodyScrollPosition = deferredBodyScrollPosition,
+              onDeferredBodyScrollPositionConsumed = { deferredBodyScrollPosition = null },
+              onSharedTopScrollChanged = updateSharedTopScrollState,
+              onBodyScrollPositionChanged = { position ->
+                updateBodyScrollPosition(scrollKey, position)
+              },
           )
         }
       }

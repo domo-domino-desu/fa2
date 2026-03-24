@@ -21,18 +21,18 @@ import org.mobilenativefoundation.store.store5.StoreReadRequest
 
 /** Submission 详情存储层。 */
 class SubmissionStore(
-  private val dataSource: SubmissionDataSource,
-  private val pageCacheDao: PageCacheDao,
+    private val dataSource: SubmissionDataSource,
+    private val pageCacheDao: PageCacheDao,
 ) {
   private val store: Store<Int, Submission> = buildStore()
 
   /** 按 ID 读取详情流。 */
   fun streamBySid(sid: Int): Flow<PageState<Submission>> =
-    store.stream(StoreReadRequest.cached(sid, true)).map(::toPageState).flowWithInitialLoading()
+      store.stream(StoreReadRequest.cached(sid, true)).map(::toPageState).flowWithInitialLoading()
 
   /** 按 ID 单次读取详情。 */
   suspend fun loadBySid(sid: Int): PageState<Submission> =
-    streamBySid(sid).first { state -> state !is PageState.Loading }
+      streamBySid(sid).first { state -> state !is PageState.Loading }
 
   /** 按 URL 读取详情。 */
   suspend fun loadByUrl(url: String): PageState<Submission> {
@@ -59,42 +59,42 @@ class SubmissionStore(
 
   private fun buildStore(): Store<Int, Submission> {
     val fetcher =
-      Fetcher.of<Int, Submission>(name = "submission-fetcher") { sid ->
-        dataSource.fetchBySid(sid).requireStoreValue()
-      }
+        Fetcher.of<Int, Submission>(name = "submission-fetcher") { sid ->
+          dataSource.fetchBySid(sid).requireStoreValue()
+        }
 
     val sourceOfTruth =
-      SourceOfTruth.of<Int, Submission, Submission>(
-        reader = { sid ->
-          pageCacheDao.observeByKey(cacheKeyFor(sid)).map { entity ->
-            readCacheIfValid(
-              entity = entity,
-              expectedPageType = PAGE_TYPE_SUBMISSION,
-              decode = ::decodeDetail,
-            )
-          }
-        },
-        writer = { sid, detail -> writeCacheBySid(sid, detail) },
-        delete = { sid -> pageCacheDao.delete(cacheKeyFor(sid)) },
-        deleteAll = { pageCacheDao.deleteAll() },
-      )
+        SourceOfTruth.of<Int, Submission, Submission>(
+            reader = { sid ->
+              pageCacheDao.observeByKey(cacheKeyFor(sid)).map { entity ->
+                readCacheIfValid(
+                    entity = entity,
+                    expectedPageType = PAGE_TYPE_SUBMISSION,
+                    decode = ::decodeDetail,
+                )
+              }
+            },
+            writer = { sid, detail -> writeCacheBySid(sid, detail) },
+            delete = { sid -> pageCacheDao.delete(cacheKeyFor(sid)) },
+            deleteAll = { pageCacheDao.deleteAll() },
+        )
 
     return StoreBuilder.from(fetcher = fetcher, sourceOfTruth = sourceOfTruth).build()
   }
 
   private suspend fun writeCacheBySid(sid: Int, detail: Submission) {
     pageCacheDao.upsert(
-      PageCacheEntity(
-        cacheKey = cacheKeyFor(sid),
-        pageType = PAGE_TYPE_SUBMISSION,
-        dataJson = storeJson.encodeToString(detail),
-        cachedAtMs = Clock.System.now().toEpochMilliseconds(),
-      )
+        PageCacheEntity(
+            cacheKey = cacheKeyFor(sid),
+            pageType = PAGE_TYPE_SUBMISSION,
+            dataJson = storeJson.encodeToString(detail),
+            cachedAtMs = Clock.System.now().toEpochMilliseconds(),
+        )
     )
   }
 
   private fun decodeDetail(entity: PageCacheEntity): Submission? =
-    runCatching { storeJson.decodeFromString<Submission>(entity.dataJson) }.getOrNull()
+      runCatching { storeJson.decodeFromString<Submission>(entity.dataJson) }.getOrNull()
 
   private fun cacheKeyFor(sid: Int): String = "submission:sid=$sid"
 
@@ -104,7 +104,7 @@ class SubmissionStore(
 }
 
 private fun Flow<PageState<Submission>?>.flowWithInitialLoading(): Flow<PageState<Submission>> =
-  flow {
-    emit(PageState.Loading)
-    collect { state -> if (state != null) emit(state) }
-  }
+    flow {
+      emit(PageState.Loading)
+      collect { state -> if (state != null) emit(state) }
+    }

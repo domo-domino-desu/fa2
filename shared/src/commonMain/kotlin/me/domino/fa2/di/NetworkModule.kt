@@ -45,17 +45,17 @@ fun networkModule(): Module = module {
   }
   single {
     CfChallengeCoordinator(
-      cookiesStorage = get(),
-      userAgentStorage = get(),
-      rawHtmlDataSource = get(qualifier = named("rawHtmlDataSource")),
+        cookiesStorage = get(),
+        userAgentStorage = get(),
+        rawHtmlDataSource = get(qualifier = named("rawHtmlDataSource")),
     )
   }
   single<CfChallengeController> { get<CfChallengeCoordinator>() }
   single<ChallengeResolver> { get<CfChallengeCoordinator>() }
   single<FaHtmlDataSource> {
     ChallengeAwareFaHtmlDataSource(
-      delegate = get(qualifier = named("rawHtmlDataSource")),
-      challengeResolver = get(),
+        delegate = get(qualifier = named("rawHtmlDataSource")),
+        challengeResolver = get(),
     )
   }
   single<HttpClient>(qualifier = named("socialActionClient")) {
@@ -75,10 +75,10 @@ fun networkModule(): Module = module {
   single { JournalEndpoint(get()) }
   single {
     SocialActionEndpoint(
-      client = get(qualifier = named("socialActionClient")),
-      cookiesStorage = get(),
-      userAgentStorage = get(),
-      challengeResolver = get(),
+        client = get(qualifier = named("socialActionClient")),
+        cookiesStorage = get(),
+        userAgentStorage = get(),
+        challengeResolver = get(),
     )
   }
 }

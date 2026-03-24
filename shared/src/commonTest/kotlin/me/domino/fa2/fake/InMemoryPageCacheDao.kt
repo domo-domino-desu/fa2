@@ -11,16 +11,15 @@ class InMemoryPageCacheDao : PageCacheDao {
   private val entitiesFlow = MutableStateFlow<Map<String, PageCacheEntity>>(emptyMap())
   private val entitiesByKey: MutableMap<String, PageCacheEntity> = mutableMapOf()
 
-  override fun observeByKey(key: String): Flow<PageCacheEntity?> = entitiesFlow.map { map ->
-    map[key]
-  }
+  override fun observeByKey(key: String): Flow<PageCacheEntity?> =
+      entitiesFlow.map { map -> map[key] }
 
   override suspend fun findByKey(key: String): PageCacheEntity? = entitiesByKey[key]
 
   override suspend fun listByPageType(pageType: String): List<PageCacheEntity> =
-    entitiesByKey.values
-      .filter { entity -> entity.pageType == pageType }
-      .sortedByDescending { entity -> entity.cachedAtMs }
+      entitiesByKey.values
+          .filter { entity -> entity.pageType == pageType }
+          .sortedByDescending { entity -> entity.cachedAtMs }
 
   override suspend fun upsert(entity: PageCacheEntity) {
     entitiesByKey[entity.cacheKey] = entity

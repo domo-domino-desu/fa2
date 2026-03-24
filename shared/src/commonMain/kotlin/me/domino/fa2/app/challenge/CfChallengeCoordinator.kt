@@ -21,10 +21,10 @@ import me.domino.fa2.util.logging.FaLog
 import me.domino.fa2.util.logging.summarizeUrl
 
 class CfChallengeCoordinator(
-  private val cookiesStorage: FaCookiesStorage,
-  private val userAgentStorage: UserAgentStorage,
-  private val rawHtmlDataSource: FaHtmlDataSource,
-  private val probeRetryDelaysMs: List<Long> = listOf(0L, 600L, 1_200L),
+    private val cookiesStorage: FaCookiesStorage,
+    private val userAgentStorage: UserAgentStorage,
+    private val rawHtmlDataSource: FaHtmlDataSource,
+    private val probeRetryDelaysMs: List<Long> = listOf(0L, 600L, 1_200L),
 ) : ChallengeResolver, CfChallengeController {
   private val log = FaLog.withTag("CfChallengeCoordinator")
   private val mutex = Mutex()
@@ -34,27 +34,28 @@ class CfChallengeCoordinator(
 
   override suspend fun awaitResolution(challenge: CfChallengeSignal): Boolean {
     val safeUrl = summarizeUrl(challenge.requestUrl)
-    val deferred = mutex.withLock {
-      active?.deferred
-        ?: run {
-          val created =
-            ActiveChallengeSession(
-              triggerUrl = challenge.requestUrl,
-              cfRay = challenge.cfRay,
-              deferred = CompletableDeferred(),
-            )
-          active = created
-          mutableState.value =
-            CfChallengeUiState.Active(
-              triggerUrl = created.triggerUrl,
-              cfRay = created.cfRay,
-              status = CfChallengeStatus.AwaitingUserAction,
-            )
-          val ray = created.cfRay?.takeIf { it.isNotBlank() } ?: "-"
-          log.i { "验证会话 -> 创建(url=${summarizeUrl(created.triggerUrl)},cf-ray=$ray)" }
-          created.deferred
+    val deferred =
+        mutex.withLock {
+          active?.deferred
+              ?: run {
+                val created =
+                    ActiveChallengeSession(
+                        triggerUrl = challenge.requestUrl,
+                        cfRay = challenge.cfRay,
+                        deferred = CompletableDeferred(),
+                    )
+                active = created
+                mutableState.value =
+                    CfChallengeUiState.Active(
+                        triggerUrl = created.triggerUrl,
+                        cfRay = created.cfRay,
+                        status = CfChallengeStatus.AwaitingUserAction,
+                    )
+                val ray = created.cfRay?.takeIf { it.isNotBlank() } ?: "-"
+                log.i { "验证会话 -> 创建(url=${summarizeUrl(created.triggerUrl)},cf-ray=$ray)" }
+                created.deferred
+              }
         }
-    }
     log.d { "验证会话 -> 等待(url=$safeUrl)" }
     val resolved = deferred.await()
     log.i { "验证会话 -> 完成(url=$safeUrl,result=${if (resolved) "成功" else "失败"})" }
@@ -80,8 +81,8 @@ class CfChallengeCoordinator(
   }
 
   override suspend fun confirmFromWebView(
-    port: CfChallengeWebViewPort,
-    triggerUrl: String,
+      port: CfChallengeWebViewPort,
+      triggerUrl: String,
   ): Boolean {
     log.i { "验证会话 -> 开始确认(url=${summarizeUrl(triggerUrl)})" }
     val userAgent = readNonBlankUserAgent(port)
@@ -89,13 +90,13 @@ class CfChallengeCoordinator(
       userAgentStorage.saveOverride(userAgent)
     }
     val capturedCookieHeader =
-      captureCfCookieHeaderWithRetry(
-        port = port,
-        urls = listOf(FaUrls.home, triggerUrl, port.lastLoadedUrl.orEmpty()),
-      )
+        captureCfCookieHeaderWithRetry(
+            port = port,
+            urls = listOf(FaUrls.home, triggerUrl, port.lastLoadedUrl.orEmpty()),
+        )
     return confirmCapturedCookie(
-      capturedCookieHeader = capturedCookieHeader,
-      triggerUrl = triggerUrl,
+        capturedCookieHeader = capturedCookieHeader,
+        triggerUrl = triggerUrl,
     )
   }
 
@@ -105,34 +106,36 @@ class CfChallengeCoordinator(
   }
 
   private suspend fun confirmCapturedCookie(
-    capturedCookieHeader: String,
-    triggerUrl: String,
+      capturedCookieHeader: String,
+      triggerUrl: String,
   ): Boolean {
     val session = mutex.withLock { active } ?: return false
     mutableState.value =
-      CfChallengeUiState.Active(
-        triggerUrl = session.triggerUrl,
-        cfRay = session.cfRay,
-        status = CfChallengeStatus.Verifying,
-      )
+        CfChallengeUiState.Active(
+            triggerUrl = session.triggerUrl,
+            cfRay = session.cfRay,
+            status = CfChallengeStatus.Verifying,
+        )
 
     if (!containsCloudflareCookie(capturedCookieHeader)) {
       log.w { "验证会话 -> 未捕获cf cookie(url=${summarizeUrl(triggerUrl)})" }
       mutableState.value =
-        CfChallengeUiState.Active(
-          triggerUrl = session.triggerUrl,
-          cfRay = session.cfRay,
-          status =
-            CfChallengeStatus.VerificationFailed(detail = "未抓取到 cf_clearance，请先在 WebView 完成验证。"),
-        )
+          CfChallengeUiState.Active(
+              triggerUrl = session.triggerUrl,
+              cfRay = session.cfRay,
+              status =
+                  CfChallengeStatus.VerificationFailed(
+                      detail = "未抓取到 cf_clearance，请先在 WebView 完成验证。"
+                  ),
+          )
       return false
     }
 
     val cookieSnapshot = cookiesStorage.loadRawCookieHeader().orEmpty()
     return try {
       cookiesStorage.mergeRawCookieHeader(
-        raw = capturedCookieHeader,
-        shouldMerge = ::isCloudflareCookieName,
+          raw = capturedCookieHeader,
+          shouldMerge = ::isCloudflareCookieName,
       )
       val mergedSnapshot = cookiesStorage.loadRawCookieHeader()
       log.d { "验证会话 -> 合并cookie(${if (mergedSnapshot.isBlank()) "空" else "已设置"})" }
@@ -145,12 +148,14 @@ class CfChallengeCoordinator(
       cookiesStorage.saveRawCookieHeader(cookieSnapshot)
       log.e(error) { "验证会话 -> 确认失败(url=${summarizeUrl(triggerUrl)})" }
       mutableState.value =
-        CfChallengeUiState.Active(
-          triggerUrl = session.triggerUrl,
-          cfRay = session.cfRay,
-          status =
-            CfChallengeStatus.VerificationFailed(detail = error.message ?: error::class.simpleName),
-        )
+          CfChallengeUiState.Active(
+              triggerUrl = session.triggerUrl,
+              cfRay = session.cfRay,
+              status =
+                  CfChallengeStatus.VerificationFailed(
+                      detail = error.message ?: error::class.simpleName
+                  ),
+          )
       false
     }
   }
@@ -168,9 +173,9 @@ class CfChallengeCoordinator(
         is HtmlResponseResult.CfChallenge -> {
           log.w { "验证探测 -> 仍命中challenge" }
           lastError =
-            IllegalStateException(
-              "Challenge still active${response.cfRay?.let { ", cf-ray=$it" }.orEmpty()}"
-            )
+              IllegalStateException(
+                  "Challenge still active${response.cfRay?.let { ", cf-ray=$it" }.orEmpty()}"
+              )
         }
 
         is HtmlResponseResult.Error -> {
@@ -183,12 +188,13 @@ class CfChallengeCoordinator(
   }
 
   private suspend fun completeActive(result: Boolean) {
-    val toComplete = mutex.withLock {
-      val session = active
-      active = null
-      mutableState.value = CfChallengeUiState.Idle
-      session
-    }
+    val toComplete =
+        mutex.withLock {
+          val session = active
+          active = null
+          mutableState.value = CfChallengeUiState.Idle
+          session
+        }
     if (toComplete != null) {
       log.d { "验证会话 -> 清理(result=${if (result) "成功" else "失败"})" }
     }
@@ -197,10 +203,10 @@ class CfChallengeCoordinator(
 }
 
 private suspend fun captureCfCookieHeaderWithRetry(
-  port: CfChallengeWebViewPort,
-  urls: List<String>,
-  maxAttempts: Int = 8,
-  delayMs: Long = 450L,
+    port: CfChallengeWebViewPort,
+    urls: List<String>,
+    maxAttempts: Int = 8,
+    delayMs: Long = 450L,
 ): String {
   val distinctUrls = urls.map { url -> url.trim() }.filter { url -> url.isNotBlank() }.distinct()
   repeat(maxAttempts) { attempt ->
@@ -218,9 +224,9 @@ private suspend fun captureCfCookieHeaderWithRetry(
 }
 
 private suspend fun readNonBlankUserAgent(
-  port: CfChallengeWebViewPort,
-  maxAttempts: Int = 3,
-  delayMs: Long = 220L,
+    port: CfChallengeWebViewPort,
+    maxAttempts: Int = 3,
+    delayMs: Long = 220L,
 ): String {
   repeat(maxAttempts) { attempt ->
     val userAgent = port.readUserAgent()?.trim().orEmpty()
@@ -235,16 +241,16 @@ private suspend fun readNonBlankUserAgent(
 }
 
 private fun containsCloudflareCookie(cookieHeader: String): Boolean =
-  cookieHeader
-    .split(';')
-    .map { token -> token.trim().substringBefore('=').trim() }
-    .any(::isCloudflareCookieName)
+    cookieHeader
+        .split(';')
+        .map { token -> token.trim().substringBefore('=').trim() }
+        .any(::isCloudflareCookieName)
 
 sealed interface CfChallengeUiState {
   data object Idle : CfChallengeUiState
 
   data class Active(val triggerUrl: String, val cfRay: String?, val status: CfChallengeStatus) :
-    CfChallengeUiState
+      CfChallengeUiState
 }
 
 sealed interface CfChallengeStatus {
@@ -256,7 +262,7 @@ sealed interface CfChallengeStatus {
 }
 
 private data class ActiveChallengeSession(
-  val triggerUrl: String,
-  val cfRay: String?,
-  val deferred: CompletableDeferred<Boolean>,
+    val triggerUrl: String,
+    val cfRay: String?,
+    val deferred: CompletableDeferred<Boolean>,
 )

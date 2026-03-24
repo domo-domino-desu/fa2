@@ -10,7 +10,7 @@ import me.domino.fa2.util.toPageState
 class BrowseDataSource(private val endpoint: BrowseEndpoint, private val parser: GalleryParser) {
   /** 拉取 Browse 指定分页。 */
   suspend fun fetchPage(url: String): PageState<SubmissionListingPage> =
-    endpoint.fetchByUrl(url).toPageState { success ->
-      parser.parseListing(html = success.body, baseUrl = success.url)
-    }
+      endpoint.fetchByUrl(url).toPageState { success ->
+        parser.parseListing(html = success.body, baseUrl = success.url)
+      }
 }

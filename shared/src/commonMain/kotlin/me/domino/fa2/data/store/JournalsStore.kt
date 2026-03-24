@@ -20,27 +20,27 @@ import org.mobilenativefoundation.store.store5.StoreReadRequest
 
 /** Journals 分页存储层。 */
 class JournalsStore(
-  private val dataSource: JournalsDataSource,
-  private val pageCacheDao: PageCacheDao,
+    private val dataSource: JournalsDataSource,
+    private val pageCacheDao: PageCacheDao,
 ) {
   private val store: Store<JournalsPageKey, JournalPage> = buildStore()
 
   /** 读取 journals 分页流。 */
   fun stream(username: String, nextPageUrl: String?): Flow<PageState<JournalPage>> {
     val key =
-      JournalsPageKey(
-        username = normalizeUsername(username),
-        nextPageUrl = nextPageUrl?.trim()?.takeIf { it.isNotBlank() },
-      )
+        JournalsPageKey(
+            username = normalizeUsername(username),
+            nextPageUrl = nextPageUrl?.trim()?.takeIf { it.isNotBlank() },
+        )
     return store
-      .stream(StoreReadRequest.cached(key, true))
-      .map(::toPageState)
-      .flowWithInitialLoading()
+        .stream(StoreReadRequest.cached(key, true))
+        .map(::toPageState)
+        .flowWithInitialLoading()
   }
 
   /** 单次读取 journals 分页。 */
   suspend fun loadPageOnce(username: String, nextPageUrl: String?): PageState<JournalPage> =
-    stream(username, nextPageUrl).first { state -> state !is PageState.Loading }
+      stream(username, nextPageUrl).first { state -> state !is PageState.Loading }
 
   /** 失效指定用户 Journals 缓存（含 Store 内存层）。 */
   suspend fun invalidateUser(username: String) {
@@ -60,40 +60,40 @@ class JournalsStore(
 
   private fun buildStore(): Store<JournalsPageKey, JournalPage> {
     val fetcher =
-      Fetcher.of<JournalsPageKey, JournalPage>(name = "journals-fetcher") { key ->
-        dataSource.fetchPage(key.username, key.nextPageUrl).requireStoreValue()
-      }
+        Fetcher.of<JournalsPageKey, JournalPage>(name = "journals-fetcher") { key ->
+          dataSource.fetchPage(key.username, key.nextPageUrl).requireStoreValue()
+        }
 
     val sourceOfTruth =
-      SourceOfTruth.of<JournalsPageKey, JournalPage, JournalPage>(
-        reader = { key ->
-          pageCacheDao.observeByKey(cacheKeyFor(key)).map { entity ->
-            readCacheIfValid(
-              entity = entity,
-              expectedPageType = PAGE_TYPE_JOURNALS,
-              decode = ::decodePage,
-            )
-          }
-        },
-        writer = { key, page ->
-          pageCacheDao.upsert(
-            PageCacheEntity(
-              cacheKey = cacheKeyFor(key),
-              pageType = PAGE_TYPE_JOURNALS,
-              dataJson = storeJson.encodeToString(page),
-              cachedAtMs = Clock.System.now().toEpochMilliseconds(),
-            )
-          )
-        },
-        delete = { key -> pageCacheDao.delete(cacheKeyFor(key)) },
-        deleteAll = { pageCacheDao.deleteAll() },
-      )
+        SourceOfTruth.of<JournalsPageKey, JournalPage, JournalPage>(
+            reader = { key ->
+              pageCacheDao.observeByKey(cacheKeyFor(key)).map { entity ->
+                readCacheIfValid(
+                    entity = entity,
+                    expectedPageType = PAGE_TYPE_JOURNALS,
+                    decode = ::decodePage,
+                )
+              }
+            },
+            writer = { key, page ->
+              pageCacheDao.upsert(
+                  PageCacheEntity(
+                      cacheKey = cacheKeyFor(key),
+                      pageType = PAGE_TYPE_JOURNALS,
+                      dataJson = storeJson.encodeToString(page),
+                      cachedAtMs = Clock.System.now().toEpochMilliseconds(),
+                  )
+              )
+            },
+            delete = { key -> pageCacheDao.delete(cacheKeyFor(key)) },
+            deleteAll = { pageCacheDao.deleteAll() },
+        )
 
     return StoreBuilder.from(fetcher = fetcher, sourceOfTruth = sourceOfTruth).build()
   }
 
   private fun decodePage(entity: PageCacheEntity): JournalPage? =
-    runCatching { storeJson.decodeFromString<JournalPage>(entity.dataJson) }.getOrNull()
+      runCatching { storeJson.decodeFromString<JournalPage>(entity.dataJson) }.getOrNull()
 
   private fun cacheKeyFor(key: JournalsPageKey): String {
     val cursor = key.nextPageUrl?.ifBlank { null } ?: "first"
@@ -123,7 +123,7 @@ class JournalsStore(
 }
 
 private fun Flow<PageState<JournalPage>?>.flowWithInitialLoading(): Flow<PageState<JournalPage>> =
-  flow {
-    emit(PageState.Loading)
-    collect { state -> if (state != null) emit(state) }
-  }
+    flow {
+      emit(PageState.Loading)
+      collect { state -> if (state != null) emit(state) }
+    }

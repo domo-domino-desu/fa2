@@ -6,8 +6,8 @@ import me.domino.fa2.util.FaUrls
 
 /** Submission 请求端点。 */
 class SubmissionEndpoint(
-  /** HTML 数据源。 */
-  private val dataSource: FaHtmlDataSource
+    /** HTML 数据源。 */
+    private val dataSource: FaHtmlDataSource
 ) {
   /**
    * 按 sid 拉取 submission 详情页。

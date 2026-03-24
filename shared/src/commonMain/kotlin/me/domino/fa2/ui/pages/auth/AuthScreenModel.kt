@@ -12,8 +12,8 @@ import me.domino.fa2.util.logging.FaLog
 
 /** 登录页面状态模型。 */
 class AuthScreenModel(
-  /** 认证仓储。 */
-  private val authRepository: AuthRepository
+    /** 认证仓储。 */
+    private val authRepository: AuthRepository
 ) : StateScreenModel<AuthUiState>(AuthUiState.Loading) {
   private val log = FaLog.withTag("AuthScreenModel")
 
@@ -74,29 +74,29 @@ class AuthScreenModel(
   /** 执行一次登录态探测并更新 UI 状态。 */
   private suspend fun probeAndUpdate() {
     val nextState =
-      when (val result = authRepository.probeLogin()) {
-        is AuthProbeResult.LoggedIn -> {
-          AuthUiState.Authenticated(username = result.username)
-        }
+        when (val result = authRepository.probeLogin()) {
+          is AuthProbeResult.LoggedIn -> {
+            AuthUiState.Authenticated(username = result.username)
+          }
 
-        is AuthProbeResult.AuthInvalid -> {
-          AuthUiState.AuthInvalid(message = result.message)
-        }
+          is AuthProbeResult.AuthInvalid -> {
+            AuthUiState.AuthInvalid(message = result.message)
+          }
 
-        is AuthProbeResult.Error -> {
-          AuthUiState.AuthInvalid(message = result.message)
+          is AuthProbeResult.Error -> {
+            AuthUiState.AuthInvalid(message = result.message)
+          }
         }
-      }
     mutableState.value = nextState
     log.i { "登录态探测 -> ${summarizeAuthUiState(nextState)}" }
   }
 
   private fun summarizeAuthUiState(state: AuthUiState): String =
-    when (state) {
-      AuthUiState.Loading -> "加载中"
-      is AuthUiState.Authenticated -> "已认证"
-      is AuthUiState.AuthInvalid -> "认证无效"
-    }
+      when (state) {
+        AuthUiState.Loading -> "加载中"
+        is AuthUiState.Authenticated -> "已认证"
+        is AuthUiState.AuthInvalid -> "认证无效"
+      }
 }
 
 /** 登录页状态定义。 */
@@ -110,8 +110,8 @@ sealed interface AuthUiState {
    * @property message 提示文案。
    */
   data class AuthInvalid(
-    /** 展示给用户的输入提示文案。 */
-    val message: String
+      /** 展示给用户的输入提示文案。 */
+      val message: String
   ) : AuthUiState
 
   /**
@@ -120,7 +120,7 @@ sealed interface AuthUiState {
    * @property username 当前用户名，可能为空。
    */
   data class Authenticated(
-    /** 已登录用户名；页面缺信息时可能为空。 */
-    val username: String?
+      /** 已登录用户名；页面缺信息时可能为空。 */
+      val username: String?
   ) : AuthUiState
 }

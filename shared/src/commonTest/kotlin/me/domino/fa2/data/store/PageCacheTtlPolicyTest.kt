@@ -12,18 +12,26 @@ class PageCacheTtlPolicyTest {
   fun shortTtlUsesThreeMinutes() {
     val now = Clock.System.now().toEpochMilliseconds()
     val fresh =
-      PageCacheEntity(
-        cacheKey = "feed:fromSid=0",
-        pageType = "feed_page_v1",
-        dataJson = "{}",
-        cachedAtMs = now - 2 * 60 * 1000L,
-      )
+        PageCacheEntity(
+            cacheKey = "feed:fromSid=0",
+            pageType = "feed_page_v1",
+            dataJson = "{}",
+            cachedAtMs = now - 2 * 60 * 1000L,
+        )
     val expired = fresh.copy(cachedAtMs = now - 4 * 60 * 1000L)
 
     val freshValue =
-      readCacheIfValid(entity = fresh, expectedPageType = "feed_page_v1", decode = { "fresh" })
+        readCacheIfValid(
+            entity = fresh,
+            expectedPageType = "feed_page_v1",
+            decode = { "fresh" },
+        )
     val expiredValue =
-      readCacheIfValid(entity = expired, expectedPageType = "feed_page_v1", decode = { "expired" })
+        readCacheIfValid(
+            entity = expired,
+            expectedPageType = "feed_page_v1",
+            decode = { "expired" },
+        )
 
     assertEquals("fresh", freshValue)
     assertNull(expiredValue)
@@ -33,22 +41,26 @@ class PageCacheTtlPolicyTest {
   fun longTtlUsesThirtyMinutes() {
     val now = Clock.System.now().toEpochMilliseconds()
     val fresh =
-      PageCacheEntity(
-        cacheKey = "user:username=terriniss",
-        pageType = "user_header_v1",
-        dataJson = "{}",
-        cachedAtMs = now - 20 * 60 * 1000L,
-      )
+        PageCacheEntity(
+            cacheKey = "user:username=terriniss",
+            pageType = "user_header_v1",
+            dataJson = "{}",
+            cachedAtMs = now - 20 * 60 * 1000L,
+        )
     val expired = fresh.copy(cachedAtMs = now - 40 * 60 * 1000L)
 
     val freshValue =
-      readCacheIfValid(entity = fresh, expectedPageType = "user_header_v1", decode = { "fresh" })
+        readCacheIfValid(
+            entity = fresh,
+            expectedPageType = "user_header_v1",
+            decode = { "fresh" },
+        )
     val expiredValue =
-      readCacheIfValid(
-        entity = expired,
-        expectedPageType = "user_header_v1",
-        decode = { "expired" },
-      )
+        readCacheIfValid(
+            entity = expired,
+            expectedPageType = "user_header_v1",
+            decode = { "expired" },
+        )
 
     assertEquals("fresh", freshValue)
     assertNull(expiredValue)
@@ -58,19 +70,19 @@ class PageCacheTtlPolicyTest {
   fun watchlistUsesShortTtl() {
     val now = Clock.System.now().toEpochMilliseconds()
     val expired =
-      PageCacheEntity(
-        cacheKey = "watchlist:category=watching:username=terriniss:cursor=first",
-        pageType = "watchlist_page_v1",
-        dataJson = "{}",
-        cachedAtMs = now - 5 * 60 * 1000L,
-      )
+        PageCacheEntity(
+            cacheKey = "watchlist:category=watching:username=terriniss:cursor=first",
+            pageType = "watchlist_page_v1",
+            dataJson = "{}",
+            cachedAtMs = now - 5 * 60 * 1000L,
+        )
 
     val value =
-      readCacheIfValid(
-        entity = expired,
-        expectedPageType = "watchlist_page_v1",
-        decode = { "watchlist" },
-      )
+        readCacheIfValid(
+            entity = expired,
+            expectedPageType = "watchlist_page_v1",
+            decode = { "watchlist" },
+        )
 
     assertNull(value)
   }

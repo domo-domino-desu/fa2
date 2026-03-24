@@ -18,9 +18,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -41,9 +39,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -64,9 +60,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -87,9 +81,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -110,9 +102,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -133,9 +123,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -153,9 +141,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -173,9 +159,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -193,9 +177,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "http://source.android.com"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -216,9 +198,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -239,9 +219,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -262,9 +240,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -285,9 +261,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -308,9 +282,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -331,9 +303,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -354,9 +324,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -377,9 +345,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -400,9 +366,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -423,9 +387,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -446,9 +408,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -469,9 +429,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -492,9 +450,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -515,9 +471,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -538,9 +492,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -561,9 +513,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -584,9 +534,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -607,9 +555,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -630,9 +576,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -653,9 +597,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -676,9 +618,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -696,9 +636,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "http://source.android.com"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -719,9 +657,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -742,9 +678,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -765,9 +699,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -785,9 +717,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -808,9 +738,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -831,9 +759,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -854,9 +780,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -877,9 +801,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "BSD-3-Clause"
-      ],
+      "licenses": ["BSD-3-Clause"],
       "funding": []
     },
     {
@@ -900,9 +822,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -920,9 +840,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "http://source.android.com"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -940,9 +858,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "http://source.android.com"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -960,9 +876,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -983,9 +897,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1006,9 +918,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1029,9 +939,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1049,9 +957,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "http://source.android.com"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1069,9 +975,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "http://source.android.com"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1092,9 +996,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1115,9 +1017,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1138,9 +1038,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1161,9 +1059,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1184,9 +1080,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1207,9 +1101,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1230,9 +1122,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1253,9 +1143,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1276,9 +1164,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1299,9 +1185,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1322,9 +1206,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1345,9 +1227,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1368,9 +1248,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1388,9 +1266,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "http://source.android.com"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1408,9 +1284,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "http://source.android.com"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1431,9 +1305,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1454,9 +1326,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1474,9 +1344,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "http://source.android.com"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1497,9 +1365,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1520,9 +1386,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1543,9 +1407,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1566,9 +1428,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1589,9 +1449,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1612,9 +1470,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1635,9 +1491,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1658,9 +1512,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1681,9 +1533,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1701,9 +1551,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1721,9 +1569,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1744,9 +1590,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1767,9 +1611,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1790,9 +1632,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1810,9 +1650,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "http://source.android.com"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1833,9 +1671,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1856,9 +1692,7 @@
         "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
         "url": "https://cs.android.com/androidx/platform/frameworks/support"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1877,9 +1711,7 @@
         "developerConnection": "scm:git:git://github.com/cbeyls/HtmlConverterCompose.git",
         "url": "https://github.com/cbeyls/HtmlConverterCompose"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -1898,9 +1730,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/adrielcafe/voyager.git",
         "url": "https://github.com/adrielcafe/voyager"
       },
-      "licenses": [
-        "MIT"
-      ],
+      "licenses": ["MIT"],
       "funding": []
     },
     {
@@ -1919,9 +1749,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/adrielcafe/voyager.git",
         "url": "https://github.com/adrielcafe/voyager"
       },
-      "licenses": [
-        "MIT"
-      ],
+      "licenses": ["MIT"],
       "funding": []
     },
     {
@@ -1940,9 +1768,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/adrielcafe/voyager.git",
         "url": "https://github.com/adrielcafe/voyager"
       },
-      "licenses": [
-        "MIT"
-      ],
+      "licenses": ["MIT"],
       "funding": []
     },
     {
@@ -1961,9 +1787,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/adrielcafe/voyager.git",
         "url": "https://github.com/adrielcafe/voyager"
       },
-      "licenses": [
-        "MIT"
-      ],
+      "licenses": ["MIT"],
       "funding": []
     },
     {
@@ -1982,9 +1806,7 @@
         "developerConnection": "scm:git:git://github.com/touchlab/Kermit.git",
         "url": "https://github.com/touchlab/Kermit"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2003,9 +1825,7 @@
         "developerConnection": "scm:git:git://github.com/touchlab/Stately.git",
         "url": "https://github.com/touchlab/Stately"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2023,9 +1843,7 @@
         "connection": "https://github.com/fleeksoft/charset.git",
         "url": "https://github.com/fleeksoft/charset"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2043,9 +1861,7 @@
         "connection": "https://github.com/fleeksoft/fleeksoft-io.git",
         "url": "https://github.com/fleeksoft/fleeksoft-io"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2063,9 +1879,7 @@
         "connection": "https://github.com/fleeksoft/ksoup.git",
         "url": "https://github.com/fleeksoft/ksoup"
       },
-      "licenses": [
-        "MIT"
-      ],
+      "licenses": ["MIT"],
       "funding": []
     },
     {
@@ -2093,9 +1907,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/oshi/oshi.git/oshi-core",
         "url": "https://github.com/oshi/oshi.git/oshi-core"
       },
-      "licenses": [
-        "MIT"
-      ],
+      "licenses": ["MIT"],
       "funding": []
     },
     {
@@ -2114,9 +1926,7 @@
         "developerConnection": "scm:git://github.com/zacharee/jSystemThemeDetector.git",
         "url": "git://github.com/zacharee/jSystemThemeDetector.git"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2135,9 +1945,7 @@
         "developerConnection": "scm:git://github.com/zacharee/jfa.git",
         "url": "git://github.com/zacharee/jfa.git"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2156,9 +1964,7 @@
         "developerConnection": "scm:git:git://github.com/google/accompanist.git",
         "url": "https://github.com/google/accompanist/"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2178,9 +1984,7 @@
         "developerConnection": "scm:git:git@github.com:google/guava.git/listenablefuture",
         "url": "https://github.com/google/guava/listenablefuture"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2199,9 +2003,7 @@
         "developerConnection": "scm:git@github.com:mikepenz/AboutLibraries.git",
         "url": "https://github.com/mikepenz/AboutLibraries"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2220,9 +2022,7 @@
         "developerConnection": "scm:git@github.com:mikepenz/AboutLibraries.git",
         "url": "https://github.com/mikepenz/AboutLibraries"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2241,9 +2041,7 @@
         "developerConnection": "scm:git@github.com:mikepenz/AboutLibraries.git",
         "url": "https://github.com/mikepenz/AboutLibraries"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2262,9 +2060,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/square/okhttp.git",
         "url": "https://github.com/square/okhttp"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2283,9 +2079,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/square/okhttp.git",
         "url": "https://github.com/square/okhttp"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2304,9 +2098,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/square/okio.git",
         "url": "https://github.com/square/okio/"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2325,9 +2117,7 @@
         "developerConnection": "scm:git:ssh://git@github.com:zacharee/MultiplatformMaterialYou.git",
         "url": "https://github.com/zacharee/MultiplatformMaterialYou"
       },
-      "licenses": [
-        "MIT"
-      ],
+      "licenses": ["MIT"],
       "funding": []
     },
     {
@@ -2346,9 +2136,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/coil-kt/coil.git",
         "url": "https://github.com/coil-kt/coil"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2367,9 +2155,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/coil-kt/coil.git",
         "url": "https://github.com/coil-kt/coil"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2388,9 +2174,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/coil-kt/coil.git",
         "url": "https://github.com/coil-kt/coil"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2409,9 +2193,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/coil-kt/coil.git",
         "url": "https://github.com/coil-kt/coil"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2430,9 +2212,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/coil-kt/coil.git",
         "url": "https://github.com/coil-kt/coil"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2451,9 +2231,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/coil-kt/coil.git",
         "url": "https://github.com/coil-kt/coil"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2472,9 +2250,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/coil-kt/coil.git",
         "url": "https://github.com/coil-kt/coil"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2493,9 +2269,7 @@
         "developerConnection": "https://github.com/G00fY2/version-compare.git",
         "url": "https://github.com/G00fY2/version-compare"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2514,9 +2288,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/kdroidFilter/ComposeDesktopNativeWebiew.git",
         "url": "https://github.com/kdroidFilter/ComposeDesktopNativeWebiew"
       },
-      "licenses": [
-        "MIT"
-      ],
+      "licenses": ["MIT"],
       "funding": []
     },
     {
@@ -2535,9 +2307,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/kdroidFilter/ComposeDesktopNativeWebiew.git",
         "url": "https://github.com/kdroidFilter/ComposeDesktopNativeWebiew"
       },
-      "licenses": [
-        "MIT"
-      ],
+      "licenses": ["MIT"],
       "funding": []
     },
     {
@@ -2556,9 +2326,7 @@
         "developerConnection": "https://github.com/panpf/zoomimage.git",
         "url": "https://github.com/panpf/zoomimage"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2576,9 +2344,7 @@
         "connection": "https://github.com/InsertKoinIO/koin.git",
         "url": "https://github.com/InsertKoinIO/koin"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2596,9 +2362,7 @@
       "scm": {
         "url": "https://github.com/ktorio/ktor.git"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2616,9 +2380,7 @@
       "scm": {
         "url": "https://github.com/ktorio/ktor.git"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2636,9 +2398,7 @@
       "scm": {
         "url": "https://github.com/ktorio/ktor.git"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2656,9 +2416,7 @@
       "scm": {
         "url": "https://github.com/ktorio/ktor.git"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2676,9 +2434,7 @@
       "scm": {
         "url": "https://github.com/ktorio/ktor.git"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2696,9 +2452,7 @@
       "scm": {
         "url": "https://github.com/ktorio/ktor.git"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2716,9 +2470,7 @@
       "scm": {
         "url": "https://github.com/ktorio/ktor.git"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2736,9 +2488,7 @@
       "scm": {
         "url": "https://github.com/ktorio/ktor.git"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2756,9 +2506,7 @@
       "scm": {
         "url": "https://github.com/ktorio/ktor.git"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2776,9 +2524,7 @@
       "scm": {
         "url": "https://github.com/ktorio/ktor.git"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2796,9 +2542,7 @@
       "scm": {
         "url": "https://github.com/ktorio/ktor.git"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2816,9 +2560,7 @@
       "scm": {
         "url": "https://github.com/ktorio/ktor.git"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2850,9 +2592,7 @@
         "developerConnection": "scm:git:git@github.com:junit-team/junit4.git",
         "url": "https://github.com/junit-team/junit4"
       },
-      "licenses": [
-        "EPL-1.0"
-      ],
+      "licenses": ["EPL-1.0"],
       "funding": []
     },
     {
@@ -2874,10 +2614,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/java-native-access/jna.git",
         "url": "https://github.com/java-native-access/jna"
       },
-      "licenses": [
-        "LGPL-2.1-or-later",
-        "Apache-2.0"
-      ],
+      "licenses": ["LGPL-2.1-or-later", "Apache-2.0"],
       "funding": []
     },
     {
@@ -2899,10 +2636,7 @@
         "developerConnection": "scm:git:ssh://git@github.com/java-native-access/jna.git",
         "url": "https://github.com/java-native-access/jna"
       },
-      "licenses": [
-        "LGPL-2.1-or-later",
-        "Apache-2.0"
-      ],
+      "licenses": ["LGPL-2.1-or-later", "Apache-2.0"],
       "funding": []
     },
     {
@@ -2932,9 +2666,7 @@
         "connection": "scm:git:git@github.com:hamcrest/JavaHamcrest.git/hamcrest-core",
         "url": "https://github.com/hamcrest/JavaHamcrest/hamcrest-core"
       },
-      "licenses": [
-        "BSD-3-Clause"
-      ],
+      "licenses": ["BSD-3-Clause"],
       "funding": []
     },
     {
@@ -2954,9 +2686,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2976,9 +2706,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -2998,9 +2726,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3020,9 +2746,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3042,9 +2766,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3064,9 +2786,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3086,9 +2806,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3108,9 +2826,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3130,9 +2846,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3152,9 +2866,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3174,9 +2886,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3196,9 +2906,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3218,9 +2926,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3240,9 +2946,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3260,9 +2964,7 @@
       "scm": {
         "url": "https://github.com/JetBrains/compose-hot-reload"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3280,9 +2982,7 @@
       "scm": {
         "url": "https://github.com/JetBrains/compose-hot-reload"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3300,9 +3000,7 @@
       "scm": {
         "url": "https://github.com/JetBrains/compose-hot-reload"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3320,9 +3018,7 @@
       "scm": {
         "url": "https://github.com/JetBrains/compose-hot-reload"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3340,9 +3036,7 @@
       "scm": {
         "url": "https://github.com/JetBrains/compose-hot-reload"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3360,9 +3054,7 @@
       "scm": {
         "url": "https://github.com/JetBrains/compose-hot-reload"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3382,9 +3074,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3404,9 +3094,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3426,9 +3114,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3448,9 +3134,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3470,9 +3154,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3492,9 +3174,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3514,9 +3194,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3536,9 +3214,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3558,9 +3234,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3580,9 +3254,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3602,9 +3274,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3624,9 +3294,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3646,9 +3314,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3668,9 +3334,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3690,9 +3354,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3712,9 +3374,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
         "url": "https://github.com/JetBrains/compose-jb"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3734,9 +3394,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/kotlin.git",
         "url": "https://github.com/JetBrains/kotlin"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3756,9 +3414,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/kotlin.git",
         "url": "https://github.com/JetBrains/kotlin"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3778,9 +3434,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/kotlin.git",
         "url": "https://github.com/JetBrains/kotlin"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3800,9 +3454,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/kotlin.git",
         "url": "https://github.com/JetBrains/kotlin"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3822,9 +3474,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/kotlin.git",
         "url": "https://github.com/JetBrains/kotlin"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3844,9 +3494,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/kotlin.git",
         "url": "https://github.com/JetBrains/kotlin"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3866,9 +3514,7 @@
         "developerConnection": "scm:git:https://github.com/JetBrains/kotlin.git",
         "url": "https://github.com/JetBrains/kotlin"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3886,9 +3532,7 @@
       "scm": {
         "url": "https://github.com/Kotlin/kotlinx.atomicfu"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3906,9 +3550,7 @@
       "scm": {
         "url": "https://github.com/Kotlin/kotlinx.collections.immutable"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3926,9 +3568,7 @@
       "scm": {
         "url": "https://github.com/Kotlin/kotlinx.coroutines"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3946,9 +3586,7 @@
       "scm": {
         "url": "https://github.com/Kotlin/kotlinx.coroutines"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3966,9 +3604,7 @@
       "scm": {
         "url": "https://github.com/Kotlin/kotlinx.coroutines"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -3986,9 +3622,7 @@
       "scm": {
         "url": "https://github.com/Kotlin/kotlinx.coroutines"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4006,9 +3640,7 @@
       "scm": {
         "url": "https://github.com/Kotlin/kotlinx.coroutines"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4026,9 +3658,7 @@
       "scm": {
         "url": "https://github.com/Kotlin/kotlinx.coroutines"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4046,9 +3676,7 @@
       "scm": {
         "url": "https://github.com/Kotlin/kotlinx-datetime"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4066,9 +3694,7 @@
       "scm": {
         "url": "https://github.com/Kotlin/kotlinx-io"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4086,9 +3712,7 @@
       "scm": {
         "url": "https://github.com/Kotlin/kotlinx-io"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4106,9 +3730,7 @@
       "scm": {
         "url": "https://github.com/Kotlin/kotlinx-io"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4126,9 +3748,7 @@
       "scm": {
         "url": "https://github.com/Kotlin/kotlinx.serialization"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4146,9 +3766,7 @@
       "scm": {
         "url": "https://github.com/Kotlin/kotlinx.serialization"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4166,9 +3784,7 @@
       "scm": {
         "url": "https://github.com/Kotlin/kotlinx.serialization"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4186,9 +3802,7 @@
       "scm": {
         "url": "https://github.com/Kotlin/kotlinx.serialization"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4207,9 +3821,7 @@
         "connection": "scm:git:git@github.com:JetBrains/JetBrainsRuntimeApi.git",
         "url": "https://github.com/JetBrains/JetBrainsRuntimeApi"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4229,9 +3841,7 @@
         "developerConnection": "scm:git:https://www.github.com/JetBrains/skiko.git",
         "url": "https://www.github.com/JetBrains/skiko"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4251,9 +3861,7 @@
         "developerConnection": "scm:git:https://www.github.com/JetBrains/skiko.git",
         "url": "https://www.github.com/JetBrains/skiko"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4273,9 +3881,7 @@
         "developerConnection": "scm:git:https://www.github.com/JetBrains/skiko.git",
         "url": "https://www.github.com/JetBrains/skiko"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4295,9 +3901,7 @@
         "developerConnection": "scm:git:ssh://github.com:JetBrains/java-annotations.git",
         "url": "https://github.com/JetBrains/java-annotations"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4316,9 +3920,7 @@
         "developerConnection": "scm:git:git@github.com:jspecify/jspecify.git",
         "url": "https://github.com/jspecify/jspecify/"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4335,9 +3937,7 @@
       "scm": {
         "url": "https://github.com/kobjects/ktxml"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4356,9 +3956,7 @@
         "developerConnection": "scm:git:git@github.com:MobileNativeFoundation/Store.git",
         "url": "https://github.com/MobileNativeFoundation/Store"
       },
-      "licenses": [
-        "Apache-2.0"
-      ],
+      "licenses": ["Apache-2.0"],
       "funding": []
     },
     {
@@ -4380,9 +3978,7 @@
         "connection": "scm:git:https://github.com/qos-ch/slf4j.git/slf4j-parent/slf4j-api",
         "url": "https://github.com/qos-ch/slf4j/slf4j-parent/slf4j-api"
       },
-      "licenses": [
-        "MIT"
-      ],
+      "licenses": ["MIT"],
       "funding": []
     },
     {
@@ -4404,9 +4000,7 @@
         "connection": "scm:git:https://github.com/qos-ch/slf4j.git/slf4j-parent/slf4j-simple",
         "url": "https://github.com/qos-ch/slf4j/slf4j-parent/slf4j-simple"
       },
-      "licenses": [
-        "MIT"
-      ],
+      "licenses": ["MIT"],
       "funding": []
     }
   ],

@@ -19,22 +19,22 @@ class LogSummariesTest {
   @Test
   fun summarizeHtmlResultReturnsChineseShortText() {
     assertEquals(
-      "成功",
-      summarizeHtmlResult(
-        HtmlResponseResult.Success(body = "<html/>", url = "https://www.furaffinity.net/")
-      ),
+        "成功",
+        summarizeHtmlResult(
+            HtmlResponseResult.Success(body = "<html/>", url = "https://www.furaffinity.net/")
+        ),
     )
     assertEquals(
-      "Cloudflare验证(cf-ray=abc123)",
-      summarizeHtmlResult(HtmlResponseResult.CfChallenge("abc123")),
+        "Cloudflare验证(cf-ray=abc123)",
+        summarizeHtmlResult(HtmlResponseResult.CfChallenge("abc123")),
     )
     assertEquals(
-      "受限:Mature content is blocked",
-      summarizeHtmlResult(HtmlResponseResult.MatureBlocked("Mature content is blocked")),
+        "受限:Mature content is blocked",
+        summarizeHtmlResult(HtmlResponseResult.MatureBlocked("Mature content is blocked")),
     )
     assertEquals(
-      "HTTP503:HTTP 503 for /browse/",
-      summarizeHtmlResult(HtmlResponseResult.Error(503, "HTTP 503 for /browse/")),
+        "HTTP503:HTTP 503 for /browse/",
+        summarizeHtmlResult(HtmlResponseResult.Error(503, "HTTP 503 for /browse/")),
     )
   }
 }

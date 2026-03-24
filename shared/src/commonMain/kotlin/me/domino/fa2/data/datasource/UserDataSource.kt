@@ -10,7 +10,7 @@ import me.domino.fa2.util.toPageState
 class UserDataSource(private val endpoint: UserEndpoint, private val parser: UserParser) {
   /** 拉取 user header。 */
   suspend fun fetchUser(username: String): PageState<User> =
-    endpoint.fetch(username).toPageState { success ->
-      parser.parse(html = success.body, url = success.url)
-    }
+      endpoint.fetch(username).toPageState { success ->
+        parser.parse(html = success.body, url = success.url)
+      }
 }

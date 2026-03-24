@@ -27,117 +27,117 @@ import org.koin.core.parameter.parametersOf
 
 /** User 父路由页面。 */
 class UserRouteScreen(
-  /** 目标用户名。 */
-  private val username: String,
-  /** 初始子路由。 */
-  private val initialChildRoute: UserChildRoute = UserChildRoute.Gallery,
-  /** 初始文件夹 URL（可选）。 */
-  private val initialFolderUrl: String? = null,
+    /** 目标用户名。 */
+    private val username: String,
+    /** 初始子路由。 */
+    private val initialChildRoute: UserChildRoute = UserChildRoute.Gallery,
+    /** 初始文件夹 URL（可选）。 */
+    private val initialFolderUrl: String? = null,
 ) : Screen {
   override val key: String =
-    "user-route:${username.lowercase()}:${initialChildRoute.routeKey}:${initialFolderUrl.orEmpty()}"
+      "user-route:${username.lowercase()}:${initialChildRoute.routeKey}:${initialFolderUrl.orEmpty()}"
 
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
     val parentNavigator = LocalNavigator.currentOrThrow
     val userScreenModel =
-      koinScreenModel<UserScreenModel> {
-        parametersOf(username, initialChildRoute, initialFolderUrl)
-      }
+        koinScreenModel<UserScreenModel> {
+          parametersOf(username, initialChildRoute, initialFolderUrl)
+        }
     val userState by userScreenModel.state.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
       UserRouteTopBar(
-        title = userState.header?.displayName?.ifBlank { username } ?: username,
-        onBack = { parentNavigator.pop() },
-        onGoHome = { parentNavigator.goBackHome() },
-        shareUrl = FaUrls.user(username),
+          title = userState.header?.displayName?.ifBlank { username } ?: username,
+          onBack = { parentNavigator.pop() },
+          onGoHome = { parentNavigator.goBackHome() },
+          shareUrl = FaUrls.user(username),
       )
 
       Navigator(
-        screen =
-          UserChildRouteScreen(
-            username = username,
-            route = initialChildRoute,
-            initialFolderUrl = initialFolderUrl,
-          )
+          screen =
+              UserChildRouteScreen(
+                  username = username,
+                  route = initialChildRoute,
+                  initialFolderUrl = initialFolderUrl,
+              )
       ) {
         CompositionLocalProvider(
-          LocalUserHeaderContent provides
-            {
-              UserHeaderCard(
-                state = userState,
-                onRetry = { userScreenModel.load() },
-                onToggleProfileExpanded = userScreenModel::toggleProfileExpanded,
-                onToggleWatch = userScreenModel::toggleWatch,
-                onOpenWatchedBy = {
-                  val initialUrl =
-                    userState.header?.watchedByListUrl?.trim()?.takeIf { value ->
-                      value.isNotBlank()
-                    } ?: FaUrls.watchlistTo(username)
-                  parentNavigator.push(
-                    UserWatchlistRouteScreen(
-                      username = username,
-                      category = WatchlistCategory.WatchedBy,
-                      initialUrl = initialUrl,
-                    )
+            LocalUserHeaderContent provides
+                {
+                  UserHeaderCard(
+                      state = userState,
+                      onRetry = { userScreenModel.load() },
+                      onToggleProfileExpanded = userScreenModel::toggleProfileExpanded,
+                      onToggleWatch = userScreenModel::toggleWatch,
+                      onOpenWatchedBy = {
+                        val initialUrl =
+                            userState.header?.watchedByListUrl?.trim()?.takeIf { value ->
+                              value.isNotBlank()
+                            } ?: FaUrls.watchlistTo(username)
+                        parentNavigator.push(
+                            UserWatchlistRouteScreen(
+                                username = username,
+                                category = WatchlistCategory.WatchedBy,
+                                initialUrl = initialUrl,
+                            )
+                        )
+                      },
+                      onOpenWatching = {
+                        val initialUrl =
+                            userState.header?.watchingListUrl?.trim()?.takeIf { value ->
+                              value.isNotBlank()
+                            } ?: FaUrls.watchlistBy(username)
+                        parentNavigator.push(
+                            UserWatchlistRouteScreen(
+                                username = username,
+                                category = WatchlistCategory.Watching,
+                                initialUrl = initialUrl,
+                            )
+                        )
+                      },
                   )
                 },
-                onOpenWatching = {
-                  val initialUrl =
-                    userState.header?.watchingListUrl?.trim()?.takeIf { value ->
-                      value.isNotBlank()
-                    } ?: FaUrls.watchlistBy(username)
-                  parentNavigator.push(
-                    UserWatchlistRouteScreen(
-                      username = username,
-                      category = WatchlistCategory.Watching,
-                      initialUrl = initialUrl,
-                    )
-                  )
+            LocalUserHeaderRefreshAction provides { userScreenModel.load(forceRefresh = true) },
+            LocalUserSubmissionFolderResolver provides
+                { route ->
+                  userScreenModel.getSubmissionRouteFolderUrl(route)
                 },
-              )
-            },
-          LocalUserHeaderRefreshAction provides { userScreenModel.load(forceRefresh = true) },
-          LocalUserSubmissionFolderResolver provides
-            { route ->
-              userScreenModel.getSubmissionRouteFolderUrl(route)
-            },
-          LocalUserSubmissionFolderUpdater provides
-            { route, folderUrl ->
-              userScreenModel.setSubmissionRouteFolderUrl(route, folderUrl)
-            },
-          LocalUserSharedTopScrollStateResolver provides
-            {
-              userScreenModel.getSharedTopScrollState()
-            },
-          LocalUserSharedTopScrollStateUpdater provides
-            { position ->
-              userScreenModel.setSharedTopScrollState(position)
-            },
-          LocalUserBodyScrollPositionResolver provides
-            { scrollKey ->
-              userScreenModel.getBodyScrollPosition(scrollKey)
-            },
-          LocalUserBodyScrollPositionUpdater provides
-            { scrollKey, position ->
-              userScreenModel.setBodyScrollPosition(scrollKey, position)
-            },
-          LocalUserSubmissionSnapshotResolver provides
-            { cacheKey ->
-              userScreenModel.getSubmissionSectionSnapshot(cacheKey)
-            },
-          LocalUserSubmissionSnapshotUpdater provides
-            { cacheKey, snapshot ->
-              userScreenModel.setSubmissionSectionSnapshot(cacheKey, snapshot)
-            },
+            LocalUserSubmissionFolderUpdater provides
+                { route, folderUrl ->
+                  userScreenModel.setSubmissionRouteFolderUrl(route, folderUrl)
+                },
+            LocalUserSharedTopScrollStateResolver provides
+                {
+                  userScreenModel.getSharedTopScrollState()
+                },
+            LocalUserSharedTopScrollStateUpdater provides
+                { position ->
+                  userScreenModel.setSharedTopScrollState(position)
+                },
+            LocalUserBodyScrollPositionResolver provides
+                { scrollKey ->
+                  userScreenModel.getBodyScrollPosition(scrollKey)
+                },
+            LocalUserBodyScrollPositionUpdater provides
+                { scrollKey, position ->
+                  userScreenModel.setBodyScrollPosition(scrollKey, position)
+                },
+            LocalUserSubmissionSnapshotResolver provides
+                { cacheKey ->
+                  userScreenModel.getSubmissionSectionSnapshot(cacheKey)
+                },
+            LocalUserSubmissionSnapshotUpdater provides
+                { cacheKey, snapshot ->
+                  userScreenModel.setSubmissionSectionSnapshot(cacheKey, snapshot)
+                },
         ) {
           Box(
-            modifier =
-              Modifier.fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(top = 4.dp)
+              modifier =
+                  Modifier.fillMaxSize()
+                      .background(MaterialTheme.colorScheme.surface)
+                      .padding(top = 4.dp)
           ) {
             CurrentScreen()
           }

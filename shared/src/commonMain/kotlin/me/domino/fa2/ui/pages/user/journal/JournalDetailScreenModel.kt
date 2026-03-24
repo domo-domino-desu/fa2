@@ -16,25 +16,25 @@ sealed interface JournalDetailUiState {
 
   /** 成功态。 */
   data class Success(
-    /** 详情数据。 */
-    val detail: JournalDetail
+      /** 详情数据。 */
+      val detail: JournalDetail
   ) : JournalDetailUiState
 
   /** 错误态。 */
   data class Error(
-    /** 错误文案。 */
-    val message: String
+      /** 错误文案。 */
+      val message: String
   ) : JournalDetailUiState
 }
 
 /** Journal 详情状态模型。 */
 class JournalDetailScreenModel(
-  /** Journal ID。 */
-  private val journalId: Int,
-  /** Journal URL（兜底）。 */
-  private val journalUrl: String?,
-  /** Journal 仓储。 */
-  private val repository: JournalRepository,
+    /** Journal ID。 */
+    private val journalId: Int,
+    /** Journal URL（兜底）。 */
+    private val journalUrl: String?,
+    /** Journal 仓储。 */
+    private val repository: JournalRepository,
 ) : StateScreenModel<JournalDetailUiState>(JournalDetailUiState.Loading) {
   private val log = FaLog.withTag("JournalDetailScreenModel")
 
@@ -48,27 +48,27 @@ class JournalDetailScreenModel(
     mutableState.value = JournalDetailUiState.Loading
     screenModelScope.launch {
       val result =
-        if (journalId > 0) {
-          repository.loadJournalDetail(journalId)
-        } else {
-          val fallbackUrl = journalUrl?.trim().orEmpty()
-          if (fallbackUrl.isBlank()) {
-            PageState.Error(IllegalStateException("Invalid journal id and url"))
+          if (journalId > 0) {
+            repository.loadJournalDetail(journalId)
           } else {
-            repository.loadJournalDetailByUrl(fallbackUrl)
+            val fallbackUrl = journalUrl?.trim().orEmpty()
+            if (fallbackUrl.isBlank()) {
+              PageState.Error(IllegalStateException("Invalid journal id and url"))
+            } else {
+              repository.loadJournalDetailByUrl(fallbackUrl)
+            }
           }
-        }
 
       mutableState.value =
-        when (result) {
-          is PageState.Success -> JournalDetailUiState.Success(result.data)
-          PageState.CfChallenge -> JournalDetailUiState.Error("需要 Cloudflare 验证")
-          is PageState.MatureBlocked -> JournalDetailUiState.Error(result.reason)
-          is PageState.Error ->
-            JournalDetailUiState.Error(result.exception.message ?: result.exception.toString())
+          when (result) {
+            is PageState.Success -> JournalDetailUiState.Success(result.data)
+            PageState.CfChallenge -> JournalDetailUiState.Error("需要 Cloudflare 验证")
+            is PageState.MatureBlocked -> JournalDetailUiState.Error(result.reason)
+            is PageState.Error ->
+                JournalDetailUiState.Error(result.exception.message ?: result.exception.toString())
 
-          PageState.Loading -> JournalDetailUiState.Error("加载中断")
-        }
+            PageState.Loading -> JournalDetailUiState.Error("加载中断")
+          }
       when (result) {
         is PageState.Success -> {
           log.i { "加载Journal详情 -> ${summarizePageState(result)}" }

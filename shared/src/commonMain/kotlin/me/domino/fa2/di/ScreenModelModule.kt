@@ -29,36 +29,36 @@ fun screenModelModule(): Module = module {
   factory { (username: String) -> MoreScreenModel(username, get(), get()) }
   factory { (initialSid: Int, holder: SubmissionListHolder) ->
     SubmissionScreenModel(
-      initialSid = initialSid,
-      holder = holder,
-      feedSource = SubmissionPagerFeedSourceImpl(get()),
-      submissionSource = SubmissionPagerDetailSourceImpl(get()),
+        initialSid = initialSid,
+        holder = holder,
+        feedSource = SubmissionPagerFeedSourceImpl(get()),
+        submissionSource = SubmissionPagerDetailSourceImpl(get()),
     )
   }
   factory { (username: String, initialChildRoute: UserChildRoute, initialFolderUrl: String?) ->
     UserScreenModel(
-      username = username,
-      repository = get(),
-      initialChildRoute = initialChildRoute,
-      initialFolderUrl = initialFolderUrl,
+        username = username,
+        repository = get(),
+        initialChildRoute = initialChildRoute,
+        initialFolderUrl = initialFolderUrl,
     )
   }
   factory {
-    (
-      username: String,
-      route: UserChildRoute,
-      holder: SubmissionListHolder,
-      initialFolderUrl: String?,
-      initialSnapshot: UserSubmissionSectionUiState?,
-    ) ->
+      (
+          username: String,
+          route: UserChildRoute,
+          holder: SubmissionListHolder,
+          initialFolderUrl: String?,
+          initialSnapshot: UserSubmissionSectionUiState?,
+      ) ->
     UserSubmissionSectionScreenModel(
-      username = username,
-      route = route,
-      galleryRepository = get(),
-      favoritesRepository = get(),
-      submissionListHolder = holder,
-      initialFolderUrl = initialFolderUrl,
-      initialSnapshot = initialSnapshot,
+        username = username,
+        route = route,
+        galleryRepository = get(),
+        favoritesRepository = get(),
+        submissionListHolder = holder,
+        initialFolderUrl = initialFolderUrl,
+        initialSnapshot = initialSnapshot,
     )
   }
   factory { (username: String) -> UserJournalsScreenModel(username = username, repository = get()) }
@@ -67,10 +67,10 @@ fun screenModelModule(): Module = module {
   }
   factory { (username: String, category: WatchlistCategory, initialUrl: String?) ->
     UserWatchlistScreenModel(
-      username = username,
-      category = category,
-      repository = get(),
-      initialPageUrl = initialUrl,
+        username = username,
+        category = category,
+        repository = get(),
+        initialPageUrl = initialUrl,
     )
   }
 }

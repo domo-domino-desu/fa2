@@ -78,33 +78,35 @@ fun SettingsScreen(onBack: () -> Unit, onGoHome: () -> Unit) {
     saveStatusText = null
     scope.launch {
       runCatching { settingsService.updateSettings(target) }
-        .onSuccess { saveStatusText = "设置已保存" }
-        .onFailure { error ->
-          saveStatusText = "保存失败：${error.message ?: error::class.simpleName.orEmpty()}"
-        }
+          .onSuccess { saveStatusText = "设置已保存" }
+          .onFailure { error ->
+            saveStatusText = "保存失败：${error.message ?: error::class.simpleName.orEmpty()}"
+          }
       saving = false
     }
   }
 
   Scaffold(
-    containerColor = MaterialTheme.colorScheme.surface,
-    topBar = {
-      SettingsRouteTopBar(
-        onBack = onBack,
-        onGoHome = onGoHome,
-        showActions = loaded && initialized,
-        saving = saving,
-        hasUnsavedChanges = hasUnsavedChanges,
-        validationMessage = validationMessage,
-        onResetDraft = ::resetDraftToPersisted,
-        onSaveDraft = ::saveDraft,
-      )
-    },
+      containerColor = MaterialTheme.colorScheme.surface,
+      topBar = {
+        SettingsRouteTopBar(
+            onBack = onBack,
+            onGoHome = onGoHome,
+            showActions = loaded && initialized,
+            saving = saving,
+            hasUnsavedChanges = hasUnsavedChanges,
+            validationMessage = validationMessage,
+            onResetDraft = ::resetDraftToPersisted,
+            onSaveDraft = ::saveDraft,
+        )
+      },
   ) { innerPadding ->
     if (!loaded || !initialized) {
       Column(
-        modifier =
-          Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 16.dp, vertical = 12.dp)
+          modifier =
+              Modifier.fillMaxSize()
+                  .padding(innerPadding)
+                  .padding(horizontal = 16.dp, vertical = 12.dp)
       ) {
         Text(text = "正在加载设置...", style = MaterialTheme.typography.bodyMedium)
       }
@@ -112,48 +114,51 @@ fun SettingsScreen(onBack: () -> Unit, onGoHome: () -> Unit) {
     }
 
     LazyColumn(
-      modifier = Modifier.fillMaxSize().padding(innerPadding),
-      contentPadding = PaddingValues(vertical = 12.dp),
-      verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxSize().padding(innerPadding),
+        contentPadding = PaddingValues(vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
       item { AppearanceSettingsSection(draft = draft, onDraftChange = { next -> draft = next }) }
 
       item {
         TranslationSettingsSection(
-          draft = draft,
-          onDraftChange = { next -> draft = next },
-          showApiKey = showApiKey,
-          onToggleShowApiKey = { showApiKey = !showApiKey },
+            draft = draft,
+            onDraftChange = { next -> draft = next },
+            showApiKey = showApiKey,
+            onToggleShowApiKey = { showApiKey = !showApiKey },
         )
       }
 
       item {
-        BlockedContentSettingsSection(draft = draft, onDraftChange = { next -> draft = next })
+        BlockedContentSettingsSection(
+            draft = draft,
+            onDraftChange = { next -> draft = next },
+        )
       }
 
       validationMessage?.let { message ->
         item {
           Text(
-            text = message,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.error,
-            modifier = Modifier.padding(horizontal = 18.dp),
+              text = message,
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.error,
+              modifier = Modifier.padding(horizontal = 18.dp),
           )
         }
       }
 
       saveStatusText
-        ?.takeIf { it.isNotBlank() }
-        ?.let { message ->
-          item {
-            Text(
-              text = message,
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.padding(horizontal = 18.dp),
-            )
+          ?.takeIf { it.isNotBlank() }
+          ?.let { message ->
+            item {
+              Text(
+                  text = message,
+                  style = MaterialTheme.typography.bodySmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.padding(horizontal = 18.dp),
+              )
+            }
           }
-        }
     }
   }
 }

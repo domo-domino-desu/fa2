@@ -9,10 +9,10 @@ sealed interface HtmlResponseResult {
    * @property url 请求地址。
    */
   data class Success(
-    /** 原始 HTML 文本。 */
-    val body: String,
-    /** 最终请求地址。 */
-    val url: String,
+      /** 原始 HTML 文本。 */
+      val body: String,
+      /** 最终请求地址。 */
+      val url: String,
   ) : HtmlResponseResult
 
   /**
@@ -22,10 +22,10 @@ sealed interface HtmlResponseResult {
    * @property message 错误信息。
    */
   data class Error(
-    /** HTTP 状态码。 */
-    val statusCode: Int,
-    /** 错误描述文案。 */
-    val message: String,
+      /** HTTP 状态码。 */
+      val statusCode: Int,
+      /** 错误描述文案。 */
+      val message: String,
   ) : HtmlResponseResult
 
   /**
@@ -34,8 +34,8 @@ sealed interface HtmlResponseResult {
    * @property reason 拦截原因。
    */
   data class MatureBlocked(
-    /** mature 拦截说明。 */
-    val reason: String
+      /** mature 拦截说明。 */
+      val reason: String
   ) : HtmlResponseResult
 
   /**
@@ -44,8 +44,8 @@ sealed interface HtmlResponseResult {
    * @property cfRay Cloudflare 请求标识。
    */
   data class CfChallenge(
-    /** Cloudflare 的 CF-Ray 标识。 */
-    val cfRay: String?
+      /** Cloudflare 的 CF-Ray 标识。 */
+      val cfRay: String?
   ) : HtmlResponseResult
 
   companion object {
@@ -54,18 +54,18 @@ sealed interface HtmlResponseResult {
 
     /** Cloudflare challenge 关键标记。 */
     private val cfMarkers =
-      listOf(
-        "<title>just a moment",
-        "<title>attention required",
-        "<title>checking your browser",
-        "id=\"challenge-running\"",
-        "id=\"cf-challenge-running\"",
-        "id=\"challenge-form\"",
-        "name=\"cf-turnstile-response\"",
-        "name=\"h-captcha-response\"",
-        "__cf_chl_managed_tk__",
-        "cf_chl_opt",
-      )
+        listOf(
+            "<title>just a moment",
+            "<title>attention required",
+            "<title>checking your browser",
+            "id=\"challenge-running\"",
+            "id=\"cf-challenge-running\"",
+            "id=\"challenge-form\"",
+            "name=\"cf-turnstile-response\"",
+            "name=\"h-captcha-response\"",
+            "__cf_chl_managed_tk__",
+            "cf_chl_opt",
+        )
 
     /**
      * 分类入口。
@@ -76,10 +76,10 @@ sealed interface HtmlResponseResult {
      * @param url 请求地址。
      */
     fun classify(
-      statusCode: Int,
-      headers: Map<String, List<String>>,
-      body: String,
-      url: String,
+        statusCode: Int,
+        headers: Map<String, List<String>>,
+        body: String,
+        url: String,
     ): HtmlResponseResult {
       val normalizedBody = body.lowercase()
       val server = firstHeader(headers, "server").orEmpty()
@@ -87,17 +87,17 @@ sealed interface HtmlResponseResult {
       val matchedCfMarker = cfMarkers.any { marker -> normalizedBody.contains(marker) }
 
       if (
-        matchedCfMarker &&
-          (statusCode in cfStatusCodes ||
-            server.contains("cloudflare", ignoreCase = true) ||
-            !cfRay.isNullOrBlank())
+          matchedCfMarker &&
+              (statusCode in cfStatusCodes ||
+                  server.contains("cloudflare", ignoreCase = true) ||
+                  !cfRay.isNullOrBlank())
       ) {
         return CfChallenge(cfRay = cfRay)
       }
 
       if (
-        normalizedBody.contains("this submission contains mature") ||
-          normalizedBody.contains("registered and enabled")
+          normalizedBody.contains("this submission contains mature") ||
+              normalizedBody.contains("registered and enabled")
       ) {
         return MatureBlocked(reason = "Mature content is blocked")
       }
@@ -116,10 +116,10 @@ sealed interface HtmlResponseResult {
      * @param name 目标 header 名。
      */
     private fun firstHeader(headers: Map<String, List<String>>, name: String): String? =
-      headers.entries
-        .firstOrNull { (key, _) -> key.equals(name, ignoreCase = true) }
-        ?.value
-        ?.firstOrNull()
-        ?.takeIf { it.isNotBlank() }
+        headers.entries
+            .firstOrNull { (key, _) -> key.equals(name, ignoreCase = true) }
+            ?.value
+            ?.firstOrNull()
+            ?.takeIf { it.isNotBlank() }
   }
 }

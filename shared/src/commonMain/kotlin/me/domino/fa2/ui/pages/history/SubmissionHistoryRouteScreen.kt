@@ -46,9 +46,9 @@ class SubmissionHistoryRouteScreen : Screen {
     var submissions by remember { mutableStateOf<List<SubmissionThumbnail>>(emptyList()) }
     val holderTag = "submission-list-holder:history"
     val submissionListHolder =
-      rootNavigator.rememberNavigatorScreenModel<SubmissionListHolder>(tag = holderTag) {
-        SubmissionListHolder()
-      }
+        rootNavigator.rememberNavigatorScreenModel<SubmissionListHolder>(tag = holderTag) {
+          SubmissionListHolder()
+        }
 
     LaunchedEffect(Unit) {
       submissions = historyRepository.loadSubmissionHistory()
@@ -61,43 +61,43 @@ class SubmissionHistoryRouteScreen : Screen {
 
     Column(modifier = Modifier.fillMaxSize()) {
       SubmissionHistoryRouteTopBar(
-        onBack = { navigator.pop() },
-        onGoHome = { navigator.goBackHome() },
+          onBack = { navigator.pop() },
+          onGoHome = { navigator.goBackHome() },
       )
 
       when {
         loading -> {
           Text(
-            text = "正在加载浏览记录...",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+              text = "正在加载浏览记录...",
+              style = MaterialTheme.typography.bodyMedium,
+              modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
           )
         }
 
         submissions.isEmpty() -> {
           Text(
-            text = "暂无浏览记录。",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+              text = "暂无浏览记录。",
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
           )
         }
 
         else -> {
           SubmissionWaterfall(
-            items = submissions,
-            onItemClick = { item ->
-              submissionListHolder.setCurrentBySid(item.id)
-              navigator.push(SubmissionRouteScreen(initialSid = item.id, holderTag = holderTag))
-            },
-            onLastVisibleIndexChanged = {},
-            canLoadMore = false,
-            loadingMore = false,
-            appendErrorMessage = null,
-            onRetryLoadMore = {},
-            state = waterfallState,
-            minCardWidthDp = settings.waterfallMinCardWidthDp,
-            blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
+              items = submissions,
+              onItemClick = { item ->
+                submissionListHolder.setCurrentBySid(item.id)
+                navigator.push(SubmissionRouteScreen(initialSid = item.id, holderTag = holderTag))
+              },
+              onLastVisibleIndexChanged = {},
+              canLoadMore = false,
+              loadingMore = false,
+              appendErrorMessage = null,
+              onRetryLoadMore = {},
+              state = waterfallState,
+              minCardWidthDp = settings.waterfallMinCardWidthDp,
+              blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
           )
         }
       }

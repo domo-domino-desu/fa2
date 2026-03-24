@@ -12,9 +12,9 @@ import me.domino.fa2.util.logging.summarizeUrl
 
 /** Submission 仓储。 */
 class SubmissionRepository(
-  private val submissionStore: SubmissionStore,
-  private val socialActionEndpoint: SocialActionEndpoint,
-  private val galleryStore: GalleryStore,
+    private val submissionStore: SubmissionStore,
+    private val socialActionEndpoint: SocialActionEndpoint,
+    private val galleryStore: GalleryStore,
 ) {
   private val log = FaLog.withTag("SubmissionRepository")
 
@@ -50,25 +50,30 @@ class SubmissionRepository(
     log.i { "收藏操作 -> sid=$sid,url=${summarizeUrl(normalizedUrl)}" }
 
     val state =
-      when (val response = socialActionEndpoint.execute(normalizedUrl)) {
-        is SocialActionResult.Completed -> {
-          submissionStore.invalidateBySid(sid)
-          galleryStore.invalidateSection(GalleryStore.Section.Favorites)
-          PageState.Success(Unit)
+        when (val response = socialActionEndpoint.execute(normalizedUrl)) {
+          is SocialActionResult.Completed -> {
+            submissionStore.invalidateBySid(sid)
+            galleryStore.invalidateSection(GalleryStore.Section.Favorites)
+            PageState.Success(Unit)
+          }
+
+          is SocialActionResult.Challenge ->
+              PageState.Error(IllegalStateException("Cloudflare challenge unresolved"))
+
+          is SocialActionResult.Blocked -> PageState.MatureBlocked(response.reason)
+          is SocialActionResult.Failed -> PageState.Error(IllegalStateException(response.message))
         }
-
-        is SocialActionResult.Challenge ->
-          PageState.Error(IllegalStateException("Cloudflare challenge unresolved"))
-
-        is SocialActionResult.Blocked -> PageState.MatureBlocked(response.reason)
-        is SocialActionResult.Failed -> PageState.Error(IllegalStateException(response.message))
-      }
     log.i { "收藏操作 -> ${summarizePageState(state)}" }
     return state
   }
 
   /** 屏蔽标签。 */
-  suspend fun blockTag(sid: Int, tagName: String, nonce: String, toAdd: Boolean): PageState<Unit> {
+  suspend fun blockTag(
+      sid: Int,
+      tagName: String,
+      nonce: String,
+      toAdd: Boolean,
+  ): PageState<Unit> {
     val normalizedTagName = tagName.trim()
     val normalizedNonce = nonce.trim()
     if (normalizedTagName.isBlank()) {
@@ -82,25 +87,25 @@ class SubmissionRepository(
     log.i { "标签屏蔽 -> sid=$sid,tag=$normalizedTagName,toAdd=$toAdd" }
 
     val state =
-      when (
-        val response =
-          socialActionEndpoint.updateTagBlocklist(
-            tagName = normalizedTagName,
-            nonce = normalizedNonce,
-            toAdd = toAdd,
-          )
-      ) {
-        is SocialActionResult.Completed -> {
-          submissionStore.invalidateBySid(sid)
-          PageState.Success(Unit)
+        when (
+            val response =
+                socialActionEndpoint.updateTagBlocklist(
+                    tagName = normalizedTagName,
+                    nonce = normalizedNonce,
+                    toAdd = toAdd,
+                )
+        ) {
+          is SocialActionResult.Completed -> {
+            submissionStore.invalidateBySid(sid)
+            PageState.Success(Unit)
+          }
+
+          is SocialActionResult.Challenge ->
+              PageState.Error(IllegalStateException("Cloudflare challenge unresolved"))
+
+          is SocialActionResult.Blocked -> PageState.MatureBlocked(response.reason)
+          is SocialActionResult.Failed -> PageState.Error(IllegalStateException(response.message))
         }
-
-        is SocialActionResult.Challenge ->
-          PageState.Error(IllegalStateException("Cloudflare challenge unresolved"))
-
-        is SocialActionResult.Blocked -> PageState.MatureBlocked(response.reason)
-        is SocialActionResult.Failed -> PageState.Error(IllegalStateException(response.message))
-      }
     log.i { "标签屏蔽 -> ${summarizePageState(state)}" }
     return state
   }

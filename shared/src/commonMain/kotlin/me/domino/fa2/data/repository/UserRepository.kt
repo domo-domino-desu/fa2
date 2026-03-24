@@ -11,8 +11,8 @@ import me.domino.fa2.util.logging.summarizeUrl
 
 /** User 主页仓储。 */
 class UserRepository(
-  private val userStore: UserStore,
-  private val socialActionEndpoint: SocialActionEndpoint,
+    private val userStore: UserStore,
+    private val socialActionEndpoint: SocialActionEndpoint,
 ) {
   private val log = FaLog.withTag("UserRepository")
 
@@ -43,18 +43,18 @@ class UserRepository(
     log.i { "关注操作 -> user=$username,url=${summarizeUrl(normalizedUrl)}" }
 
     val state =
-      when (val response = socialActionEndpoint.execute(normalizedUrl)) {
-        is SocialActionResult.Completed -> {
-          userStore.invalidate(username)
-          PageState.Success(Unit)
+        when (val response = socialActionEndpoint.execute(normalizedUrl)) {
+          is SocialActionResult.Completed -> {
+            userStore.invalidate(username)
+            PageState.Success(Unit)
+          }
+
+          is SocialActionResult.Challenge ->
+              PageState.Error(IllegalStateException("Cloudflare challenge unresolved"))
+
+          is SocialActionResult.Blocked -> PageState.MatureBlocked(response.reason)
+          is SocialActionResult.Failed -> PageState.Error(IllegalStateException(response.message))
         }
-
-        is SocialActionResult.Challenge ->
-          PageState.Error(IllegalStateException("Cloudflare challenge unresolved"))
-
-        is SocialActionResult.Blocked -> PageState.MatureBlocked(response.reason)
-        is SocialActionResult.Failed -> PageState.Error(IllegalStateException(response.message))
-      }
     log.i { "关注操作 -> ${summarizePageState(state)}" }
     return state
   }

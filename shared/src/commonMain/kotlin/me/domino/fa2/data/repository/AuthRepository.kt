@@ -6,8 +6,8 @@ import me.domino.fa2.util.logging.FaLog
 
 /** 认证仓储。 用于把 UI 层与底层数据源隔离。 */
 class AuthRepository(
-  /** 认证数据源。 */
-  private val dataSource: AuthDataSource
+    /** 认证数据源。 */
+    private val dataSource: AuthDataSource
 ) {
   private val log = FaLog.withTag("AuthRepository")
 

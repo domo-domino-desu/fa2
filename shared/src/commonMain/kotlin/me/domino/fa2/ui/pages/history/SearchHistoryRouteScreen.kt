@@ -49,51 +49,54 @@ class SearchHistoryRouteScreen : Screen {
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-      SearchHistoryRouteTopBar(onBack = { navigator.pop() }, onGoHome = { navigator.goBackHome() })
+      SearchHistoryRouteTopBar(
+          onBack = { navigator.pop() },
+          onGoHome = { navigator.goBackHome() },
+      )
 
       when {
         loading -> {
           Text(
-            text = "正在加载搜索记录...",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+              text = "正在加载搜索记录...",
+              style = MaterialTheme.typography.bodyMedium,
+              modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
           )
         }
 
         histories.isEmpty() -> {
           Text(
-            text = "暂无搜索记录。",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+              text = "暂无搜索记录。",
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
           )
         }
 
         else -> {
           LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+              modifier = Modifier.fillMaxSize(),
+              contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+              verticalArrangement = Arrangement.spacedBy(8.dp),
           ) {
             items(items = histories, key = { query -> query }) { query ->
               Surface(
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(14.dp),
-                border =
-                  BorderStroke(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.46f),
-                  ),
-                modifier =
-                  Modifier.fillMaxWidth().clickable {
-                    navigator.push(SearchRouteScreen(initialQuery = query))
-                  },
+                  color = MaterialTheme.colorScheme.surface,
+                  shape = RoundedCornerShape(14.dp),
+                  border =
+                      BorderStroke(
+                          width = 1.dp,
+                          color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.46f),
+                      ),
+                  modifier =
+                      Modifier.fillMaxWidth().clickable {
+                        navigator.push(SearchRouteScreen(initialQuery = query))
+                      },
               ) {
                 Text(
-                  text = query,
-                  style = MaterialTheme.typography.bodyLarge,
-                  fontWeight = FontWeight.Medium,
-                  modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                    text = query,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
                 )
               }
             }

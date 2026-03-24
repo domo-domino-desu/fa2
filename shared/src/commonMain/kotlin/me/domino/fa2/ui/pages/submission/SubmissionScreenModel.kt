@@ -26,20 +26,20 @@ internal const val pagerPrefetchDebounceMs: Long = 500L
 
 /** 投稿详情浏览页面状态模型。 */
 class SubmissionScreenModel(
-  /** 初始投稿 ID。 */
-  private val initialSid: Int,
-  /** 投稿列表共享持有器。 */
-  private val holder: SubmissionListHolder,
-  /** Feed 数据源。 */
-  private val feedSource: SubmissionPagerFeedSource,
-  /** Submission 数据源。 */
-  private val submissionSource: SubmissionPagerDetailSource,
+    /** 初始投稿 ID。 */
+    private val initialSid: Int,
+    /** 投稿列表共享持有器。 */
+    private val holder: SubmissionListHolder,
+    /** Feed 数据源。 */
+    private val feedSource: SubmissionPagerFeedSource,
+    /** Submission 数据源。 */
+    private val submissionSource: SubmissionPagerDetailSource,
 ) : StateScreenModel<SubmissionPagerUiState>(SubmissionPagerUiState.Empty) {
   private val log = FaLog.withTag("SubmissionScreenModel")
   private val paginationStateMachine =
-    PaginationStateMachine<SubmissionThumbnail, Int>(keyOf = { item -> item.id })
+      PaginationStateMachine<SubmissionThumbnail, Int>(keyOf = { item -> item.id })
   private val mutablePageState =
-    MutableStateFlow<PageState<SubmissionPagerUiState>>(PageState.Loading)
+      MutableStateFlow<PageState<SubmissionPagerUiState>>(PageState.Loading)
   val pageState: StateFlow<PageState<SubmissionPagerUiState>> = mutablePageState.asStateFlow()
 
   /** 每个 sid 的详情状态。 */
@@ -137,19 +137,18 @@ class SubmissionScreenModel(
 
     val originalDetail = currentState.detail
     val optimisticDetail =
-      originalDetail.copy(
-        isFavorited = !originalDetail.isFavorited,
-        favoriteCount =
-          (originalDetail.favoriteCount + if (originalDetail.isFavorited) -1 else 1).coerceAtLeast(
-            0
-          ),
-      )
+        originalDetail.copy(
+            isFavorited = !originalDetail.isFavorited,
+            favoriteCount =
+                (originalDetail.favoriteCount + if (originalDetail.isFavorited) -1 else 1)
+                    .coerceAtLeast(0),
+        )
     detailBySid[sid] =
-      currentState.copy(
-        detail = optimisticDetail,
-        favoriteUpdating = true,
-        favoriteErrorMessage = null,
-      )
+        currentState.copy(
+            detail = optimisticDetail,
+            favoriteUpdating = true,
+            favoriteErrorMessage = null,
+        )
     refreshState()
 
     screenModelScope.launch {
@@ -160,63 +159,63 @@ class SubmissionScreenModel(
             is PageState.Success -> {
               prefetchedSuccessSids += sid
               detailBySid[sid] =
-                SubmissionDetailUiState.Success(
-                  detail =
-                    optimisticDetail.copy(
-                      isFavorited = refreshed.data.isFavorited,
-                      favoriteCount = refreshed.data.favoriteCount,
-                      favoriteActionUrl =
-                        refreshed.data.favoriteActionUrl.ifBlank {
-                          guessNextFavoriteActionUrl(actionUrl)
-                        },
-                    ),
-                  blockedKeywords = currentState.blockedKeywords,
-                  favoriteUpdating = false,
-                  favoriteErrorMessage = null,
-                )
+                  SubmissionDetailUiState.Success(
+                      detail =
+                          optimisticDetail.copy(
+                              isFavorited = refreshed.data.isFavorited,
+                              favoriteCount = refreshed.data.favoriteCount,
+                              favoriteActionUrl =
+                                  refreshed.data.favoriteActionUrl.ifBlank {
+                                    guessNextFavoriteActionUrl(actionUrl)
+                                  },
+                          ),
+                      blockedKeywords = currentState.blockedKeywords,
+                      favoriteUpdating = false,
+                      favoriteErrorMessage = null,
+                  )
               log.i { "收藏操作 -> 成功(sid=$sid,isFavorited=${refreshed.data.isFavorited})" }
             }
 
             PageState.CfChallenge -> {
               detailBySid[sid] =
-                SubmissionDetailUiState.Success(
-                  detail =
-                    optimisticDetail.copy(
-                      favoriteActionUrl = guessNextFavoriteActionUrl(actionUrl)
-                    ),
-                  blockedKeywords = currentState.blockedKeywords,
-                  favoriteUpdating = false,
-                  favoriteErrorMessage = "收藏已提交，但状态同步需要 Cloudflare 验证",
-                )
+                  SubmissionDetailUiState.Success(
+                      detail =
+                          optimisticDetail.copy(
+                              favoriteActionUrl = guessNextFavoriteActionUrl(actionUrl)
+                          ),
+                      blockedKeywords = currentState.blockedKeywords,
+                      favoriteUpdating = false,
+                      favoriteErrorMessage = "收藏已提交，但状态同步需要 Cloudflare 验证",
+                  )
               log.w { "收藏操作 -> 已提交, 但刷新需要Cloudflare验证(sid=$sid)" }
             }
 
             is PageState.MatureBlocked -> {
               detailBySid[sid] =
-                SubmissionDetailUiState.Success(
-                  detail =
-                    optimisticDetail.copy(
-                      favoriteActionUrl = guessNextFavoriteActionUrl(actionUrl)
-                    ),
-                  blockedKeywords = currentState.blockedKeywords,
-                  favoriteUpdating = false,
-                  favoriteErrorMessage = "收藏已提交，但状态同步失败：${refreshed.reason}",
-                )
+                  SubmissionDetailUiState.Success(
+                      detail =
+                          optimisticDetail.copy(
+                              favoriteActionUrl = guessNextFavoriteActionUrl(actionUrl)
+                          ),
+                      blockedKeywords = currentState.blockedKeywords,
+                      favoriteUpdating = false,
+                      favoriteErrorMessage = "收藏已提交，但状态同步失败：${refreshed.reason}",
+                  )
               log.w { "收藏操作 -> 已提交, 但刷新受限(sid=$sid,reason=${refreshed.reason})" }
             }
 
             is PageState.Error -> {
               detailBySid[sid] =
-                SubmissionDetailUiState.Success(
-                  detail =
-                    optimisticDetail.copy(
-                      favoriteActionUrl = guessNextFavoriteActionUrl(actionUrl)
-                    ),
-                  blockedKeywords = currentState.blockedKeywords,
-                  favoriteUpdating = false,
-                  favoriteErrorMessage =
-                    "收藏已提交，但状态同步失败：${refreshed.exception.message ?: refreshed.exception}",
-                )
+                  SubmissionDetailUiState.Success(
+                      detail =
+                          optimisticDetail.copy(
+                              favoriteActionUrl = guessNextFavoriteActionUrl(actionUrl)
+                          ),
+                      blockedKeywords = currentState.blockedKeywords,
+                      favoriteUpdating = false,
+                      favoriteErrorMessage =
+                          "收藏已提交，但状态同步失败：${refreshed.exception.message ?: refreshed.exception}",
+                  )
               log.e(refreshed.exception) { "收藏操作 -> 已提交, 但刷新失败(sid=$sid)" }
             }
 
@@ -226,35 +225,35 @@ class SubmissionScreenModel(
 
         PageState.CfChallenge -> {
           detailBySid[sid] =
-            SubmissionDetailUiState.Success(
-              detail = originalDetail,
-              blockedKeywords = currentState.blockedKeywords,
-              favoriteUpdating = false,
-              favoriteErrorMessage = "需要 Cloudflare 验证",
-            )
+              SubmissionDetailUiState.Success(
+                  detail = originalDetail,
+                  blockedKeywords = currentState.blockedKeywords,
+                  favoriteUpdating = false,
+                  favoriteErrorMessage = "需要 Cloudflare 验证",
+              )
           log.w { "收藏操作 -> Cloudflare验证(sid=$sid)" }
         }
 
         is PageState.MatureBlocked -> {
           detailBySid[sid] =
-            SubmissionDetailUiState.Success(
-              detail = originalDetail,
-              blockedKeywords = currentState.blockedKeywords,
-              favoriteUpdating = false,
-              favoriteErrorMessage = toggleResult.reason,
-            )
+              SubmissionDetailUiState.Success(
+                  detail = originalDetail,
+                  blockedKeywords = currentState.blockedKeywords,
+                  favoriteUpdating = false,
+                  favoriteErrorMessage = toggleResult.reason,
+              )
           log.w { "收藏操作 -> 受限(sid=$sid,reason=${toggleResult.reason})" }
         }
 
         is PageState.Error -> {
           detailBySid[sid] =
-            SubmissionDetailUiState.Success(
-              detail = originalDetail,
-              blockedKeywords = currentState.blockedKeywords,
-              favoriteUpdating = false,
-              favoriteErrorMessage =
-                toggleResult.exception.message ?: toggleResult.exception.toString(),
-            )
+              SubmissionDetailUiState.Success(
+                  detail = originalDetail,
+                  blockedKeywords = currentState.blockedKeywords,
+                  favoriteUpdating = false,
+                  favoriteErrorMessage =
+                      toggleResult.exception.message ?: toggleResult.exception.toString(),
+              )
           log.e(toggleResult.exception) { "收藏操作 -> 失败(sid=$sid)" }
         }
 
@@ -286,11 +285,11 @@ class SubmissionScreenModel(
           is PageState.Success -> {
             prefetchedSuccessSids += sid
             val refreshedState =
-              SubmissionDetailUiState.Success(
-                detail = refreshed.data,
-                blockedKeywords = toBlockedKeywordSet(refreshed.data),
-                favoriteErrorMessage = null,
-              )
+                SubmissionDetailUiState.Success(
+                    detail = refreshed.data,
+                    blockedKeywords = toBlockedKeywordSet(refreshed.data),
+                    favoriteErrorMessage = null,
+                )
             detailBySid[sid] = refreshedState
             refreshState()
 
@@ -304,10 +303,10 @@ class SubmissionScreenModel(
             }
 
             executeTagBlockRequest(
-              sid = sid,
-              tagName = normalizedTagName,
-              toAdd = toAdd,
-              nonce = refreshedNonce,
+                sid = sid,
+                tagName = normalizedTagName,
+                toAdd = toAdd,
+                nonce = refreshedNonce,
             )
           }
 
@@ -320,7 +319,7 @@ class SubmissionScreenModel(
 
           is PageState.MatureBlocked -> {
             detailBySid[sid] =
-              currentState.copy(favoriteErrorMessage = "刷新详情失败：${refreshed.reason}")
+                currentState.copy(favoriteErrorMessage = "刷新详情失败：${refreshed.reason}")
             refreshState()
             emitToast("刷新详情失败：${refreshed.reason}")
             log.w { "标签屏蔽 -> 刷新详情受限(sid=$sid,reason=${refreshed.reason})" }
@@ -341,19 +340,29 @@ class SubmissionScreenModel(
     }
 
     screenModelScope.launch {
-      executeTagBlockRequest(sid = sid, tagName = normalizedTagName, toAdd = toAdd, nonce = nonce)
+      executeTagBlockRequest(
+          sid = sid,
+          tagName = normalizedTagName,
+          toAdd = toAdd,
+          nonce = nonce,
+      )
     }
   }
 
   private suspend fun executeTagBlockRequest(
-    sid: Int,
-    tagName: String,
-    toAdd: Boolean,
-    nonce: String,
+      sid: Int,
+      tagName: String,
+      toAdd: Boolean,
+      nonce: String,
   ) {
     when (
-      val blocked =
-        submissionSource.blockTag(sid = sid, tagName = tagName, nonce = nonce, toAdd = toAdd)
+        val blocked =
+            submissionSource.blockTag(
+                sid = sid,
+                tagName = tagName,
+                nonce = nonce,
+                toAdd = toAdd,
+            )
     ) {
       is PageState.Success -> {
         val latest = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return
@@ -365,7 +374,10 @@ class SubmissionScreenModel(
           latestBlocked.remove(normalizedTagKey)
         }
         detailBySid[sid] =
-          latest.copy(blockedKeywords = latestBlocked.toSet(), favoriteErrorMessage = null)
+            latest.copy(
+                blockedKeywords = latestBlocked.toSet(),
+                favoriteErrorMessage = null,
+            )
         emitToast(if (toAdd) "已屏蔽标签：$tagName" else "已解除屏蔽：$tagName")
         log.i { "标签屏蔽 -> 成功(sid=$sid,tag=$tagName,toAdd=$toAdd)" }
       }
@@ -387,9 +399,9 @@ class SubmissionScreenModel(
       is PageState.Error -> {
         val latest = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return
         detailBySid[sid] =
-          latest.copy(
-            favoriteErrorMessage = blocked.exception.message ?: blocked.exception.toString()
-          )
+            latest.copy(
+                favoriteErrorMessage = blocked.exception.message ?: blocked.exception.toString()
+            )
         emitToast("屏蔽失败：${blocked.exception.message ?: blocked.exception}")
         log.e(blocked.exception) { "标签屏蔽 -> 失败(sid=$sid,tag=$tagName)" }
       }
@@ -423,16 +435,16 @@ class SubmissionScreenModel(
     }
 
     val uiState =
-      SubmissionPagerUiState.Data(
-        submissions = items,
-        detailBySid = detailBySid.toMap(),
-        currentIndex = index.coerceIn(0, (items.lastIndex).coerceAtLeast(0)),
-        hasPrevious = holder.previous() != null,
-        hasNext = holder.next() != null || !nextPageUrl.isNullOrBlank(),
-        hasMore = !nextPageUrl.isNullOrBlank(),
-        isLoadingMore = isLoadingMore,
-        appendErrorMessage = appendErrorMessage,
-      )
+        SubmissionPagerUiState.Data(
+            submissions = items,
+            detailBySid = detailBySid.toMap(),
+            currentIndex = index.coerceIn(0, (items.lastIndex).coerceAtLeast(0)),
+            hasPrevious = holder.previous() != null,
+            hasNext = holder.next() != null || !nextPageUrl.isNullOrBlank(),
+            hasMore = !nextPageUrl.isNullOrBlank(),
+            isLoadingMore = isLoadingMore,
+            appendErrorMessage = appendErrorMessage,
+        )
     mutableState.value = uiState
     mutablePageState.value = PageState.Success(uiState)
   }
@@ -450,48 +462,49 @@ class SubmissionScreenModel(
     val targetSids = computePrefetchCandidateSids()
     if (targetSids.isEmpty()) return
 
-    prefetchJob = screenModelScope.launch {
-      delay(pagerPrefetchDebounceMs)
-      targetSids.forEach { sid ->
-        if (sid in prefetchedSuccessSids || sid in prefetchingSids) return@forEach
-        prefetchingSids += sid
-        launch {
-          try {
-            when (val next = submissionSource.loadBySid(sid)) {
-              is PageState.Success -> {
-                prefetchedSuccessSids += sid
-                val currentState = detailBySid[sid]
-                if (currentState !is SubmissionDetailUiState.Success) {
-                  detailBySid[sid] =
-                    SubmissionDetailUiState.Success(
-                      detail = next.data,
-                      blockedKeywords = toBlockedKeywordSet(next.data),
-                    )
-                  refreshState()
-                }
-              }
+    prefetchJob =
+        screenModelScope.launch {
+          delay(pagerPrefetchDebounceMs)
+          targetSids.forEach { sid ->
+            if (sid in prefetchedSuccessSids || sid in prefetchingSids) return@forEach
+            prefetchingSids += sid
+            launch {
+              try {
+                when (val next = submissionSource.loadBySid(sid)) {
+                  is PageState.Success -> {
+                    prefetchedSuccessSids += sid
+                    val currentState = detailBySid[sid]
+                    if (currentState !is SubmissionDetailUiState.Success) {
+                      detailBySid[sid] =
+                          SubmissionDetailUiState.Success(
+                              detail = next.data,
+                              blockedKeywords = toBlockedKeywordSet(next.data),
+                          )
+                      refreshState()
+                    }
+                  }
 
-              PageState.CfChallenge,
-              is PageState.MatureBlocked,
-              is PageState.Error,
-              PageState.Loading -> Unit
+                  PageState.CfChallenge,
+                  is PageState.MatureBlocked,
+                  is PageState.Error,
+                  PageState.Loading -> Unit
+                }
+              } finally {
+                prefetchingSids -= sid
+              }
             }
-          } finally {
-            prefetchingSids -= sid
           }
         }
-      }
-    }
   }
 
   private fun computePrefetchCandidateSids(): List<Int> {
     val totalSize = holder.size()
     if (totalSize == 0) return emptyList()
     val targetIndices =
-      computeSubmissionPrefetchIndices(
-        currentIndex = holder.currentIndex(),
-        lastIndex = totalSize - 1,
-      )
+        computeSubmissionPrefetchIndices(
+            currentIndex = holder.currentIndex(),
+            lastIndex = totalSize - 1,
+        )
     return targetIndices.mapNotNull { index -> holder.getAt(index)?.id }
   }
 
@@ -510,7 +523,7 @@ class SubmissionScreenModel(
   }
 
   private fun toBlockedKeywordSet(detail: Submission): Set<String> =
-    detail.blockedTagNames.map(::normalizeTagKey).filter { it.isNotBlank() }.toSet()
+      detail.blockedTagNames.map(::normalizeTagKey).filter { it.isNotBlank() }.toSet()
 
   /** 加载当前页附近的下一页数据。 */
   private fun appendIfNearEnd(force: Boolean) {
@@ -535,47 +548,48 @@ class SubmissionScreenModel(
     applyPaginationSnapshot(paginationStateMachine.beginAppend(snapshot))
     refreshState()
 
-    appendJob = screenModelScope.launch {
-      val next = feedSource.loadPageByNextUrl(targetNextPageUrl)
-      val reduced =
-        paginationStateMachine.reduceAppend(
-          snapshot = toPaginationSnapshot(),
-          result = next,
-          itemsOf = { page -> page.submissions },
-          nextPageUrlOf = { page -> page.nextPageUrl },
-        )
-      applyPaginationSnapshot(reduced)
-      refreshState()
-      when (next) {
-        is PageState.Success -> {
-          scheduleDetailPrefetch()
-          log.d { "自动加载投稿列表 -> ${summarizePageState(next)}(count=${reduced.items.size})" }
-        }
+    appendJob =
+        screenModelScope.launch {
+          val next = feedSource.loadPageByNextUrl(targetNextPageUrl)
+          val reduced =
+              paginationStateMachine.reduceAppend(
+                  snapshot = toPaginationSnapshot(),
+                  result = next,
+                  itemsOf = { page -> page.submissions },
+                  nextPageUrlOf = { page -> page.nextPageUrl },
+              )
+          applyPaginationSnapshot(reduced)
+          refreshState()
+          when (next) {
+            is PageState.Success -> {
+              scheduleDetailPrefetch()
+              log.d { "自动加载投稿列表 -> ${summarizePageState(next)}(count=${reduced.items.size})" }
+            }
 
-        PageState.CfChallenge -> log.w { "自动加载投稿列表 -> Cloudflare验证" }
-        is PageState.MatureBlocked -> log.w { "自动加载投稿列表 -> 受限(${next.reason})" }
-        is PageState.Error -> log.e(next.exception) { "自动加载投稿列表 -> 失败" }
-        PageState.Loading -> log.d { "自动加载投稿列表 -> 加载中" }
-      }
-    }
+            PageState.CfChallenge -> log.w { "自动加载投稿列表 -> Cloudflare验证" }
+            is PageState.MatureBlocked -> log.w { "自动加载投稿列表 -> 受限(${next.reason})" }
+            is PageState.Error -> log.e(next.exception) { "自动加载投稿列表 -> 失败" }
+            PageState.Loading -> log.d { "自动加载投稿列表 -> 加载中" }
+          }
+        }
   }
 
   private fun toPaginationSnapshot(): PaginationSnapshot<SubmissionThumbnail> =
-    PaginationSnapshot(
-      items =
-        buildList {
-          for (cursor in 0 until holder.size()) {
-            val item = holder.getAt(cursor) ?: continue
-            add(item)
-          }
-        },
-      nextPageUrl = nextPageUrl,
-      loading = false,
-      refreshing = false,
-      isLoadingMore = isLoadingMore,
-      errorMessage = null,
-      appendErrorMessage = appendErrorMessage,
-    )
+      PaginationSnapshot(
+          items =
+              buildList {
+                for (cursor in 0 until holder.size()) {
+                  val item = holder.getAt(cursor) ?: continue
+                  add(item)
+                }
+              },
+          nextPageUrl = nextPageUrl,
+          loading = false,
+          refreshing = false,
+          isLoadingMore = isLoadingMore,
+          errorMessage = null,
+          appendErrorMessage = appendErrorMessage,
+      )
 
   private fun applyPaginationSnapshot(snapshot: PaginationSnapshot<SubmissionThumbnail>) {
     holder.replace(submissions = snapshot.items, nextPageUrl = snapshot.nextPageUrl)
@@ -602,36 +616,36 @@ class SubmissionScreenModel(
     screenModelScope.launch {
       val targetUrl = current.submissionUrl.ifBlank { FaUrls.submission(current.id) }
       val detailState =
-        when (val next = submissionSource.loadByUrl(targetUrl)) {
-          is PageState.Success -> {
-            prefetchedSuccessSids += sid
-            log.d { "加载投稿详情 -> ${summarizePageState(next)}(sid=$sid)" }
-            SubmissionDetailUiState.Success(
-              detail = next.data,
-              blockedKeywords = toBlockedKeywordSet(next.data),
-            )
-          }
+          when (val next = submissionSource.loadByUrl(targetUrl)) {
+            is PageState.Success -> {
+              prefetchedSuccessSids += sid
+              log.d { "加载投稿详情 -> ${summarizePageState(next)}(sid=$sid)" }
+              SubmissionDetailUiState.Success(
+                  detail = next.data,
+                  blockedKeywords = toBlockedKeywordSet(next.data),
+              )
+            }
 
-          PageState.CfChallenge -> {
-            log.w { "加载投稿详情 -> Cloudflare验证(sid=$sid)" }
-            SubmissionDetailUiState.Error("需要 Cloudflare 验证")
-          }
+            PageState.CfChallenge -> {
+              log.w { "加载投稿详情 -> Cloudflare验证(sid=$sid)" }
+              SubmissionDetailUiState.Error("需要 Cloudflare 验证")
+            }
 
-          is PageState.MatureBlocked -> {
-            log.w { "加载投稿详情 -> 受限(sid=$sid,reason=${next.reason})" }
-            SubmissionDetailUiState.Error(next.reason)
-          }
+            is PageState.MatureBlocked -> {
+              log.w { "加载投稿详情 -> 受限(sid=$sid,reason=${next.reason})" }
+              SubmissionDetailUiState.Error(next.reason)
+            }
 
-          is PageState.Error -> {
-            log.e(next.exception) { "加载投稿详情 -> 失败(sid=$sid)" }
-            SubmissionDetailUiState.Error(next.exception.message ?: next.exception.toString())
-          }
+            is PageState.Error -> {
+              log.e(next.exception) { "加载投稿详情 -> 失败(sid=$sid)" }
+              SubmissionDetailUiState.Error(next.exception.message ?: next.exception.toString())
+            }
 
-          PageState.Loading -> {
-            log.w { "加载投稿详情 -> 加载中断(sid=$sid)" }
-            SubmissionDetailUiState.Error("加载中断")
+            PageState.Loading -> {
+              log.w { "加载投稿详情 -> 加载中断(sid=$sid)" }
+              SubmissionDetailUiState.Error("加载中断")
+            }
           }
-        }
       detailBySid[sid] = detailState
       refreshState()
     }

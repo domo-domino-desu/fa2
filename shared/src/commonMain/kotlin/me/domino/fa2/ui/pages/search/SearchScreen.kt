@@ -26,9 +26,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
 import me.domino.fa2.ui.components.submission.WaterfallLoadingSkeleton
-import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.pages.search.component.SearchHint
 import me.domino.fa2.ui.pages.search.component.SearchOverlayContent
 import me.domino.fa2.ui.pages.search.component.SearchStatusCard
@@ -36,9 +36,9 @@ import org.koin.compose.koinInject
 
 @Composable
 fun SearchScreen(
-  state: SearchUiState,
-  actions: SearchScreenActions,
-  waterfallState: LazyStaggeredGridState,
+    state: SearchUiState,
+    actions: SearchScreenActions,
+    waterfallState: LazyStaggeredGridState,
 ) {
   val settingsService = koinInject<AppSettingsService>()
   val settings by settingsService.settings.collectAsState()
@@ -47,11 +47,11 @@ fun SearchScreen(
   Box(modifier = Modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
       SearchBarShell(
-        query = state.draft.query,
-        overlayVisible = state.overlayVisible,
-        onToggleOverlay = {
-          if (state.overlayVisible) actions.onCloseOverlay() else actions.onOpenOverlay()
-        },
+          query = state.draft.query,
+          overlayVisible = state.overlayVisible,
+          onToggleOverlay = {
+            if (state.overlayVisible) actions.onCloseOverlay() else actions.onOpenOverlay()
+          },
       )
 
       if (!state.hasSearched) {
@@ -60,37 +60,37 @@ fun SearchScreen(
         when {
           state.loading && state.submissions.isEmpty() -> {
             WaterfallLoadingSkeleton(
-              minCardWidthDp = settings.waterfallMinCardWidthDp,
-              state = waterfallState,
-              modifier = Modifier.fillMaxSize(),
+                minCardWidthDp = settings.waterfallMinCardWidthDp,
+                state = waterfallState,
+                modifier = Modifier.fillMaxSize(),
             )
           }
 
           !state.errorMessage.isNullOrBlank() && state.submissions.isEmpty() -> {
             SearchStatusCard(
-              title = "搜索失败",
-              body = state.errorMessage.orEmpty(),
-              onRetry = actions.onRetry,
+                title = "搜索失败",
+                body = state.errorMessage.orEmpty(),
+                onRetry = actions.onRetry,
             )
           }
 
           else -> {
             PullToRefreshBox(
-              isRefreshing = state.refreshing,
-              onRefresh = actions.onRefresh,
-              modifier = Modifier.fillMaxSize(),
+                isRefreshing = state.refreshing,
+                onRefresh = actions.onRefresh,
+                modifier = Modifier.fillMaxSize(),
             ) {
               SubmissionWaterfall(
-                items = state.submissions,
-                onItemClick = actions.onOpenSubmission,
-                onLastVisibleIndexChanged = actions.onLastVisibleIndexChanged,
-                canLoadMore = state.hasMore,
-                loadingMore = state.isLoadingMore,
-                appendErrorMessage = state.appendErrorMessage,
-                onRetryLoadMore = actions.onRetryLoadMore,
-                state = waterfallState,
-                minCardWidthDp = settings.waterfallMinCardWidthDp,
-                blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
+                  items = state.submissions,
+                  onItemClick = actions.onOpenSubmission,
+                  onLastVisibleIndexChanged = actions.onLastVisibleIndexChanged,
+                  canLoadMore = state.hasMore,
+                  loadingMore = state.isLoadingMore,
+                  appendErrorMessage = state.appendErrorMessage,
+                  onRetryLoadMore = actions.onRetryLoadMore,
+                  state = waterfallState,
+                  minCardWidthDp = settings.waterfallMinCardWidthDp,
+                  blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
               )
             }
           }
@@ -100,10 +100,10 @@ fun SearchScreen(
 
     if (state.overlayVisible) {
       SearchOverlayContent(
-        form = state.draft,
-        actions = actions,
-        canSearch = canSearch,
-        modifier = Modifier.fillMaxSize(),
+          form = state.draft,
+          actions = actions,
+          canSearch = canSearch,
+          modifier = Modifier.fillMaxSize(),
       )
     }
   }
@@ -114,34 +114,34 @@ fun SearchScreen(
 @Composable
 private fun SearchBarShell(query: String, overlayVisible: Boolean, onToggleOverlay: () -> Unit) {
   Surface(
-    color = MaterialTheme.colorScheme.surface,
-    shadowElevation = 2.dp,
-    modifier = Modifier.fillMaxWidth(),
+      color = MaterialTheme.colorScheme.surface,
+      shadowElevation = 2.dp,
+      modifier = Modifier.fillMaxWidth(),
   ) {
     Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-      verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
       Box(modifier = Modifier.weight(1f)) {
         OutlinedTextField(
-          value = query,
-          onValueChange = {},
-          readOnly = true,
-          placeholder = { Text("输入关键字，例如 wolf @keywords female") },
-          singleLine = true,
-          modifier = Modifier.fillMaxWidth().height(56.dp),
-          trailingIcon = {
-            Icon(
-              imageVector =
-                if (overlayVisible) {
-                  Icons.AutoMirrored.Filled.ArrowBack
-                } else {
-                  Icons.Filled.Search
-                },
-              contentDescription = if (overlayVisible) "关闭搜索遮罩" else "打开搜索遮罩",
-            )
-          },
+            value = query,
+            onValueChange = {},
+            readOnly = true,
+            placeholder = { Text("输入关键字，例如 wolf @keywords female") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            trailingIcon = {
+              Icon(
+                  imageVector =
+                      if (overlayVisible) {
+                        Icons.AutoMirrored.Filled.ArrowBack
+                      } else {
+                        Icons.Filled.Search
+                      },
+                  contentDescription = if (overlayVisible) "关闭搜索遮罩" else "打开搜索遮罩",
+              )
+            },
         )
         Box(modifier = Modifier.fillMaxWidth().height(56.dp).clickable(onClick = onToggleOverlay))
       }

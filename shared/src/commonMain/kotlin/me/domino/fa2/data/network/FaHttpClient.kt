@@ -21,12 +21,12 @@ interface FaHtmlDataSource {
 
 /** 最小 HTTP 数据源实现。 负责加 Cookie、合并 Set-Cookie、并调用响应分类器。 */
 class FaHttpClient(
-  /** Ktor 客户端实例。 */
-  private val client: HttpClient,
-  /** Cookie 读写存储。 */
-  private val cookiesStorage: FaCookiesStorage,
-  /** UA 读写存储。 */
-  private val userAgentStorage: UserAgentStorage,
+    /** Ktor 客户端实例。 */
+    private val client: HttpClient,
+    /** Cookie 读写存储。 */
+    private val cookiesStorage: FaCookiesStorage,
+    /** UA 读写存储。 */
+    private val userAgentStorage: UserAgentStorage,
 ) : FaHtmlDataSource {
   private val log = FaLog.withTag("FaHttpClient")
 
@@ -47,14 +47,14 @@ class FaHttpClient(
       "请求页面 -> 上下文(cookies=$cookiesText,ua=${if (userAgent.isBlank()) "空" else "已设置"})"
     }
     val response =
-      client.get(url) {
-        if (cookieHeader.isNotBlank()) {
-          header(HttpHeaders.Cookie, cookieHeader)
+        client.get(url) {
+          if (cookieHeader.isNotBlank()) {
+            header(HttpHeaders.Cookie, cookieHeader)
+          }
+          header(HttpHeaders.UserAgent, userAgent)
+          header(HttpHeaders.Accept, "text/html,application/xhtml+xml")
+          header(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9")
         }
-        header(HttpHeaders.UserAgent, userAgent)
-        header(HttpHeaders.Accept, "text/html,application/xhtml+xml")
-        header(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9")
-      }
 
     val body = response.bodyAsText()
     val headers = response.headers.entries().associate { (key, values) -> key to values }
@@ -62,18 +62,18 @@ class FaHttpClient(
     cookiesStorage.mergeSetCookieValues(setCookieValues)
 
     val classified =
-      HtmlResponseResult.classify(
-        statusCode = response.status.value,
-        headers = headers,
-        body = body,
-        url = url,
-      )
+        HtmlResponseResult.classify(
+            statusCode = response.status.value,
+            headers = headers,
+            body = body,
+            url = url,
+        )
     val cfRay =
-      headers.entries
-        .firstOrNull { (key, _) -> key.equals("cf-ray", ignoreCase = true) }
-        ?.value
-        ?.firstOrNull()
-        .orEmpty()
+        headers.entries
+            .firstOrNull { (key, _) -> key.equals("cf-ray", ignoreCase = true) }
+            ?.value
+            ?.firstOrNull()
+            .orEmpty()
     log.d {
       val ray = if (cfRay.isBlank()) "-" else cfRay
       "请求页面 -> ${summarizeHtmlResult(classified)}(status=${response.status.value},cf-ray=$ray)"
@@ -82,11 +82,11 @@ class FaHttpClient(
   }
 
   private fun extractCookieNames(cookieHeader: String): List<String> =
-    cookieHeader
-      .split(';')
-      .mapNotNull { token ->
-        val name = token.substringBefore('=').trim()
-        name.takeIf { it.isNotBlank() }
-      }
-      .distinct()
+      cookieHeader
+          .split(';')
+          .mapNotNull { token ->
+            val name = token.substringBefore('=').trim()
+            name.takeIf { it.isNotBlank() }
+          }
+          .distinct()
 }

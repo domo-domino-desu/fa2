@@ -23,9 +23,9 @@ fun AppNavigator(externalFaLinkEvents: Flow<String> = emptyFlow()) {
     val defaultUriHandler = LocalUriHandler.current
     val rootNavigator = LocalNavigator.currentOrThrow.rootNavigator()
     val faLinkUriHandler =
-      remember(rootNavigator, defaultUriHandler) {
-        FaLinkUriHandler(navigator = rootNavigator, fallback = defaultUriHandler)
-      }
+        remember(rootNavigator, defaultUriHandler) {
+          FaLinkUriHandler(navigator = rootNavigator, fallback = defaultUriHandler)
+        }
     var pendingExternalUri by remember { mutableStateOf<String?>(null) }
     val currentRootScreen = rootNavigator.lastItem
 

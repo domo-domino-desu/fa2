@@ -2,10 +2,10 @@ package me.domino.fa2.data.network.challenge
 
 /** Cloudflare challenge 触发信息。 */
 data class CfChallengeSignal(
-  /** 触发 challenge 的请求地址。 */
-  val requestUrl: String,
-  /** Cloudflare 响应中的 cf-ray（可能为空）。 */
-  val cfRay: String?,
+    /** 触发 challenge 的请求地址。 */
+    val requestUrl: String,
+    /** Cloudflare 响应中的 cf-ray（可能为空）。 */
+    val cfRay: String?,
 )
 
 /** challenge 处理器：请求命中 challenge 后由上层协调解题并返回是否可重试。 */

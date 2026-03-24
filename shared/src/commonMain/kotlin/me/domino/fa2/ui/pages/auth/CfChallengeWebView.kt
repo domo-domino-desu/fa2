@@ -18,12 +18,12 @@ private const val userAgentEvalTimeoutMs = 1_500L
 
 /** challenge WebView 组合适配器。 */
 data class ChallengeWebViewAdapter(
-  /** WebView 交互端口。 */
-  val port: CfChallengeWebViewPort,
-  /** WebView 状态。 */
-  val webViewState: WebViewState,
-  /** WebView 导航器。 */
-  val navigator: WebViewNavigator,
+    /** WebView 交互端口。 */
+    val port: CfChallengeWebViewPort,
+    /** WebView 状态。 */
+    val webViewState: WebViewState,
+    /** WebView 导航器。 */
+    val navigator: WebViewNavigator,
 )
 
 /**
@@ -37,9 +37,9 @@ fun rememberChallengeWebViewAdapter(initialUrl: String): ChallengeWebViewAdapter
   val navigator = rememberWebViewNavigator()
   return remember(webViewState, navigator) {
     ChallengeWebViewAdapter(
-      port = ComposeCfChallengeWebViewPort(webViewState = webViewState, navigator = navigator),
-      webViewState = webViewState,
-      navigator = navigator,
+        port = ComposeCfChallengeWebViewPort(webViewState = webViewState, navigator = navigator),
+        webViewState = webViewState,
+        navigator = navigator,
     )
   }
 }
@@ -57,10 +57,10 @@ fun CfChallengeWebView(adapter: ChallengeWebViewAdapter, modifier: Modifier) {
 
 /** Compose WebView 端口实现。 */
 private class ComposeCfChallengeWebViewPort(
-  /** WebView 状态。 */
-  private val webViewState: WebViewState,
-  /** WebView 导航器。 */
-  private val navigator: WebViewNavigator,
+    /** WebView 状态。 */
+    private val webViewState: WebViewState,
+    /** WebView 导航器。 */
+    private val navigator: WebViewNavigator,
 ) : CfChallengeWebViewPort {
   /** 当前最后加载地址。 */
   override val lastLoadedUrl: String?
@@ -81,9 +81,9 @@ private class ComposeCfChallengeWebViewPort(
    * @param url 目标地址。
    */
   override suspend fun captureCookieHeader(url: String): String =
-    webViewState.cookieManager.getCookies(url).joinToString("; ") { cookie ->
-      "${cookie.name}=${cookie.value}"
-    }
+      webViewState.cookieManager.getCookies(url).joinToString("; ") { cookie ->
+        "${cookie.name}=${cookie.value}"
+      }
 
   /**
    * 注入 cookie header。
@@ -94,30 +94,30 @@ private class ComposeCfChallengeWebViewPort(
   override suspend fun injectCookieHeader(url: String, cookieHeader: String) {
     parseCookieHeader(cookieHeader).forEach { pair ->
       webViewState.cookieManager.setCookie(
-        url = url,
-        cookie =
-          Cookie(
-            name = pair.name,
-            value = pair.value,
-            domain = null,
-            path = "/",
-            isSecure = false,
-            isHttpOnly = false,
-          ),
+          url = url,
+          cookie =
+              Cookie(
+                  name = pair.name,
+                  value = pair.value,
+                  domain = null,
+                  path = "/",
+                  isSecure = false,
+                  isHttpOnly = false,
+              ),
       )
     }
   }
 
   /** 读取 WebView UA。 */
   override suspend fun readUserAgent(): String? =
-    withTimeoutOrNull(userAgentEvalTimeoutMs) {
-      suspendCancellableCoroutine { continuation ->
-        navigator.evaluateJavaScript("navigator.userAgent") { rawUa ->
-          if (!continuation.isActive) return@evaluateJavaScript
-          continuation.resume(rawUa.removeSurrounding("\"").trim().ifBlank { "" })
+      withTimeoutOrNull(userAgentEvalTimeoutMs) {
+        suspendCancellableCoroutine { continuation ->
+          navigator.evaluateJavaScript("navigator.userAgent") { rawUa ->
+            if (!continuation.isActive) return@evaluateJavaScript
+            continuation.resume(rawUa.removeSurrounding("\"").trim().ifBlank { "" })
+          }
         }
       }
-    }
 }
 
 /**
@@ -126,22 +126,22 @@ private class ComposeCfChallengeWebViewPort(
  * @param rawCookieHeader 原始 cookie header。
  */
 private fun parseCookieHeader(rawCookieHeader: String): List<CookieNameValue> =
-  rawCookieHeader
-    .split(';')
-    .map { token -> token.trim() }
-    .filter { token -> token.isNotBlank() && token.contains('=') }
-    .map { token ->
-      CookieNameValue(
-        name = token.substringBefore('=').trim(),
-        value = token.substringAfter('=', "").trim(),
-      )
-    }
-    .filter { pair -> pair.name.isNotBlank() }
+    rawCookieHeader
+        .split(';')
+        .map { token -> token.trim() }
+        .filter { token -> token.isNotBlank() && token.contains('=') }
+        .map { token ->
+          CookieNameValue(
+              name = token.substringBefore('=').trim(),
+              value = token.substringAfter('=', "").trim(),
+          )
+        }
+        .filter { pair -> pair.name.isNotBlank() }
 
 /** Cookie 键值对。 */
 private data class CookieNameValue(
-  /** Cookie 名称。 */
-  val name: String,
-  /** Cookie 值。 */
-  val value: String,
+    /** Cookie 名称。 */
+    val name: String,
+    /** Cookie 值。 */
+    val value: String,
 )

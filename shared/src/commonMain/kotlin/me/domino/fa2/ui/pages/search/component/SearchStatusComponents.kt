@@ -19,9 +19,9 @@ import androidx.compose.ui.unit.dp
 internal fun SearchHint(text: String, modifier: Modifier = Modifier) {
   Box(modifier = modifier.padding(16.dp), contentAlignment = Alignment.Center) {
     Text(
-      text = text,
-      style = MaterialTheme.typography.bodyLarge,
-      color = MaterialTheme.colorScheme.onSurfaceVariant,
+        text = text,
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
   }
 }
@@ -29,24 +29,24 @@ internal fun SearchHint(text: String, modifier: Modifier = Modifier) {
 @Composable
 internal fun SearchStatusCard(title: String, body: String, onRetry: () -> Unit) {
   Surface(
-    color = MaterialTheme.colorScheme.surface,
-    shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
-    border =
-      BorderStroke(
-        width = 1.dp,
-        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
-      ),
-    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
+      color = MaterialTheme.colorScheme.surface,
+      shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+      border =
+          BorderStroke(
+              width = 1.dp,
+              color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+          ),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
   ) {
     Column(
-      modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       Text(text = title, style = MaterialTheme.typography.titleMedium)
       Text(
-        text = body,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+          text = body,
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
       Button(onClick = onRetry) { Text("重试") }
     }

@@ -26,7 +26,7 @@ interface CookiePersistence {
 /** 基于 KSafe 的 Cookie 持久化实现。 */
 class KSafeCookiePersistence(private val cookieVault: KSafe) : CookiePersistence {
   override suspend fun loadCookieHeader(): String =
-    cookieVault.get(key = CookiePersistence.KEY_COOKIE_HEADER, defaultValue = "")
+      cookieVault.get(key = CookiePersistence.KEY_COOKIE_HEADER, defaultValue = "")
 
   override suspend fun saveCookieHeader(value: String) {
     cookieVault.put(key = CookiePersistence.KEY_COOKIE_HEADER, value = value)

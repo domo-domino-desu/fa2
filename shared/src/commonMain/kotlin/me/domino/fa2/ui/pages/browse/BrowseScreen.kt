@@ -45,21 +45,21 @@ import org.koin.compose.koinInject
 
 @Composable
 fun BrowseScreen(
-  state: BrowseUiState,
-  onUpdateCategory: (Int) -> Unit,
-  onUpdateType: (Int) -> Unit,
-  onUpdateSpecies: (Int) -> Unit,
-  onUpdateGender: (String) -> Unit,
-  onSetRatingGeneral: (Boolean) -> Unit,
-  onSetRatingMature: (Boolean) -> Unit,
-  onSetRatingAdult: (Boolean) -> Unit,
-  onApplyFilter: () -> Unit,
-  onRefresh: () -> Unit,
-  onRetry: () -> Unit,
-  onOpenSubmission: (SubmissionThumbnail) -> Unit,
-  onLastVisibleIndexChanged: (Int) -> Unit,
-  onRetryLoadMore: () -> Unit,
-  waterfallState: LazyStaggeredGridState,
+    state: BrowseUiState,
+    onUpdateCategory: (Int) -> Unit,
+    onUpdateType: (Int) -> Unit,
+    onUpdateSpecies: (Int) -> Unit,
+    onUpdateGender: (String) -> Unit,
+    onSetRatingGeneral: (Boolean) -> Unit,
+    onSetRatingMature: (Boolean) -> Unit,
+    onSetRatingAdult: (Boolean) -> Unit,
+    onApplyFilter: () -> Unit,
+    onRefresh: () -> Unit,
+    onRetry: () -> Unit,
+    onOpenSubmission: (SubmissionThumbnail) -> Unit,
+    onLastVisibleIndexChanged: (Int) -> Unit,
+    onRetryLoadMore: () -> Unit,
+    waterfallState: LazyStaggeredGridState,
 ) {
   val settingsService = koinInject<AppSettingsService>()
   val settings by settingsService.settings.collectAsState()
@@ -67,63 +67,69 @@ fun BrowseScreen(
 
   val filterBar: @Composable () -> Unit = {
     BrowseFilterSummaryBar(
-      chips = buildBrowseFilterChips(state.appliedFilter),
-      onOpenFilterPage = { filterPageVisible = true },
+        chips = buildBrowseFilterChips(state.appliedFilter),
+        onOpenFilterPage = { filterPageVisible = true },
     )
   }
 
   if (state.loading && state.submissions.isEmpty()) {
-    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
       filterBar()
       WaterfallLoadingSkeleton(
-        minCardWidthDp = settings.waterfallMinCardWidthDp,
-        state = waterfallState,
-        modifier = Modifier.fillMaxSize(),
+          minCardWidthDp = settings.waterfallMinCardWidthDp,
+          state = waterfallState,
+          modifier = Modifier.fillMaxSize(),
       )
     }
   } else if (!state.errorMessage.isNullOrBlank() && state.submissions.isEmpty()) {
-    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
       filterBar()
       BrowseStatusCard(title = "加载失败", body = state.errorMessage.orEmpty(), onRetry = onRetry)
     }
   } else {
     PullToRefreshBox(
-      isRefreshing = state.refreshing,
-      onRefresh = onRefresh,
-      modifier = Modifier.fillMaxSize(),
+        isRefreshing = state.refreshing,
+        onRefresh = onRefresh,
+        modifier = Modifier.fillMaxSize(),
     ) {
       SubmissionWaterfall(
-        items = state.submissions,
-        onItemClick = onOpenSubmission,
-        onLastVisibleIndexChanged = onLastVisibleIndexChanged,
-        canLoadMore = state.hasMore,
-        loadingMore = state.isLoadingMore,
-        appendErrorMessage = state.appendErrorMessage,
-        onRetryLoadMore = onRetryLoadMore,
-        state = waterfallState,
-        minCardWidthDp = settings.waterfallMinCardWidthDp,
-        headerContent = filterBar,
-        blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
+          items = state.submissions,
+          onItemClick = onOpenSubmission,
+          onLastVisibleIndexChanged = onLastVisibleIndexChanged,
+          canLoadMore = state.hasMore,
+          loadingMore = state.isLoadingMore,
+          appendErrorMessage = state.appendErrorMessage,
+          onRetryLoadMore = onRetryLoadMore,
+          state = waterfallState,
+          minCardWidthDp = settings.waterfallMinCardWidthDp,
+          headerContent = filterBar,
+          blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
       )
     }
   }
 
   if (filterPageVisible) {
     BrowseFilterPage(
-      filter = state.draftFilter,
-      onClose = { filterPageVisible = false },
-      onApply = {
-        onApplyFilter()
-        filterPageVisible = false
-      },
-      onUpdateCategory = onUpdateCategory,
-      onUpdateType = onUpdateType,
-      onUpdateSpecies = onUpdateSpecies,
-      onUpdateGender = onUpdateGender,
-      onSetRatingGeneral = onSetRatingGeneral,
-      onSetRatingMature = onSetRatingMature,
-      onSetRatingAdult = onSetRatingAdult,
-      modifier = Modifier.fillMaxSize(),
+        filter = state.draftFilter,
+        onClose = { filterPageVisible = false },
+        onApply = {
+          onApplyFilter()
+          filterPageVisible = false
+        },
+        onUpdateCategory = onUpdateCategory,
+        onUpdateType = onUpdateType,
+        onUpdateSpecies = onUpdateSpecies,
+        onUpdateGender = onUpdateGender,
+        onSetRatingGeneral = onSetRatingGeneral,
+        onSetRatingMature = onSetRatingMature,
+        onSetRatingAdult = onSetRatingAdult,
+        modifier = Modifier.fillMaxSize(),
     )
   }
 
@@ -134,25 +140,25 @@ fun BrowseScreen(
 @OptIn(ExperimentalLayoutApi::class)
 private fun BrowseFilterSummaryBar(chips: List<String>, onOpenFilterPage: () -> Unit) {
   Row(
-    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 1.dp),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.SpaceBetween,
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 1.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween,
   ) {
     FlowRow(
-      modifier = Modifier.weight(1f),
-      horizontalArrangement = Arrangement.spacedBy(6.dp),
-      verticalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier.weight(1f),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
       chips.forEach { chip ->
         Surface(
-          color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.78f),
-          shape = CircleShape,
+            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.78f),
+            shape = CircleShape,
         ) {
           Text(
-            text = chip,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-            modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
+              text = chip,
+              style = MaterialTheme.typography.labelMedium,
+              color = MaterialTheme.colorScheme.onSecondaryContainer,
+              modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
           )
         }
       }
@@ -166,78 +172,78 @@ private fun BrowseFilterSummaryBar(chips: List<String>, onOpenFilterPage: () -> 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun BrowseFilterPage(
-  filter: BrowseFilterState,
-  onClose: () -> Unit,
-  onApply: () -> Unit,
-  onUpdateCategory: (Int) -> Unit,
-  onUpdateType: (Int) -> Unit,
-  onUpdateSpecies: (Int) -> Unit,
-  onUpdateGender: (String) -> Unit,
-  onSetRatingGeneral: (Boolean) -> Unit,
-  onSetRatingMature: (Boolean) -> Unit,
-  onSetRatingAdult: (Boolean) -> Unit,
-  modifier: Modifier = Modifier,
+    filter: BrowseFilterState,
+    onClose: () -> Unit,
+    onApply: () -> Unit,
+    onUpdateCategory: (Int) -> Unit,
+    onUpdateType: (Int) -> Unit,
+    onUpdateSpecies: (Int) -> Unit,
+    onUpdateGender: (String) -> Unit,
+    onSetRatingGeneral: (Boolean) -> Unit,
+    onSetRatingMature: (Boolean) -> Unit,
+    onSetRatingAdult: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   var typePickerVisible by remember { mutableStateOf(false) }
   var speciesPickerVisible by remember { mutableStateOf(false) }
   val selectedTypeLabel =
-    browseTypeOptions.firstOrNull { option -> option.value == filter.type }?.label
-      ?: filter.type.toString()
+      browseTypeOptions.firstOrNull { option -> option.value == filter.type }?.label
+          ?: filter.type.toString()
   val selectedSpeciesLabel =
-    browseSpeciesOptions.firstOrNull { option -> option.value == filter.species }?.label
-      ?: filter.species.toString()
+      browseSpeciesOptions.firstOrNull { option -> option.value == filter.species }?.label
+          ?: filter.species.toString()
 
   Surface(modifier = modifier, color = MaterialTheme.colorScheme.surface) {
     Column(modifier = Modifier.fillMaxSize()) {
       BrowseFilterOverlayTopBar(onClose = onClose, onApply = onApply)
 
       Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+          modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 10.dp),
+          verticalArrangement = Arrangement.spacedBy(10.dp),
       ) {
         Row(
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-          modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
         ) {
           FilterDropdownField(
-            label = "Category",
-            options = browseCategoryOptions,
-            selected = filter.category,
-            onSelected = onUpdateCategory,
-            modifier = Modifier.weight(1f),
+              label = "Category",
+              options = browseCategoryOptions,
+              selected = filter.category,
+              onSelected = onUpdateCategory,
+              modifier = Modifier.weight(1f),
           )
           FilterDialogTriggerField(
-            label = "Type",
-            valueLabel = selectedTypeLabel,
-            onOpenPicker = { typePickerVisible = true },
-            modifier = Modifier.weight(1f),
+              label = "Type",
+              valueLabel = selectedTypeLabel,
+              onOpenPicker = { typePickerVisible = true },
+              modifier = Modifier.weight(1f),
           )
         }
         Row(
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-          modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
         ) {
           FilterDialogTriggerField(
-            label = "Species",
-            valueLabel = selectedSpeciesLabel,
-            onOpenPicker = { speciesPickerVisible = true },
-            modifier = Modifier.weight(1f),
+              label = "Species",
+              valueLabel = selectedSpeciesLabel,
+              onOpenPicker = { speciesPickerVisible = true },
+              modifier = Modifier.weight(1f),
           )
           FilterDropdownField(
-            label = "Gender",
-            options = browseGenderOptions,
-            selected = filter.gender,
-            onSelected = onUpdateGender,
-            modifier = Modifier.weight(1f),
+              label = "Gender",
+              options = browseGenderOptions,
+              selected = filter.gender,
+              onSelected = onUpdateGender,
+              modifier = Modifier.weight(1f),
           )
         }
         RatingRow(
-          general = filter.ratingGeneral,
-          mature = filter.ratingMature,
-          adult = filter.ratingAdult,
-          onSetGeneral = onSetRatingGeneral,
-          onSetMature = onSetRatingMature,
-          onSetAdult = onSetRatingAdult,
+            general = filter.ratingGeneral,
+            mature = filter.ratingMature,
+            adult = filter.ratingAdult,
+            onSetGeneral = onSetRatingGeneral,
+            onSetMature = onSetRatingMature,
+            onSetAdult = onSetRatingAdult,
         )
       }
     }
@@ -245,38 +251,38 @@ private fun BrowseFilterPage(
 
   if (typePickerVisible) {
     GroupedTextPickerDialog(
-      title = "Type",
-      groups = browseTypeOptionGroups,
-      selected = filter.type,
-      onSelected = onUpdateType,
-      onDismissRequest = { typePickerVisible = false },
+        title = "Type",
+        groups = browseTypeOptionGroups,
+        selected = filter.type,
+        onSelected = onUpdateType,
+        onDismissRequest = { typePickerVisible = false },
     )
   }
 
   if (speciesPickerVisible) {
     GroupedTextPickerDialog(
-      title = "Species",
-      groups = browseSpeciesOptionGroups,
-      selected = filter.species,
-      onSelected = onUpdateSpecies,
-      onDismissRequest = { speciesPickerVisible = false },
+        title = "Species",
+        groups = browseSpeciesOptionGroups,
+        selected = filter.species,
+        onSelected = onUpdateSpecies,
+        onDismissRequest = { speciesPickerVisible = false },
     )
   }
 }
 
 @Composable
 private fun RatingRow(
-  general: Boolean,
-  mature: Boolean,
-  adult: Boolean,
-  onSetGeneral: (Boolean) -> Unit,
-  onSetMature: (Boolean) -> Unit,
-  onSetAdult: (Boolean) -> Unit,
+    general: Boolean,
+    mature: Boolean,
+    adult: Boolean,
+    onSetGeneral: (Boolean) -> Unit,
+    onSetMature: (Boolean) -> Unit,
+    onSetAdult: (Boolean) -> Unit,
 ) {
   Row(
-    modifier = Modifier.fillMaxWidth(),
-    horizontalArrangement = Arrangement.spacedBy(12.dp),
-    verticalAlignment = Alignment.CenterVertically,
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(12.dp),
+      verticalAlignment = Alignment.CenterVertically,
   ) {
     RatingCheckbox("General", general, onSetGeneral)
     RatingCheckbox("Mature", mature, onSetMature)
@@ -295,24 +301,24 @@ private fun RatingCheckbox(label: String, checked: Boolean, onCheckedChange: (Bo
 @Composable
 private fun BrowseStatusCard(title: String, body: String, onRetry: () -> Unit) {
   Surface(
-    color = MaterialTheme.colorScheme.surface,
-    shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
-    border =
-      androidx.compose.foundation.BorderStroke(
-        width = 1.dp,
-        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
-      ),
-    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+      color = MaterialTheme.colorScheme.surface,
+      shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+      border =
+          androidx.compose.foundation.BorderStroke(
+              width = 1.dp,
+              color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+          ),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
   ) {
     Column(
-      modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       Text(text = title, style = MaterialTheme.typography.titleMedium)
       Text(
-        text = body,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+          text = body,
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
       Button(onClick = onRetry) { Text("重试") }
     }
@@ -330,39 +336,39 @@ private val browseTypeOptionGroups = FaBrowseTaxonomyOptions.typeOptionGroups
 private val browseSpeciesOptionGroups = FaBrowseTaxonomyOptions.speciesOptionGroups
 
 private val browseGenderOptions =
-  listOf(
-    FilterOption("", "Any"),
-    FilterOption("male", "Male"),
-    FilterOption("female", "Female"),
-    FilterOption("trans_male", "Trans (Male)"),
-    FilterOption("trans_female", "Trans (Female)"),
-    FilterOption("intersex", "Intersex"),
-    FilterOption("non_binary", "Non-Binary"),
-  )
+    listOf(
+        FilterOption("", "Any"),
+        FilterOption("male", "Male"),
+        FilterOption("female", "Female"),
+        FilterOption("trans_male", "Trans (Male)"),
+        FilterOption("trans_female", "Trans (Female)"),
+        FilterOption("intersex", "Intersex"),
+        FilterOption("non_binary", "Non-Binary"),
+    )
 
 private fun buildBrowseFilterChips(filter: BrowseFilterState): List<String> {
   val categoryLabel =
-    browseCategoryOptions.firstOrNull { it.value == filter.category }?.label
-      ?: filter.category.toString()
+      browseCategoryOptions.firstOrNull { it.value == filter.category }?.label
+          ?: filter.category.toString()
   val typeLabel =
-    browseTypeOptions.firstOrNull { it.value == filter.type }?.label ?: filter.type.toString()
+      browseTypeOptions.firstOrNull { it.value == filter.type }?.label ?: filter.type.toString()
   val speciesLabel =
-    browseSpeciesOptions.firstOrNull { it.value == filter.species }?.label
-      ?: filter.species.toString()
+      browseSpeciesOptions.firstOrNull { it.value == filter.species }?.label
+          ?: filter.species.toString()
   val genderLabel = browseGenderOptions.firstOrNull { it.value == filter.gender }?.label ?: "Any"
   val ratingLabel =
-    buildList {
-        if (filter.ratingGeneral) add("General")
-        if (filter.ratingMature) add("Mature")
-        if (filter.ratingAdult) add("Adult")
-      }
-      .joinToString(" + ")
-      .ifBlank { "None" }
+      buildList {
+            if (filter.ratingGeneral) add("General")
+            if (filter.ratingMature) add("Mature")
+            if (filter.ratingAdult) add("Adult")
+          }
+          .joinToString(" + ")
+          .ifBlank { "None" }
   return listOf(
-    "Category: $categoryLabel",
-    "Type: $typeLabel",
-    "Species: $speciesLabel",
-    "Gender: $genderLabel",
-    "Rating: $ratingLabel",
+      "Category: $categoryLabel",
+      "Type: $typeLabel",
+      "Species: $speciesLabel",
+      "Gender: $genderLabel",
+      "Rating: $ratingLabel",
   )
 }

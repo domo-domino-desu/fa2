@@ -9,7 +9,7 @@ internal actual suspend fun loadPlatformAboutLibrariesJsonOrNull(): String? {
   val appContext = runCatching { GlobalContext.get().get<Context>() }.getOrNull() ?: return null
 
   return runCatching {
-      appContext.assets.open(aboutLibrariesAssetName).bufferedReader().use { it.readText() }
-    }
-    .getOrNull()
+        appContext.assets.open(aboutLibrariesAssetName).bufferedReader().use { it.readText() }
+      }
+      .getOrNull()
 }

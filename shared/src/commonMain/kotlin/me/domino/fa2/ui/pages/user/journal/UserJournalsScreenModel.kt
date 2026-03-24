@@ -16,20 +16,20 @@ private const val journalsAutoLoadThreshold = 6
 
 /** Journals 子页状态。 */
 data class UserJournalsUiState(
-  /** 当前日志列表。 */
-  val journals: List<JournalSummary> = emptyList(),
-  /** 下一页 URL。 */
-  val nextPageUrl: String? = null,
-  /** 是否加载中。 */
-  val loading: Boolean = false,
-  /** 是否刷新中。 */
-  val refreshing: Boolean = false,
-  /** 是否正在加载更多。 */
-  val isLoadingMore: Boolean = false,
-  /** 首页错误。 */
-  val errorMessage: String? = null,
-  /** 追加错误。 */
-  val appendErrorMessage: String? = null,
+    /** 当前日志列表。 */
+    val journals: List<JournalSummary> = emptyList(),
+    /** 下一页 URL。 */
+    val nextPageUrl: String? = null,
+    /** 是否加载中。 */
+    val loading: Boolean = false,
+    /** 是否刷新中。 */
+    val refreshing: Boolean = false,
+    /** 是否正在加载更多。 */
+    val isLoadingMore: Boolean = false,
+    /** 首页错误。 */
+    val errorMessage: String? = null,
+    /** 追加错误。 */
+    val appendErrorMessage: String? = null,
 ) {
   /** 是否有更多。 */
   val hasMore: Boolean
@@ -38,14 +38,14 @@ data class UserJournalsUiState(
 
 /** Journals 子页状态模型。 */
 class UserJournalsScreenModel(
-  /** 用户名。 */
-  private val username: String,
-  /** Journals 仓储。 */
-  private val repository: JournalsRepository,
+    /** 用户名。 */
+    private val username: String,
+    /** Journals 仓储。 */
+    private val repository: JournalsRepository,
 ) : StateScreenModel<UserJournalsUiState>(UserJournalsUiState()) {
   private val log = FaLog.withTag("UserJournalsScreenModel")
   private val paginationStateMachine =
-    PaginationStateMachine<JournalSummary, Int>(keyOf = { item -> item.id })
+      PaginationStateMachine<JournalSummary, Int>(keyOf = { item -> item.id })
   private var loadJob: Job? = null
   private var appendJob: Job? = null
 
@@ -67,40 +67,41 @@ class UserJournalsScreenModel(
     }
 
     mutableState.value =
-      snapshot.applyPagination(
-        paginationStateMachine.beginLoad(
-          snapshot = snapshot.toPaginationSnapshot(),
-          forceRefresh = forceRefresh,
+        snapshot.applyPagination(
+            paginationStateMachine.beginLoad(
+                snapshot = snapshot.toPaginationSnapshot(),
+                forceRefresh = forceRefresh,
+            )
         )
-      )
 
-    loadJob = screenModelScope.launch {
-      val firstPageState =
-        if (forceRefresh) {
-          repository.refreshJournalsFirstPage(username)
-        } else {
-          repository.loadJournalsPage(username, nextPageUrl = null)
-        }
-      val reduced =
-        paginationStateMachine.reduceFirstPage(
-          snapshot = state.value.toPaginationSnapshot(),
-          result = firstPageState,
-          itemsOf = { page -> page.journals },
-          nextPageUrlOf = { page -> page.nextPageUrl },
-        )
-      val updated = state.value.applyPagination(reduced)
-      mutableState.value = updated
-      when (val next = firstPageState) {
-        is PageState.Success -> {
-          log.i { "加载Journals页 -> ${summarizePageState(next)}(count=${updated.journals.size})" }
-        }
+    loadJob =
+        screenModelScope.launch {
+          val firstPageState =
+              if (forceRefresh) {
+                repository.refreshJournalsFirstPage(username)
+              } else {
+                repository.loadJournalsPage(username, nextPageUrl = null)
+              }
+          val reduced =
+              paginationStateMachine.reduceFirstPage(
+                  snapshot = state.value.toPaginationSnapshot(),
+                  result = firstPageState,
+                  itemsOf = { page -> page.journals },
+                  nextPageUrlOf = { page -> page.nextPageUrl },
+              )
+          val updated = state.value.applyPagination(reduced)
+          mutableState.value = updated
+          when (val next = firstPageState) {
+            is PageState.Success -> {
+              log.i { "加载Journals页 -> ${summarizePageState(next)}(count=${updated.journals.size})" }
+            }
 
-        PageState.CfChallenge -> log.w { "加载Journals页 -> Cloudflare验证" }
-        is PageState.MatureBlocked -> log.w { "加载Journals页 -> 受限(${next.reason})" }
-        is PageState.Error -> log.e(next.exception) { "加载Journals页 -> 失败" }
-        PageState.Loading -> log.d { "加载Journals页 -> 加载中" }
-      }
-    }
+            PageState.CfChallenge -> log.w { "加载Journals页 -> Cloudflare验证" }
+            is PageState.MatureBlocked -> log.w { "加载Journals页 -> 受限(${next.reason})" }
+            is PageState.Error -> log.e(next.exception) { "加载Journals页 -> 失败" }
+            PageState.Loading -> log.d { "加载Journals页 -> 加载中" }
+          }
+        }
   }
 
   /** 触底回调。 */
@@ -132,53 +133,58 @@ class UserJournalsScreenModel(
     log.d { "自动加载Journals页 -> 开始(force=$force)" }
 
     mutableState.value =
-      snapshot.applyPagination(paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot()))
-
-    appendJob = screenModelScope.launch {
-      val next = repository.loadJournalsPage(username, nextPageUrl = nextUrl)
-      val reduced =
-        paginationStateMachine.reduceAppend(
-          snapshot = state.value.toPaginationSnapshot(),
-          result = next,
-          itemsOf = { page -> page.journals },
-          nextPageUrlOf = { page -> page.nextPageUrl },
+        snapshot.applyPagination(
+            paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot())
         )
-      val updated = state.value.applyPagination(reduced)
-      mutableState.value = updated
-      when (next) {
-        is PageState.Success -> {
-          log.d { "自动加载Journals页 -> ${summarizePageState(next)}(count=${updated.journals.size})" }
-        }
 
-        PageState.CfChallenge -> log.w { "自动加载Journals页 -> Cloudflare验证" }
-        is PageState.MatureBlocked -> log.w { "自动加载Journals页 -> 受限(${next.reason})" }
-        is PageState.Error -> log.e(next.exception) { "自动加载Journals页 -> 失败" }
-        PageState.Loading -> log.d { "自动加载Journals页 -> 加载中" }
-      }
-    }
+    appendJob =
+        screenModelScope.launch {
+          val next = repository.loadJournalsPage(username, nextPageUrl = nextUrl)
+          val reduced =
+              paginationStateMachine.reduceAppend(
+                  snapshot = state.value.toPaginationSnapshot(),
+                  result = next,
+                  itemsOf = { page -> page.journals },
+                  nextPageUrlOf = { page -> page.nextPageUrl },
+              )
+          val updated = state.value.applyPagination(reduced)
+          mutableState.value = updated
+          when (next) {
+            is PageState.Success -> {
+              log.d {
+                "自动加载Journals页 -> ${summarizePageState(next)}(count=${updated.journals.size})"
+              }
+            }
+
+            PageState.CfChallenge -> log.w { "自动加载Journals页 -> Cloudflare验证" }
+            is PageState.MatureBlocked -> log.w { "自动加载Journals页 -> 受限(${next.reason})" }
+            is PageState.Error -> log.e(next.exception) { "自动加载Journals页 -> 失败" }
+            PageState.Loading -> log.d { "自动加载Journals页 -> 加载中" }
+          }
+        }
   }
 }
 
 private fun UserJournalsUiState.toPaginationSnapshot(): PaginationSnapshot<JournalSummary> =
-  PaginationSnapshot(
-    items = journals,
-    nextPageUrl = nextPageUrl,
-    loading = loading,
-    refreshing = refreshing,
-    isLoadingMore = isLoadingMore,
-    errorMessage = errorMessage,
-    appendErrorMessage = appendErrorMessage,
-  )
+    PaginationSnapshot(
+        items = journals,
+        nextPageUrl = nextPageUrl,
+        loading = loading,
+        refreshing = refreshing,
+        isLoadingMore = isLoadingMore,
+        errorMessage = errorMessage,
+        appendErrorMessage = appendErrorMessage,
+    )
 
 private fun UserJournalsUiState.applyPagination(
-  snapshot: PaginationSnapshot<JournalSummary>
+    snapshot: PaginationSnapshot<JournalSummary>
 ): UserJournalsUiState =
-  copy(
-    journals = snapshot.items,
-    nextPageUrl = snapshot.nextPageUrl,
-    loading = snapshot.loading,
-    refreshing = snapshot.refreshing,
-    isLoadingMore = snapshot.isLoadingMore,
-    errorMessage = snapshot.errorMessage,
-    appendErrorMessage = snapshot.appendErrorMessage,
-  )
+    copy(
+        journals = snapshot.items,
+        nextPageUrl = snapshot.nextPageUrl,
+        loading = snapshot.loading,
+        refreshing = snapshot.refreshing,
+        isLoadingMore = snapshot.isLoadingMore,
+        errorMessage = snapshot.errorMessage,
+        appendErrorMessage = snapshot.appendErrorMessage,
+    )

@@ -74,7 +74,10 @@ class SubmissionParserTest {
   fun failsOnMalformedHtml() {
     val parser = SubmissionParser()
     assertFailsWith<IllegalStateException> {
-      parser.parse(html = "<html><body><h1>broken</h1></body></html>", url = FaUrls.submission(1))
+      parser.parse(
+          html = "<html><body><h1>broken</h1></body></html>",
+          url = FaUrls.submission(1),
+      )
     }
   }
 }

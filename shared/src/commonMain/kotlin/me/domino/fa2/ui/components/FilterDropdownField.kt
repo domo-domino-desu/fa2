@@ -47,41 +47,41 @@ data class FilterOptionGroup<T>(val label: String, val options: List<FilterOptio
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> FilterDropdownField(
-  label: String,
-  options: List<FilterOption<T>>,
-  selected: T,
-  onSelected: (T) -> Unit,
-  modifier: Modifier = Modifier,
+    label: String,
+    options: List<FilterOption<T>>,
+    selected: T,
+    onSelected: (T) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   var expanded by remember { mutableStateOf(false) }
   val selectedLabel = options.firstOrNull { option -> option.value == selected }?.label.orEmpty()
 
   ExposedDropdownMenuBox(
-    expanded = expanded,
-    onExpandedChange = { expanded = !expanded },
-    modifier = modifier,
+      expanded = expanded,
+      onExpandedChange = { expanded = !expanded },
+      modifier = modifier,
   ) {
     OutlinedTextField(
-      value = selectedLabel,
-      onValueChange = {},
-      readOnly = true,
-      label = { Text(label) },
-      trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-      colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-      modifier =
-        Modifier.fillMaxWidth()
-          .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-          .onFocusChanged { if (it.isFocused) expanded = true },
+        value = selectedLabel,
+        onValueChange = {},
+        readOnly = true,
+        label = { Text(label) },
+        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+        modifier =
+            Modifier.fillMaxWidth()
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                .onFocusChanged { if (it.isFocused) expanded = true },
     )
 
     ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
       options.forEach { option ->
         DropdownMenuItem(
-          text = { Text(option.label) },
-          onClick = {
-            onSelected(option.value)
-            expanded = false
-          },
+            text = { Text(option.label) },
+            onClick = {
+              onSelected(option.value)
+              expanded = false
+            },
         )
       }
     }
@@ -92,56 +92,56 @@ fun <T> FilterDropdownField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> GroupedFilterDropdownField(
-  label: String,
-  groups: List<FilterOptionGroup<T>>,
-  selected: T,
-  onSelected: (T) -> Unit,
-  modifier: Modifier = Modifier,
+    label: String,
+    groups: List<FilterOptionGroup<T>>,
+    selected: T,
+    onSelected: (T) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   var expanded by remember { mutableStateOf(false) }
   val options = groups.flatMap { group -> group.options }
   val selectedLabel = options.firstOrNull { option -> option.value == selected }?.label.orEmpty()
 
   ExposedDropdownMenuBox(
-    expanded = expanded,
-    onExpandedChange = { expanded = !expanded },
-    modifier = modifier,
+      expanded = expanded,
+      onExpandedChange = { expanded = !expanded },
+      modifier = modifier,
   ) {
     OutlinedTextField(
-      value = selectedLabel,
-      onValueChange = {},
-      readOnly = true,
-      label = { Text(label) },
-      trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-      colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-      modifier =
-        Modifier.fillMaxWidth()
-          .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-          .onFocusChanged { if (it.isFocused) expanded = true },
+        value = selectedLabel,
+        onValueChange = {},
+        readOnly = true,
+        label = { Text(label) },
+        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+        modifier =
+            Modifier.fillMaxWidth()
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                .onFocusChanged { if (it.isFocused) expanded = true },
     )
 
     ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
       groups.forEach { group ->
         if (group.label.isNotBlank()) {
           DropdownMenuItem(
-            text = {
-              Text(
-                text = group.label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-              )
-            },
-            onClick = {},
-            enabled = false,
+              text = {
+                Text(
+                    text = group.label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+              },
+              onClick = {},
+              enabled = false,
           )
         }
         group.options.forEach { option ->
           DropdownMenuItem(
-            text = { Text(option.label) },
-            onClick = {
-              onSelected(option.value)
-              expanded = false
-            },
+              text = { Text(option.label) },
+              onClick = {
+                onSelected(option.value)
+                expanded = false
+              },
           )
         }
       }
@@ -153,20 +153,20 @@ fun <T> GroupedFilterDropdownField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterDialogTriggerField(
-  label: String,
-  valueLabel: String,
-  onOpenPicker: () -> Unit,
-  modifier: Modifier = Modifier,
+    label: String,
+    valueLabel: String,
+    onOpenPicker: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   Box(modifier = modifier) {
     OutlinedTextField(
-      value = valueLabel,
-      onValueChange = {},
-      readOnly = true,
-      label = { Text(label) },
-      trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
-      colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-      modifier = Modifier.fillMaxWidth(),
+        value = valueLabel,
+        onValueChange = {},
+        readOnly = true,
+        label = { Text(label) },
+        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
+        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+        modifier = Modifier.fillMaxWidth(),
     )
     Box(modifier = Modifier.matchParentSize().clickable(onClick = onOpenPicker))
   }
@@ -175,17 +175,17 @@ fun FilterDialogTriggerField(
 /** 纯文本可滚动分组选择弹窗。 */
 @Composable
 fun <T> GroupedTextPickerDialog(
-  title: String,
-  groups: List<FilterOptionGroup<T>>,
-  selected: T,
-  onSelected: (T) -> Unit,
-  onDismissRequest: () -> Unit,
+    title: String,
+    groups: List<FilterOptionGroup<T>>,
+    selected: T,
+    onSelected: (T) -> Unit,
+    onDismissRequest: () -> Unit,
 ) {
   val listState = rememberLazyListState()
   val selectedGroupIndex =
-    remember(groups, selected) {
-      groups.indexOfFirst { group -> group.options.any { option -> option.value == selected } }
-    }
+      remember(groups, selected) {
+        groups.indexOfFirst { group -> group.options.any { option -> option.value == selected } }
+      }
   LaunchedEffect(selectedGroupIndex) {
     if (selectedGroupIndex >= 0) {
       // 第 0 项是标题，分组从第 1 项开始。
@@ -195,28 +195,29 @@ fun <T> GroupedTextPickerDialog(
 
   Dialog(onDismissRequest = onDismissRequest) {
     Surface(
-      shape = MaterialTheme.shapes.large,
-      tonalElevation = 4.dp,
-      modifier = Modifier.fillMaxWidth().heightIn(max = 620.dp),
+        shape = MaterialTheme.shapes.large,
+        tonalElevation = 4.dp,
+        modifier = Modifier.fillMaxWidth().heightIn(max = 620.dp),
     ) {
       LazyColumn(
-        state = listState,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+          state = listState,
+          modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+          verticalArrangement = Arrangement.spacedBy(2.dp),
       ) {
         item(key = "picker-title") {
           Row(
-            modifier =
-              Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 8.dp),
+              horizontalArrangement = Arrangement.SpaceBetween,
           ) {
             Text(text = title, style = MaterialTheme.typography.titleMedium)
             TextButton(
-              colors =
-                ButtonDefaults.textButtonColors(
-                  contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                ),
-              onClick = onDismissRequest,
+                colors =
+                    ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                onClick = onDismissRequest,
             ) {
               Text("关闭")
             }
@@ -225,10 +226,10 @@ fun <T> GroupedTextPickerDialog(
         groups.forEach { group ->
           item(key = "picker-group-${group.label}") {
             GroupedTextPickerSection(
-              group = group,
-              selected = selected,
-              onSelected = onSelected,
-              onDismissRequest = onDismissRequest,
+                group = group,
+                selected = selected,
+                onSelected = onSelected,
+                onDismissRequest = onDismissRequest,
             )
           }
         }
@@ -240,26 +241,26 @@ fun <T> GroupedTextPickerDialog(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun <T> GroupedTextPickerSection(
-  group: FilterOptionGroup<T>,
-  selected: T,
-  onSelected: (T) -> Unit,
-  onDismissRequest: () -> Unit,
+    group: FilterOptionGroup<T>,
+    selected: T,
+    onSelected: (T) -> Unit,
+    onDismissRequest: () -> Unit,
 ) {
   Column(
-    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
-    verticalArrangement = Arrangement.spacedBy(6.dp),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
+      verticalArrangement = Arrangement.spacedBy(6.dp),
   ) {
     if (group.label.isNotBlank()) {
       Text(
-        text = group.label,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+          text = group.label,
+          style = MaterialTheme.typography.labelMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
     }
     FlowRow(
-      horizontalArrangement = Arrangement.spacedBy(10.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
-      modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth(),
     ) {
       group.options.forEach { option ->
         val isSelected = option.value == selected
@@ -270,20 +271,20 @@ private fun <T> GroupedTextPickerSection(
           }
         }
         Text(
-          text = option.label,
-          style = MaterialTheme.typography.bodyLarge,
-          fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-          color =
-            if (isSelected) {
-              MaterialTheme.colorScheme.primary
-            } else {
-              MaterialTheme.colorScheme.onSurface
-            },
-          modifier =
-            Modifier.bringIntoViewRequester(bringIntoViewRequester).clickable {
-              onSelected(option.value)
-              onDismissRequest()
-            },
+            text = option.label,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+            color =
+                if (isSelected) {
+                  MaterialTheme.colorScheme.primary
+                } else {
+                  MaterialTheme.colorScheme.onSurface
+                },
+            modifier =
+                Modifier.bringIntoViewRequester(bringIntoViewRequester).clickable {
+                  onSelected(option.value)
+                  onDismissRequest()
+                },
         )
       }
     }

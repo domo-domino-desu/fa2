@@ -14,23 +14,23 @@ class WatchlistRepository(private val store: WatchlistStore) {
 
   /** 加载 watchlist 分页。 */
   suspend fun loadWatchlistPage(
-    username: String,
-    category: WatchlistCategory,
-    nextPageUrl: String? = null,
+      username: String,
+      category: WatchlistCategory,
+      nextPageUrl: String? = null,
   ): PageState<WatchlistPage> {
     log.d {
       "加载Watchlist -> user=$username,category=$category,cursor=${nextPageUrl?.let(::summarizeUrl) ?: "first"}"
     }
     val state =
-      store.loadPageOnce(username = username, category = category, nextPageUrl = nextPageUrl)
+        store.loadPageOnce(username = username, category = category, nextPageUrl = nextPageUrl)
     log.d { "加载Watchlist -> ${summarizePageState(state)}" }
     return state
   }
 
   /** 强制刷新 watchlist 首页。 */
   suspend fun refreshWatchlistFirstPage(
-    username: String,
-    category: WatchlistCategory,
+      username: String,
+      category: WatchlistCategory,
   ): PageState<WatchlistPage> {
     log.i { "刷新Watchlist -> user=$username,category=$category" }
     store.invalidateUserCategory(username = username, category = category)

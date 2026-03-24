@@ -21,25 +21,25 @@ object FaLog {
 
   /** 解析桌面端日志级别系统属性。 */
   fun parseDesktopSeverity(raw: String?): Severity =
-    when (raw?.trim()?.lowercase()) {
-      "verbose",
-      "trace",
-      "v" -> Severity.Verbose
-      "debug",
-      "d" -> Severity.Debug
-      "info",
-      "i",
-      null,
-      "" -> Severity.Info
-      "warn",
-      "warning",
-      "w" -> Severity.Warn
-      "error",
-      "e" -> Severity.Error
-      "assert",
-      "a" -> Severity.Assert
-      else -> Severity.Info
-    }
+      when (raw?.trim()?.lowercase()) {
+        "verbose",
+        "trace",
+        "v" -> Severity.Verbose
+        "debug",
+        "d" -> Severity.Debug
+        "info",
+        "i",
+        null,
+        "" -> Severity.Info
+        "warn",
+        "warning",
+        "w" -> Severity.Warn
+        "error",
+        "e" -> Severity.Error
+        "assert",
+        "a" -> Severity.Assert
+        else -> Severity.Info
+      }
 
   /** 日志是否已初始化。 */
   fun isInitialized(): Boolean = initialized

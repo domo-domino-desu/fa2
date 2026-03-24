@@ -20,13 +20,13 @@ private const val autoLoadThreshold = 10
 
 /** Feed 页 UI 状态。 */
 data class FeedUiState(
-  val submissions: List<SubmissionThumbnail> = emptyList(),
-  val nextPageUrl: String? = null,
-  val loading: Boolean = false,
-  val refreshing: Boolean = false,
-  val isLoadingMore: Boolean = false,
-  val errorMessage: String? = null,
-  val appendErrorMessage: String? = null,
+    val submissions: List<SubmissionThumbnail> = emptyList(),
+    val nextPageUrl: String? = null,
+    val loading: Boolean = false,
+    val refreshing: Boolean = false,
+    val isLoadingMore: Boolean = false,
+    val errorMessage: String? = null,
+    val appendErrorMessage: String? = null,
 ) {
   val hasMore: Boolean
     get() = !nextPageUrl.isNullOrBlank()
@@ -34,14 +34,14 @@ data class FeedUiState(
 
 /** Feed 页面状态模型。 负责分页聚合、加载状态管理与共享列表同步。 */
 class FeedScreenModel(
-  /** Feed 仓储。 */
-  private val repository: FeedRepository,
-  /** 投稿列表共享持有器。 */
-  private val submissionListHolder: SubmissionListHolder,
+    /** Feed 仓储。 */
+    private val repository: FeedRepository,
+    /** 投稿列表共享持有器。 */
+    private val submissionListHolder: SubmissionListHolder,
 ) : StateScreenModel<FeedUiState>(FeedUiState()) {
   private val log = FaLog.withTag("FeedScreenModel")
   private val paginationStateMachine =
-    PaginationStateMachine<SubmissionThumbnail, Int>(keyOf = { item -> item.id })
+      PaginationStateMachine<SubmissionThumbnail, Int>(keyOf = { item -> item.id })
 
   private val mutablePageState = MutableStateFlow<PageState<FeedUiState>>(PageState.Loading)
   val pageState: StateFlow<PageState<FeedUiState>> = mutablePageState.asStateFlow()
@@ -70,60 +70,61 @@ class FeedScreenModel(
     }
 
     mutableState.value =
-      current.applyPagination(
-        paginationStateMachine.beginLoad(
-          snapshot = current.toPaginationSnapshot(),
-          forceRefresh = forceRefresh,
+        current.applyPagination(
+            paginationStateMachine.beginLoad(
+                snapshot = current.toPaginationSnapshot(),
+                forceRefresh = forceRefresh,
+            )
         )
-      )
     if (current.submissions.isEmpty()) {
       mutablePageState.value = PageState.Loading
     }
 
-    loadJob = screenModelScope.launch {
-      val firstPageState =
-        if (forceRefresh) {
-          repository.refreshFirstPage()
-        } else {
-          repository.loadFirstPage()
-        }
-      val reduced =
-        paginationStateMachine.reduceFirstPage(
-          snapshot = state.value.toPaginationSnapshot(),
-          result = firstPageState,
-          itemsOf = { page -> page.submissions },
-          nextPageUrlOf = { page -> page.nextPageUrl },
-        )
-      val updated = state.value.applyPagination(reduced)
-      mutableState.value = updated
-      when (val next = firstPageState) {
-        is PageState.Success -> {
-          syncSubmissionListHolder(updated)
-          mutablePageState.value = PageState.Success(updated)
-          log.i { "加载Feed -> 成功(count=${updated.submissions.size})" }
-        }
+    loadJob =
+        screenModelScope.launch {
+          val firstPageState =
+              if (forceRefresh) {
+                repository.refreshFirstPage()
+              } else {
+                repository.loadFirstPage()
+              }
+          val reduced =
+              paginationStateMachine.reduceFirstPage(
+                  snapshot = state.value.toPaginationSnapshot(),
+                  result = firstPageState,
+                  itemsOf = { page -> page.submissions },
+                  nextPageUrlOf = { page -> page.nextPageUrl },
+              )
+          val updated = state.value.applyPagination(reduced)
+          mutableState.value = updated
+          when (val next = firstPageState) {
+            is PageState.Success -> {
+              syncSubmissionListHolder(updated)
+              mutablePageState.value = PageState.Success(updated)
+              log.i { "加载Feed -> 成功(count=${updated.submissions.size})" }
+            }
 
-        PageState.CfChallenge -> {
-          mutablePageState.value = PageState.CfChallenge
-          log.w { "加载Feed -> Cloudflare验证" }
-        }
+            PageState.CfChallenge -> {
+              mutablePageState.value = PageState.CfChallenge
+              log.w { "加载Feed -> Cloudflare验证" }
+            }
 
-        is PageState.MatureBlocked -> {
-          mutablePageState.value = PageState.MatureBlocked(next.reason)
-          log.w { "加载Feed -> 受限(${next.reason})" }
-        }
+            is PageState.MatureBlocked -> {
+              mutablePageState.value = PageState.MatureBlocked(next.reason)
+              log.w { "加载Feed -> 受限(${next.reason})" }
+            }
 
-        is PageState.Error -> {
-          mutablePageState.value = PageState.Error(next.exception)
-          log.e(next.exception) { "加载Feed -> 失败" }
-        }
+            is PageState.Error -> {
+              mutablePageState.value = PageState.Error(next.exception)
+              log.e(next.exception) { "加载Feed -> 失败" }
+            }
 
-        PageState.Loading -> {
-          mutablePageState.value = PageState.Loading
-          log.d { "加载Feed -> 加载中" }
+            PageState.Loading -> {
+              mutablePageState.value = PageState.Loading
+              log.d { "加载Feed -> 加载中" }
+            }
+          }
         }
-      }
-    }
   }
 
   /** 刷新首页。 */
@@ -186,59 +187,65 @@ class FeedScreenModel(
     log.d { "自动加载Feed -> 开始(force=$force)" }
 
     mutableState.value =
-      snapshot.applyPagination(paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot()))
-
-    appendJob = screenModelScope.launch {
-      val pageState = repository.loadPageByNextUrl(nextUrl)
-      val reduced =
-        paginationStateMachine.reduceAppend(
-          snapshot = state.value.toPaginationSnapshot(),
-          result = pageState,
-          itemsOf = { page -> page.submissions },
-          nextPageUrlOf = { page -> page.nextPageUrl },
+        snapshot.applyPagination(
+            paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot())
         )
-      val updated = state.value.applyPagination(reduced)
-      mutableState.value = updated
-      when (val next = pageState) {
-        is PageState.Success -> {
-          syncSubmissionListHolder(updated)
-          mutablePageState.value = PageState.Success(updated)
-          log.d { "自动加载Feed -> ${summarizePageState(next)}(count=${updated.submissions.size})" }
-        }
 
-        PageState.CfChallenge -> log.w { "自动加载Feed -> Cloudflare验证" }
-        is PageState.MatureBlocked -> log.w { "自动加载Feed -> 受限(${next.reason})" }
-        is PageState.Error -> log.e(next.exception) { "自动加载Feed -> 失败" }
-        PageState.Loading -> log.d { "自动加载Feed -> 加载中" }
-      }
-    }
+    appendJob =
+        screenModelScope.launch {
+          val pageState = repository.loadPageByNextUrl(nextUrl)
+          val reduced =
+              paginationStateMachine.reduceAppend(
+                  snapshot = state.value.toPaginationSnapshot(),
+                  result = pageState,
+                  itemsOf = { page -> page.submissions },
+                  nextPageUrlOf = { page -> page.nextPageUrl },
+              )
+          val updated = state.value.applyPagination(reduced)
+          mutableState.value = updated
+          when (val next = pageState) {
+            is PageState.Success -> {
+              syncSubmissionListHolder(updated)
+              mutablePageState.value = PageState.Success(updated)
+              log.d { "自动加载Feed -> ${summarizePageState(next)}(count=${updated.submissions.size})" }
+            }
+
+            PageState.CfChallenge -> log.w { "自动加载Feed -> Cloudflare验证" }
+            is PageState.MatureBlocked -> log.w { "自动加载Feed -> 受限(${next.reason})" }
+            is PageState.Error -> log.e(next.exception) { "自动加载Feed -> 失败" }
+            PageState.Loading -> log.d { "自动加载Feed -> 加载中" }
+          }
+        }
   }
 
   private fun syncSubmissionListHolder(state: FeedUiState) {
-    submissionListHolder.replace(submissions = state.submissions, nextPageUrl = state.nextPageUrl)
+    submissionListHolder.replace(
+        submissions = state.submissions,
+        nextPageUrl = state.nextPageUrl,
+    )
   }
 }
 
 private fun FeedUiState.toPaginationSnapshot(): PaginationSnapshot<SubmissionThumbnail> =
-  PaginationSnapshot(
-    items = submissions,
-    nextPageUrl = nextPageUrl,
-    loading = loading,
-    refreshing = refreshing,
-    isLoadingMore = isLoadingMore,
-    errorMessage = errorMessage,
-    appendErrorMessage = appendErrorMessage,
-  )
+    PaginationSnapshot(
+        items = submissions,
+        nextPageUrl = nextPageUrl,
+        loading = loading,
+        refreshing = refreshing,
+        isLoadingMore = isLoadingMore,
+        errorMessage = errorMessage,
+        appendErrorMessage = appendErrorMessage,
+    )
 
 private fun FeedUiState.applyPagination(
-  snapshot: PaginationSnapshot<SubmissionThumbnail>
+    snapshot: PaginationSnapshot<SubmissionThumbnail>
 ): FeedUiState =
-  copy(
-    submissions = snapshot.items,
-    nextPageUrl = snapshot.nextPageUrl,
-    loading = snapshot.loading,
-    refreshing = snapshot.refreshing,
-    isLoadingMore = snapshot.isLoadingMore,
-    errorMessage = snapshot.errorMessage,
-    appendErrorMessage = snapshot.appendErrorMessage,
-  )
+    copy(
+        submissions = snapshot.items,
+        nextPageUrl = snapshot.nextPageUrl,
+        loading = snapshot.loading,
+        refreshing = snapshot.refreshing,
+        isLoadingMore = snapshot.isLoadingMore,
+        errorMessage = snapshot.errorMessage,
+        appendErrorMessage = snapshot.appendErrorMessage,
+    )

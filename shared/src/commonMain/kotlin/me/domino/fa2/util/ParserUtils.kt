@@ -12,10 +12,10 @@ object ParserUtils {
   private val submissionsFromSidRegex = Regex("""new~(\d+)@""")
   private val journalRegex = Regex("""/journal/(\d+)/?""")
   private val submissionDataScriptRegex =
-    Regex(
-      pattern = """<script[^>]*id=["']js-submissionData["'][^>]*>(.*?)</script>""",
-      options = setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL),
-    )
+      Regex(
+          pattern = """<script[^>]*id=["']js-submissionData["'][^>]*>(.*?)</script>""",
+          options = setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL),
+      )
   private val json = Json { ignoreUnknownKeys = true }
   private val fullImageTimestampRegex = Regex("""(?:^|/)art/[^/]+/(\d{9,})/""")
   private val fullImageAllowedHosts = setOf("d.furaffinity.net", "d.facdn.net")
@@ -30,8 +30,8 @@ object ParserUtils {
     val target = maybeRelativeUrl.trim()
     if (target.isBlank()) return target
     if (
-      target.startsWith("http://", ignoreCase = true) ||
-        target.startsWith("https://", ignoreCase = true)
+        target.startsWith("http://", ignoreCase = true) ||
+            target.startsWith("https://", ignoreCase = true)
     ) {
       return target
     }
@@ -52,11 +52,11 @@ object ParserUtils {
     }
 
     val baseDir =
-      if (pathStart >= 0) {
-        normalizedBase.substring(0, normalizedBase.lastIndexOf('/') + 1)
-      } else {
-        "$normalizedBase/"
-      }
+        if (pathStart >= 0) {
+          normalizedBase.substring(0, normalizedBase.lastIndexOf('/') + 1)
+        } else {
+          "$normalizedBase/"
+        }
     return "$baseDir$target"
   }
 
@@ -76,7 +76,7 @@ object ParserUtils {
    * @param url submission 链接。
    */
   fun parseSubmissionSid(url: String): Int? =
-    submissionRegex.find(url)?.groupValues?.getOrNull(1)?.toIntOrNull()
+      submissionRegex.find(url)?.groupValues?.getOrNull(1)?.toIntOrNull()
 
   /**
    * 从 submissions 下一页 URL 中解析 fromSid 游标。
@@ -84,7 +84,7 @@ object ParserUtils {
    * @param url 下一页链接。
    */
   fun parseSubmissionsFromSid(url: String): Int? =
-    submissionsFromSidRegex.find(url)?.groupValues?.getOrNull(1)?.toIntOrNull()
+      submissionsFromSidRegex.find(url)?.groupValues?.getOrNull(1)?.toIntOrNull()
 
   /**
    * 从 journal URL 中解析日志 ID。
@@ -92,13 +92,13 @@ object ParserUtils {
    * @param url journal 链接。
    */
   fun parseJournalId(url: String): Int? =
-    journalRegex.find(url)?.groupValues?.getOrNull(1)?.toIntOrNull()
+      journalRegex.find(url)?.groupValues?.getOrNull(1)?.toIntOrNull()
 
   /** 根据原图 URL 推导缩略图 URL。 需要 submission sid 与原图路径中的时间戳目录（`/art/{author}/{timestamp}/...`）。 */
   fun deriveSubmissionThumbnailUrlFromFullImage(
-    sid: Int,
-    fullImageUrl: String,
-    size: Int = 600,
+      sid: Int,
+      fullImageUrl: String,
+      size: Int = 600,
   ): String? {
     if (sid <= 0 || size <= 0) return null
     val normalized = fullImageUrl.trim()
@@ -107,9 +107,9 @@ object ParserUtils {
 
     val pathOnly = extractUrlPath(normalized)
     val timestamp =
-      fullImageTimestampRegex.find(pathOnly)?.groupValues?.getOrNull(1)?.trim()?.takeIf { value ->
-        value.isNotBlank()
-      } ?: return null
+        fullImageTimestampRegex.find(pathOnly)?.groupValues?.getOrNull(1)?.trim()?.takeIf { value ->
+          value.isNotBlank()
+        } ?: return null
     return "https://t.furaffinity.net/$sid@$size-$timestamp.jpg"
   }
 
@@ -121,8 +121,8 @@ object ParserUtils {
     if (hostStart >= normalized.length) return null
     val hostEnd = normalized.indexOfAny(charArrayOf('/', '?', '#'), startIndex = hostStart)
     val host =
-      if (hostEnd >= 0) normalized.substring(hostStart, hostEnd)
-      else normalized.substring(hostStart)
+        if (hostEnd >= 0) normalized.substring(hostStart, hostEnd)
+        else normalized.substring(hostStart)
     return host.trim().ifBlank { null }
   }
 
@@ -146,8 +146,8 @@ object ParserUtils {
         val sid = sidRaw.toIntOrNull() ?: return@forEach
         val entry = entryElement.jsonObject
         val usernameLower =
-          entry["lower"]?.jsonPrimitive?.contentOrNull?.trim()?.ifBlank { null }
-            ?: entry["username"]?.jsonPrimitive?.contentOrNull?.trim()?.lowercase().orEmpty()
+            entry["lower"]?.jsonPrimitive?.contentOrNull?.trim()?.ifBlank { null }
+                ?: entry["username"]?.jsonPrimitive?.contentOrNull?.trim()?.lowercase().orEmpty()
         val avatarMtime = entry["avatar_mtime"]?.jsonPrimitive?.contentOrNull?.trim().orEmpty()
         if (avatarMtime.isBlank()) return@forEach
         val avatarUrl = FaUrls.avatar(usernameLower = usernameLower, avatarMtime = avatarMtime)
@@ -159,16 +159,16 @@ object ParserUtils {
   }
 
   private fun parseSubmissionDataRoot(html: String) =
-    runCatching {
-        val jsonText =
-          submissionDataScriptRegex.find(html)?.groupValues?.getOrNull(1).orEmpty().trim()
-        if (jsonText.isBlank()) {
-          null
-        } else {
-          json.parseToJsonElement(jsonText).jsonObject
-        }
-      }
-      .getOrNull()
+      runCatching {
+            val jsonText =
+                submissionDataScriptRegex.find(html)?.groupValues?.getOrNull(1).orEmpty().trim()
+            if (jsonText.isBlank()) {
+              null
+            } else {
+              json.parseToJsonElement(jsonText).jsonObject
+            }
+          }
+          .getOrNull()
 
   /** 若页面是系统消息页则抛出业务可读异常。 */
   fun ensureUserPageAccessible(document: Document) {

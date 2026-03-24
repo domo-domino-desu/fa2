@@ -42,33 +42,33 @@ import org.koin.core.parameter.parametersOf
 
 /** Journal 详情路由页面。 */
 class JournalDetailRouteScreen(
-  /** Journal ID。 */
-  private val journalId: Int,
-  /** Journal URL 兜底。 */
-  private val journalUrl: String? = null,
+    /** Journal ID。 */
+    private val journalId: Int,
+    /** Journal URL 兜底。 */
+    private val journalUrl: String? = null,
 ) : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
     val screenModel =
-      koinScreenModel<JournalDetailScreenModel> { parametersOf(journalId, journalUrl) }
+        koinScreenModel<JournalDetailScreenModel> { parametersOf(journalId, journalUrl) }
     val state by screenModel.state.collectAsState()
     val shareUrl =
-      when (val snapshot = state) {
-        is JournalDetailUiState.Success -> snapshot.detail.journalUrl
-        JournalDetailUiState.Loading,
-        is JournalDetailUiState.Error -> {
-          journalUrl?.trim().takeUnless { it.isNullOrBlank() }
-            ?: if (journalId > 0) FaUrls.journal(journalId) else ""
+        when (val snapshot = state) {
+          is JournalDetailUiState.Success -> snapshot.detail.journalUrl
+          JournalDetailUiState.Loading,
+          is JournalDetailUiState.Error -> {
+            journalUrl?.trim().takeUnless { it.isNullOrBlank() }
+                ?: if (journalId > 0) FaUrls.journal(journalId) else ""
+          }
         }
-      }
 
     Column(modifier = Modifier.fillMaxSize()) {
       JournalDetailRouteTopBar(
-        onBack = { navigator.pop() },
-        onGoHome = { navigator.goBackHome() },
-        shareUrl = shareUrl,
+          onBack = { navigator.pop() },
+          onGoHome = { navigator.goBackHome() },
+          shareUrl = shareUrl,
       )
 
       when (val snapshot = state) {
@@ -82,15 +82,18 @@ class JournalDetailRouteScreen(
 
         is JournalDetailUiState.Success -> {
           JournalDetailContent(
-            detail = snapshot.detail,
-            onOpenAuthor = { author ->
-              val normalized = author.trim()
-              if (normalized.isNotBlank()) {
-                navigator.push(
-                  UserRouteScreen(username = normalized, initialChildRoute = UserChildRoute.Gallery)
-                )
-              }
-            },
+              detail = snapshot.detail,
+              onOpenAuthor = { author ->
+                val normalized = author.trim()
+                if (normalized.isNotBlank()) {
+                  navigator.push(
+                      UserRouteScreen(
+                          username = normalized,
+                          initialChildRoute = UserChildRoute.Gallery,
+                      )
+                  )
+                }
+              },
           )
         }
       }
@@ -101,16 +104,16 @@ class JournalDetailRouteScreen(
 @Composable
 private fun JournalDetailSkeleton() {
   Column(
-    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-    verticalArrangement = Arrangement.spacedBy(10.dp),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+      verticalArrangement = Arrangement.spacedBy(10.dp),
   ) {
     SkeletonBlock(
-      modifier = Modifier.fillMaxWidth().height(220.dp),
-      shape = RoundedCornerShape(14.dp),
+        modifier = Modifier.fillMaxWidth().height(220.dp),
+        shape = RoundedCornerShape(14.dp),
     )
     SkeletonBlock(
-      modifier = Modifier.fillMaxWidth().height(168.dp),
-      shape = RoundedCornerShape(14.dp),
+        modifier = Modifier.fillMaxWidth().height(168.dp),
+        shape = RoundedCornerShape(14.dp),
     )
   }
 }
@@ -118,20 +121,20 @@ private fun JournalDetailSkeleton() {
 @Composable
 private fun JournalDetailErrorCard(message: String, onRetry: () -> Unit) {
   Surface(
-    color = MaterialTheme.colorScheme.surface,
-    shape = RoundedCornerShape(14.dp),
-    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
-    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+      color = MaterialTheme.colorScheme.surface,
+      shape = RoundedCornerShape(14.dp),
+      border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
   ) {
     Column(
-      modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       Text(text = "加载失败", style = MaterialTheme.typography.titleMedium)
       Text(
-        text = message,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+          text = message,
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
       Button(onClick = onRetry) { Text("重试") }
     }
@@ -140,44 +143,51 @@ private fun JournalDetailErrorCard(message: String, onRetry: () -> Unit) {
 
 @Composable
 private fun JournalDetailContent(
-  detail: me.domino.fa2.data.model.JournalDetail,
-  onOpenAuthor: (String) -> Unit,
+    detail: me.domino.fa2.data.model.JournalDetail,
+    onOpenAuthor: (String) -> Unit,
 ) {
-  LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+  LazyColumn(
+      modifier = Modifier.fillMaxSize(),
+      verticalArrangement = Arrangement.spacedBy(10.dp),
+  ) {
     item {
       Surface(
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(14.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+          color = MaterialTheme.colorScheme.surface,
+          shape = RoundedCornerShape(14.dp),
+          border =
+              BorderStroke(
+                  1.dp,
+                  MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+              ),
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
       ) {
         Column(
-          modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-          verticalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
           Text(
-            text = detail.title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold,
+              text = detail.title,
+              style = MaterialTheme.typography.titleLarge,
+              fontWeight = FontWeight.SemiBold,
           )
           Text(
-            text = "${detail.timestampNatural} · ${detail.rating} · ${detail.commentCount} 评论",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+              text = "${detail.timestampNatural} · ${detail.rating} · ${detail.commentCount} 评论",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
           HtmlText(
-            html = detail.bodyHtml,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
+              html = detail.bodyHtml,
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurface,
           )
         }
       }
     }
     item {
       JournalCommentsCard(
-        commentCount = detail.commentCount,
-        comments = detail.comments,
-        onOpenAuthor = onOpenAuthor,
+          commentCount = detail.commentCount,
+          comments = detail.comments,
+          onOpenAuthor = onOpenAuthor,
       )
     }
   }
@@ -185,38 +195,38 @@ private fun JournalDetailContent(
 
 @Composable
 private fun JournalCommentsCard(
-  commentCount: Int,
-  comments: List<me.domino.fa2.data.model.PageComment>,
-  onOpenAuthor: (String) -> Unit,
+    commentCount: Int,
+    comments: List<me.domino.fa2.data.model.PageComment>,
+    onOpenAuthor: (String) -> Unit,
 ) {
   Surface(
-    color = MaterialTheme.colorScheme.surface,
-    shape = RoundedCornerShape(14.dp),
-    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
-    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+      color = MaterialTheme.colorScheme.surface,
+      shape = RoundedCornerShape(14.dp),
+      border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
   ) {
     Column(
-      modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       Text(
-        text = "评论 · $commentCount",
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.SemiBold,
+          text = "评论 · $commentCount",
+          style = MaterialTheme.typography.titleMedium,
+          fontWeight = FontWeight.SemiBold,
       )
       if (comments.isEmpty()) {
         Text(
-          text = "暂无可展示评论",
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
+            text = "暂无可展示评论",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
       } else {
         comments.take(40).forEachIndexed { index, comment ->
           JournalCommentItem(comment = comment, onOpenAuthor = onOpenAuthor)
           if (index != minOf(comments.lastIndex, 39)) {
             HorizontalDivider(
-              thickness = 1.dp,
-              color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
             )
           }
         }
@@ -227,44 +237,44 @@ private fun JournalCommentsCard(
 
 @Composable
 private fun JournalCommentItem(
-  comment: me.domino.fa2.data.model.PageComment,
-  onOpenAuthor: (String) -> Unit,
+    comment: me.domino.fa2.data.model.PageComment,
+    onOpenAuthor: (String) -> Unit,
 ) {
   val normalizedAuthor = comment.author.trim()
   val indentation = (comment.depth.coerceIn(0, 6) * 10).dp
   Column(
-    modifier = Modifier.fillMaxWidth().padding(start = indentation),
-    verticalArrangement = Arrangement.spacedBy(4.dp),
+      modifier = Modifier.fillMaxWidth().padding(start = indentation),
+      verticalArrangement = Arrangement.spacedBy(4.dp),
   ) {
     val authorClickableModifier =
-      if (normalizedAuthor.isNotBlank()) {
-        Modifier.clickable { onOpenAuthor(normalizedAuthor) }
-      } else {
-        Modifier
-      }
+        if (normalizedAuthor.isNotBlank()) {
+          Modifier.clickable { onOpenAuthor(normalizedAuthor) }
+        } else {
+          Modifier
+        }
     Row(
-      modifier = authorClickableModifier,
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = authorClickableModifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       Surface(
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.62f),
-        modifier = Modifier.size(30.dp),
+          shape = CircleShape,
+          color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.62f),
+          modifier = Modifier.size(30.dp),
       ) {
         if (comment.authorAvatarUrl.isNotBlank()) {
           NetworkImage(
-            url = comment.authorAvatarUrl,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-            showLoadingPlaceholder = false,
+              url = comment.authorAvatarUrl,
+              modifier = Modifier.fillMaxSize(),
+              contentScale = ContentScale.Crop,
+              showLoadingPlaceholder = false,
           )
         } else {
           Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(
-              text = comment.authorDisplayName.firstOrNull()?.uppercase() ?: "?",
-              style = MaterialTheme.typography.labelSmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = comment.authorDisplayName.firstOrNull()?.uppercase() ?: "?",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
           }
         }
@@ -272,21 +282,21 @@ private fun JournalCommentItem(
 
       Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
-          text = comment.authorDisplayName,
-          style = MaterialTheme.typography.bodySmall,
-          fontWeight = FontWeight.SemiBold,
+            text = comment.authorDisplayName,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.SemiBold,
         )
         Text(
-          text = comment.timestampNatural,
-          style = MaterialTheme.typography.labelSmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
+            text = comment.timestampNatural,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
       }
     }
     HtmlText(
-      html = comment.bodyHtml.ifBlank { "<p>（无内容）</p>" },
-      style = MaterialTheme.typography.bodySmall,
-      color = MaterialTheme.colorScheme.onSurface,
+        html = comment.bodyHtml.ifBlank { "<p>（无内容）</p>" },
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurface,
     )
   }
 }

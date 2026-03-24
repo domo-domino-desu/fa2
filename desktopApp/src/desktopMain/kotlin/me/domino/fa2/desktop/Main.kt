@@ -22,22 +22,22 @@ fun main() = application {
   FaLog.withTag("DesktopMain").i { "桌面启动 -> 日志级别=${severity.name}" }
   startAppKoin(desktopPlatformModule())
   Window(
-    onCloseRequest = {
-      FaLog.withTag("DesktopMain").i { "窗口关闭 -> 释放资源" }
-      stopAppKoin()
-      exitApplication()
-    },
-    title = "fa2",
+      onCloseRequest = {
+        FaLog.withTag("DesktopMain").i { "窗口关闭 -> 释放资源" }
+        stopAppKoin()
+        exitApplication()
+      },
+      title = "fa2",
   ) {
     setSingletonImageLoaderFactory { platformContext ->
       ImageLoader.Builder(platformContext)
-        .diskCache {
-          DiskCache.Builder()
-            .directory(desktopCoilDiskCachePath())
-            .maxSizeBytes(coilDiskCacheMaxBytes)
-            .build()
-        }
-        .build()
+          .diskCache {
+            DiskCache.Builder()
+                .directory(desktopCoilDiskCachePath())
+                .maxSizeBytes(coilDiskCacheMaxBytes)
+                .build()
+          }
+          .build()
     }
     Fa2App()
   }

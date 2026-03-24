@@ -10,9 +10,9 @@ object TestFixtures {
   fun read(fileName: String): String {
     val path = "fixture/$fileName"
     val stream =
-      checkNotNull(Thread.currentThread().contextClassLoader.getResourceAsStream(path)) {
-        "Fixture not found: $path"
-      }
+        checkNotNull(Thread.currentThread().contextClassLoader.getResourceAsStream(path)) {
+          "Fixture not found: $path"
+        }
     return stream.bufferedReader().use { reader -> reader.readText() }
   }
 }

@@ -9,12 +9,12 @@ import me.domino.fa2.util.logging.FaLog
 
 /** More 页面状态模型。 */
 class MoreScreenModel(
-  /** 当前用户名。 */
-  private val username: String,
-  /** 认证仓储。 */
-  private val authRepository: AuthRepository,
-  /** 历史记录仓储。 */
-  private val historyRepository: ActivityHistoryRepository,
+    /** 当前用户名。 */
+    private val username: String,
+    /** 认证仓储。 */
+    private val authRepository: AuthRepository,
+    /** 历史记录仓储。 */
+    private val historyRepository: ActivityHistoryRepository,
 ) : StateScreenModel<MoreUiState>(MoreUiState.Loading) {
   private val log = FaLog.withTag("MoreScreenModel")
 
@@ -27,24 +27,24 @@ class MoreScreenModel(
     log.i { "加载More -> 开始" }
     screenModelScope.launch {
       runCatching {
-          val hasCookie = authRepository.loadCookieHeader().isNotBlank()
-          val submissionHistoryCount = historyRepository.loadSubmissionHistory().size
-          val searchHistoryCount = historyRepository.loadSearchHistory().size
-          mutableState.value =
-            MoreUiState.Ready(
-              username = username,
-              hasCookie = hasCookie,
-              submissionHistoryCount = submissionHistoryCount,
-              searchHistoryCount = searchHistoryCount,
-              loggingOut = false,
-              errorMessage = null,
-              loggedOut = false,
-            )
-          log.i {
-            "加载More -> 成功(cookie=${if (hasCookie) "已设置" else "空"},history=$submissionHistoryCount/$searchHistoryCount)"
+            val hasCookie = authRepository.loadCookieHeader().isNotBlank()
+            val submissionHistoryCount = historyRepository.loadSubmissionHistory().size
+            val searchHistoryCount = historyRepository.loadSearchHistory().size
+            mutableState.value =
+                MoreUiState.Ready(
+                    username = username,
+                    hasCookie = hasCookie,
+                    submissionHistoryCount = submissionHistoryCount,
+                    searchHistoryCount = searchHistoryCount,
+                    loggingOut = false,
+                    errorMessage = null,
+                    loggedOut = false,
+                )
+            log.i {
+              "加载More -> 成功(cookie=${if (hasCookie) "已设置" else "空"},history=$submissionHistoryCount/$searchHistoryCount)"
+            }
           }
-        }
-        .onFailure { error -> log.e(error) { "加载More -> 失败" } }
+          .onFailure { error -> log.e(error) { "加载More -> 失败" } }
     }
   }
 
@@ -58,27 +58,27 @@ class MoreScreenModel(
     screenModelScope.launch {
       mutableState.value = snapshot.copy(loggingOut = true, errorMessage = null)
       runCatching { authRepository.clearSession() }
-        .onSuccess {
-          mutableState.value =
-            snapshot.copy(
-              hasCookie = false,
-              submissionHistoryCount = snapshot.submissionHistoryCount,
-              searchHistoryCount = snapshot.searchHistoryCount,
-              loggingOut = false,
-              errorMessage = null,
-              loggedOut = true,
-            )
-          log.i { "退出登录 -> 成功" }
-        }
-        .onFailure { throwable ->
-          mutableState.value =
-            snapshot.copy(
-              loggingOut = false,
-              errorMessage = throwable.message ?: "退出登录失败",
-              loggedOut = false,
-            )
-          log.e(throwable) { "退出登录 -> 失败" }
-        }
+          .onSuccess {
+            mutableState.value =
+                snapshot.copy(
+                    hasCookie = false,
+                    submissionHistoryCount = snapshot.submissionHistoryCount,
+                    searchHistoryCount = snapshot.searchHistoryCount,
+                    loggingOut = false,
+                    errorMessage = null,
+                    loggedOut = true,
+                )
+            log.i { "退出登录 -> 成功" }
+          }
+          .onFailure { throwable ->
+            mutableState.value =
+                snapshot.copy(
+                    loggingOut = false,
+                    errorMessage = throwable.message ?: "退出登录失败",
+                    loggedOut = false,
+                )
+            log.e(throwable) { "退出登录 -> 失败" }
+          }
     }
   }
 }
@@ -100,19 +100,19 @@ sealed interface MoreUiState {
    * @property loggedOut 是否已完成退出。
    */
   data class Ready(
-    /** 当前用户名。 */
-    val username: String,
-    /** 当前是否有 cookie。 */
-    val hasCookie: Boolean,
-    /** 投稿历史数量。 */
-    val submissionHistoryCount: Int,
-    /** 搜索历史数量。 */
-    val searchHistoryCount: Int,
-    /** 是否正在执行退出。 */
-    val loggingOut: Boolean,
-    /** 错误信息。 */
-    val errorMessage: String?,
-    /** 是否已经退出成功。 */
-    val loggedOut: Boolean,
+      /** 当前用户名。 */
+      val username: String,
+      /** 当前是否有 cookie。 */
+      val hasCookie: Boolean,
+      /** 投稿历史数量。 */
+      val submissionHistoryCount: Int,
+      /** 搜索历史数量。 */
+      val searchHistoryCount: Int,
+      /** 是否正在执行退出。 */
+      val loggingOut: Boolean,
+      /** 错误信息。 */
+      val errorMessage: String?,
+      /** 是否已经退出成功。 */
+      val loggedOut: Boolean,
   ) : MoreUiState
 }

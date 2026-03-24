@@ -10,20 +10,20 @@ import me.domino.fa2.data.settings.ThemeMode
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun Fa2Theme(
-  themeMode: ThemeMode = ThemeMode.SYSTEM,
-  /** 主题包裹的页面内容。 */
-  content: @Composable () -> Unit,
+    themeMode: ThemeMode = ThemeMode.SYSTEM,
+    /** 主题包裹的页面内容。 */
+    content: @Composable () -> Unit,
 ) {
   val forceDarkMode =
-    when (themeMode) {
-      ThemeMode.SYSTEM -> null
-      ThemeMode.LIGHT -> false
-      ThemeMode.DARK -> true
-    }
+      when (themeMode) {
+        ThemeMode.SYSTEM -> null
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+      }
 
   MaterialExpressiveTheme(
-    colorScheme = rememberPlatformColorScheme(forceDarkMode),
-    content = content,
+      colorScheme = rememberPlatformColorScheme(forceDarkMode),
+      content = content,
   )
 }
 

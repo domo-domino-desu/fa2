@@ -31,9 +31,9 @@ class BrowseRouteScreen(private val initialFilter: BrowseFilterState) : Screen {
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
     val submissionListHolder =
-      navigator.rememberNavigatorScreenModel<SubmissionListHolder>(tag = holderTag) {
-        SubmissionListHolder()
-      }
+        navigator.rememberNavigatorScreenModel<SubmissionListHolder>(tag = holderTag) {
+          SubmissionListHolder()
+        }
     val screenModel = koinScreenModel<BrowseScreenModel> { parametersOf(submissionListHolder) }
     val pageState by screenModel.pageState.collectAsState()
     val waterfallState = rememberLazyStaggeredGridState()
@@ -45,24 +45,24 @@ class BrowseRouteScreen(private val initialFilter: BrowseFilterState) : Screen {
 
       PageStateWrapper(state = pageState, onRetry = screenModel::refresh) { state ->
         BrowseScreen(
-          state = state,
-          onUpdateCategory = screenModel::updateCategory,
-          onUpdateType = screenModel::updateType,
-          onUpdateSpecies = screenModel::updateSpecies,
-          onUpdateGender = screenModel::updateGender,
-          onSetRatingGeneral = screenModel::setRatingGeneral,
-          onSetRatingMature = screenModel::setRatingMature,
-          onSetRatingAdult = screenModel::setRatingAdult,
-          onApplyFilter = screenModel::applyFilter,
-          onRefresh = screenModel::refresh,
-          onRetry = screenModel::refresh,
-          onOpenSubmission = { item ->
-            screenModel.setCurrentSubmission(item.id)
-            navigator.push(SubmissionRouteScreen(initialSid = item.id, holderTag = holderTag))
-          },
-          onLastVisibleIndexChanged = screenModel::onLastVisibleIndexChanged,
-          onRetryLoadMore = screenModel::retryLoadMore,
-          waterfallState = waterfallState,
+            state = state,
+            onUpdateCategory = screenModel::updateCategory,
+            onUpdateType = screenModel::updateType,
+            onUpdateSpecies = screenModel::updateSpecies,
+            onUpdateGender = screenModel::updateGender,
+            onSetRatingGeneral = screenModel::setRatingGeneral,
+            onSetRatingMature = screenModel::setRatingMature,
+            onSetRatingAdult = screenModel::setRatingAdult,
+            onApplyFilter = screenModel::applyFilter,
+            onRefresh = screenModel::refresh,
+            onRetry = screenModel::refresh,
+            onOpenSubmission = { item ->
+              screenModel.setCurrentSubmission(item.id)
+              navigator.push(SubmissionRouteScreen(initialSid = item.id, holderTag = holderTag))
+            },
+            onLastVisibleIndexChanged = screenModel::onLastVisibleIndexChanged,
+            onRetryLoadMore = screenModel::retryLoadMore,
+            waterfallState = waterfallState,
         )
       }
     }

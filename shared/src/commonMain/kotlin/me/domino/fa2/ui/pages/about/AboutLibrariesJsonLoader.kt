@@ -7,11 +7,11 @@ private const val emptyAboutLibrariesJson = """{"licenses":{},"libraries":[]}"""
 
 internal suspend fun loadAboutLibrariesJson(): String {
   val composeResourceJson =
-    runCatching { Res.readBytes(aboutLibrariesResourcePath).decodeToString() }.getOrNull()
+      runCatching { Res.readBytes(aboutLibrariesResourcePath).decodeToString() }.getOrNull()
   if (!composeResourceJson.isNullOrBlank()) return composeResourceJson
 
   return loadPlatformAboutLibrariesJsonOrNull()?.takeIf { it.isNotBlank() }
-    ?: emptyAboutLibrariesJson
+      ?: emptyAboutLibrariesJson
 }
 
 internal expect suspend fun loadPlatformAboutLibrariesJsonOrNull(): String?

@@ -48,7 +48,7 @@ class WatchlistParserTest {
     assertEquals("2glasseyes", page.users.first().username)
     assertEquals("2Glasseyes", page.users.first().displayName)
     assertTrue(
-      page.users.first().profileUrl.startsWith("https://www.furaffinity.net/user/2glasseyes")
+        page.users.first().profileUrl.startsWith("https://www.furaffinity.net/user/2glasseyes")
     )
     assertTrue(page.nextPageUrl.orEmpty().contains("page=2"))
   }

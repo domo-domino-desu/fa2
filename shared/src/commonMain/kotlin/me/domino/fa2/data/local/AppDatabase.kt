@@ -10,9 +10,9 @@ import me.domino.fa2.data.local.entity.SubmissionHistoryEntity
 
 /** 应用数据库。 */
 @Database(
-  entities = [PageCacheEntity::class, SubmissionHistoryEntity::class, SearchHistoryEntity::class],
-  version = 1,
-  exportSchema = false,
+    entities = [PageCacheEntity::class, SubmissionHistoryEntity::class, SearchHistoryEntity::class],
+    version = 1,
+    exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
   /** 提供页面缓存数据访问对象。 */

@@ -24,35 +24,35 @@ import me.domino.fa2.data.network.challenge.ChallengeResolver
 
 /** 社交动作端点（Fav/Watch 等）。 */
 class SocialActionEndpoint(
-  private val dataSource: FaHtmlDataSource? = null,
-  private val client: HttpClient? = null,
-  private val cookiesStorage: FaCookiesStorage? = null,
-  private val userAgentStorage: UserAgentStorage? = null,
-  private val challengeResolver: ChallengeResolver? = null,
+    private val dataSource: FaHtmlDataSource? = null,
+    private val client: HttpClient? = null,
+    private val cookiesStorage: FaCookiesStorage? = null,
+    private val userAgentStorage: UserAgentStorage? = null,
+    private val challengeResolver: ChallengeResolver? = null,
 ) {
   private val json by lazy { Json { ignoreUnknownKeys = true } }
 
   constructor(
-    dataSource: FaHtmlDataSource
+      dataSource: FaHtmlDataSource
   ) : this(
-    dataSource = dataSource,
-    client = null,
-    cookiesStorage = null,
-    userAgentStorage = null,
-    challengeResolver = null,
+      dataSource = dataSource,
+      client = null,
+      cookiesStorage = null,
+      userAgentStorage = null,
+      challengeResolver = null,
   )
 
   constructor(
-    client: HttpClient,
-    cookiesStorage: FaCookiesStorage,
-    userAgentStorage: UserAgentStorage,
-    challengeResolver: ChallengeResolver,
+      client: HttpClient,
+      cookiesStorage: FaCookiesStorage,
+      userAgentStorage: UserAgentStorage,
+      challengeResolver: ChallengeResolver,
   ) : this(
-    dataSource = null,
-    client = client,
-    cookiesStorage = cookiesStorage,
-    userAgentStorage = userAgentStorage,
-    challengeResolver = challengeResolver,
+      dataSource = null,
+      client = client,
+      cookiesStorage = cookiesStorage,
+      userAgentStorage = userAgentStorage,
+      challengeResolver = challengeResolver,
   )
 
   /** 执行动作 URL。 */
@@ -66,20 +66,20 @@ class SocialActionEndpoint(
     val availableCookiesStorage = cookiesStorage
     val availableUserAgentStorage = userAgentStorage
     if (
-      availableClient != null &&
-        availableCookiesStorage != null &&
-        availableUserAgentStorage != null
+        availableClient != null &&
+            availableCookiesStorage != null &&
+            availableUserAgentStorage != null
     ) {
       return executeByRawHttp(
-        actionUrl = targetUrl,
-        client = availableClient,
-        cookiesStorage = availableCookiesStorage,
-        userAgentStorage = availableUserAgentStorage,
+          actionUrl = targetUrl,
+          client = availableClient,
+          cookiesStorage = availableCookiesStorage,
+          userAgentStorage = availableUserAgentStorage,
       )
     }
 
     val availableDataSource =
-      dataSource ?: return SocialActionResult.Failed("No HTTP backend for social action")
+        dataSource ?: return SocialActionResult.Failed("No HTTP backend for social action")
     return when (val response = availableDataSource.get(targetUrl)) {
       is HtmlResponseResult.Success -> SocialActionResult.Completed(redirected = false)
       is HtmlResponseResult.CfChallenge -> {
@@ -88,9 +88,9 @@ class SocialActionEndpoint(
           SocialActionResult.Challenge(cfRay = response.cfRay)
         } else {
           val resolved =
-            resolver.awaitResolution(
-              challenge = CfChallengeSignal(requestUrl = targetUrl, cfRay = response.cfRay)
-            )
+              resolver.awaitResolution(
+                  challenge = CfChallengeSignal(requestUrl = targetUrl, cfRay = response.cfRay)
+              )
           if (!resolved) {
             SocialActionResult.Failed("Cloudflare challenge unresolved")
           } else {
@@ -99,7 +99,7 @@ class SocialActionEndpoint(
               is HtmlResponseResult.MatureBlocked -> SocialActionResult.Blocked(retried.reason)
               is HtmlResponseResult.Error -> SocialActionResult.Failed(retried.message)
               is HtmlResponseResult.CfChallenge ->
-                SocialActionResult.Challenge(cfRay = retried.cfRay)
+                  SocialActionResult.Challenge(cfRay = retried.cfRay)
             }
           }
         }
@@ -112,9 +112,9 @@ class SocialActionEndpoint(
 
   /** 屏蔽/取消屏蔽标签（POST /route/tag_blocking）。 */
   suspend fun updateTagBlocklist(
-    tagName: String,
-    nonce: String,
-    toAdd: Boolean = true,
+      tagName: String,
+      nonce: String,
+      toAdd: Boolean = true,
   ): SocialActionResult {
     val normalizedTagName = tagName.trim()
     val normalizedNonce = nonce.trim()
@@ -129,45 +129,45 @@ class SocialActionEndpoint(
     val availableCookiesStorage = cookiesStorage
     val availableUserAgentStorage = userAgentStorage
     if (
-      availableClient == null ||
-        availableCookiesStorage == null ||
-        availableUserAgentStorage == null
+        availableClient == null ||
+            availableCookiesStorage == null ||
+            availableUserAgentStorage == null
     ) {
       return SocialActionResult.Failed("No HTTP backend for tag blocking")
     }
 
     return executeTagBlockingByRawHttp(
-      tagName = normalizedTagName,
-      nonce = normalizedNonce,
-      toAdd = toAdd,
-      client = availableClient,
-      cookiesStorage = availableCookiesStorage,
-      userAgentStorage = availableUserAgentStorage,
-      challengeRetryCount = 0,
-      rateLimitedRetryCount = 0,
+        tagName = normalizedTagName,
+        nonce = normalizedNonce,
+        toAdd = toAdd,
+        client = availableClient,
+        cookiesStorage = availableCookiesStorage,
+        userAgentStorage = availableUserAgentStorage,
+        challengeRetryCount = 0,
+        rateLimitedRetryCount = 0,
     )
   }
 
   private suspend fun executeByRawHttp(
-    actionUrl: String,
-    client: HttpClient,
-    cookiesStorage: FaCookiesStorage,
-    userAgentStorage: UserAgentStorage,
-    challengeRetryCount: Int = 0,
+      actionUrl: String,
+      client: HttpClient,
+      cookiesStorage: FaCookiesStorage,
+      userAgentStorage: UserAgentStorage,
+      challengeRetryCount: Int = 0,
   ): SocialActionResult {
     userAgentStorage.loadPersistedIfNeeded()
     val cookieHeader = cookiesStorage.loadRawCookieHeader()
     val userAgent = userAgentStorage.currentUserAgent()
 
     val response =
-      client.get(actionUrl) {
-        if (cookieHeader.isNotBlank()) {
-          header(HttpHeaders.Cookie, cookieHeader)
+        client.get(actionUrl) {
+          if (cookieHeader.isNotBlank()) {
+            header(HttpHeaders.Cookie, cookieHeader)
+          }
+          header(HttpHeaders.UserAgent, userAgent)
+          header(HttpHeaders.Accept, "text/html,application/xhtml+xml")
+          header(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9")
         }
-        header(HttpHeaders.UserAgent, userAgent)
-        header(HttpHeaders.Accept, "text/html,application/xhtml+xml")
-        header(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9")
-      }
 
     val statusCode = response.status.value
     val setCookieValues = response.headers.getAll(HttpHeaders.SetCookie).orEmpty()
@@ -180,13 +180,13 @@ class SocialActionEndpoint(
     val body = response.bodyAsText()
     val headers = response.headers.entries().associate { (key, values) -> key to values }
     return when (
-      val classified =
-        HtmlResponseResult.classify(
-          statusCode = statusCode,
-          headers = headers,
-          body = body,
-          url = actionUrl,
-        )
+        val classified =
+            HtmlResponseResult.classify(
+                statusCode = statusCode,
+                headers = headers,
+                body = body,
+                url = actionUrl,
+            )
     ) {
       is HtmlResponseResult.Success -> SocialActionResult.Completed(redirected = false)
       is HtmlResponseResult.CfChallenge -> {
@@ -195,20 +195,20 @@ class SocialActionEndpoint(
           SocialActionResult.Challenge(cfRay = classified.cfRay)
         } else {
           val resolved =
-            resolver.awaitResolution(
-              challenge = CfChallengeSignal(requestUrl = actionUrl, cfRay = classified.cfRay)
-            )
+              resolver.awaitResolution(
+                  challenge = CfChallengeSignal(requestUrl = actionUrl, cfRay = classified.cfRay)
+              )
           if (!resolved) {
             SocialActionResult.Failed("Cloudflare challenge unresolved")
           } else if (challengeRetryCount >= 1) {
             SocialActionResult.Challenge(cfRay = classified.cfRay)
           } else {
             executeByRawHttp(
-              actionUrl = actionUrl,
-              client = client,
-              cookiesStorage = cookiesStorage,
-              userAgentStorage = userAgentStorage,
-              challengeRetryCount = challengeRetryCount + 1,
+                actionUrl = actionUrl,
+                client = client,
+                cookiesStorage = cookiesStorage,
+                userAgentStorage = userAgentStorage,
+                challengeRetryCount = challengeRetryCount + 1,
             )
           }
         }
@@ -220,14 +220,14 @@ class SocialActionEndpoint(
   }
 
   private suspend fun executeTagBlockingByRawHttp(
-    tagName: String,
-    nonce: String,
-    toAdd: Boolean,
-    client: HttpClient,
-    cookiesStorage: FaCookiesStorage,
-    userAgentStorage: UserAgentStorage,
-    challengeRetryCount: Int,
-    rateLimitedRetryCount: Int,
+      tagName: String,
+      nonce: String,
+      toAdd: Boolean,
+      client: HttpClient,
+      cookiesStorage: FaCookiesStorage,
+      userAgentStorage: UserAgentStorage,
+      challengeRetryCount: Int,
+      rateLimitedRetryCount: Int,
   ): SocialActionResult {
     val action = if (toAdd) "add-tag" else "remove-tag"
     val tagBlockingUrl = "https://www.furaffinity.net/route/tag_blocking"
@@ -238,23 +238,23 @@ class SocialActionEndpoint(
     val nonceFingerprint = "len=${nonce.length},hash=${nonce.hashCode().toUInt().toString(16)}"
 
     val response =
-      client.post(tagBlockingUrl) {
-        if (cookieHeader.isNotBlank()) {
-          header(HttpHeaders.Cookie, cookieHeader)
-        }
-        header(HttpHeaders.UserAgent, userAgent)
-        header(HttpHeaders.Accept, "application/json,text/plain,*/*")
-        header(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9")
-        setBody(
-          FormDataContent(
-            Parameters.build {
-              append("action", action)
-              append("key", nonce)
-              append("tag_name", tagName)
-            }
+        client.post(tagBlockingUrl) {
+          if (cookieHeader.isNotBlank()) {
+            header(HttpHeaders.Cookie, cookieHeader)
+          }
+          header(HttpHeaders.UserAgent, userAgent)
+          header(HttpHeaders.Accept, "application/json,text/plain,*/*")
+          header(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9")
+          setBody(
+              FormDataContent(
+                  Parameters.build {
+                    append("action", action)
+                    append("key", nonce)
+                    append("tag_name", tagName)
+                  }
+              )
           )
-        )
-      }
+        }
 
     val statusCode = response.status.value
     val setCookieValues = response.headers.getAll(HttpHeaders.SetCookie).orEmpty()
@@ -276,37 +276,40 @@ class SocialActionEndpoint(
       val error = jsonObject["error"]?.jsonPrimitive?.contentOrNull.orEmpty()
       if (error.equals("rate-limited", ignoreCase = true) && rateLimitedRetryCount < 2) {
         val timeLeftSeconds =
-          jsonObject["time-left"]?.jsonPrimitive?.contentOrNull?.toFloatOrNull()?.coerceAtLeast(0f)
-            ?: 0.5f
+            jsonObject["time-left"]
+                ?.jsonPrimitive
+                ?.contentOrNull
+                ?.toFloatOrNull()
+                ?.coerceAtLeast(0f) ?: 0.5f
         val delayMs = (timeLeftSeconds * 1000).toLong().coerceIn(200L, 3_000L)
         delay(delayMs)
         return executeTagBlockingByRawHttp(
-          tagName = tagName,
-          nonce = nonce,
-          toAdd = toAdd,
-          client = client,
-          cookiesStorage = cookiesStorage,
-          userAgentStorage = userAgentStorage,
-          challengeRetryCount = challengeRetryCount,
-          rateLimitedRetryCount = rateLimitedRetryCount + 1,
+            tagName = tagName,
+            nonce = nonce,
+            toAdd = toAdd,
+            client = client,
+            cookiesStorage = cookiesStorage,
+            userAgentStorage = userAgentStorage,
+            challengeRetryCount = challengeRetryCount,
+            rateLimitedRetryCount = rateLimitedRetryCount + 1,
         )
       }
 
       val message =
-        jsonObject["message"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }
-          ?: error.ifBlank { "Tag blocking failed" }
+          jsonObject["message"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }
+              ?: error.ifBlank { "Tag blocking failed" }
       return SocialActionResult.Failed(message)
     }
 
     val headers = response.headers.entries().associate { (key, values) -> key to values }
     return when (
-      val classified =
-        HtmlResponseResult.classify(
-          statusCode = statusCode,
-          headers = headers,
-          body = body,
-          url = tagBlockingUrl,
-        )
+        val classified =
+            HtmlResponseResult.classify(
+                statusCode = statusCode,
+                headers = headers,
+                body = body,
+                url = tagBlockingUrl,
+            )
     ) {
       is HtmlResponseResult.Success -> SocialActionResult.Completed(redirected = false)
       is HtmlResponseResult.CfChallenge -> {
@@ -315,23 +318,27 @@ class SocialActionEndpoint(
           SocialActionResult.Challenge(cfRay = classified.cfRay)
         } else {
           val resolved =
-            resolver.awaitResolution(
-              challenge = CfChallengeSignal(requestUrl = tagBlockingUrl, cfRay = classified.cfRay)
-            )
+              resolver.awaitResolution(
+                  challenge =
+                      CfChallengeSignal(
+                          requestUrl = tagBlockingUrl,
+                          cfRay = classified.cfRay,
+                      )
+              )
           if (!resolved) {
             SocialActionResult.Failed("Cloudflare challenge unresolved")
           } else if (challengeRetryCount >= 1) {
             SocialActionResult.Challenge(cfRay = classified.cfRay)
           } else {
             executeTagBlockingByRawHttp(
-              tagName = tagName,
-              nonce = nonce,
-              toAdd = toAdd,
-              client = client,
-              cookiesStorage = cookiesStorage,
-              userAgentStorage = userAgentStorage,
-              challengeRetryCount = challengeRetryCount + 1,
-              rateLimitedRetryCount = rateLimitedRetryCount,
+                tagName = tagName,
+                nonce = nonce,
+                toAdd = toAdd,
+                client = client,
+                cookiesStorage = cookiesStorage,
+                userAgentStorage = userAgentStorage,
+                challengeRetryCount = challengeRetryCount + 1,
+                rateLimitedRetryCount = rateLimitedRetryCount,
             )
           }
         }

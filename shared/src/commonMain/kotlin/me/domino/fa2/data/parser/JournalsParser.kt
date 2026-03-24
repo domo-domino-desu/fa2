@@ -17,14 +17,14 @@ class JournalsParser {
     val journals = sections.mapNotNull(::parseJournalSummary)
 
     val nextPageUrl =
-      document
-        .select("a, form")
-        .firstOrNull(::isOlderButton)
-        ?.let { node ->
-          val raw = node.attr("href").ifBlank { node.attr("action") }
-          raw.trim().takeIf { it.isNotBlank() }
-        }
-        ?.let { raw -> ParserUtils.toAbsoluteUrl(baseUrl, raw) }
+        document
+            .select("a, form")
+            .firstOrNull(::isOlderButton)
+            ?.let { node ->
+              val raw = node.attr("href").ifBlank { node.attr("action") }
+              raw.trim().takeIf { it.isNotBlank() }
+            }
+            ?.let { raw -> ParserUtils.toAbsoluteUrl(baseUrl, raw) }
 
     return JournalPage(journals = journals, nextPageUrl = nextPageUrl)
   }
@@ -32,45 +32,45 @@ class JournalsParser {
   private fun parseJournalSummary(section: Element): JournalSummary? {
     val sid = section.id().substringAfter("jid:", "").toIntOrNull() ?: return null
     val title =
-      section.selectFirst("div.section-header h2")?.text()?.trim().orEmpty().ifBlank {
-        "Untitled Journal #$sid"
-      }
+        section.selectFirst("div.section-header h2")?.text()?.trim().orEmpty().ifBlank {
+          "Untitled Journal #$sid"
+        }
     val timestampNode = section.selectFirst("div.section-header span.popup_date")
     val timestampRaw = timestampNode?.attr("title")?.trim()?.takeIf { it.isNotBlank() }
     val timestampNatural = timestampNode?.text()?.trim().orEmpty().ifBlank { "未知时间" }
 
     val commentCount =
-      section
-        .selectFirst("div.section-footer span.font-large")
-        ?.text()
-        ?.filter { ch -> ch.isDigit() }
-        ?.toIntOrNull() ?: 0
+        section
+            .selectFirst("div.section-footer span.font-large")
+            ?.text()
+            ?.filter { ch -> ch.isDigit() }
+            ?.toIntOrNull() ?: 0
 
     val journalUrl =
-      section
-        .selectFirst("div.section-footer a[href*='/journal/']")
-        ?.attr("href")
-        ?.trim()
-        ?.takeIf { it.isNotBlank() }
-        ?.let { href -> ParserUtils.toAbsoluteUrl("https://www.furaffinity.net/", href) }
-        ?: "https://www.furaffinity.net/journal/$sid/"
+        section
+            .selectFirst("div.section-footer a[href*='/journal/']")
+            ?.attr("href")
+            ?.trim()
+            ?.takeIf { it.isNotBlank() }
+            ?.let { href -> ParserUtils.toAbsoluteUrl("https://www.furaffinity.net/", href) }
+            ?: "https://www.furaffinity.net/journal/$sid/"
 
     val bodyText =
-      section
-        .selectFirst("div.section-body div.journal-body")
-        ?.html()
-        ?.let { bodyHtml -> Ksoup.parseBodyFragment(bodyHtml).text().trim() }
-        .orEmpty()
+        section
+            .selectFirst("div.section-body div.journal-body")
+            ?.html()
+            ?.let { bodyHtml -> Ksoup.parseBodyFragment(bodyHtml).text().trim() }
+            .orEmpty()
     val excerpt = buildExcerpt(bodyText)
 
     return JournalSummary(
-      id = sid,
-      title = title,
-      journalUrl = journalUrl,
-      timestampNatural = timestampNatural,
-      timestampRaw = timestampRaw,
-      commentCount = commentCount,
-      excerpt = excerpt,
+        id = sid,
+        title = title,
+        journalUrl = journalUrl,
+        timestampNatural = timestampNatural,
+        timestampRaw = timestampRaw,
+        commentCount = commentCount,
+        excerpt = excerpt,
     )
   }
 

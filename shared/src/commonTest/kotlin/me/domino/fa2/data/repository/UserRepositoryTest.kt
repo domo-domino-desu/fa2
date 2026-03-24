@@ -23,12 +23,12 @@ class UserRepositoryTest {
     val repository = buildRepository(source)
 
     source.enqueue(
-      url = FaUrls.user("terriniss"),
-      response =
-        HtmlResponseResult.Success(
-          body = TestFixtures.read("www.furaffinity.net:user:terriniss.html"),
-          url = FaUrls.user("terriniss"),
-        ),
+        url = FaUrls.user("terriniss"),
+        response =
+            HtmlResponseResult.Success(
+                body = TestFixtures.read("www.furaffinity.net:user:terriniss.html"),
+                url = FaUrls.user("terriniss"),
+            ),
     )
 
     val state = repository.loadUser("terriniss")
@@ -42,12 +42,12 @@ class UserRepositoryTest {
     val repository = buildRepository(source)
 
     source.enqueue(
-      url = FaUrls.user("unknown"),
-      response =
-        HtmlResponseResult.Success(
-          body = TestFixtures.read("www.furaffinity.net:user:username-system-error.html"),
-          url = FaUrls.user("unknown"),
-        ),
+        url = FaUrls.user("unknown"),
+        response =
+            HtmlResponseResult.Success(
+                body = TestFixtures.read("www.furaffinity.net:user:username-system-error.html"),
+                url = FaUrls.user("unknown"),
+            ),
     )
 
     val state = repository.loadUser("unknown")
@@ -56,11 +56,14 @@ class UserRepositoryTest {
 
   private fun buildRepository(source: FaHtmlDataSource): UserRepository {
     val store =
-      UserStore(
-        dataSource = UserDataSource(endpoint = UserEndpoint(source), parser = UserParser()),
-        pageCacheDao = InMemoryPageCacheDao(),
-      )
-    return UserRepository(userStore = store, socialActionEndpoint = SocialActionEndpoint(source))
+        UserStore(
+            dataSource = UserDataSource(endpoint = UserEndpoint(source), parser = UserParser()),
+            pageCacheDao = InMemoryPageCacheDao(),
+        )
+    return UserRepository(
+        userStore = store,
+        socialActionEndpoint = SocialActionEndpoint(source),
+    )
   }
 }
 
@@ -75,7 +78,10 @@ private class UserScriptedHtmlDataSource : FaHtmlDataSource {
   override suspend fun get(url: String): HtmlResponseResult {
     val queue = queueByUrl[url]
     if (queue == null || queue.isEmpty()) {
-      return HtmlResponseResult.Error(statusCode = 500, message = "No scripted response for $url")
+      return HtmlResponseResult.Error(
+          statusCode = 500,
+          message = "No scripted response for $url",
+      )
     }
     return queue.removeFirst()
   }

@@ -17,20 +17,20 @@ private const val watchlistAutoLoadThreshold = 14
 
 /** 用户关注列表状态。 */
 data class UserWatchlistUiState(
-  /** 当前页用户列表。 */
-  val users: List<WatchlistUser> = emptyList(),
-  /** 下一页地址。 */
-  val nextPageUrl: String? = null,
-  /** 是否加载中。 */
-  val loading: Boolean = false,
-  /** 是否刷新中。 */
-  val refreshing: Boolean = false,
-  /** 是否正在加载更多。 */
-  val isLoadingMore: Boolean = false,
-  /** 首页错误。 */
-  val errorMessage: String? = null,
-  /** 追加错误。 */
-  val appendErrorMessage: String? = null,
+    /** 当前页用户列表。 */
+    val users: List<WatchlistUser> = emptyList(),
+    /** 下一页地址。 */
+    val nextPageUrl: String? = null,
+    /** 是否加载中。 */
+    val loading: Boolean = false,
+    /** 是否刷新中。 */
+    val refreshing: Boolean = false,
+    /** 是否正在加载更多。 */
+    val isLoadingMore: Boolean = false,
+    /** 首页错误。 */
+    val errorMessage: String? = null,
+    /** 追加错误。 */
+    val appendErrorMessage: String? = null,
 ) {
   /** 是否有下一页。 */
   val hasMore: Boolean
@@ -39,14 +39,14 @@ data class UserWatchlistUiState(
 
 /** 用户关注列表 ScreenModel。 */
 class UserWatchlistScreenModel(
-  private val username: String,
-  private val category: WatchlistCategory,
-  private val repository: WatchlistRepository,
-  private val initialPageUrl: String? = null,
+    private val username: String,
+    private val category: WatchlistCategory,
+    private val repository: WatchlistRepository,
+    private val initialPageUrl: String? = null,
 ) : StateScreenModel<UserWatchlistUiState>(UserWatchlistUiState()) {
   private val log = FaLog.withTag("UserWatchlistScreenModel")
   private val paginationStateMachine =
-    PaginationStateMachine<WatchlistUser, String>(keyOf = { item -> item.username.lowercase() })
+      PaginationStateMachine<WatchlistUser, String>(keyOf = { item -> item.username.lowercase() })
   private var loadJob: Job? = null
   private var appendJob: Job? = null
 
@@ -68,50 +68,54 @@ class UserWatchlistScreenModel(
     }
 
     mutableState.value =
-      snapshot.applyPagination(
-        paginationStateMachine.beginLoad(
-          snapshot = snapshot.toPaginationSnapshot(),
-          forceRefresh = forceRefresh,
+        snapshot.applyPagination(
+            paginationStateMachine.beginLoad(
+                snapshot = snapshot.toPaginationSnapshot(),
+                forceRefresh = forceRefresh,
+            )
         )
-      )
 
     val firstPageUrl =
-      if (forceRefresh) {
-        null
-      } else {
-        initialPageUrl?.trim()?.takeIf { value -> value.isNotBlank() }
-      }
-    loadJob = screenModelScope.launch {
-      val next =
         if (forceRefresh) {
-          repository.refreshWatchlistFirstPage(username = username, category = category)
+          null
         } else {
-          repository.loadWatchlistPage(
-            username = username,
-            category = category,
-            nextPageUrl = firstPageUrl,
-          )
+          initialPageUrl?.trim()?.takeIf { value -> value.isNotBlank() }
         }
-      val reduced =
-        paginationStateMachine.reduceFirstPage(
-          snapshot = state.value.toPaginationSnapshot(),
-          result = next,
-          itemsOf = { page -> page.users },
-          nextPageUrlOf = { page -> page.nextPageUrl },
-        )
-      val updated = state.value.applyPagination(reduced)
-      mutableState.value = updated
-      when (next) {
-        is PageState.Success -> {
-          log.i { "加载Watchlist页 -> ${summarizePageState(next)}(count=${updated.users.size})" }
-        }
+    loadJob =
+        screenModelScope.launch {
+          val next =
+              if (forceRefresh) {
+                repository.refreshWatchlistFirstPage(
+                    username = username,
+                    category = category,
+                )
+              } else {
+                repository.loadWatchlistPage(
+                    username = username,
+                    category = category,
+                    nextPageUrl = firstPageUrl,
+                )
+              }
+          val reduced =
+              paginationStateMachine.reduceFirstPage(
+                  snapshot = state.value.toPaginationSnapshot(),
+                  result = next,
+                  itemsOf = { page -> page.users },
+                  nextPageUrlOf = { page -> page.nextPageUrl },
+              )
+          val updated = state.value.applyPagination(reduced)
+          mutableState.value = updated
+          when (next) {
+            is PageState.Success -> {
+              log.i { "加载Watchlist页 -> ${summarizePageState(next)}(count=${updated.users.size})" }
+            }
 
-        PageState.CfChallenge -> log.w { "加载Watchlist页 -> Cloudflare验证" }
-        is PageState.MatureBlocked -> log.w { "加载Watchlist页 -> 受限(${next.reason})" }
-        is PageState.Error -> log.e(next.exception) { "加载Watchlist页 -> 失败" }
-        PageState.Loading -> log.d { "加载Watchlist页 -> 加载中" }
-      }
-    }
+            PageState.CfChallenge -> log.w { "加载Watchlist页 -> Cloudflare验证" }
+            is PageState.MatureBlocked -> log.w { "加载Watchlist页 -> 受限(${next.reason})" }
+            is PageState.Error -> log.e(next.exception) { "加载Watchlist页 -> 失败" }
+            PageState.Loading -> log.d { "加载Watchlist页 -> 加载中" }
+          }
+        }
   }
 
   /** 列表触底回调。 */
@@ -143,58 +147,61 @@ class UserWatchlistScreenModel(
     log.d { "自动加载Watchlist页 -> 开始(force=$force)" }
 
     mutableState.value =
-      snapshot.applyPagination(paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot()))
+        snapshot.applyPagination(
+            paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot())
+        )
 
-    appendJob = screenModelScope.launch {
-      val next =
-        repository.loadWatchlistPage(
-          username = username,
-          category = category,
-          nextPageUrl = nextUrl,
-        )
-      val reduced =
-        paginationStateMachine.reduceAppend(
-          snapshot = state.value.toPaginationSnapshot(),
-          result = next,
-          itemsOf = { page -> page.users },
-          nextPageUrlOf = { page -> page.nextPageUrl },
-        )
-      val updated = state.value.applyPagination(reduced)
-      mutableState.value = updated
-      when (next) {
-        is PageState.Success -> {
-          log.d { "自动加载Watchlist页 -> ${summarizePageState(next)}(count=${updated.users.size})" }
+    appendJob =
+        screenModelScope.launch {
+          val next =
+              repository.loadWatchlistPage(
+                  username = username,
+                  category = category,
+                  nextPageUrl = nextUrl,
+              )
+          val reduced =
+              paginationStateMachine.reduceAppend(
+                  snapshot = state.value.toPaginationSnapshot(),
+                  result = next,
+                  itemsOf = { page -> page.users },
+                  nextPageUrlOf = { page -> page.nextPageUrl },
+              )
+          val updated = state.value.applyPagination(reduced)
+          mutableState.value = updated
+          when (next) {
+            is PageState.Success -> {
+              log.d { "自动加载Watchlist页 -> ${summarizePageState(next)}(count=${updated.users.size})" }
+            }
+
+            PageState.CfChallenge -> log.w { "自动加载Watchlist页 -> Cloudflare验证" }
+            is PageState.MatureBlocked -> log.w { "自动加载Watchlist页 -> 受限(${next.reason})" }
+            is PageState.Error -> log.e(next.exception) { "自动加载Watchlist页 -> 失败" }
+            PageState.Loading -> log.d { "自动加载Watchlist页 -> 加载中" }
+          }
         }
-
-        PageState.CfChallenge -> log.w { "自动加载Watchlist页 -> Cloudflare验证" }
-        is PageState.MatureBlocked -> log.w { "自动加载Watchlist页 -> 受限(${next.reason})" }
-        is PageState.Error -> log.e(next.exception) { "自动加载Watchlist页 -> 失败" }
-        PageState.Loading -> log.d { "自动加载Watchlist页 -> 加载中" }
-      }
-    }
   }
 }
 
 private fun UserWatchlistUiState.toPaginationSnapshot(): PaginationSnapshot<WatchlistUser> =
-  PaginationSnapshot(
-    items = users,
-    nextPageUrl = nextPageUrl,
-    loading = loading,
-    refreshing = refreshing,
-    isLoadingMore = isLoadingMore,
-    errorMessage = errorMessage,
-    appendErrorMessage = appendErrorMessage,
-  )
+    PaginationSnapshot(
+        items = users,
+        nextPageUrl = nextPageUrl,
+        loading = loading,
+        refreshing = refreshing,
+        isLoadingMore = isLoadingMore,
+        errorMessage = errorMessage,
+        appendErrorMessage = appendErrorMessage,
+    )
 
 private fun UserWatchlistUiState.applyPagination(
-  snapshot: PaginationSnapshot<WatchlistUser>
+    snapshot: PaginationSnapshot<WatchlistUser>
 ): UserWatchlistUiState =
-  copy(
-    users = snapshot.items,
-    nextPageUrl = snapshot.nextPageUrl,
-    loading = snapshot.loading,
-    refreshing = snapshot.refreshing,
-    isLoadingMore = snapshot.isLoadingMore,
-    errorMessage = snapshot.errorMessage,
-    appendErrorMessage = snapshot.appendErrorMessage,
-  )
+    copy(
+        users = snapshot.items,
+        nextPageUrl = snapshot.nextPageUrl,
+        loading = snapshot.loading,
+        refreshing = snapshot.refreshing,
+        isLoadingMore = snapshot.isLoadingMore,
+        errorMessage = snapshot.errorMessage,
+        appendErrorMessage = snapshot.appendErrorMessage,
+    )

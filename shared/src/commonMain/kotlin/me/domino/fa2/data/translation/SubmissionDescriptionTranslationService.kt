@@ -14,8 +14,8 @@ import me.domino.fa2.data.settings.TranslationProvider
 
 /** submission 描述翻译编排服务。 */
 class SubmissionDescriptionTranslationService(
-  private val translationPort: TranslationPort,
-  private val settingsService: AppSettingsService,
+    private val translationPort: TranslationPort,
+    private val settingsService: AppSettingsService,
 ) {
   /** 从 description HTML 中提取可翻译段。 */
   fun extractBlocks(descriptionHtml: String): List<SubmissionDescriptionBlock> {
@@ -24,26 +24,27 @@ class SubmissionDescriptionTranslationService(
     val root = Ksoup.parseBodyFragment(descriptionHtml).body()
     val blockHtmlList = mutableListOf<String>()
     collectBlocksFromNodes(
-      nodes = root.childNodes(),
-      wrappers = emptyList(),
-      output = blockHtmlList,
+        nodes = root.childNodes(),
+        wrappers = emptyList(),
+        output = blockHtmlList,
     )
 
-    val blocks = blockHtmlList.mapNotNull { html ->
-      val sourceText = normalizeTranslationText(htmlToString(html = html, compactMode = true))
-      if (sourceText.isBlank()) {
-        null
-      } else {
-        SubmissionDescriptionBlock(originalHtml = html, sourceText = sourceText)
-      }
-    }
+    val blocks =
+        blockHtmlList.mapNotNull { html ->
+          val sourceText = normalizeTranslationText(htmlToString(html = html, compactMode = true))
+          if (sourceText.isBlank()) {
+            null
+          } else {
+            SubmissionDescriptionBlock(originalHtml = html, sourceText = sourceText)
+          }
+        }
     return blocks
   }
 
   private fun collectBlocksFromNodes(
-    nodes: List<Node>,
-    wrappers: List<Element>,
-    output: MutableList<String>,
+      nodes: List<Node>,
+      wrappers: List<Element>,
+      output: MutableList<String>,
   ) {
     val current = StringBuilder()
     var pendingBreaks = 0
@@ -80,9 +81,9 @@ class SubmissionDescriptionTranslationService(
           tag in wrapperContainerTags -> {
             flushCurrent()
             collectBlocksFromNodes(
-              nodes = node.childNodes(),
-              wrappers = wrappers + listOf(node),
-              output = output,
+                nodes = node.childNodes(),
+                wrappers = wrappers + listOf(node),
+                output = output,
             )
           }
 
@@ -105,8 +106,8 @@ class SubmissionDescriptionTranslationService(
 
   /** 按当前设置分块翻译并回传每段状态。 */
   suspend fun translateBlocks(
-    blocks: List<SubmissionDescriptionBlock>,
-    onBlockResult: (index: Int, result: SubmissionDescriptionBlockResult) -> Unit,
+      blocks: List<SubmissionDescriptionBlock>,
+      onBlockResult: (index: Int, result: SubmissionDescriptionBlockResult) -> Unit,
   ) {
     if (blocks.isEmpty()) return
 
@@ -115,13 +116,16 @@ class SubmissionDescriptionTranslationService(
 
     val sourceTexts = blocks.map { block -> block.sourceText }
     val chunks =
-      buildChunks(sourceTexts = sourceTexts, chunkWordLimit = settings.translationChunkWordLimit)
+        buildChunks(
+            sourceTexts = sourceTexts,
+            chunkWordLimit = settings.translationChunkWordLimit,
+        )
 
     coroutineScope {
       val resultChannel =
-        Channel<Pair<Int, List<SubmissionDescriptionBlockResult>>>(
-          capacity = chunks.size.coerceAtLeast(1)
-        )
+          Channel<Pair<Int, List<SubmissionDescriptionBlockResult>>>(
+              capacity = chunks.size.coerceAtLeast(1)
+          )
       val semaphore = Semaphore(settings.translationMaxConcurrency)
 
       chunks.forEach { chunk ->
@@ -141,8 +145,8 @@ class SubmissionDescriptionTranslationService(
   }
 
   private suspend fun translateChunk(
-    chunk: TranslationChunk,
-    settings: me.domino.fa2.data.settings.AppSettings,
+      chunk: TranslationChunk,
+      settings: me.domino.fa2.data.settings.AppSettings,
   ): List<SubmissionDescriptionBlockResult> {
     if (chunk.sourceTexts.all { it.isBlank() }) {
       return List(chunk.sourceTexts.size) { SubmissionDescriptionBlockResult.EmptyResult }
@@ -150,35 +154,38 @@ class SubmissionDescriptionTranslationService(
 
     val payload = chunk.sourceTexts.joinToString(BATCH_SEPARATOR)
     val translatedLines =
-      runCatching {
-          translationPort
-            .translate(
-              TranslationRequest(
-                provider = settings.translationProvider,
-                sourceText = payload,
-                openAiConfig =
-                  settings.openAiTranslationConfig.takeIf {
-                    settings.translationProvider == TranslationProvider.OPENAI_COMPATIBLE
-                  },
-              )
-            )
-            .trim()
-        }
-        .fold(
-          onSuccess = { translated ->
-            if (translated.isBlank()) {
-              List(chunk.sourceTexts.size) { "" }
-            } else {
-              parseChunkTranslation(
-                translated = translated,
-                expectedBlockCount = chunk.sourceTexts.size,
-              )
+        runCatching {
+              translationPort
+                  .translate(
+                      TranslationRequest(
+                          provider = settings.translationProvider,
+                          sourceText = payload,
+                          openAiConfig =
+                              settings.openAiTranslationConfig.takeIf {
+                                settings.translationProvider ==
+                                    TranslationProvider.OPENAI_COMPATIBLE
+                              },
+                      )
+                  )
+                  .trim()
             }
-          },
-          onFailure = { error ->
-            return List(chunk.sourceTexts.size) { SubmissionDescriptionBlockResult.Failure(error) }
-          },
-        )
+            .fold(
+                onSuccess = { translated ->
+                  if (translated.isBlank()) {
+                    List(chunk.sourceTexts.size) { "" }
+                  } else {
+                    parseChunkTranslation(
+                        translated = translated,
+                        expectedBlockCount = chunk.sourceTexts.size,
+                    )
+                  }
+                },
+                onFailure = { error ->
+                  return List(chunk.sourceTexts.size) {
+                    SubmissionDescriptionBlockResult.Failure(error)
+                  }
+                },
+            )
 
     return translatedLines.map { translatedLine ->
       if (translatedLine.isBlank()) {
@@ -189,7 +196,10 @@ class SubmissionDescriptionTranslationService(
     }
   }
 
-  private fun buildChunks(sourceTexts: List<String>, chunkWordLimit: Int): List<TranslationChunk> {
+  private fun buildChunks(
+      sourceTexts: List<String>,
+      chunkWordLimit: Int,
+  ): List<TranslationChunk> {
     val normalizedWordLimit = chunkWordLimit.coerceAtLeast(1)
     val chunks = mutableListOf<TranslationChunk>()
 
@@ -278,13 +288,13 @@ class SubmissionDescriptionTranslationService(
   }
 
   private fun normalizeTranslationText(text: String): String =
-    text
-      .replace(invisibleCharsRegex, "")
-      .replace("\u00A0", " ")
-      .replace(Regex("[\\t\\x0B\\f\\r ]+"), " ")
-      .replace(Regex(" *\\n *"), "\n")
-      .replace(Regex("\\n{3,}"), "\n\n")
-      .trim()
+      text
+          .replace(invisibleCharsRegex, "")
+          .replace("\u00A0", " ")
+          .replace(Regex("[\\t\\x0B\\f\\r ]+"), " ")
+          .replace(Regex(" *\\n *"), "\n")
+          .replace(Regex("\\n{3,}"), "\n\n")
+          .trim()
 
   private fun appendNodeHtml(builder: StringBuilder, node: Node) {
     val html = node.outerHtml()
@@ -314,26 +324,26 @@ class SubmissionDescriptionTranslationService(
 
   companion object {
     private val standaloneBoundaryTags =
-      setOf("p", "blockquote", "li", "h1", "h2", "h3", "h4", "h5", "h6", "tr", "hr")
+        setOf("p", "blockquote", "li", "h1", "h2", "h3", "h4", "h5", "h6", "tr", "hr")
     private val wrapperContainerTags =
-      setOf(
-        "div",
-        "section",
-        "article",
-        "code",
-        "pre",
-        "ul",
-        "ol",
-        "table",
-        "tbody",
-        "thead",
-        "tfoot",
-      )
+        setOf(
+            "div",
+            "section",
+            "article",
+            "code",
+            "pre",
+            "ul",
+            "ol",
+            "table",
+            "tbody",
+            "thead",
+            "tfoot",
+        )
     private const val BATCH_SEPARATOR = "\n\n%%\n\n"
     private const val separatorMarker = "%%"
     private const val separatorWordCost = 1
     private val cjkRegex =
-      Regex("[\\u3400-\\u4DBF\\u4E00-\\u9FFF\\uF900-\\uFAFF\\u3040-\\u30FF\\uAC00-\\uD7AF]")
+        Regex("[\\u3400-\\u4DBF\\u4E00-\\u9FFF\\uF900-\\uFAFF\\u3040-\\u30FF\\uAC00-\\uD7AF]")
     private val latinWordRegex = Regex("[\\p{L}\\p{N}]+")
     private val invisibleCharsRegex = Regex("[\\u200B-\\u200D\\uFEFF]")
   }

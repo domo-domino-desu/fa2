@@ -6,8 +6,8 @@ import me.domino.fa2.util.FaUrls
 
 /** 单篇 Journal 端点。 */
 class JournalEndpoint(
-  /** HTML 数据源。 */
-  private val dataSource: FaHtmlDataSource
+    /** HTML 数据源。 */
+    private val dataSource: FaHtmlDataSource
 ) {
   /** 按 ID 拉取日志详情。 */
   suspend fun fetch(journalId: Int): HtmlResponseResult = dataSource.get(FaUrls.journal(journalId))

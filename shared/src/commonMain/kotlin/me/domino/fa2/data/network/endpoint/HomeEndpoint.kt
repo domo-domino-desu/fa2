@@ -6,8 +6,8 @@ import me.domino.fa2.util.FaUrls
 
 /** 首页请求端点。 */
 class HomeEndpoint(
-  /** HTML 数据源。 */
-  private val dataSource: FaHtmlDataSource
+    /** HTML 数据源。 */
+    private val dataSource: FaHtmlDataSource
 ) {
   /** 拉取首页 HTML。 */
   suspend fun fetch(): HtmlResponseResult = dataSource.get(FaUrls.home)

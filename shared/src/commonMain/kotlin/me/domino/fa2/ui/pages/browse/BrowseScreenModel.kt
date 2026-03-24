@@ -20,25 +20,25 @@ import me.domino.fa2.util.logging.summarizePageState
 private const val browseAutoLoadThreshold = 10
 
 data class BrowseFilterState(
-  val category: Int = 1,
-  val type: Int = 1,
-  val species: Int = 1,
-  val gender: String = "",
-  val ratingGeneral: Boolean = true,
-  val ratingMature: Boolean = true,
-  val ratingAdult: Boolean = true,
+    val category: Int = 1,
+    val type: Int = 1,
+    val species: Int = 1,
+    val gender: String = "",
+    val ratingGeneral: Boolean = true,
+    val ratingMature: Boolean = true,
+    val ratingAdult: Boolean = true,
 )
 
 data class BrowseUiState(
-  val draftFilter: BrowseFilterState = BrowseFilterState(),
-  val appliedFilter: BrowseFilterState = BrowseFilterState(),
-  val submissions: List<SubmissionThumbnail> = emptyList(),
-  val nextPageUrl: String? = null,
-  val loading: Boolean = false,
-  val refreshing: Boolean = false,
-  val isLoadingMore: Boolean = false,
-  val errorMessage: String? = null,
-  val appendErrorMessage: String? = null,
+    val draftFilter: BrowseFilterState = BrowseFilterState(),
+    val appliedFilter: BrowseFilterState = BrowseFilterState(),
+    val submissions: List<SubmissionThumbnail> = emptyList(),
+    val nextPageUrl: String? = null,
+    val loading: Boolean = false,
+    val refreshing: Boolean = false,
+    val isLoadingMore: Boolean = false,
+    val errorMessage: String? = null,
+    val appendErrorMessage: String? = null,
 ) {
   val hasMore: Boolean
     get() = !nextPageUrl.isNullOrBlank()
@@ -46,12 +46,12 @@ data class BrowseUiState(
 
 /** Browse 页面状态模型。 */
 class BrowseScreenModel(
-  private val repository: BrowseRepository,
-  private val submissionListHolder: SubmissionListHolder,
+    private val repository: BrowseRepository,
+    private val submissionListHolder: SubmissionListHolder,
 ) : StateScreenModel<BrowseUiState>(BrowseUiState()) {
   private val log = FaLog.withTag("BrowseScreenModel")
   private val paginationStateMachine =
-    PaginationStateMachine<SubmissionThumbnail, Int>(keyOf = { item -> item.id })
+      PaginationStateMachine<SubmissionThumbnail, Int>(keyOf = { item -> item.id })
   private val mutablePageState = MutableStateFlow<PageState<BrowseUiState>>(PageState.Loading)
   val pageState: StateFlow<PageState<BrowseUiState>> = mutablePageState.asStateFlow()
   private var loadJob: Job? = null
@@ -63,7 +63,7 @@ class BrowseScreenModel(
 
   fun updateCategory(category: Int) {
     mutableState.value =
-      state.value.copy(draftFilter = state.value.draftFilter.copy(category = category))
+        state.value.copy(draftFilter = state.value.draftFilter.copy(category = category))
   }
 
   fun updateType(type: Int) {
@@ -72,27 +72,27 @@ class BrowseScreenModel(
 
   fun updateSpecies(species: Int) {
     mutableState.value =
-      state.value.copy(draftFilter = state.value.draftFilter.copy(species = species))
+        state.value.copy(draftFilter = state.value.draftFilter.copy(species = species))
   }
 
   fun updateGender(gender: String) {
     mutableState.value =
-      state.value.copy(draftFilter = state.value.draftFilter.copy(gender = gender))
+        state.value.copy(draftFilter = state.value.draftFilter.copy(gender = gender))
   }
 
   fun setRatingGeneral(enabled: Boolean) {
     mutableState.value =
-      state.value.copy(draftFilter = state.value.draftFilter.copy(ratingGeneral = enabled))
+        state.value.copy(draftFilter = state.value.draftFilter.copy(ratingGeneral = enabled))
   }
 
   fun setRatingMature(enabled: Boolean) {
     mutableState.value =
-      state.value.copy(draftFilter = state.value.draftFilter.copy(ratingMature = enabled))
+        state.value.copy(draftFilter = state.value.draftFilter.copy(ratingMature = enabled))
   }
 
   fun setRatingAdult(enabled: Boolean) {
     mutableState.value =
-      state.value.copy(draftFilter = state.value.draftFilter.copy(ratingAdult = enabled))
+        state.value.copy(draftFilter = state.value.draftFilter.copy(ratingAdult = enabled))
   }
 
   fun applyFilter() {
@@ -134,60 +134,61 @@ class BrowseScreenModel(
     if (loadJob?.isActive == true) return
     val snapshot = state.value
     mutableState.value =
-      snapshot.applyPagination(
-        paginationStateMachine.beginLoad(
-          snapshot = snapshot.toPaginationSnapshot(),
-          forceRefresh = forceRefresh,
+        snapshot.applyPagination(
+            paginationStateMachine.beginLoad(
+                snapshot = snapshot.toPaginationSnapshot(),
+                forceRefresh = forceRefresh,
+            )
         )
-      )
     if (snapshot.submissions.isEmpty()) {
       mutablePageState.value = PageState.Loading
     }
     val firstPageUrl = buildBrowseUrl(snapshot.appliedFilter)
-    loadJob = screenModelScope.launch {
-      val pageState =
-        if (forceRefresh) {
-          repository.refreshPage(firstPageUrl)
-        } else {
-          repository.loadPage(firstPageUrl)
-        }
-      val reduced =
-        paginationStateMachine.reduceFirstPage(
-          snapshot = state.value.toPaginationSnapshot(),
-          result = pageState,
-          itemsOf = { page -> page.submissions },
-          nextPageUrlOf = { page -> page.nextPageUrl },
-        )
-      val updated = state.value.applyPagination(reduced)
-      mutableState.value = updated
-      when (pageState) {
-        is PageState.Success -> {
-          syncSubmissionListHolder(updated)
-          mutablePageState.value = PageState.Success(updated)
-          log.i { "加载Browse -> 成功(count=${updated.submissions.size})" }
-        }
+    loadJob =
+        screenModelScope.launch {
+          val pageState =
+              if (forceRefresh) {
+                repository.refreshPage(firstPageUrl)
+              } else {
+                repository.loadPage(firstPageUrl)
+              }
+          val reduced =
+              paginationStateMachine.reduceFirstPage(
+                  snapshot = state.value.toPaginationSnapshot(),
+                  result = pageState,
+                  itemsOf = { page -> page.submissions },
+                  nextPageUrlOf = { page -> page.nextPageUrl },
+              )
+          val updated = state.value.applyPagination(reduced)
+          mutableState.value = updated
+          when (pageState) {
+            is PageState.Success -> {
+              syncSubmissionListHolder(updated)
+              mutablePageState.value = PageState.Success(updated)
+              log.i { "加载Browse -> 成功(count=${updated.submissions.size})" }
+            }
 
-        PageState.CfChallenge -> {
-          mutablePageState.value = PageState.CfChallenge
-          log.w { "加载Browse -> Cloudflare验证" }
-        }
+            PageState.CfChallenge -> {
+              mutablePageState.value = PageState.CfChallenge
+              log.w { "加载Browse -> Cloudflare验证" }
+            }
 
-        is PageState.MatureBlocked -> {
-          mutablePageState.value = PageState.MatureBlocked(pageState.reason)
-          log.w { "加载Browse -> 受限(${pageState.reason})" }
-        }
+            is PageState.MatureBlocked -> {
+              mutablePageState.value = PageState.MatureBlocked(pageState.reason)
+              log.w { "加载Browse -> 受限(${pageState.reason})" }
+            }
 
-        is PageState.Error -> {
-          mutablePageState.value = PageState.Error(pageState.exception)
-          log.e(pageState.exception) { "加载Browse -> 失败" }
-        }
+            is PageState.Error -> {
+              mutablePageState.value = PageState.Error(pageState.exception)
+              log.e(pageState.exception) { "加载Browse -> 失败" }
+            }
 
-        PageState.Loading -> {
-          mutablePageState.value = PageState.Loading
-          log.d { "加载Browse -> 加载中" }
+            PageState.Loading -> {
+              mutablePageState.value = PageState.Loading
+              log.d { "加载Browse -> 加载中" }
+            }
+          }
         }
-      }
-    }
   }
 
   private fun loadMore(force: Boolean) {
@@ -198,73 +199,79 @@ class BrowseScreenModel(
     log.d { "自动加载Browse -> 开始(force=$force)" }
 
     mutableState.value =
-      snapshot.applyPagination(paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot()))
-
-    appendJob = screenModelScope.launch {
-      val pageState = repository.loadPage(nextUrl)
-      val reduced =
-        paginationStateMachine.reduceAppend(
-          snapshot = state.value.toPaginationSnapshot(),
-          result = pageState,
-          itemsOf = { page -> page.submissions },
-          nextPageUrlOf = { page -> page.nextPageUrl },
+        snapshot.applyPagination(
+            paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot())
         )
-      val updated = state.value.applyPagination(reduced)
-      mutableState.value = updated
-      when (pageState) {
-        is PageState.Success -> {
-          syncSubmissionListHolder(updated)
-          mutablePageState.value = PageState.Success(updated)
-          log.d {
-            "自动加载Browse -> ${summarizePageState(pageState)}(count=${updated.submissions.size})"
+
+    appendJob =
+        screenModelScope.launch {
+          val pageState = repository.loadPage(nextUrl)
+          val reduced =
+              paginationStateMachine.reduceAppend(
+                  snapshot = state.value.toPaginationSnapshot(),
+                  result = pageState,
+                  itemsOf = { page -> page.submissions },
+                  nextPageUrlOf = { page -> page.nextPageUrl },
+              )
+          val updated = state.value.applyPagination(reduced)
+          mutableState.value = updated
+          when (pageState) {
+            is PageState.Success -> {
+              syncSubmissionListHolder(updated)
+              mutablePageState.value = PageState.Success(updated)
+              log.d {
+                "自动加载Browse -> ${summarizePageState(pageState)}(count=${updated.submissions.size})"
+              }
+            }
+
+            PageState.CfChallenge -> log.w { "自动加载Browse -> Cloudflare验证" }
+            is PageState.MatureBlocked -> log.w { "自动加载Browse -> 受限(${pageState.reason})" }
+            is PageState.Error -> log.e(pageState.exception) { "自动加载Browse -> 失败" }
+            PageState.Loading -> log.d { "自动加载Browse -> 加载中" }
           }
         }
-
-        PageState.CfChallenge -> log.w { "自动加载Browse -> Cloudflare验证" }
-        is PageState.MatureBlocked -> log.w { "自动加载Browse -> 受限(${pageState.reason})" }
-        is PageState.Error -> log.e(pageState.exception) { "自动加载Browse -> 失败" }
-        PageState.Loading -> log.d { "自动加载Browse -> 加载中" }
-      }
-    }
   }
 
   private fun buildBrowseUrl(filter: BrowseFilterState): String =
-    FaUrls.browse(
-      cat = filter.category,
-      atype = filter.type,
-      species = filter.species,
-      gender = filter.gender,
-      page = 1,
-      ratingGeneral = filter.ratingGeneral,
-      ratingMature = filter.ratingMature,
-      ratingAdult = filter.ratingAdult,
-    )
+      FaUrls.browse(
+          cat = filter.category,
+          atype = filter.type,
+          species = filter.species,
+          gender = filter.gender,
+          page = 1,
+          ratingGeneral = filter.ratingGeneral,
+          ratingMature = filter.ratingMature,
+          ratingAdult = filter.ratingAdult,
+      )
 
   private fun syncSubmissionListHolder(state: BrowseUiState) {
-    submissionListHolder.replace(submissions = state.submissions, nextPageUrl = state.nextPageUrl)
+    submissionListHolder.replace(
+        submissions = state.submissions,
+        nextPageUrl = state.nextPageUrl,
+    )
   }
 }
 
 private fun BrowseUiState.toPaginationSnapshot(): PaginationSnapshot<SubmissionThumbnail> =
-  PaginationSnapshot(
-    items = submissions,
-    nextPageUrl = nextPageUrl,
-    loading = loading,
-    refreshing = refreshing,
-    isLoadingMore = isLoadingMore,
-    errorMessage = errorMessage,
-    appendErrorMessage = appendErrorMessage,
-  )
+    PaginationSnapshot(
+        items = submissions,
+        nextPageUrl = nextPageUrl,
+        loading = loading,
+        refreshing = refreshing,
+        isLoadingMore = isLoadingMore,
+        errorMessage = errorMessage,
+        appendErrorMessage = appendErrorMessage,
+    )
 
 private fun BrowseUiState.applyPagination(
-  snapshot: PaginationSnapshot<SubmissionThumbnail>
+    snapshot: PaginationSnapshot<SubmissionThumbnail>
 ): BrowseUiState =
-  copy(
-    submissions = snapshot.items,
-    nextPageUrl = snapshot.nextPageUrl,
-    loading = snapshot.loading,
-    refreshing = snapshot.refreshing,
-    isLoadingMore = snapshot.isLoadingMore,
-    errorMessage = snapshot.errorMessage,
-    appendErrorMessage = snapshot.appendErrorMessage,
-  )
+    copy(
+        submissions = snapshot.items,
+        nextPageUrl = snapshot.nextPageUrl,
+        loading = snapshot.loading,
+        refreshing = snapshot.refreshing,
+        isLoadingMore = snapshot.isLoadingMore,
+        errorMessage = snapshot.errorMessage,
+        appendErrorMessage = snapshot.appendErrorMessage,
+    )

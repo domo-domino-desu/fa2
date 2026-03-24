@@ -15,34 +15,34 @@ class ActivityHistoryRepository(private val historyDao: HistoryDao) {
     log.d { "记录投稿历史 -> sid=${item.id}" }
     val nowMs = Clock.System.now().toEpochMilliseconds()
     historyDao.upsertSubmission(
-      SubmissionHistoryEntity(
-        sid = item.id,
-        visitedAtMs = nowMs,
-        submissionUrl = item.submissionUrl,
-        title = item.title,
-        author = item.author,
-        thumbnailUrl = item.thumbnailUrl,
-        thumbnailAspectRatio = item.thumbnailAspectRatio,
-        authorAvatarUrl = item.authorAvatarUrl,
-        isBlockedByTag = item.isBlockedByTag,
-      )
+        SubmissionHistoryEntity(
+            sid = item.id,
+            visitedAtMs = nowMs,
+            submissionUrl = item.submissionUrl,
+            title = item.title,
+            author = item.author,
+            thumbnailUrl = item.thumbnailUrl,
+            thumbnailAspectRatio = item.thumbnailAspectRatio,
+            authorAvatarUrl = item.authorAvatarUrl,
+            isBlockedByTag = item.isBlockedByTag,
+        )
     )
   }
 
   suspend fun loadSubmissionHistory(): List<SubmissionThumbnail> {
     val history =
-      historyDao.listSubmissionsByLatest().take(maxSubmissionHistoryCount).map { entry ->
-        SubmissionThumbnail(
-          id = entry.sid,
-          submissionUrl = entry.submissionUrl,
-          title = entry.title,
-          author = entry.author,
-          thumbnailUrl = entry.thumbnailUrl,
-          thumbnailAspectRatio = entry.thumbnailAspectRatio,
-          authorAvatarUrl = entry.authorAvatarUrl,
-          isBlockedByTag = entry.isBlockedByTag,
-        )
-      }
+        historyDao.listSubmissionsByLatest().take(maxSubmissionHistoryCount).map { entry ->
+          SubmissionThumbnail(
+              id = entry.sid,
+              submissionUrl = entry.submissionUrl,
+              title = entry.title,
+              author = entry.author,
+              thumbnailUrl = entry.thumbnailUrl,
+              thumbnailAspectRatio = entry.thumbnailAspectRatio,
+              authorAvatarUrl = entry.authorAvatarUrl,
+              isBlockedByTag = entry.isBlockedByTag,
+          )
+        }
     log.d { "读取投稿历史 -> 成功(count=${history.size})" }
     return history
   }
@@ -53,21 +53,21 @@ class ActivityHistoryRepository(private val historyDao: HistoryDao) {
     log.d { "记录搜索历史 -> query=${normalized.take(40)}" }
     val nowMs = Clock.System.now().toEpochMilliseconds()
     historyDao.upsertSearch(
-      SearchHistoryEntity(
-        queryKey = normalized.lowercase(),
-        query = normalized,
-        visitedAtMs = nowMs,
-      )
+        SearchHistoryEntity(
+            queryKey = normalized.lowercase(),
+            query = normalized,
+            visitedAtMs = nowMs,
+        )
     )
   }
 
   suspend fun loadSearchHistory(): List<String> {
     val history =
-      historyDao
-        .listSearchesByLatest()
-        .take(maxSearchHistoryCount)
-        .map { entry -> entry.query.trim() }
-        .filter { value -> value.isNotBlank() }
+        historyDao
+            .listSearchesByLatest()
+            .take(maxSearchHistoryCount)
+            .map { entry -> entry.query.trim() }
+            .filter { value -> value.isNotBlank() }
     log.d { "读取搜索历史 -> 成功(count=${history.size})" }
     return history
   }

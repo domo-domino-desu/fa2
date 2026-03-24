@@ -10,7 +10,7 @@ import me.domino.fa2.util.toPageState
 class FeedDataSource(private val endpoint: FeedEndpoint, private val parser: FeedParser) {
   /** 拉取 feed 分页。 */
   suspend fun fetchPage(fromSid: Int?): PageState<FeedPage> =
-    endpoint.fetch(fromSid).toPageState { success ->
-      parser.parse(html = success.body, baseUrl = success.url)
-    }
+      endpoint.fetch(fromSid).toPageState { success ->
+        parser.parse(html = success.body, baseUrl = success.url)
+      }
 }

@@ -36,36 +36,36 @@ class AboutRouteScreen : Screen {
       AboutRouteTopBar(onBack = { navigator.pop() }, onGoHome = { navigator.goBackHome() })
 
       LibrariesContainer(
-        libraries = libraries,
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-        header = {
-          item {
-            ElevatedCard(modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)) {
-              Column(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-              ) {
-                Text(text = "fa2", style = MaterialTheme.typography.titleMedium)
-                Text(
-                  text = "本页由 AboutLibraries 生成依赖与许可证信息",
-                  style = MaterialTheme.typography.bodySmall,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+          libraries = libraries,
+          modifier = Modifier.fillMaxSize(),
+          contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+          header = {
+            item {
+              ElevatedCard(modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                  Text(text = "fa2", style = MaterialTheme.typography.titleMedium)
+                  Text(
+                      text = "本页由 AboutLibraries 生成依赖与许可证信息",
+                      style = MaterialTheme.typography.bodySmall,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  )
+                }
               }
             }
-          }
-        },
-        footer = {
-          item {
-            Text(
-              text = "许可证与依赖元数据来源：AboutLibraries",
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
-            )
-          }
-        },
+          },
+          footer = {
+            item {
+              Text(
+                  text = "许可证与依赖元数据来源：AboutLibraries",
+                  style = MaterialTheme.typography.bodySmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+              )
+            }
+          },
       )
     }
   }

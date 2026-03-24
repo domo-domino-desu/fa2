@@ -21,27 +21,27 @@ interface SubmissionPagerDetailSource {
 }
 
 class SubmissionPagerFeedSourceImpl(private val repository: FeedRepository) :
-  SubmissionPagerFeedSource {
+    SubmissionPagerFeedSource {
   override suspend fun loadPageByNextUrl(nextPageUrl: String): PageState<FeedPage> =
-    repository.loadPageByNextUrl(nextPageUrl)
+      repository.loadPageByNextUrl(nextPageUrl)
 }
 
 class SubmissionPagerDetailSourceImpl(private val repository: SubmissionRepository) :
-  SubmissionPagerDetailSource {
+    SubmissionPagerDetailSource {
   override suspend fun loadBySid(sid: Int): PageState<Submission> =
-    repository.loadSubmissionDetailBySid(sid)
+      repository.loadSubmissionDetailBySid(sid)
 
   override suspend fun loadByUrl(url: String): PageState<Submission> =
-    repository.loadSubmissionDetailByUrl(url)
+      repository.loadSubmissionDetailByUrl(url)
 
   override suspend fun toggleFavorite(sid: Int, actionUrl: String): PageState<Unit> =
-    repository.toggleFavorite(sid = sid, actionUrl = actionUrl)
+      repository.toggleFavorite(sid = sid, actionUrl = actionUrl)
 
   override suspend fun blockTag(
-    sid: Int,
-    tagName: String,
-    nonce: String,
-    toAdd: Boolean,
+      sid: Int,
+      tagName: String,
+      nonce: String,
+      toAdd: Boolean,
   ): PageState<Unit> =
-    repository.blockTag(sid = sid, tagName = tagName, nonce = nonce, toAdd = toAdd)
+      repository.blockTag(sid = sid, tagName = tagName, nonce = nonce, toAdd = toAdd)
 }

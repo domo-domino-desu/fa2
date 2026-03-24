@@ -26,11 +26,11 @@ fun desktopPlatformModule(): Module = module {
   }
   single<DataStore<Preferences>> {
     PreferenceDataStoreFactory.createWithPath(
-      produceFile = {
-        val dataStoreFile = resolvePreferencesFile()
-        ensureParentDir(dataStoreFile)
-        dataStoreFile.absolutePath.toPath()
-      }
+        produceFile = {
+          val dataStoreFile = resolvePreferencesFile()
+          ensureParentDir(dataStoreFile)
+          dataStoreFile.absolutePath.toPath()
+        }
     )
   }
   single(named(KOIN_QUALIFIER_COOKIE_VAULT)) { KSafe(fileName = KOIN_QUALIFIER_COOKIE_VAULT) }

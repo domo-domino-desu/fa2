@@ -19,20 +19,20 @@ private suspend fun downloadUrlWithSaveDialog(url: String): Boolean {
   val normalized = url.trim()
   if (normalized.isBlank()) return false
   val target =
-    runCatching { chooseSaveFile(defaultFileNameForUrl(normalized)) }.getOrNull() ?: return false
+      runCatching { chooseSaveFile(defaultFileNameForUrl(normalized)) }.getOrNull() ?: return false
   return withContext(Dispatchers.IO) {
     runCatching {
-        target.parentFile?.mkdirs()
-        val connection =
-          URI(normalized).toURL().openConnection().apply {
-            connectTimeout = 15_000
-            readTimeout = 30_000
+          target.parentFile?.mkdirs()
+          val connection =
+              URI(normalized).toURL().openConnection().apply {
+                connectTimeout = 15_000
+                readTimeout = 30_000
+              }
+          connection.getInputStream().use { input ->
+            target.outputStream().use { output -> input.copyTo(output) }
           }
-        connection.getInputStream().use { input ->
-          target.outputStream().use { output -> input.copyTo(output) }
         }
-      }
-      .isSuccess
+        .isSuccess
   }
 }
 
@@ -41,15 +41,15 @@ private fun chooseSaveFile(defaultFileName: String): File? {
     val owner = Frame()
     try {
       FileDialog(owner, "保存文件", FileDialog.SAVE)
-        .apply {
-          file = defaultFileName
-          isVisible = true
-        }
-        .let { dialog ->
-          val selectedFile = dialog.file ?: return@runOnAwtEventThread null
-          val selectedDirectory = dialog.directory ?: return@runOnAwtEventThread null
-          File(selectedDirectory, selectedFile)
-        }
+          .apply {
+            file = defaultFileName
+            isVisible = true
+          }
+          .let { dialog ->
+            val selectedFile = dialog.file ?: return@runOnAwtEventThread null
+            val selectedDirectory = dialog.directory ?: return@runOnAwtEventThread null
+            File(selectedDirectory, selectedFile)
+          }
     } finally {
       owner.dispose()
     }

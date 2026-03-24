@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.first
 
 /** 轻量 KV 存储封装。 */
 class KeyValueStorage(
-  /** DataStore Preferences 实例。 */
-  private val dataStore: DataStore<Preferences>
+    /** DataStore Preferences 实例。 */
+    private val dataStore: DataStore<Preferences>
 ) {
   /**
    * 读取字符串值。

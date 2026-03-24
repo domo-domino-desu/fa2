@@ -67,12 +67,12 @@ class MinimalFlowIntegrationTest {
     val feedRepository: FeedRepository = koin.get()
 
     source.enqueue(
-      url = FaUrls.home,
-      response =
-        HtmlResponseResult.Success(
-          body = TestFixtures.read("www.furaffinity.net:loggedout.html"),
-          url = FaUrls.home,
-        ),
+        url = FaUrls.home,
+        response =
+            HtmlResponseResult.Success(
+                body = TestFixtures.read("www.furaffinity.net:loggedout.html"),
+                url = FaUrls.home,
+            ),
     )
     val firstProbe = authDataSource.probeLogin()
     assertTrue(firstProbe is AuthProbeResult.AuthInvalid)
@@ -80,23 +80,23 @@ class MinimalFlowIntegrationTest {
     authDataSource.submitCookie("a=1; b=2; cf_clearance=test")
 
     source.enqueue(
-      url = FaUrls.home,
-      response =
-        HtmlResponseResult.Success(
-          body = TestFixtures.read("www.furaffinity.net:loggedin.html"),
-          url = FaUrls.home,
-        ),
+        url = FaUrls.home,
+        response =
+            HtmlResponseResult.Success(
+                body = TestFixtures.read("www.furaffinity.net:loggedin.html"),
+                url = FaUrls.home,
+            ),
     )
     val secondProbe = authDataSource.probeLogin()
     assertTrue(secondProbe is AuthProbeResult.LoggedIn)
 
     source.enqueue(
-      url = FaUrls.submissions(),
-      response =
-        HtmlResponseResult.Success(
-          body = TestFixtures.read("www.furaffinity.net:msg:submissions-firstpage.html"),
-          url = FaUrls.submissions(),
-        ),
+        url = FaUrls.submissions(),
+        response =
+            HtmlResponseResult.Success(
+                body = TestFixtures.read("www.furaffinity.net:msg:submissions-firstpage.html"),
+                url = FaUrls.submissions(),
+            ),
     )
     val states = feedRepository.streamFirstPage().take(2).toList()
     assertTrue(states.first() is PageState.Loading)
@@ -110,7 +110,10 @@ class MinimalFlowIntegrationTest {
     startTestKoin(source, newTestStorageConfig())
     val authDataSource: AuthDataSource = GlobalContext.get().get()
 
-    source.enqueue(url = FaUrls.home, response = HtmlResponseResult.CfChallenge(cfRay = "ray123"))
+    source.enqueue(
+        url = FaUrls.home,
+        response = HtmlResponseResult.CfChallenge(cfRay = "ray123"),
+    )
     val firstProbe = authDataSource.probeLogin()
     assertTrue(firstProbe is AuthProbeResult.Error)
   }
@@ -161,7 +164,7 @@ class MinimalFlowIntegrationTest {
 
     val cookiesStorage: FaCookiesStorage = GlobalContext.get().get()
     cookiesStorage.mergeSetCookieValues(
-      listOf("a=1; Path=/; HttpOnly", "cf_clearance=cloud; Path=/; Secure")
+        listOf("a=1; Path=/; HttpOnly", "cf_clearance=cloud; Path=/; Secure")
     )
 
     val restoredCookiesStorage = newFreshCookiesStorage()
@@ -170,10 +173,10 @@ class MinimalFlowIntegrationTest {
     assertTrue(restored.contains("cf_clearance=cloud"))
 
     restoredCookiesStorage.mergeSetCookieValues(
-      listOf(
-        "a=gone; Max-Age=0; Path=/",
-        "cf_clearance=gone; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/",
-      )
+        listOf(
+            "a=gone; Max-Age=0; Path=/",
+            "cf_clearance=gone; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/",
+        )
     )
 
     val afterDelete = restoredCookiesStorage.loadRawCookieHeader()
@@ -214,7 +217,7 @@ class MinimalFlowIntegrationTest {
     val dataStore: DataStore<Preferences> = GlobalContext.get().get()
     dataStore.edit { preferences ->
       preferences[stringPreferencesKey(CookiePersistence.KEY_COOKIE_HEADER)] =
-        "legacy=1; cf_clearance=legacy"
+          "legacy=1; cf_clearance=legacy"
     }
 
     val authDataSource: AuthDataSource = GlobalContext.get().get()
@@ -245,13 +248,13 @@ private fun startTestKoin(htmlDataSource: FaHtmlDataSource, storage: TestStorage
  * @param htmlDataSource 需要注入的脚本化数据源。
  */
 private fun testOverrideModule(
-  htmlDataSource: FaHtmlDataSource,
-  storage: TestStorageConfig,
+    htmlDataSource: FaHtmlDataSource,
+    storage: TestStorageConfig,
 ): Module = module {
   single<AppDatabaseBuilderFactory> {
     AppDatabaseBuilderFactory {
       val dbPath =
-        "/tmp/fa2-test-${Clock.System.now().toEpochMilliseconds()}-${Random.nextInt(100_000)}.db"
+          "/tmp/fa2-test-${Clock.System.now().toEpochMilliseconds()}-${Random.nextInt(100_000)}.db"
       Room.databaseBuilder<AppDatabase>(name = dbPath).setDriver(BundledSQLiteDriver())
     }
   }
@@ -273,9 +276,9 @@ private fun shutdownTestKoin() {
 private fun newTestStorageConfig(): TestStorageConfig {
   val randomSuffix = Random.nextLong().toString().replace('-', '0')
   return TestStorageConfig(
-    dataStorePath =
-      "${FileSystem.SYSTEM_TEMPORARY_DIRECTORY}/fa2-test-$randomSuffix.preferences_pb".toPath(),
-    cookieVaultFileName = "fa2test_$randomSuffix",
+      dataStorePath =
+          "${FileSystem.SYSTEM_TEMPORARY_DIRECTORY}/fa2-test-$randomSuffix.preferences_pb".toPath(),
+      cookieVaultFileName = "fa2test_$randomSuffix",
   )
 }
 
@@ -289,9 +292,9 @@ private fun newFreshCookiesStorage(): FaCookiesStorage {
 private fun newFreshAuthDataSource(): AuthDataSource {
   val koin = GlobalContext.get()
   return AuthDataSource(
-    homeEndpoint = koin.get(),
-    cookiesStorage = newFreshCookiesStorage(),
-    userAgentStorage = koin.get<UserAgentStorage>(),
+      homeEndpoint = koin.get(),
+      cookiesStorage = newFreshCookiesStorage(),
+      userAgentStorage = koin.get<UserAgentStorage>(),
   )
 }
 
@@ -319,7 +322,10 @@ private class ScriptedHtmlDataSource : FaHtmlDataSource {
   override suspend fun get(url: String): HtmlResponseResult {
     val queue = queueByUrl[url]
     if (queue == null || queue.isEmpty()) {
-      return HtmlResponseResult.Error(statusCode = 500, message = "No scripted response for $url")
+      return HtmlResponseResult.Error(
+          statusCode = 500,
+          message = "No scripted response for $url",
+      )
     }
     return queue.removeFirst()
   }

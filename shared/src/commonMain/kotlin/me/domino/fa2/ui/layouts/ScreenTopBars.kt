@@ -27,20 +27,20 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RouteTopBar(
-  title: String,
-  onBack: () -> Unit,
-  onGoHome: () -> Unit,
-  actions: @Composable RowScope.() -> Unit = {},
+    title: String,
+    onBack: () -> Unit,
+    onGoHome: () -> Unit,
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
   TopAppBar(
-    title = { Text(text = title, style = MaterialTheme.typography.titleLarge) },
-    navigationIcon = { BackHomeTopBarNavigation(onBack = onBack, onGoHome = onGoHome) },
-    actions = actions,
-    colors =
-      TopAppBarDefaults.topAppBarColors(
-        containerColor = MaterialTheme.colorScheme.surface,
-        scrolledContainerColor = MaterialTheme.colorScheme.surface,
-      ),
+      title = { Text(text = title, style = MaterialTheme.typography.titleLarge) },
+      navigationIcon = { BackHomeTopBarNavigation(onBack = onBack, onGoHome = onGoHome) },
+      actions = actions,
+      colors =
+          TopAppBarDefaults.topAppBarColors(
+              containerColor = MaterialTheme.colorScheme.surface,
+              scrolledContainerColor = MaterialTheme.colorScheme.surface,
+          ),
   )
 }
 
@@ -52,14 +52,14 @@ fun AboutRouteTopBar(onBack: () -> Unit, onGoHome: () -> Unit) {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsRouteTopBar(
-  onBack: () -> Unit,
-  onGoHome: () -> Unit,
-  showActions: Boolean,
-  saving: Boolean,
-  hasUnsavedChanges: Boolean,
-  validationMessage: String?,
-  onResetDraft: () -> Unit,
-  onSaveDraft: () -> Unit,
+    onBack: () -> Unit,
+    onGoHome: () -> Unit,
+    showActions: Boolean,
+    saving: Boolean,
+    hasUnsavedChanges: Boolean,
+    validationMessage: String?,
+    onResetDraft: () -> Unit,
+    onSaveDraft: () -> Unit,
 ) {
   RouteTopBar(title = "设置", onBack = onBack, onGoHome = onGoHome) {
     if (showActions) {
@@ -67,13 +67,13 @@ fun SettingsRouteTopBar(
         Icon(imageVector = Icons.Filled.RestartAlt, contentDescription = "回滚到已保存配置")
       }
       IconButton(
-        onClick = onSaveDraft,
-        enabled = !saving && validationMessage == null && hasUnsavedChanges,
+          onClick = onSaveDraft,
+          enabled = !saving && validationMessage == null && hasUnsavedChanges,
       ) {
         if (saving) {
           LoadingIndicator(
-            modifier = Modifier.padding(6.dp).size(24.dp),
-            color = MaterialTheme.colorScheme.primary,
+              modifier = Modifier.padding(6.dp).size(24.dp),
+              color = MaterialTheme.colorScheme.primary,
           )
         } else {
           Icon(imageVector = Icons.Filled.Save, contentDescription = "保存设置")
@@ -119,10 +119,10 @@ fun UserRouteTopBar(title: String, onBack: () -> Unit, onGoHome: () -> Unit, sha
 
 @Composable
 fun UserWatchlistRouteTopBar(
-  title: String,
-  onBack: () -> Unit,
-  onGoHome: () -> Unit,
-  shareUrl: String,
+    title: String,
+    onBack: () -> Unit,
+    onGoHome: () -> Unit,
+    shareUrl: String,
 ) {
   RouteTopBar(title = title, onBack = onBack, onGoHome = onGoHome) {
     TopBarShareAction(url = shareUrl)
@@ -131,11 +131,11 @@ fun UserWatchlistRouteTopBar(
 
 @Composable
 fun SubmissionRouteTopBar(
-  onBack: () -> Unit,
-  onGoHome: () -> Unit,
-  shareUrl: String,
-  downloadUrl: String?,
-  onDownload: () -> Unit,
+    onBack: () -> Unit,
+    onGoHome: () -> Unit,
+    shareUrl: String,
+    downloadUrl: String?,
+    onDownload: () -> Unit,
 ) {
   RouteTopBar(title = "", onBack = onBack, onGoHome = onGoHome) {
     if (!downloadUrl.isNullOrBlank()) {
@@ -151,23 +151,26 @@ fun SubmissionRouteTopBar(
 @Composable
 fun BrowseFilterOverlayTopBar(onClose: () -> Unit, onApply: () -> Unit) {
   TopAppBar(
-    title = { Text(text = "浏览筛选", style = MaterialTheme.typography.titleMedium) },
-    navigationIcon = {
-      IconButton(onClick = onClose) {
-        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "关闭筛选页面")
-      }
-    },
-    actions = {
-      IconButton(onClick = onApply) {
-        Icon(imageVector = Icons.Filled.Done, contentDescription = "应用筛选")
-      }
-    },
-    colors =
-      TopAppBarDefaults.topAppBarColors(
-        containerColor = MaterialTheme.colorScheme.surface,
-        scrolledContainerColor = MaterialTheme.colorScheme.surface,
-      ),
-    windowInsets = WindowInsets(0, 0, 0, 0),
+      title = { Text(text = "浏览筛选", style = MaterialTheme.typography.titleMedium) },
+      navigationIcon = {
+        IconButton(onClick = onClose) {
+          Icon(
+              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = "关闭筛选页面",
+          )
+        }
+      },
+      actions = {
+        IconButton(onClick = onApply) {
+          Icon(imageVector = Icons.Filled.Done, contentDescription = "应用筛选")
+        }
+      },
+      colors =
+          TopAppBarDefaults.topAppBarColors(
+              containerColor = MaterialTheme.colorScheme.surface,
+              scrolledContainerColor = MaterialTheme.colorScheme.surface,
+          ),
+      windowInsets = WindowInsets(0, 0, 0, 0),
   )
 }
 
@@ -175,22 +178,25 @@ fun BrowseFilterOverlayTopBar(onClose: () -> Unit, onApply: () -> Unit) {
 @Composable
 fun SearchOverlayTopBar(onClose: () -> Unit, onApplySearch: () -> Unit, canSearch: Boolean) {
   TopAppBar(
-    title = { Text(text = "搜索筛选", style = MaterialTheme.typography.titleMedium) },
-    navigationIcon = {
-      IconButton(onClick = onClose) {
-        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "关闭搜索遮罩")
-      }
-    },
-    actions = {
-      IconButton(onClick = onApplySearch, enabled = canSearch) {
-        Icon(imageVector = Icons.Filled.Search, contentDescription = "执行搜索")
-      }
-    },
-    colors =
-      TopAppBarDefaults.topAppBarColors(
-        containerColor = MaterialTheme.colorScheme.surface,
-        scrolledContainerColor = MaterialTheme.colorScheme.surface,
-      ),
-    windowInsets = WindowInsets(0, 0, 0, 0),
+      title = { Text(text = "搜索筛选", style = MaterialTheme.typography.titleMedium) },
+      navigationIcon = {
+        IconButton(onClick = onClose) {
+          Icon(
+              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = "关闭搜索遮罩",
+          )
+        }
+      },
+      actions = {
+        IconButton(onClick = onApplySearch, enabled = canSearch) {
+          Icon(imageVector = Icons.Filled.Search, contentDescription = "执行搜索")
+        }
+      },
+      colors =
+          TopAppBarDefaults.topAppBarColors(
+              containerColor = MaterialTheme.colorScheme.surface,
+              scrolledContainerColor = MaterialTheme.colorScheme.surface,
+          ),
+      windowInsets = WindowInsets(0, 0, 0, 0),
   )
 }

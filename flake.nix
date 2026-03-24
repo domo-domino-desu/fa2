@@ -65,14 +65,18 @@
           packages =
             with pkgs;
             [
-              bashInteractive
               git
-              jdk21
-              kotlin
-              libicns
-              librsvg
               imagemagick
-              which
+              jdk21
+              ktfmt
+              lefthook
+              libicns
+              libxml2
+              librsvg
+              lint-staged
+              nodejs
+              nodePackages.prettier
+              treefmt
             ]
             ++ desktopLibs;
 

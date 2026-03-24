@@ -19,8 +19,8 @@ class WatchlistParser {
   }
 
   private fun parseUsers(
-    document: com.fleeksoft.ksoup.nodes.Document,
-    baseUrl: String,
+      document: com.fleeksoft.ksoup.nodes.Document,
+      baseUrl: String,
   ): List<WatchlistUser> {
     val unique = LinkedHashMap<String, WatchlistUser>()
     document.select("div.watch-list-items a[href*='/user/']").forEach { anchor ->
@@ -34,29 +34,36 @@ class WatchlistParser {
     val rawHref = anchor.attr("href").trim().takeIf { href -> href.isNotBlank() } ?: return null
     val profileUrl = ParserUtils.toAbsoluteUrl(baseUrl, rawHref)
     val username =
-      rawHref.substringAfter("/user/", "").substringBefore('/').trim().ifBlank { null }
-        ?: return null
+        rawHref.substringAfter("/user/", "").substringBefore('/').trim().ifBlank { null }
+            ?: return null
     val displayName =
-      anchor.selectFirst(".c-usernameBlockSimple__displayName")?.text()?.trim().orEmpty().ifBlank {
-        anchor.text().trim().removePrefix("~").ifBlank { username }
-      }
-    return WatchlistUser(username = username, displayName = displayName, profileUrl = profileUrl)
+        anchor
+            .selectFirst(".c-usernameBlockSimple__displayName")
+            ?.text()
+            ?.trim()
+            .orEmpty()
+            .ifBlank { anchor.text().trim().removePrefix("~").ifBlank { username } }
+    return WatchlistUser(
+        username = username,
+        displayName = displayName,
+        profileUrl = profileUrl,
+    )
   }
 
   private fun parseNextPageUrl(
-    document: com.fleeksoft.ksoup.nodes.Document,
-    baseUrl: String,
+      document: com.fleeksoft.ksoup.nodes.Document,
+      baseUrl: String,
   ): String? {
     val nextForm =
-      document.select("div.watchlist-navigation form").firstOrNull(::isNextFormEnabled)
-        ?: return null
+        document.select("div.watchlist-navigation form").firstOrNull(::isNextFormEnabled)
+            ?: return null
     val action =
-      nextForm.attr("action").trim().takeIf { value -> value.isNotBlank() } ?: return null
+        nextForm.attr("action").trim().takeIf { value -> value.isNotBlank() } ?: return null
     val absoluteAction = ParserUtils.toAbsoluteUrl(baseUrl, action)
     val nextPage =
-      nextForm.selectFirst("input[name=page]")?.attr("value")?.trim()?.takeIf { value ->
-        value.isNotBlank()
-      } ?: return absoluteAction
+        nextForm.selectFirst("input[name=page]")?.attr("value")?.trim()?.takeIf { value ->
+          value.isNotBlank()
+        } ?: return absoluteAction
     return appendQueryParam(absoluteAction, "page", nextPage)
   }
 

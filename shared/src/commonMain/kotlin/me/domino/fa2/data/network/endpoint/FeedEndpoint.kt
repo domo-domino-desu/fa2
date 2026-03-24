@@ -6,8 +6,8 @@ import me.domino.fa2.util.FaUrls
 
 /** Feed 请求端点。 */
 class FeedEndpoint(
-  /** HTML 数据源。 */
-  private val dataSource: FaHtmlDataSource
+    /** HTML 数据源。 */
+    private val dataSource: FaHtmlDataSource
 ) {
   /**
    * 拉取 submissions 页面。
@@ -15,5 +15,5 @@ class FeedEndpoint(
    * @param fromSid 分页游标。
    */
   suspend fun fetch(fromSid: Int? = null): HtmlResponseResult =
-    dataSource.get(FaUrls.submissions(fromSid))
+      dataSource.get(FaUrls.submissions(fromSid))
 }

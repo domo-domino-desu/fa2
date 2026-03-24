@@ -16,7 +16,11 @@ class GalleryParserTest {
     val parser = GalleryParser()
 
     val page =
-      parser.parse(html = html, baseUrl = FaUrls.gallery("tiaamaito"), defaultAuthor = "tiaamaito")
+        parser.parse(
+            html = html,
+            baseUrl = FaUrls.gallery("tiaamaito"),
+            defaultAuthor = "tiaamaito",
+        )
 
     assertTrue(page.submissions.isNotEmpty())
     assertNotNull(page.nextPageUrl)
@@ -28,7 +32,9 @@ class GalleryParserTest {
     assertTrue(page.folderGroups.flattenFolders().any { folder -> folder.isActive })
     assertTrue(page.folderGroups.flattenFolders().any { folder -> folder.url.contains("/folder/") })
     assertTrue(
-      page.submissions.any { item -> item.authorAvatarUrl.startsWith("https://a.furaffinity.net/") }
+        page.submissions.any { item ->
+          item.authorAvatarUrl.startsWith("https://a.furaffinity.net/")
+        }
     )
   }
 
@@ -38,11 +44,11 @@ class GalleryParserTest {
     val parser = GalleryParser()
 
     val page =
-      parser.parse(
-        html = html,
-        baseUrl = FaUrls.favorites("tiaamaito"),
-        defaultAuthor = "tiaamaito",
-      )
+        parser.parse(
+            html = html,
+            baseUrl = FaUrls.favorites("tiaamaito"),
+            defaultAuthor = "tiaamaito",
+        )
 
     assertTrue(page.submissions.isNotEmpty())
     assertNotNull(page.nextPageUrl)
@@ -52,32 +58,32 @@ class GalleryParserTest {
   @Test
   fun parsesThumbnailFromSrcsetWhenSrcMissing() {
     val html =
-      """
-      <html>
-          <body>
-              <section class="gallery-section">
-                  <figure id="sid-998877">
-                      <a href="/view/998877/">
-                          <img src="" srcset="//t.furaffinity.net/998877@300-1700000000.jpg 1x, //t.furaffinity.net/998877@600-1700000000.jpg 2x" data-width="300" data-height="200" />
-                      </a>
-                      <figcaption>
-                          <p><a href="/view/998877/" title="Demo">Demo</a></p>
-                          <p><i>by</i> <a href="/user/demo/">demo</a></p>
-                      </figcaption>
-                  </figure>
-              </section>
-          </body>
-      </html>
-      """
-        .trimIndent()
+        """
+        <html>
+            <body>
+                <section class="gallery-section">
+                    <figure id="sid-998877">
+                        <a href="/view/998877/">
+                            <img src="" srcset="//t.furaffinity.net/998877@300-1700000000.jpg 1x, //t.furaffinity.net/998877@600-1700000000.jpg 2x" data-width="300" data-height="200" />
+                        </a>
+                        <figcaption>
+                            <p><a href="/view/998877/" title="Demo">Demo</a></p>
+                            <p><i>by</i> <a href="/user/demo/">demo</a></p>
+                        </figcaption>
+                    </figure>
+                </section>
+            </body>
+        </html>
+        """
+            .trimIndent()
     val parser = GalleryParser()
 
     val page = parser.parse(html = html, baseUrl = FaUrls.gallery("demo"), defaultAuthor = "demo")
 
     assertEquals(1, page.submissions.size)
     assertEquals(
-      "https://t.furaffinity.net/998877@300-1700000000.jpg",
-      page.submissions.first().thumbnailUrl,
+        "https://t.furaffinity.net/998877@300-1700000000.jpg",
+        page.submissions.first().thumbnailUrl,
     )
   }
 }

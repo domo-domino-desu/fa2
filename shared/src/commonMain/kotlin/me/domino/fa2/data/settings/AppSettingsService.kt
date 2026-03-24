@@ -50,9 +50,9 @@ class AppSettingsService(private val storage: AppSettingsStorage) {
 
   suspend fun updateOpenAiTranslationConfig(config: OpenAiTranslationConfig) {
     updateSettings(
-      mutableSettings.value.copy(
-        openAiTranslationConfig = OpenAiTranslationConfig.normalize(config)
-      )
+        mutableSettings.value.copy(
+            openAiTranslationConfig = OpenAiTranslationConfig.normalize(config)
+        )
     )
   }
 

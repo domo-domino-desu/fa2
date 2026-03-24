@@ -5,8 +5,8 @@ import kotlinx.coroutines.sync.withLock
 
 /** 轻量 Cookie 存储。 负责内存态与持久化双写。 */
 class FaCookiesStorage(
-  /** Cookie 持久化端口。 */
-  private val cookiePersistence: CookiePersistence
+    /** Cookie 持久化端口。 */
+    private val cookiePersistence: CookiePersistence
 ) {
   /** 并发保护锁。 */
   private val mutex = Mutex()
@@ -59,9 +59,9 @@ class FaCookiesStorage(
    * @param acceptIncoming 新输入 Cookie 接受条件。
    */
   suspend fun replaceRawCookieHeader(
-    raw: String,
-    preserveExisting: (String) -> Boolean = { false },
-    acceptIncoming: (String) -> Boolean = { true },
+      raw: String,
+      preserveExisting: (String) -> Boolean = { false },
+      acceptIncoming: (String) -> Boolean = { true },
   ) {
     restorePersistedIfNeeded()
     mutex.withLock {
@@ -104,7 +104,7 @@ class FaCookiesStorage(
 
         val lowered = setCookie.lowercase()
         val shouldDelete =
-          lowered.contains("max-age=0") || lowered.contains("expires=thu, 01 jan 1970")
+            lowered.contains("max-age=0") || lowered.contains("expires=thu, 01 jan 1970")
         if (shouldDelete) {
           existing.remove(name)
         } else {
@@ -151,7 +151,7 @@ class FaCookiesStorage(
    * @param raw 原始 Cookie 文本。
    */
   private fun normalizeCookieHeader(raw: String): String =
-    parseCookieMap(raw).entries.joinToString("; ") { (name, value) -> "$name=$value" }
+      parseCookieMap(raw).entries.joinToString("; ") { (name, value) -> "$name=$value" }
 
   /**
    * 解析 Cookie 文本到键值映射。
@@ -160,17 +160,16 @@ class FaCookiesStorage(
    */
   private fun parseCookieMap(raw: String): LinkedHashMap<String, String> {
     val output = LinkedHashMap<String, String>()
-    raw
-      .split(';')
-      .map { it.trim() }
-      .filter { it.isNotBlank() && it.contains('=') }
-      .forEach { token ->
-        val name = token.substringBefore('=').trim()
-        val value = token.substringAfter('=', "").trim()
-        if (name.isNotBlank()) {
-          output[name] = value
+    raw.split(';')
+        .map { it.trim() }
+        .filter { it.isNotBlank() && it.contains('=') }
+        .forEach { token ->
+          val name = token.substringBefore('=').trim()
+          val value = token.substringAfter('=', "").trim()
+          if (name.isNotBlank()) {
+            output[name] = value
+          }
         }
-      }
     return output
   }
 

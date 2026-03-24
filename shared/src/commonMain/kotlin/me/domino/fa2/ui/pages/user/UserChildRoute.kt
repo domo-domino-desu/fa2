@@ -2,10 +2,10 @@ package me.domino.fa2.ui.pages.user
 
 /** User 子路由。 */
 enum class UserChildRoute(
-  /** 路由键。 */
-  val routeKey: String,
-  /** 展示标题。 */
-  val title: String,
+    /** 路由键。 */
+    val routeKey: String,
+    /** 展示标题。 */
+    val title: String,
 ) {
   /** Gallery。 */
   Gallery(routeKey = "gallery", title = "Gallery"),
@@ -23,7 +23,7 @@ enum class UserChildRoute(
   companion object {
     /** 从字符串恢复子路由。 */
     fun fromRouteKey(routeKey: String?): UserChildRoute =
-      entries.firstOrNull { route -> route.routeKey.equals(routeKey?.trim(), ignoreCase = true) }
-        ?: Gallery
+        entries.firstOrNull { route -> route.routeKey.equals(routeKey?.trim(), ignoreCase = true) }
+            ?: Gallery
   }
 }

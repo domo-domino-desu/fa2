@@ -10,9 +10,9 @@ actual fun rememberPlatformTextCopier(): (String) -> Boolean {
   return remember {
     { text ->
       runCatching {
-          Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(text), null)
-        }
-        .isSuccess
+            Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(text), null)
+          }
+          .isSuccess
     }
   }
 }

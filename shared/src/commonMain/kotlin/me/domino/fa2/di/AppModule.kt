@@ -9,15 +9,15 @@ import org.koin.core.module.Module
 
 /** 汇总应用模块。 */
 fun appModules(platformModule: Module): List<Module> =
-  listOf(
-    networkModule(),
-    databaseModule(),
-    dataSourceModule(),
-    storeModule(),
-    repositoryModule(),
-    screenModelModule(),
-    platformModule,
-  )
+    listOf(
+        networkModule(),
+        databaseModule(),
+        dataSourceModule(),
+        storeModule(),
+        repositoryModule(),
+        screenModelModule(),
+        platformModule,
+    )
 
 /** 初始化应用 Koin。 */
 fun startAppKoin(platformModule: Module) {

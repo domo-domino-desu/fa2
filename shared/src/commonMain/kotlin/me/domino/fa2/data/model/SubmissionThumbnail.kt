@@ -15,20 +15,20 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class SubmissionThumbnail(
-  /** 投稿唯一 ID。 */
-  val id: Int,
-  /** 投稿详情页 URL。 */
-  val submissionUrl: String = "",
-  /** 投稿标题。 */
-  val title: String,
-  /** 投稿作者名。 */
-  val author: String,
-  /** 作者头像地址。 */
-  val authorAvatarUrl: String = "",
-  /** 缩略图绝对地址。 */
-  val thumbnailUrl: String,
-  /** 缩略图宽高比（宽 / 高）。 */
-  val thumbnailAspectRatio: Float,
-  /** 是否命中 tag 屏蔽。 */
-  val isBlockedByTag: Boolean = false,
+    /** 投稿唯一 ID。 */
+    val id: Int,
+    /** 投稿详情页 URL。 */
+    val submissionUrl: String = "",
+    /** 投稿标题。 */
+    val title: String,
+    /** 投稿作者名。 */
+    val author: String,
+    /** 作者头像地址。 */
+    val authorAvatarUrl: String = "",
+    /** 缩略图绝对地址。 */
+    val thumbnailUrl: String,
+    /** 缩略图宽高比（宽 / 高）。 */
+    val thumbnailAspectRatio: Float,
+    /** 是否命中 tag 屏蔽。 */
+    val isBlockedByTag: Boolean = false,
 )

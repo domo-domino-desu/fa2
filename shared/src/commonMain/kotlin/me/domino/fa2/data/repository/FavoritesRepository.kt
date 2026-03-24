@@ -13,24 +13,24 @@ class FavoritesRepository(private val galleryStore: GalleryStore) {
 
   /** 加载 favorites 分页。 */
   suspend fun loadFavoritesPage(
-    username: String,
-    nextPageUrl: String? = null,
+      username: String,
+      nextPageUrl: String? = null,
   ): PageState<GalleryPage> {
     log.d { "加载Favorites -> user=$username,cursor=${nextPageUrl?.let(::summarizeUrl) ?: "first"}" }
     val state =
-      galleryStore.loadPageOnce(
-        section = GalleryStore.Section.Favorites,
-        username = username,
-        nextPageUrl = nextPageUrl,
-      )
+        galleryStore.loadPageOnce(
+            section = GalleryStore.Section.Favorites,
+            username = username,
+            nextPageUrl = nextPageUrl,
+        )
     log.d { "加载Favorites -> ${summarizePageState(state)}" }
     return state
   }
 
   /** 强制刷新 favorites 首页。 */
   suspend fun refreshFavoritesFirstPage(
-    username: String,
-    firstPageUrlOverride: String? = null,
+      username: String,
+      firstPageUrlOverride: String? = null,
   ): PageState<GalleryPage> {
     log.i {
       "刷新Favorites -> user=$username,override=${firstPageUrlOverride?.let(::summarizeUrl) ?: "none"}"

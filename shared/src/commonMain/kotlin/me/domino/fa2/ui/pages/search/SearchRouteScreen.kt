@@ -31,9 +31,9 @@ class SearchRouteScreen(private val initialQuery: String) : Screen {
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
     val submissionListHolder =
-      navigator.rememberNavigatorScreenModel<SubmissionListHolder>(tag = holderTag) {
-        SubmissionListHolder()
-      }
+        navigator.rememberNavigatorScreenModel<SubmissionListHolder>(tag = holderTag) {
+          SubmissionListHolder()
+        }
     val screenModel = koinScreenModel<SearchScreenModel> { parametersOf(submissionListHolder) }
     val pageState by screenModel.pageState.collectAsState()
     val waterfallState = rememberLazyStaggeredGridState()
@@ -51,41 +51,46 @@ class SearchRouteScreen(private val initialQuery: String) : Screen {
 
       PageStateWrapper(state = pageState, onRetry = screenModel::refresh) { state ->
         SearchScreen(
-          state = state,
-          actions =
-            SearchScreenActions(
-              onOpenOverlay = screenModel::openOverlay,
-              onCloseOverlay = screenModel::closeOverlay,
-              onUpdateQuery = screenModel::updateQuery,
-              onToggleGender = screenModel::toggleGender,
-              onUpdateCategory = screenModel::updateCategory,
-              onUpdateType = screenModel::updateType,
-              onUpdateSpecies = screenModel::updateSpecies,
-              onUpdateOrderBy = screenModel::updateOrderBy,
-              onUpdateOrderDirection = screenModel::updateOrderDirection,
-              onUpdateRange = screenModel::updateRange,
-              onUpdateRangeFrom = screenModel::updateRangeFrom,
-              onUpdateRangeTo = screenModel::updateRangeTo,
-              onSetRatingGeneral = screenModel::setRatingGeneral,
-              onSetRatingMature = screenModel::setRatingMature,
-              onSetRatingAdult = screenModel::setRatingAdult,
-              onSetTypeArt = screenModel::setTypeArt,
-              onSetTypeMusic = screenModel::setTypeMusic,
-              onSetTypeFlash = screenModel::setTypeFlash,
-              onSetTypeStory = screenModel::setTypeStory,
-              onSetTypePhoto = screenModel::setTypePhoto,
-              onSetTypePoetry = screenModel::setTypePoetry,
-              onApplySearch = screenModel::applySearch,
-              onRefresh = screenModel::refresh,
-              onRetry = screenModel::refresh,
-              onOpenSubmission = { item ->
-                screenModel.setCurrentSubmission(item.id)
-                navigator.push(SubmissionRouteScreen(initialSid = item.id, holderTag = holderTag))
-              },
-              onLastVisibleIndexChanged = screenModel::onLastVisibleIndexChanged,
-              onRetryLoadMore = screenModel::retryLoadMore,
-            ),
-          waterfallState = waterfallState,
+            state = state,
+            actions =
+                SearchScreenActions(
+                    onOpenOverlay = screenModel::openOverlay,
+                    onCloseOverlay = screenModel::closeOverlay,
+                    onUpdateQuery = screenModel::updateQuery,
+                    onToggleGender = screenModel::toggleGender,
+                    onUpdateCategory = screenModel::updateCategory,
+                    onUpdateType = screenModel::updateType,
+                    onUpdateSpecies = screenModel::updateSpecies,
+                    onUpdateOrderBy = screenModel::updateOrderBy,
+                    onUpdateOrderDirection = screenModel::updateOrderDirection,
+                    onUpdateRange = screenModel::updateRange,
+                    onUpdateRangeFrom = screenModel::updateRangeFrom,
+                    onUpdateRangeTo = screenModel::updateRangeTo,
+                    onSetRatingGeneral = screenModel::setRatingGeneral,
+                    onSetRatingMature = screenModel::setRatingMature,
+                    onSetRatingAdult = screenModel::setRatingAdult,
+                    onSetTypeArt = screenModel::setTypeArt,
+                    onSetTypeMusic = screenModel::setTypeMusic,
+                    onSetTypeFlash = screenModel::setTypeFlash,
+                    onSetTypeStory = screenModel::setTypeStory,
+                    onSetTypePhoto = screenModel::setTypePhoto,
+                    onSetTypePoetry = screenModel::setTypePoetry,
+                    onApplySearch = screenModel::applySearch,
+                    onRefresh = screenModel::refresh,
+                    onRetry = screenModel::refresh,
+                    onOpenSubmission = { item ->
+                      screenModel.setCurrentSubmission(item.id)
+                      navigator.push(
+                          SubmissionRouteScreen(
+                              initialSid = item.id,
+                              holderTag = holderTag,
+                          )
+                      )
+                    },
+                    onLastVisibleIndexChanged = screenModel::onLastVisibleIndexChanged,
+                    onRetryLoadMore = screenModel::retryLoadMore,
+                ),
+            waterfallState = waterfallState,
         )
       }
     }

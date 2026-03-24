@@ -30,39 +30,39 @@ enum class SearchGender(val token: String) {
 }
 
 data class SearchFormState(
-  val query: String = "",
-  val category: Int = 1,
-  val type: Int = 1,
-  val species: Int = 1,
-  val orderBy: String = "relevancy",
-  val orderDirection: String = "desc",
-  val range: String = "all",
-  val rangeFrom: String = "",
-  val rangeTo: String = "",
-  val ratingGeneral: Boolean = true,
-  val ratingMature: Boolean = true,
-  val ratingAdult: Boolean = true,
-  val typeArt: Boolean = true,
-  val typeMusic: Boolean = true,
-  val typeFlash: Boolean = true,
-  val typeStory: Boolean = true,
-  val typePhoto: Boolean = true,
-  val typePoetry: Boolean = true,
-  val selectedGenders: Set<SearchGender> = emptySet(),
+    val query: String = "",
+    val category: Int = 1,
+    val type: Int = 1,
+    val species: Int = 1,
+    val orderBy: String = "relevancy",
+    val orderDirection: String = "desc",
+    val range: String = "all",
+    val rangeFrom: String = "",
+    val rangeTo: String = "",
+    val ratingGeneral: Boolean = true,
+    val ratingMature: Boolean = true,
+    val ratingAdult: Boolean = true,
+    val typeArt: Boolean = true,
+    val typeMusic: Boolean = true,
+    val typeFlash: Boolean = true,
+    val typeStory: Boolean = true,
+    val typePhoto: Boolean = true,
+    val typePoetry: Boolean = true,
+    val selectedGenders: Set<SearchGender> = emptySet(),
 )
 
 data class SearchUiState(
-  val overlayVisible: Boolean = false,
-  val draft: SearchFormState = SearchFormState(),
-  val applied: SearchFormState? = null,
-  val hasSearched: Boolean = false,
-  val submissions: List<SubmissionThumbnail> = emptyList(),
-  val nextPageUrl: String? = null,
-  val loading: Boolean = false,
-  val refreshing: Boolean = false,
-  val isLoadingMore: Boolean = false,
-  val errorMessage: String? = null,
-  val appendErrorMessage: String? = null,
+    val overlayVisible: Boolean = false,
+    val draft: SearchFormState = SearchFormState(),
+    val applied: SearchFormState? = null,
+    val hasSearched: Boolean = false,
+    val submissions: List<SubmissionThumbnail> = emptyList(),
+    val nextPageUrl: String? = null,
+    val loading: Boolean = false,
+    val refreshing: Boolean = false,
+    val isLoadingMore: Boolean = false,
+    val errorMessage: String? = null,
+    val appendErrorMessage: String? = null,
 ) {
   val hasMore: Boolean
     get() = !nextPageUrl.isNullOrBlank()
@@ -70,14 +70,15 @@ data class SearchUiState(
 
 /** Search 页面状态模型。 */
 class SearchScreenModel(
-  private val repository: SearchRepository,
-  private val submissionListHolder: SubmissionListHolder,
-  private val historyRepository: ActivityHistoryRepository,
+    private val repository: SearchRepository,
+    private val submissionListHolder: SubmissionListHolder,
+    private val historyRepository: ActivityHistoryRepository,
 ) : StateScreenModel<SearchUiState>(SearchUiState()) {
   private val log = FaLog.withTag("SearchScreenModel")
   private val paginationStateMachine =
-    PaginationStateMachine<SubmissionThumbnail, Int>(keyOf = { item -> item.id })
-  private val mutablePageState = MutableStateFlow<PageState<SearchUiState>>(PageState.Success(state.value))
+      PaginationStateMachine<SubmissionThumbnail, Int>(keyOf = { item -> item.id })
+  private val mutablePageState =
+      MutableStateFlow<PageState<SearchUiState>>(PageState.Success(state.value))
   val pageState: StateFlow<PageState<SearchUiState>> = mutablePageState.asStateFlow()
   private var loadJob: Job? = null
   private var appendJob: Job? = null
@@ -94,21 +95,21 @@ class SearchScreenModel(
   fun updateQuery(query: String) {
     val genders = parseGendersFromQuery(query)
     mutableState.value =
-      state.value.copy(draft = state.value.draft.copy(query = query, selectedGenders = genders))
+        state.value.copy(draft = state.value.draft.copy(query = query, selectedGenders = genders))
   }
 
   fun toggleGender(gender: SearchGender, checked: Boolean) {
     val current = state.value.draft
     val updatedGenders =
-      current.selectedGenders
-        .toMutableSet()
-        .apply { if (checked) add(gender) else remove(gender) }
-        .toSet()
+        current.selectedGenders
+            .toMutableSet()
+            .apply { if (checked) add(gender) else remove(gender) }
+            .toSet()
     val rewrittenQuery = rewriteQueryWithGenders(query = current.query, genders = updatedGenders)
     mutableState.value =
-      state.value.copy(
-        draft = current.copy(query = rewrittenQuery, selectedGenders = updatedGenders)
-      )
+        state.value.copy(
+            draft = current.copy(query = rewrittenQuery, selectedGenders = updatedGenders)
+        )
   }
 
   fun updateCategory(category: Int) {
@@ -129,7 +130,7 @@ class SearchScreenModel(
 
   fun updateOrderDirection(orderDirection: String) {
     mutableState.value =
-      state.value.copy(draft = state.value.draft.copy(orderDirection = orderDirection))
+        state.value.copy(draft = state.value.draft.copy(orderDirection = orderDirection))
   }
 
   fun updateRange(range: String) {
@@ -189,7 +190,7 @@ class SearchScreenModel(
     }
     firstPageUrl = buildSearchUrl(form = applied, page = 1)
     mutableState.value =
-      state.value.copy(overlayVisible = false, applied = applied, hasSearched = true)
+        state.value.copy(overlayVisible = false, applied = applied, hasSearched = true)
     mutablePageState.value = PageState.Loading
     screenModelScope.launch { historyRepository.recordSearchQuery(applied.query) }
     log.i { "应用Search -> 已提交(keywordLen=${applied.query.length})" }
@@ -231,61 +232,62 @@ class SearchScreenModel(
     }
     val snapshot = state.value
     mutableState.value =
-      snapshot.applyPagination(
-        paginationStateMachine.beginLoad(
-          snapshot = snapshot.toPaginationSnapshot(),
-          forceRefresh = forceRefresh,
+        snapshot.applyPagination(
+            paginationStateMachine.beginLoad(
+                snapshot = snapshot.toPaginationSnapshot(),
+                forceRefresh = forceRefresh,
+            )
         )
-      )
     if (snapshot.submissions.isEmpty()) {
       mutablePageState.value = PageState.Loading
     }
-    loadJob = screenModelScope.launch {
-      val pageState =
-        if (forceRefresh) {
-          repository.refreshPage(firstUrl)
-        } else {
-          repository.loadPage(firstUrl)
-        }
-      val reduced =
-        paginationStateMachine.reduceFirstPage(
-          snapshot = state.value.toPaginationSnapshot(),
-          result = pageState,
-          itemsOf = { page -> page.submissions },
-          nextPageUrlOf = { page -> page.nextPageUrl },
-        )
-      val updated = state.value.applyPagination(reduced)
-      mutableState.value = updated
-      when (pageState) {
-        is PageState.Success -> {
-          syncSubmissionListHolder(updated)
-          mutablePageState.value = PageState.Success(updated)
-          log.i {
-            "加载Search -> ${summarizePageState(pageState)}(count=${updated.submissions.size})"
+    loadJob =
+        screenModelScope.launch {
+          val pageState =
+              if (forceRefresh) {
+                repository.refreshPage(firstUrl)
+              } else {
+                repository.loadPage(firstUrl)
+              }
+          val reduced =
+              paginationStateMachine.reduceFirstPage(
+                  snapshot = state.value.toPaginationSnapshot(),
+                  result = pageState,
+                  itemsOf = { page -> page.submissions },
+                  nextPageUrlOf = { page -> page.nextPageUrl },
+              )
+          val updated = state.value.applyPagination(reduced)
+          mutableState.value = updated
+          when (pageState) {
+            is PageState.Success -> {
+              syncSubmissionListHolder(updated)
+              mutablePageState.value = PageState.Success(updated)
+              log.i {
+                "加载Search -> ${summarizePageState(pageState)}(count=${updated.submissions.size})"
+              }
+            }
+
+            PageState.CfChallenge -> {
+              mutablePageState.value = PageState.CfChallenge
+              log.w { "加载Search -> Cloudflare验证" }
+            }
+
+            is PageState.MatureBlocked -> {
+              mutablePageState.value = PageState.MatureBlocked(pageState.reason)
+              log.w { "加载Search -> 受限(${pageState.reason})" }
+            }
+
+            is PageState.Error -> {
+              mutablePageState.value = PageState.Error(pageState.exception)
+              log.e(pageState.exception) { "加载Search -> 失败" }
+            }
+
+            PageState.Loading -> {
+              mutablePageState.value = PageState.Loading
+              log.d { "加载Search -> 加载中" }
+            }
           }
         }
-
-        PageState.CfChallenge -> {
-          mutablePageState.value = PageState.CfChallenge
-          log.w { "加载Search -> Cloudflare验证" }
-        }
-
-        is PageState.MatureBlocked -> {
-          mutablePageState.value = PageState.MatureBlocked(pageState.reason)
-          log.w { "加载Search -> 受限(${pageState.reason})" }
-        }
-
-        is PageState.Error -> {
-          mutablePageState.value = PageState.Error(pageState.exception)
-          log.e(pageState.exception) { "加载Search -> 失败" }
-        }
-
-        PageState.Loading -> {
-          mutablePageState.value = PageState.Loading
-          log.d { "加载Search -> 加载中" }
-        }
-      }
-    }
   }
 
   private fun loadMore(force: Boolean) {
@@ -302,89 +304,95 @@ class SearchScreenModel(
     log.d { "自动加载Search -> 开始(force=$force)" }
 
     mutableState.value =
-      snapshot.applyPagination(paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot()))
-
-    appendJob = screenModelScope.launch {
-      val pageState = repository.loadPage(nextUrl)
-      val reduced =
-        paginationStateMachine.reduceAppend(
-          snapshot = state.value.toPaginationSnapshot(),
-          result = pageState,
-          itemsOf = { page -> page.submissions },
-          nextPageUrlOf = { page -> page.nextPageUrl },
+        snapshot.applyPagination(
+            paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot())
         )
-      val updated = state.value.applyPagination(reduced)
-      mutableState.value = updated
-      when (pageState) {
-        is PageState.Success -> {
-          syncSubmissionListHolder(updated)
-          mutablePageState.value = PageState.Success(updated)
-          log.d {
-            "自动加载Search -> ${summarizePageState(pageState)}(count=${updated.submissions.size})"
+
+    appendJob =
+        screenModelScope.launch {
+          val pageState = repository.loadPage(nextUrl)
+          val reduced =
+              paginationStateMachine.reduceAppend(
+                  snapshot = state.value.toPaginationSnapshot(),
+                  result = pageState,
+                  itemsOf = { page -> page.submissions },
+                  nextPageUrlOf = { page -> page.nextPageUrl },
+              )
+          val updated = state.value.applyPagination(reduced)
+          mutableState.value = updated
+          when (pageState) {
+            is PageState.Success -> {
+              syncSubmissionListHolder(updated)
+              mutablePageState.value = PageState.Success(updated)
+              log.d {
+                "自动加载Search -> ${summarizePageState(pageState)}(count=${updated.submissions.size})"
+              }
+            }
+
+            PageState.CfChallenge -> log.w { "自动加载Search -> Cloudflare验证" }
+            is PageState.MatureBlocked -> log.w { "自动加载Search -> 受限(${pageState.reason})" }
+            is PageState.Error -> log.e(pageState.exception) { "自动加载Search -> 失败" }
+            PageState.Loading -> log.d { "自动加载Search -> 加载中" }
           }
         }
-
-        PageState.CfChallenge -> log.w { "自动加载Search -> Cloudflare验证" }
-        is PageState.MatureBlocked -> log.w { "自动加载Search -> 受限(${pageState.reason})" }
-        is PageState.Error -> log.e(pageState.exception) { "自动加载Search -> 失败" }
-        PageState.Loading -> log.d { "自动加载Search -> 加载中" }
-      }
-    }
   }
 
   private fun buildSearchUrl(form: SearchFormState, page: Int): String =
-    FaUrls.search(
-      FaUrls.SearchParams(
-        q = form.query,
-        page = page,
-        category = form.category,
-        arttype = form.type,
-        species = form.species,
-        orderBy = form.orderBy,
-        orderDirection = form.orderDirection,
-        range = form.range,
-        rangeFrom = form.rangeFrom,
-        rangeTo = form.rangeTo,
-        ratingGeneral = form.ratingGeneral,
-        ratingMature = form.ratingMature,
-        ratingAdult = form.ratingAdult,
-        typeArt = form.typeArt,
-        typeMusic = form.typeMusic,
-        typeFlash = form.typeFlash,
-        typeStory = form.typeStory,
-        typePhoto = form.typePhoto,
-        typePoetry = form.typePoetry,
+      FaUrls.search(
+          FaUrls.SearchParams(
+              q = form.query,
+              page = page,
+              category = form.category,
+              arttype = form.type,
+              species = form.species,
+              orderBy = form.orderBy,
+              orderDirection = form.orderDirection,
+              range = form.range,
+              rangeFrom = form.rangeFrom,
+              rangeTo = form.rangeTo,
+              ratingGeneral = form.ratingGeneral,
+              ratingMature = form.ratingMature,
+              ratingAdult = form.ratingAdult,
+              typeArt = form.typeArt,
+              typeMusic = form.typeMusic,
+              typeFlash = form.typeFlash,
+              typeStory = form.typeStory,
+              typePhoto = form.typePhoto,
+              typePoetry = form.typePoetry,
+          )
       )
-    )
 
   private fun syncSubmissionListHolder(state: SearchUiState) {
-    submissionListHolder.replace(submissions = state.submissions, nextPageUrl = state.nextPageUrl)
+    submissionListHolder.replace(
+        submissions = state.submissions,
+        nextPageUrl = state.nextPageUrl,
+    )
   }
 }
 
 private fun SearchUiState.toPaginationSnapshot(): PaginationSnapshot<SubmissionThumbnail> =
-  PaginationSnapshot(
-    items = submissions,
-    nextPageUrl = nextPageUrl,
-    loading = loading,
-    refreshing = refreshing,
-    isLoadingMore = isLoadingMore,
-    errorMessage = errorMessage,
-    appendErrorMessage = appendErrorMessage,
-  )
+    PaginationSnapshot(
+        items = submissions,
+        nextPageUrl = nextPageUrl,
+        loading = loading,
+        refreshing = refreshing,
+        isLoadingMore = isLoadingMore,
+        errorMessage = errorMessage,
+        appendErrorMessage = appendErrorMessage,
+    )
 
 private fun SearchUiState.applyPagination(
-  snapshot: PaginationSnapshot<SubmissionThumbnail>
+    snapshot: PaginationSnapshot<SubmissionThumbnail>
 ): SearchUiState =
-  copy(
-    submissions = snapshot.items,
-    nextPageUrl = snapshot.nextPageUrl,
-    loading = snapshot.loading,
-    refreshing = snapshot.refreshing,
-    isLoadingMore = snapshot.isLoadingMore,
-    errorMessage = snapshot.errorMessage,
-    appendErrorMessage = snapshot.appendErrorMessage,
-  )
+    copy(
+        submissions = snapshot.items,
+        nextPageUrl = snapshot.nextPageUrl,
+        loading = snapshot.loading,
+        refreshing = snapshot.refreshing,
+        isLoadingMore = snapshot.isLoadingMore,
+        errorMessage = snapshot.errorMessage,
+        appendErrorMessage = snapshot.appendErrorMessage,
+    )
 
 internal fun parseGendersFromQuery(query: String): Set<SearchGender> {
   val tokens = query.split(Regex("\\s+")).filter { token -> token.isNotBlank() }
@@ -402,7 +410,7 @@ internal fun rewriteQueryWithGenders(query: String, genders: Set<SearchGender>):
   val tokens = query.split(Regex("\\s+")).filter { token -> token.isNotBlank() }.toMutableList()
   val keywordsIndex = tokens.indexOfFirst { token -> token.equals("@keywords", ignoreCase = true) }
   val selectedGenderTokens =
-    SearchGender.entries.filter { gender -> gender in genders }.map { gender -> gender.token }
+      SearchGender.entries.filter { gender -> gender in genders }.map { gender -> gender.token }
 
   if (keywordsIndex < 0) {
     if (selectedGenderTokens.isEmpty()) {
@@ -418,11 +426,12 @@ internal fun rewriteQueryWithGenders(query: String, genders: Set<SearchGender>):
 
   val beforeKeywords = tokens.take(keywordsIndex)
   val afterKeywords = tokens.drop(keywordsIndex + 1)
-  val nonGenderKeywords = afterKeywords.filterNot { token ->
-    SearchGender.entries.any { gender ->
-      gender.token.equals(token.trim().lowercase(), ignoreCase = true)
-    }
-  }
+  val nonGenderKeywords =
+      afterKeywords.filterNot { token ->
+        SearchGender.entries.any { gender ->
+          gender.token.equals(token.trim().lowercase(), ignoreCase = true)
+        }
+      }
 
   if (selectedGenderTokens.isEmpty() && nonGenderKeywords.isEmpty()) {
     return beforeKeywords.joinToString(" ").trim()

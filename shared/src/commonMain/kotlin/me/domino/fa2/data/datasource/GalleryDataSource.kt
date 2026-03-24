@@ -11,11 +11,11 @@ class GalleryDataSource(private val endpoint: GalleryEndpoint, private val parse
   /** 拉取 gallery 分页。 */
   suspend fun fetchPage(username: String, nextPageUrl: String?): PageState<GalleryPage> {
     val response =
-      if (nextPageUrl.isNullOrBlank()) {
-        endpoint.fetch(username)
-      } else {
-        endpoint.fetchByUrl(nextPageUrl)
-      }
+        if (nextPageUrl.isNullOrBlank()) {
+          endpoint.fetch(username)
+        } else {
+          endpoint.fetchByUrl(nextPageUrl)
+        }
     return response.toPageState { success ->
       parser.parse(html = success.body, baseUrl = success.url, defaultAuthor = username)
     }

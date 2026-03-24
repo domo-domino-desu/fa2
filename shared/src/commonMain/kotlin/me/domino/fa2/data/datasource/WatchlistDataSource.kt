@@ -9,24 +9,24 @@ import me.domino.fa2.util.toPageState
 
 /** watchlist 远端数据源。 */
 class WatchlistDataSource(
-  private val endpoint: WatchlistEndpoint,
-  private val parser: WatchlistParser,
+    private val endpoint: WatchlistEndpoint,
+    private val parser: WatchlistParser,
 ) {
   /** 拉取 watchlist 分页。 */
   suspend fun fetchPage(
-    username: String,
-    category: WatchlistCategory,
-    nextPageUrl: String?,
+      username: String,
+      category: WatchlistCategory,
+      nextPageUrl: String?,
   ): PageState<WatchlistPage> {
     val response =
-      if (nextPageUrl.isNullOrBlank()) {
-        when (category) {
-          WatchlistCategory.WatchedBy -> endpoint.fetchWatchedBy(username)
-          WatchlistCategory.Watching -> endpoint.fetchWatching(username)
+        if (nextPageUrl.isNullOrBlank()) {
+          when (category) {
+            WatchlistCategory.WatchedBy -> endpoint.fetchWatchedBy(username)
+            WatchlistCategory.Watching -> endpoint.fetchWatching(username)
+          }
+        } else {
+          endpoint.fetchByUrl(nextPageUrl)
         }
-      } else {
-        endpoint.fetchByUrl(nextPageUrl)
-      }
     return response.toPageState { success ->
       parser.parse(html = success.body, baseUrl = success.url)
     }
