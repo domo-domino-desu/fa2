@@ -12,7 +12,7 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.gif.GifDecoder
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import me.domino.fa2.ui.app.Fa2App
+import me.domino.fa2.ui.host.Fa2App
 import okio.Path.Companion.toPath
 
 private const val coilDiskCacheMaxBytes = 1024L * 1024L * 1024L

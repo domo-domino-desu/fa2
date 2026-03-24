@@ -1,22 +1,22 @@
 package me.domino.fa2.di
 
 import me.domino.fa2.data.model.WatchlistCategory
-import me.domino.fa2.ui.navigation.MoreScreenModel
 import me.domino.fa2.ui.navigation.SubmissionListHolder
-import me.domino.fa2.ui.screen.auth.AuthScreenModel
-import me.domino.fa2.ui.screen.browse.BrowseScreenModel
-import me.domino.fa2.ui.screen.feed.FeedScreenModel
-import me.domino.fa2.ui.screen.search.SearchScreenModel
-import me.domino.fa2.ui.screen.submission.SubmissionPagerDetailSourceImpl
-import me.domino.fa2.ui.screen.submission.SubmissionPagerFeedSourceImpl
-import me.domino.fa2.ui.screen.submission.SubmissionScreenModel
-import me.domino.fa2.ui.screen.user.JournalDetailScreenModel
-import me.domino.fa2.ui.screen.user.UserChildRoute
-import me.domino.fa2.ui.screen.user.UserJournalsScreenModel
-import me.domino.fa2.ui.screen.user.UserScreenModel
-import me.domino.fa2.ui.screen.user.UserSubmissionSectionScreenModel
-import me.domino.fa2.ui.screen.user.UserSubmissionSectionUiState
-import me.domino.fa2.ui.screen.user.UserWatchlistScreenModel
+import me.domino.fa2.ui.pages.auth.AuthScreenModel
+import me.domino.fa2.ui.pages.browse.BrowseScreenModel
+import me.domino.fa2.ui.pages.feed.FeedScreenModel
+import me.domino.fa2.ui.pages.more.MoreScreenModel
+import me.domino.fa2.ui.pages.search.SearchScreenModel
+import me.domino.fa2.ui.pages.submission.SubmissionPagerDetailSourceImpl
+import me.domino.fa2.ui.pages.submission.SubmissionPagerFeedSourceImpl
+import me.domino.fa2.ui.pages.submission.SubmissionScreenModel
+import me.domino.fa2.ui.pages.user.JournalDetailScreenModel
+import me.domino.fa2.ui.pages.user.UserChildRoute
+import me.domino.fa2.ui.pages.user.UserJournalsScreenModel
+import me.domino.fa2.ui.pages.user.UserScreenModel
+import me.domino.fa2.ui.pages.user.UserSubmissionSectionScreenModel
+import me.domino.fa2.ui.pages.user.UserSubmissionSectionUiState
+import me.domino.fa2.ui.pages.user.UserWatchlistScreenModel
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -25,7 +25,7 @@ fun screenModelModule(): Module = module {
   factory { AuthScreenModel(get()) }
   factory { (holder: SubmissionListHolder) -> FeedScreenModel(get(), holder) }
   factory { (holder: SubmissionListHolder) -> BrowseScreenModel(get(), holder) }
-  factory { (holder: SubmissionListHolder) -> SearchScreenModel(get(), holder) }
+  factory { (holder: SubmissionListHolder) -> SearchScreenModel(get(), holder, get()) }
   factory { (username: String) -> MoreScreenModel(username, get(), get()) }
   factory { (initialSid: Int, holder: SubmissionListHolder) ->
     SubmissionScreenModel(

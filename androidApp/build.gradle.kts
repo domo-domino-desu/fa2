@@ -3,7 +3,6 @@ import org.gradle.api.tasks.Copy
 plugins {
   alias(libs.plugins.androidApplication)
   alias(libs.plugins.composeCompiler)
-  alias(libs.plugins.ktfmt)
 }
 
 android {
@@ -72,8 +71,6 @@ android {
 }
 
 kotlin { jvmToolchain(21) }
-
-ktfmt { googleStyle() }
 
 dependencies {
   implementation(project(":shared"))

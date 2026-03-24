@@ -4,10 +4,10 @@ import androidx.compose.ui.platform.UriHandler
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import kotlin.random.Random
-import me.domino.fa2.ui.screen.feed.SubmissionRouteScreen
-import me.domino.fa2.ui.screen.user.JournalDetailRouteScreen
-import me.domino.fa2.ui.screen.user.UserChildRoute
-import me.domino.fa2.ui.screen.user.UserRouteScreen
+import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
+import me.domino.fa2.ui.pages.user.JournalDetailRouteScreen
+import me.domino.fa2.ui.pages.user.UserChildRoute
+import me.domino.fa2.ui.pages.user.UserRouteScreen
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.ParserUtils
 

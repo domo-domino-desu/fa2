@@ -4,7 +4,6 @@ plugins {
   alias(libs.plugins.kotlinMultiplatform)
   alias(libs.plugins.composeMultiplatform)
   alias(libs.plugins.composeCompiler)
-  alias(libs.plugins.ktfmt)
 }
 
 val appVersionName = providers.gradleProperty("APP_VERSION_NAME").get()
@@ -35,8 +34,6 @@ kotlin {
     val desktopTest by getting { dependencies { implementation(kotlin("test")) } }
   }
 }
-
-ktfmt { googleStyle() }
 
 compose.desktop {
   application {

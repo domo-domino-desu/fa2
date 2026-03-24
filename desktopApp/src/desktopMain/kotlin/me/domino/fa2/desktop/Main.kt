@@ -7,7 +7,7 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
 import me.domino.fa2.di.startAppKoin
 import me.domino.fa2.di.stopAppKoin
-import me.domino.fa2.ui.app.Fa2App
+import me.domino.fa2.ui.host.Fa2App
 import me.domino.fa2.util.logging.FaLog
 import okio.Path
 import okio.Path.Companion.toPath

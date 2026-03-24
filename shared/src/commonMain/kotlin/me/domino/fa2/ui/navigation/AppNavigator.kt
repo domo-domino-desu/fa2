@@ -14,7 +14,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import me.domino.fa2.ui.screen.auth.AuthRouteScreen
+import me.domino.fa2.ui.pages.auth.AuthRouteScreen
 
 /** 应用导航容器。 */
 @Composable

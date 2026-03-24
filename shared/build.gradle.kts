@@ -6,7 +6,6 @@ plugins {
   alias(libs.plugins.kotlinx.serialization)
   alias(libs.plugins.aboutLibraries)
   alias(libs.plugins.ksp)
-  alias(libs.plugins.ktfmt)
 }
 
 kotlin {
@@ -85,8 +84,6 @@ dependencies {
   add("kspDesktop", libs.room.compiler)
   add("kspAndroid", libs.room.compiler)
 }
-
-ktfmt { googleStyle() }
 
 tasks.register("test") {
   group = "verification"

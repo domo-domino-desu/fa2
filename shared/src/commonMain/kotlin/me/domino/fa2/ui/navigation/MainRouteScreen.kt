@@ -15,19 +15,25 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.repository.ActivityHistoryRepository
-import me.domino.fa2.ui.screen.auth.AuthRouteScreen
-import me.domino.fa2.ui.screen.browse.BrowseScreen
-import me.domino.fa2.ui.screen.browse.BrowseScreenModel
-import me.domino.fa2.ui.screen.feed.FeedScreen
-import me.domino.fa2.ui.screen.feed.FeedScreenModel
-import me.domino.fa2.ui.screen.feed.SubmissionRouteScreen
-import me.domino.fa2.ui.screen.search.SearchScreen
-import me.domino.fa2.ui.screen.search.SearchScreenActions
-import me.domino.fa2.ui.screen.search.SearchScreenModel
-import me.domino.fa2.ui.screen.user.UserChildRoute
-import me.domino.fa2.ui.screen.user.UserRouteScreen
-import org.koin.compose.koinInject
+import me.domino.fa2.ui.components.PageStateWrapper
+import me.domino.fa2.ui.pages.about.AboutRouteScreen
+import me.domino.fa2.ui.pages.auth.AuthRouteScreen
+import me.domino.fa2.ui.pages.browse.BrowseScreen
+import me.domino.fa2.ui.pages.browse.BrowseScreenModel
+import me.domino.fa2.ui.pages.feed.FeedScreen
+import me.domino.fa2.ui.pages.feed.FeedScreenModel
+import me.domino.fa2.ui.pages.history.SearchHistoryRouteScreen
+import me.domino.fa2.ui.pages.history.SubmissionHistoryRouteScreen
+import me.domino.fa2.ui.pages.more.MoreScreen
+import me.domino.fa2.ui.pages.more.MoreScreenModel
+import me.domino.fa2.ui.pages.more.MoreUiState
+import me.domino.fa2.ui.pages.search.SearchScreen
+import me.domino.fa2.ui.pages.search.SearchScreenActions
+import me.domino.fa2.ui.pages.search.SearchScreenModel
+import me.domino.fa2.ui.pages.settings.SettingsRouteScreen
+import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
+import me.domino.fa2.ui.pages.user.UserChildRoute
+import me.domino.fa2.ui.pages.user.UserRouteScreen
 import org.koin.core.parameter.parametersOf
 
 /** 登录后的主路由页面。 */
@@ -39,7 +45,6 @@ class MainRouteScreen(
   @Composable
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
-    val historyRepository = koinInject<ActivityHistoryRepository>()
     val feedSubmissionListHolder =
       navigator.rememberNavigatorScreenModel<SubmissionListHolder>(
         tag = "submission-list-holder:feed"
@@ -65,9 +70,9 @@ class MainRouteScreen(
     val searchScreenModel =
       koinScreenModel<SearchScreenModel> { parametersOf(searchSubmissionListHolder) }
     val moreScreenModel = koinScreenModel<MoreScreenModel> { parametersOf(username) }
-    val feedState by feedScreenModel.state.collectAsState()
-    val browseState by browseScreenModel.state.collectAsState()
-    val searchState by searchScreenModel.state.collectAsState()
+    val feedPageState by feedScreenModel.pageState.collectAsState()
+    val browsePageState by browseScreenModel.pageState.collectAsState()
+    val searchPageState by searchScreenModel.pageState.collectAsState()
     val moreState by moreScreenModel.state.collectAsState()
     val feedWaterfallState = rememberLazyStaggeredGridState()
     val browseWaterfallState = rememberLazyStaggeredGridState()
@@ -136,102 +141,107 @@ class MainRouteScreen(
     ) {
       when (currentTopLevelDestination) {
         TopLevelDestination.FEED -> {
-          FeedScreen(
-            state = feedState,
+          PageStateWrapper(
+            state = feedPageState,
             onRetry = { feedScreenModel.load(forceRefresh = true) },
-            onRefresh = feedScreenModel::refresh,
-            onOpenSubmission = { item ->
-              feedScreenModel.setCurrentSubmission(item.id)
-              navigator.push(
-                SubmissionRouteScreen(
-                  initialSid = item.id,
-                  holderTag = "submission-list-holder:feed",
+          ) { feedState ->
+            FeedScreen(
+              state = feedState,
+              onRetry = { feedScreenModel.load(forceRefresh = true) },
+              onRefresh = feedScreenModel::refresh,
+              onOpenSubmission = { item ->
+                feedScreenModel.setCurrentSubmission(item.id)
+                navigator.push(
+                  SubmissionRouteScreen(
+                    initialSid = item.id,
+                    holderTag = "submission-list-holder:feed",
+                  )
                 )
-              )
-            },
-            onLastVisibleIndexChanged = feedScreenModel::onLastVisibleIndexChanged,
-            onRetryLoadMore = feedScreenModel::retryLoadMore,
-            waterfallState = feedWaterfallState,
-          )
+              },
+              onLastVisibleIndexChanged = feedScreenModel::onLastVisibleIndexChanged,
+              onRetryLoadMore = feedScreenModel::retryLoadMore,
+              waterfallState = feedWaterfallState,
+            )
+          }
         }
 
         TopLevelDestination.BROWSE -> {
-          BrowseScreen(
-            state = browseState,
-            onUpdateCategory = browseScreenModel::updateCategory,
-            onUpdateType = browseScreenModel::updateType,
-            onUpdateSpecies = browseScreenModel::updateSpecies,
-            onUpdateGender = browseScreenModel::updateGender,
-            onSetRatingGeneral = browseScreenModel::setRatingGeneral,
-            onSetRatingMature = browseScreenModel::setRatingMature,
-            onSetRatingAdult = browseScreenModel::setRatingAdult,
-            onApplyFilter = browseScreenModel::applyFilter,
-            onRefresh = browseScreenModel::refresh,
-            onRetry = browseScreenModel::refresh,
-            onOpenSubmission = { item ->
-              browseScreenModel.setCurrentSubmission(item.id)
-              navigator.push(
-                SubmissionRouteScreen(
-                  initialSid = item.id,
-                  holderTag = "submission-list-holder:browse",
+          PageStateWrapper(state = browsePageState, onRetry = browseScreenModel::refresh) {
+            browseState ->
+            BrowseScreen(
+              state = browseState,
+              onUpdateCategory = browseScreenModel::updateCategory,
+              onUpdateType = browseScreenModel::updateType,
+              onUpdateSpecies = browseScreenModel::updateSpecies,
+              onUpdateGender = browseScreenModel::updateGender,
+              onSetRatingGeneral = browseScreenModel::setRatingGeneral,
+              onSetRatingMature = browseScreenModel::setRatingMature,
+              onSetRatingAdult = browseScreenModel::setRatingAdult,
+              onApplyFilter = browseScreenModel::applyFilter,
+              onRefresh = browseScreenModel::refresh,
+              onRetry = browseScreenModel::refresh,
+              onOpenSubmission = { item ->
+                browseScreenModel.setCurrentSubmission(item.id)
+                navigator.push(
+                  SubmissionRouteScreen(
+                    initialSid = item.id,
+                    holderTag = "submission-list-holder:browse",
+                  )
                 )
-              )
-            },
-            onLastVisibleIndexChanged = browseScreenModel::onLastVisibleIndexChanged,
-            onRetryLoadMore = browseScreenModel::retryLoadMore,
-            waterfallState = browseWaterfallState,
-          )
+              },
+              onLastVisibleIndexChanged = browseScreenModel::onLastVisibleIndexChanged,
+              onRetryLoadMore = browseScreenModel::retryLoadMore,
+              waterfallState = browseWaterfallState,
+            )
+          }
         }
 
         TopLevelDestination.SEARCH -> {
-          SearchScreen(
-            state = searchState,
-            actions =
-              SearchScreenActions(
-                onOpenOverlay = searchScreenModel::openOverlay,
-                onCloseOverlay = searchScreenModel::closeOverlay,
-                onUpdateQuery = searchScreenModel::updateQuery,
-                onToggleGender = searchScreenModel::toggleGender,
-                onUpdateCategory = searchScreenModel::updateCategory,
-                onUpdateType = searchScreenModel::updateType,
-                onUpdateSpecies = searchScreenModel::updateSpecies,
-                onUpdateOrderBy = searchScreenModel::updateOrderBy,
-                onUpdateOrderDirection = searchScreenModel::updateOrderDirection,
-                onUpdateRange = searchScreenModel::updateRange,
-                onUpdateRangeFrom = searchScreenModel::updateRangeFrom,
-                onUpdateRangeTo = searchScreenModel::updateRangeTo,
-                onSetRatingGeneral = searchScreenModel::setRatingGeneral,
-                onSetRatingMature = searchScreenModel::setRatingMature,
-                onSetRatingAdult = searchScreenModel::setRatingAdult,
-                onSetTypeArt = searchScreenModel::setTypeArt,
-                onSetTypeMusic = searchScreenModel::setTypeMusic,
-                onSetTypeFlash = searchScreenModel::setTypeFlash,
-                onSetTypeStory = searchScreenModel::setTypeStory,
-                onSetTypePhoto = searchScreenModel::setTypePhoto,
-                onSetTypePoetry = searchScreenModel::setTypePoetry,
-                onApplySearch = {
-                  val query = searchState.draft.query.trim()
-                  searchScreenModel.applySearch()
-                  if (query.isNotBlank()) {
-                    coroutineScope.launch { historyRepository.recordSearchQuery(query) }
-                  }
-                },
-                onRefresh = searchScreenModel::refresh,
-                onRetry = searchScreenModel::refresh,
-                onOpenSubmission = { item ->
-                  searchScreenModel.setCurrentSubmission(item.id)
-                  navigator.push(
-                    SubmissionRouteScreen(
-                      initialSid = item.id,
-                      holderTag = "submission-list-holder:search",
+          PageStateWrapper(state = searchPageState, onRetry = searchScreenModel::refresh) {
+            searchState ->
+            SearchScreen(
+              state = searchState,
+              actions =
+                SearchScreenActions(
+                  onOpenOverlay = searchScreenModel::openOverlay,
+                  onCloseOverlay = searchScreenModel::closeOverlay,
+                  onUpdateQuery = searchScreenModel::updateQuery,
+                  onToggleGender = searchScreenModel::toggleGender,
+                  onUpdateCategory = searchScreenModel::updateCategory,
+                  onUpdateType = searchScreenModel::updateType,
+                  onUpdateSpecies = searchScreenModel::updateSpecies,
+                  onUpdateOrderBy = searchScreenModel::updateOrderBy,
+                  onUpdateOrderDirection = searchScreenModel::updateOrderDirection,
+                  onUpdateRange = searchScreenModel::updateRange,
+                  onUpdateRangeFrom = searchScreenModel::updateRangeFrom,
+                  onUpdateRangeTo = searchScreenModel::updateRangeTo,
+                  onSetRatingGeneral = searchScreenModel::setRatingGeneral,
+                  onSetRatingMature = searchScreenModel::setRatingMature,
+                  onSetRatingAdult = searchScreenModel::setRatingAdult,
+                  onSetTypeArt = searchScreenModel::setTypeArt,
+                  onSetTypeMusic = searchScreenModel::setTypeMusic,
+                  onSetTypeFlash = searchScreenModel::setTypeFlash,
+                  onSetTypeStory = searchScreenModel::setTypeStory,
+                  onSetTypePhoto = searchScreenModel::setTypePhoto,
+                  onSetTypePoetry = searchScreenModel::setTypePoetry,
+                  onApplySearch = searchScreenModel::applySearch,
+                  onRefresh = searchScreenModel::refresh,
+                  onRetry = searchScreenModel::refresh,
+                  onOpenSubmission = { item ->
+                    searchScreenModel.setCurrentSubmission(item.id)
+                    navigator.push(
+                      SubmissionRouteScreen(
+                        initialSid = item.id,
+                        holderTag = "submission-list-holder:search",
+                      )
                     )
-                  )
-                },
-                onLastVisibleIndexChanged = searchScreenModel::onLastVisibleIndexChanged,
-                onRetryLoadMore = searchScreenModel::retryLoadMore,
-              ),
-            waterfallState = searchWaterfallState,
-          )
+                  },
+                  onLastVisibleIndexChanged = searchScreenModel::onLastVisibleIndexChanged,
+                  onRetryLoadMore = searchScreenModel::retryLoadMore,
+                ),
+              waterfallState = searchWaterfallState,
+            )
+          }
         }
 
         TopLevelDestination.MORE -> {

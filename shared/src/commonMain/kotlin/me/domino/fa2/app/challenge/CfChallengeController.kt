@@ -1,7 +1,7 @@
 package me.domino.fa2.app.challenge
 
 import kotlinx.coroutines.flow.StateFlow
-import me.domino.fa2.ui.screen.auth.CfChallengeWebViewPort
+import me.domino.fa2.ui.pages.auth.CfChallengeWebViewPort
 
 interface CfChallengeController {
   val state: StateFlow<CfChallengeUiState>

@@ -14,7 +14,7 @@ import me.domino.fa2.data.network.HtmlResponseResult
 import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.data.network.challenge.CfChallengeSignal
 import me.domino.fa2.data.network.challenge.ChallengeResolver
-import me.domino.fa2.ui.screen.auth.CfChallengeWebViewPort
+import me.domino.fa2.ui.pages.auth.CfChallengeWebViewPort
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.isCloudflareCookieName
 import me.domino.fa2.util.logging.FaLog
