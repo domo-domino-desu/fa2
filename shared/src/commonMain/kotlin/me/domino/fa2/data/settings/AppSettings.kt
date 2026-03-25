@@ -35,9 +35,9 @@ data class AppSettings(
     val defaultThemeMode: ThemeMode = ThemeMode.SYSTEM
     const val defaultWaterfallMinCardWidthDp: Int = 220
     val defaultBlockedSubmissionWaterfallMode: BlockedSubmissionWaterfallMode =
-        BlockedSubmissionWaterfallMode.SHOW
+        BlockedSubmissionWaterfallMode.BLUR_THEN_OPEN
     val defaultBlockedSubmissionPagerMode: BlockedSubmissionPagerMode =
-        BlockedSubmissionPagerMode.SHOW
+        BlockedSubmissionPagerMode.BLUR_THEN_OPEN
 
     const val minTranslationChunkWordLimit: Int = 50
     const val maxTranslationChunkWordLimit: Int = 10000

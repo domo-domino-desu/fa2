@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -39,6 +40,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistUser
 import me.domino.fa2.ui.components.NetworkImage
@@ -65,6 +67,7 @@ class UserWatchlistRouteScreen(
         koinScreenModel<UserWatchlistScreenModel> { parametersOf(username, category, initialUrl) }
     val state by screenModel.state.collectAsState()
     val listState: LazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
     val latestOnLastVisible = rememberUpdatedState(screenModel::onLastVisibleIndexChanged)
     val shareUrl =
         when (category) {
@@ -89,6 +92,7 @@ class UserWatchlistRouteScreen(
           onBack = { navigator.pop() },
           onGoHome = { navigator.goBackHome() },
           shareUrl = shareUrl,
+          onTitleClick = { coroutineScope.launch { listState.animateScrollToItem(0) } },
       )
 
       PullToRefreshBox(

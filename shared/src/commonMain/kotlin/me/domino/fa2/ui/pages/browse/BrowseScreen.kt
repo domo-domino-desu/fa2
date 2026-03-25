@@ -1,6 +1,7 @@
 package me.domino.fa2.ui.pages.browse
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -9,7 +10,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,10 +27,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.search.SearchUiLabelsRepository
 import me.domino.fa2.data.settings.AppSettingsService
@@ -93,72 +98,74 @@ fun BrowseScreen(
     )
   }
 
-  if (state.loading && state.submissions.isEmpty()) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-      filterBar()
-      WaterfallLoadingSkeleton(
-          minCardWidthDp = settings.waterfallMinCardWidthDp,
-          state = waterfallState,
+  Box(modifier = Modifier.fillMaxSize()) {
+    if (state.loading && state.submissions.isEmpty()) {
+      Column(
+          modifier = Modifier.fillMaxSize(),
+          verticalArrangement = Arrangement.spacedBy(10.dp),
+      ) {
+        filterBar()
+        WaterfallLoadingSkeleton(
+            minCardWidthDp = settings.waterfallMinCardWidthDp,
+            state = waterfallState,
+            modifier = Modifier.fillMaxSize(),
+        )
+      }
+    } else if (!state.errorMessage.isNullOrBlank() && state.submissions.isEmpty()) {
+      Column(
+          modifier = Modifier.fillMaxSize(),
+          verticalArrangement = Arrangement.spacedBy(10.dp),
+      ) {
+        filterBar()
+        BrowseStatusCard(title = "加载失败", body = state.errorMessage.orEmpty(), onRetry = onRetry)
+      }
+    } else {
+      PullToRefreshBox(
+          isRefreshing = state.refreshing,
+          onRefresh = onRefresh,
+          modifier = Modifier.fillMaxSize(),
+      ) {
+        SubmissionWaterfall(
+            items = state.submissions,
+            onItemClick = onOpenSubmission,
+            onLastVisibleIndexChanged = onLastVisibleIndexChanged,
+            canLoadMore = state.hasMore,
+            loadingMore = state.isLoadingMore,
+            appendErrorMessage = state.appendErrorMessage,
+            onRetryLoadMore = onRetryLoadMore,
+            state = waterfallState,
+            minCardWidthDp = settings.waterfallMinCardWidthDp,
+            headerContent = filterBar,
+            blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
+        )
+      }
+    }
+
+    if (filterPageVisible) {
+      BrowseFilterPage(
+          filter = state.draftFilter,
+          onClose = { filterPageVisible = false },
+          onApply = {
+            onApplyFilter()
+            filterPageVisible = false
+          },
+          onUpdateCategory = onUpdateCategory,
+          onUpdateType = onUpdateType,
+          onUpdateSpecies = onUpdateSpecies,
+          onUpdateGender = onUpdateGender,
+          onSetRatingGeneral = onSetRatingGeneral,
+          onSetRatingMature = onSetRatingMature,
+          onSetRatingAdult = onSetRatingAdult,
+          categoryOptions = browseCategoryOptions,
+          typeOptions = browseTypeOptions,
+          speciesOptions = browseSpeciesOptions,
+          typeOptionGroups = browseTypeOptionGroups,
+          speciesOptionGroups = browseSpeciesOptionGroups,
+          genderOptions = browseGenderOptions,
+          searchUiLabelsRepository = searchUiLabelsRepository,
           modifier = Modifier.fillMaxSize(),
       )
     }
-  } else if (!state.errorMessage.isNullOrBlank() && state.submissions.isEmpty()) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-      filterBar()
-      BrowseStatusCard(title = "加载失败", body = state.errorMessage.orEmpty(), onRetry = onRetry)
-    }
-  } else {
-    PullToRefreshBox(
-        isRefreshing = state.refreshing,
-        onRefresh = onRefresh,
-        modifier = Modifier.fillMaxSize(),
-    ) {
-      SubmissionWaterfall(
-          items = state.submissions,
-          onItemClick = onOpenSubmission,
-          onLastVisibleIndexChanged = onLastVisibleIndexChanged,
-          canLoadMore = state.hasMore,
-          loadingMore = state.isLoadingMore,
-          appendErrorMessage = state.appendErrorMessage,
-          onRetryLoadMore = onRetryLoadMore,
-          state = waterfallState,
-          minCardWidthDp = settings.waterfallMinCardWidthDp,
-          headerContent = filterBar,
-          blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
-      )
-    }
-  }
-
-  if (filterPageVisible) {
-    BrowseFilterPage(
-        filter = state.draftFilter,
-        onClose = { filterPageVisible = false },
-        onApply = {
-          onApplyFilter()
-          filterPageVisible = false
-        },
-        onUpdateCategory = onUpdateCategory,
-        onUpdateType = onUpdateType,
-        onUpdateSpecies = onUpdateSpecies,
-        onUpdateGender = onUpdateGender,
-        onSetRatingGeneral = onSetRatingGeneral,
-        onSetRatingMature = onSetRatingMature,
-        onSetRatingAdult = onSetRatingAdult,
-        categoryOptions = browseCategoryOptions,
-        typeOptions = browseTypeOptions,
-        speciesOptions = browseSpeciesOptions,
-        typeOptionGroups = browseTypeOptionGroups,
-        speciesOptionGroups = browseSpeciesOptionGroups,
-        genderOptions = browseGenderOptions,
-        searchUiLabelsRepository = searchUiLabelsRepository,
-        modifier = Modifier.fillMaxSize(),
-    )
   }
 
   PlatformBackHandler(enabled = filterPageVisible, onBack = { filterPageVisible = false })
@@ -229,11 +236,20 @@ private fun BrowseFilterPage(
           ?: filter.species.toString()
 
   Surface(modifier = modifier, color = MaterialTheme.colorScheme.surface) {
+    val bodyScrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
     Column(modifier = Modifier.fillMaxSize()) {
-      BrowseFilterOverlayTopBar(onClose = onClose, onApply = onApply)
+      BrowseFilterOverlayTopBar(
+          onClose = onClose,
+          onApply = onApply,
+          onTitleClick = { coroutineScope.launch { bodyScrollState.animateScrollTo(0) } },
+      )
 
       Column(
-          modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 10.dp),
+          modifier =
+              Modifier.fillMaxSize()
+                  .verticalScroll(bodyScrollState)
+                  .padding(horizontal = 12.dp, vertical = 10.dp),
           verticalArrangement = Arrangement.spacedBy(10.dp),
       ) {
         Row(

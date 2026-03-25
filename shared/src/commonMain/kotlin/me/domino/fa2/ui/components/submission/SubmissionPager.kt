@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -60,6 +61,8 @@ fun SubmissionPager(
     requestPagerFocus: () -> Unit,
     /** 原图缩放遮罩显隐回调。 */
     onZoomOverlayVisibilityChanged: (Boolean) -> Unit,
+    /** 当前页回顶触发信号。 */
+    scrollCurrentPageToTopSignal: Int,
     /** 左右滑中的被屏蔽投稿策略。 */
     blockedSubmissionMode: BlockedSubmissionPagerMode,
 ) {
@@ -93,6 +96,14 @@ fun SubmissionPager(
   }
   PlatformBackHandler(enabled = !zoomOverlayImageUrl.isNullOrBlank()) { zoomOverlayImageUrl = null }
   val blockedMediaRevealState = remember { mutableStateMapOf<Int, Boolean>() }
+  val currentPageScrollStates = remember {
+    mutableStateMapOf<Int, androidx.compose.foundation.ScrollState>()
+  }
+
+  LaunchedEffect(scrollCurrentPageToTopSignal, pagerState.currentPage) {
+    val scrollState = currentPageScrollStates[pagerState.currentPage] ?: return@LaunchedEffect
+    scrollState.animateScrollTo(0)
+  }
 
   Box(modifier = Modifier.fillMaxSize()) {
     Column(
@@ -102,6 +113,14 @@ fun SubmissionPager(
       HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
         val item = submissions[page]
         val scrollState = rememberScrollState()
+        DisposableEffect(page, scrollState) {
+          currentPageScrollStates[page] = scrollState
+          onDispose {
+            if (currentPageScrollStates[page] === scrollState) {
+              currentPageScrollStates.remove(page)
+            }
+          }
+        }
         Box(modifier = Modifier.fillMaxSize()) {
           Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
             SubmissionDetailContent(

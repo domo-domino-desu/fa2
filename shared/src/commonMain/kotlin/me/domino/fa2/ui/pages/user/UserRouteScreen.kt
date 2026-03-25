@@ -4,15 +4,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.CurrentScreen
@@ -46,6 +47,7 @@ class UserRouteScreen(
           parametersOf(username, initialChildRoute, initialFolderUrl)
         }
     val userState by userScreenModel.state.collectAsState()
+    var onCurrentRouteScrollToTop by remember { mutableStateOf<(() -> Unit)?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
       UserRouteTopBar(
@@ -53,6 +55,7 @@ class UserRouteScreen(
           onBack = { parentNavigator.pop() },
           onGoHome = { parentNavigator.goBackHome() },
           shareUrl = FaUrls.user(username),
+          onTitleClick = { onCurrentRouteScrollToTop?.invoke() },
       )
 
       Navigator(
@@ -132,13 +135,12 @@ class UserRouteScreen(
                 { cacheKey, snapshot ->
                   userScreenModel.setSubmissionSectionSnapshot(cacheKey, snapshot)
                 },
+            LocalUserCurrentRouteScrollToTopActionUpdater provides
+                { action ->
+                  onCurrentRouteScrollToTop = action
+                },
         ) {
-          Box(
-              modifier =
-                  Modifier.fillMaxSize()
-                      .background(MaterialTheme.colorScheme.surface)
-                      .padding(top = 4.dp)
-          ) {
+          Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
             CurrentScreen()
           }
         }

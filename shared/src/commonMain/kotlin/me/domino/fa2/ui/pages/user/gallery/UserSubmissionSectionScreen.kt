@@ -81,6 +81,8 @@ internal fun UserSubmissionSectionScreen(
   val settingsService = koinInject<AppSettingsService>()
   val settings by settingsService.settings.collectAsState()
   val scope = rememberCoroutineScope()
+  val sectionGridContentPadding =
+      PaddingValues(start = 12.dp, top = 0.dp, end = 12.dp, bottom = 12.dp)
   val latestOnSharedTopScrollChanged = rememberUpdatedState(onSharedTopScrollChanged)
   val latestOnBodyScrollPositionChanged = rememberUpdatedState(onBodyScrollPositionChanged)
   val latestOnDeferredBodyScrollPositionConsumed =
@@ -187,6 +189,7 @@ internal fun UserSubmissionSectionScreen(
             minCardWidthDp = settings.waterfallMinCardWidthDp,
             state = waterfallState,
             itemCount = 72,
+            contentPadding = sectionGridContentPadding,
             headerContent = headerContent,
             preItemsContent = topItemsContent,
         )
@@ -196,6 +199,7 @@ internal fun UserSubmissionSectionScreen(
         UserSubmissionSectionSingleStateGrid(
             minCardWidthDp = settings.waterfallMinCardWidthDp,
             state = waterfallState,
+            contentPadding = sectionGridContentPadding,
             headerContent = headerContent,
             preItemsContent = topItemsContent,
         ) {
@@ -224,6 +228,7 @@ internal fun UserSubmissionSectionScreen(
               onRetryLoadMore = onRetryLoadMore,
               state = waterfallState,
               minCardWidthDp = settings.waterfallMinCardWidthDp,
+              contentPadding = sectionGridContentPadding,
               blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
               headerContent = headerContent,
               preItemsContent = {
@@ -260,6 +265,7 @@ internal fun UserSubmissionSectionScreen(
 private fun UserSubmissionSectionSingleStateGrid(
     minCardWidthDp: Int,
     state: LazyStaggeredGridState,
+    contentPadding: PaddingValues,
     headerContent: (@Composable () -> Unit)?,
     preItemsContent: LazyStaggeredGridScope.() -> Unit,
     content: @Composable () -> Unit,
@@ -269,7 +275,7 @@ private fun UserSubmissionSectionSingleStateGrid(
       columns = StaggeredGridCells.Adaptive(minCardWidthDp.dp),
       horizontalArrangement = Arrangement.spacedBy(12.dp),
       verticalItemSpacing = 12.dp,
-      contentPadding = PaddingValues(12.dp),
+      contentPadding = contentPadding,
       modifier = Modifier.fillMaxSize(),
   ) {
     if (headerContent != null) {
@@ -318,7 +324,7 @@ private fun UserStatusCard(title: String, body: String, onRetry: () -> Unit) {
 @Composable
 private fun UserFolderGroupsCard(groups: List<GalleryFolderGroup>, onOpenFolder: (String) -> Unit) {
   Column(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+      modifier = Modifier.fillMaxWidth(),
       verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
     groups.forEach { group ->

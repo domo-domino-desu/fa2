@@ -13,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -20,6 +21,7 @@ import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.settings.AppSettingsService
@@ -42,6 +44,7 @@ class SubmissionHistoryRouteScreen : Screen {
     val settingsService = koinInject<AppSettingsService>()
     val settings by settingsService.settings.collectAsState()
     val waterfallState = rememberLazyStaggeredGridState()
+    val coroutineScope = rememberCoroutineScope()
     var loading by remember { mutableStateOf(true) }
     var submissions by remember { mutableStateOf<List<SubmissionThumbnail>>(emptyList()) }
     val holderTag = "submission-list-holder:history"
@@ -63,6 +66,7 @@ class SubmissionHistoryRouteScreen : Screen {
       SubmissionHistoryRouteTopBar(
           onBack = { navigator.pop() },
           onGoHome = { navigator.goBackHome() },
+          onTitleClick = { coroutineScope.launch { waterfallState.animateScrollToItem(0) } },
       )
 
       when {

@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -24,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -33,6 +36,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.launch
 import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.components.HtmlText
 import me.domino.fa2.ui.components.NetworkImage
@@ -60,6 +64,8 @@ class JournalDetailRouteScreen(
     val screenModel =
         koinScreenModel<JournalDetailScreenModel> { parametersOf(journalId, journalUrl) }
     val translationService = koinInject<SubmissionDescriptionTranslationService>()
+    val listState: LazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
     val state by screenModel.state.collectAsState()
     val shareUrl =
         when (val snapshot = state) {
@@ -76,6 +82,7 @@ class JournalDetailRouteScreen(
           onBack = { navigator.pop() },
           onGoHome = { navigator.goBackHome() },
           shareUrl = shareUrl,
+          onTitleClick = { coroutineScope.launch { listState.animateScrollToItem(0) } },
       )
 
       when (val snapshot = state) {
@@ -91,6 +98,7 @@ class JournalDetailRouteScreen(
           JournalDetailContent(
               detail = snapshot.detail,
               translationService = translationService,
+              listState = listState,
               onOpenAuthor = { author ->
                 val normalized = author.trim()
                 if (normalized.isNotBlank()) {
@@ -153,6 +161,7 @@ private fun JournalDetailErrorCard(message: String, onRetry: () -> Unit) {
 private fun JournalDetailContent(
     detail: me.domino.fa2.data.model.JournalDetail,
     translationService: SubmissionDescriptionTranslationService,
+    listState: LazyListState,
     onOpenAuthor: (String) -> Unit,
 ) {
   val translationController =
@@ -162,6 +171,7 @@ private fun JournalDetailContent(
       )
 
   LazyColumn(
+      state = listState,
       modifier = Modifier.fillMaxSize(),
       verticalArrangement = Arrangement.spacedBy(10.dp),
   ) {

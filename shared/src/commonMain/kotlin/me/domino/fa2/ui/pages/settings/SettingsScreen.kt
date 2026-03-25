@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -40,6 +41,7 @@ fun SettingsScreen(onBack: () -> Unit, onGoHome: () -> Unit) {
   var saving by remember { mutableStateOf(false) }
   var showApiKey by remember { mutableStateOf(false) }
   var saveStatusText by remember { mutableStateOf<String?>(null) }
+  val listState = rememberLazyListState()
 
   LaunchedEffect(Unit) { settingsService.ensureLoaded() }
 
@@ -98,6 +100,7 @@ fun SettingsScreen(onBack: () -> Unit, onGoHome: () -> Unit) {
             validationMessage = validationMessage,
             onResetDraft = ::resetDraftToPersisted,
             onSaveDraft = ::saveDraft,
+            onTitleClick = { scope.launch { listState.animateScrollToItem(0) } },
         )
       },
   ) { innerPadding ->
@@ -114,6 +117,7 @@ fun SettingsScreen(onBack: () -> Unit, onGoHome: () -> Unit) {
     }
 
     LazyColumn(
+        state = listState,
         modifier = Modifier.fillMaxSize().padding(innerPadding),
         contentPadding = PaddingValues(vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),

@@ -9,12 +9,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.launch
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.navigation.rootNavigator
 import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
@@ -44,6 +46,7 @@ class UserChildRouteScreen(
     val updateBodyScrollPosition = LocalUserBodyScrollPositionUpdater.current
     val resolveSubmissionSnapshot = LocalUserSubmissionSnapshotResolver.current
     val updateSubmissionSnapshot = LocalUserSubmissionSnapshotUpdater.current
+    val updateCurrentRouteScrollToTopAction = LocalUserCurrentRouteScrollToTopActionUpdater.current
     val routeInitialFolderUrl = resolveFolderUrl(route) ?: initialFolderUrl
     when (route) {
       UserChildRoute.Journals -> {
@@ -71,6 +74,12 @@ class UserChildRouteScreen(
                   initialFirstVisibleItemScrollOffset =
                       initialScrollPosition.firstVisibleItemScrollOffset,
               )
+          val scope = rememberCoroutineScope()
+          LaunchedEffect(listState, updateCurrentRouteScrollToTopAction) {
+            updateCurrentRouteScrollToTopAction {
+              scope.launch { listState.animateScrollToItem(0) }
+            }
+          }
           var deferredBodyScrollPosition by
               remember(scrollKey) {
                 mutableStateOf(initialScrollPosition.deferredBodyScrollPosition)
@@ -172,6 +181,12 @@ class UserChildRouteScreen(
                   initialFirstVisibleItemScrollOffset =
                       initialScrollPosition.firstVisibleItemScrollOffset,
               )
+          val scope = rememberCoroutineScope()
+          LaunchedEffect(waterfallState, updateCurrentRouteScrollToTopAction) {
+            updateCurrentRouteScrollToTopAction {
+              scope.launch { waterfallState.animateScrollToItem(0) }
+            }
+          }
           var deferredBodyScrollPosition by
               remember(scrollKey) {
                 mutableStateOf(initialScrollPosition.deferredBodyScrollPosition)

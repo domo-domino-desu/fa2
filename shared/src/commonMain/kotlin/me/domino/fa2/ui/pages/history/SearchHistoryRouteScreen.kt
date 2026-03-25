@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -20,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.SearchHistoryRecord
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.ui.layouts.SearchHistoryRouteTopBar
@@ -43,6 +46,8 @@ class SearchHistoryRouteScreen : Screen {
     val historyRepository = koinInject<ActivityHistoryRepository>()
     var loading by remember { mutableStateOf(true) }
     var histories by remember { mutableStateOf<List<SearchHistoryRecord>>(emptyList()) }
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
       histories = historyRepository.loadSearchHistory()
@@ -53,6 +58,7 @@ class SearchHistoryRouteScreen : Screen {
       SearchHistoryRouteTopBar(
           onBack = { navigator.pop() },
           onGoHome = { navigator.goBackHome() },
+          onTitleClick = { coroutineScope.launch { listState.animateScrollToItem(0) } },
       )
 
       when {
@@ -75,6 +81,7 @@ class SearchHistoryRouteScreen : Screen {
 
         else -> {
           LazyColumn(
+              state = listState,
               modifier = Modifier.fillMaxSize(),
               contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
               verticalArrangement = Arrangement.spacedBy(8.dp),

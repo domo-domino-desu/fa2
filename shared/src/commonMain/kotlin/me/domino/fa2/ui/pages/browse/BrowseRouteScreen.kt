@@ -8,11 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.launch
 import me.domino.fa2.ui.components.PageStateWrapper
 import me.domino.fa2.ui.layouts.BrowseRouteTopBar
 import me.domino.fa2.ui.navigation.SubmissionListHolder
@@ -38,11 +40,16 @@ class BrowseRouteScreen(private val initialFilter: BrowseFilterState) : Screen {
     val state by screenModel.state.collectAsState()
     val pageState by screenModel.pageState.collectAsState()
     val waterfallState = rememberLazyStaggeredGridState()
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(initialFilter) { screenModel.applyFilter(initialFilter) }
 
     Column(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
-      BrowseRouteTopBar(onBack = { navigator.pop() }, onGoHome = { navigator.goBackHome() })
+      BrowseRouteTopBar(
+          onBack = { navigator.pop() },
+          onGoHome = { navigator.goBackHome() },
+          onTitleClick = { coroutineScope.launch { waterfallState.animateScrollToItem(0) } },
+      )
 
       PageStateWrapper(state = pageState, onRetry = screenModel::refresh) {
         BrowseScreen(

@@ -90,6 +90,8 @@ fun SubmissionWaterfall(
     state: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
     /** 单列最小宽度（dp）。 */
     minCardWidthDp: Int = defaultWaterfallCardMinWidthDp,
+    /** 网格内边距。 */
+    contentPadding: PaddingValues = waterfallPadding,
     /** 可选列表头部（整行）。 */
     headerContent: (@Composable () -> Unit)? = null,
     /** 可选头部附加项（整行，可多个）。 */
@@ -134,7 +136,7 @@ fun SubmissionWaterfall(
       state = state,
       horizontalArrangement = Arrangement.spacedBy(12.dp),
       verticalItemSpacing = 12.dp,
-      contentPadding = waterfallPadding,
+      contentPadding = contentPadding,
       modifier = Modifier.fillMaxSize(),
   ) {
     if (headerContent != null) {
@@ -194,7 +196,7 @@ private fun SubmissionWaterfallItem(
           ),
       modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
   ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
       Box(
           modifier =
               Modifier.fillMaxWidth()
@@ -238,7 +240,7 @@ private fun SubmissionWaterfallItem(
         }
       }
       Column(
-          modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+          modifier = Modifier.padding(start = 10.dp, end = 10.dp, bottom = 8.dp),
           verticalArrangement = Arrangement.spacedBy(4.dp),
       ) {
         Text(
@@ -291,11 +293,11 @@ private fun SubmissionWaterfallItem(
 private fun categoryBadgeIcon(iconToken: String): ImageVector =
     when (iconToken) {
       "image" -> FaMaterialSymbols.Outlined.Image
-      "animated_images" -> FaMaterialSymbols.Outlined.Movie
-      "import_contacts" -> FaMaterialSymbols.Outlined.AutoStories
+      "movie" -> FaMaterialSymbols.Outlined.Movie
+      "subject" -> FaMaterialSymbols.Outlined.Subject
       "music_note" -> FaMaterialSymbols.Outlined.MusicNote
       "inventory_2" -> FaMaterialSymbols.Outlined.Inventory2
-      "other" -> FaMaterialSymbols.Outlined.Category
+      "category" -> FaMaterialSymbols.Outlined.Category
       else -> FaMaterialSymbols.Outlined.Category
     }
 

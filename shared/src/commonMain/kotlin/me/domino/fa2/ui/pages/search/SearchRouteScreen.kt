@@ -62,7 +62,11 @@ class SearchRouteScreen(
     }
 
     Column(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
-      SearchRouteTopBar(onBack = { navigator.pop() }, onGoHome = { navigator.goBackHome() })
+      SearchRouteTopBar(
+          onBack = { navigator.pop() },
+          onGoHome = { navigator.goBackHome() },
+          onTitleClick = { coroutineScope.launch { waterfallState.animateScrollToItem(0) } },
+      )
 
       PageStateWrapper(state = pageState, onRetry = screenModel::refresh) {
         SearchScreen(

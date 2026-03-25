@@ -127,6 +127,7 @@ class SubmissionRouteScreen(
         }
     val topBarActions = resolveTopBarActions(initialSid = initialSid, state = state)
     var zoomOverlayVisible by remember { mutableStateOf(false) }
+    var scrollCurrentPageToTopSignal by remember { mutableStateOf(0) }
 
     LaunchedEffect(Unit) { requestPagerFocus() }
     LaunchedEffect(screenModel, showToast) {
@@ -176,6 +177,7 @@ class SubmissionRouteScreen(
                 }
               }
             },
+            onTitleClick = { scrollCurrentPageToTopSignal++ },
         )
       }
       PageStateWrapper(state = pageState, onRetry = screenModel::retryCurrentDetail) {
@@ -241,6 +243,7 @@ class SubmissionRouteScreen(
                   descriptionTranslationService = descriptionTranslationService,
                   requestPagerFocus = requestPagerFocus,
                   onZoomOverlayVisibilityChanged = { visible -> zoomOverlayVisible = visible },
+                  scrollCurrentPageToTopSignal = scrollCurrentPageToTopSignal,
                   blockedSubmissionMode = settings.blockedSubmissionPagerMode,
               )
 

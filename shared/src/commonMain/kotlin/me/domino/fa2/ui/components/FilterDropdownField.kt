@@ -1,6 +1,7 @@
 package me.domino.fa2.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -178,6 +180,7 @@ fun FilterDialogTriggerField(
 
 /** 纯文本可滚动分组选择弹窗。 */
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 fun <T> GroupedTextPickerDialog(
     title: String,
     groups: List<FilterOptionGroup<T>>,
@@ -205,24 +208,29 @@ fun <T> GroupedTextPickerDialog(
     ) {
       LazyColumn(
           state = listState,
-          modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+          modifier = Modifier.fillMaxWidth(),
           verticalArrangement = Arrangement.spacedBy(2.dp),
       ) {
-        item(key = "picker-title") {
-          Row(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 8.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.SpaceBetween,
-          ) {
-            Text(text = title, style = MaterialTheme.typography.titleLarge)
-            IconButton(onClick = onDismissRequest) {
-              Icon(
-                  imageVector = FaMaterialSymbols.Filled.Close,
-                  contentDescription = "关闭",
-                  tint = MaterialTheme.colorScheme.onSurfaceVariant,
-              )
+        stickyHeader(key = "picker-title") {
+          Surface(color = MaterialTheme.colorScheme.surface) {
+            Column {
+              Row(
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 8.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.SpaceBetween,
+              ) {
+                Text(text = title, style = MaterialTheme.typography.titleLarge)
+                IconButton(onClick = onDismissRequest) {
+                  Icon(
+                      imageVector = FaMaterialSymbols.Filled.Close,
+                      contentDescription = "关闭",
+                      tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                  )
+                }
+              }
+              HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
             }
           }
         }

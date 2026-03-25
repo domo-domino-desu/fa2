@@ -126,7 +126,6 @@ symbolCraft {
 
   materialSymbols(
       "arrow_back",
-      "auto_stories",
       "category",
       "comment",
       "content_copy",
@@ -145,8 +144,10 @@ symbolCraft {
       "music_note",
       "search",
       "share",
+      "subject",
       "tag",
       "translate",
+      "vertical_align_top",
       "visibility",
   ) {
     style(weight = 400, variant = SymbolVariant.OUTLINED, fill = SymbolFill.UNFILLED)

@@ -23,3 +23,5 @@ internal val LocalUserSubmissionSnapshotResolver =
     staticCompositionLocalOf<(String) -> UserSubmissionSectionUiState?> { { null } }
 internal val LocalUserSubmissionSnapshotUpdater =
     staticCompositionLocalOf<(String, UserSubmissionSectionUiState) -> Unit> { { _, _ -> } }
+internal val LocalUserCurrentRouteScrollToTopActionUpdater =
+    staticCompositionLocalOf<((() -> Unit)?) -> Unit> { { _ -> } }

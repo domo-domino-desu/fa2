@@ -1,5 +1,6 @@
 package me.domino.fa2.ui.layouts
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
@@ -24,10 +25,35 @@ private fun RouteTopBar(
     title: String,
     onBack: () -> Unit,
     onGoHome: () -> Unit,
+    onTitleClick: (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
   TopAppBar(
-      title = { Text(text = title, style = MaterialTheme.typography.titleLarge) },
+      title = {
+        if (title.isBlank()) {
+          if (onTitleClick != null) {
+            IconButton(onClick = onTitleClick) {
+              Icon(
+                  imageVector = FaMaterialSymbols.Outlined.VerticalAlignTop,
+                  contentDescription = "回到顶部",
+              )
+            }
+          } else {
+            Text(text = "")
+          }
+        } else {
+          Text(
+              text = title,
+              style = MaterialTheme.typography.titleLarge,
+              modifier =
+                  if (onTitleClick != null) {
+                    Modifier.clickable(onClick = onTitleClick)
+                  } else {
+                    Modifier
+                  },
+          )
+        }
+      },
       navigationIcon = { BackHomeTopBarNavigation(onBack = onBack, onGoHome = onGoHome) },
       actions = actions,
       colors =
@@ -39,8 +65,8 @@ private fun RouteTopBar(
 }
 
 @Composable
-fun AboutRouteTopBar(onBack: () -> Unit, onGoHome: () -> Unit) {
-  RouteTopBar(title = "开源许可", onBack = onBack, onGoHome = onGoHome)
+fun AboutRouteTopBar(onBack: () -> Unit, onGoHome: () -> Unit, onTitleClick: (() -> Unit)? = null) {
+  RouteTopBar(title = "开源许可", onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick)
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -54,8 +80,9 @@ fun SettingsRouteTopBar(
     validationMessage: String?,
     onResetDraft: () -> Unit,
     onSaveDraft: () -> Unit,
+    onTitleClick: (() -> Unit)? = null,
 ) {
-  RouteTopBar(title = "设置", onBack = onBack, onGoHome = onGoHome) {
+  RouteTopBar(title = "设置", onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick) {
     if (showActions) {
       IconButton(onClick = onResetDraft, enabled = !saving && hasUnsavedChanges) {
         Icon(imageVector = FaMaterialSymbols.Filled.RestartAlt, contentDescription = "回滚到已保存配置")
@@ -78,35 +105,67 @@ fun SettingsRouteTopBar(
 }
 
 @Composable
-fun SearchHistoryRouteTopBar(onBack: () -> Unit, onGoHome: () -> Unit) {
-  RouteTopBar(title = "搜索记录", onBack = onBack, onGoHome = onGoHome)
+fun SearchHistoryRouteTopBar(
+    onBack: () -> Unit,
+    onGoHome: () -> Unit,
+    onTitleClick: (() -> Unit)? = null,
+) {
+  RouteTopBar(title = "搜索记录", onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick)
 }
 
 @Composable
-fun SubmissionHistoryRouteTopBar(onBack: () -> Unit, onGoHome: () -> Unit) {
-  RouteTopBar(title = "浏览记录", onBack = onBack, onGoHome = onGoHome)
+fun SubmissionHistoryRouteTopBar(
+    onBack: () -> Unit,
+    onGoHome: () -> Unit,
+    onTitleClick: (() -> Unit)? = null,
+) {
+  RouteTopBar(title = "浏览记录", onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick)
 }
 
 @Composable
-fun BrowseRouteTopBar(onBack: () -> Unit, onGoHome: () -> Unit) {
-  RouteTopBar(title = "Browse", onBack = onBack, onGoHome = onGoHome)
+fun BrowseRouteTopBar(
+    onBack: () -> Unit,
+    onGoHome: () -> Unit,
+    onTitleClick: (() -> Unit)? = null,
+) {
+  RouteTopBar(title = "Browse", onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick)
 }
 
 @Composable
-fun SearchRouteTopBar(onBack: () -> Unit, onGoHome: () -> Unit) {
-  RouteTopBar(title = "Search", onBack = onBack, onGoHome = onGoHome)
+fun SearchRouteTopBar(
+    onBack: () -> Unit,
+    onGoHome: () -> Unit,
+    onTitleClick: (() -> Unit)? = null,
+) {
+  RouteTopBar(title = "Search", onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick)
 }
 
 @Composable
-fun JournalDetailRouteTopBar(onBack: () -> Unit, onGoHome: () -> Unit, shareUrl: String) {
-  RouteTopBar(title = "Journal", onBack = onBack, onGoHome = onGoHome) {
+fun JournalDetailRouteTopBar(
+    onBack: () -> Unit,
+    onGoHome: () -> Unit,
+    shareUrl: String,
+    onTitleClick: (() -> Unit)? = null,
+) {
+  RouteTopBar(
+      title = "Journal",
+      onBack = onBack,
+      onGoHome = onGoHome,
+      onTitleClick = onTitleClick,
+  ) {
     TopBarShareAction(url = shareUrl)
   }
 }
 
 @Composable
-fun UserRouteTopBar(title: String, onBack: () -> Unit, onGoHome: () -> Unit, shareUrl: String) {
-  RouteTopBar(title = title, onBack = onBack, onGoHome = onGoHome) {
+fun UserRouteTopBar(
+    title: String,
+    onBack: () -> Unit,
+    onGoHome: () -> Unit,
+    shareUrl: String,
+    onTitleClick: (() -> Unit)? = null,
+) {
+  RouteTopBar(title = title, onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick) {
     TopBarShareAction(url = shareUrl)
   }
 }
@@ -117,8 +176,9 @@ fun UserWatchlistRouteTopBar(
     onBack: () -> Unit,
     onGoHome: () -> Unit,
     shareUrl: String,
+    onTitleClick: (() -> Unit)? = null,
 ) {
-  RouteTopBar(title = title, onBack = onBack, onGoHome = onGoHome) {
+  RouteTopBar(title = title, onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick) {
     TopBarShareAction(url = shareUrl)
   }
 }
@@ -130,8 +190,9 @@ fun SubmissionRouteTopBar(
     shareUrl: String,
     downloadUrl: String?,
     onDownload: () -> Unit,
+    onTitleClick: (() -> Unit)? = null,
 ) {
-  RouteTopBar(title = "", onBack = onBack, onGoHome = onGoHome) {
+  RouteTopBar(title = "", onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick) {
     if (!downloadUrl.isNullOrBlank()) {
       IconButton(onClick = onDownload) {
         Icon(imageVector = FaMaterialSymbols.Filled.Download, contentDescription = "下载")
@@ -143,13 +204,28 @@ fun SubmissionRouteTopBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrowseFilterOverlayTopBar(onClose: () -> Unit, onApply: () -> Unit) {
+fun BrowseFilterOverlayTopBar(
+    onClose: () -> Unit,
+    onApply: () -> Unit,
+    onTitleClick: (() -> Unit)? = null,
+) {
   TopAppBar(
-      title = { Text(text = "浏览筛选", style = MaterialTheme.typography.titleMedium) },
+      title = {
+        Text(
+            text = "浏览筛选",
+            style = MaterialTheme.typography.titleMedium,
+            modifier =
+                if (onTitleClick != null) {
+                  Modifier.clickable(onClick = onTitleClick)
+                } else {
+                  Modifier
+                },
+        )
+      },
       navigationIcon = {
         IconButton(onClick = onClose) {
           Icon(
-              imageVector = FaMaterialSymbols.AutoMirrored.Filled.ArrowBack,
+              imageVector = FaMaterialSymbols.Filled.Close,
               contentDescription = "关闭筛选页面",
           )
         }
@@ -170,13 +246,29 @@ fun BrowseFilterOverlayTopBar(onClose: () -> Unit, onApply: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchOverlayTopBar(onClose: () -> Unit, onApplySearch: () -> Unit, canSearch: Boolean) {
+fun SearchOverlayTopBar(
+    onClose: () -> Unit,
+    onApplySearch: () -> Unit,
+    canSearch: Boolean,
+    onTitleClick: (() -> Unit)? = null,
+) {
   TopAppBar(
-      title = { Text(text = "搜索筛选", style = MaterialTheme.typography.titleMedium) },
+      title = {
+        Text(
+            text = "搜索筛选",
+            style = MaterialTheme.typography.titleMedium,
+            modifier =
+                if (onTitleClick != null) {
+                  Modifier.clickable(onClick = onTitleClick)
+                } else {
+                  Modifier
+                },
+        )
+      },
       navigationIcon = {
         IconButton(onClick = onClose) {
           Icon(
-              imageVector = FaMaterialSymbols.AutoMirrored.Filled.ArrowBack,
+              imageVector = FaMaterialSymbols.Filled.Close,
               contentDescription = "关闭搜索遮罩",
           )
         }

@@ -41,7 +41,7 @@
             "c_flash",
             "c_interactive_media"
           ],
-          "icon": "animated_images"
+          "icon": "movie"
         },
         {
           "key": "cg_readable_art",
@@ -50,7 +50,7 @@
             "zh-Hans": "文字作品"
           },
           "itemKeys": ["c_story", "c_poetry", "c_prose"],
-          "icon": "import_contacts"
+          "icon": "subject"
         },
         {
           "key": "cg_audio_art",

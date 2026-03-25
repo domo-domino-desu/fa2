@@ -57,8 +57,7 @@ internal fun UserHeaderCard(
                   color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
               )
             },
-        modifier =
-            Modifier.fillMaxWidth().padding(horizontal = 4.dp).padding(top = 6.dp, bottom = 4.dp),
+        modifier = Modifier.fillMaxWidth(),
     ) {
       val bannerUrl = header?.profileBannerUrl.orEmpty()
 

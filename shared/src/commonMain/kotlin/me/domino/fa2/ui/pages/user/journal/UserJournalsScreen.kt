@@ -173,7 +173,7 @@ internal fun UserJournalsScreen(
     ) {
       LazyColumn(
           state = listState,
-          modifier = Modifier.fillMaxSize().padding(top = 12.dp),
+          modifier = Modifier.fillMaxSize(),
           verticalArrangement = Arrangement.spacedBy(12.dp),
       ) {
         if (headerContent != null) {
