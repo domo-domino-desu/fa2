@@ -15,4 +15,18 @@ object TestFixtures {
         }
     return stream.bufferedReader().use { reader -> reader.readText() }
   }
+
+  /**
+   * 读取 fixture 目录下的二进制文件。
+   *
+   * @param fileName 文件名（不含 `fixture/` 前缀）。
+   */
+  fun readBytes(fileName: String): ByteArray {
+    val path = "fixture/$fileName"
+    val stream =
+        checkNotNull(Thread.currentThread().contextClassLoader.getResourceAsStream(path)) {
+          "Fixture not found: $path"
+        }
+    return stream.use { input -> input.readBytes() }
+  }
 }

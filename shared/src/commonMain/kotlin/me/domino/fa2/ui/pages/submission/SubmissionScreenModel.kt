@@ -18,6 +18,9 @@ import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.state.PaginationSnapshot
 import me.domino.fa2.ui.state.PaginationStateMachine
 import me.domino.fa2.util.FaUrls
+import me.domino.fa2.util.attachmenttext.AttachmentTextExtractor
+import me.domino.fa2.util.attachmenttext.AttachmentTextProgress
+import me.domino.fa2.util.attachmenttext.deriveAttachmentFileName
 import me.domino.fa2.util.logging.FaLog
 import me.domino.fa2.util.logging.summarizePageState
 
@@ -122,6 +125,115 @@ class SubmissionScreenModel(
     loadDetail(current = current, force = true)
   }
 
+  /** 解析当前投稿附件文本。 */
+  fun loadAttachmentTextCurrent() {
+    val current = holder.current() ?: return
+    val sid = current.id
+    val currentState = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return
+    val attachmentState = currentState.attachmentTextState ?: return
+    if (
+        attachmentState is SubmissionAttachmentTextUiState.Loading ||
+            attachmentState is SubmissionAttachmentTextUiState.Success
+    ) {
+      return
+    }
+
+    val downloadUrl = currentState.detail.downloadUrl?.trim().orEmpty()
+    val fileName =
+        when (attachmentState) {
+          is SubmissionAttachmentTextUiState.Idle -> attachmentState.fileName
+          is SubmissionAttachmentTextUiState.Error -> attachmentState.fileName
+          is SubmissionAttachmentTextUiState.Loading,
+          is SubmissionAttachmentTextUiState.Success -> return
+        }.trim()
+    if (downloadUrl.isBlank()) {
+      detailBySid[sid] =
+          currentState.copy(
+              attachmentTextState =
+                  SubmissionAttachmentTextUiState.Error(
+                      fileName = fileName,
+                      message = "缺少附件下载地址",
+                  )
+          )
+      refreshState()
+      return
+    }
+
+    detailBySid[sid] =
+        currentState.copy(
+            attachmentTextState =
+                SubmissionAttachmentTextUiState.Loading(
+                    fileName = fileName,
+                    progress = initialAttachmentTextProgress(fileName),
+                )
+        )
+    refreshState()
+
+    screenModelScope.launch {
+      val result =
+          submissionSource.loadAttachmentText(
+              downloadUrl = downloadUrl,
+              downloadFileName = fileName,
+              onProgress = progressUpdate@{ progress ->
+                    val latestState =
+                        detailBySid[sid] as? SubmissionDetailUiState.Success
+                            ?: return@progressUpdate
+                    val latestAttachmentState =
+                        latestState.attachmentTextState as? SubmissionAttachmentTextUiState.Loading
+                            ?: return@progressUpdate
+                    detailBySid[sid] =
+                        latestState.copy(
+                            attachmentTextState = latestAttachmentState.copy(progress = progress)
+                        )
+                    refreshState()
+                  },
+          )
+
+      val latestState = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return@launch
+      detailBySid[sid] =
+          when (result) {
+            is PageState.Success ->
+                latestState.copy(
+                    attachmentTextState =
+                        SubmissionAttachmentTextUiState.Success(
+                            fileName = fileName,
+                            document = result.data,
+                        )
+                )
+
+            PageState.CfChallenge ->
+                latestState.copy(
+                    attachmentTextState =
+                        SubmissionAttachmentTextUiState.Error(
+                            fileName = fileName,
+                            message = "需要 Cloudflare 验证",
+                        )
+                )
+
+            is PageState.MatureBlocked ->
+                latestState.copy(
+                    attachmentTextState =
+                        SubmissionAttachmentTextUiState.Error(
+                            fileName = fileName,
+                            message = result.reason,
+                        )
+                )
+
+            is PageState.Error ->
+                latestState.copy(
+                    attachmentTextState =
+                        SubmissionAttachmentTextUiState.Error(
+                            fileName = fileName,
+                            message = result.exception.message ?: result.exception.toString(),
+                        )
+                )
+
+            PageState.Loading -> latestState
+          }
+      refreshState()
+    }
+  }
+
   /** 收藏/取消收藏当前投稿（乐观更新）。 */
   fun toggleFavoriteCurrent() {
     val current = holder.current() ?: return
@@ -172,6 +284,15 @@ class SubmissionScreenModel(
                       blockedKeywords = currentState.blockedKeywords,
                       favoriteUpdating = false,
                       favoriteErrorMessage = null,
+                      attachmentTextState =
+                          resolveAttachmentTextState(
+                              detail =
+                                  optimisticDetail.copy(
+                                      downloadUrl = refreshed.data.downloadUrl,
+                                      downloadFileName = refreshed.data.downloadFileName,
+                                  ),
+                              previous = currentState.attachmentTextState,
+                          ),
                   )
               log.i { "收藏操作 -> 成功(sid=$sid,isFavorited=${refreshed.data.isFavorited})" }
             }
@@ -186,6 +307,7 @@ class SubmissionScreenModel(
                       blockedKeywords = currentState.blockedKeywords,
                       favoriteUpdating = false,
                       favoriteErrorMessage = "收藏已提交，但状态同步需要 Cloudflare 验证",
+                      attachmentTextState = currentState.attachmentTextState,
                   )
               log.w { "收藏操作 -> 已提交, 但刷新需要Cloudflare验证(sid=$sid)" }
             }
@@ -200,6 +322,7 @@ class SubmissionScreenModel(
                       blockedKeywords = currentState.blockedKeywords,
                       favoriteUpdating = false,
                       favoriteErrorMessage = "收藏已提交，但状态同步失败：${refreshed.reason}",
+                      attachmentTextState = currentState.attachmentTextState,
                   )
               log.w { "收藏操作 -> 已提交, 但刷新受限(sid=$sid,reason=${refreshed.reason})" }
             }
@@ -215,6 +338,7 @@ class SubmissionScreenModel(
                       favoriteUpdating = false,
                       favoriteErrorMessage =
                           "收藏已提交，但状态同步失败：${refreshed.exception.message ?: refreshed.exception}",
+                      attachmentTextState = currentState.attachmentTextState,
                   )
               log.e(refreshed.exception) { "收藏操作 -> 已提交, 但刷新失败(sid=$sid)" }
             }
@@ -230,6 +354,7 @@ class SubmissionScreenModel(
                   blockedKeywords = currentState.blockedKeywords,
                   favoriteUpdating = false,
                   favoriteErrorMessage = "需要 Cloudflare 验证",
+                  attachmentTextState = currentState.attachmentTextState,
               )
           log.w { "收藏操作 -> Cloudflare验证(sid=$sid)" }
         }
@@ -241,6 +366,7 @@ class SubmissionScreenModel(
                   blockedKeywords = currentState.blockedKeywords,
                   favoriteUpdating = false,
                   favoriteErrorMessage = toggleResult.reason,
+                  attachmentTextState = currentState.attachmentTextState,
               )
           log.w { "收藏操作 -> 受限(sid=$sid,reason=${toggleResult.reason})" }
         }
@@ -253,6 +379,7 @@ class SubmissionScreenModel(
                   favoriteUpdating = false,
                   favoriteErrorMessage =
                       toggleResult.exception.message ?: toggleResult.exception.toString(),
+                  attachmentTextState = currentState.attachmentTextState,
               )
           log.e(toggleResult.exception) { "收藏操作 -> 失败(sid=$sid)" }
         }
@@ -289,6 +416,11 @@ class SubmissionScreenModel(
                     detail = refreshed.data,
                     blockedKeywords = toBlockedKeywordSet(refreshed.data),
                     favoriteErrorMessage = null,
+                    attachmentTextState =
+                        resolveAttachmentTextState(
+                            detail = refreshed.data,
+                            previous = currentState.attachmentTextState,
+                        ),
                 )
             detailBySid[sid] = refreshedState
             refreshState()
@@ -479,6 +611,7 @@ class SubmissionScreenModel(
                           SubmissionDetailUiState.Success(
                               detail = next.data,
                               blockedKeywords = toBlockedKeywordSet(next.data),
+                              attachmentTextState = resolveAttachmentTextState(next.data),
                           )
                       refreshState()
                     }
@@ -623,6 +756,13 @@ class SubmissionScreenModel(
               SubmissionDetailUiState.Success(
                   detail = next.data,
                   blockedKeywords = toBlockedKeywordSet(next.data),
+                  attachmentTextState =
+                      resolveAttachmentTextState(
+                          detail = next.data,
+                          previous =
+                              (detailBySid[sid] as? SubmissionDetailUiState.Success)
+                                  ?.attachmentTextState,
+                      ),
               )
             }
 
@@ -653,3 +793,35 @@ class SubmissionScreenModel(
 }
 
 private fun normalizeTagKey(tagName: String): String = tagName.trim().lowercase()
+
+private fun resolveAttachmentTextState(
+    detail: Submission,
+    previous: SubmissionAttachmentTextUiState? = null,
+): SubmissionAttachmentTextUiState? {
+  val fileName =
+      deriveAttachmentFileName(detail.downloadUrl, detail.downloadFileName)?.takeIf {
+        AttachmentTextExtractor.isSupported(it)
+      } ?: return null
+
+  return when (previous) {
+    null -> SubmissionAttachmentTextUiState.Idle(fileName)
+    is SubmissionAttachmentTextUiState.Idle -> previous.copy(fileName = fileName)
+    is SubmissionAttachmentTextUiState.Loading -> previous.copy(fileName = fileName)
+    is SubmissionAttachmentTextUiState.Error -> previous.copy(fileName = fileName)
+    is SubmissionAttachmentTextUiState.Success ->
+        if (previous.fileName == fileName) previous
+        else SubmissionAttachmentTextUiState.Idle(fileName)
+  }
+}
+
+private fun initialAttachmentTextProgress(fileName: String): AttachmentTextProgress =
+    AttachmentTextProgress(
+        overallFraction = 0f,
+        stageIndex = 1,
+        stageCount = 1,
+        stageId = "download_attachment",
+        stageLabel = "下载附件",
+        stageFraction = 0f,
+        message = "准备下载附件",
+        currentItemLabel = fileName,
+    )

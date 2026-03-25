@@ -32,7 +32,7 @@ fun repositoryModule(): Module = module {
   single { FeedRepository(get()) }
   single { BrowseRepository(get()) }
   single { SearchRepository(get()) }
-  single { SubmissionRepository(get(), get(), get()) }
+  single { SubmissionRepository(get(), get(), get(), get()) }
   single { UserRepository(get(), get()) }
   single { GalleryRepository(get()) }
   single { FavoritesRepository(get()) }

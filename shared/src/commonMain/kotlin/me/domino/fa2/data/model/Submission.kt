@@ -61,6 +61,8 @@ data class Submission(
     val fullImageUrl: String,
     /** 下载 URL（可为空）。 */
     val downloadUrl: String?,
+    /** 附件文件名（可为空）。 */
+    val downloadFileName: String? = null,
     /** 媒体宽高比。 */
     val aspectRatio: Float,
     /** 描述 HTML。 */

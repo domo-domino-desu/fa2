@@ -240,6 +240,7 @@ class SubmissionRouteScreen(
                       showToast("链接已复制")
                     }
                   },
+                  onLoadAttachmentText = screenModel::loadAttachmentTextCurrent,
                   descriptionTranslationService = descriptionTranslationService,
                   requestPagerFocus = requestPagerFocus,
                   onZoomOverlayVisibilityChanged = { visible -> zoomOverlayVisible = visible },

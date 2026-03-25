@@ -35,6 +35,8 @@ internal fun SubmissionDetailContent(
     isBlockedMediaRevealed: Boolean,
     /** 解锁当前投稿媒体显示。 */
     onRevealBlockedMedia: () -> Unit,
+    /** 加载附件文本。 */
+    onLoadAttachmentText: () -> Unit,
     /** 描述翻译服务。 */
     descriptionTranslationService: SubmissionDescriptionTranslationService,
     /** 请求 pager 容器重新获取焦点。 */
@@ -68,6 +70,8 @@ internal fun SubmissionDetailContent(
           isBlockedMediaRevealed = isBlockedMediaRevealed,
           onRevealBlockedMedia = onRevealBlockedMedia,
           descriptionTranslationService = descriptionTranslationService,
+          attachmentTextState = state.attachmentTextState,
+          onLoadAttachmentText = onLoadAttachmentText,
           requestPagerFocus = requestPagerFocus,
       )
     }

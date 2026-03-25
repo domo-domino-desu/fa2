@@ -19,6 +19,8 @@ import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.ParserUtils
+import me.domino.fa2.util.attachmenttext.AttachmentTextDocument
+import me.domino.fa2.util.attachmenttext.AttachmentTextProgress
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SubmissionScreenModelPrefetchTest {
@@ -108,6 +110,13 @@ private class RecordingDetailSource : SubmissionPagerDetailSource {
             ?: return PageState.Error(IllegalArgumentException("Invalid submission url: $url"))
     return PageState.Success(testSubmission(sid))
   }
+
+  override suspend fun loadAttachmentText(
+      downloadUrl: String,
+      downloadFileName: String,
+      onProgress: (AttachmentTextProgress) -> Unit,
+  ): PageState<AttachmentTextDocument> =
+      PageState.Error(IllegalStateException("No attachment parsing expected in this test"))
 
   override suspend fun toggleFavorite(sid: Int, actionUrl: String): PageState<Unit> =
       PageState.Success(Unit)

@@ -6,6 +6,7 @@ import com.fleeksoft.ksoup.nodes.Element
 import me.domino.fa2.data.model.PageComment
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.util.ParserUtils
+import me.domino.fa2.util.attachmenttext.deriveAttachmentFileName
 
 /** Submission 详情页解析器。 */
 class SubmissionParser {
@@ -74,6 +75,7 @@ class SubmissionParser {
         previewImageUrl = media.previewImageUrl,
         fullImageUrl = media.fullImageUrl,
         downloadUrl = metadata.downloadUrl,
+        downloadFileName = metadata.downloadFileName,
         aspectRatio = parseAspectRatio(metadata.size),
         descriptionHtml = descriptionHtml,
     )
@@ -261,6 +263,11 @@ class SubmissionParser {
             ?.trim()
             ?.takeIf { it.isNotBlank() }
             ?.let { href -> ParserUtils.toAbsoluteUrl(pageUrl, href) }
+    val downloadFileName =
+        deriveAttachmentFileName(
+            downloadUrl = downloadUrl,
+            linkText = document.selectFirst("div.download a")?.text(),
+        )
 
     val favoriteAction =
         parseFavoriteActionUrl(
@@ -305,6 +312,7 @@ class SubmissionParser {
         blockedTagNames = blockedTagNames,
         tagBlockNonce = tagBlockNonce,
         downloadUrl = downloadUrl,
+        downloadFileName = downloadFileName,
     )
   }
 
@@ -413,6 +421,7 @@ class SubmissionParser {
       val blockedTagNames: List<String>,
       val tagBlockNonce: String,
       val downloadUrl: String?,
+      val downloadFileName: String?,
   )
 
   private data class FavoriteAction(val actionUrl: String, val isFavorited: Boolean)

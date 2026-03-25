@@ -1,0 +1,14 @@
+附件文本测试样本来源：
+
+- attachmenttext-external.docx
+  https://raw.githubusercontent.com/alexschiller/file-format-commons/master/files/ffc.docx
+- attachmenttext-external.odt
+  https://raw.githubusercontent.com/alexschiller/file-format-commons/master/files/ffc.odt
+- attachmenttext-external.rtf
+  https://raw.githubusercontent.com/alexschiller/file-format-commons/master/files/ffc.rtf
+- attachmenttext-external.pdf
+  https://raw.githubusercontent.com/alexschiller/file-format-commons/master/files/ffc.pdf
+- attachmenttext-multipage.pdf
+  https://raw.githubusercontent.com/py-pdf/sample-files/main/004-pdflatex-4-pages/pdflatex-4-pages.pdf
+
+本目录中的 attachmenttext-styled.docx / attachmenttext-styled.odt 为测试时本地生成的极小样本。

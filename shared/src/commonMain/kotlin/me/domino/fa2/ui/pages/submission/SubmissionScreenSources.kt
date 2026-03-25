@@ -5,6 +5,8 @@ import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.repository.FeedRepository
 import me.domino.fa2.data.repository.SubmissionRepository
+import me.domino.fa2.util.attachmenttext.AttachmentTextDocument
+import me.domino.fa2.util.attachmenttext.AttachmentTextProgress
 
 interface SubmissionPagerFeedSource {
   suspend fun loadPageByNextUrl(nextPageUrl: String): PageState<FeedPage>
@@ -14,6 +16,12 @@ interface SubmissionPagerDetailSource {
   suspend fun loadBySid(sid: Int): PageState<Submission>
 
   suspend fun loadByUrl(url: String): PageState<Submission>
+
+  suspend fun loadAttachmentText(
+      downloadUrl: String,
+      downloadFileName: String,
+      onProgress: (AttachmentTextProgress) -> Unit = {},
+  ): PageState<AttachmentTextDocument>
 
   suspend fun toggleFavorite(sid: Int, actionUrl: String): PageState<Unit>
 
@@ -33,6 +41,17 @@ class SubmissionPagerDetailSourceImpl(private val repository: SubmissionReposito
 
   override suspend fun loadByUrl(url: String): PageState<Submission> =
       repository.loadSubmissionDetailByUrl(url)
+
+  override suspend fun loadAttachmentText(
+      downloadUrl: String,
+      downloadFileName: String,
+      onProgress: (AttachmentTextProgress) -> Unit,
+  ): PageState<AttachmentTextDocument> =
+      repository.loadAttachmentText(
+          downloadUrl = downloadUrl,
+          downloadFileName = downloadFileName,
+          onProgress = onProgress,
+      )
 
   override suspend fun toggleFavorite(sid: Int, actionUrl: String): PageState<Unit> =
       repository.toggleFavorite(sid = sid, actionUrl = actionUrl)

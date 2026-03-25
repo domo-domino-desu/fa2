@@ -2,10 +2,15 @@ package me.domino.fa2.data.repository
 
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
+import me.domino.fa2.data.network.endpoint.AttachmentDownloadResult
+import me.domino.fa2.data.network.endpoint.AttachmentDownloadSource
 import me.domino.fa2.data.network.endpoint.SocialActionEndpoint
 import me.domino.fa2.data.network.endpoint.SocialActionResult
 import me.domino.fa2.data.store.GalleryStore
 import me.domino.fa2.data.store.SubmissionStore
+import me.domino.fa2.util.attachmenttext.AttachmentTextDocument
+import me.domino.fa2.util.attachmenttext.AttachmentTextExtractor
+import me.domino.fa2.util.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.util.logging.FaLog
 import me.domino.fa2.util.logging.summarizePageState
 import me.domino.fa2.util.logging.summarizeUrl
@@ -15,6 +20,7 @@ class SubmissionRepository(
     private val submissionStore: SubmissionStore,
     private val socialActionEndpoint: SocialActionEndpoint,
     private val galleryStore: GalleryStore,
+    private val attachmentDownloadSource: AttachmentDownloadSource? = null,
 ) {
   private val log = FaLog.withTag("SubmissionRepository")
 
@@ -38,6 +44,71 @@ class SubmissionRepository(
   suspend fun prefetchSubmissionDetailBySid(sid: Int) {
     log.d { "预取投稿详情 -> sid=$sid" }
     submissionStore.prefetchBySid(sid)
+  }
+
+  /** 下载并解析附件文本。 */
+  suspend fun loadAttachmentText(
+      downloadUrl: String,
+      downloadFileName: String,
+      onProgress: (AttachmentTextProgress) -> Unit = {},
+  ): PageState<AttachmentTextDocument> {
+    val normalizedUrl = downloadUrl.trim()
+    val normalizedFileName = downloadFileName.trim()
+    if (normalizedUrl.isBlank()) {
+      return PageState.Error(IllegalArgumentException("Missing attachment download url"))
+    }
+    if (normalizedFileName.isBlank()) {
+      return PageState.Error(IllegalArgumentException("Missing attachment file name"))
+    }
+
+    val downloadSource =
+        attachmentDownloadSource
+            ?: return PageState.Error(IllegalStateException("Attachment download unavailable"))
+    if (!AttachmentTextExtractor.isSupported(normalizedFileName)) {
+      return PageState.Error(
+          IllegalArgumentException("Unsupported attachment format: $normalizedFileName")
+      )
+    }
+
+    log.i { "加载附件文本 -> 开始(file=$normalizedFileName,url=${summarizeUrl(normalizedUrl)})" }
+    return when (
+        val result = downloadSource.fetch(url = normalizedUrl, fileName = normalizedFileName)
+    ) {
+      is AttachmentDownloadResult.Success -> {
+        runCatching {
+              AttachmentTextExtractor.parse(
+                  fileName = normalizedFileName,
+                  bytes = result.payload.bytes,
+                  onProgress = onProgress,
+              )
+            }
+            .fold(
+                onSuccess = { document ->
+                  log.i { "加载附件文本 -> 成功(file=$normalizedFileName)" }
+                  PageState.Success(document)
+                },
+                onFailure = { error ->
+                  log.e(error) { "加载附件文本 -> 解析失败(file=$normalizedFileName)" }
+                  PageState.Error(error)
+                },
+            )
+      }
+
+      is AttachmentDownloadResult.Challenge -> {
+        log.w { "加载附件文本 -> Cloudflare验证(file=$normalizedFileName)" }
+        PageState.CfChallenge
+      }
+
+      is AttachmentDownloadResult.Blocked -> {
+        log.w { "加载附件文本 -> 受限(file=$normalizedFileName,reason=${result.reason})" }
+        PageState.MatureBlocked(result.reason)
+      }
+
+      is AttachmentDownloadResult.Failed -> {
+        log.w { "加载附件文本 -> 失败(file=$normalizedFileName,message=${result.message})" }
+        PageState.Error(IllegalStateException(result.message))
+      }
+    }
   }
 
   /** 收藏/取消收藏投稿。 */

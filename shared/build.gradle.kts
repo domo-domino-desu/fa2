@@ -70,6 +70,7 @@ kotlin {
       dependencies {
         implementation(libs.ktor.client.okhttp)
         implementation(libs.slf4j.simple)
+        implementation(libs.pdfbox)
       }
     }
 
@@ -78,6 +79,7 @@ kotlin {
         implementation(libs.androidx.activity.compose)
         implementation(libs.coil.gif)
         implementation(libs.ktor.client.okhttp)
+        implementation(libs.pdfbox.android)
       }
     }
   }

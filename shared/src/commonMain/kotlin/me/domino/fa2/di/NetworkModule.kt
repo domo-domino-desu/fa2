@@ -13,6 +13,8 @@ import me.domino.fa2.data.network.KSafeCookiePersistence
 import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.data.network.challenge.ChallengeAwareFaHtmlDataSource
 import me.domino.fa2.data.network.challenge.ChallengeResolver
+import me.domino.fa2.data.network.endpoint.AttachmentDownloadEndpoint
+import me.domino.fa2.data.network.endpoint.AttachmentDownloadSource
 import me.domino.fa2.data.network.endpoint.BrowseEndpoint
 import me.domino.fa2.data.network.endpoint.FavoriteEndpoint
 import me.domino.fa2.data.network.endpoint.FeedEndpoint
@@ -62,6 +64,14 @@ fun networkModule(): Module = module {
   }
   single<HttpClient>(qualifier = named("socialActionClient")) {
     get<HttpClient>().config { followRedirects = false }
+  }
+  single<AttachmentDownloadSource> {
+    AttachmentDownloadEndpoint(
+        client = get(),
+        cookiesStorage = get(),
+        userAgentStorage = get(),
+        challengeResolver = get(),
+    )
   }
 
   single { HomeEndpoint(get()) }

@@ -55,6 +55,8 @@ fun SubmissionPager(
     onOpenBrowseFilter: (category: Int, type: Int, species: Int) -> Unit,
     /** 复制投稿链接。 */
     onCopySubmissionUrl: (String) -> Unit,
+    /** 加载附件文本。 */
+    onLoadAttachmentText: () -> Unit,
     /** 描述翻译服务。 */
     descriptionTranslationService: SubmissionDescriptionTranslationService,
     /** 请求 pager 容器重新获取焦点。 */
@@ -137,6 +139,7 @@ fun SubmissionPager(
                 blockedSubmissionMode = blockedSubmissionMode,
                 isBlockedMediaRevealed = blockedMediaRevealState[item.id] == true,
                 onRevealBlockedMedia = { blockedMediaRevealState[item.id] = true },
+                onLoadAttachmentText = onLoadAttachmentText,
                 descriptionTranslationService = descriptionTranslationService,
                 requestPagerFocus = requestPagerFocus,
             )

@@ -10,6 +10,9 @@ import me.domino.fa2.data.datasource.SubmissionDataSource
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.network.FaHtmlDataSource
 import me.domino.fa2.data.network.HtmlResponseResult
+import me.domino.fa2.data.network.endpoint.AttachmentDownloadPayload
+import me.domino.fa2.data.network.endpoint.AttachmentDownloadResult
+import me.domino.fa2.data.network.endpoint.AttachmentDownloadSource
 import me.domino.fa2.data.network.endpoint.FavoriteEndpoint
 import me.domino.fa2.data.network.endpoint.GalleryEndpoint
 import me.domino.fa2.data.network.endpoint.SocialActionEndpoint
@@ -21,6 +24,7 @@ import me.domino.fa2.data.store.SubmissionStore
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.util.FaUrls
+import me.domino.fa2.util.attachmenttext.AttachmentTextFormat
 
 /** SubmissionRepository 详情链路测试。 */
 class SubmissionRepositoryTest {
@@ -48,6 +52,7 @@ class SubmissionRepositoryTest {
     assertEquals("1.22 MB", detail.fileSize)
     assertTrue(detail.fullImageUrl.isNotBlank())
     assertTrue(detail.previewImageUrl.isNotBlank())
+    assertEquals("1665402309.annetpeas_the_hookah_fa.png", detail.downloadFileName)
   }
 
   @Test
@@ -67,9 +72,58 @@ class SubmissionRepositoryTest {
     val state = repository.loadSubmissionDetailByUrl(FaUrls.submission(targetSid))
     assertTrue(state is PageState.Success)
     assertEquals(targetSid, state.data.id)
+    assertEquals("1660265303.terriniss_ауцпекн6г.jpg", state.data.downloadFileName)
   }
 
-  private fun buildRepository(source: FaHtmlDataSource): SubmissionRepository {
+  @Test
+  fun loadAttachmentTextParsesDownloadedTextFile() = runTest {
+    val repository =
+        buildRepository(
+            source = SubmissionScriptedHtmlDataSource(),
+            attachmentDownloadSource =
+                FakeAttachmentDownloadSource(
+                    AttachmentDownloadResult.Success(
+                        AttachmentDownloadPayload(
+                            bytes = "Hello\n\nWorld".encodeToByteArray(),
+                            contentType = "text/plain",
+                        )
+                    )
+                ),
+        )
+
+    val state =
+        repository.loadAttachmentText(
+            downloadUrl = "https://example.com/sample.txt",
+            downloadFileName = "sample.txt",
+        )
+
+    assertTrue(state is PageState.Success)
+    assertEquals(AttachmentTextFormat.TEXT, state.data.format)
+    assertTrue(state.data.html.contains("<p>Hello</p>"))
+  }
+
+  @Test
+  fun loadAttachmentTextReturnsChallengeState() = runTest {
+    val repository =
+        buildRepository(
+            source = SubmissionScriptedHtmlDataSource(),
+            attachmentDownloadSource =
+                FakeAttachmentDownloadSource(AttachmentDownloadResult.Challenge(cfRay = "abc")),
+        )
+
+    val state =
+        repository.loadAttachmentText(
+            downloadUrl = "https://example.com/sample.txt",
+            downloadFileName = "sample.txt",
+        )
+
+    assertEquals(PageState.CfChallenge, state)
+  }
+
+  private fun buildRepository(
+      source: FaHtmlDataSource,
+      attachmentDownloadSource: AttachmentDownloadSource? = null,
+  ): SubmissionRepository {
     val pageCacheDao = InMemoryPageCacheDao()
     val store =
         SubmissionStore(
@@ -95,8 +149,14 @@ class SubmissionRepositoryTest {
         submissionStore = store,
         socialActionEndpoint = SocialActionEndpoint(source),
         galleryStore = galleryStore,
+        attachmentDownloadSource = attachmentDownloadSource,
     )
   }
+}
+
+private class FakeAttachmentDownloadSource(private val result: AttachmentDownloadResult) :
+    AttachmentDownloadSource {
+  override suspend fun fetch(url: String, fileName: String): AttachmentDownloadResult = result
 }
 
 /** 脚本化 HTML 数据源，用于控制请求返回。 */

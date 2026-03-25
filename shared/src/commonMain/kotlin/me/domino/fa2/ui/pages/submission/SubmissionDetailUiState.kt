@@ -11,6 +11,7 @@ sealed interface SubmissionDetailUiState {
       val blockedKeywords: Set<String> = emptySet(),
       val favoriteUpdating: Boolean = false,
       val favoriteErrorMessage: String? = null,
+      val attachmentTextState: SubmissionAttachmentTextUiState? = null,
   ) : SubmissionDetailUiState
 
   data class Error(val message: String) : SubmissionDetailUiState

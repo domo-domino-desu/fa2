@@ -28,7 +28,9 @@ import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.icons.FaMaterialSymbols
+import me.domino.fa2.ui.pages.submission.SubmissionAttachmentTextUiState
 import me.domino.fa2.util.ParserUtils
+import me.domino.fa2.util.attachmenttext.attachmentFileExtension
 import me.domino.fa2.util.sanitizeDetailAspectRatio
 import org.koin.compose.koinInject
 
@@ -50,12 +52,18 @@ internal fun SubmissionDetailSuccessContent(
     isBlockedMediaRevealed: Boolean,
     onRevealBlockedMedia: () -> Unit,
     descriptionTranslationService: SubmissionDescriptionTranslationService,
+    attachmentTextState: SubmissionAttachmentTextUiState?,
+    onLoadAttachmentText: () -> Unit,
     requestPagerFocus: () -> Unit,
 ) {
   val taxonomyRepository = koinInject<FaTaxonomyRepository>()
   val taxonomyCatalog by taxonomyRepository.catalog.collectAsState()
   val fileExtensionLabel =
-      remember(detail.downloadUrl) { extractDownloadFileExtension(detail.downloadUrl) }
+      remember(detail.downloadUrl, detail.downloadFileName) {
+        attachmentFileExtension(detail.downloadFileName)
+            ?: attachmentFileExtension(detail.downloadUrl)
+            ?: extractDownloadFileExtension(detail.downloadUrl)
+      }
   val metrics =
       remember(detail) {
         buildList {
@@ -226,6 +234,14 @@ internal fun SubmissionDetailSuccessContent(
         translationService = descriptionTranslationService,
         requestPagerFocus = requestPagerFocus,
     )
+    attachmentTextState?.let { state ->
+      SubmissionAttachmentTextCard(
+          attachmentTextState = state,
+          translationService = descriptionTranslationService,
+          onLoadAttachmentText = onLoadAttachmentText,
+          requestPagerFocus = requestPagerFocus,
+      )
+    }
     SubmissionCommentsCard(
         commentCount = detail.commentCount,
         comments = detail.comments,
