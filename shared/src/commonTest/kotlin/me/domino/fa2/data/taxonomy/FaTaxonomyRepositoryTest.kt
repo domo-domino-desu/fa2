@@ -33,6 +33,6 @@ class FaTaxonomyRepositoryTest {
     assertEquals(1, categoryGroups[0].options.first().value)
     assertEquals(37, categoryGroups[1].options.first().value)
     assertEquals("image", repository.categoryCardIconByTag("c_wallpaper"))
-    assertEquals("other", repository.categoryCardIconByTag("c_other"))
+    assertEquals("category", repository.categoryCardIconByTag("c_other"))
   }
 }

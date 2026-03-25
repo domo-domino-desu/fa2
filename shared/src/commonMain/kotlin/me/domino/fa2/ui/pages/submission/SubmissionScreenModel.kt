@@ -2,7 +2,9 @@ package me.domino.fa2.ui.pages.submission
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,9 +16,14 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.data.translation.SubmissionDescriptionBlock
+import me.domino.fa2.data.translation.SubmissionDescriptionBlockResult
+import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.state.PaginationSnapshot
 import me.domino.fa2.ui.state.PaginationStateMachine
+import me.domino.fa2.ui.state.SubmissionDescriptionDisplayBlock
+import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.attachmenttext.AttachmentTextExtractor
 import me.domino.fa2.util.attachmenttext.AttachmentTextProgress
@@ -26,6 +33,16 @@ import me.domino.fa2.util.logging.summarizePageState
 
 private const val pagerAppendThreshold = 2
 internal const val pagerPrefetchDebounceMs: Long = 500L
+
+private enum class SubmissionTranslationTarget {
+  DESCRIPTION,
+  ATTACHMENT,
+}
+
+private data class SubmissionTranslationJobKey(
+    val sid: Int,
+    val target: SubmissionTranslationTarget,
+)
 
 /** 投稿详情浏览页面状态模型。 */
 class SubmissionScreenModel(
@@ -37,6 +54,8 @@ class SubmissionScreenModel(
     private val feedSource: SubmissionPagerFeedSource,
     /** Submission 数据源。 */
     private val submissionSource: SubmissionPagerDetailSource,
+    /** 描述/附件翻译编排服务。 */
+    private val translationService: SubmissionDescriptionTranslationService,
 ) : StateScreenModel<SubmissionPagerUiState>(SubmissionPagerUiState.Empty) {
   private val log = FaLog.withTag("SubmissionScreenModel")
   private val paginationStateMachine =
@@ -47,6 +66,15 @@ class SubmissionScreenModel(
 
   /** 每个 sid 的详情状态。 */
   private val detailBySid: MutableMap<Int, SubmissionDetailUiState> = mutableMapOf()
+
+  /** 每个 sid 的正文滚动偏移。 */
+  private val scrollOffsetBySid: MutableMap<Int, Int> = mutableMapOf()
+
+  /** 每个 sid 的回顶命令版本。 */
+  private val scrollToTopVersionBySid: MutableMap<Int, Long> = mutableMapOf()
+
+  /** 翻译任务。 */
+  private val translationJobs: MutableMap<SubmissionTranslationJobKey, Job> = mutableMapOf()
 
   /** 当前追加任务。 */
   private var appendJob: Job? = null
@@ -118,11 +146,43 @@ class SubmissionScreenModel(
     appendIfNearEnd(force = false)
   }
 
+  /** 记录当前 submission 页面滚动偏移。 */
+  fun setCurrentPageScrollOffset(sid: Int, offset: Int) {
+    val normalized = offset.coerceAtLeast(0)
+    if (scrollOffsetBySid[sid] == normalized) return
+    scrollOffsetBySid[sid] = normalized
+  }
+
+  /** 查询某个 sid 当前记住的滚动偏移。 */
+  fun scrollOffsetForSid(sid: Int): Int = scrollOffsetBySid[sid] ?: 0
+
+  /** 查询某个 sid 当前的回顶版本。 */
+  fun scrollToTopVersionForSid(sid: Int): Long = scrollToTopVersionBySid[sid] ?: 0L
+
+  /** 请求当前页回顶。 */
+  fun requestCurrentPageScrollToTop() {
+    val current = holder.current() ?: return
+    val sid = current.id
+    scrollOffsetBySid[sid] = 0
+    scrollToTopVersionBySid[sid] = (scrollToTopVersionBySid[sid] ?: 0L) + 1L
+    refreshState()
+  }
+
   /** 重试当前详情页。 */
   fun retryCurrentDetail() {
     val current = holder.current() ?: return
     log.i { "重试详情加载 -> sid=${current.id}" }
     loadDetail(current = current, force = true)
+  }
+
+  /** 触发当前投稿描述翻译。 */
+  fun translateDescriptionCurrent() {
+    translateCurrent(target = SubmissionTranslationTarget.DESCRIPTION)
+  }
+
+  /** 触发当前投稿附件文本翻译。 */
+  fun translateAttachmentCurrent() {
+    translateCurrent(target = SubmissionTranslationTarget.ATTACHMENT)
   }
 
   /** 解析当前投稿附件文本。 */
@@ -147,25 +207,29 @@ class SubmissionScreenModel(
           is SubmissionAttachmentTextUiState.Success -> return
         }.trim()
     if (downloadUrl.isBlank()) {
+      cancelTranslationJob(sid, SubmissionTranslationTarget.ATTACHMENT)
       detailBySid[sid] =
           currentState.copy(
               attachmentTextState =
                   SubmissionAttachmentTextUiState.Error(
                       fileName = fileName,
                       message = "缺少附件下载地址",
-                  )
+                  ),
+              attachmentTranslationState = null,
           )
       refreshState()
       return
     }
 
+    cancelTranslationJob(sid, SubmissionTranslationTarget.ATTACHMENT)
     detailBySid[sid] =
         currentState.copy(
             attachmentTextState =
                 SubmissionAttachmentTextUiState.Loading(
                     fileName = fileName,
                     progress = initialAttachmentTextProgress(fileName),
-                )
+                ),
+            attachmentTranslationState = null,
         )
     refreshState()
 
@@ -192,14 +256,22 @@ class SubmissionScreenModel(
       val latestState = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return@launch
       detailBySid[sid] =
           when (result) {
-            is PageState.Success ->
-                latestState.copy(
-                    attachmentTextState =
-                        SubmissionAttachmentTextUiState.Success(
-                            fileName = fileName,
-                            document = result.data,
-                        )
-                )
+            is PageState.Success -> {
+              val nextAttachmentState =
+                  SubmissionAttachmentTextUiState.Success(
+                      fileName = fileName,
+                      document = result.data,
+                  )
+              latestState.copy(
+                  attachmentTextState = nextAttachmentState,
+                  attachmentTranslationState =
+                      resolveAttachmentTranslationState(
+                          attachmentTextState = nextAttachmentState,
+                          previous = latestState.attachmentTranslationState,
+                          translationService = translationService,
+                      ),
+              )
+            }
 
             PageState.CfChallenge ->
                 latestState.copy(
@@ -207,7 +279,8 @@ class SubmissionScreenModel(
                         SubmissionAttachmentTextUiState.Error(
                             fileName = fileName,
                             message = "需要 Cloudflare 验证",
-                        )
+                        ),
+                    attachmentTranslationState = null,
                 )
 
             is PageState.MatureBlocked ->
@@ -216,7 +289,8 @@ class SubmissionScreenModel(
                         SubmissionAttachmentTextUiState.Error(
                             fileName = fileName,
                             message = result.reason,
-                        )
+                        ),
+                    attachmentTranslationState = null,
                 )
 
             is PageState.Error ->
@@ -225,7 +299,8 @@ class SubmissionScreenModel(
                         SubmissionAttachmentTextUiState.Error(
                             fileName = fileName,
                             message = result.exception.message ?: result.exception.toString(),
-                        )
+                        ),
+                    attachmentTranslationState = null,
                 )
 
             PageState.Loading -> latestState
@@ -271,7 +346,8 @@ class SubmissionScreenModel(
             is PageState.Success -> {
               prefetchedSuccessSids += sid
               detailBySid[sid] =
-                  SubmissionDetailUiState.Success(
+                  buildSuccessDetailState(
+                      sid = sid,
                       detail =
                           optimisticDetail.copy(
                               isFavorited = refreshed.data.isFavorited,
@@ -280,65 +356,51 @@ class SubmissionScreenModel(
                                   refreshed.data.favoriteActionUrl.ifBlank {
                                     guessNextFavoriteActionUrl(actionUrl)
                                   },
+                              downloadUrl = refreshed.data.downloadUrl,
+                              downloadFileName = refreshed.data.downloadFileName,
                           ),
+                      previous = currentState,
                       blockedKeywords = currentState.blockedKeywords,
-                      favoriteUpdating = false,
-                      favoriteErrorMessage = null,
-                      attachmentTextState =
-                          resolveAttachmentTextState(
-                              detail =
-                                  optimisticDetail.copy(
-                                      downloadUrl = refreshed.data.downloadUrl,
-                                      downloadFileName = refreshed.data.downloadFileName,
-                                  ),
-                              previous = currentState.attachmentTextState,
-                          ),
                   )
               log.i { "收藏操作 -> 成功(sid=$sid,isFavorited=${refreshed.data.isFavorited})" }
             }
 
             PageState.CfChallenge -> {
               detailBySid[sid] =
-                  SubmissionDetailUiState.Success(
+                  currentState.copy(
                       detail =
                           optimisticDetail.copy(
                               favoriteActionUrl = guessNextFavoriteActionUrl(actionUrl)
                           ),
-                      blockedKeywords = currentState.blockedKeywords,
                       favoriteUpdating = false,
                       favoriteErrorMessage = "收藏已提交，但状态同步需要 Cloudflare 验证",
-                      attachmentTextState = currentState.attachmentTextState,
                   )
               log.w { "收藏操作 -> 已提交, 但刷新需要Cloudflare验证(sid=$sid)" }
             }
 
             is PageState.MatureBlocked -> {
               detailBySid[sid] =
-                  SubmissionDetailUiState.Success(
+                  currentState.copy(
                       detail =
                           optimisticDetail.copy(
                               favoriteActionUrl = guessNextFavoriteActionUrl(actionUrl)
                           ),
-                      blockedKeywords = currentState.blockedKeywords,
                       favoriteUpdating = false,
                       favoriteErrorMessage = "收藏已提交，但状态同步失败：${refreshed.reason}",
-                      attachmentTextState = currentState.attachmentTextState,
                   )
               log.w { "收藏操作 -> 已提交, 但刷新受限(sid=$sid,reason=${refreshed.reason})" }
             }
 
             is PageState.Error -> {
               detailBySid[sid] =
-                  SubmissionDetailUiState.Success(
+                  currentState.copy(
                       detail =
                           optimisticDetail.copy(
                               favoriteActionUrl = guessNextFavoriteActionUrl(actionUrl)
                           ),
-                      blockedKeywords = currentState.blockedKeywords,
                       favoriteUpdating = false,
                       favoriteErrorMessage =
                           "收藏已提交，但状态同步失败：${refreshed.exception.message ?: refreshed.exception}",
-                      attachmentTextState = currentState.attachmentTextState,
                   )
               log.e(refreshed.exception) { "收藏操作 -> 已提交, 但刷新失败(sid=$sid)" }
             }
@@ -349,37 +411,31 @@ class SubmissionScreenModel(
 
         PageState.CfChallenge -> {
           detailBySid[sid] =
-              SubmissionDetailUiState.Success(
+              currentState.copy(
                   detail = originalDetail,
-                  blockedKeywords = currentState.blockedKeywords,
                   favoriteUpdating = false,
                   favoriteErrorMessage = "需要 Cloudflare 验证",
-                  attachmentTextState = currentState.attachmentTextState,
               )
           log.w { "收藏操作 -> Cloudflare验证(sid=$sid)" }
         }
 
         is PageState.MatureBlocked -> {
           detailBySid[sid] =
-              SubmissionDetailUiState.Success(
+              currentState.copy(
                   detail = originalDetail,
-                  blockedKeywords = currentState.blockedKeywords,
                   favoriteUpdating = false,
                   favoriteErrorMessage = toggleResult.reason,
-                  attachmentTextState = currentState.attachmentTextState,
               )
           log.w { "收藏操作 -> 受限(sid=$sid,reason=${toggleResult.reason})" }
         }
 
         is PageState.Error -> {
           detailBySid[sid] =
-              SubmissionDetailUiState.Success(
+              currentState.copy(
                   detail = originalDetail,
-                  blockedKeywords = currentState.blockedKeywords,
                   favoriteUpdating = false,
                   favoriteErrorMessage =
                       toggleResult.exception.message ?: toggleResult.exception.toString(),
-                  attachmentTextState = currentState.attachmentTextState,
               )
           log.e(toggleResult.exception) { "收藏操作 -> 失败(sid=$sid)" }
         }
@@ -412,15 +468,11 @@ class SubmissionScreenModel(
           is PageState.Success -> {
             prefetchedSuccessSids += sid
             val refreshedState =
-                SubmissionDetailUiState.Success(
+                buildSuccessDetailState(
+                    sid = sid,
                     detail = refreshed.data,
+                    previous = currentState,
                     blockedKeywords = toBlockedKeywordSet(refreshed.data),
-                    favoriteErrorMessage = null,
-                    attachmentTextState =
-                        resolveAttachmentTextState(
-                            detail = refreshed.data,
-                            previous = currentState.attachmentTextState,
-                        ),
                 )
             detailBySid[sid] = refreshedState
             refreshState()
@@ -570,6 +622,7 @@ class SubmissionScreenModel(
         SubmissionPagerUiState.Data(
             submissions = items,
             detailBySid = detailBySid.toMap(),
+            scrollToTopVersionBySid = scrollToTopVersionBySid.toMap(),
             currentIndex = index.coerceIn(0, (items.lastIndex).coerceAtLeast(0)),
             hasPrevious = holder.previous() != null,
             hasNext = holder.next() != null || !nextPageUrl.isNullOrBlank(),
@@ -605,16 +658,16 @@ class SubmissionScreenModel(
                 when (val next = submissionSource.loadBySid(sid)) {
                   is PageState.Success -> {
                     prefetchedSuccessSids += sid
-                    val currentState = detailBySid[sid]
-                    if (currentState !is SubmissionDetailUiState.Success) {
-                      detailBySid[sid] =
-                          SubmissionDetailUiState.Success(
-                              detail = next.data,
-                              blockedKeywords = toBlockedKeywordSet(next.data),
-                              attachmentTextState = resolveAttachmentTextState(next.data),
-                          )
-                      refreshState()
-                    }
+                    val currentState = detailBySid[sid] as? SubmissionDetailUiState.Success
+                    detailBySid[sid] =
+                        buildSuccessDetailState(
+                            sid = sid,
+                            detail = next.data,
+                            previous = currentState,
+                            blockedKeywords =
+                                currentState?.blockedKeywords ?: toBlockedKeywordSet(next.data),
+                        )
+                    refreshState()
                   }
 
                   PageState.CfChallenge,
@@ -657,6 +710,78 @@ class SubmissionScreenModel(
 
   private fun toBlockedKeywordSet(detail: Submission): Set<String> =
       detail.blockedTagNames.map(::normalizeTagKey).filter { it.isNotBlank() }.toSet()
+
+  private fun translateCurrent(target: SubmissionTranslationTarget) {
+    val current = holder.current() ?: return
+    val sid = current.id
+    val currentState = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return
+    val translationState = currentState.translationStateOf(target) ?: return
+    if (translationState.translating || translationState.sourceBlocks.isEmpty()) return
+
+    val jobKey = SubmissionTranslationJobKey(sid = sid, target = target)
+    cancelTranslationJob(sid, target)
+
+    val pendingState = translationState.toPendingState()
+    detailBySid[sid] = currentState.withTranslationState(target = target, state = pendingState)
+    refreshState()
+
+    val job =
+        screenModelScope.launch {
+          try {
+            translationService.translateBlocks(pendingState.sourceBlocks) { index, result ->
+              val latestState =
+                  detailBySid[sid] as? SubmissionDetailUiState.Success ?: return@translateBlocks
+              val latestTranslationState =
+                  latestState.translationStateOf(target) ?: return@translateBlocks
+              if (latestTranslationState.sourceKey != pendingState.sourceKey) return@translateBlocks
+
+              val updatedState =
+                  latestTranslationState.withBlockResult(
+                      index = index,
+                      result = result,
+                  )
+              detailBySid[sid] =
+                  latestState.withTranslationState(target = target, state = updatedState)
+              refreshState()
+            }
+          } catch (cancelled: CancellationException) {
+            throw cancelled
+          } catch (_: Throwable) {
+            val latestState = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return@launch
+            val latestTranslationState = latestState.translationStateOf(target) ?: return@launch
+            if (latestTranslationState.sourceKey == pendingState.sourceKey) {
+              detailBySid[sid] =
+                  latestState.withTranslationState(
+                      target = target,
+                      state = latestTranslationState.markPendingBlocksAsFailed(),
+                  )
+              refreshState()
+            }
+          } finally {
+            val currentJob = currentCoroutineContext()[Job]
+            val runningJob = translationJobs[jobKey]
+            if (runningJob === currentJob) {
+              translationJobs.remove(jobKey)
+            }
+            val latestState = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return@launch
+            val latestTranslationState = latestState.translationStateOf(target) ?: return@launch
+            if (latestTranslationState.sourceKey == pendingState.sourceKey) {
+              detailBySid[sid] =
+                  latestState.withTranslationState(
+                      target = target,
+                      state = latestTranslationState.copy(translating = false),
+                  )
+              refreshState()
+            }
+          }
+        }
+    translationJobs[jobKey] = job
+  }
+
+  private fun cancelTranslationJob(sid: Int, target: SubmissionTranslationTarget) {
+    val key = SubmissionTranslationJobKey(sid = sid, target = target)
+    translationJobs.remove(key)?.cancel()
+  }
 
   /** 加载当前页附近的下一页数据。 */
   private fun appendIfNearEnd(force: Boolean) {
@@ -733,6 +858,7 @@ class SubmissionScreenModel(
 
   private fun loadDetail(current: SubmissionThumbnail, force: Boolean) {
     val sid = current.id
+    val previous = detailBySid[sid] as? SubmissionDetailUiState.Success
     if (!force) {
       when (detailBySid[sid]) {
         is SubmissionDetailUiState.Loading,
@@ -753,16 +879,10 @@ class SubmissionScreenModel(
             is PageState.Success -> {
               prefetchedSuccessSids += sid
               log.d { "加载投稿详情 -> ${summarizePageState(next)}(sid=$sid)" }
-              SubmissionDetailUiState.Success(
+              buildSuccessDetailState(
+                  sid = sid,
                   detail = next.data,
-                  blockedKeywords = toBlockedKeywordSet(next.data),
-                  attachmentTextState =
-                      resolveAttachmentTextState(
-                          detail = next.data,
-                          previous =
-                              (detailBySid[sid] as? SubmissionDetailUiState.Success)
-                                  ?.attachmentTextState,
-                      ),
+                  previous = previous,
               )
             }
 
@@ -790,6 +910,51 @@ class SubmissionScreenModel(
       refreshState()
     }
   }
+
+  private fun buildSuccessDetailState(
+      sid: Int,
+      detail: Submission,
+      previous: SubmissionDetailUiState.Success? = null,
+      blockedKeywords: Set<String> = toBlockedKeywordSet(detail),
+      favoriteUpdating: Boolean = false,
+      favoriteErrorMessage: String? = null,
+  ): SubmissionDetailUiState.Success {
+    val descriptionTranslationState =
+        resolveTranslationState(
+            sourceHtml = detail.descriptionHtml,
+            sourceFileName = null,
+            previous = previous?.descriptionTranslationState,
+            translationService = translationService,
+        )
+    val attachmentTextState =
+        resolveAttachmentTextState(
+            detail = detail,
+            previous = previous?.attachmentTextState,
+        )
+    val attachmentTranslationState =
+        resolveAttachmentTranslationState(
+            attachmentTextState = attachmentTextState,
+            previous = previous?.attachmentTranslationState,
+            translationService = translationService,
+        )
+
+    if (previous?.descriptionTranslationState?.sourceKey != descriptionTranslationState.sourceKey) {
+      cancelTranslationJob(sid, SubmissionTranslationTarget.DESCRIPTION)
+    }
+    if (previous?.attachmentTranslationState?.sourceKey != attachmentTranslationState?.sourceKey) {
+      cancelTranslationJob(sid, SubmissionTranslationTarget.ATTACHMENT)
+    }
+
+    return SubmissionDetailUiState.Success(
+        detail = detail,
+        blockedKeywords = blockedKeywords,
+        descriptionTranslationState = descriptionTranslationState,
+        favoriteUpdating = favoriteUpdating,
+        favoriteErrorMessage = favoriteErrorMessage,
+        attachmentTextState = attachmentTextState,
+        attachmentTranslationState = attachmentTranslationState,
+    )
+  }
 }
 
 private fun normalizeTagKey(tagName: String): String = tagName.trim().lowercase()
@@ -813,6 +978,130 @@ private fun resolveAttachmentTextState(
         else SubmissionAttachmentTextUiState.Idle(fileName)
   }
 }
+
+private fun resolveTranslationState(
+    sourceHtml: String,
+    sourceFileName: String?,
+    previous: SubmissionTranslationUiState?,
+    translationService: SubmissionDescriptionTranslationService,
+): SubmissionTranslationUiState {
+  val sourceBlocks = translationService.extractBlocks(sourceHtml)
+  val sourceKey =
+      buildTranslationSourceKey(sourceHtml = sourceHtml, sourceFileName = sourceFileName)
+  if (previous?.sourceKey == sourceKey) return previous
+
+  return SubmissionTranslationUiState(
+      sourceKey = sourceKey,
+      sourceHtml = sourceHtml,
+      sourceBlocks = sourceBlocks,
+      blocks = sourceBlocks.toIdleDisplayBlocks(),
+      sourceFileName = sourceFileName,
+  )
+}
+
+private fun resolveAttachmentTranslationState(
+    attachmentTextState: SubmissionAttachmentTextUiState?,
+    previous: SubmissionTranslationUiState?,
+    translationService: SubmissionDescriptionTranslationService,
+): SubmissionTranslationUiState? {
+  val successState = attachmentTextState as? SubmissionAttachmentTextUiState.Success ?: return null
+  return resolveTranslationState(
+      sourceHtml = successState.document.html,
+      sourceFileName = successState.fileName,
+      previous = previous,
+      translationService = translationService,
+  )
+}
+
+private fun buildTranslationSourceKey(sourceHtml: String, sourceFileName: String?): String =
+    listOfNotNull(sourceFileName?.trim()?.takeIf { it.isNotBlank() }, sourceHtml)
+        .joinToString("\n@@\n")
+
+private fun List<SubmissionDescriptionBlock>.toIdleDisplayBlocks():
+    List<SubmissionDescriptionDisplayBlock> = map { block ->
+  SubmissionDescriptionDisplayBlock(
+      originalHtml = block.originalHtml,
+      translated = null,
+      status = SubmissionDescriptionTranslationStatus.IDLE,
+  )
+}
+
+private fun SubmissionTranslationUiState.toPendingState(): SubmissionTranslationUiState =
+    copy(
+        blocks =
+            sourceBlocks.map { block ->
+              SubmissionDescriptionDisplayBlock(
+                  originalHtml = block.originalHtml,
+                  translated = null,
+                  status = SubmissionDescriptionTranslationStatus.PENDING,
+              )
+            },
+        translating = true,
+        hasTriggered = true,
+    )
+
+private fun SubmissionTranslationUiState.withBlockResult(
+    index: Int,
+    result: SubmissionDescriptionBlockResult,
+): SubmissionTranslationUiState =
+    copy(
+        blocks =
+            blocks.mapIndexed { currentIndex, block ->
+              if (currentIndex != index) {
+                block
+              } else {
+                when (result) {
+                  is SubmissionDescriptionBlockResult.Success ->
+                      block.copy(
+                          translated = result.translatedText,
+                          status = SubmissionDescriptionTranslationStatus.SUCCESS,
+                      )
+
+                  SubmissionDescriptionBlockResult.EmptyResult ->
+                      block.copy(
+                          translated = null,
+                          status = SubmissionDescriptionTranslationStatus.EMPTY,
+                      )
+
+                  is SubmissionDescriptionBlockResult.Failure ->
+                      block.copy(
+                          translated = null,
+                          status = SubmissionDescriptionTranslationStatus.FAILURE,
+                      )
+                }
+              }
+            }
+    )
+
+private fun SubmissionTranslationUiState.markPendingBlocksAsFailed(): SubmissionTranslationUiState =
+    copy(
+        blocks =
+            blocks.map { block ->
+              if (block.status == SubmissionDescriptionTranslationStatus.PENDING) {
+                block.copy(status = SubmissionDescriptionTranslationStatus.FAILURE)
+              } else {
+                block
+              }
+            },
+        translating = false,
+    )
+
+private fun SubmissionDetailUiState.Success.translationStateOf(
+    target: SubmissionTranslationTarget
+): SubmissionTranslationUiState? =
+    when (target) {
+      SubmissionTranslationTarget.DESCRIPTION -> descriptionTranslationState
+      SubmissionTranslationTarget.ATTACHMENT -> attachmentTranslationState
+    }
+
+private fun SubmissionDetailUiState.Success.withTranslationState(
+    target: SubmissionTranslationTarget,
+    state: SubmissionTranslationUiState,
+): SubmissionDetailUiState.Success =
+    when (target) {
+      SubmissionTranslationTarget.DESCRIPTION -> copy(descriptionTranslationState = state)
+      SubmissionTranslationTarget.ATTACHMENT -> copy(attachmentTranslationState = state)
+    }
 
 private fun initialAttachmentTextProgress(fileName: String): AttachmentTextProgress =
     AttachmentTextProgress(

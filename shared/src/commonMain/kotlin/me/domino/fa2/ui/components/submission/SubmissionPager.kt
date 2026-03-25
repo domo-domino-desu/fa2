@@ -13,7 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -27,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
-import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.platform.PlatformVerticalScrollbar
 import me.domino.fa2.ui.pages.submission.SubmissionDetailUiState
@@ -57,14 +55,20 @@ fun SubmissionPager(
     onCopySubmissionUrl: (String) -> Unit,
     /** 加载附件文本。 */
     onLoadAttachmentText: () -> Unit,
-    /** 描述翻译服务。 */
-    descriptionTranslationService: SubmissionDescriptionTranslationService,
+    /** 触发描述翻译。 */
+    onTranslateDescription: () -> Unit,
+    /** 触发附件翻译。 */
+    onTranslateAttachment: () -> Unit,
+    /** 查询各 sid 当前保存的滚动偏移。 */
+    scrollOffsetOfSid: (Int) -> Int,
     /** 请求 pager 容器重新获取焦点。 */
     requestPagerFocus: () -> Unit,
     /** 原图缩放遮罩显隐回调。 */
     onZoomOverlayVisibilityChanged: (Boolean) -> Unit,
-    /** 当前页回顶触发信号。 */
-    scrollCurrentPageToTopSignal: Int,
+    /** 当前页滚动偏移变更。 */
+    onPageScrollOffsetChanged: (sid: Int, offset: Int) -> Unit,
+    /** 各 sid 的回顶命令版本。 */
+    scrollToTopVersionBySid: Map<Int, Long>,
     /** 左右滑中的被屏蔽投稿策略。 */
     blockedSubmissionMode: BlockedSubmissionPagerMode,
 ) {
@@ -98,14 +102,7 @@ fun SubmissionPager(
   }
   PlatformBackHandler(enabled = !zoomOverlayImageUrl.isNullOrBlank()) { zoomOverlayImageUrl = null }
   val blockedMediaRevealState = remember { mutableStateMapOf<Int, Boolean>() }
-  val currentPageScrollStates = remember {
-    mutableStateMapOf<Int, androidx.compose.foundation.ScrollState>()
-  }
-
-  LaunchedEffect(scrollCurrentPageToTopSignal, pagerState.currentPage) {
-    val scrollState = currentPageScrollStates[pagerState.currentPage] ?: return@LaunchedEffect
-    scrollState.animateScrollTo(0)
-  }
+  val consumedScrollToTopVersions = remember { mutableStateMapOf<Int, Long>() }
 
   Box(modifier = Modifier.fillMaxSize()) {
     Column(
@@ -114,13 +111,17 @@ fun SubmissionPager(
     ) {
       HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
         val item = submissions[page]
-        val scrollState = rememberScrollState()
-        DisposableEffect(page, scrollState) {
-          currentPageScrollStates[page] = scrollState
-          onDispose {
-            if (currentPageScrollStates[page] === scrollState) {
-              currentPageScrollStates.remove(page)
-            }
+        val scrollState = rememberScrollState(initial = scrollOffsetOfSid(item.id))
+        LaunchedEffect(item.id, scrollState) {
+          snapshotFlow { scrollState.value }
+              .distinctUntilChanged()
+              .collect { offset -> onPageScrollOffsetChanged(item.id, offset) }
+        }
+        val scrollToTopVersion = scrollToTopVersionBySid[item.id] ?: 0L
+        LaunchedEffect(item.id, scrollToTopVersion) {
+          val previousConsumed = consumedScrollToTopVersions.put(item.id, scrollToTopVersion)
+          if (previousConsumed != null && scrollToTopVersion > previousConsumed) {
+            scrollState.animateScrollTo(0)
           }
         }
         Box(modifier = Modifier.fillMaxSize()) {
@@ -140,7 +141,8 @@ fun SubmissionPager(
                 isBlockedMediaRevealed = blockedMediaRevealState[item.id] == true,
                 onRevealBlockedMedia = { blockedMediaRevealState[item.id] = true },
                 onLoadAttachmentText = onLoadAttachmentText,
-                descriptionTranslationService = descriptionTranslationService,
+                onTranslateDescription = onTranslateDescription,
+                onTranslateAttachment = onTranslateAttachment,
                 requestPagerFocus = requestPagerFocus,
             )
           }

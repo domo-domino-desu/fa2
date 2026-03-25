@@ -54,6 +54,7 @@ class SubmissionScreenModelAttachmentTextTest {
                 holder = holder,
                 feedSource = NoopFeedSourceForAttachmentTest(),
                 submissionSource = detailSource,
+                translationService = createTestSubmissionTranslationService(),
             )
 
         runCurrent()
@@ -92,6 +93,7 @@ class SubmissionScreenModelAttachmentTextTest {
                 holder = holder,
                 feedSource = NoopFeedSourceForAttachmentTest(),
                 submissionSource = detailSource,
+                translationService = createTestSubmissionTranslationService(),
             )
 
         runCurrent()

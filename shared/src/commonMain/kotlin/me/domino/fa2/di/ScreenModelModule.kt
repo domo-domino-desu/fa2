@@ -35,6 +35,7 @@ fun screenModelModule(): Module = module {
         holder = holder,
         feedSource = SubmissionPagerFeedSourceImpl(get()),
         submissionSource = SubmissionPagerDetailSourceImpl(get()),
+        translationService = get(),
     )
   }
   factory { (username: String, initialChildRoute: UserChildRoute, initialFolderUrl: String?) ->

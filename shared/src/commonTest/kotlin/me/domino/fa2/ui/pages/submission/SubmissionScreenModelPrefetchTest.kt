@@ -64,6 +64,7 @@ class SubmissionScreenModelPrefetchTest {
             holder = holder,
             feedSource = NoopFeedSource(),
             submissionSource = detailSource,
+            translationService = createTestSubmissionTranslationService(),
         )
 
         runCurrent()

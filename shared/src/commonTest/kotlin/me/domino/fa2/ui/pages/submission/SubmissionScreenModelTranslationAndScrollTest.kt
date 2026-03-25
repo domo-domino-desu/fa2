@@ -1,0 +1,343 @@
+package me.domino.fa2.ui.pages.submission
+
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import me.domino.fa2.data.model.FeedPage
+import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.Submission
+import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.ui.navigation.SubmissionListHolder
+import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
+import me.domino.fa2.util.FaUrls
+import me.domino.fa2.util.ParserUtils
+import me.domino.fa2.util.attachmenttext.AttachmentTextDocument
+import me.domino.fa2.util.attachmenttext.AttachmentTextFormat
+import me.domino.fa2.util.attachmenttext.AttachmentTextParagraph
+import me.domino.fa2.util.attachmenttext.AttachmentTextProgress
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class SubmissionScreenModelTranslationAndScrollTest {
+  private val dispatcher = StandardTestDispatcher()
+
+  @BeforeTest
+  fun setUp() {
+    Dispatchers.setMain(dispatcher)
+  }
+
+  @AfterTest
+  fun tearDown() {
+    Dispatchers.resetMain()
+  }
+
+  @Test
+  fun cachesDescriptionTranslationAcrossPageChangesAndResetsWhenDescriptionChanges() =
+      runTest(dispatcher.scheduler) {
+        val holder = SubmissionListHolder()
+        holder.replace(
+            submissions = listOf(translationTestThumbnail(1), translationTestThumbnail(2)),
+            nextPageUrl = null,
+        )
+        val detailSource =
+            MutableSubmissionDetailSource(
+                submissions =
+                    mutableMapOf(
+                        1 to translationTestSubmission(1, descriptionHtml = "<p>hello</p>"),
+                        2 to translationTestSubmission(2, descriptionHtml = "<p>world</p>"),
+                    )
+            )
+        val model =
+            SubmissionScreenModel(
+                initialSid = 1,
+                holder = holder,
+                feedSource = NoopFeedSourceForTranslationTest(),
+                submissionSource = detailSource,
+                translationService =
+                    createTestSubmissionTranslationService { request ->
+                      request.sourceText.uppercase()
+                    },
+            )
+
+        runCurrent()
+        model.translateDescriptionCurrent()
+        advanceUntilIdle()
+
+        val translatedState =
+            ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
+                    as SubmissionDetailUiState.Success)
+                .descriptionTranslationState
+        assertEquals(true, translatedState.hasTriggered)
+        assertEquals(
+            SubmissionDescriptionTranslationStatus.SUCCESS,
+            translatedState.blocks.single().status,
+        )
+        assertEquals("HELLO", translatedState.blocks.single().translated)
+
+        model.onPageChanged(1)
+        runCurrent()
+        model.onPageChanged(0)
+        runCurrent()
+
+        val restoredState =
+            ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
+                    as SubmissionDetailUiState.Success)
+                .descriptionTranslationState
+        assertEquals(
+            SubmissionDescriptionTranslationStatus.SUCCESS,
+            restoredState.blocks.single().status,
+        )
+        assertEquals("HELLO", restoredState.blocks.single().translated)
+
+        detailSource.submissions[1] =
+            translationTestSubmission(1, descriptionHtml = "<p>changed</p>")
+        model.retryCurrentDetail()
+        advanceUntilIdle()
+
+        val resetState =
+            ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
+                    as SubmissionDetailUiState.Success)
+                .descriptionTranslationState
+        assertEquals(false, resetState.hasTriggered)
+        assertEquals("<p>changed</p>", resetState.sourceHtml)
+        assertEquals(
+            SubmissionDescriptionTranslationStatus.IDLE,
+            resetState.blocks.single().status,
+        )
+        assertEquals(null, resetState.blocks.single().translated)
+      }
+
+  @Test
+  fun resetsAttachmentTranslationWhenAttachmentSourceChanges() =
+      runTest(dispatcher.scheduler) {
+        val holder = SubmissionListHolder()
+        holder.replace(submissions = listOf(translationTestThumbnail(1)), nextPageUrl = null)
+        val detailSource =
+            MutableSubmissionDetailSource(
+                submissions =
+                    mutableMapOf(
+                        1 to
+                            translationTestSubmission(
+                                1,
+                                descriptionHtml = "<p>desc</p>",
+                                downloadUrl = "https://example.com/sample.txt",
+                                downloadFileName = "sample.txt",
+                            )
+                    ),
+                attachmentResults =
+                    ArrayDeque(
+                        listOf(PageState.Success(translationTestAttachmentDocument("hello")))
+                    ),
+            )
+        val model =
+            SubmissionScreenModel(
+                initialSid = 1,
+                holder = holder,
+                feedSource = NoopFeedSourceForTranslationTest(),
+                submissionSource = detailSource,
+                translationService =
+                    createTestSubmissionTranslationService { request ->
+                      request.sourceText.uppercase()
+                    },
+            )
+
+        runCurrent()
+        model.loadAttachmentTextCurrent()
+        advanceUntilIdle()
+        model.translateAttachmentCurrent()
+        advanceUntilIdle()
+
+        val translatedAttachmentState =
+            ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
+                    as SubmissionDetailUiState.Success)
+                .attachmentTranslationState
+        assertNotNull(translatedAttachmentState)
+        assertEquals(
+            SubmissionDescriptionTranslationStatus.SUCCESS,
+            translatedAttachmentState.blocks.single().status,
+        )
+        assertEquals("HELLO", translatedAttachmentState.blocks.single().translated)
+
+        detailSource.submissions[1] =
+            translationTestSubmission(
+                1,
+                descriptionHtml = "<p>desc</p>",
+                downloadUrl = "https://example.com/other.txt",
+                downloadFileName = "other.txt",
+            )
+        model.retryCurrentDetail()
+        advanceUntilIdle()
+
+        val refreshedState =
+            (model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
+                as SubmissionDetailUiState.Success
+        assertEquals(
+            SubmissionAttachmentTextUiState.Idle("other.txt"),
+            refreshedState.attachmentTextState,
+        )
+        assertNull(refreshedState.attachmentTranslationState)
+      }
+
+  @Test
+  fun remembersScrollOffsetsAndAdvancesScrollToTopVersionForCurrentSid() =
+      runTest(dispatcher.scheduler) {
+        val holder = SubmissionListHolder()
+        holder.replace(
+            submissions = listOf(translationTestThumbnail(1), translationTestThumbnail(2)),
+            nextPageUrl = null,
+        )
+        val detailSource =
+            MutableSubmissionDetailSource(
+                submissions =
+                    mutableMapOf(
+                        1 to translationTestSubmission(1),
+                        2 to translationTestSubmission(2),
+                    )
+            )
+        val model =
+            SubmissionScreenModel(
+                initialSid = 1,
+                holder = holder,
+                feedSource = NoopFeedSourceForTranslationTest(),
+                submissionSource = detailSource,
+                translationService = createTestSubmissionTranslationService(),
+            )
+
+        runCurrent()
+        model.setCurrentPageScrollOffset(1, 128)
+        assertEquals(128, model.scrollOffsetForSid(1))
+        assertEquals(0, model.scrollOffsetForSid(2))
+
+        val versionBeforeFirst = model.scrollToTopVersionForSid(1)
+        val versionBeforeSecond = model.scrollToTopVersionForSid(2)
+        model.requestCurrentPageScrollToTop()
+
+        assertEquals(0, model.scrollOffsetForSid(1))
+        assertEquals(versionBeforeFirst + 1, model.scrollToTopVersionForSid(1))
+        assertEquals(versionBeforeSecond, model.scrollToTopVersionForSid(2))
+
+        model.onPageChanged(1)
+        runCurrent()
+        model.setCurrentPageScrollOffset(2, 44)
+        model.requestCurrentPageScrollToTop()
+
+        assertEquals(0, model.scrollOffsetForSid(2))
+        assertEquals(versionBeforeSecond + 1, model.scrollToTopVersionForSid(2))
+        assertEquals(versionBeforeFirst + 1, model.scrollToTopVersionForSid(1))
+      }
+}
+
+private class MutableSubmissionDetailSource(
+    val submissions: MutableMap<Int, Submission>,
+    private val attachmentResults: ArrayDeque<PageState<AttachmentTextDocument>> = ArrayDeque(),
+) : SubmissionPagerDetailSource {
+  override suspend fun loadBySid(sid: Int): PageState<Submission> =
+      submissions[sid]?.let { submission -> PageState.Success(submission) }
+          ?: PageState.Error(IllegalStateException("Missing submission for sid=$sid"))
+
+  override suspend fun loadByUrl(url: String): PageState<Submission> {
+    val sid =
+        ParserUtils.parseSubmissionSid(url)
+            ?: return PageState.Error(IllegalArgumentException("Invalid submission url: $url"))
+    return loadBySid(sid)
+  }
+
+  override suspend fun loadAttachmentText(
+      downloadUrl: String,
+      downloadFileName: String,
+      onProgress: (AttachmentTextProgress) -> Unit,
+  ): PageState<AttachmentTextDocument> {
+    onProgress(
+        AttachmentTextProgress(
+            overallFraction = 0.5f,
+            stageIndex = 1,
+            stageCount = 1,
+            stageId = "decode_bytes",
+            stageLabel = "解析附件",
+            stageFraction = 0.5f,
+            message = "处理中",
+            currentItemLabel = downloadFileName,
+        )
+    )
+    return attachmentResults.removeFirstOrNull()
+        ?: PageState.Error(IllegalStateException("No attachment result prepared"))
+  }
+
+  override suspend fun toggleFavorite(sid: Int, actionUrl: String): PageState<Unit> =
+      PageState.Success(Unit)
+
+  override suspend fun blockTag(
+      sid: Int,
+      tagName: String,
+      nonce: String,
+      toAdd: Boolean,
+  ): PageState<Unit> = PageState.Success(Unit)
+}
+
+private class NoopFeedSourceForTranslationTest : SubmissionPagerFeedSource {
+  override suspend fun loadPageByNextUrl(nextPageUrl: String): PageState<FeedPage> =
+      PageState.Error(IllegalStateException("No feed fetch expected in this test"))
+}
+
+private fun translationTestAttachmentDocument(text: String): AttachmentTextDocument =
+    AttachmentTextDocument(
+        format = AttachmentTextFormat.TEXT,
+        html = "<p>$text</p>",
+        paragraphs = listOf(AttachmentTextParagraph(html = "<p>$text</p>")),
+    )
+
+private fun translationTestThumbnail(sid: Int): SubmissionThumbnail =
+    SubmissionThumbnail(
+        id = sid,
+        submissionUrl = FaUrls.submission(sid),
+        title = "title-$sid",
+        author = "author",
+        authorAvatarUrl = "",
+        thumbnailUrl = "https://t.furaffinity.net/$sid@400-0.jpg",
+        thumbnailAspectRatio = 1f,
+        categoryTag = "c_all",
+    )
+
+private fun translationTestSubmission(
+    sid: Int,
+    descriptionHtml: String = "<p>submission-$sid</p>",
+    downloadUrl: String? = null,
+    downloadFileName: String? = null,
+): Submission =
+    Submission(
+        id = sid,
+        submissionUrl = FaUrls.submission(sid),
+        title = "submission-$sid",
+        author = "author-$sid",
+        authorDisplayName = "Author $sid",
+        timestampRaw = null,
+        timestampNatural = "now",
+        viewCount = 1,
+        commentCount = 2,
+        favoriteCount = 3,
+        isFavorited = false,
+        favoriteActionUrl = "",
+        rating = "General",
+        category = "Category",
+        type = "Type",
+        species = "Species",
+        size = "100x100",
+        fileSize = "100 KB",
+        keywords = emptyList(),
+        previewImageUrl = "https://d.furaffinity.net/art/test/$sid-preview.jpg",
+        fullImageUrl = "https://d.furaffinity.net/art/test/$sid-full.jpg",
+        downloadUrl = downloadUrl,
+        downloadFileName = downloadFileName,
+        aspectRatio = 1f,
+        descriptionHtml = descriptionHtml,
+    )

@@ -27,6 +27,8 @@ sealed interface SubmissionPagerUiState {
       val submissions: List<SubmissionThumbnail>,
       /** 详情状态映射。 */
       val detailBySid: Map<Int, SubmissionDetailUiState>,
+      /** 各 sid 的回顶命令版本。 */
+      val scrollToTopVersionBySid: Map<Int, Long>,
       /** 当前索引。 */
       val currentIndex: Int,
       /** 是否可上一条。 */

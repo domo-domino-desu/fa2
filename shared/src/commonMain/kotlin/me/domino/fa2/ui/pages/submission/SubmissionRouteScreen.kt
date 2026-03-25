@@ -17,10 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -48,7 +46,6 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.components.LocalShowToast
 import me.domino.fa2.ui.components.PageStateWrapper
 import me.domino.fa2.ui.components.platform.rememberPlatformTextCopier
@@ -109,7 +106,6 @@ class SubmissionRouteScreen(
         koinScreenModel<SubmissionScreenModel> { parametersOf(initialSid, submissionListHolder) }
     val settingsService = koinInject<AppSettingsService>()
     val settings by settingsService.settings.collectAsState()
-    val descriptionTranslationService = koinInject<SubmissionDescriptionTranslationService>()
     val historyRepository = koinInject<ActivityHistoryRepository>()
     val state by screenModel.state.collectAsState()
     val pageState by screenModel.pageState.collectAsState()
@@ -127,8 +123,7 @@ class SubmissionRouteScreen(
           }
         }
     val topBarActions = resolveTopBarActions(initialSid = initialSid, state = state)
-    var zoomOverlayVisible by remember { mutableStateOf(false) }
-    var scrollCurrentPageToTopSignal by remember { mutableStateOf(0) }
+    val zoomOverlayVisible = remember { androidx.compose.runtime.mutableStateOf(false) }
 
     LaunchedEffect(Unit) { requestPagerFocus() }
     LaunchedEffect(screenModel, showToast) {
@@ -166,7 +161,7 @@ class SubmissionRouteScreen(
                 }
                 .testTag("submission-route")
     ) {
-      if (!zoomOverlayVisible) {
+      if (!zoomOverlayVisible.value) {
         SubmissionRouteTopBar(
             onBack = { navigator.pop() },
             onGoHome = { navigator.goBackHome() },
@@ -181,7 +176,7 @@ class SubmissionRouteScreen(
                 }
               }
             },
-            onTitleClick = { scrollCurrentPageToTopSignal++ },
+            onTitleClick = screenModel::requestCurrentPageScrollToTop,
         )
       }
       PageStateWrapper(state = pageState, onRetry = screenModel::retryCurrentDetail) {
@@ -245,10 +240,15 @@ class SubmissionRouteScreen(
                     }
                   },
                   onLoadAttachmentText = screenModel::loadAttachmentTextCurrent,
-                  descriptionTranslationService = descriptionTranslationService,
+                  onTranslateDescription = screenModel::translateDescriptionCurrent,
+                  onTranslateAttachment = screenModel::translateAttachmentCurrent,
+                  scrollOffsetOfSid = screenModel::scrollOffsetForSid,
                   requestPagerFocus = requestPagerFocus,
-                  onZoomOverlayVisibilityChanged = { visible -> zoomOverlayVisible = visible },
-                  scrollCurrentPageToTopSignal = scrollCurrentPageToTopSignal,
+                  onZoomOverlayVisibilityChanged = { visible ->
+                    zoomOverlayVisible.value = visible
+                  },
+                  onPageScrollOffsetChanged = screenModel::setCurrentPageScrollOffset,
+                  scrollToTopVersionBySid = snapshot.scrollToTopVersionBySid,
                   blockedSubmissionMode = settings.blockedSubmissionPagerMode,
               )
 
@@ -258,7 +258,7 @@ class SubmissionRouteScreen(
                     snapshot.detailBySid[item.id] as? SubmissionDetailUiState.Success
                   }
               if (
-                  !zoomOverlayVisible &&
+                  !zoomOverlayVisible.value &&
                       detailState != null &&
                       detailState.detail.favoriteActionUrl.isNotBlank()
               ) {

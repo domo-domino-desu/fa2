@@ -15,23 +15,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.components.TranslatableHtmlBlockContent
 import me.domino.fa2.ui.components.TranslateActionButton
-import me.domino.fa2.ui.state.rememberSubmissionDescriptionTranslationState
+import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
 
 @Composable
 internal fun SubmissionDescriptionCard(
-    descriptionHtml: String,
-    translationService: SubmissionDescriptionTranslationService,
+    translationState: SubmissionTranslationUiState,
+    onTranslate: () -> Unit,
     requestPagerFocus: () -> Unit,
 ) {
-  val translationController =
-      rememberSubmissionDescriptionTranslationState(
-          descriptionHtml = descriptionHtml,
-          service = translationService,
-      )
-
   Surface(
       color = MaterialTheme.colorScheme.surface,
       shape = RoundedCornerShape(14.dp),
@@ -62,17 +55,17 @@ internal fun SubmissionDescriptionCard(
             modifier = Modifier.padding(start = 4.dp),
         )
         TranslateActionButton(
-            translating = translationController.translating,
+            translating = translationState.translating,
             label = "描述",
             onTranslate = {
-              translationController.translate()
+              onTranslate()
               requestPagerFocus()
             },
             modifier = Modifier.padding(start = 3.dp, top = 1.dp),
         )
       }
       TranslatableHtmlBlockContent(
-          blocks = translationController.blocks,
+          blocks = translationState.blocks,
           emptyText = "暂无描述",
           originalTextStyle = MaterialTheme.typography.bodyMedium,
           originalTextColor = MaterialTheme.colorScheme.onSurfaceVariant,

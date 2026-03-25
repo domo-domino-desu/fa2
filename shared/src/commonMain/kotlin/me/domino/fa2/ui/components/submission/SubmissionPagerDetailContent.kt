@@ -3,7 +3,6 @@ package me.domino.fa2.ui.components.submission
 import androidx.compose.runtime.Composable
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
-import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.pages.submission.SubmissionDetailUiState
 
 /** 单条投稿详情内容。 */
@@ -37,8 +36,10 @@ internal fun SubmissionDetailContent(
     onRevealBlockedMedia: () -> Unit,
     /** 加载附件文本。 */
     onLoadAttachmentText: () -> Unit,
-    /** 描述翻译服务。 */
-    descriptionTranslationService: SubmissionDescriptionTranslationService,
+    /** 触发描述翻译。 */
+    onTranslateDescription: () -> Unit,
+    /** 触发附件翻译。 */
+    onTranslateAttachment: () -> Unit,
     /** 请求 pager 容器重新获取焦点。 */
     requestPagerFocus: () -> Unit,
 ) {
@@ -69,9 +70,12 @@ internal fun SubmissionDetailContent(
           blockedSubmissionMode = blockedSubmissionMode,
           isBlockedMediaRevealed = isBlockedMediaRevealed,
           onRevealBlockedMedia = onRevealBlockedMedia,
-          descriptionTranslationService = descriptionTranslationService,
+          descriptionTranslationState = state.descriptionTranslationState,
+          onTranslateDescription = onTranslateDescription,
           attachmentTextState = state.attachmentTextState,
+          attachmentTranslationState = state.attachmentTranslationState,
           onLoadAttachmentText = onLoadAttachmentText,
+          onTranslateAttachment = onTranslateAttachment,
           requestPagerFocus = requestPagerFocus,
       )
     }

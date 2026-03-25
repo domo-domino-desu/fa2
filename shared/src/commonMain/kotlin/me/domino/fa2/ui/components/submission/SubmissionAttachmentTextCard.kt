@@ -22,19 +22,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
-import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.components.TranslatableHtmlBlockContent
 import me.domino.fa2.ui.components.TranslateActionButton
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.SubmissionAttachmentTextUiState
-import me.domino.fa2.ui.state.rememberSubmissionDescriptionTranslationState
+import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun SubmissionAttachmentTextCard(
     attachmentTextState: SubmissionAttachmentTextUiState,
-    translationService: SubmissionDescriptionTranslationService,
+    translationState: SubmissionTranslationUiState?,
     onLoadAttachmentText: () -> Unit,
+    onTranslate: () -> Unit,
     requestPagerFocus: () -> Unit,
 ) {
   val clickable =
@@ -62,26 +62,21 @@ internal fun SubmissionAttachmentTextCard(
     ) {
       when (attachmentTextState) {
         is SubmissionAttachmentTextUiState.Success -> {
-          val translationController =
-              rememberSubmissionDescriptionTranslationState(
-                  descriptionHtml = attachmentTextState.document.html,
-                  service = translationService,
-              )
           AttachmentCardHeader(
               fileName = attachmentTextState.fileName,
               translateButton = {
                 TranslateActionButton(
-                    translating = translationController.translating,
+                    translating = translationState?.translating == true,
                     label = "附件文本",
                     onTranslate = {
-                      translationController.translate()
+                      onTranslate()
                       requestPagerFocus()
                     },
                 )
               },
           )
           TranslatableHtmlBlockContent(
-              blocks = translationController.blocks,
+              blocks = translationState?.blocks ?: emptyList(),
               emptyText = "附件内容为空",
               originalTextStyle = MaterialTheme.typography.bodyMedium,
               originalTextColor = MaterialTheme.colorScheme.onSurfaceVariant,

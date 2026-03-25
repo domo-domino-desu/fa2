@@ -9,9 +9,11 @@ sealed interface SubmissionDetailUiState {
   data class Success(
       val detail: Submission,
       val blockedKeywords: Set<String> = emptySet(),
+      val descriptionTranslationState: SubmissionTranslationUiState,
       val favoriteUpdating: Boolean = false,
       val favoriteErrorMessage: String? = null,
       val attachmentTextState: SubmissionAttachmentTextUiState? = null,
+      val attachmentTranslationState: SubmissionTranslationUiState? = null,
   ) : SubmissionDetailUiState
 
   data class Error(val message: String) : SubmissionDetailUiState

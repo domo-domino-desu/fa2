@@ -25,10 +25,10 @@ import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
-import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.SubmissionAttachmentTextUiState
+import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
 import me.domino.fa2.util.ParserUtils
 import me.domino.fa2.util.attachmenttext.attachmentFileExtension
 import me.domino.fa2.util.sanitizeDetailAspectRatio
@@ -51,9 +51,12 @@ internal fun SubmissionDetailSuccessContent(
     blockedSubmissionMode: BlockedSubmissionPagerMode,
     isBlockedMediaRevealed: Boolean,
     onRevealBlockedMedia: () -> Unit,
-    descriptionTranslationService: SubmissionDescriptionTranslationService,
+    descriptionTranslationState: SubmissionTranslationUiState,
+    onTranslateDescription: () -> Unit,
     attachmentTextState: SubmissionAttachmentTextUiState?,
+    attachmentTranslationState: SubmissionTranslationUiState?,
     onLoadAttachmentText: () -> Unit,
+    onTranslateAttachment: () -> Unit,
     requestPagerFocus: () -> Unit,
 ) {
   val taxonomyRepository = koinInject<FaTaxonomyRepository>()
@@ -230,15 +233,16 @@ internal fun SubmissionDetailSuccessContent(
         onKeywordLongPress = onKeywordLongPress,
     )
     SubmissionDescriptionCard(
-        descriptionHtml = detail.descriptionHtml,
-        translationService = descriptionTranslationService,
+        translationState = descriptionTranslationState,
+        onTranslate = onTranslateDescription,
         requestPagerFocus = requestPagerFocus,
     )
     attachmentTextState?.let { state ->
       SubmissionAttachmentTextCard(
           attachmentTextState = state,
-          translationService = descriptionTranslationService,
+          translationState = attachmentTranslationState,
           onLoadAttachmentText = onLoadAttachmentText,
+          onTranslate = onTranslateAttachment,
           requestPagerFocus = requestPagerFocus,
       )
     }
