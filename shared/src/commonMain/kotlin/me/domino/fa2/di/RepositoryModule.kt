@@ -12,8 +12,10 @@ import me.domino.fa2.data.repository.SearchRepository
 import me.domino.fa2.data.repository.SubmissionRepository
 import me.domino.fa2.data.repository.UserRepository
 import me.domino.fa2.data.repository.WatchlistRepository
+import me.domino.fa2.data.search.SearchUiLabelsRepository
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.settings.AppSettingsStorage
+import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -22,6 +24,8 @@ import org.koin.dsl.module
 fun repositoryModule(): Module = module {
   single { AppSettingsStorage(get()) }
   single { AppSettingsService(get()) }
+  single { FaTaxonomyRepository() }
+  single { SearchUiLabelsRepository() }
   single { ActivityHistoryRepository(get()) }
   single { SubmissionDescriptionTranslationService(get(), get()) }
   single { AuthRepository(get()) }

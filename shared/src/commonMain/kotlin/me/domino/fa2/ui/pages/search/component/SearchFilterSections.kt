@@ -20,15 +20,21 @@ private data class GenderOption(val gender: SearchGender, val label: String, val
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
 internal fun GenderKeywordsSection(
+    title: String,
     selectedGenders: Set<SearchGender>,
+    labelForGender: (SearchGender) -> String,
     onToggleGender: (SearchGender, Boolean) -> Unit,
 ) {
   val options =
       SearchGender.entries.map { gender ->
-        GenderOption(gender = gender, label = gender.token, checked = gender in selectedGenders)
+        GenderOption(
+            gender = gender,
+            label = labelForGender(gender),
+            checked = gender in selectedGenders,
+        )
       }
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-    Text(text = "Gender Keywords", style = MaterialTheme.typography.titleSmall)
+    Text(text = title, style = MaterialTheme.typography.titleSmall)
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -59,7 +65,7 @@ internal fun RatingsSection(
     onSetAdult: (Boolean) -> Unit,
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-    Text("Ratings", style = MaterialTheme.typography.titleSmall)
+    Text("分级", style = MaterialTheme.typography.titleSmall)
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -74,6 +80,13 @@ internal fun RatingsSection(
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
 internal fun SubmissionTypeSection(
+    title: String,
+    artLabel: String,
+    musicLabel: String,
+    flashLabel: String,
+    storyLabel: String,
+    photoLabel: String,
+    poetryLabel: String,
     typeArt: Boolean,
     typeMusic: Boolean,
     typeFlash: Boolean,
@@ -88,17 +101,17 @@ internal fun SubmissionTypeSection(
     onSetTypePoetry: (Boolean) -> Unit,
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-    Text("Submission Types", style = MaterialTheme.typography.titleSmall)
+    Text(title, style = MaterialTheme.typography.titleSmall)
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-      RatingItem("Art", typeArt, onSetTypeArt)
-      RatingItem("Music", typeMusic, onSetTypeMusic)
-      RatingItem("Flash", typeFlash, onSetTypeFlash)
-      RatingItem("Story", typeStory, onSetTypeStory)
-      RatingItem("Photo", typePhoto, onSetTypePhoto)
-      RatingItem("Poetry", typePoetry, onSetTypePoetry)
+      RatingItem(artLabel, typeArt, onSetTypeArt)
+      RatingItem(musicLabel, typeMusic, onSetTypeMusic)
+      RatingItem(flashLabel, typeFlash, onSetTypeFlash)
+      RatingItem(storyLabel, typeStory, onSetTypeStory)
+      RatingItem(photoLabel, typePhoto, onSetTypePhoto)
+      RatingItem(poetryLabel, typePoetry, onSetTypePoetry)
     }
   }
 }

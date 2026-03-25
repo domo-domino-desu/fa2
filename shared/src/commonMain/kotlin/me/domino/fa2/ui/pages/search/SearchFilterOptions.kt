@@ -1,34 +1,31 @@
 package me.domino.fa2.ui.pages.search
 
-import me.domino.fa2.ui.components.FaBrowseTaxonomyOptions
+import me.domino.fa2.data.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.components.FilterOption
 
-internal val searchCategoryOptions = FaBrowseTaxonomyOptions.categoryOptions
-
-internal val searchTypeOptions = FaBrowseTaxonomyOptions.typeOptions
-
-internal val searchSpeciesOptions = FaBrowseTaxonomyOptions.speciesOptions
-
-internal val searchTypeOptionGroups = FaBrowseTaxonomyOptions.typeOptionGroups
-
-internal val searchSpeciesOptionGroups = FaBrowseTaxonomyOptions.speciesOptionGroups
-
-internal val orderByOptions =
+internal fun orderByOptions(labelsRepository: SearchUiLabelsRepository) =
     listOf(
-        FilterOption("relevancy", "Relevancy"),
-        FilterOption("date", "Date"),
-        FilterOption("popularity", "Popularity"),
+        FilterOption("relevancy", labelsRepository.orderByLabel("relevancy")),
+        FilterOption("date", labelsRepository.orderByLabel("date")),
+        FilterOption("popularity", labelsRepository.orderByLabel("popularity")),
     )
 
-internal val orderDirectionOptions =
-    listOf(FilterOption("desc", "Descending"), FilterOption("asc", "Ascending"))
-
-internal val rangeOptions =
+internal fun orderDirectionOptions(labelsRepository: SearchUiLabelsRepository) =
     listOf(
-        FilterOption("all", "All Time"),
-        FilterOption("1day", "Last 24 Hours"),
-        FilterOption("3days", "Last 3 Days"),
-        FilterOption("7days", "Last 7 Days"),
-        FilterOption("30days", "Last 30 Days"),
-        FilterOption("manual", "Manual"),
+        FilterOption("desc", labelsRepository.orderDirectionLabel("desc")),
+        FilterOption("asc", labelsRepository.orderDirectionLabel("asc")),
+    )
+
+internal fun rangeOptions(labelsRepository: SearchUiLabelsRepository) =
+    listOf(
+        FilterOption("1day", labelsRepository.rangeLabel("1day")),
+        FilterOption("3days", labelsRepository.rangeLabel("3days")),
+        FilterOption("7days", labelsRepository.rangeLabel("7days")),
+        FilterOption("30days", labelsRepository.rangeLabel("30days")),
+        FilterOption("90days", labelsRepository.rangeLabel("90days")),
+        FilterOption("1year", labelsRepository.rangeLabel("1year")),
+        FilterOption("3years", labelsRepository.rangeLabel("3years")),
+        FilterOption("5years", labelsRepository.rangeLabel("5years")),
+        FilterOption("all", labelsRepository.rangeLabel("all")),
+        FilterOption("manual", labelsRepository.rangeLabel("manual")),
     )

@@ -98,3 +98,4 @@ AGENT.md
 repomix*
 .repomix*
 local.properties
+**/generated

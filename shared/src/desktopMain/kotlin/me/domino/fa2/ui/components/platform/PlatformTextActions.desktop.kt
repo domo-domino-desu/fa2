@@ -21,3 +21,5 @@ actual fun rememberPlatformTextCopier(): (String) -> Boolean {
 actual fun rememberPlatformTextSharer(): (String) -> Boolean {
   return remember { { _ -> false } }
 }
+
+@Composable actual fun rememberPlatformShareActionUsesCopyIcon(): Boolean = true

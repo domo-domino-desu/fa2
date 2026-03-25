@@ -52,6 +52,8 @@ fun SubmissionPager(
     onKeywordLongPress: (String) -> Unit,
     /** 跳转 Browse 筛选回调。 */
     onOpenBrowseFilter: (category: Int, type: Int, species: Int) -> Unit,
+    /** 复制投稿链接。 */
+    onCopySubmissionUrl: (String) -> Unit,
     /** 描述翻译服务。 */
     descriptionTranslationService: SubmissionDescriptionTranslationService,
     /** 请求 pager 容器重新获取焦点。 */
@@ -110,6 +112,7 @@ fun SubmissionPager(
                 onSearchKeyword = onSearchKeyword,
                 onKeywordLongPress = onKeywordLongPress,
                 onOpenBrowseFilter = onOpenBrowseFilter,
+                onCopySubmissionUrl = onCopySubmissionUrl,
                 onOpenImageZoom = { imageUrl -> zoomOverlayImageUrl = imageUrl },
                 isBlockedByTag = item.isBlockedByTag,
                 blockedSubmissionMode = blockedSubmissionMode,

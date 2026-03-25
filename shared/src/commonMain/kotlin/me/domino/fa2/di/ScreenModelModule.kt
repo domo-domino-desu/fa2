@@ -25,7 +25,9 @@ fun screenModelModule(): Module = module {
   factory { AuthScreenModel(get()) }
   factory { (holder: SubmissionListHolder) -> FeedScreenModel(get(), holder) }
   factory { (holder: SubmissionListHolder) -> BrowseScreenModel(get(), holder) }
-  factory { (holder: SubmissionListHolder) -> SearchScreenModel(get(), holder, get()) }
+  factory { (holder: SubmissionListHolder) ->
+    SearchScreenModel(get(), holder, get(), get(), get())
+  }
   factory { (username: String) -> MoreScreenModel(username, get(), get()) }
   factory { (initialSid: Int, holder: SubmissionListHolder) ->
     SubmissionScreenModel(

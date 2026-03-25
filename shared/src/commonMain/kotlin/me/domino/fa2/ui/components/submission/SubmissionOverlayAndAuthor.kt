@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.panpf.zoomimage.CoilZoomAsyncImage
 import me.domino.fa2.ui.components.NetworkImage
+import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.util.isGifUrl
 
 @Composable
@@ -61,7 +60,7 @@ internal fun SubmissionZoomImageOverlay(imageUrl: String, onDismiss: () -> Unit)
             Modifier.align(Alignment.TopEnd).padding(12.dp).focusProperties { canFocus = false },
     ) {
       Icon(
-          imageVector = Icons.Filled.Close,
+          imageVector = FaMaterialSymbols.Filled.Close,
           contentDescription = "关闭预览",
           tint = MaterialTheme.colorScheme.onSurface,
       )

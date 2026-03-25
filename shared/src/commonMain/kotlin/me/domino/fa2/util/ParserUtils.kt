@@ -1,6 +1,7 @@
 package me.domino.fa2.util
 
 import com.fleeksoft.ksoup.nodes.Document
+import com.fleeksoft.ksoup.nodes.Element
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
@@ -19,6 +20,13 @@ object ParserUtils {
   private val json = Json { ignoreUnknownKeys = true }
   private val fullImageTimestampRegex = Regex("""(?:^|/)art/[^/]+/(\d{9,})/""")
   private val fullImageAllowedHosts = setOf("d.furaffinity.net", "d.facdn.net")
+  private val tagTokenSplitRegex = Regex("""[\s,]+""")
+
+  /** 页面级 tag 屏蔽设置。 */
+  data class TagBlockSettings(
+      val blockedTags: Set<String>,
+      val hideTagless: Boolean,
+  )
 
   /**
    * 将相对 URL 转为绝对 URL（KMP 纯字符串实现）。
@@ -169,6 +177,35 @@ object ParserUtils {
             }
           }
           .getOrNull()
+
+  /** 解析页面 body 上的屏蔽设置。 */
+  fun parseTagBlockSettings(document: Document): TagBlockSettings {
+    val body = document.selectFirst("body")
+    val blockedTags = parseTagTokens(body?.attr("data-tag-blocklist").orEmpty())
+    val hideTagless =
+        body?.attr("data-tag-blocklist-hide-tagless")?.trim()?.let { raw ->
+          raw == "1" || raw.equals("true", ignoreCase = true)
+        } ?: false
+    return TagBlockSettings(blockedTags = blockedTags, hideTagless = hideTagless)
+  }
+
+  /** 解析图片上的 `data-tags`。 */
+  fun parseImageTags(image: Element): Set<String> = parseTagTokens(image.attr("data-tags"))
+
+  /** 判断投稿是否命中 tag 屏蔽。 */
+  fun isBlockedByTagSettings(
+      imageTags: Set<String>,
+      tagBlockSettings: TagBlockSettings,
+  ): Boolean =
+      imageTags.any { tag -> tag in tagBlockSettings.blockedTags } ||
+          (tagBlockSettings.hideTagless && imageTags.isEmpty())
+
+  private fun parseTagTokens(raw: String): Set<String> =
+      raw.split(tagTokenSplitRegex)
+          .asSequence()
+          .map { token -> token.trim().lowercase() }
+          .filter { token -> token.isNotBlank() }
+          .toSet()
 
   /** 若页面是系统消息页则抛出业务可读异常。 */
   fun ensureUserPageAccessible(document: Document) {

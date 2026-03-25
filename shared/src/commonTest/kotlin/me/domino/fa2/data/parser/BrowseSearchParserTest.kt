@@ -1,6 +1,7 @@
 package me.domino.fa2.data.parser
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import me.domino.fa2.fake.TestFixtures
@@ -46,5 +47,124 @@ class BrowseSearchParserTest {
     assertTrue(page.submissions.isNotEmpty())
     assertTrue(page.submissions.any { item -> item.isBlockedByTag })
     assertTrue(page.submissions.any { item -> !item.isBlockedByTag })
+  }
+
+  @Test
+  fun marksBlockedWhenImageTagsOverlapBlocklistInListing() {
+    val html =
+        """
+        <html>
+            <body data-tag-blocklist="weight">
+                <section class="gallery-section">
+                    <figure id="sid-998877">
+                        <a href="/view/998877/">
+                            <img class="" data-tags="female weight bunny" src="//t.furaffinity.net/998877@300-1700000000.jpg" data-width="300" data-height="200" />
+                        </a>
+                        <figcaption>
+                            <p><a href="/view/998877/" title="Demo">Demo</a></p>
+                            <p><i>by</i> <a href="/user/demo/">demo</a></p>
+                        </figcaption>
+                    </figure>
+                </section>
+            </body>
+        </html>
+        """
+            .trimIndent()
+    val parser = GalleryParser()
+
+    val page = parser.parseListing(html = html, baseUrl = FaUrls.browse())
+
+    assertEquals(1, page.submissions.size)
+    assertTrue(page.submissions.first().isBlockedByTag)
+  }
+
+  @Test
+  fun doesNotMarkBlockedWhenOnlyNonPreviewImageHasBlockedClass() {
+    val html =
+        """
+        <html>
+            <body data-tag-blocklist="weight">
+                <section class="gallery-section">
+                    <figure id="sid-998877">
+                        <a href="/view/998877/">
+                            <img class="" src="//t.furaffinity.net/998877@300-1700000000.jpg" data-width="300" data-height="200" />
+                        </a>
+                        <div class="extra">
+                            <img class="blocked-content" data-reason='["weight"]' src="//t.furaffinity.net/meta.jpg" />
+                        </div>
+                        <figcaption>
+                            <p><a href="/view/998877/" title="Demo">Demo</a></p>
+                            <p><i>by</i> <a href="/user/demo/">demo</a></p>
+                        </figcaption>
+                    </figure>
+                </section>
+            </body>
+        </html>
+        """
+            .trimIndent()
+    val parser = GalleryParser()
+
+    val page = parser.parseListing(html = html, baseUrl = FaUrls.browse())
+
+    assertEquals(1, page.submissions.size)
+    assertTrue(!page.submissions.first().isBlockedByTag)
+  }
+
+  @Test
+  fun doesNotMarkBlockedWhenReasonIsEmptyArrayWithoutClass() {
+    val html =
+        """
+        <html>
+            <body data-tag-blocklist="weight">
+                <section class="gallery-section">
+                    <figure id="sid-998877">
+                        <a href="/view/998877/">
+                            <img data-reason="[]" data-tags="wolf dragon" src="//t.furaffinity.net/998877@300-1700000000.jpg" data-width="300" data-height="200" />
+                        </a>
+                        <figcaption>
+                            <p><a href="/view/998877/" title="Demo">Demo</a></p>
+                            <p><i>by</i> <a href="/user/demo/">demo</a></p>
+                        </figcaption>
+                    </figure>
+                </section>
+            </body>
+        </html>
+        """
+            .trimIndent()
+    val parser = GalleryParser()
+
+    val page = parser.parseListing(html = html, baseUrl = FaUrls.browse())
+
+    assertEquals(1, page.submissions.size)
+    assertTrue(!page.submissions.first().isBlockedByTag)
+  }
+
+  @Test
+  fun marksBlockedWhenHideTaglessEnabledAndImageHasNoTags() {
+    val html =
+        """
+        <html>
+            <body data-tag-blocklist="" data-tag-blocklist-hide-tagless="1">
+                <section class="gallery-section">
+                    <figure id="sid-998877">
+                        <a href="/view/998877/">
+                            <img class="" data-tags="" src="//t.furaffinity.net/998877@300-1700000000.jpg" data-width="300" data-height="200" />
+                        </a>
+                        <figcaption>
+                            <p><a href="/view/998877/" title="Demo">Demo</a></p>
+                            <p><i>by</i> <a href="/user/demo/">demo</a></p>
+                        </figcaption>
+                    </figure>
+                </section>
+            </body>
+        </html>
+        """
+            .trimIndent()
+    val parser = GalleryParser()
+
+    val page = parser.parseListing(html = html, baseUrl = FaUrls.browse())
+
+    assertEquals(1, page.submissions.size)
+    assertTrue(page.submissions.first().isBlockedByTag)
   }
 }

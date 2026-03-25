@@ -25,12 +25,15 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -39,13 +42,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
+import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.ThumbnailImage
+import me.domino.fa2.ui.icons.FaMaterialSymbols
+import org.koin.compose.koinInject
 
 /** 瀑布流卡片最小宽度。 */
 private const val defaultWaterfallCardMinWidthDp = 220
@@ -90,6 +97,8 @@ fun SubmissionWaterfall(
     /** 被屏蔽投稿在瀑布流中的展示策略。 */
     blockedSubmissionMode: BlockedSubmissionWaterfallMode = BlockedSubmissionWaterfallMode.SHOW,
 ) {
+  val taxonomyRepository = koinInject<FaTaxonomyRepository>()
+  val taxonomyCatalog by taxonomyRepository.catalog.collectAsState()
   val blockedRevealState = remember { mutableStateMapOf<Int, Boolean>() }
   val sourceIndexById =
       remember(items) { items.withIndex().associate { (index, item) -> item.id to index } }
@@ -133,12 +142,18 @@ fun SubmissionWaterfall(
     }
     preItemsContent?.invoke(this)
     items(items = items, key = { item -> item.id }) { item ->
+      val isBlockedRevealed = blockedRevealState[item.id] == true
       val blurredBlocked =
           item.isBlockedByTag &&
               blockedSubmissionMode == BlockedSubmissionWaterfallMode.BLUR_THEN_OPEN &&
-              blockedRevealState[item.id] != true
+              !isBlockedRevealed
+      val categoryIconToken =
+          remember(item.categoryTag, taxonomyCatalog) {
+            taxonomyRepository.categoryCardIconByTag(item.categoryTag).orEmpty()
+          }
       SubmissionWaterfallItem(
           item = item,
+          categoryIconToken = categoryIconToken,
           blockedMaskActive = blurredBlocked,
           onClick = {
             if (blurredBlocked) {
@@ -163,6 +178,8 @@ fun SubmissionWaterfall(
 private fun SubmissionWaterfallItem(
     /** 投稿数据。 */
     item: SubmissionThumbnail,
+    /** taxonomy 分类 icon token。 */
+    categoryIconToken: String,
     /** 是否显示屏蔽遮罩。 */
     blockedMaskActive: Boolean,
     /** 点击回调。 */
@@ -201,12 +218,23 @@ private fun SubmissionWaterfallItem(
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier.padding(8.dp),
         ) {
-          Text(
-              text = "#${item.id}",
-              style = MaterialTheme.typography.labelMedium,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
+          Row(
               modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-          )
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(4.dp),
+          ) {
+            Icon(
+                imageVector = categoryBadgeIcon(categoryIconToken),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(16.dp),
+            )
+            Text(
+                text = item.id.toString(),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
         }
       }
       Column(
@@ -259,6 +287,17 @@ private fun SubmissionWaterfallItem(
     }
   }
 }
+
+private fun categoryBadgeIcon(iconToken: String): ImageVector =
+    when (iconToken) {
+      "image" -> FaMaterialSymbols.Outlined.Image
+      "animated_images" -> FaMaterialSymbols.Outlined.Movie
+      "import_contacts" -> FaMaterialSymbols.Outlined.AutoStories
+      "music_note" -> FaMaterialSymbols.Outlined.MusicNote
+      "inventory_2" -> FaMaterialSymbols.Outlined.Inventory2
+      "other" -> FaMaterialSymbols.Outlined.UnknownDocument
+      else -> FaMaterialSymbols.Outlined.Category
+    }
 
 /** 统一分页状态 Footer。 */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

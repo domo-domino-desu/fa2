@@ -1,5 +1,6 @@
 package me.domino.fa2.ui.components.submission
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -68,12 +69,17 @@ private fun SubmissionTagFlowRow(
             Modifier
           }
       Surface(
-          color =
-              if (isBlocked) {
-                MaterialTheme.colorScheme.error.copy(alpha = 0.2f)
-              } else {
-                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.72f)
-              },
+          color = MaterialTheme.colorScheme.surface,
+          border =
+              BorderStroke(
+                  width = 1.dp,
+                  color =
+                      if (isBlocked) {
+                        MaterialTheme.colorScheme.error.copy(alpha = 0.55f)
+                      } else {
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.72f)
+                      },
+              ),
           shape = RoundedCornerShape(999.dp),
           modifier = chipModifier,
       ) {
@@ -86,7 +92,7 @@ private fun SubmissionTagFlowRow(
                 if (isBlocked) {
                   MaterialTheme.colorScheme.error
                 } else {
-                  MaterialTheme.colorScheme.onSecondaryContainer
+                  MaterialTheme.colorScheme.onSurfaceVariant
                 },
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
         )

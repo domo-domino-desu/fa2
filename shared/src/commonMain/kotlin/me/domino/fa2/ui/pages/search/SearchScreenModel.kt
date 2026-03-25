@@ -2,6 +2,7 @@ package me.domino.fa2.ui.pages.search
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import io.ktor.http.decodeURLQueryComponent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,6 +12,9 @@ import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.repository.SearchRepository
+import me.domino.fa2.data.search.SearchUiLabelsRepository
+import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
+import me.domino.fa2.ui.components.FilterOption
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.state.PaginationSnapshot
 import me.domino.fa2.ui.state.PaginationStateMachine
@@ -73,6 +77,8 @@ class SearchScreenModel(
     private val repository: SearchRepository,
     private val submissionListHolder: SubmissionListHolder,
     private val historyRepository: ActivityHistoryRepository,
+    private val taxonomyRepository: FaTaxonomyRepository,
+    private val searchUiLabelsRepository: SearchUiLabelsRepository,
 ) : StateScreenModel<SearchUiState>(SearchUiState()) {
   private val log = FaLog.withTag("SearchScreenModel")
   private val paginationStateMachine =
@@ -188,12 +194,44 @@ class SearchScreenModel(
       log.w { "应用Search -> 跳过(空关键词)" }
       return
     }
-    firstPageUrl = buildSearchUrl(form = applied, page = 1)
+    val firstUrl = buildSearchUrl(form = applied, page = 1)
+    firstPageUrl = firstUrl
     mutableState.value =
-        state.value.copy(overlayVisible = false, applied = applied, hasSearched = true)
+        state.value.copy(
+            overlayVisible = false,
+            draft = applied,
+            applied = applied,
+            hasSearched = true,
+        )
     mutablePageState.value = PageState.Loading
-    screenModelScope.launch { historyRepository.recordSearchQuery(applied.query) }
+    val filtersSummary =
+        buildSearchFiltersSummary(applied, taxonomyRepository, searchUiLabelsRepository)
+    screenModelScope.launch {
+      historyRepository.recordSearchQuery(
+          query = applied.query,
+          filtersSummary = filtersSummary,
+          searchUrl = firstUrl,
+      )
+    }
     log.i { "应用Search -> 已提交(keywordLen=${applied.query.length})" }
+    load(forceRefresh = true)
+  }
+
+  fun applySearchFromUrl(url: String, fallbackQuery: String = "") {
+    val normalizedUrl = url.trim()
+    if (normalizedUrl.isBlank()) return
+    val restored = parseSearchFormFromUrl(url = normalizedUrl, fallbackQuery = fallbackQuery)
+    if (restored.query.isBlank()) return
+    log.i { "应用Search(历史) -> 开始" }
+    firstPageUrl = normalizedUrl
+    mutableState.value =
+        state.value.copy(
+            overlayVisible = false,
+            draft = restored,
+            applied = restored,
+            hasSearched = true,
+        )
+    mutablePageState.value = PageState.Loading
     load(forceRefresh = true)
   }
 
@@ -444,4 +482,197 @@ internal fun rewriteQueryWithGenders(query: String, genders: Set<SearchGender>):
     addAll(selectedGenderTokens)
   }
   return rebuilt.joinToString(" ").trim()
+}
+
+internal fun buildSearchFiltersSummary(
+    form: SearchFormState,
+    taxonomyRepository: FaTaxonomyRepository,
+    searchUiLabelsRepository: SearchUiLabelsRepository,
+): String {
+  val defaults = SearchFormState()
+  val summary = mutableListOf<String>()
+  val orderByOptions = orderByOptions(searchUiLabelsRepository)
+  val orderDirectionOptions = orderDirectionOptions(searchUiLabelsRepository)
+  val rangeOptions = rangeOptions(searchUiLabelsRepository)
+
+  if (form.category != defaults.category) {
+    val label =
+        taxonomyRepository.categoryDisplayNameById(form.category) ?: form.category.toString()
+    summary += searchUiLabelsRepository.formatLabelValue("类别", label)
+  }
+  if (form.type != defaults.type) {
+    val label = taxonomyRepository.typeDisplayNameById(form.type) ?: form.type.toString()
+    summary += searchUiLabelsRepository.formatLabelValue("分类", label)
+  }
+  if (form.species != defaults.species) {
+    val label = taxonomyRepository.speciesDisplayNameById(form.species) ?: form.species.toString()
+    summary += searchUiLabelsRepository.formatLabelValue("物种", label)
+  }
+  if (form.orderBy != defaults.orderBy) {
+    summary +=
+        searchUiLabelsRepository.formatLabelValue(
+            searchUiLabelsRepository.summarySortLabel(),
+            orderByOptions.labelOf(form.orderBy),
+        )
+  }
+  if (form.orderDirection != defaults.orderDirection) {
+    summary +=
+        searchUiLabelsRepository.formatLabelValue(
+            searchUiLabelsRepository.summaryDirectionLabel(),
+            orderDirectionOptions.labelOf(form.orderDirection),
+        )
+  }
+  if (form.range != defaults.range) {
+    val label = rangeOptions.labelOf(form.range)
+    if (form.range == "manual") {
+      val from = form.rangeFrom.trim()
+      val to = form.rangeTo.trim()
+      val detail =
+          when {
+            from.isNotBlank() && to.isNotBlank() ->
+                "${searchUiLabelsRepository.fromLabel()} $from " +
+                    "${searchUiLabelsRepository.toLabel()} $to"
+            from.isNotBlank() -> "${searchUiLabelsRepository.fromLabel()} $from"
+            to.isNotBlank() -> "${searchUiLabelsRepository.toLabel()} $to"
+            else -> ""
+          }
+      summary +=
+          if (detail.isBlank()) {
+            searchUiLabelsRepository.formatLabelValue(
+                searchUiLabelsRepository.summaryDateLabel(),
+                label,
+            )
+          } else {
+            searchUiLabelsRepository.formatLabelValue(
+                searchUiLabelsRepository.summaryDateLabel(),
+                "$label（$detail）",
+            )
+          }
+    } else {
+      summary +=
+          searchUiLabelsRepository.formatLabelValue(
+              searchUiLabelsRepository.summaryDateLabel(),
+              label,
+          )
+    }
+  }
+
+  if (
+      form.ratingGeneral != defaults.ratingGeneral ||
+          form.ratingMature != defaults.ratingMature ||
+          form.ratingAdult != defaults.ratingAdult
+  ) {
+    val ratings = buildList {
+      if (form.ratingGeneral) add("General")
+      if (form.ratingMature) add("Mature")
+      if (form.ratingAdult) add("Adult")
+    }
+    summary +=
+        searchUiLabelsRepository.formatLabelValue(
+            "分级",
+            ratings.ifEmpty { listOf("None") }.joinToString(", "),
+        )
+  }
+
+  if (
+      form.typeArt != defaults.typeArt ||
+          form.typeMusic != defaults.typeMusic ||
+          form.typeFlash != defaults.typeFlash ||
+          form.typeStory != defaults.typeStory ||
+          form.typePhoto != defaults.typePhoto ||
+          form.typePoetry != defaults.typePoetry
+  ) {
+    val types = buildList {
+      if (form.typeArt) add(searchUiLabelsRepository.submissionTypeLabel("art"))
+      if (form.typeMusic) add(searchUiLabelsRepository.submissionTypeLabel("music"))
+      if (form.typeFlash) add(searchUiLabelsRepository.submissionTypeLabel("flash"))
+      if (form.typeStory) add(searchUiLabelsRepository.submissionTypeLabel("story"))
+      if (form.typePhoto) add(searchUiLabelsRepository.submissionTypeLabel("photo"))
+      if (form.typePoetry) add(searchUiLabelsRepository.submissionTypeLabel("poetry"))
+    }
+    summary +=
+        searchUiLabelsRepository.formatLabelValue(
+            searchUiLabelsRepository.summarySubmissionTypesLabel(),
+            types.ifEmpty { listOf(searchUiLabelsRepository.noneLabel()) }.joinToString("、"),
+        )
+  }
+
+  if (form.selectedGenders.isNotEmpty()) {
+    val genders =
+        SearchGender.entries
+            .filter { gender -> gender in form.selectedGenders }
+            .joinToString("、") { gender -> searchUiLabelsRepository.genderLabel(gender.token) }
+    if (genders.isNotBlank()) {
+      summary +=
+          searchUiLabelsRepository.formatLabelValue(
+              searchUiLabelsRepository.summaryGendersLabel(),
+              genders,
+          )
+    }
+  }
+
+  return summary.joinToString(" · ")
+}
+
+private fun <T> List<FilterOption<T>>.labelOf(value: T): String =
+    firstOrNull { option -> option.value == value }?.label ?: value.toString()
+
+private fun parseSearchFormFromUrl(url: String, fallbackQuery: String): SearchFormState {
+  val rawQuery = url.substringAfter('?', "").substringBefore('#')
+  val params: Map<String, List<String>> =
+      rawQuery
+          .split('&')
+          .asSequence()
+          .map { token -> token.trim() }
+          .filter { token -> token.isNotBlank() }
+          .map { token ->
+            val keyRaw = token.substringBefore('=')
+            val valueRaw = token.substringAfter('=', "")
+            keyRaw.decodeURLQueryComponent() to valueRaw.decodeURLQueryComponent()
+          }
+          .groupBy(keySelector = { pair -> pair.first }, valueTransform = { pair -> pair.second })
+
+  fun first(name: String): String = params[name]?.firstOrNull().orEmpty()
+  fun firstInt(name: String, default: Int): Int = first(name).toIntOrNull() ?: default
+  fun has(name: String): Boolean = params.containsKey(name)
+  fun boolFlag(name: String): Boolean = first(name) == "1"
+
+  val defaults = SearchFormState()
+  val query = first("q").ifBlank { fallbackQuery.trim() }
+  val selectedGenders = parseGendersFromQuery(query)
+
+  val ratingKeys = listOf("rating-general", "rating-mature", "rating-adult")
+  val hasAnyRatingFlag = ratingKeys.any(::has)
+  val typeKeys =
+      listOf(
+          "type-art",
+          "type-music",
+          "type-flash",
+          "type-story",
+          "type-photo",
+          "type-poetry",
+      )
+  val hasAnyTypeFlag = typeKeys.any(::has)
+
+  return SearchFormState(
+      query = query.trim(),
+      category = firstInt("category", defaults.category),
+      type = firstInt("arttype", defaults.type),
+      species = firstInt("species", defaults.species),
+      orderBy = first("order-by").ifBlank { defaults.orderBy },
+      orderDirection = first("order-direction").ifBlank { defaults.orderDirection },
+      range = first("range").ifBlank { defaults.range },
+      rangeFrom = first("range_from"),
+      rangeTo = first("range_to"),
+      ratingGeneral = if (hasAnyRatingFlag) boolFlag("rating-general") else defaults.ratingGeneral,
+      ratingMature = if (hasAnyRatingFlag) boolFlag("rating-mature") else defaults.ratingMature,
+      ratingAdult = if (hasAnyRatingFlag) boolFlag("rating-adult") else defaults.ratingAdult,
+      typeArt = if (hasAnyTypeFlag) boolFlag("type-art") else defaults.typeArt,
+      typeMusic = if (hasAnyTypeFlag) boolFlag("type-music") else defaults.typeMusic,
+      typeFlash = if (hasAnyTypeFlag) boolFlag("type-flash") else defaults.typeFlash,
+      typeStory = if (hasAnyTypeFlag) boolFlag("type-story") else defaults.typeStory,
+      typePhoto = if (hasAnyTypeFlag) boolFlag("type-photo") else defaults.typePhoto,
+      typePoetry = if (hasAnyTypeFlag) boolFlag("type-poetry") else defaults.typePoetry,
+      selectedGenders = selectedGenders,
+  )
 }

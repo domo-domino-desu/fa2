@@ -6,11 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -25,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import me.domino.fa2.ui.icons.FaMaterialSymbols
 
 /** 顶层导航目标。 */
 enum class TopLevelDestination {
@@ -85,7 +81,7 @@ fun AppScaffold(
             NavigationRailItem(
                 selected = selected,
                 onClick = { onTopLevelDestinationClick(destination.destination, selected) },
-                icon = { TopLevelDestinationIcon(destination) },
+                icon = { TopLevelDestinationIcon(destination, selected) },
                 label = { TopLevelDestinationLabel(destination) },
             )
           }
@@ -103,7 +99,7 @@ fun AppScaffold(
                 NavigationBarItem(
                     selected = selected,
                     onClick = { onTopLevelDestinationClick(destination.destination, selected) },
-                    icon = { TopLevelDestinationIcon(destination) },
+                    icon = { TopLevelDestinationIcon(destination, selected) },
                     label = { TopLevelDestinationLabel(destination) },
                 )
               }
@@ -122,8 +118,10 @@ private data class TopLevelDestinationItem(
     val destination: TopLevelDestination,
     /** 展示文案。 */
     val label: String,
-    /** 图标。 */
-    val icon: ImageVector,
+    /** 选中图标。 */
+    val selectedIcon: ImageVector,
+    /** 未选中图标。 */
+    val unselectedIcon: ImageVector,
 )
 
 /** 顶层导航条目集合。 */
@@ -132,22 +130,26 @@ private val TOP_LEVEL_DESTINATIONS: List<TopLevelDestinationItem> =
         TopLevelDestinationItem(
             destination = TopLevelDestination.FEED,
             label = "动态",
-            icon = Icons.Filled.Home,
+            selectedIcon = FaMaterialSymbols.Filled.Home,
+            unselectedIcon = FaMaterialSymbols.Outlined.Home,
         ),
         TopLevelDestinationItem(
             destination = TopLevelDestination.BROWSE,
-            label = "Browse",
-            icon = Icons.Filled.Explore,
+            label = "浏览",
+            selectedIcon = FaMaterialSymbols.Filled.Explore,
+            unselectedIcon = FaMaterialSymbols.Outlined.Explore,
         ),
         TopLevelDestinationItem(
             destination = TopLevelDestination.SEARCH,
-            label = "Search",
-            icon = Icons.Filled.Search,
+            label = "搜索",
+            selectedIcon = FaMaterialSymbols.Filled.Search,
+            unselectedIcon = FaMaterialSymbols.Outlined.Search,
         ),
         TopLevelDestinationItem(
             destination = TopLevelDestination.MORE,
             label = "更多",
-            icon = Icons.Filled.Menu,
+            selectedIcon = FaMaterialSymbols.Filled.Menu,
+            unselectedIcon = FaMaterialSymbols.Outlined.Menu,
         ),
     )
 
@@ -155,9 +157,13 @@ private val TOP_LEVEL_DESTINATIONS: List<TopLevelDestinationItem> =
 @Composable
 private fun TopLevelDestinationIcon(
     /** 导航条目。 */
-    destination: TopLevelDestinationItem
+    destination: TopLevelDestinationItem,
+    selected: Boolean,
 ) {
-  Icon(imageVector = destination.icon, contentDescription = destination.label)
+  Icon(
+      imageVector = if (selected) destination.selectedIcon else destination.unselectedIcon,
+      contentDescription = destination.label,
+  )
 }
 
 /** 导航文案。 */

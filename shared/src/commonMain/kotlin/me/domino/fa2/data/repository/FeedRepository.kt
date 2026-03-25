@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import me.domino.fa2.data.model.FeedPage
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.store.FeedStore
+import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.logging.FaLog
 import me.domino.fa2.util.logging.summarizePageState
 import me.domino.fa2.util.logging.summarizeUrl
@@ -20,7 +21,8 @@ class FeedRepository(private val feedStore: FeedStore) {
 
   /** 单次读取首页。 */
   suspend fun loadFirstPage(): PageState<FeedPage> {
-    log.d { "加载Feed首页 -> 开始" }
+    val requestUrl = FaUrls.submissions(fromSid = null)
+    log.d { "加载Feed首页 -> url=${summarizeUrl(requestUrl)}" }
     val state = feedStore.loadPageOnce(fromSid = null)
     log.d { "加载Feed首页 -> ${summarizePageState(state)}" }
     return state
@@ -28,7 +30,8 @@ class FeedRepository(private val feedStore: FeedStore) {
 
   /** 强制刷新首页。 */
   suspend fun refreshFirstPage(): PageState<FeedPage> {
-    log.i { "刷新Feed首页 -> 开始" }
+    val requestUrl = FaUrls.submissions(fromSid = null)
+    log.i { "刷新Feed首页 -> url=${summarizeUrl(requestUrl)}" }
     val state = feedStore.refreshPage(fromSid = null)
     log.i { "刷新Feed首页 -> ${summarizePageState(state)}" }
     return state
@@ -36,7 +39,8 @@ class FeedRepository(private val feedStore: FeedStore) {
 
   /** 单次读取分页。 */
   suspend fun loadPage(fromSid: Int?): PageState<FeedPage> {
-    log.d { "加载Feed分页 -> fromSid=${fromSid ?: "first"}" }
+    val requestUrl = FaUrls.submissions(fromSid)
+    log.d { "加载Feed分页 -> fromSid=${fromSid ?: "first"},url=${summarizeUrl(requestUrl)}" }
     val state = feedStore.loadPageOnce(fromSid = fromSid)
     log.d { "加载Feed分页 -> ${summarizePageState(state)}" }
     return state
@@ -52,7 +56,8 @@ class FeedRepository(private val feedStore: FeedStore) {
 
   /** 预取指定分页。 */
   suspend fun prefetchPage(fromSid: Int?) {
-    log.d { "预取Feed分页 -> fromSid=${fromSid ?: "first"}" }
+    val requestUrl = FaUrls.submissions(fromSid)
+    log.d { "预取Feed分页 -> fromSid=${fromSid ?: "first"},url=${summarizeUrl(requestUrl)}" }
     feedStore.prefetchPage(fromSid = fromSid)
   }
 }

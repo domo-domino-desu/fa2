@@ -11,15 +11,11 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Comment
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Tag
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -28,11 +24,13 @@ import androidx.compose.ui.unit.dp
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
+import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
-import me.domino.fa2.ui.components.FaBrowseTaxonomyOptions
 import me.domino.fa2.ui.components.NetworkImage
+import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.util.ParserUtils
 import me.domino.fa2.util.sanitizeDetailAspectRatio
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -45,6 +43,7 @@ internal fun SubmissionDetailSuccessContent(
     onSearchKeyword: (String) -> Unit,
     onKeywordLongPress: (String) -> Unit,
     onOpenBrowseFilter: (category: Int, type: Int, species: Int) -> Unit,
+    onCopySubmissionUrl: (String) -> Unit,
     onOpenImageZoom: (String) -> Unit,
     isBlockedByTag: Boolean,
     blockedSubmissionMode: BlockedSubmissionPagerMode,
@@ -53,24 +52,30 @@ internal fun SubmissionDetailSuccessContent(
     descriptionTranslationService: SubmissionDescriptionTranslationService,
     requestPagerFocus: () -> Unit,
 ) {
+  val taxonomyRepository = koinInject<FaTaxonomyRepository>()
+  val taxonomyCatalog by taxonomyRepository.catalog.collectAsState()
   val metrics =
       remember(detail) {
         listOf(
             SubmissionInfoMetric(
-                icon = Icons.Filled.Visibility,
+                icon = FaMaterialSymbols.Filled.Visibility,
                 text = detail.viewCount.toString(),
             ),
             SubmissionInfoMetric(
-                icon = Icons.AutoMirrored.Filled.Comment,
+                icon = FaMaterialSymbols.AutoMirrored.Filled.Comment,
                 text = detail.commentCount.toString(),
             ),
             SubmissionInfoMetric(
-                icon = Icons.Filled.Favorite,
+                icon = FaMaterialSymbols.Filled.Favorite,
                 text = detail.favoriteCount.toString(),
             ),
-            SubmissionInfoMetric(icon = Icons.Filled.Tag, text = "ID ${detail.id}"),
-            SubmissionInfoMetric(icon = Icons.Filled.Image, text = detail.size),
-            SubmissionInfoMetric(icon = Icons.Filled.Image, text = detail.fileSize),
+            SubmissionInfoMetric(
+                icon = FaMaterialSymbols.Filled.Tag,
+                text = "ID ${detail.id}",
+                onClick = { onCopySubmissionUrl(detail.submissionUrl) },
+            ),
+            SubmissionInfoMetric(icon = FaMaterialSymbols.Filled.Image, text = detail.size),
+            SubmissionInfoMetric(icon = FaMaterialSymbols.Filled.Download, text = detail.fileSize),
         )
       }
 
@@ -84,12 +89,24 @@ internal fun SubmissionDetailSuccessContent(
   val mediaUrl = detail.fullImageUrl.ifBlank { detail.previewImageUrl }.ifBlank { thumbnailUrl }
   val zoomImageUrl = mediaUrl.trim()
   val browseFilter =
-      remember(detail.category, detail.type, detail.species) {
+      remember(detail.category, detail.type, detail.species, taxonomyCatalog) {
         SubmissionBrowseFilter(
-            category = FaBrowseTaxonomyOptions.findCategoryIdByLabel(detail.category),
-            type = FaBrowseTaxonomyOptions.findTypeIdByLabel(detail.type),
-            species = FaBrowseTaxonomyOptions.findSpeciesIdByLabel(detail.species),
+            category = taxonomyRepository.findCategoryIdByEnglishLabel(detail.category),
+            type = taxonomyRepository.findTypeIdByEnglishLabel(detail.type),
+            species = taxonomyRepository.findSpeciesIdByEnglishLabel(detail.species),
         )
+      }
+  val localizedCategory =
+      remember(detail.category, taxonomyCatalog) {
+        taxonomyRepository.categoryDisplayNameByEnglishLabel(detail.category) ?: detail.category
+      }
+  val localizedType =
+      remember(detail.type, taxonomyCatalog) {
+        taxonomyRepository.typeDisplayNameByEnglishLabel(detail.type) ?: detail.type
+      }
+  val localizedSpecies =
+      remember(detail.species, taxonomyCatalog) {
+        taxonomyRepository.speciesDisplayNameByEnglishLabel(detail.species) ?: detail.species
       }
   val keywordChips =
       remember(detail) { detail.keywords.filter { chip -> chip.isNotBlank() }.distinct().take(12) }
@@ -159,9 +176,9 @@ internal fun SubmissionDetailSuccessContent(
     )
     SubmissionBrowseMetadataSection(
         rating = detail.rating,
-        category = detail.category,
-        type = detail.type,
-        species = detail.species,
+        category = localizedCategory,
+        type = localizedType,
+        species = localizedSpecies,
         browseFilter = browseFilter,
         onOpenBrowseFilter = onOpenBrowseFilter,
     )

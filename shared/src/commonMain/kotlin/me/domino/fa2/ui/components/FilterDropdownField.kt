@@ -14,8 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -39,6 +37,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import me.domino.fa2.ui.icons.FaMaterialSymbols
 
 /** 通用筛选下拉项。 */
 data class FilterOption<T>(val value: T, val label: String)
@@ -218,7 +217,7 @@ fun <T> GroupedTextPickerDialog(
             Text(text = title, style = MaterialTheme.typography.titleLarge)
             IconButton(onClick = onDismissRequest) {
               Icon(
-                  imageVector = Icons.Filled.Close,
+                  imageVector = FaMaterialSymbols.Filled.Close,
                   contentDescription = "关闭",
                   tint = MaterialTheme.colorScheme.onSurfaceVariant,
               )

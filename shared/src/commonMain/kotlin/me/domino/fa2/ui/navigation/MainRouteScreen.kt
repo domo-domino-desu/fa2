@@ -231,7 +231,10 @@ class MainRouteScreen(
                         onSetTypeStory = searchScreenModel::setTypeStory,
                         onSetTypePhoto = searchScreenModel::setTypePhoto,
                         onSetTypePoetry = searchScreenModel::setTypePoetry,
-                        onApplySearch = searchScreenModel::applySearch,
+                        onApplySearch = {
+                          coroutineScope.launch { searchWaterfallState.scrollToItem(0) }
+                          searchScreenModel.applySearch()
+                        },
                         onRefresh = searchScreenModel::refresh,
                         onRetry = searchScreenModel::refresh,
                         onOpenSubmission = { item ->

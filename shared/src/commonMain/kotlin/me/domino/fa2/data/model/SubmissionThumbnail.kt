@@ -11,6 +11,7 @@ import kotlinx.serialization.Serializable
  * @property authorAvatarUrl 作者头像地址。
  * @property thumbnailUrl 缩略图地址。
  * @property thumbnailAspectRatio 缩略图宽高比。
+ * @property categoryTag taxonomy 中的分类 tag（如 `c_artwork_digital`）。
  * @property isBlockedByTag 是否命中站内 tag 屏蔽。
  */
 @Serializable
@@ -29,6 +30,8 @@ data class SubmissionThumbnail(
     val thumbnailUrl: String,
     /** 缩略图宽高比（宽 / 高）。 */
     val thumbnailAspectRatio: Float,
+    /** taxonomy 中的分类 tag。 */
+    val categoryTag: String,
     /** 是否命中 tag 屏蔽。 */
     val isBlockedByTag: Boolean = false,
 )

@@ -5,12 +5,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import me.domino.fa2.ui.components.settings.SettingsAccountHeader
 import me.domino.fa2.ui.components.settings.SettingsGroup
 import me.domino.fa2.ui.components.settings.SettingsListItem
+import me.domino.fa2.ui.icons.FaMaterialSymbols
 
 /** More 页面。 */
 @Composable
@@ -95,7 +90,7 @@ private fun MoreContent(
     item {
       SettingsGroup(titleHorizontalPadding = 0.dp, containerHorizontalPadding = 0.dp) {
         SettingsListItem(
-            icon = Icons.Filled.History,
+            icon = FaMaterialSymbols.Filled.History,
             title = "浏览记录",
             subtitle =
                 if (state.submissionHistoryCount > 0) {
@@ -106,7 +101,7 @@ private fun MoreContent(
             onClick = onOpenSubmissionHistory,
         )
         SettingsListItem(
-            icon = Icons.Filled.Search,
+            icon = FaMaterialSymbols.Filled.Search,
             title = "搜索记录",
             subtitle =
                 if (state.searchHistoryCount > 0) {
@@ -117,19 +112,19 @@ private fun MoreContent(
             onClick = onOpenSearchHistory,
         )
         SettingsListItem(
-            icon = Icons.Filled.Settings,
+            icon = FaMaterialSymbols.Filled.Settings,
             title = "设置",
             subtitle = "主题、瀑布流列宽与翻译设置",
             onClick = onOpenSettings,
         )
         SettingsListItem(
-            icon = Icons.Filled.Info,
+            icon = FaMaterialSymbols.Filled.Info,
             title = "开源许可",
             subtitle = "查看本应用使用的开源库与许可证",
             onClick = onOpenAbout,
         )
         SettingsListItem(
-            icon = Icons.AutoMirrored.Filled.Logout,
+            icon = FaMaterialSymbols.AutoMirrored.Filled.Logout,
             title = "退出登录",
             subtitle =
                 if (state.loggingOut) {

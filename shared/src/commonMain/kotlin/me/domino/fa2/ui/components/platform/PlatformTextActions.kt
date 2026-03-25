@@ -7,3 +7,6 @@ import androidx.compose.runtime.Composable
 
 /** 系统分享文本（返回是否成功触发）。 */
 @Composable expect fun rememberPlatformTextSharer(): (String) -> Boolean
+
+/** 顶栏分享按钮是否应展示复制图标。 */
+@Composable expect fun rememberPlatformShareActionUsesCopyIcon(): Boolean

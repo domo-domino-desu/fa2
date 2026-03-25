@@ -46,3 +46,5 @@ actual fun rememberPlatformTextSharer(): (String) -> Boolean {
     }
   }
 }
+
+@Composable actual fun rememberPlatformShareActionUsesCopyIcon(): Boolean = false

@@ -23,6 +23,8 @@ internal fun SubmissionDetailContent(
     onKeywordLongPress: (String) -> Unit,
     /** 跳转 Browse 筛选回调。 */
     onOpenBrowseFilter: (category: Int, type: Int, species: Int) -> Unit,
+    /** 复制投稿链接。 */
+    onCopySubmissionUrl: (String) -> Unit,
     /** 打开图片放大回调。 */
     onOpenImageZoom: (String) -> Unit,
     /** 当前投稿是否命中屏蔽标签。 */
@@ -59,6 +61,7 @@ internal fun SubmissionDetailContent(
           onSearchKeyword = onSearchKeyword,
           onKeywordLongPress = onKeywordLongPress,
           onOpenBrowseFilter = onOpenBrowseFilter,
+          onCopySubmissionUrl = onCopySubmissionUrl,
           onOpenImageZoom = onOpenImageZoom,
           isBlockedByTag = isBlockedByTag,
           blockedSubmissionMode = blockedSubmissionMode,

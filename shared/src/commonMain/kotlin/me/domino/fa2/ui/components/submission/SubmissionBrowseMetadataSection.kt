@@ -14,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import me.domino.fa2.data.search.SearchUiLabelsRepository
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -43,9 +45,9 @@ internal fun SubmissionBrowseMetadataSection(
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-    SubmissionBrowseMetadataField(label = "Rating", value = normalizedRating, onClick = null)
+    SubmissionBrowseMetadataField(label = "分级", value = normalizedRating, onClick = null)
     SubmissionBrowseMetadataField(
-        label = "Category",
+        label = "类别",
         value = normalizedCategory,
         onClick =
             if (browseFilter.category != null) {
@@ -55,7 +57,7 @@ internal fun SubmissionBrowseMetadataSection(
             },
     )
     SubmissionBrowseMetadataField(
-        label = "Type",
+        label = "分类",
         value = normalizedType,
         onClick =
             if (browseFilter.type != null) {
@@ -65,7 +67,7 @@ internal fun SubmissionBrowseMetadataSection(
             },
     )
     SubmissionBrowseMetadataField(
-        label = "Species",
+        label = "物种",
         value = normalizedSpecies,
         onClick =
             if (browseFilter.species != null) {
@@ -79,6 +81,7 @@ internal fun SubmissionBrowseMetadataSection(
 
 @Composable
 private fun SubmissionBrowseMetadataField(label: String, value: String, onClick: (() -> Unit)?) {
+  val searchUiLabelsRepository = koinInject<SearchUiLabelsRepository>()
   if (value.isBlank()) return
   Surface(
       color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.72f),
@@ -86,7 +89,7 @@ private fun SubmissionBrowseMetadataField(label: String, value: String, onClick:
       modifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier,
   ) {
     Text(
-        text = "$label: $value",
+        text = searchUiLabelsRepository.formatLabelValue(label, value),
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSecondaryContainer,
         maxLines = 1,

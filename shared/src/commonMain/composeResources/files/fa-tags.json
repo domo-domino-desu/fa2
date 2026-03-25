@@ -1,0 +1,4556 @@
+{
+  "version": 1,
+  "sections": {
+    "category": {
+      "groups": [
+        {
+          "key": "cg_visual_art",
+          "displayName": {
+            "en": "Visual Art",
+            "zh-Hans": "视觉艺术"
+          },
+          "itemKeys": [
+            "c_all",
+            "c_3d_models",
+            "c_artwork_digital",
+            "c_artwork_traditional",
+            "c_cel_shading",
+            "c_crafting",
+            "c_designs",
+            "c_food_recipes",
+            "c_fursuiting",
+            "c_icons",
+            "c_mosaics",
+            "c_photography",
+            "c_pixel_art",
+            "c_sculpting",
+            "c_virtual_photography"
+          ],
+          "icon": "image"
+        },
+        {
+          "key": "cg_animation_and_media",
+          "displayName": {
+            "en": "Animation & Media",
+            "zh-Hans": "动画与媒体"
+          },
+          "itemKeys": [
+            "c_2d_animation",
+            "c_3d_animation",
+            "c_pixel_animation",
+            "c_flash",
+            "c_interactive_media"
+          ],
+          "icon": "animated_images"
+        },
+        {
+          "key": "cg_readable_art",
+          "displayName": {
+            "en": "Readable Art",
+            "zh-Hans": "文字作品"
+          },
+          "itemKeys": ["c_story", "c_poetry", "c_prose"],
+          "icon": "import_contacts"
+        },
+        {
+          "key": "cg_audio_art",
+          "displayName": {
+            "en": "Audio Art",
+            "zh-Hans": "音频作品"
+          },
+          "itemKeys": ["c_music", "c_podcasts"],
+          "icon": "music_note"
+        },
+        {
+          "key": "cg_downloadable",
+          "displayName": {
+            "en": "Downloadable",
+            "zh-Hans": "可下载内容"
+          },
+          "itemKeys": ["c_skins", "c_handhelds", "c_resources"],
+          "icon": "inventory_2"
+        },
+        {
+          "key": "cg_other_stuff",
+          "displayName": {
+            "en": "Other Stuff",
+            "zh-Hans": "其他内容"
+          },
+          "itemKeys": [
+            "c_adoptables",
+            "c_auctions",
+            "c_contests",
+            "c_current_events",
+            "c_desktops",
+            "c_stockart",
+            "c_screenshots",
+            "c_scraps",
+            "c_wallpaper",
+            "c_ych_sale",
+            "c_other"
+          ],
+          "icon": "other"
+        }
+      ],
+      "items": {
+        "c_all": {
+          "id": 1,
+          "displayName": {
+            "en": "All",
+            "zh-Hans": "全部"
+          },
+          "groupKey": "cg_visual_art"
+        },
+        "c_3d_models": {
+          "id": 34,
+          "displayName": {
+            "en": "3D Models",
+            "zh-Hans": "3D 模型"
+          },
+          "groupKey": "cg_visual_art"
+        },
+        "c_artwork_digital": {
+          "id": 2,
+          "displayName": {
+            "en": "Artwork (Digital)",
+            "zh-Hans": "数字绘画"
+          },
+          "groupKey": "cg_visual_art"
+        },
+        "c_artwork_traditional": {
+          "id": 3,
+          "displayName": {
+            "en": "Artwork (Traditional)",
+            "zh-Hans": "传统绘画"
+          },
+          "groupKey": "cg_visual_art"
+        },
+        "c_cel_shading": {
+          "id": 4,
+          "displayName": {
+            "en": "Cel Shading",
+            "zh-Hans": "赛璐璐风格"
+          },
+          "groupKey": "cg_visual_art"
+        },
+        "c_crafting": {
+          "id": 5,
+          "displayName": {
+            "en": "Crafting",
+            "zh-Hans": "手工"
+          },
+          "groupKey": "cg_visual_art"
+        },
+        "c_designs": {
+          "id": 6,
+          "displayName": {
+            "en": "Designs",
+            "zh-Hans": "设计"
+          },
+          "groupKey": "cg_visual_art"
+        },
+        "c_food_recipes": {
+          "id": 32,
+          "displayName": {
+            "en": "Food / Recipes",
+            "zh-Hans": "食物/菜谱"
+          },
+          "groupKey": "cg_visual_art"
+        },
+        "c_fursuiting": {
+          "id": 8,
+          "displayName": {
+            "en": "Fursuiting",
+            "zh-Hans": "兽装"
+          },
+          "groupKey": "cg_visual_art"
+        },
+        "c_icons": {
+          "id": 9,
+          "displayName": {
+            "en": "Icons",
+            "zh-Hans": "图标"
+          },
+          "groupKey": "cg_visual_art"
+        },
+        "c_mosaics": {
+          "id": 10,
+          "displayName": {
+            "en": "Mosaics",
+            "zh-Hans": "马赛克拼贴"
+          },
+          "groupKey": "cg_visual_art"
+        },
+        "c_photography": {
+          "id": 11,
+          "displayName": {
+            "en": "Photography",
+            "zh-Hans": "摄影"
+          },
+          "groupKey": "cg_visual_art"
+        },
+        "c_pixel_art": {
+          "id": 36,
+          "displayName": {
+            "en": "Pixel Art",
+            "zh-Hans": "像素画"
+          },
+          "groupKey": "cg_visual_art"
+        },
+        "c_sculpting": {
+          "id": 12,
+          "displayName": {
+            "en": "Sculpting",
+            "zh-Hans": "雕塑"
+          },
+          "groupKey": "cg_visual_art"
+        },
+        "c_virtual_photography": {
+          "id": 35,
+          "displayName": {
+            "en": "Virtual Photography",
+            "zh-Hans": "虚拟摄影"
+          },
+          "groupKey": "cg_visual_art"
+        },
+        "c_2d_animation": {
+          "id": 37,
+          "displayName": {
+            "en": "2D Animation",
+            "zh-Hans": "2D 动画"
+          },
+          "groupKey": "cg_animation_and_media"
+        },
+        "c_3d_animation": {
+          "id": 38,
+          "displayName": {
+            "en": "3D Animation",
+            "zh-Hans": "3D 动画"
+          },
+          "groupKey": "cg_animation_and_media"
+        },
+        "c_pixel_animation": {
+          "id": 39,
+          "displayName": {
+            "en": "Pixel Animation",
+            "zh-Hans": "像素动画"
+          },
+          "groupKey": "cg_animation_and_media"
+        },
+        "c_flash": {
+          "id": 7,
+          "displayName": {
+            "en": "Flash",
+            "zh-Hans": "Flash"
+          },
+          "groupKey": "cg_animation_and_media"
+        },
+        "c_interactive_media": {
+          "id": 40,
+          "displayName": {
+            "en": "Interactive Media",
+            "zh-Hans": "互动媒体"
+          },
+          "groupKey": "cg_animation_and_media"
+        },
+        "c_story": {
+          "id": 13,
+          "displayName": {
+            "en": "Story",
+            "zh-Hans": "故事"
+          },
+          "groupKey": "cg_readable_art"
+        },
+        "c_poetry": {
+          "id": 14,
+          "displayName": {
+            "en": "Poetry",
+            "zh-Hans": "诗歌"
+          },
+          "groupKey": "cg_readable_art"
+        },
+        "c_prose": {
+          "id": 15,
+          "displayName": {
+            "en": "Prose",
+            "zh-Hans": "散文"
+          },
+          "groupKey": "cg_readable_art"
+        },
+        "c_music": {
+          "id": 16,
+          "displayName": {
+            "en": "Music",
+            "zh-Hans": "音乐"
+          },
+          "groupKey": "cg_audio_art"
+        },
+        "c_podcasts": {
+          "id": 17,
+          "displayName": {
+            "en": "Podcasts",
+            "zh-Hans": "播客"
+          },
+          "groupKey": "cg_audio_art"
+        },
+        "c_skins": {
+          "id": 18,
+          "displayName": {
+            "en": "Skins",
+            "zh-Hans": "皮肤"
+          },
+          "groupKey": "cg_downloadable"
+        },
+        "c_handhelds": {
+          "id": 19,
+          "displayName": {
+            "en": "Handhelds",
+            "zh-Hans": "掌机创作"
+          },
+          "groupKey": "cg_downloadable"
+        },
+        "c_resources": {
+          "id": 20,
+          "displayName": {
+            "en": "Resources",
+            "zh-Hans": "资源"
+          },
+          "groupKey": "cg_downloadable"
+        },
+        "c_adoptables": {
+          "id": 21,
+          "displayName": {
+            "en": "Adoptables",
+            "zh-Hans": "设定领养"
+          },
+          "groupKey": "cg_other_stuff"
+        },
+        "c_auctions": {
+          "id": 22,
+          "displayName": {
+            "en": "Auctions",
+            "zh-Hans": "拍卖"
+          },
+          "groupKey": "cg_other_stuff"
+        },
+        "c_contests": {
+          "id": 23,
+          "displayName": {
+            "en": "Contests",
+            "zh-Hans": "比赛"
+          },
+          "groupKey": "cg_other_stuff"
+        },
+        "c_current_events": {
+          "id": 24,
+          "displayName": {
+            "en": "Current Events",
+            "zh-Hans": "时事"
+          },
+          "groupKey": "cg_other_stuff"
+        },
+        "c_desktops": {
+          "id": 25,
+          "displayName": {
+            "en": "Desktops",
+            "zh-Hans": "桌面"
+          },
+          "groupKey": "cg_other_stuff",
+          "icon": "image"
+        },
+        "c_stockart": {
+          "id": 26,
+          "displayName": {
+            "en": "Stockart",
+            "zh-Hans": "图库资源"
+          },
+          "groupKey": "cg_other_stuff",
+          "icon": "image"
+        },
+        "c_screenshots": {
+          "id": 27,
+          "displayName": {
+            "en": "Screenshots",
+            "zh-Hans": "截图"
+          },
+          "groupKey": "cg_other_stuff",
+          "icon": "image"
+        },
+        "c_scraps": {
+          "id": 28,
+          "displayName": {
+            "en": "Scraps",
+            "zh-Hans": "草稿"
+          },
+          "groupKey": "cg_other_stuff"
+        },
+        "c_wallpaper": {
+          "id": 29,
+          "displayName": {
+            "en": "Wallpaper",
+            "zh-Hans": "壁纸"
+          },
+          "groupKey": "cg_other_stuff",
+          "icon": "image"
+        },
+        "c_ych_sale": {
+          "id": 30,
+          "displayName": {
+            "en": "YCH / Sale",
+            "zh-Hans": "YCH/出售"
+          },
+          "groupKey": "cg_other_stuff"
+        },
+        "c_other": {
+          "id": 31,
+          "displayName": {
+            "en": "Other",
+            "zh-Hans": "其他"
+          },
+          "groupKey": "cg_other_stuff"
+        }
+      }
+    },
+    "type": {
+      "groups": [
+        {
+          "key": "tg_general_things",
+          "displayName": {
+            "en": "General Things",
+            "zh-Hans": "常规"
+          },
+          "itemKeys": [
+            "t_all",
+            "t_abstract",
+            "t_animal_related_non_anthro",
+            "t_anime",
+            "t_comics",
+            "t_doodle",
+            "t_fanart",
+            "t_fantasy",
+            "t_human",
+            "t_portraits",
+            "t_scenery",
+            "t_still_life",
+            "t_tutorials",
+            "t_miscellaneous"
+          ]
+        },
+        {
+          "key": "tg_specialty",
+          "displayName": {
+            "en": "Specialty",
+            "zh-Hans": "特殊"
+          },
+          "itemKeys": [
+            "t_general_furry_art",
+            "t_abdl",
+            "t_baby_fur",
+            "t_bondage",
+            "t_digimon",
+            "t_fat_furs",
+            "t_fetish_other",
+            "t_fursuit",
+            "t_gore_macabre_art",
+            "t_hyper",
+            "t_hypnosis",
+            "t_inflation",
+            "t_macro_micro",
+            "t_muscle",
+            "t_my_little_pony_brony",
+            "t_paw",
+            "t_pokemon",
+            "t_pregnancy",
+            "t_sonic",
+            "t_transformation",
+            "t_tf_tg",
+            "t_vore",
+            "t_water_sports"
+          ]
+        },
+        {
+          "key": "tg_music",
+          "displayName": {
+            "en": "Music",
+            "zh-Hans": "音乐"
+          },
+          "itemKeys": [
+            "t_techno",
+            "t_trance",
+            "t_house",
+            "t_90s",
+            "t_80s",
+            "t_70s",
+            "t_60s",
+            "t_pre_60s",
+            "t_classical",
+            "t_game_music",
+            "t_rock",
+            "t_pop",
+            "t_rap",
+            "t_industrial",
+            "t_other_music"
+          ]
+        }
+      ],
+      "items": {
+        "t_all": {
+          "id": 1,
+          "displayName": {
+            "en": "All",
+            "zh-Hans": "全部"
+          },
+          "groupKey": "tg_general_things"
+        },
+        "t_abstract": {
+          "id": 2,
+          "displayName": {
+            "en": "Abstract",
+            "zh-Hans": "抽象"
+          },
+          "groupKey": "tg_general_things"
+        },
+        "t_animal_related_non_anthro": {
+          "id": 3,
+          "displayName": {
+            "en": "Animal related (non-anthro)",
+            "zh-Hans": "动物相关（非拟人）"
+          },
+          "groupKey": "tg_general_things"
+        },
+        "t_anime": {
+          "id": 4,
+          "displayName": {
+            "en": "Anime",
+            "zh-Hans": "动漫"
+          },
+          "groupKey": "tg_general_things"
+        },
+        "t_comics": {
+          "id": 5,
+          "displayName": {
+            "en": "Comics",
+            "zh-Hans": "漫画"
+          },
+          "groupKey": "tg_general_things"
+        },
+        "t_doodle": {
+          "id": 6,
+          "displayName": {
+            "en": "Doodle",
+            "zh-Hans": "涂鸦"
+          },
+          "groupKey": "tg_general_things"
+        },
+        "t_fanart": {
+          "id": 7,
+          "displayName": {
+            "en": "Fanart",
+            "zh-Hans": "同人作品"
+          },
+          "groupKey": "tg_general_things"
+        },
+        "t_fantasy": {
+          "id": 8,
+          "displayName": {
+            "en": "Fantasy",
+            "zh-Hans": "奇幻"
+          },
+          "groupKey": "tg_general_things"
+        },
+        "t_human": {
+          "id": 9,
+          "displayName": {
+            "en": "Human",
+            "zh-Hans": "人类"
+          },
+          "groupKey": "tg_general_things"
+        },
+        "t_portraits": {
+          "id": 10,
+          "displayName": {
+            "en": "Portraits",
+            "zh-Hans": "肖像"
+          },
+          "groupKey": "tg_general_things"
+        },
+        "t_scenery": {
+          "id": 11,
+          "displayName": {
+            "en": "Scenery",
+            "zh-Hans": "风景"
+          },
+          "groupKey": "tg_general_things"
+        },
+        "t_still_life": {
+          "id": 12,
+          "displayName": {
+            "en": "Still Life",
+            "zh-Hans": "静物"
+          },
+          "groupKey": "tg_general_things"
+        },
+        "t_tutorials": {
+          "id": 13,
+          "displayName": {
+            "en": "Tutorials",
+            "zh-Hans": "教程"
+          },
+          "groupKey": "tg_general_things"
+        },
+        "t_miscellaneous": {
+          "id": 14,
+          "displayName": {
+            "en": "Miscellaneous",
+            "zh-Hans": "杂项"
+          },
+          "groupKey": "tg_general_things"
+        },
+        "t_general_furry_art": {
+          "id": 100,
+          "displayName": {
+            "en": "General Furry Art",
+            "zh-Hans": "通用Furry艺术"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_abdl": {
+          "id": 122,
+          "displayName": {
+            "en": "ABDL",
+            "zh-Hans": "ABDL"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_baby_fur": {
+          "id": 101,
+          "displayName": {
+            "en": "Baby fur",
+            "zh-Hans": "兽宝宝"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_bondage": {
+          "id": 102,
+          "displayName": {
+            "en": "Bondage",
+            "zh-Hans": "捆绑"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_digimon": {
+          "id": 103,
+          "displayName": {
+            "en": "Digimon",
+            "zh-Hans": "数码宝贝"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_fat_furs": {
+          "id": 104,
+          "displayName": {
+            "en": "Fat Furs",
+            "zh-Hans": "肥胖"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_fetish_other": {
+          "id": 105,
+          "displayName": {
+            "en": "Fetish Other",
+            "zh-Hans": "其他癖好"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_fursuit": {
+          "id": 106,
+          "displayName": {
+            "en": "Fursuit",
+            "zh-Hans": "兽装"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_gore_macabre_art": {
+          "id": 119,
+          "displayName": {
+            "en": "Gore / Macabre Art",
+            "zh-Hans": "Gore/黑暗艺术"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_hyper": {
+          "id": 107,
+          "displayName": {
+            "en": "Hyper",
+            "zh-Hans": "巨大器官"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_hypnosis": {
+          "id": 121,
+          "displayName": {
+            "en": "Hypnosis",
+            "zh-Hans": "催眠"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_inflation": {
+          "id": 108,
+          "displayName": {
+            "en": "Inflation",
+            "zh-Hans": "膨胀"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_macro_micro": {
+          "id": 109,
+          "displayName": {
+            "en": "Macro / Micro",
+            "zh-Hans": "巨大/缩小"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_muscle": {
+          "id": 110,
+          "displayName": {
+            "en": "Muscle",
+            "zh-Hans": "肌肉"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_my_little_pony_brony": {
+          "id": 111,
+          "displayName": {
+            "en": "My Little Pony / Brony",
+            "zh-Hans": "小马宝莉/Brony"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_paw": {
+          "id": 112,
+          "displayName": {
+            "en": "Paw",
+            "zh-Hans": "爪控"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_pokemon": {
+          "id": 113,
+          "displayName": {
+            "en": "Pokemon",
+            "zh-Hans": "宝可梦"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_pregnancy": {
+          "id": 114,
+          "displayName": {
+            "en": "Pregnancy",
+            "zh-Hans": "怀孕"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_sonic": {
+          "id": 115,
+          "displayName": {
+            "en": "Sonic",
+            "zh-Hans": "索尼克"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_transformation": {
+          "id": 116,
+          "displayName": {
+            "en": "Transformation",
+            "zh-Hans": "TF"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_tf_tg": {
+          "id": 120,
+          "displayName": {
+            "en": "TF / TG",
+            "zh-Hans": "TF/TG"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_vore": {
+          "id": 117,
+          "displayName": {
+            "en": "Vore",
+            "zh-Hans": "吞食"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_water_sports": {
+          "id": 118,
+          "displayName": {
+            "en": "Water Sports",
+            "zh-Hans": "尿液"
+          },
+          "groupKey": "tg_specialty"
+        },
+        "t_techno": {
+          "id": 201,
+          "displayName": {
+            "en": "Techno",
+            "zh-Hans": "Techno"
+          },
+          "groupKey": "tg_music"
+        },
+        "t_trance": {
+          "id": 202,
+          "displayName": {
+            "en": "Trance",
+            "zh-Hans": "Trance"
+          },
+          "groupKey": "tg_music"
+        },
+        "t_house": {
+          "id": 203,
+          "displayName": {
+            "en": "House",
+            "zh-Hans": "House"
+          },
+          "groupKey": "tg_music"
+        },
+        "t_90s": {
+          "id": 204,
+          "displayName": {
+            "en": "90s",
+            "zh-Hans": "90 年代"
+          },
+          "groupKey": "tg_music"
+        },
+        "t_80s": {
+          "id": 205,
+          "displayName": {
+            "en": "80s",
+            "zh-Hans": "80 年代"
+          },
+          "groupKey": "tg_music"
+        },
+        "t_70s": {
+          "id": 206,
+          "displayName": {
+            "en": "70s",
+            "zh-Hans": "70 年代"
+          },
+          "groupKey": "tg_music"
+        },
+        "t_60s": {
+          "id": 207,
+          "displayName": {
+            "en": "60s",
+            "zh-Hans": "60 年代"
+          },
+          "groupKey": "tg_music"
+        },
+        "t_pre_60s": {
+          "id": 208,
+          "displayName": {
+            "en": "Pre-60s",
+            "zh-Hans": "60 年代前"
+          },
+          "groupKey": "tg_music"
+        },
+        "t_classical": {
+          "id": 209,
+          "displayName": {
+            "en": "Classical",
+            "zh-Hans": "古典"
+          },
+          "groupKey": "tg_music"
+        },
+        "t_game_music": {
+          "id": 210,
+          "displayName": {
+            "en": "Game Music",
+            "zh-Hans": "游戏音乐"
+          },
+          "groupKey": "tg_music"
+        },
+        "t_rock": {
+          "id": 211,
+          "displayName": {
+            "en": "Rock",
+            "zh-Hans": "摇滚"
+          },
+          "groupKey": "tg_music"
+        },
+        "t_pop": {
+          "id": 212,
+          "displayName": {
+            "en": "Pop",
+            "zh-Hans": "流行"
+          },
+          "groupKey": "tg_music"
+        },
+        "t_rap": {
+          "id": 213,
+          "displayName": {
+            "en": "Rap",
+            "zh-Hans": "说唱"
+          },
+          "groupKey": "tg_music"
+        },
+        "t_industrial": {
+          "id": 214,
+          "displayName": {
+            "en": "Industrial",
+            "zh-Hans": "工业"
+          },
+          "groupKey": "tg_music"
+        },
+        "t_other_music": {
+          "id": 200,
+          "displayName": {
+            "en": "Other Music",
+            "zh-Hans": "其他音乐"
+          },
+          "groupKey": "tg_music"
+        }
+      }
+    },
+    "species": {
+      "groups": [
+        {
+          "key": "sg_ungrouped_0",
+          "displayName": {
+            "en": "",
+            "zh-Hans": ""
+          },
+          "itemKeys": ["s_unspecified_any"]
+        },
+        {
+          "key": "sg_general",
+          "displayName": {
+            "en": "General",
+            "zh-Hans": "常规"
+          },
+          "itemKeys": [
+            "s_airborne_vehicle",
+            "s_alien_other",
+            "s_amphibian_other",
+            "s_aquatic_other",
+            "s_avian_other",
+            "s_bear_other",
+            "s_bovine_other",
+            "s_canine_other",
+            "s_cervine_other",
+            "s_dog_other",
+            "s_dragon_other",
+            "s_equine_other",
+            "s_exotic_other",
+            "s_feline_other",
+            "s_fox_other",
+            "s_goo_slime",
+            "s_hybrid_species",
+            "s_inanimate",
+            "s_insect_other",
+            "s_land_vehicle",
+            "s_mammal_other",
+            "s_marsupial_other",
+            "s_mustelid_other",
+            "s_plant_fungus",
+            "s_primate_other",
+            "s_reptilian_other",
+            "s_robot_android_cyborg",
+            "s_rodent_other",
+            "s_sea_vehicle",
+            "s_taur_other",
+            "s_vulpine_other"
+          ]
+        },
+        {
+          "key": "sg_fandom_creations",
+          "displayName": {
+            "en": "Fandom Creations",
+            "zh-Hans": "同人原创种"
+          },
+          "itemKeys": [
+            "s_original_species",
+            "s_fan_species_character",
+            "s_aeromorph",
+            "s_angel_dragon",
+            "s_avali",
+            "s_chakat",
+            "s_citra",
+            "s_crux",
+            "s_dracat",
+            "s_dutch_angel_dragon",
+            "s_felkin",
+            "s_ferrin",
+            "s_jogauni",
+            "s_langurhali",
+            "s_nevrean",
+            "s_protogen",
+            "s_rexouium",
+            "s_sergal",
+            "s_synx",
+            "s_wickerbeast",
+            "s_yinglet",
+            "s_zorgoia"
+          ]
+        },
+        {
+          "key": "sg_mythological_fantasy",
+          "displayName": {
+            "en": "Mythological / Fantasy",
+            "zh-Hans": "神话/奇幻"
+          },
+          "itemKeys": [
+            "s_angel",
+            "s_centaur",
+            "s_cerberus",
+            "s_changeling_shape_shifter",
+            "s_chimera",
+            "s_chupacabra",
+            "s_cockatrice",
+            "s_daemon",
+            "s_demon",
+            "s_displacer_beast",
+            "s_dragonborn",
+            "s_drow",
+            "s_dwarf",
+            "s_eastern_dragon",
+            "s_elf",
+            "s_gargoyle",
+            "s_goblin",
+            "s_golem",
+            "s_gryphon",
+            "s_harpy",
+            "s_hellhound",
+            "s_hippogriff",
+            "s_hobbit",
+            "s_hydra",
+            "s_imp",
+            "s_incubus",
+            "s_jackalope",
+            "s_kirin",
+            "s_kitsune",
+            "s_kobold",
+            "s_lamia",
+            "s_manticore",
+            "s_minotaur",
+            "s_naga",
+            "s_nephilim",
+            "s_orc",
+            "s_pegasus",
+            "s_peryton",
+            "s_phoenix",
+            "s_sasquatch",
+            "s_satyr",
+            "s_sphinx",
+            "s_succubus",
+            "s_tiefling",
+            "s_troll",
+            "s_unicorn",
+            "s_water_dragon",
+            "s_werewolf_lycanthrope",
+            "s_western_dragon",
+            "s_wyvern",
+            "s_yokai"
+          ]
+        },
+        {
+          "key": "sg_games_media",
+          "displayName": {
+            "en": "Games / Media",
+            "zh-Hans": "游戏/媒体"
+          },
+          "itemKeys": [
+            "s_alicorn_mlp",
+            "s_argonian",
+            "s_asari",
+            "s_bangaa",
+            "s_bubble_dragon",
+            "s_burmecian",
+            "s_charr",
+            "s_chiss",
+            "s_chocobo",
+            "s_deathclaw",
+            "s_digimon",
+            "s_draenei",
+            "s_drell",
+            "s_elcor",
+            "s_ewok",
+            "s_hanar",
+            "s_hrothgar",
+            "s_iksar",
+            "s_kaiju_giant_monster",
+            "s_kelpie",
+            "s_kemonomimi",
+            "s_khajiit",
+            "s_koopa",
+            "s_krogan",
+            "s_lombax",
+            "s_mimiga",
+            "s_mobian",
+            "s_moogle",
+            "s_neopet",
+            "s_nu_mou",
+            "s_pokemon",
+            "s_pony_mlp",
+            "s_protoss",
+            "s_quarian",
+            "s_ronso",
+            "s_salarian",
+            "s_sangheili_elites",
+            "s_tauntaun",
+            "s_tauren",
+            "s_trandoshan",
+            "s_transformer",
+            "s_turian",
+            "s_twilek",
+            "s_viera",
+            "s_wookiee",
+            "s_xenomorph",
+            "s_yautja_predator",
+            "s_yordle",
+            "s_yoshi",
+            "s_zerg"
+          ]
+        },
+        {
+          "key": "sg_animal_kingdom",
+          "displayName": {
+            "en": "Animal Kingdom",
+            "zh-Hans": "动物王国"
+          },
+          "itemKeys": [
+            "s_aardvark",
+            "s_aardwolf",
+            "s_african_wild_dog",
+            "s_akita",
+            "s_albatross",
+            "s_alligator_crocodile",
+            "s_alpaca",
+            "s_anaconda",
+            "s_anteater",
+            "s_antelope",
+            "s_arachnid",
+            "s_arctic_fox",
+            "s_armadillo",
+            "s_axolotl",
+            "s_baboon",
+            "s_badger",
+            "s_bat",
+            "s_beaver",
+            "s_bee",
+            "s_binturong",
+            "s_bison",
+            "s_blue_jay",
+            "s_border_collie",
+            "s_brown_bear",
+            "s_buffalo",
+            "s_buffalo_bison",
+            "s_bull_terrier",
+            "s_butterfly",
+            "s_caiman",
+            "s_camel",
+            "s_capybara",
+            "s_caribou",
+            "s_caterpillar",
+            "s_cephalopod",
+            "s_chameleon",
+            "s_cheetah",
+            "s_chicken",
+            "s_chimpanzee",
+            "s_chinchilla",
+            "s_chipmunk",
+            "s_civet",
+            "s_clouded_leopard",
+            "s_coatimundi",
+            "s_cockatiel",
+            "s_corgi",
+            "s_corvid",
+            "s_cougar_puma",
+            "s_cow",
+            "s_coyote",
+            "s_crab",
+            "s_crane",
+            "s_crayfish",
+            "s_crow",
+            "s_crustacean",
+            "s_dalmatian",
+            "s_deer",
+            "s_dhole",
+            "s_dingo",
+            "s_dinosaur",
+            "s_doberman",
+            "s_dolphin",
+            "s_donkey_mule",
+            "s_duck",
+            "s_eagle",
+            "s_eel",
+            "s_elephant",
+            "s_falcon",
+            "s_fennec",
+            "s_ferret",
+            "s_finch",
+            "s_fish",
+            "s_flamingo",
+            "s_fossa",
+            "s_frog",
+            "s_gazelle",
+            "s_gecko",
+            "s_genet",
+            "s_german_shepherd",
+            "s_gibbon",
+            "s_giraffe",
+            "s_goat",
+            "s_goose",
+            "s_gorilla",
+            "s_gray_fox",
+            "s_great_dane",
+            "s_grizzly_bear",
+            "s_guinea_pig",
+            "s_hamster",
+            "s_hawk",
+            "s_hedgehog",
+            "s_heron",
+            "s_hippopotamus",
+            "s_honeybee_bumblebee",
+            "s_horse",
+            "s_housecat",
+            "s_human",
+            "s_humanoid",
+            "s_hummingbird",
+            "s_husky",
+            "s_hyena",
+            "s_iguana",
+            "s_impala",
+            "s_jackal",
+            "s_jaguar",
+            "s_kangaroo",
+            "s_kangaroo_mouse",
+            "s_kangaroo_rat",
+            "s_kinkajou",
+            "s_kit_fox",
+            "s_koala",
+            "s_kodiak_bear",
+            "s_komodo_dragon",
+            "s_labrador",
+            "s_lemur",
+            "s_leopard",
+            "s_liger",
+            "s_linsang",
+            "s_lion",
+            "s_lizard",
+            "s_llama",
+            "s_lobster",
+            "s_longhair_cat",
+            "s_lynx",
+            "s_magpie",
+            "s_maine_coon",
+            "s_malamute",
+            "s_mammal_feline",
+            "s_mammal_herd",
+            "s_mammal_marsupial",
+            "s_mammal_mustelid",
+            "s_mammal_other_predator",
+            "s_mammal_prey",
+            "s_mammal_primate",
+            "s_mammal_rodent",
+            "s_manatee",
+            "s_mandrill",
+            "s_maned_wolf",
+            "s_mantid",
+            "s_marmoset",
+            "s_marten",
+            "s_meerkat",
+            "s_mink",
+            "s_mole",
+            "s_mongoose",
+            "s_monitor_lizard",
+            "s_monkey",
+            "s_moose",
+            "s_moth",
+            "s_mouse",
+            "s_musk_deer",
+            "s_musk_ox",
+            "s_newt",
+            "s_ocelot",
+            "s_octopus",
+            "s_okapi",
+            "s_olingo",
+            "s_opossum",
+            "s_orangutan",
+            "s_orca",
+            "s_oryx",
+            "s_ostrich",
+            "s_otter",
+            "s_owl",
+            "s_panda",
+            "s_pangolin",
+            "s_panther",
+            "s_parakeet",
+            "s_parrot_macaw",
+            "s_peacock",
+            "s_penguin",
+            "s_persian_cat",
+            "s_pig_swine",
+            "s_pigeon",
+            "s_pika",
+            "s_pine_marten",
+            "s_platypus",
+            "s_polar_bear",
+            "s_pony",
+            "s_poodle",
+            "s_porcupine",
+            "s_porpoise",
+            "s_procyonid",
+            "s_puffin",
+            "s_quoll",
+            "s_rabbit_hare",
+            "s_raccoon",
+            "s_rat",
+            "s_ray",
+            "s_red_fox",
+            "s_red_panda",
+            "s_reindeer",
+            "s_reptillian",
+            "s_rhinoceros",
+            "s_robin",
+            "s_rottweiler",
+            "s_sabercats",
+            "s_sabertooth",
+            "s_salamander",
+            "s_scorpion",
+            "s_seagull",
+            "s_seahorse",
+            "s_seal",
+            "s_secretary_bird",
+            "s_serpent_dragon",
+            "s_serval",
+            "s_shark",
+            "s_sheep",
+            "s_shiba_inu",
+            "s_shorthair_cat",
+            "s_shrew",
+            "s_siamese",
+            "s_sifaka",
+            "s_silver_fox",
+            "s_skunk",
+            "s_sloth",
+            "s_snail",
+            "s_snake_serpent",
+            "s_snow_leopard",
+            "s_sparrow",
+            "s_squid",
+            "s_squirrel",
+            "s_stoat",
+            "s_stork",
+            "s_sugar_glider",
+            "s_sun_bear",
+            "s_swan",
+            "s_swift_fox",
+            "s_tanuki",
+            "s_tapir",
+            "s_tasmanian_devil",
+            "s_thylacine",
+            "s_tiger",
+            "s_toucan",
+            "s_turtle_tortoise",
+            "s_vulture",
+            "s_wallaby",
+            "s_walrus",
+            "s_wasp",
+            "s_weasel",
+            "s_whale",
+            "s_wolf",
+            "s_wolverine",
+            "s_zebra"
+          ]
+        }
+      ],
+      "items": {
+        "s_unspecified_any": {
+          "id": 1,
+          "displayName": {
+            "en": "Unspecified / Any",
+            "zh-Hans": "未指定/任意"
+          },
+          "groupKey": "sg_ungrouped_0"
+        },
+        "s_airborne_vehicle": {
+          "id": 10001,
+          "displayName": {
+            "en": "Airborne Vehicle",
+            "zh-Hans": "飞行载具"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_alien_other": {
+          "id": 5001,
+          "displayName": {
+            "en": "Alien (Other)",
+            "zh-Hans": "外星（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_amphibian_other": {
+          "id": 1000,
+          "displayName": {
+            "en": "Amphibian (Other)",
+            "zh-Hans": "两栖（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_aquatic_other": {
+          "id": 2000,
+          "displayName": {
+            "en": "Aquatic (Other)",
+            "zh-Hans": "水生（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_avian_other": {
+          "id": 3000,
+          "displayName": {
+            "en": "Avian (Other)",
+            "zh-Hans": "鸟类（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_bear_other": {
+          "id": 6002,
+          "displayName": {
+            "en": "Bear (Other)",
+            "zh-Hans": "熊类（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_bovine_other": {
+          "id": 6007,
+          "displayName": {
+            "en": "Bovine (Other)",
+            "zh-Hans": "牛科（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_canine_other": {
+          "id": 6017,
+          "displayName": {
+            "en": "Canine (Other)",
+            "zh-Hans": "犬科（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_cervine_other": {
+          "id": 6018,
+          "displayName": {
+            "en": "Cervine (Other)",
+            "zh-Hans": "鹿科（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_dog_other": {
+          "id": 6010,
+          "displayName": {
+            "en": "Dog (Other)",
+            "zh-Hans": "犬类（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_dragon_other": {
+          "id": 4000,
+          "displayName": {
+            "en": "Dragon (Other)",
+            "zh-Hans": "龙类（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_equine_other": {
+          "id": 10009,
+          "displayName": {
+            "en": "Equine (Other)",
+            "zh-Hans": "马科（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_exotic_other": {
+          "id": 5000,
+          "displayName": {
+            "en": "Exotic (Other)",
+            "zh-Hans": "异域（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_feline_other": {
+          "id": 6030,
+          "displayName": {
+            "en": "Feline (Other)",
+            "zh-Hans": "猫科（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_fox_other": {
+          "id": 6075,
+          "displayName": {
+            "en": "Fox (Other)",
+            "zh-Hans": "狐类（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_goo_slime": {
+          "id": 10007,
+          "displayName": {
+            "en": "Goo / Slime",
+            "zh-Hans": "胶质/史莱姆"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_hybrid_species": {
+          "id": 10002,
+          "displayName": {
+            "en": "Hybrid Species",
+            "zh-Hans": "混种"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_inanimate": {
+          "id": 10006,
+          "displayName": {
+            "en": "Inanimate",
+            "zh-Hans": "无生命物体"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_insect_other": {
+          "id": 8003,
+          "displayName": {
+            "en": "Insect (Other)",
+            "zh-Hans": "昆虫（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_land_vehicle": {
+          "id": 10003,
+          "displayName": {
+            "en": "Land Vehicle",
+            "zh-Hans": "陆地载具"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_mammal_other": {
+          "id": 6000,
+          "displayName": {
+            "en": "Mammal (Other)",
+            "zh-Hans": "哺乳类（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_marsupial_other": {
+          "id": 6042,
+          "displayName": {
+            "en": "Marsupial (Other)",
+            "zh-Hans": "有袋类（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_mustelid_other": {
+          "id": 6051,
+          "displayName": {
+            "en": "Mustelid (Other)",
+            "zh-Hans": "鼬科（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_plant_fungus": {
+          "id": 10008,
+          "displayName": {
+            "en": "Plant / Fungus",
+            "zh-Hans": "植物/真菌"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_primate_other": {
+          "id": 6058,
+          "displayName": {
+            "en": "Primate (Other)",
+            "zh-Hans": "灵长类（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_reptilian_other": {
+          "id": 7000,
+          "displayName": {
+            "en": "Reptilian (Other)",
+            "zh-Hans": "爬行类（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_robot_android_cyborg": {
+          "id": 10004,
+          "displayName": {
+            "en": "Robot / Android / Cyborg",
+            "zh-Hans": "机器人/仿生人/赛博格"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_rodent_other": {
+          "id": 6067,
+          "displayName": {
+            "en": "Rodent (Other)",
+            "zh-Hans": "啮齿类（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_sea_vehicle": {
+          "id": 10005,
+          "displayName": {
+            "en": "Sea Vehicle",
+            "zh-Hans": "海上载具"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_taur_other": {
+          "id": 5025,
+          "displayName": {
+            "en": "Taur (Other)",
+            "zh-Hans": "半人马型（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_vulpine_other": {
+          "id": 6015,
+          "displayName": {
+            "en": "Vulpine (Other)",
+            "zh-Hans": "犬狐类（其他）"
+          },
+          "groupKey": "sg_general"
+        },
+        "s_original_species": {
+          "id": 11014,
+          "displayName": {
+            "en": "Original Species",
+            "zh-Hans": "原创种族"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_fan_species_character": {
+          "id": 11015,
+          "displayName": {
+            "en": "Fan Species / Character",
+            "zh-Hans": "同人种族/角色"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_aeromorph": {
+          "id": 11001,
+          "displayName": {
+            "en": "Aeromorph",
+            "zh-Hans": "Aeromorph"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_angel_dragon": {
+          "id": 11002,
+          "displayName": {
+            "en": "Angel Dragon",
+            "zh-Hans": "天使龙"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_avali": {
+          "id": 11012,
+          "displayName": {
+            "en": "Avali",
+            "zh-Hans": "Avali"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_chakat": {
+          "id": 5003,
+          "displayName": {
+            "en": "Chakat",
+            "zh-Hans": "Chakat"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_citra": {
+          "id": 5005,
+          "displayName": {
+            "en": "Citra",
+            "zh-Hans": "Citra"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_crux": {
+          "id": 5006,
+          "displayName": {
+            "en": "Crux",
+            "zh-Hans": "Crux"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_dracat": {
+          "id": 5009,
+          "displayName": {
+            "en": "Dracat",
+            "zh-Hans": "Dracat"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_dutch_angel_dragon": {
+          "id": 11003,
+          "displayName": {
+            "en": "Dutch Angel Dragon",
+            "zh-Hans": "荷兰天使龙"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_felkin": {
+          "id": 11011,
+          "displayName": {
+            "en": "Felkin",
+            "zh-Hans": "Felkin"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_ferrin": {
+          "id": 11004,
+          "displayName": {
+            "en": "Ferrin",
+            "zh-Hans": "Ferrin"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_jogauni": {
+          "id": 11005,
+          "displayName": {
+            "en": "Jogauni",
+            "zh-Hans": "Jogauni"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_langurhali": {
+          "id": 5014,
+          "displayName": {
+            "en": "Langurhali",
+            "zh-Hans": "Langurhali"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_nevrean": {
+          "id": 11006,
+          "displayName": {
+            "en": "Nevrean",
+            "zh-Hans": "Nevrean"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_protogen": {
+          "id": 11007,
+          "displayName": {
+            "en": "Protogen",
+            "zh-Hans": "Protogen"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_rexouium": {
+          "id": 11016,
+          "displayName": {
+            "en": "Rexouium",
+            "zh-Hans": "Rexouium"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_sergal": {
+          "id": 5021,
+          "displayName": {
+            "en": "Sergal",
+            "zh-Hans": "Sergal"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_synx": {
+          "id": 11010,
+          "displayName": {
+            "en": "Synx",
+            "zh-Hans": "Synx"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_wickerbeast": {
+          "id": 11013,
+          "displayName": {
+            "en": "Wickerbeast",
+            "zh-Hans": "Wickerbeast"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_yinglet": {
+          "id": 11009,
+          "displayName": {
+            "en": "Yinglet",
+            "zh-Hans": "Yinglet"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_zorgoia": {
+          "id": 11008,
+          "displayName": {
+            "en": "Zorgoia",
+            "zh-Hans": "Zorgoia"
+          },
+          "groupKey": "sg_fandom_creations"
+        },
+        "s_angel": {
+          "id": 12001,
+          "displayName": {
+            "en": "Angel",
+            "zh-Hans": "天使"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_centaur": {
+          "id": 12002,
+          "displayName": {
+            "en": "Centaur",
+            "zh-Hans": "半人马"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_cerberus": {
+          "id": 12003,
+          "displayName": {
+            "en": "Cerberus",
+            "zh-Hans": "刻耳柏洛斯"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_changeling_shape_shifter": {
+          "id": 12038,
+          "displayName": {
+            "en": "Changeling / Shape Shifter",
+            "zh-Hans": "幻形灵/变形者"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_chimera": {
+          "id": 12004,
+          "displayName": {
+            "en": "Chimera",
+            "zh-Hans": "奇美拉"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_chupacabra": {
+          "id": 12005,
+          "displayName": {
+            "en": "Chupacabra",
+            "zh-Hans": "卓柏卡布拉"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_cockatrice": {
+          "id": 12006,
+          "displayName": {
+            "en": "Cockatrice",
+            "zh-Hans": "鸡蛇兽"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_daemon": {
+          "id": 5007,
+          "displayName": {
+            "en": "Daemon",
+            "zh-Hans": "魔灵"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_demon": {
+          "id": 12007,
+          "displayName": {
+            "en": "Demon",
+            "zh-Hans": "恶魔"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_displacer_beast": {
+          "id": 12008,
+          "displayName": {
+            "en": "Displacer Beast",
+            "zh-Hans": "移位兽"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_dragonborn": {
+          "id": 12009,
+          "displayName": {
+            "en": "Dragonborn",
+            "zh-Hans": "龙裔"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_drow": {
+          "id": 12010,
+          "displayName": {
+            "en": "Drow",
+            "zh-Hans": "卓尔"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_dwarf": {
+          "id": 12011,
+          "displayName": {
+            "en": "Dwarf",
+            "zh-Hans": "矮人"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_eastern_dragon": {
+          "id": 4001,
+          "displayName": {
+            "en": "Eastern Dragon",
+            "zh-Hans": "东方龙"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_elf": {
+          "id": 5011,
+          "displayName": {
+            "en": "Elf",
+            "zh-Hans": "精灵"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_gargoyle": {
+          "id": 5012,
+          "displayName": {
+            "en": "Gargoyle",
+            "zh-Hans": "石像鬼"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_goblin": {
+          "id": 12012,
+          "displayName": {
+            "en": "Goblin",
+            "zh-Hans": "哥布林"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_golem": {
+          "id": 12013,
+          "displayName": {
+            "en": "Golem",
+            "zh-Hans": "魔像"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_gryphon": {
+          "id": 3007,
+          "displayName": {
+            "en": "Gryphon",
+            "zh-Hans": "狮鹫"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_harpy": {
+          "id": 12014,
+          "displayName": {
+            "en": "Harpy",
+            "zh-Hans": "鹰身女妖"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_hellhound": {
+          "id": 12015,
+          "displayName": {
+            "en": "Hellhound",
+            "zh-Hans": "地狱犬"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_hippogriff": {
+          "id": 12016,
+          "displayName": {
+            "en": "Hippogriff",
+            "zh-Hans": "鹰马"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_hobbit": {
+          "id": 12017,
+          "displayName": {
+            "en": "Hobbit",
+            "zh-Hans": "霍比特"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_hydra": {
+          "id": 4002,
+          "displayName": {
+            "en": "Hydra",
+            "zh-Hans": "九头蛇"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_imp": {
+          "id": 12018,
+          "displayName": {
+            "en": "Imp",
+            "zh-Hans": "小恶魔"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_incubus": {
+          "id": 12019,
+          "displayName": {
+            "en": "Incubus",
+            "zh-Hans": "梦魇"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_jackalope": {
+          "id": 12020,
+          "displayName": {
+            "en": "Jackalope",
+            "zh-Hans": "角兔"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_kirin": {
+          "id": 12021,
+          "displayName": {
+            "en": "Kirin",
+            "zh-Hans": "麒麟"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_kitsune": {
+          "id": 12022,
+          "displayName": {
+            "en": "Kitsune",
+            "zh-Hans": "九尾狐"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_kobold": {
+          "id": 12023,
+          "displayName": {
+            "en": "Kobold",
+            "zh-Hans": "狗头人"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_lamia": {
+          "id": 12024,
+          "displayName": {
+            "en": "Lamia",
+            "zh-Hans": "拉弥亚"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_manticore": {
+          "id": 12025,
+          "displayName": {
+            "en": "Manticore",
+            "zh-Hans": "蝎尾狮"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_minotaur": {
+          "id": 12026,
+          "displayName": {
+            "en": "Minotaur",
+            "zh-Hans": "牛头人"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_naga": {
+          "id": 5016,
+          "displayName": {
+            "en": "Naga",
+            "zh-Hans": "娜迦"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_nephilim": {
+          "id": 12027,
+          "displayName": {
+            "en": "Nephilim",
+            "zh-Hans": "拿非利人"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_orc": {
+          "id": 5018,
+          "displayName": {
+            "en": "Orc",
+            "zh-Hans": "兽人"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_pegasus": {
+          "id": 12028,
+          "displayName": {
+            "en": "Pegasus",
+            "zh-Hans": "飞马"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_peryton": {
+          "id": 12029,
+          "displayName": {
+            "en": "Peryton",
+            "zh-Hans": "佩律冬"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_phoenix": {
+          "id": 3010,
+          "displayName": {
+            "en": "Phoenix",
+            "zh-Hans": "凤凰"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_sasquatch": {
+          "id": 12030,
+          "displayName": {
+            "en": "Sasquatch",
+            "zh-Hans": "大脚怪"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_satyr": {
+          "id": 5020,
+          "displayName": {
+            "en": "Satyr",
+            "zh-Hans": "萨堤尔"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_sphinx": {
+          "id": 12031,
+          "displayName": {
+            "en": "Sphinx",
+            "zh-Hans": "斯芬克斯"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_succubus": {
+          "id": 12032,
+          "displayName": {
+            "en": "Succubus",
+            "zh-Hans": "魅魔"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_tiefling": {
+          "id": 12033,
+          "displayName": {
+            "en": "Tiefling",
+            "zh-Hans": "提夫林"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_troll": {
+          "id": 12034,
+          "displayName": {
+            "en": "Troll",
+            "zh-Hans": "巨魔"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_unicorn": {
+          "id": 5023,
+          "displayName": {
+            "en": "Unicorn",
+            "zh-Hans": "独角兽"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_water_dragon": {
+          "id": 12035,
+          "displayName": {
+            "en": "Water Dragon",
+            "zh-Hans": "水龙"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_werewolf_lycanthrope": {
+          "id": 12036,
+          "displayName": {
+            "en": "Werewolf / Lycanthrope",
+            "zh-Hans": "狼人/狼人化生物"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_western_dragon": {
+          "id": 4004,
+          "displayName": {
+            "en": "Western Dragon",
+            "zh-Hans": "西方龙"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_wyvern": {
+          "id": 4005,
+          "displayName": {
+            "en": "Wyvern",
+            "zh-Hans": "飞龙"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_yokai": {
+          "id": 12037,
+          "displayName": {
+            "en": "Yokai",
+            "zh-Hans": "妖怪"
+          },
+          "groupKey": "sg_mythological_fantasy"
+        },
+        "s_alicorn_mlp": {
+          "id": 13001,
+          "displayName": {
+            "en": "Alicorn (MLP)",
+            "zh-Hans": "天角兽（MLP）"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_argonian": {
+          "id": 5002,
+          "displayName": {
+            "en": "Argonian",
+            "zh-Hans": "亚龙人"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_asari": {
+          "id": 13002,
+          "displayName": {
+            "en": "Asari",
+            "zh-Hans": "阿莎丽"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_bangaa": {
+          "id": 13003,
+          "displayName": {
+            "en": "Bangaa",
+            "zh-Hans": "邦加族"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_bubble_dragon": {
+          "id": 13004,
+          "displayName": {
+            "en": "Bubble Dragon",
+            "zh-Hans": "泡泡龙"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_burmecian": {
+          "id": 13005,
+          "displayName": {
+            "en": "Burmecian",
+            "zh-Hans": "布尔美西亚人"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_charr": {
+          "id": 13006,
+          "displayName": {
+            "en": "Charr",
+            "zh-Hans": "夏尔"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_chiss": {
+          "id": 13007,
+          "displayName": {
+            "en": "Chiss",
+            "zh-Hans": "奇斯"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_chocobo": {
+          "id": 5004,
+          "displayName": {
+            "en": "Chocobo",
+            "zh-Hans": "陆行鸟"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_deathclaw": {
+          "id": 13008,
+          "displayName": {
+            "en": "Deathclaw",
+            "zh-Hans": "死爪"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_digimon": {
+          "id": 5008,
+          "displayName": {
+            "en": "Digimon",
+            "zh-Hans": "数码宝贝"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_draenei": {
+          "id": 5010,
+          "displayName": {
+            "en": "Draenei",
+            "zh-Hans": "德莱尼"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_drell": {
+          "id": 13009,
+          "displayName": {
+            "en": "Drell",
+            "zh-Hans": "德雷尔"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_elcor": {
+          "id": 13010,
+          "displayName": {
+            "en": "Elcor",
+            "zh-Hans": "艾科"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_ewok": {
+          "id": 13011,
+          "displayName": {
+            "en": "Ewok",
+            "zh-Hans": "伊沃克"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_hanar": {
+          "id": 13012,
+          "displayName": {
+            "en": "Hanar",
+            "zh-Hans": "哈纳"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_hrothgar": {
+          "id": 13013,
+          "displayName": {
+            "en": "Hrothgar",
+            "zh-Hans": "赫罗斯加"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_iksar": {
+          "id": 5013,
+          "displayName": {
+            "en": "Iksar",
+            "zh-Hans": "伊克萨"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_kaiju_giant_monster": {
+          "id": 5015,
+          "displayName": {
+            "en": "Kaiju / Giant Monster",
+            "zh-Hans": "怪兽/巨型怪物"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_kelpie": {
+          "id": 13041,
+          "displayName": {
+            "en": "Kelpie",
+            "zh-Hans": "凯尔派"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_kemonomimi": {
+          "id": 13014,
+          "displayName": {
+            "en": "Kemonomimi",
+            "zh-Hans": "兽耳"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_khajiit": {
+          "id": 13015,
+          "displayName": {
+            "en": "Khajiit",
+            "zh-Hans": "卡吉特"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_koopa": {
+          "id": 13016,
+          "displayName": {
+            "en": "Koopa",
+            "zh-Hans": "库巴族"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_krogan": {
+          "id": 13017,
+          "displayName": {
+            "en": "Krogan",
+            "zh-Hans": "克洛根"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_lombax": {
+          "id": 13018,
+          "displayName": {
+            "en": "Lombax",
+            "zh-Hans": "隆巴克斯"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_mimiga": {
+          "id": 13019,
+          "displayName": {
+            "en": "Mimiga",
+            "zh-Hans": "米米加"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_mobian": {
+          "id": 13020,
+          "displayName": {
+            "en": "Mobian",
+            "zh-Hans": "Mobian"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_moogle": {
+          "id": 5017,
+          "displayName": {
+            "en": "Moogle",
+            "zh-Hans": "莫古利"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_neopet": {
+          "id": 13021,
+          "displayName": {
+            "en": "Neopet",
+            "zh-Hans": "尼奥宠"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_nu_mou": {
+          "id": 13022,
+          "displayName": {
+            "en": "Nu Mou",
+            "zh-Hans": "努摩"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_pokemon": {
+          "id": 5019,
+          "displayName": {
+            "en": "Pokemon",
+            "zh-Hans": "宝可梦"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_pony_mlp": {
+          "id": 13023,
+          "displayName": {
+            "en": "Pony (MLP)",
+            "zh-Hans": "小马（MLP）"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_protoss": {
+          "id": 13024,
+          "displayName": {
+            "en": "Protoss",
+            "zh-Hans": "神族"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_quarian": {
+          "id": 13025,
+          "displayName": {
+            "en": "Quarian",
+            "zh-Hans": "奎利安"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_ronso": {
+          "id": 13026,
+          "displayName": {
+            "en": "Ronso",
+            "zh-Hans": "隆索"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_salarian": {
+          "id": 13027,
+          "displayName": {
+            "en": "Salarian",
+            "zh-Hans": "萨拉睿"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_sangheili_elites": {
+          "id": 13028,
+          "displayName": {
+            "en": "Sangheili / Elites",
+            "zh-Hans": "桑赫利/精英"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_tauntaun": {
+          "id": 13029,
+          "displayName": {
+            "en": "Tauntaun",
+            "zh-Hans": "汤汤"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_tauren": {
+          "id": 13030,
+          "displayName": {
+            "en": "Tauren",
+            "zh-Hans": "牛头人"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_trandoshan": {
+          "id": 13031,
+          "displayName": {
+            "en": "Trandoshan",
+            "zh-Hans": "特兰多沙人"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_transformer": {
+          "id": 13032,
+          "displayName": {
+            "en": "Transformer",
+            "zh-Hans": "变形金刚"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_turian": {
+          "id": 13033,
+          "displayName": {
+            "en": "Turian",
+            "zh-Hans": "突锐"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_twilek": {
+          "id": 13034,
+          "displayName": {
+            "en": "Twi'lek",
+            "zh-Hans": "特维勒克"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_viera": {
+          "id": 13035,
+          "displayName": {
+            "en": "Viera",
+            "zh-Hans": "维埃拉"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_wookiee": {
+          "id": 13036,
+          "displayName": {
+            "en": "Wookiee",
+            "zh-Hans": "伍基"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_xenomorph": {
+          "id": 5024,
+          "displayName": {
+            "en": "Xenomorph",
+            "zh-Hans": "异形"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_yautja_predator": {
+          "id": 13037,
+          "displayName": {
+            "en": "Yautja / Predator",
+            "zh-Hans": "亚乌加/铁血战士"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_yordle": {
+          "id": 13038,
+          "displayName": {
+            "en": "Yordle",
+            "zh-Hans": "约德尔"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_yoshi": {
+          "id": 13039,
+          "displayName": {
+            "en": "Yoshi",
+            "zh-Hans": "耀西"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_zerg": {
+          "id": 13040,
+          "displayName": {
+            "en": "Zerg",
+            "zh-Hans": "虫族"
+          },
+          "groupKey": "sg_games_media"
+        },
+        "s_aardvark": {
+          "id": 14001,
+          "displayName": {
+            "en": "Aardvark",
+            "zh-Hans": "土豚"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_aardwolf": {
+          "id": 14002,
+          "displayName": {
+            "en": "Aardwolf",
+            "zh-Hans": "土狼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_african_wild_dog": {
+          "id": 14003,
+          "displayName": {
+            "en": "African Wild Dog",
+            "zh-Hans": "非洲野犬"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_akita": {
+          "id": 14004,
+          "displayName": {
+            "en": "Akita",
+            "zh-Hans": "秋田犬"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_albatross": {
+          "id": 14005,
+          "displayName": {
+            "en": "Albatross",
+            "zh-Hans": "信天翁"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_alligator_crocodile": {
+          "id": 7001,
+          "displayName": {
+            "en": "Alligator / Crocodile",
+            "zh-Hans": "鳄鱼/短吻鳄"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_alpaca": {
+          "id": 14006,
+          "displayName": {
+            "en": "Alpaca",
+            "zh-Hans": "羊驼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_anaconda": {
+          "id": 14007,
+          "displayName": {
+            "en": "Anaconda",
+            "zh-Hans": "水蚺"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_anteater": {
+          "id": 14008,
+          "displayName": {
+            "en": "Anteater",
+            "zh-Hans": "食蚁兽"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_antelope": {
+          "id": 6004,
+          "displayName": {
+            "en": "Antelope",
+            "zh-Hans": "羚羊"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_arachnid": {
+          "id": 8000,
+          "displayName": {
+            "en": "Arachnid",
+            "zh-Hans": "蛛形纲"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_arctic_fox": {
+          "id": 14009,
+          "displayName": {
+            "en": "Arctic Fox",
+            "zh-Hans": "北极狐"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_armadillo": {
+          "id": 14010,
+          "displayName": {
+            "en": "Armadillo",
+            "zh-Hans": "犰狳"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_axolotl": {
+          "id": 14011,
+          "displayName": {
+            "en": "Axolotl",
+            "zh-Hans": "美西螈"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_baboon": {
+          "id": 14012,
+          "displayName": {
+            "en": "Baboon",
+            "zh-Hans": "狒狒"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_badger": {
+          "id": 6045,
+          "displayName": {
+            "en": "Badger",
+            "zh-Hans": "獾"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_bat": {
+          "id": 6001,
+          "displayName": {
+            "en": "Bat",
+            "zh-Hans": "蝙蝠"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_beaver": {
+          "id": 6064,
+          "displayName": {
+            "en": "Beaver",
+            "zh-Hans": "海狸"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_bee": {
+          "id": 14013,
+          "displayName": {
+            "en": "Bee",
+            "zh-Hans": "蜜蜂"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_binturong": {
+          "id": 14014,
+          "displayName": {
+            "en": "Binturong",
+            "zh-Hans": "熊狸"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_bison": {
+          "id": 14015,
+          "displayName": {
+            "en": "Bison",
+            "zh-Hans": "野牛"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_blue_jay": {
+          "id": 14016,
+          "displayName": {
+            "en": "Blue Jay",
+            "zh-Hans": "蓝松鸦"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_border_collie": {
+          "id": 14017,
+          "displayName": {
+            "en": "Border Collie",
+            "zh-Hans": "边境牧羊犬"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_brown_bear": {
+          "id": 14018,
+          "displayName": {
+            "en": "Brown Bear",
+            "zh-Hans": "棕熊"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_buffalo": {
+          "id": 14019,
+          "displayName": {
+            "en": "Buffalo",
+            "zh-Hans": "水牛"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_buffalo_bison": {
+          "id": 14020,
+          "displayName": {
+            "en": "Buffalo / Bison",
+            "zh-Hans": "水牛/野牛"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_bull_terrier": {
+          "id": 14021,
+          "displayName": {
+            "en": "Bull Terrier",
+            "zh-Hans": "牛头梗"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_butterfly": {
+          "id": 14022,
+          "displayName": {
+            "en": "Butterfly",
+            "zh-Hans": "蝴蝶"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_caiman": {
+          "id": 14023,
+          "displayName": {
+            "en": "Caiman",
+            "zh-Hans": "凯门鳄"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_camel": {
+          "id": 6074,
+          "displayName": {
+            "en": "Camel",
+            "zh-Hans": "骆驼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_capybara": {
+          "id": 14024,
+          "displayName": {
+            "en": "Capybara",
+            "zh-Hans": "水豚"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_caribou": {
+          "id": 14025,
+          "displayName": {
+            "en": "Caribou",
+            "zh-Hans": "驯鹿"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_caterpillar": {
+          "id": 14026,
+          "displayName": {
+            "en": "Caterpillar",
+            "zh-Hans": "毛毛虫"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_cephalopod": {
+          "id": 2001,
+          "displayName": {
+            "en": "Cephalopod",
+            "zh-Hans": "头足类"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_chameleon": {
+          "id": 14027,
+          "displayName": {
+            "en": "Chameleon",
+            "zh-Hans": "变色龙"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_cheetah": {
+          "id": 6021,
+          "displayName": {
+            "en": "Cheetah",
+            "zh-Hans": "猎豹"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_chicken": {
+          "id": 14028,
+          "displayName": {
+            "en": "Chicken",
+            "zh-Hans": "鸡"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_chimpanzee": {
+          "id": 14029,
+          "displayName": {
+            "en": "Chimpanzee",
+            "zh-Hans": "黑猩猩"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_chinchilla": {
+          "id": 14030,
+          "displayName": {
+            "en": "Chinchilla",
+            "zh-Hans": "毛丝鼠"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_chipmunk": {
+          "id": 14031,
+          "displayName": {
+            "en": "Chipmunk",
+            "zh-Hans": "花栗鼠"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_civet": {
+          "id": 14032,
+          "displayName": {
+            "en": "Civet",
+            "zh-Hans": "灵猫"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_clouded_leopard": {
+          "id": 14033,
+          "displayName": {
+            "en": "Clouded Leopard",
+            "zh-Hans": "云豹"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_coatimundi": {
+          "id": 14034,
+          "displayName": {
+            "en": "Coatimundi",
+            "zh-Hans": "南美浣熊"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_cockatiel": {
+          "id": 14035,
+          "displayName": {
+            "en": "Cockatiel",
+            "zh-Hans": "鸡尾鹦鹉"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_corgi": {
+          "id": 14036,
+          "displayName": {
+            "en": "Corgi",
+            "zh-Hans": "柯基"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_corvid": {
+          "id": 3001,
+          "displayName": {
+            "en": "Corvid",
+            "zh-Hans": "鸦科"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_cougar_puma": {
+          "id": 6022,
+          "displayName": {
+            "en": "Cougar / Puma",
+            "zh-Hans": "美洲狮/彪"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_cow": {
+          "id": 6003,
+          "displayName": {
+            "en": "Cow",
+            "zh-Hans": "牛"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_coyote": {
+          "id": 6008,
+          "displayName": {
+            "en": "Coyote",
+            "zh-Hans": "郊狼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_crab": {
+          "id": 14037,
+          "displayName": {
+            "en": "Crab",
+            "zh-Hans": "蟹"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_crane": {
+          "id": 14038,
+          "displayName": {
+            "en": "Crane",
+            "zh-Hans": "鹤"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_crayfish": {
+          "id": 14039,
+          "displayName": {
+            "en": "Crayfish",
+            "zh-Hans": "小龙虾"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_crow": {
+          "id": 3002,
+          "displayName": {
+            "en": "Crow",
+            "zh-Hans": "乌鸦"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_crustacean": {
+          "id": 14040,
+          "displayName": {
+            "en": "Crustacean",
+            "zh-Hans": "甲壳类"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_dalmatian": {
+          "id": 14041,
+          "displayName": {
+            "en": "Dalmatian",
+            "zh-Hans": "大麦町犬"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_deer": {
+          "id": 14042,
+          "displayName": {
+            "en": "Deer",
+            "zh-Hans": "鹿"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_dhole": {
+          "id": 14043,
+          "displayName": {
+            "en": "Dhole",
+            "zh-Hans": "豺"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_dingo": {
+          "id": 6011,
+          "displayName": {
+            "en": "Dingo",
+            "zh-Hans": "澳洲野犬"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_dinosaur": {
+          "id": 8001,
+          "displayName": {
+            "en": "Dinosaur",
+            "zh-Hans": "恐龙"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_doberman": {
+          "id": 6009,
+          "displayName": {
+            "en": "Doberman",
+            "zh-Hans": "杜宾犬"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_dolphin": {
+          "id": 2002,
+          "displayName": {
+            "en": "Dolphin",
+            "zh-Hans": "海豚"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_donkey_mule": {
+          "id": 6019,
+          "displayName": {
+            "en": "Donkey / Mule",
+            "zh-Hans": "驴/骡"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_duck": {
+          "id": 3003,
+          "displayName": {
+            "en": "Duck",
+            "zh-Hans": "鸭"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_eagle": {
+          "id": 3004,
+          "displayName": {
+            "en": "Eagle",
+            "zh-Hans": "鹰"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_eel": {
+          "id": 14044,
+          "displayName": {
+            "en": "Eel",
+            "zh-Hans": "鳗鱼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_elephant": {
+          "id": 14045,
+          "displayName": {
+            "en": "Elephant",
+            "zh-Hans": "大象"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_falcon": {
+          "id": 3005,
+          "displayName": {
+            "en": "Falcon",
+            "zh-Hans": "隼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_fennec": {
+          "id": 6072,
+          "displayName": {
+            "en": "Fennec",
+            "zh-Hans": "耳廓狐"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_ferret": {
+          "id": 6046,
+          "displayName": {
+            "en": "Ferret",
+            "zh-Hans": "雪貂"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_finch": {
+          "id": 14046,
+          "displayName": {
+            "en": "Finch",
+            "zh-Hans": "雀科"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_fish": {
+          "id": 2005,
+          "displayName": {
+            "en": "Fish",
+            "zh-Hans": "鱼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_flamingo": {
+          "id": 14047,
+          "displayName": {
+            "en": "Flamingo",
+            "zh-Hans": "火烈鸟"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_fossa": {
+          "id": 14048,
+          "displayName": {
+            "en": "Fossa",
+            "zh-Hans": "马岛獴"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_frog": {
+          "id": 1001,
+          "displayName": {
+            "en": "Frog",
+            "zh-Hans": "青蛙"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_gazelle": {
+          "id": 6005,
+          "displayName": {
+            "en": "Gazelle",
+            "zh-Hans": "瞪羚"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_gecko": {
+          "id": 7003,
+          "displayName": {
+            "en": "Gecko",
+            "zh-Hans": "壁虎"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_genet": {
+          "id": 14049,
+          "displayName": {
+            "en": "Genet",
+            "zh-Hans": "麝猫"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_german_shepherd": {
+          "id": 6012,
+          "displayName": {
+            "en": "German Shepherd",
+            "zh-Hans": "德国牧羊犬"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_gibbon": {
+          "id": 14050,
+          "displayName": {
+            "en": "Gibbon",
+            "zh-Hans": "长臂猿"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_giraffe": {
+          "id": 6031,
+          "displayName": {
+            "en": "Giraffe",
+            "zh-Hans": "长颈鹿"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_goat": {
+          "id": 6006,
+          "displayName": {
+            "en": "Goat",
+            "zh-Hans": "山羊"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_goose": {
+          "id": 3006,
+          "displayName": {
+            "en": "Goose",
+            "zh-Hans": "鹅"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_gorilla": {
+          "id": 6054,
+          "displayName": {
+            "en": "Gorilla",
+            "zh-Hans": "大猩猩"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_gray_fox": {
+          "id": 14051,
+          "displayName": {
+            "en": "Gray Fox",
+            "zh-Hans": "灰狐"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_great_dane": {
+          "id": 14052,
+          "displayName": {
+            "en": "Great Dane",
+            "zh-Hans": "大丹犬"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_grizzly_bear": {
+          "id": 14053,
+          "displayName": {
+            "en": "Grizzly Bear",
+            "zh-Hans": "灰熊"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_guinea_pig": {
+          "id": 14054,
+          "displayName": {
+            "en": "Guinea Pig",
+            "zh-Hans": "豚鼠"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_hamster": {
+          "id": 14055,
+          "displayName": {
+            "en": "Hamster",
+            "zh-Hans": "仓鼠"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_hawk": {
+          "id": 3008,
+          "displayName": {
+            "en": "Hawk",
+            "zh-Hans": "鹰隼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_hedgehog": {
+          "id": 6032,
+          "displayName": {
+            "en": "Hedgehog",
+            "zh-Hans": "刺猬"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_heron": {
+          "id": 14056,
+          "displayName": {
+            "en": "Heron",
+            "zh-Hans": "鹭"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_hippopotamus": {
+          "id": 6033,
+          "displayName": {
+            "en": "Hippopotamus",
+            "zh-Hans": "河马"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_honeybee_bumblebee": {
+          "id": 14057,
+          "displayName": {
+            "en": "Honeybee / Bumblebee",
+            "zh-Hans": "蜜蜂/大黄蜂"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_horse": {
+          "id": 6034,
+          "displayName": {
+            "en": "Horse",
+            "zh-Hans": "马"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_housecat": {
+          "id": 6020,
+          "displayName": {
+            "en": "Housecat",
+            "zh-Hans": "家猫"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_human": {
+          "id": 6055,
+          "displayName": {
+            "en": "Human",
+            "zh-Hans": "人类"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_humanoid": {
+          "id": 14058,
+          "displayName": {
+            "en": "Humanoid",
+            "zh-Hans": "类人"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_hummingbird": {
+          "id": 14059,
+          "displayName": {
+            "en": "Hummingbird",
+            "zh-Hans": "蜂鸟"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_husky": {
+          "id": 6014,
+          "displayName": {
+            "en": "Husky",
+            "zh-Hans": "哈士奇"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_hyena": {
+          "id": 6035,
+          "displayName": {
+            "en": "Hyena",
+            "zh-Hans": "鬣狗"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_iguana": {
+          "id": 7004,
+          "displayName": {
+            "en": "Iguana",
+            "zh-Hans": "鬣蜥"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_impala": {
+          "id": 14060,
+          "displayName": {
+            "en": "Impala",
+            "zh-Hans": "黑斑羚"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_jackal": {
+          "id": 6013,
+          "displayName": {
+            "en": "Jackal",
+            "zh-Hans": "豺狼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_jaguar": {
+          "id": 6023,
+          "displayName": {
+            "en": "Jaguar",
+            "zh-Hans": "美洲豹"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_kangaroo": {
+          "id": 6038,
+          "displayName": {
+            "en": "Kangaroo",
+            "zh-Hans": "袋鼠"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_kangaroo_mouse": {
+          "id": 14061,
+          "displayName": {
+            "en": "Kangaroo Mouse",
+            "zh-Hans": "袋鼠鼠"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_kangaroo_rat": {
+          "id": 14062,
+          "displayName": {
+            "en": "Kangaroo Rat",
+            "zh-Hans": "更格卢鼠"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_kinkajou": {
+          "id": 14063,
+          "displayName": {
+            "en": "Kinkajou",
+            "zh-Hans": "蜜熊"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_kit_fox": {
+          "id": 14064,
+          "displayName": {
+            "en": "Kit Fox",
+            "zh-Hans": "侏狐"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_koala": {
+          "id": 6039,
+          "displayName": {
+            "en": "Koala",
+            "zh-Hans": "考拉"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_kodiak_bear": {
+          "id": 14065,
+          "displayName": {
+            "en": "Kodiak Bear",
+            "zh-Hans": "科迪亚克棕熊"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_komodo_dragon": {
+          "id": 14066,
+          "displayName": {
+            "en": "Komodo Dragon",
+            "zh-Hans": "科莫多巨蜥"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_labrador": {
+          "id": 14067,
+          "displayName": {
+            "en": "Labrador",
+            "zh-Hans": "拉布拉多"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_lemur": {
+          "id": 6056,
+          "displayName": {
+            "en": "Lemur",
+            "zh-Hans": "狐猴"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_leopard": {
+          "id": 6024,
+          "displayName": {
+            "en": "Leopard",
+            "zh-Hans": "豹子"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_liger": {
+          "id": 14068,
+          "displayName": {
+            "en": "Liger",
+            "zh-Hans": "狮虎兽"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_linsang": {
+          "id": 14069,
+          "displayName": {
+            "en": "Linsang",
+            "zh-Hans": "林狸"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_lion": {
+          "id": 6025,
+          "displayName": {
+            "en": "Lion",
+            "zh-Hans": "狮子"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_lizard": {
+          "id": 7005,
+          "displayName": {
+            "en": "Lizard",
+            "zh-Hans": "蜥蜴"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_llama": {
+          "id": 6036,
+          "displayName": {
+            "en": "Llama",
+            "zh-Hans": "美洲驼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_lobster": {
+          "id": 14070,
+          "displayName": {
+            "en": "Lobster",
+            "zh-Hans": "龙虾"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_longhair_cat": {
+          "id": 14071,
+          "displayName": {
+            "en": "Longhair Cat",
+            "zh-Hans": "长毛猫"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_lynx": {
+          "id": 6026,
+          "displayName": {
+            "en": "Lynx",
+            "zh-Hans": "猞猁"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_magpie": {
+          "id": 14072,
+          "displayName": {
+            "en": "Magpie",
+            "zh-Hans": "喜鹊"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_maine_coon": {
+          "id": 14073,
+          "displayName": {
+            "en": "Maine Coon",
+            "zh-Hans": "缅因猫"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_malamute": {
+          "id": 14074,
+          "displayName": {
+            "en": "Malamute",
+            "zh-Hans": "阿拉斯加犬"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_mammal_feline": {
+          "id": 14075,
+          "displayName": {
+            "en": "Mammal - Feline",
+            "zh-Hans": "哺乳类-猫科动物"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_mammal_herd": {
+          "id": 14076,
+          "displayName": {
+            "en": "Mammal - Herd",
+            "zh-Hans": "哺乳类-群居草食类"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_mammal_marsupial": {
+          "id": 14077,
+          "displayName": {
+            "en": "Mammal - Marsupial",
+            "zh-Hans": "哺乳类-有袋类"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_mammal_mustelid": {
+          "id": 14078,
+          "displayName": {
+            "en": "Mammal - Mustelid",
+            "zh-Hans": "哺乳类-鼬科"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_mammal_other_predator": {
+          "id": 14079,
+          "displayName": {
+            "en": "Mammal - Other Predator",
+            "zh-Hans": "哺乳类-其他掠食者"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_mammal_prey": {
+          "id": 14080,
+          "displayName": {
+            "en": "Mammal - Prey",
+            "zh-Hans": "哺乳类-被捕食者"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_mammal_primate": {
+          "id": 14081,
+          "displayName": {
+            "en": "Mammal - Primate",
+            "zh-Hans": "哺乳类-灵长类"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_mammal_rodent": {
+          "id": 14082,
+          "displayName": {
+            "en": "Mammal - Rodent",
+            "zh-Hans": "哺乳类-啮齿类"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_manatee": {
+          "id": 14083,
+          "displayName": {
+            "en": "Manatee",
+            "zh-Hans": "海牛"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_mandrill": {
+          "id": 14084,
+          "displayName": {
+            "en": "Mandrill",
+            "zh-Hans": "山魈"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_maned_wolf": {
+          "id": 14085,
+          "displayName": {
+            "en": "Maned Wolf",
+            "zh-Hans": "鬃狼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_mantid": {
+          "id": 8004,
+          "displayName": {
+            "en": "Mantid",
+            "zh-Hans": "螳螂"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_marmoset": {
+          "id": 14086,
+          "displayName": {
+            "en": "Marmoset",
+            "zh-Hans": "狨猴"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_marten": {
+          "id": 14087,
+          "displayName": {
+            "en": "Marten",
+            "zh-Hans": "貂"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_meerkat": {
+          "id": 6043,
+          "displayName": {
+            "en": "Meerkat",
+            "zh-Hans": "狐獴"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_mink": {
+          "id": 6048,
+          "displayName": {
+            "en": "Mink",
+            "zh-Hans": "水貂"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_mole": {
+          "id": 14088,
+          "displayName": {
+            "en": "Mole",
+            "zh-Hans": "鼹鼠"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_mongoose": {
+          "id": 6044,
+          "displayName": {
+            "en": "Mongoose",
+            "zh-Hans": "獴"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_monitor_lizard": {
+          "id": 14089,
+          "displayName": {
+            "en": "Monitor Lizard",
+            "zh-Hans": "巨蜥"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_monkey": {
+          "id": 6057,
+          "displayName": {
+            "en": "Monkey",
+            "zh-Hans": "猴子"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_moose": {
+          "id": 14090,
+          "displayName": {
+            "en": "Moose",
+            "zh-Hans": "驼鹿"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_moth": {
+          "id": 14091,
+          "displayName": {
+            "en": "Moth",
+            "zh-Hans": "飞蛾"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_mouse": {
+          "id": 6065,
+          "displayName": {
+            "en": "Mouse",
+            "zh-Hans": "老鼠"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_musk_deer": {
+          "id": 14092,
+          "displayName": {
+            "en": "Musk Deer",
+            "zh-Hans": "麝"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_musk_ox": {
+          "id": 14093,
+          "displayName": {
+            "en": "Musk Ox",
+            "zh-Hans": "麝牛"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_newt": {
+          "id": 1002,
+          "displayName": {
+            "en": "Newt",
+            "zh-Hans": "蝾螈"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_ocelot": {
+          "id": 6027,
+          "displayName": {
+            "en": "Ocelot",
+            "zh-Hans": "豹猫"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_octopus": {
+          "id": 14094,
+          "displayName": {
+            "en": "Octopus",
+            "zh-Hans": "章鱼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_okapi": {
+          "id": 14095,
+          "displayName": {
+            "en": "Okapi",
+            "zh-Hans": "霍加狓"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_olingo": {
+          "id": 14096,
+          "displayName": {
+            "en": "Olingo",
+            "zh-Hans": "蜜熊狸"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_opossum": {
+          "id": 6037,
+          "displayName": {
+            "en": "Opossum",
+            "zh-Hans": "负鼠"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_orangutan": {
+          "id": 14097,
+          "displayName": {
+            "en": "Orangutan",
+            "zh-Hans": "红毛猩猩"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_orca": {
+          "id": 14098,
+          "displayName": {
+            "en": "Orca",
+            "zh-Hans": "虎鲸"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_oryx": {
+          "id": 14099,
+          "displayName": {
+            "en": "Oryx",
+            "zh-Hans": "剑羚"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_ostrich": {
+          "id": 14100,
+          "displayName": {
+            "en": "Ostrich",
+            "zh-Hans": "鸵鸟"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_otter": {
+          "id": 6047,
+          "displayName": {
+            "en": "Otter",
+            "zh-Hans": "水獭"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_owl": {
+          "id": 3009,
+          "displayName": {
+            "en": "Owl",
+            "zh-Hans": "猫头鹰"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_panda": {
+          "id": 6052,
+          "displayName": {
+            "en": "Panda",
+            "zh-Hans": "熊猫"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_pangolin": {
+          "id": 14101,
+          "displayName": {
+            "en": "Pangolin",
+            "zh-Hans": "穿山甲"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_panther": {
+          "id": 6028,
+          "displayName": {
+            "en": "Panther",
+            "zh-Hans": "黑豹"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_parakeet": {
+          "id": 14102,
+          "displayName": {
+            "en": "Parakeet",
+            "zh-Hans": "长尾小鹦鹉"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_parrot_macaw": {
+          "id": 14103,
+          "displayName": {
+            "en": "Parrot / Macaw",
+            "zh-Hans": "鹦鹉"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_peacock": {
+          "id": 14104,
+          "displayName": {
+            "en": "Peacock",
+            "zh-Hans": "孔雀"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_penguin": {
+          "id": 14105,
+          "displayName": {
+            "en": "Penguin",
+            "zh-Hans": "企鹅"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_persian_cat": {
+          "id": 14106,
+          "displayName": {
+            "en": "Persian Cat",
+            "zh-Hans": "波斯猫"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_pig_swine": {
+          "id": 6053,
+          "displayName": {
+            "en": "Pig / Swine",
+            "zh-Hans": "猪类"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_pigeon": {
+          "id": 14107,
+          "displayName": {
+            "en": "Pigeon",
+            "zh-Hans": "鸽子"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_pika": {
+          "id": 14108,
+          "displayName": {
+            "en": "Pika",
+            "zh-Hans": "鼠兔"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_pine_marten": {
+          "id": 14109,
+          "displayName": {
+            "en": "Pine Marten",
+            "zh-Hans": "松貂"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_platypus": {
+          "id": 14110,
+          "displayName": {
+            "en": "Platypus",
+            "zh-Hans": "鸭嘴兽"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_polar_bear": {
+          "id": 14111,
+          "displayName": {
+            "en": "Polar Bear",
+            "zh-Hans": "北极熊"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_pony": {
+          "id": 6073,
+          "displayName": {
+            "en": "Pony",
+            "zh-Hans": "小马"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_poodle": {
+          "id": 14112,
+          "displayName": {
+            "en": "Poodle",
+            "zh-Hans": "贵宾犬"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_porcupine": {
+          "id": 14113,
+          "displayName": {
+            "en": "Porcupine",
+            "zh-Hans": "豪猪"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_porpoise": {
+          "id": 2004,
+          "displayName": {
+            "en": "Porpoise",
+            "zh-Hans": "鼠海豚"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_procyonid": {
+          "id": 14114,
+          "displayName": {
+            "en": "Procyonid",
+            "zh-Hans": "浣熊科"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_puffin": {
+          "id": 14115,
+          "displayName": {
+            "en": "Puffin",
+            "zh-Hans": "海鹦"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_quoll": {
+          "id": 6040,
+          "displayName": {
+            "en": "Quoll",
+            "zh-Hans": "袋鼬"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_rabbit_hare": {
+          "id": 6059,
+          "displayName": {
+            "en": "Rabbit / Hare",
+            "zh-Hans": "兔子/野兔"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_raccoon": {
+          "id": 6060,
+          "displayName": {
+            "en": "Raccoon",
+            "zh-Hans": "浣熊"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_rat": {
+          "id": 6061,
+          "displayName": {
+            "en": "Rat",
+            "zh-Hans": "鼠"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_ray": {
+          "id": 14116,
+          "displayName": {
+            "en": "Ray",
+            "zh-Hans": "鳐鱼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_red_fox": {
+          "id": 14117,
+          "displayName": {
+            "en": "Red Fox",
+            "zh-Hans": "赤狐"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_red_panda": {
+          "id": 6062,
+          "displayName": {
+            "en": "Red Panda",
+            "zh-Hans": "小熊猫"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_reindeer": {
+          "id": 14118,
+          "displayName": {
+            "en": "Reindeer",
+            "zh-Hans": "驯鹿"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_reptillian": {
+          "id": 14119,
+          "displayName": {
+            "en": "Reptillian",
+            "zh-Hans": "爬行类"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_rhinoceros": {
+          "id": 6063,
+          "displayName": {
+            "en": "Rhinoceros",
+            "zh-Hans": "犀牛"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_robin": {
+          "id": 14120,
+          "displayName": {
+            "en": "Robin",
+            "zh-Hans": "知更鸟"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_rottweiler": {
+          "id": 14121,
+          "displayName": {
+            "en": "Rottweiler",
+            "zh-Hans": "罗威纳犬"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_sabercats": {
+          "id": 14122,
+          "displayName": {
+            "en": "Sabercats",
+            "zh-Hans": "剑齿猫"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_sabertooth": {
+          "id": 14123,
+          "displayName": {
+            "en": "Sabertooth",
+            "zh-Hans": "剑齿虎"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_salamander": {
+          "id": 1003,
+          "displayName": {
+            "en": "Salamander",
+            "zh-Hans": "蝾螈"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_scorpion": {
+          "id": 8005,
+          "displayName": {
+            "en": "Scorpion",
+            "zh-Hans": "蝎子"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_seagull": {
+          "id": 14124,
+          "displayName": {
+            "en": "Seagull",
+            "zh-Hans": "海鸥"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_seahorse": {
+          "id": 14125,
+          "displayName": {
+            "en": "Seahorse",
+            "zh-Hans": "海马"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_seal": {
+          "id": 6068,
+          "displayName": {
+            "en": "Seal",
+            "zh-Hans": "海豹"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_secretary_bird": {
+          "id": 14126,
+          "displayName": {
+            "en": "Secretary Bird",
+            "zh-Hans": "蛇鹫"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_serpent_dragon": {
+          "id": 4003,
+          "displayName": {
+            "en": "Serpent Dragon",
+            "zh-Hans": "蛇龙"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_serval": {
+          "id": 14127,
+          "displayName": {
+            "en": "Serval",
+            "zh-Hans": "薮猫"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_shark": {
+          "id": 2006,
+          "displayName": {
+            "en": "Shark",
+            "zh-Hans": "鲨鱼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_sheep": {
+          "id": 14128,
+          "displayName": {
+            "en": "Sheep",
+            "zh-Hans": "绵羊"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_shiba_inu": {
+          "id": 14129,
+          "displayName": {
+            "en": "Shiba Inu",
+            "zh-Hans": "柴犬"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_shorthair_cat": {
+          "id": 14130,
+          "displayName": {
+            "en": "Shorthair Cat",
+            "zh-Hans": "短毛猫"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_shrew": {
+          "id": 14131,
+          "displayName": {
+            "en": "Shrew",
+            "zh-Hans": "鼩鼱"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_siamese": {
+          "id": 14132,
+          "displayName": {
+            "en": "Siamese",
+            "zh-Hans": "暹罗猫"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_sifaka": {
+          "id": 14133,
+          "displayName": {
+            "en": "Sifaka",
+            "zh-Hans": "冕狐猴"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_silver_fox": {
+          "id": 14134,
+          "displayName": {
+            "en": "Silver Fox",
+            "zh-Hans": "银狐"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_skunk": {
+          "id": 6069,
+          "displayName": {
+            "en": "Skunk",
+            "zh-Hans": "臭鼬"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_sloth": {
+          "id": 14135,
+          "displayName": {
+            "en": "Sloth",
+            "zh-Hans": "树懒"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_snail": {
+          "id": 14136,
+          "displayName": {
+            "en": "Snail",
+            "zh-Hans": "蜗牛"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_snake_serpent": {
+          "id": 7006,
+          "displayName": {
+            "en": "Snake / Serpent",
+            "zh-Hans": "蛇/蛇形生物"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_snow_leopard": {
+          "id": 14137,
+          "displayName": {
+            "en": "Snow Leopard",
+            "zh-Hans": "雪豹"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_sparrow": {
+          "id": 14138,
+          "displayName": {
+            "en": "Sparrow",
+            "zh-Hans": "麻雀"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_squid": {
+          "id": 14139,
+          "displayName": {
+            "en": "Squid",
+            "zh-Hans": "鱿鱼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_squirrel": {
+          "id": 6070,
+          "displayName": {
+            "en": "Squirrel",
+            "zh-Hans": "松鼠"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_stoat": {
+          "id": 14140,
+          "displayName": {
+            "en": "Stoat",
+            "zh-Hans": "白鼬"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_stork": {
+          "id": 14141,
+          "displayName": {
+            "en": "Stork",
+            "zh-Hans": "鹳"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_sugar_glider": {
+          "id": 14142,
+          "displayName": {
+            "en": "Sugar Glider",
+            "zh-Hans": "蜜袋鼯"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_sun_bear": {
+          "id": 14143,
+          "displayName": {
+            "en": "Sun Bear",
+            "zh-Hans": "马来熊"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_swan": {
+          "id": 3011,
+          "displayName": {
+            "en": "Swan",
+            "zh-Hans": "天鹅"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_swift_fox": {
+          "id": 14144,
+          "displayName": {
+            "en": "Swift Fox",
+            "zh-Hans": "草原狐"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_tanuki": {
+          "id": 5022,
+          "displayName": {
+            "en": "Tanuki",
+            "zh-Hans": "狸"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_tapir": {
+          "id": 14145,
+          "displayName": {
+            "en": "Tapir",
+            "zh-Hans": "貘"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_tasmanian_devil": {
+          "id": 14146,
+          "displayName": {
+            "en": "Tasmanian Devil",
+            "zh-Hans": "袋獾"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_thylacine": {
+          "id": 14147,
+          "displayName": {
+            "en": "Thylacine",
+            "zh-Hans": "袋狼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_tiger": {
+          "id": 6029,
+          "displayName": {
+            "en": "Tiger",
+            "zh-Hans": "老虎"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_toucan": {
+          "id": 14148,
+          "displayName": {
+            "en": "Toucan",
+            "zh-Hans": "巨嘴鸟"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_turtle_tortoise": {
+          "id": 7007,
+          "displayName": {
+            "en": "Turtle / Tortoise",
+            "zh-Hans": "龟/陆龟"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_vulture": {
+          "id": 14149,
+          "displayName": {
+            "en": "Vulture",
+            "zh-Hans": "秃鹫"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_wallaby": {
+          "id": 6041,
+          "displayName": {
+            "en": "Wallaby",
+            "zh-Hans": "沙袋鼠"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_walrus": {
+          "id": 14150,
+          "displayName": {
+            "en": "Walrus",
+            "zh-Hans": "海象"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_wasp": {
+          "id": 14151,
+          "displayName": {
+            "en": "Wasp",
+            "zh-Hans": "黄蜂"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_weasel": {
+          "id": 6049,
+          "displayName": {
+            "en": "Weasel",
+            "zh-Hans": "黄鼠狼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_whale": {
+          "id": 2003,
+          "displayName": {
+            "en": "Whale",
+            "zh-Hans": "鲸"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_wolf": {
+          "id": 6016,
+          "displayName": {
+            "en": "Wolf",
+            "zh-Hans": "狼"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_wolverine": {
+          "id": 6050,
+          "displayName": {
+            "en": "Wolverine",
+            "zh-Hans": "狼獾"
+          },
+          "groupKey": "sg_animal_kingdom"
+        },
+        "s_zebra": {
+          "id": 6071,
+          "displayName": {
+            "en": "Zebra",
+            "zh-Hans": "斑马"
+          },
+          "groupKey": "sg_animal_kingdom"
+        }
+      }
+    }
+  }
+}

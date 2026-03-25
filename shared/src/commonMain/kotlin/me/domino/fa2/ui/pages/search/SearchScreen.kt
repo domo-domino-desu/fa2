@@ -10,9 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -29,6 +26,7 @@ import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
 import me.domino.fa2.ui.components.submission.WaterfallLoadingSkeleton
+import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.search.component.SearchHint
 import me.domino.fa2.ui.pages.search.component.SearchOverlayContent
 import me.domino.fa2.ui.pages.search.component.SearchStatusCard
@@ -135,9 +133,9 @@ private fun SearchBarShell(query: String, overlayVisible: Boolean, onToggleOverl
               Icon(
                   imageVector =
                       if (overlayVisible) {
-                        Icons.AutoMirrored.Filled.ArrowBack
+                        FaMaterialSymbols.AutoMirrored.Filled.ArrowBack
                       } else {
-                        Icons.Filled.Search
+                        FaMaterialSymbols.Filled.Search
                       },
                   contentDescription = if (overlayVisible) "关闭搜索遮罩" else "打开搜索遮罩",
               )

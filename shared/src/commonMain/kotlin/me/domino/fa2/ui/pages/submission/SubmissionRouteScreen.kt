@@ -6,9 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
@@ -56,6 +53,7 @@ import me.domino.fa2.ui.components.PageStateWrapper
 import me.domino.fa2.ui.components.platform.rememberPlatformTextCopier
 import me.domino.fa2.ui.components.platform.rememberPlatformUrlDownloader
 import me.domino.fa2.ui.components.submission.SubmissionPager
+import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.layouts.SubmissionRouteTopBar
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.navigation.goBackHome
@@ -100,6 +98,7 @@ class SubmissionRouteScreen(
                       author = "",
                       thumbnailUrl = "",
                       thumbnailAspectRatio = 1f,
+                      categoryTag = "",
                   )
               ),
           nextPageUrl = null,
@@ -233,6 +232,12 @@ class SubmissionRouteScreen(
                         )
                     )
                   },
+                  onCopySubmissionUrl = { submissionUrl ->
+                    val normalizedUrl = submissionUrl.trim()
+                    if (normalizedUrl.isNotBlank() && copyTextToClipboard(normalizedUrl)) {
+                      showToast("链接已复制")
+                    }
+                  },
                   descriptionTranslationService = descriptionTranslationService,
                   requestPagerFocus = requestPagerFocus,
                   onZoomOverlayVisibilityChanged = { visible -> zoomOverlayVisible = visible },
@@ -274,9 +279,9 @@ class SubmissionRouteScreen(
                     Icon(
                         imageVector =
                             if (detailState.detail.isFavorited) {
-                              Icons.Filled.Favorite
+                              FaMaterialSymbols.Filled.Favorite
                             } else {
-                              Icons.Filled.FavoriteBorder
+                              FaMaterialSymbols.Filled.FavoriteBorder
                             },
                         contentDescription =
                             if (detailState.detail.isFavorited) {

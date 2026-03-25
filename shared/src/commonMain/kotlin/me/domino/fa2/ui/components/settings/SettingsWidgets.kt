@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -28,6 +26,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import me.domino.fa2.ui.icons.FaMaterialSymbols
 
 /** More 页顶部账号头。 */
 @Composable
@@ -179,7 +178,7 @@ fun SettingsListItem(
         )
       }
       Icon(
-          imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+          imageVector = FaMaterialSymbols.AutoMirrored.Filled.KeyboardArrowRight,
           contentDescription = null,
           tint = MaterialTheme.colorScheme.onSurfaceVariant,
       )

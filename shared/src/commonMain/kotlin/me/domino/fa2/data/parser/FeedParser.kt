@@ -21,8 +21,7 @@ class FeedParser {
    */
   fun parse(html: String, baseUrl: String): FeedPage {
     val document = Ksoup.parse(html, baseUrl)
-    val hasTagBlocklist =
-        document.selectFirst("body")?.attr("data-tag-blocklist")?.trim()?.isNotBlank() == true
+    val tagBlockSettings = ParserUtils.parseTagBlockSettings(document)
     val figureNodes =
         submissionSelectors
             .asSequence()
@@ -36,7 +35,7 @@ class FeedParser {
           parseSubmission(
               node = node,
               avatarUrls = avatarUrls,
-              hasTagBlocklist = hasTagBlocklist,
+              tagBlockSettings = tagBlockSettings,
           )
         }
     val nextPageUrl =
@@ -60,7 +59,7 @@ class FeedParser {
   private fun parseSubmission(
       node: Element,
       avatarUrls: Map<Int, String>,
-      hasTagBlocklist: Boolean,
+      tagBlockSettings: ParserUtils.TagBlockSettings,
   ): SubmissionThumbnail? {
     val rawSubmissionUrl = node.selectFirst("a[href*=\"/view/\"]")?.attr("href").orEmpty()
     val submissionUrl =
@@ -74,7 +73,10 @@ class FeedParser {
             ?: ParserUtils.parseSubmissionSid(submissionUrl)
             ?: return null
 
-    val image = node.selectFirst("a[href*='/view/'] img") ?: node.selectFirst("img") ?: return null
+    val image =
+        node.selectFirst("a[href*='/view/'] > img")
+            ?: node.selectFirst("a[href*='/view/'] img")
+            ?: return null
     val captionLinks = node.select("figcaption p a")
 
     val title =
@@ -99,16 +101,25 @@ class FeedParser {
             baseUrl = "https://www.furaffinity.net/",
             maybeRelativeUrl = thumbnailRaw,
         )
+    val resolvedSubmissionUrl = submissionUrl.ifBlank { FaUrls.submission(id) }
+    val imageTags = ParserUtils.parseImageTags(image)
+    val categoryTag = imageTags.sorted().firstOrNull { tag -> tag.startsWith("c_") }.orEmpty()
+    val isBlockedByTag =
+        ParserUtils.isBlockedByTagSettings(
+            imageTags = imageTags,
+            tagBlockSettings = tagBlockSettings,
+        )
 
     return SubmissionThumbnail(
         id = id,
-        submissionUrl = submissionUrl.ifBlank { FaUrls.submission(id) },
+        submissionUrl = resolvedSubmissionUrl,
         title = title,
         author = author,
         authorAvatarUrl = avatarUrls[id].orEmpty(),
         thumbnailUrl = thumbnailUrl,
         thumbnailAspectRatio = width / height,
-        isBlockedByTag = parseBlockedByTag(image = image, hasTagBlocklist = hasTagBlocklist),
+        categoryTag = categoryTag,
+        isBlockedByTag = isBlockedByTag,
     )
   }
 
@@ -134,14 +145,6 @@ class FeedParser {
 
   private fun extractSrcsetFirstUrl(rawSrcset: String): String =
       rawSrcset.substringBefore(',').substringBefore(' ').trim()
-
-  private fun parseBlockedByTag(image: Element, hasTagBlocklist: Boolean): Boolean {
-    val hasReason = image.attr("data-reason").trim().isNotBlank()
-    val title = image.attr("title").trim().lowercase()
-    val hasBlockedTitle = title.contains("blocked tags")
-    val blockedByClass = hasTagBlocklist && image.hasClass("blocked-content")
-    return hasReason || hasBlockedTitle || blockedByClass
-  }
 
   /**
    * 判断节点是否表示“下一页”按钮。

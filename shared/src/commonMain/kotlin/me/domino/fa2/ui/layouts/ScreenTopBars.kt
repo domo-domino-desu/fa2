@@ -4,13 +4,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.RestartAlt
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -23,6 +16,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import me.domino.fa2.ui.icons.FaMaterialSymbols
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +58,7 @@ fun SettingsRouteTopBar(
   RouteTopBar(title = "设置", onBack = onBack, onGoHome = onGoHome) {
     if (showActions) {
       IconButton(onClick = onResetDraft, enabled = !saving && hasUnsavedChanges) {
-        Icon(imageVector = Icons.Filled.RestartAlt, contentDescription = "回滚到已保存配置")
+        Icon(imageVector = FaMaterialSymbols.Filled.RestartAlt, contentDescription = "回滚到已保存配置")
       }
       IconButton(
           onClick = onSaveDraft,
@@ -76,7 +70,7 @@ fun SettingsRouteTopBar(
               color = MaterialTheme.colorScheme.primary,
           )
         } else {
-          Icon(imageVector = Icons.Filled.Save, contentDescription = "保存设置")
+          Icon(imageVector = FaMaterialSymbols.Filled.Save, contentDescription = "保存设置")
         }
       }
     }
@@ -140,7 +134,7 @@ fun SubmissionRouteTopBar(
   RouteTopBar(title = "", onBack = onBack, onGoHome = onGoHome) {
     if (!downloadUrl.isNullOrBlank()) {
       IconButton(onClick = onDownload) {
-        Icon(imageVector = Icons.Outlined.ArrowDownward, contentDescription = "下载")
+        Icon(imageVector = FaMaterialSymbols.Filled.Download, contentDescription = "下载")
       }
     }
     TopBarShareAction(url = shareUrl)
@@ -155,14 +149,14 @@ fun BrowseFilterOverlayTopBar(onClose: () -> Unit, onApply: () -> Unit) {
       navigationIcon = {
         IconButton(onClick = onClose) {
           Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              imageVector = FaMaterialSymbols.AutoMirrored.Filled.ArrowBack,
               contentDescription = "关闭筛选页面",
           )
         }
       },
       actions = {
         IconButton(onClick = onApply) {
-          Icon(imageVector = Icons.Filled.Done, contentDescription = "应用筛选")
+          Icon(imageVector = FaMaterialSymbols.Filled.Done, contentDescription = "应用筛选")
         }
       },
       colors =
@@ -182,14 +176,14 @@ fun SearchOverlayTopBar(onClose: () -> Unit, onApplySearch: () -> Unit, canSearc
       navigationIcon = {
         IconButton(onClick = onClose) {
           Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              imageVector = FaMaterialSymbols.AutoMirrored.Filled.ArrowBack,
               contentDescription = "关闭搜索遮罩",
           )
         }
       },
       actions = {
         IconButton(onClick = onApplySearch, enabled = canSearch) {
-          Icon(imageVector = Icons.Filled.Search, contentDescription = "执行搜索")
+          Icon(imageVector = FaMaterialSymbols.Filled.Search, contentDescription = "执行搜索")
         }
       },
       colors =

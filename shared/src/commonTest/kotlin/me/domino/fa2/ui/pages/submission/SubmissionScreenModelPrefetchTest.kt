@@ -86,6 +86,7 @@ private fun testThumbnail(sid: Int): SubmissionThumbnail =
         authorAvatarUrl = "",
         thumbnailUrl = "https://t.furaffinity.net/$sid@400-0.jpg",
         thumbnailAspectRatio = 1f,
+        categoryTag = "c_all",
     )
 
 private class NoopFeedSource : SubmissionPagerFeedSource {

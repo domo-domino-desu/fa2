@@ -27,13 +27,14 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import me.domino.fa2.data.model.SearchHistoryRecord
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.ui.layouts.SearchHistoryRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.pages.search.SearchRouteScreen
 import org.koin.compose.koinInject
 
-/** 搜索历史页面（纯文字列表）。 */
+/** 搜索历史页面（关键词 + 条件摘要）。 */
 class SearchHistoryRouteScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
@@ -41,7 +42,7 @@ class SearchHistoryRouteScreen : Screen {
     val navigator = LocalNavigator.currentOrThrow
     val historyRepository = koinInject<ActivityHistoryRepository>()
     var loading by remember { mutableStateOf(true) }
-    var histories by remember { mutableStateOf<List<String>>(emptyList()) }
+    var histories by remember { mutableStateOf<List<SearchHistoryRecord>>(emptyList()) }
 
     LaunchedEffect(Unit) {
       histories = historyRepository.loadSearchHistory()
@@ -78,7 +79,12 @@ class SearchHistoryRouteScreen : Screen {
               contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
               verticalArrangement = Arrangement.spacedBy(8.dp),
           ) {
-            items(items = histories, key = { query -> query }) { query ->
+            items(
+                items = histories,
+                key = { entry ->
+                  "${entry.query}:${entry.filtersSummary}:${entry.searchUrl.orEmpty()}"
+                },
+            ) { entry ->
               Surface(
                   color = MaterialTheme.colorScheme.surface,
                   shape = RoundedCornerShape(14.dp),
@@ -89,15 +95,29 @@ class SearchHistoryRouteScreen : Screen {
                       ),
                   modifier =
                       Modifier.fillMaxWidth().clickable {
-                        navigator.push(SearchRouteScreen(initialQuery = query))
+                        navigator.push(
+                            SearchRouteScreen(
+                                initialQuery = entry.query,
+                                initialSearchUrl = entry.searchUrl,
+                            )
+                        )
                       },
               ) {
-                Text(
-                    text = query,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                )
+                Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
+                  Text(
+                      text = entry.query,
+                      style = MaterialTheme.typography.bodyLarge,
+                      fontWeight = FontWeight.Medium,
+                  )
+                  if (entry.filtersSummary.isNotBlank()) {
+                    Text(
+                        text = entry.filtersSummary,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                  }
+                }
               }
             }
           }

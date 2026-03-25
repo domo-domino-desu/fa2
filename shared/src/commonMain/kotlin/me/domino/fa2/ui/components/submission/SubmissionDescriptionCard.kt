@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -29,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.components.HtmlText
+import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
 import me.domino.fa2.ui.state.rememberSubmissionDescriptionTranslationState
 
@@ -77,24 +76,25 @@ internal fun SubmissionDescriptionCard(
         Box(
             modifier =
                 Modifier.padding(start = 3.dp)
+                    .padding(top = 1.dp)
+                    .padding(1.dp)
                     .clip(CircleShape)
                     .clickable(enabled = !translationController.translating) {
                       translationController.translate()
                       requestPagerFocus()
                     }
-                    .padding(1.dp)
                     .focusProperties { canFocus = false }
         ) {
           if (translationController.translating) {
             LoadingIndicator(
-                modifier = Modifier.size(14.dp),
+                modifier = Modifier.size(16.dp),
                 color = MaterialTheme.colorScheme.primary,
             )
           } else {
             Icon(
-                imageVector = Icons.Outlined.Translate,
+                imageVector = FaMaterialSymbols.Outlined.Translate,
                 contentDescription = "翻译描述",
-                modifier = Modifier.size(17.dp),
+                modifier = Modifier.size(16.dp),
             )
           }
         }

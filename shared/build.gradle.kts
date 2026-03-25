@@ -1,3 +1,6 @@
+import io.github.kingsword09.symbolcraft.model.SymbolFill
+import io.github.kingsword09.symbolcraft.model.SymbolVariant
+
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
   alias(libs.plugins.androidKotlinMultiplatformLibrary)
@@ -6,6 +9,7 @@ plugins {
   alias(libs.plugins.kotlinx.serialization)
   alias(libs.plugins.aboutLibraries)
   alias(libs.plugins.ksp)
+  alias(libs.plugins.symbolCraft)
 }
 
 kotlin {
@@ -25,7 +29,6 @@ kotlin {
         implementation(libs.compose.runtime)
         implementation(libs.compose.foundation)
         implementation(libs.compose.material3)
-        implementation(libs.compose.material.icons.extended)
         implementation(libs.compose.ui)
         implementation(libs.compose.components.resources)
         implementation(libs.compose.native.webview)
@@ -93,3 +96,70 @@ tasks.register("test") {
 aboutLibraries {
   export { outputFile = file("src/commonMain/composeResources/files/aboutlibraries.json") }
 }
+
+symbolCraft {
+  packageName.set("me.domino.fa2.generated.symbols")
+  outputDirectory.set("src/commonMain/kotlin")
+  generatePreview.set(false)
+  cacheEnabled.set(true)
+
+  naming { pascalCase() }
+
+  materialSymbols(
+      "close",
+      "comment",
+      "done",
+      "download",
+      "explore",
+      "favorite",
+      "history",
+      "home",
+      "image",
+      "info",
+      "menu",
+      "restart_alt",
+      "save",
+      "search",
+      "settings",
+      "tag",
+      "visibility",
+  ) {
+    style(weight = 400, variant = SymbolVariant.OUTLINED, fill = SymbolFill.FILLED)
+  }
+
+  materialSymbols(
+      "arrow_back",
+      "auto_stories",
+      "category",
+      "content_copy",
+      "date_range",
+      "explore",
+      "filter_alt",
+      "home",
+      "image",
+      "inventory_2",
+      "keyboard_arrow_right",
+      "logout",
+      "menu",
+      "movie",
+      "music_note",
+      "search",
+      "share",
+      "translate",
+      "unknown_document",
+  ) {
+    style(weight = 400, variant = SymbolVariant.OUTLINED, fill = SymbolFill.UNFILLED)
+  }
+
+  materialSymbol("favorite") {
+    style(weight = 400, variant = SymbolVariant.OUTLINED, fill = SymbolFill.UNFILLED)
+  }
+}
+
+tasks
+    .matching {
+      it.name.startsWith("kspKotlin") ||
+          it.name.startsWith("compileKotlin") ||
+          it.name.startsWith("compileCommonMainKotlinMetadata")
+    }
+    .configureEach { dependsOn("generateSymbolCraftIcons") }

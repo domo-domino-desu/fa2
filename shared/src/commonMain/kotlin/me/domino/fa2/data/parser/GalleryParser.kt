@@ -62,6 +62,7 @@ class GalleryParser {
       defaultAuthor: String,
       document: com.fleeksoft.ksoup.nodes.Document,
   ): List<SubmissionThumbnail> {
+    val tagBlockSettings = ParserUtils.parseTagBlockSettings(document)
     val profileAvatarUrl =
         document
             .selectFirst("userpage-nav-avatar img")
@@ -70,8 +71,6 @@ class GalleryParser {
             ?.takeIf { it.isNotBlank() }
             ?.let { raw -> ParserUtils.toAbsoluteUrl(baseUrl, raw) }
             .orEmpty()
-    val hasTagBlocklist =
-        document.selectFirst("body")?.attr("data-tag-blocklist")?.trim()?.isNotBlank() == true
     val figures =
         figureSelectors
             .asSequence()
@@ -87,7 +86,7 @@ class GalleryParser {
               defaultAuthor = defaultAuthor,
               avatarUrls = avatarUrls,
               fallbackAuthorAvatarUrl = profileAvatarUrl,
-              hasTagBlocklist = hasTagBlocklist,
+              tagBlockSettings = tagBlockSettings,
           )
       if (parsed != null) {
         map[parsed.id] = parsed
@@ -101,7 +100,7 @@ class GalleryParser {
       defaultAuthor: String,
       avatarUrls: Map<Int, String>,
       fallbackAuthorAvatarUrl: String,
-      hasTagBlocklist: Boolean,
+      tagBlockSettings: ParserUtils.TagBlockSettings,
   ): SubmissionThumbnail? {
     val rawSubmissionUrl = node.selectFirst("a[href*='/view/']")?.attr("href").orEmpty()
     val submissionUrl =
@@ -114,7 +113,10 @@ class GalleryParser {
             ?: ParserUtils.parseSubmissionSid(submissionUrl)
             ?: return null
 
-    val image = node.selectFirst("a[href*='/view/'] img") ?: node.selectFirst("img") ?: return null
+    val image =
+        node.selectFirst("a[href*='/view/'] > img")
+            ?: node.selectFirst("a[href*='/view/'] img")
+            ?: return null
 
     val captionLinks = node.select("figcaption p a")
     val title =
@@ -147,16 +149,25 @@ class GalleryParser {
             baseUrl = "https://www.furaffinity.net/",
             maybeRelativeUrl = thumbnailRaw,
         )
+    val resolvedSubmissionUrl = submissionUrl.ifBlank { FaUrls.submission(id) }
+    val imageTags = ParserUtils.parseImageTags(image)
+    val categoryTag = imageTags.sorted().firstOrNull { tag -> tag.startsWith("c_") }.orEmpty()
+    val isBlockedByTag =
+        ParserUtils.isBlockedByTagSettings(
+            imageTags = imageTags,
+            tagBlockSettings = tagBlockSettings,
+        )
 
     return SubmissionThumbnail(
         id = id,
-        submissionUrl = submissionUrl.ifBlank { FaUrls.submission(id) },
+        submissionUrl = resolvedSubmissionUrl,
         title = title,
         author = author,
         authorAvatarUrl = resolvedAvatarUrl.orEmpty(),
         thumbnailUrl = thumbnailUrl,
         thumbnailAspectRatio = width / height,
-        isBlockedByTag = parseBlockedByTag(image = image, hasTagBlocklist = hasTagBlocklist),
+        categoryTag = categoryTag,
+        isBlockedByTag = isBlockedByTag,
     )
   }
 
@@ -182,14 +193,6 @@ class GalleryParser {
 
   private fun extractSrcsetFirstUrl(rawSrcset: String): String =
       rawSrcset.substringBefore(',').substringBefore(' ').trim()
-
-  private fun parseBlockedByTag(image: Element, hasTagBlocklist: Boolean): Boolean {
-    val hasReason = image.attr("data-reason").trim().isNotBlank()
-    val title = image.attr("title").trim().lowercase()
-    val hasBlockedTitle = title.contains("blocked tags")
-    val blockedByClass = hasTagBlocklist && image.hasClass("blocked-content")
-    return hasReason || hasBlockedTitle || blockedByClass
-  }
 
   private fun parseFolderGroups(
       document: com.fleeksoft.ksoup.nodes.Document,

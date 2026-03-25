@@ -9,7 +9,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import me.domino.fa2.data.search.SearchUiLabelsRepository
 import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.ui.components.AppFeedbackHost
 import me.domino.fa2.ui.components.challenge.CfChallengeOverlayHost
 import me.domino.fa2.ui.navigation.AppNavigator
@@ -20,9 +22,13 @@ import org.koin.compose.koinInject
 @Composable
 fun Fa2App(externalFaLinkEvents: Flow<String> = emptyFlow()) {
   val settingsService = koinInject<AppSettingsService>()
+  val taxonomyRepository = koinInject<FaTaxonomyRepository>()
+  val searchUiLabelsRepository = koinInject<SearchUiLabelsRepository>()
   val settings by settingsService.settings.collectAsState()
 
   LaunchedEffect(settingsService) { settingsService.ensureLoaded() }
+  LaunchedEffect(taxonomyRepository) { taxonomyRepository.ensureLoaded() }
+  LaunchedEffect(searchUiLabelsRepository) { searchUiLabelsRepository.ensureLoaded() }
 
   Fa2Theme(themeMode = settings.themeMode) {
     AppFeedbackHost {

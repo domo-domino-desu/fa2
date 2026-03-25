@@ -1,5 +1,6 @@
 package me.domino.fa2.ui.components.submission
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
@@ -16,6 +17,8 @@ internal fun SubmissionInfoMetricChip(metric: SubmissionInfoMetric) {
   Row(
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(4.dp),
+      modifier =
+          if (metric.onClick != null) Modifier.clickable(onClick = metric.onClick) else Modifier,
   ) {
     Icon(
         imageVector = metric.icon,

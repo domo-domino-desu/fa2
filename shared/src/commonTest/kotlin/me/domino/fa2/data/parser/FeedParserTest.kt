@@ -24,6 +24,7 @@ class FeedParserTest {
         page.submissions.first().submissionUrl.startsWith("https://www.furaffinity.net/view/")
     )
     assertTrue(page.submissions.first().authorAvatarUrl.startsWith("https://a.furaffinity.net/"))
+    assertTrue(page.submissions.none { item -> item.isBlockedByTag })
   }
 
   /** 末页面应解析出投稿，且通常没有下一页链接。 */
@@ -82,7 +83,7 @@ class FeedParserTest {
                 <section class="gallery-section">
                     <figure id="sid-123456">
                         <a href="/view/123456/">
-                            <img class="blocked-content" src="//t.furaffinity.net/123456@300-1700000000.jpg" data-width="300" data-height="200" />
+                            <img class="blocked-content" data-reason='["canine"]' data-tags="wolf canine anthro" src="//t.furaffinity.net/123456@300-1700000000.jpg" data-width="300" data-height="200" />
                         </a>
                         <figcaption>
                             <p><a href="/view/123456/" title="Sample">Sample</a></p>
@@ -100,5 +101,92 @@ class FeedParserTest {
 
     assertEquals(1, page.submissions.size)
     assertTrue(page.submissions.first().isBlockedByTag)
+  }
+
+  @Test
+  fun marksBlockedWhenImageTagsOverlapBlocklist() {
+    val html =
+        """
+        <html>
+            <body data-tag-blocklist="weight">
+                <section class="gallery-section">
+                    <figure id="sid-123456">
+                        <a href="/view/123456/">
+                            <img class="" data-tags="male weight dragon" src="//t.furaffinity.net/123456@300-1700000000.jpg" data-width="300" data-height="200" />
+                        </a>
+                        <figcaption>
+                            <p><a href="/view/123456/" title="Sample">Sample</a></p>
+                            <p><i>by</i> <a href="/user/demo/">demo</a></p>
+                        </figcaption>
+                    </figure>
+                </section>
+            </body>
+        </html>
+        """
+            .trimIndent()
+    val parser = FeedParser()
+
+    val page = parser.parse(html, FaUrls.submissions())
+
+    assertEquals(1, page.submissions.size)
+    assertTrue(page.submissions.first().isBlockedByTag)
+  }
+
+  @Test
+  fun doesNotMarkBlockedWhenBlocklistEmptyEvenIfClassMarked() {
+    val html =
+        """
+        <html>
+            <body data-tag-blocklist="">
+                <section class="gallery-section">
+                    <figure id="sid-123456">
+                        <a href="/view/123456/">
+                            <img class="blocked-content" data-tags="canine wolf" src="//t.furaffinity.net/123456@300-1700000000.jpg" data-width="300" data-height="200" />
+                        </a>
+                        <figcaption>
+                            <p><a href="/view/123456/" title="Sample">Sample</a></p>
+                            <p><i>by</i> <a href="/user/demo/">demo</a></p>
+                        </figcaption>
+                    </figure>
+                </section>
+            </body>
+        </html>
+        """
+            .trimIndent()
+    val parser = FeedParser()
+
+    val page = parser.parse(html, FaUrls.submissions())
+
+    assertEquals(1, page.submissions.size)
+    assertTrue(!page.submissions.first().isBlockedByTag)
+  }
+
+  @Test
+  fun doesNotMarkBlockedWhenNoTagOverlap() {
+    val html =
+        """
+        <html>
+            <body data-tag-blocklist="weight">
+                <section class="gallery-section">
+                    <figure id="sid-123456">
+                        <a href="/view/123456/">
+                            <img data-reason="[]" data-tags="wolf dragon" src="//t.furaffinity.net/123456@300-1700000000.jpg" data-width="300" data-height="200" />
+                        </a>
+                        <figcaption>
+                            <p><a href="/view/123456/" title="Sample">Sample</a></p>
+                            <p><i>by</i> <a href="/user/demo/">demo</a></p>
+                        </figcaption>
+                    </figure>
+                </section>
+            </body>
+        </html>
+        """
+            .trimIndent()
+    val parser = FeedParser()
+
+    val page = parser.parse(html, FaUrls.submissions())
+
+    assertEquals(1, page.submissions.size)
+    assertTrue(!page.submissions.first().isBlockedByTag)
   }
 }

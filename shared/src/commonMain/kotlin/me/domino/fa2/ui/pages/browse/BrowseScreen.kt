@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,15 +29,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.data.search.SearchUiLabelsRepository
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.ui.components.FaBrowseTaxonomyOptions
+import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.ui.components.FilterDialogTriggerField
 import me.domino.fa2.ui.components.FilterDropdownField
 import me.domino.fa2.ui.components.FilterOption
+import me.domino.fa2.ui.components.FilterOptionGroup
 import me.domino.fa2.ui.components.GroupedTextPickerDialog
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
 import me.domino.fa2.ui.components.submission.WaterfallLoadingSkeleton
+import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.layouts.BrowseFilterOverlayTopBar
 import org.koin.compose.koinInject
 
@@ -62,12 +63,32 @@ fun BrowseScreen(
     waterfallState: LazyStaggeredGridState,
 ) {
   val settingsService = koinInject<AppSettingsService>()
+  val searchUiLabelsRepository = koinInject<SearchUiLabelsRepository>()
+  val taxonomyRepository = koinInject<FaTaxonomyRepository>()
   val settings by settingsService.settings.collectAsState()
+  val searchUiLabelsCatalog by searchUiLabelsRepository.catalog.collectAsState()
+  val taxonomyCatalog by taxonomyRepository.catalog.collectAsState()
   var filterPageVisible by remember { mutableStateOf(false) }
+  val browseCategoryOptions = remember(taxonomyCatalog) { taxonomyRepository.categoryOptions() }
+  val browseTypeOptions = remember(taxonomyCatalog) { taxonomyRepository.typeOptions() }
+  val browseSpeciesOptions = remember(taxonomyCatalog) { taxonomyRepository.speciesOptions() }
+  val browseTypeOptionGroups = remember(taxonomyCatalog) { taxonomyRepository.typeOptionGroups() }
+  val browseSpeciesOptionGroups =
+      remember(taxonomyCatalog) { taxonomyRepository.speciesOptionGroups() }
+  val browseGenderOptions =
+      remember(searchUiLabelsCatalog) { buildBrowseGenderOptions(searchUiLabelsRepository) }
 
   val filterBar: @Composable () -> Unit = {
     BrowseFilterSummaryBar(
-        chips = buildBrowseFilterChips(state.appliedFilter),
+        chips =
+            buildBrowseFilterChips(
+                filter = state.appliedFilter,
+                categoryOptions = browseCategoryOptions,
+                typeOptions = browseTypeOptions,
+                speciesOptions = browseSpeciesOptions,
+                genderOptions = browseGenderOptions,
+                searchUiLabelsRepository = searchUiLabelsRepository,
+            ),
         onOpenFilterPage = { filterPageVisible = true },
     )
   }
@@ -129,6 +150,13 @@ fun BrowseScreen(
         onSetRatingGeneral = onSetRatingGeneral,
         onSetRatingMature = onSetRatingMature,
         onSetRatingAdult = onSetRatingAdult,
+        categoryOptions = browseCategoryOptions,
+        typeOptions = browseTypeOptions,
+        speciesOptions = browseSpeciesOptions,
+        typeOptionGroups = browseTypeOptionGroups,
+        speciesOptionGroups = browseSpeciesOptionGroups,
+        genderOptions = browseGenderOptions,
+        searchUiLabelsRepository = searchUiLabelsRepository,
         modifier = Modifier.fillMaxSize(),
     )
   }
@@ -164,7 +192,7 @@ private fun BrowseFilterSummaryBar(chips: List<String>, onOpenFilterPage: () -> 
       }
     }
     IconButton(onClick = onOpenFilterPage) {
-      Icon(imageVector = Icons.Outlined.FilterAlt, contentDescription = "打开筛选页面")
+      Icon(imageVector = FaMaterialSymbols.Outlined.FilterAlt, contentDescription = "打开筛选页面")
     }
   }
 }
@@ -182,15 +210,22 @@ private fun BrowseFilterPage(
     onSetRatingGeneral: (Boolean) -> Unit,
     onSetRatingMature: (Boolean) -> Unit,
     onSetRatingAdult: (Boolean) -> Unit,
+    categoryOptions: List<FilterOption<Int>>,
+    typeOptions: List<FilterOption<Int>>,
+    speciesOptions: List<FilterOption<Int>>,
+    typeOptionGroups: List<FilterOptionGroup<Int>>,
+    speciesOptionGroups: List<FilterOptionGroup<Int>>,
+    genderOptions: List<FilterOption<String>>,
+    searchUiLabelsRepository: SearchUiLabelsRepository,
     modifier: Modifier = Modifier,
 ) {
   var typePickerVisible by remember { mutableStateOf(false) }
   var speciesPickerVisible by remember { mutableStateOf(false) }
   val selectedTypeLabel =
-      browseTypeOptions.firstOrNull { option -> option.value == filter.type }?.label
+      typeOptions.firstOrNull { option -> option.value == filter.type }?.label
           ?: filter.type.toString()
   val selectedSpeciesLabel =
-      browseSpeciesOptions.firstOrNull { option -> option.value == filter.species }?.label
+      speciesOptions.firstOrNull { option -> option.value == filter.species }?.label
           ?: filter.species.toString()
 
   Surface(modifier = modifier, color = MaterialTheme.colorScheme.surface) {
@@ -206,14 +241,14 @@ private fun BrowseFilterPage(
             modifier = Modifier.fillMaxWidth(),
         ) {
           FilterDropdownField(
-              label = "Category",
-              options = browseCategoryOptions,
+              label = "类别",
+              options = categoryOptions,
               selected = filter.category,
               onSelected = onUpdateCategory,
               modifier = Modifier.weight(1f),
           )
           FilterDialogTriggerField(
-              label = "Type",
+              label = "分类",
               valueLabel = selectedTypeLabel,
               onOpenPicker = { typePickerVisible = true },
               modifier = Modifier.weight(1f),
@@ -224,14 +259,14 @@ private fun BrowseFilterPage(
             modifier = Modifier.fillMaxWidth(),
         ) {
           FilterDialogTriggerField(
-              label = "Species",
+              label = "物种",
               valueLabel = selectedSpeciesLabel,
               onOpenPicker = { speciesPickerVisible = true },
               modifier = Modifier.weight(1f),
           )
           FilterDropdownField(
-              label = "Gender",
-              options = browseGenderOptions,
+              label = searchUiLabelsRepository.summaryGendersLabel(),
+              options = genderOptions,
               selected = filter.gender,
               onSelected = onUpdateGender,
               modifier = Modifier.weight(1f),
@@ -251,8 +286,8 @@ private fun BrowseFilterPage(
 
   if (typePickerVisible) {
     GroupedTextPickerDialog(
-        title = "Type",
-        groups = browseTypeOptionGroups,
+        title = "分类",
+        groups = typeOptionGroups,
         selected = filter.type,
         onSelected = onUpdateType,
         onDismissRequest = { typePickerVisible = false },
@@ -261,8 +296,8 @@ private fun BrowseFilterPage(
 
   if (speciesPickerVisible) {
     GroupedTextPickerDialog(
-        title = "Species",
-        groups = browseSpeciesOptionGroups,
+        title = "物种",
+        groups = speciesOptionGroups,
         selected = filter.species,
         onSelected = onUpdateSpecies,
         onDismissRequest = { speciesPickerVisible = false },
@@ -325,37 +360,37 @@ private fun BrowseStatusCard(title: String, body: String, onRetry: () -> Unit) {
   }
 }
 
-private val browseCategoryOptions = FaBrowseTaxonomyOptions.categoryOptions
-
-private val browseTypeOptions = FaBrowseTaxonomyOptions.typeOptions
-
-private val browseSpeciesOptions = FaBrowseTaxonomyOptions.speciesOptions
-
-private val browseTypeOptionGroups = FaBrowseTaxonomyOptions.typeOptionGroups
-
-private val browseSpeciesOptionGroups = FaBrowseTaxonomyOptions.speciesOptionGroups
-
-private val browseGenderOptions =
+private fun buildBrowseGenderOptions(
+    searchUiLabelsRepository: SearchUiLabelsRepository
+): List<FilterOption<String>> =
     listOf(
-        FilterOption("", "Any"),
-        FilterOption("male", "Male"),
-        FilterOption("female", "Female"),
-        FilterOption("trans_male", "Trans (Male)"),
-        FilterOption("trans_female", "Trans (Female)"),
-        FilterOption("intersex", "Intersex"),
-        FilterOption("non_binary", "Non-Binary"),
+        FilterOption("", searchUiLabelsRepository.anyLabel()),
+        FilterOption("male", searchUiLabelsRepository.genderLabel("male")),
+        FilterOption("female", searchUiLabelsRepository.genderLabel("female")),
+        FilterOption("trans_male", searchUiLabelsRepository.genderLabel("trans_male")),
+        FilterOption("trans_female", searchUiLabelsRepository.genderLabel("trans_female")),
+        FilterOption("intersex", searchUiLabelsRepository.genderLabel("intersex")),
+        FilterOption("non_binary", searchUiLabelsRepository.genderLabel("non_binary")),
     )
 
-private fun buildBrowseFilterChips(filter: BrowseFilterState): List<String> {
+private fun buildBrowseFilterChips(
+    filter: BrowseFilterState,
+    categoryOptions: List<FilterOption<Int>>,
+    typeOptions: List<FilterOption<Int>>,
+    speciesOptions: List<FilterOption<Int>>,
+    genderOptions: List<FilterOption<String>>,
+    searchUiLabelsRepository: SearchUiLabelsRepository,
+): List<String> {
   val categoryLabel =
-      browseCategoryOptions.firstOrNull { it.value == filter.category }?.label
+      categoryOptions.firstOrNull { it.value == filter.category }?.label
           ?: filter.category.toString()
   val typeLabel =
-      browseTypeOptions.firstOrNull { it.value == filter.type }?.label ?: filter.type.toString()
+      typeOptions.firstOrNull { it.value == filter.type }?.label ?: filter.type.toString()
   val speciesLabel =
-      browseSpeciesOptions.firstOrNull { it.value == filter.species }?.label
-          ?: filter.species.toString()
-  val genderLabel = browseGenderOptions.firstOrNull { it.value == filter.gender }?.label ?: "Any"
+      speciesOptions.firstOrNull { it.value == filter.species }?.label ?: filter.species.toString()
+  val genderLabel =
+      genderOptions.firstOrNull { it.value == filter.gender }?.label
+          ?: searchUiLabelsRepository.anyLabel()
   val ratingLabel =
       buildList {
             if (filter.ratingGeneral) add("General")
@@ -365,10 +400,10 @@ private fun buildBrowseFilterChips(filter: BrowseFilterState): List<String> {
           .joinToString(" + ")
           .ifBlank { "None" }
   return listOf(
-      "Category: $categoryLabel",
-      "Type: $typeLabel",
-      "Species: $speciesLabel",
-      "Gender: $genderLabel",
-      "Rating: $ratingLabel",
+      "类别：$categoryLabel",
+      "分类：$typeLabel",
+      "物种：$speciesLabel",
+      "${searchUiLabelsRepository.summaryGendersLabel()}：$genderLabel",
+      "分级：$ratingLabel",
   )
 }

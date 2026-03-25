@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "summary": {
+    "sort": "排序",
+    "direction": "方向",
+    "date": "日期",
+    "genders": "性别",
+    "submissionTypes": "投稿类型"
+  },
+  "filters": {
+    "sortCriteria": "排序依据",
+    "sortDirection": "排序方向",
+    "dateFilter": "日期范围",
+    "genderKeywords": "性别关键词",
+    "submissionTypes": "投稿类型"
+  },
+  "options": {
+    "orderBy": {
+      "relevancy": "相关度",
+      "date": "日期",
+      "popularity": "热度"
+    },
+    "orderDirection": {
+      "desc": "降序",
+      "asc": "升序"
+    },
+    "range": {
+      "1day": "1 天",
+      "3days": "3 天",
+      "7days": "7 天",
+      "30days": "30 天",
+      "90days": "90 天",
+      "1year": "1 年",
+      "3years": "3 年",
+      "5years": "5 年",
+      "all": "全部时间",
+      "manual": "自定义"
+    },
+    "genders": {
+      "male": "雄性",
+      "female": "雌性",
+      "trans_male": "跨性别雄性",
+      "trans_female": "跨性别雌性",
+      "intersex": "两性兼有",
+      "non_binary": "非二元性别"
+    },
+    "submissionTypes": {
+      "art": "艺术",
+      "music": "音乐",
+      "flash": "Flash",
+      "story": "故事",
+      "photo": "摄影",
+      "poetry": "诗歌"
+    }
+  },
+  "phrases": {
+    "any": "任意",
+    "none": "无",
+    "from": "自",
+    "to": "至"
+  },
+  "punctuation": {
+    "labelValueSeparator": "："
+  }
+}

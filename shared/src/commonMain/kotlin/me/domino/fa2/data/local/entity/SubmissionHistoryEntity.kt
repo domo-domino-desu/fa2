@@ -22,6 +22,8 @@ data class SubmissionHistoryEntity(
     val thumbnailAspectRatio: Float,
     /** 作者头像链接。 */
     val authorAvatarUrl: String,
+    /** taxonomy 中的分类 tag。 */
+    val categoryTag: String,
     /** 是否命中屏蔽标签。 */
     val isBlockedByTag: Boolean,
 )
