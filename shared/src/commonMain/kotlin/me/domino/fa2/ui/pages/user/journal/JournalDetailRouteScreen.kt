@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -32,12 +33,17 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.components.HtmlText
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.SkeletonBlock
+import me.domino.fa2.ui.components.TranslatableHtmlBlockContent
+import me.domino.fa2.ui.components.TranslateActionButton
 import me.domino.fa2.ui.layouts.JournalDetailRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
+import me.domino.fa2.ui.state.rememberSubmissionDescriptionTranslationState
 import me.domino.fa2.util.FaUrls
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 /** Journal 详情路由页面。 */
@@ -53,6 +59,7 @@ class JournalDetailRouteScreen(
     val navigator = LocalNavigator.currentOrThrow
     val screenModel =
         koinScreenModel<JournalDetailScreenModel> { parametersOf(journalId, journalUrl) }
+    val translationService = koinInject<SubmissionDescriptionTranslationService>()
     val state by screenModel.state.collectAsState()
     val shareUrl =
         when (val snapshot = state) {
@@ -83,6 +90,7 @@ class JournalDetailRouteScreen(
         is JournalDetailUiState.Success -> {
           JournalDetailContent(
               detail = snapshot.detail,
+              translationService = translationService,
               onOpenAuthor = { author ->
                 val normalized = author.trim()
                 if (normalized.isNotBlank()) {
@@ -144,8 +152,15 @@ private fun JournalDetailErrorCard(message: String, onRetry: () -> Unit) {
 @Composable
 private fun JournalDetailContent(
     detail: me.domino.fa2.data.model.JournalDetail,
+    translationService: SubmissionDescriptionTranslationService,
     onOpenAuthor: (String) -> Unit,
 ) {
+  val translationController =
+      rememberSubmissionDescriptionTranslationState(
+          descriptionHtml = detail.bodyHtml,
+          service = translationService,
+      )
+
   LazyColumn(
       modifier = Modifier.fillMaxSize(),
       verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -165,20 +180,35 @@ private fun JournalDetailContent(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-          Text(
-              text = detail.title,
-              style = MaterialTheme.typography.titleLarge,
-              fontWeight = FontWeight.SemiBold,
-          )
+          Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.Top,
+          ) {
+            Text(
+                text = detail.title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f).padding(end = 10.dp),
+            )
+            TranslateActionButton(
+                translating = translationController.translating,
+                label = "日志",
+                onTranslate = { translationController.translate() },
+            )
+          }
           Text(
               text = "${detail.timestampNatural} · ${detail.rating} · ${detail.commentCount} 评论",
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
-          HtmlText(
-              html = detail.bodyHtml,
-              style = MaterialTheme.typography.bodyMedium,
-              color = MaterialTheme.colorScheme.onSurface,
+          TranslatableHtmlBlockContent(
+              blocks = translationController.blocks,
+              emptyText = "暂无正文",
+              originalTextStyle = MaterialTheme.typography.bodyMedium,
+              originalTextColor = MaterialTheme.colorScheme.onSurface,
+              translatedTextStyle = MaterialTheme.typography.bodyMedium,
+              translatedTextColor = MaterialTheme.colorScheme.onSurface,
           )
         }
       }
@@ -293,10 +323,12 @@ private fun JournalCommentItem(
         )
       }
     }
-    HtmlText(
-        html = comment.bodyHtml.ifBlank { "<p>（无内容）</p>" },
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurface,
-    )
+    SelectionContainer {
+      HtmlText(
+          html = comment.bodyHtml.ifBlank { "<p>（无内容）</p>" },
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurface,
+      )
+    }
   }
 }

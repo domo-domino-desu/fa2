@@ -1,12 +1,10 @@
 package me.domino.fa2.ui.pages.about
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,23 +37,6 @@ class AboutRouteScreen : Screen {
           libraries = libraries,
           modifier = Modifier.fillMaxSize(),
           contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-          header = {
-            item {
-              ElevatedCard(modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                  Text(text = "fa2", style = MaterialTheme.typography.titleMedium)
-                  Text(
-                      text = "本页由 AboutLibraries 生成依赖与许可证信息",
-                      style = MaterialTheme.typography.bodySmall,
-                      color = MaterialTheme.colorScheme.onSurfaceVariant,
-                  )
-                }
-              }
-            }
-          },
           footer = {
             item {
               Text(

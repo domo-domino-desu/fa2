@@ -1,5 +1,6 @@
 package me.domino.fa2.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -271,22 +273,43 @@ private fun <T> GroupedTextPickerSection(
             bringIntoViewRequester.bringIntoView()
           }
         }
-        Text(
-            text = option.label,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+        Surface(
             color =
                 if (isSelected) {
-                  MaterialTheme.colorScheme.primary
+                  MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.78f)
                 } else {
-                  MaterialTheme.colorScheme.onSurface
+                  MaterialTheme.colorScheme.surface
                 },
+            border =
+                BorderStroke(
+                    width = 1.dp,
+                    color =
+                        if (isSelected) {
+                          MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
+                        } else {
+                          MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.72f)
+                        },
+                ),
+            shape = RoundedCornerShape(999.dp),
             modifier =
                 Modifier.bringIntoViewRequester(bringIntoViewRequester).clickable {
                   onSelected(option.value)
                   onDismissRequest()
                 },
-        )
+        ) {
+          Text(
+              text = option.label,
+              style = MaterialTheme.typography.labelMedium,
+              fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+              color =
+                  if (isSelected) {
+                    MaterialTheme.colorScheme.onSecondaryContainer
+                  } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                  },
+              modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+          )
+        }
       }
     }
   }

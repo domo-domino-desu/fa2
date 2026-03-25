@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -128,10 +129,12 @@ private fun SubmissionCommentItem(comment: PageComment, onOpenAuthor: (String) -
         )
       }
     }
-    HtmlText(
-        html = comment.bodyHtml.ifBlank { "<p>（无内容）</p>" },
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurface,
-    )
+    SelectionContainer {
+      HtmlText(
+          html = comment.bodyHtml.ifBlank { "<p>（无内容）</p>" },
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurface,
+      )
+    }
   }
 }

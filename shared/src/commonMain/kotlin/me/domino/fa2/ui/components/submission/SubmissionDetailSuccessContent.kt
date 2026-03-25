@@ -54,29 +54,52 @@ internal fun SubmissionDetailSuccessContent(
 ) {
   val taxonomyRepository = koinInject<FaTaxonomyRepository>()
   val taxonomyCatalog by taxonomyRepository.catalog.collectAsState()
+  val fileExtensionLabel =
+      remember(detail.downloadUrl) { extractDownloadFileExtension(detail.downloadUrl) }
   val metrics =
       remember(detail) {
-        listOf(
-            SubmissionInfoMetric(
-                icon = FaMaterialSymbols.Filled.Visibility,
-                text = detail.viewCount.toString(),
-            ),
-            SubmissionInfoMetric(
-                icon = FaMaterialSymbols.AutoMirrored.Filled.Comment,
-                text = detail.commentCount.toString(),
-            ),
-            SubmissionInfoMetric(
-                icon = FaMaterialSymbols.Filled.Favorite,
-                text = detail.favoriteCount.toString(),
-            ),
-            SubmissionInfoMetric(
-                icon = FaMaterialSymbols.Filled.Tag,
-                text = "ID ${detail.id}",
-                onClick = { onCopySubmissionUrl(detail.submissionUrl) },
-            ),
-            SubmissionInfoMetric(icon = FaMaterialSymbols.Filled.Image, text = detail.size),
-            SubmissionInfoMetric(icon = FaMaterialSymbols.Filled.Download, text = detail.fileSize),
-        )
+        buildList {
+          add(
+              SubmissionInfoMetric(
+                  icon = FaMaterialSymbols.Outlined.Visibility,
+                  text = detail.viewCount.toString(),
+              )
+          )
+          add(
+              SubmissionInfoMetric(
+                  icon = FaMaterialSymbols.Outlined.Comment,
+                  text = detail.commentCount.toString(),
+              )
+          )
+          add(
+              SubmissionInfoMetric(
+                  icon = FaMaterialSymbols.Outlined.Favorite,
+                  text = detail.favoriteCount.toString(),
+              )
+          )
+          add(
+              SubmissionInfoMetric(
+                  icon = FaMaterialSymbols.Outlined.Tag,
+                  text = "ID ${detail.id}",
+                  onClick = { onCopySubmissionUrl(detail.submissionUrl) },
+              )
+          )
+          add(SubmissionInfoMetric(icon = FaMaterialSymbols.Outlined.Image, text = detail.size))
+          fileExtensionLabel?.let { extension ->
+            add(
+                SubmissionInfoMetric(
+                    icon = FaMaterialSymbols.Outlined.FilePresent,
+                    text = extension,
+                )
+            )
+          }
+          add(
+              SubmissionInfoMetric(
+                  icon = FaMaterialSymbols.Outlined.Download,
+                  text = detail.fileSize,
+              )
+          )
+        }
       }
 
   val derivedThumbnailUrl =
@@ -108,8 +131,16 @@ internal fun SubmissionDetailSuccessContent(
       remember(detail.species, taxonomyCatalog) {
         taxonomyRepository.speciesDisplayNameByEnglishLabel(detail.species) ?: detail.species
       }
-  val keywordChips =
-      remember(detail) { detail.keywords.filter { chip -> chip.isNotBlank() }.distinct().take(12) }
+  val filteredKeywordChips =
+      remember(detail) {
+        detail.keywords
+            .asSequence()
+            .map { keyword -> keyword.trim() }
+            .filter { keyword -> keyword.isNotBlank() && !isInternalTaxonomyTag(keyword) }
+            .distinct()
+            .take(12)
+            .toList()
+      }
   val shouldBlurBlockedMedia =
       isBlockedByTag &&
           blockedSubmissionMode == BlockedSubmissionPagerMode.BLUR_THEN_OPEN &&
@@ -183,7 +214,7 @@ internal fun SubmissionDetailSuccessContent(
         onOpenBrowseFilter = onOpenBrowseFilter,
     )
     SubmissionKeywordsSection(
-        keywordChips = keywordChips,
+        keywordChips = filteredKeywordChips,
         blockedKeywords = blockedKeywords,
         onSearchKeyword = onSearchKeyword,
         onKeywordLongPress = onKeywordLongPress,
@@ -207,4 +238,52 @@ internal fun SubmissionDetailSuccessContent(
       )
     }
   }
+}
+
+private fun extractDownloadFileExtension(downloadUrl: String?): String? {
+  val normalized = downloadUrl?.trim().orEmpty()
+  if (normalized.isBlank()) return null
+
+  val pathOnly = normalized.substringBefore('#').substringBefore('?')
+  val fileName = pathOnly.substringAfterLast('/').trim()
+  val rawCandidate =
+      if (fileName.contains('.')) {
+        fileName.substringAfterLast('.')
+      } else {
+        val query = normalized.substringAfter('?', missingDelimiterValue = "")
+        val namedValue =
+            query.split('&').firstNotNullOfOrNull { pair ->
+              val key = pair.substringBefore('=', missingDelimiterValue = "").lowercase()
+              val value = pair.substringAfter('=', missingDelimiterValue = "")
+              when (key) {
+                "filename",
+                "file",
+                "name",
+                "download" -> value
+                else -> null
+              }
+            }
+        namedValue
+            ?.substringAfterLast('/')
+            ?.substringAfterLast('.', missingDelimiterValue = "")
+            ?.trim()
+      }
+
+  val normalizedCandidate =
+      rawCandidate
+          ?.trim()
+          ?.trimEnd('/')
+          ?.takeIf { value -> value.isNotBlank() && value.all { ch -> ch.isLetterOrDigit() } }
+          ?.take(8)
+          ?.uppercase()
+
+  return normalizedCandidate
+}
+
+private fun isInternalTaxonomyTag(tag: String): Boolean {
+  val normalized = tag.trim().lowercase()
+  return normalized.startsWith("c_") ||
+      normalized.startsWith("u_") ||
+      normalized.startsWith("t_") ||
+      normalized.startsWith("s_")
 }

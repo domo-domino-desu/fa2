@@ -227,7 +227,7 @@ private fun SubmissionWaterfallItem(
                 imageVector = categoryBadgeIcon(categoryIconToken),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(width = 16.dp, height = 16.dp),
             )
             Text(
                 text = item.id.toString(),
@@ -295,7 +295,7 @@ private fun categoryBadgeIcon(iconToken: String): ImageVector =
       "import_contacts" -> FaMaterialSymbols.Outlined.AutoStories
       "music_note" -> FaMaterialSymbols.Outlined.MusicNote
       "inventory_2" -> FaMaterialSymbols.Outlined.Inventory2
-      "other" -> FaMaterialSymbols.Outlined.UnknownDocument
+      "other" -> FaMaterialSymbols.Outlined.Category
       else -> FaMaterialSymbols.Outlined.Category
     }
 

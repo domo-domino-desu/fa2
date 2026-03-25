@@ -108,22 +108,18 @@ symbolCraft {
 
   materialSymbols(
       "close",
-      "comment",
       "done",
       "download",
       "explore",
       "favorite",
       "history",
       "home",
-      "image",
       "info",
       "menu",
       "restart_alt",
       "save",
       "search",
       "settings",
-      "tag",
-      "visibility",
   ) {
     style(weight = 400, variant = SymbolVariant.OUTLINED, fill = SymbolFill.FILLED)
   }
@@ -132,9 +128,12 @@ symbolCraft {
       "arrow_back",
       "auto_stories",
       "category",
+      "comment",
       "content_copy",
       "date_range",
+      "download",
       "explore",
+      "file_present",
       "filter_alt",
       "home",
       "image",
@@ -146,8 +145,9 @@ symbolCraft {
       "music_note",
       "search",
       "share",
+      "tag",
       "translate",
-      "unknown_document",
+      "visibility",
   ) {
     style(weight = 400, variant = SymbolVariant.OUTLINED, fill = SymbolFill.UNFILLED)
   }

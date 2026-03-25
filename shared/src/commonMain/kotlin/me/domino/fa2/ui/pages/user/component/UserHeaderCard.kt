@@ -31,7 +31,7 @@ import me.domino.fa2.ui.components.HtmlText
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.SkeletonBlock
 
-private const val collapsedProfilePreviewChars = 960
+private const val collapsedProfilePreviewChars = 720
 
 @Composable
 internal fun UserHeaderCard(

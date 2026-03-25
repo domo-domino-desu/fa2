@@ -89,7 +89,7 @@
             "c_ych_sale",
             "c_other"
           ],
-          "icon": "other"
+          "icon": "category"
         }
       ],
       "items": {
@@ -1386,7 +1386,7 @@
           "id": 5001,
           "displayName": {
             "en": "Alien (Other)",
-            "zh-Hans": "外星（其他）"
+            "zh-Hans": "其他外星类"
           },
           "groupKey": "sg_general"
         },
@@ -1394,7 +1394,7 @@
           "id": 1000,
           "displayName": {
             "en": "Amphibian (Other)",
-            "zh-Hans": "两栖（其他）"
+            "zh-Hans": "其他两栖类"
           },
           "groupKey": "sg_general"
         },
@@ -1402,7 +1402,7 @@
           "id": 2000,
           "displayName": {
             "en": "Aquatic (Other)",
-            "zh-Hans": "水生（其他）"
+            "zh-Hans": "其他水生类"
           },
           "groupKey": "sg_general"
         },
@@ -1410,7 +1410,7 @@
           "id": 3000,
           "displayName": {
             "en": "Avian (Other)",
-            "zh-Hans": "鸟类（其他）"
+            "zh-Hans": "其他鸟类"
           },
           "groupKey": "sg_general"
         },
@@ -1418,7 +1418,7 @@
           "id": 6002,
           "displayName": {
             "en": "Bear (Other)",
-            "zh-Hans": "熊类（其他）"
+            "zh-Hans": "其他熊类"
           },
           "groupKey": "sg_general"
         },
@@ -1426,7 +1426,7 @@
           "id": 6007,
           "displayName": {
             "en": "Bovine (Other)",
-            "zh-Hans": "牛科（其他）"
+            "zh-Hans": "其他牛类"
           },
           "groupKey": "sg_general"
         },
@@ -1434,7 +1434,7 @@
           "id": 6017,
           "displayName": {
             "en": "Canine (Other)",
-            "zh-Hans": "犬科（其他）"
+            "zh-Hans": "其他犬科类"
           },
           "groupKey": "sg_general"
         },
@@ -1442,7 +1442,7 @@
           "id": 6018,
           "displayName": {
             "en": "Cervine (Other)",
-            "zh-Hans": "鹿科（其他）"
+            "zh-Hans": "其他鹿类"
           },
           "groupKey": "sg_general"
         },
@@ -1450,7 +1450,7 @@
           "id": 6010,
           "displayName": {
             "en": "Dog (Other)",
-            "zh-Hans": "犬类（其他）"
+            "zh-Hans": "其他犬类"
           },
           "groupKey": "sg_general"
         },
@@ -1458,7 +1458,7 @@
           "id": 4000,
           "displayName": {
             "en": "Dragon (Other)",
-            "zh-Hans": "龙类（其他）"
+            "zh-Hans": "其他龙类"
           },
           "groupKey": "sg_general"
         },
@@ -1466,7 +1466,7 @@
           "id": 10009,
           "displayName": {
             "en": "Equine (Other)",
-            "zh-Hans": "马科（其他）"
+            "zh-Hans": "其他马类"
           },
           "groupKey": "sg_general"
         },
@@ -1474,7 +1474,7 @@
           "id": 5000,
           "displayName": {
             "en": "Exotic (Other)",
-            "zh-Hans": "异域（其他）"
+            "zh-Hans": "其他异域类"
           },
           "groupKey": "sg_general"
         },
@@ -1482,7 +1482,7 @@
           "id": 6030,
           "displayName": {
             "en": "Feline (Other)",
-            "zh-Hans": "猫科（其他）"
+            "zh-Hans": "其他猫科类"
           },
           "groupKey": "sg_general"
         },
@@ -1490,7 +1490,7 @@
           "id": 6075,
           "displayName": {
             "en": "Fox (Other)",
-            "zh-Hans": "狐类（其他）"
+            "zh-Hans": "其他狐类"
           },
           "groupKey": "sg_general"
         },
@@ -1522,7 +1522,7 @@
           "id": 8003,
           "displayName": {
             "en": "Insect (Other)",
-            "zh-Hans": "昆虫（其他）"
+            "zh-Hans": "其他昆虫类"
           },
           "groupKey": "sg_general"
         },
@@ -1538,7 +1538,7 @@
           "id": 6000,
           "displayName": {
             "en": "Mammal (Other)",
-            "zh-Hans": "哺乳类（其他）"
+            "zh-Hans": "其他哺乳类"
           },
           "groupKey": "sg_general"
         },
@@ -1546,7 +1546,7 @@
           "id": 6042,
           "displayName": {
             "en": "Marsupial (Other)",
-            "zh-Hans": "有袋类（其他）"
+            "zh-Hans": "其他有袋类"
           },
           "groupKey": "sg_general"
         },
@@ -1554,7 +1554,7 @@
           "id": 6051,
           "displayName": {
             "en": "Mustelid (Other)",
-            "zh-Hans": "鼬科（其他）"
+            "zh-Hans": "其他鼬类"
           },
           "groupKey": "sg_general"
         },
@@ -1570,7 +1570,7 @@
           "id": 6058,
           "displayName": {
             "en": "Primate (Other)",
-            "zh-Hans": "灵长类（其他）"
+            "zh-Hans": "其他灵长类"
           },
           "groupKey": "sg_general"
         },
@@ -1578,7 +1578,7 @@
           "id": 7000,
           "displayName": {
             "en": "Reptilian (Other)",
-            "zh-Hans": "爬行类（其他）"
+            "zh-Hans": "其他爬行类"
           },
           "groupKey": "sg_general"
         },
@@ -1594,7 +1594,7 @@
           "id": 6067,
           "displayName": {
             "en": "Rodent (Other)",
-            "zh-Hans": "啮齿类（其他）"
+            "zh-Hans": "其他啮齿类"
           },
           "groupKey": "sg_general"
         },
@@ -1610,7 +1610,7 @@
           "id": 5025,
           "displayName": {
             "en": "Taur (Other)",
-            "zh-Hans": "半人马型（其他）"
+            "zh-Hans": "其他Taur类"
           },
           "groupKey": "sg_general"
         },
@@ -1618,7 +1618,7 @@
           "id": 6015,
           "displayName": {
             "en": "Vulpine (Other)",
-            "zh-Hans": "犬狐类（其他）"
+            "zh-Hans": "其他犬狐类"
           },
           "groupKey": "sg_general"
         },
@@ -1650,7 +1650,7 @@
           "id": 11002,
           "displayName": {
             "en": "Angel Dragon",
-            "zh-Hans": "天使龙"
+            "zh-Hans": "Angel Dragon"
           },
           "groupKey": "sg_fandom_creations"
         },
@@ -1698,7 +1698,7 @@
           "id": 11003,
           "displayName": {
             "en": "Dutch Angel Dragon",
-            "zh-Hans": "荷兰天使龙"
+            "zh-Hans": "Dutch Angel Dragon"
           },
           "groupKey": "sg_fandom_creations"
         },
@@ -1978,7 +1978,7 @@
           "id": 12017,
           "displayName": {
             "en": "Hobbit",
-            "zh-Hans": "霍比特"
+            "zh-Hans": "霍比特人"
           },
           "groupKey": "sg_mythological_fantasy"
         },
@@ -2178,7 +2178,7 @@
           "id": 12036,
           "displayName": {
             "en": "Werewolf / Lycanthrope",
-            "zh-Hans": "狼人/狼人化生物"
+            "zh-Hans": "狼人"
           },
           "groupKey": "sg_mythological_fantasy"
         },
@@ -2370,7 +2370,7 @@
           "id": 13014,
           "displayName": {
             "en": "Kemonomimi",
-            "zh-Hans": "兽耳"
+            "zh-Hans": "兽耳娘"
           },
           "groupKey": "sg_games_media"
         },
@@ -2418,7 +2418,7 @@
           "id": 13020,
           "displayName": {
             "en": "Mobian",
-            "zh-Hans": "Mobian"
+            "zh-Hans": "莫比乌斯人"
           },
           "groupKey": "sg_games_media"
         },
