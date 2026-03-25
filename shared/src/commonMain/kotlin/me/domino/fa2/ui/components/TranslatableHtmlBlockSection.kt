@@ -81,12 +81,16 @@ internal fun TranslatableHtmlBlockContent(
     }
 
     blocks.forEachIndexed { index, block ->
+      val shouldTrimOriginalTrailingWhitespace =
+          block.status == SubmissionDescriptionTranslationStatus.SUCCESS &&
+              block.translated.orEmpty().isNotBlank()
       if (selectable) {
         SelectionContainer {
           HtmlText(
               html = block.originalHtml,
               style = originalTextStyle,
               color = originalTextColor,
+              trimTrailingWhitespace = shouldTrimOriginalTrailingWhitespace,
           )
         }
       } else {
@@ -94,6 +98,7 @@ internal fun TranslatableHtmlBlockContent(
             html = block.originalHtml,
             style = originalTextStyle,
             color = originalTextColor,
+            trimTrailingWhitespace = shouldTrimOriginalTrailingWhitespace,
         )
       }
 

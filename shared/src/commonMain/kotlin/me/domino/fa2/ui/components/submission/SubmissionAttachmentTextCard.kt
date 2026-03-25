@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 import me.domino.fa2.ui.components.TranslatableHtmlBlockContent
@@ -173,9 +174,12 @@ private fun AttachmentCardHeader(
   Row(
       modifier = Modifier.fillMaxWidth(),
       verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.SpaceBetween,
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Column(
+        modifier = Modifier.weight(1f),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
       Text(
           text = "附件文本",
           style = MaterialTheme.typography.titleMedium,
@@ -185,6 +189,8 @@ private fun AttachmentCardHeader(
           text = fileName,
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis,
       )
     }
     translateButton?.invoke()

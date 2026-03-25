@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import be.digitalia.compose.htmlconverter.htmlToAnnotatedString
@@ -20,9 +21,17 @@ fun HtmlText(
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
     compactMode: Boolean = true,
+    trimTrailingWhitespace: Boolean = false,
 ) {
   val rendered =
-      remember(html, compactMode) { htmlToAnnotatedString(html = html, compactMode = compactMode) }
+      remember(html, compactMode, trimTrailingWhitespace) {
+        val annotated = htmlToAnnotatedString(html = html, compactMode = compactMode)
+        if (trimTrailingWhitespace) {
+          annotated.trimTrailingWhitespace()
+        } else {
+          annotated
+        }
+      }
   Text(
       text = rendered,
       modifier = modifier,
@@ -31,4 +40,9 @@ fun HtmlText(
       maxLines = maxLines,
       overflow = overflow,
   )
+}
+
+private fun AnnotatedString.trimTrailingWhitespace(): AnnotatedString {
+  val trimmedLength = text.trimEnd().length
+  return if (trimmedLength == text.length) this else subSequence(0, trimmedLength)
 }

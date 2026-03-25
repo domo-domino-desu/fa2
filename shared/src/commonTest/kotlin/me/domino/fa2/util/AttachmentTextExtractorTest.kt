@@ -93,6 +93,61 @@ class AttachmentTextExtractorTest {
     assertTrue(progresses.any { progress -> progress.stageId == "interpret_groups" })
   }
 
+  /** 忽略 RTF 元数据目标块。 */
+  @Test
+  fun ignoresRtfLatentStylesMetadata() = runTest {
+    val bytes =
+        """
+        {\rtf1\ansi{\*\latentstyles{\lsdqformat1 Normal;\lsdqformat1 heading 1;}}\pard Actual body\par}
+        """
+            .trimIndent()
+            .encodeToByteArray()
+
+    val document = AttachmentTextExtractor.parse(fileName = "sample.rtf", bytes = bytes)
+
+    assertTrue(document.html.contains("Actual body"))
+    assertFalse(document.html.contains("heading 1"))
+    assertFalse(document.html.contains("Normal;"))
+  }
+
+  /** 忽略非 starred 的 RTF destination，并保留下划线正文。 */
+  @Test
+  fun ignoresDirectRtfDestinationsAndPreservesUnderline() = runTest {
+    val bytes =
+        """
+        {\rtf1\ansi
+        {\fonttbl{\f0 Arial;}}
+        {\stylesheet{\s0 Normal;}}
+        {\header Header text\par}
+        {\footer Footer text\par}
+        \pard\ul Title\ulnone\par
+        Body text\par}
+        """
+            .trimIndent()
+            .encodeToByteArray()
+
+    val document = AttachmentTextExtractor.parse(fileName = "sample.rtf", bytes = bytes)
+
+    assertTrue(document.html.contains("<u>Title</u>"))
+    assertTrue(document.html.contains("Body text"))
+    assertFalse(document.html.contains("Arial"))
+    assertFalse(document.html.contains("Normal;"))
+    assertFalse(document.html.contains("Header text"))
+    assertFalse(document.html.contains("Footer text"))
+  }
+
+  /** 解析 RTF Unicode 引号。 */
+  @Test
+  fun parsesRtfUnicodeQuotes() = runTest {
+    val bytes = """{\rtf1\ansi\uc0 \u8220 quoted\u8221\par}""".encodeToByteArray()
+
+    val document = AttachmentTextExtractor.parse(fileName = "sample.rtf", bytes = bytes)
+
+    assertTrue(document.html.contains("quoted"))
+    assertTrue(document.html.contains("“"))
+    assertTrue(document.html.contains("”"))
+  }
+
   /** 解析外部真实附件。 */
   @Test
   fun parsesExternalFixtures() = runTest {

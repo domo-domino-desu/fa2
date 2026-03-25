@@ -57,6 +57,8 @@ internal data class AttachmentInlineStyle(
     val italic: Boolean = false,
     /** 删除线。 */
     val strike: Boolean = false,
+    /** 下划线。 */
+    val underline: Boolean = false,
 )
 
 /** 带样式的文本片段。 */

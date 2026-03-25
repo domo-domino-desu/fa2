@@ -5,6 +5,7 @@ import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.local.KeyValueStorage
 import me.domino.fa2.data.parser.SubmissionParser
 import me.domino.fa2.data.settings.AppSettingsService
@@ -147,7 +148,26 @@ class SubmissionDescriptionTranslationServiceTest {
     )
   }
 
-  private fun createService(): SubmissionDescriptionTranslationService {
+  @Test
+  fun stripsTrailingSeparatorMarkerFromTranslatedBlock() = runTest {
+    val service = createService(translationOutput = "译文内容\n%%")
+    val results = mutableListOf<SubmissionDescriptionBlockResult>()
+
+    service.translateBlocks(
+        blocks = listOf(SubmissionDescriptionBlock("<p>Original</p>", "Original")),
+        onBlockResult = { _, result -> results += result },
+    )
+
+    assertEquals(1, results.size)
+    assertEquals(
+        "译文内容",
+        (results.single() as SubmissionDescriptionBlockResult.Success).translatedText,
+    )
+  }
+
+  private fun createService(
+      translationOutput: String? = null
+  ): SubmissionDescriptionTranslationService {
     val randomSuffix = Random.nextLong().toString().replace('-', '0')
     val tempPath =
         "${FileSystem.SYSTEM_TEMPORARY_DIRECTORY}/fa2-test-$randomSuffix.preferences_pb".toPath()
@@ -156,7 +176,8 @@ class SubmissionDescriptionTranslationServiceTest {
     val settingsService = AppSettingsService(AppSettingsStorage(keyValueStorage))
     val translationPort =
         object : TranslationPort {
-          override suspend fun translate(request: TranslationRequest): String = request.sourceText
+          override suspend fun translate(request: TranslationRequest): String =
+              translationOutput ?: request.sourceText
         }
 
     return SubmissionDescriptionTranslationService(

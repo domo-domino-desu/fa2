@@ -101,6 +101,8 @@ private data class RtfState(
     val italic: Boolean = false,
     /** 删除线。 */
     val strike: Boolean = false,
+    /** 下划线。 */
+    val underline: Boolean = false,
     /** 跳过目标。 */
     val skipDestination: Boolean = false,
     /** Unicode 后跳过字符数。 */
@@ -114,10 +116,13 @@ private data class RtfState(
 /** 目标控制字。 */
 private val rtfIgnoredDestinations =
     setOf(
+        "latentstyles",
         "fonttbl",
         "colortbl",
         "stylesheet",
         "info",
+        "rsidtbl",
+        "mmathpr",
         "pict",
         "object",
         "header",
@@ -132,6 +137,7 @@ private val rtfIgnoredDestinations =
         "xmlnstbl",
         "datastore",
         "themedata",
+        "wgrffmtfilter",
         "fldinst",
     )
 
@@ -286,6 +292,7 @@ private fun interpretRtfTokens(
                     bold = state.bold,
                     italic = state.italic,
                     strike = state.strike,
+                    underline = state.underline,
                 ),
         )
   }
@@ -312,9 +319,16 @@ private fun interpretRtfTokens(
       }
 
       is RtfToken.ControlWord -> {
+        val normalizedName = token.name.lowercase()
         val state = currentState()
+        if (normalizedName in rtfIgnoredDestinations) {
+          replaceCurrentState { current ->
+            current.copy(skipDestination = true, pendingIgnorableDestination = false)
+          }
+          return@forEachIndexed
+        }
         if (state.pendingIgnorableDestination) {
-          val shouldSkip = token.name in rtfIgnoredDestinations
+          val shouldSkip = normalizedName in rtfIgnoredDestinations
           replaceCurrentState { current ->
             current.copy(
                 skipDestination = shouldSkip || current.skipDestination,
@@ -323,22 +337,24 @@ private fun interpretRtfTokens(
           }
           if (shouldSkip) return@forEachIndexed
         }
-        if (currentState().skipDestination && token.name !in setOf("par", "line")) {
+        if (currentState().skipDestination && normalizedName !in setOf("par", "line")) {
           return@forEachIndexed
         }
-        when (token.name) {
+        when (normalizedName) {
           "par" -> flushParagraph()
           "line" -> appendText("\n")
           "tab" -> appendText("    ")
           "plain" ->
               replaceCurrentState { current ->
-                current.copy(bold = false, italic = false, strike = false)
+                current.copy(bold = false, italic = false, strike = false, underline = false)
               }
           "b" -> replaceCurrentState { current -> current.copy(bold = (token.value ?: 1) != 0) }
           "i" -> replaceCurrentState { current -> current.copy(italic = (token.value ?: 1) != 0) }
           "strike" ->
               replaceCurrentState { current -> current.copy(strike = (token.value ?: 1) != 0) }
-          "ulnone" -> Unit
+          "ul" ->
+              replaceCurrentState { current -> current.copy(underline = (token.value ?: 1) != 0) }
+          "ulnone" -> replaceCurrentState { current -> current.copy(underline = false) }
           "uc" ->
               replaceCurrentState { current ->
                 current.copy(

@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.testing.Test
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -63,6 +64,9 @@ val shouldGenerateAppIcons =
         .map { value -> !value.toBoolean() }
         .orElse(true)
 
+val enableDesktopE2e =
+    providers.gradleProperty("enableDesktopE2e").map(String::toBoolean).orElse(false)
+
 tasks
     .matching { it.name in setOf("desktopProcessResources", "processResources") }
     .configureEach {
@@ -70,3 +74,9 @@ tasks
         dependsOn(rootProject.tasks.named("generateAppIcons"))
       }
     }
+
+tasks.named<Test>("desktopTest").configure {
+  if (!enableDesktopE2e.get()) {
+    exclude("me/domino/fa2/desktop/e2e/**")
+  }
+}

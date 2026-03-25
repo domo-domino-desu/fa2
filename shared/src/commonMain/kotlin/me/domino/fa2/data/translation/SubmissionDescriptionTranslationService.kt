@@ -188,10 +188,11 @@ class SubmissionDescriptionTranslationService(
             )
 
     return translatedLines.map { translatedLine ->
-      if (translatedLine.isBlank()) {
+      val cleanedTranslation = sanitizeTranslatedBlockText(translatedLine)
+      if (cleanedTranslation.isBlank()) {
         SubmissionDescriptionBlockResult.EmptyResult
       } else {
-        SubmissionDescriptionBlockResult.Success(translatedLine)
+        SubmissionDescriptionBlockResult.Success(cleanedTranslation)
       }
     }
   }
@@ -296,6 +297,9 @@ class SubmissionDescriptionTranslationService(
           .replace(Regex("\\n{3,}"), "\n\n")
           .trim()
 
+  private fun sanitizeTranslatedBlockText(text: String): String =
+      normalizeTranslationText(text).replace(trailingSeparatorMarkerRegex, "").trimEnd()
+
   private fun appendNodeHtml(builder: StringBuilder, node: Node) {
     val html = node.outerHtml()
     if (html.isNotBlank()) {
@@ -342,6 +346,7 @@ class SubmissionDescriptionTranslationService(
     private const val BATCH_SEPARATOR = "\n\n%%\n\n"
     private const val separatorMarker = "%%"
     private const val separatorWordCost = 1
+    private val trailingSeparatorMarkerRegex = Regex("""(?:\s|^)%%\s*$""")
     private val cjkRegex =
         Regex("[\\u3400-\\u4DBF\\u4E00-\\u9FFF\\uF900-\\uFAFF\\u3040-\\u30FF\\uAC00-\\uD7AF]")
     private val latinWordRegex = Regex("[\\p{L}\\p{N}]+")

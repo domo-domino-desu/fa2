@@ -3,6 +3,7 @@ package me.domino.fa2.android
 import android.app.Application
 import co.touchlab.kermit.Severity
 import me.domino.fa2.di.startAppKoin
+import me.domino.fa2.util.attachmenttext.initializeAttachmentTextPlatform
 import me.domino.fa2.util.logging.FaLog
 
 /** Android 应用进程入口。 */
@@ -10,6 +11,7 @@ class Fa2Application : Application() {
   /** 应用启动回调。 */
   override fun onCreate() {
     super.onCreate()
+    initializeAttachmentTextPlatform(applicationContext)
     FaLog.init(
         if (BuildConfig.DEBUG) {
           Severity.Debug
@@ -18,6 +20,6 @@ class Fa2Application : Application() {
         }
     )
     startAppKoin(androidPlatformModule(applicationContext))
-    FaLog.withTag("Fa2Application").i { "应用启动 -> Koin已初始化" }
+    FaLog.withTag("Fa2Application").i { "应用启动 -> Koin 与附件文本平台已初始化" }
   }
 }

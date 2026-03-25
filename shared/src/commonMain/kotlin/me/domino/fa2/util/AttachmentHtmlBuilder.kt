@@ -101,6 +101,7 @@ internal fun splitPlainTextParagraphs(text: String): List<String> {
 internal fun applyInlineStyle(html: String, style: AttachmentInlineStyle): String {
   if (html.isEmpty()) return html
   var result = html
+  if (style.underline) result = "<u>$result</u>"
   if (style.strike) result = "<s>$result</s>"
   if (style.italic) result = "<i>$result</i>"
   if (style.bold) result = "<b>$result</b>"
