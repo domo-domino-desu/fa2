@@ -17,6 +17,7 @@ kotlin {
     namespace = "me.domino.fa2.shared"
     compileSdk = 36
     minSdk = 24
+    androidResources { enable = true }
   }
 
   jvm("desktop")
