@@ -158,8 +158,12 @@ symbolCraft {
 
 tasks
     .matching {
-      it.name.startsWith("kspKotlin") ||
+      // KMP task names are mixed here: desktop uses compileKotlinDesktop/kspKotlinDesktop,
+      // while Android uses compileAndroidMain/kspAndroidMain. Make all Kotlin compilation
+      // entry points regenerate SymbolCraft icons in clean environments such as CI.
+      it.name.startsWith("ksp") ||
           it.name.startsWith("compileKotlin") ||
-          it.name.startsWith("compileCommonMainKotlinMetadata")
+          it.name.startsWith("compileCommonMainKotlinMetadata") ||
+          it.name.startsWith("compileAndroid")
     }
     .configureEach { dependsOn("generateSymbolCraftIcons") }
