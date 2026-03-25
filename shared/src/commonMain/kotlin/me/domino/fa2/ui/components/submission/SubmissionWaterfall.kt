@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -194,7 +195,8 @@ private fun SubmissionWaterfallItem(
               width = 1.dp,
               color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
           ),
-      modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+      modifier =
+          Modifier.fillMaxWidth().testTag("submission-waterfall-card").clickable(onClick = onClick),
   ) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
       Box(

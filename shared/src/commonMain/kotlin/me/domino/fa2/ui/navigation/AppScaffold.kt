@@ -18,6 +18,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.domino.fa2.ui.icons.FaMaterialSymbols
@@ -81,6 +82,7 @@ fun AppScaffold(
             NavigationRailItem(
                 selected = selected,
                 onClick = { onTopLevelDestinationClick(destination.destination, selected) },
+                modifier = Modifier.testTag(destination.testTag),
                 icon = { TopLevelDestinationIcon(destination, selected) },
                 label = { TopLevelDestinationLabel(destination) },
             )
@@ -99,6 +101,7 @@ fun AppScaffold(
                 NavigationBarItem(
                     selected = selected,
                     onClick = { onTopLevelDestinationClick(destination.destination, selected) },
+                    modifier = Modifier.testTag(destination.testTag),
                     icon = { TopLevelDestinationIcon(destination, selected) },
                     label = { TopLevelDestinationLabel(destination) },
                 )
@@ -118,6 +121,8 @@ private data class TopLevelDestinationItem(
     val destination: TopLevelDestination,
     /** 展示文案。 */
     val label: String,
+    /** UI 测试标签。 */
+    val testTag: String,
     /** 选中图标。 */
     val selectedIcon: ImageVector,
     /** 未选中图标。 */
@@ -130,24 +135,28 @@ private val TOP_LEVEL_DESTINATIONS: List<TopLevelDestinationItem> =
         TopLevelDestinationItem(
             destination = TopLevelDestination.FEED,
             label = "动态",
+            testTag = "nav-feed",
             selectedIcon = FaMaterialSymbols.Filled.Home,
             unselectedIcon = FaMaterialSymbols.Outlined.Home,
         ),
         TopLevelDestinationItem(
             destination = TopLevelDestination.BROWSE,
             label = "浏览",
+            testTag = "nav-browse",
             selectedIcon = FaMaterialSymbols.Filled.Explore,
             unselectedIcon = FaMaterialSymbols.Outlined.Explore,
         ),
         TopLevelDestinationItem(
             destination = TopLevelDestination.SEARCH,
             label = "搜索",
+            testTag = "nav-search",
             selectedIcon = FaMaterialSymbols.Filled.Search,
             unselectedIcon = FaMaterialSymbols.Outlined.Search,
         ),
         TopLevelDestinationItem(
             destination = TopLevelDestination.MORE,
             label = "更多",
+            testTag = "nav-more",
             selectedIcon = FaMaterialSymbols.Filled.Menu,
             unselectedIcon = FaMaterialSymbols.Outlined.Menu,
         ),

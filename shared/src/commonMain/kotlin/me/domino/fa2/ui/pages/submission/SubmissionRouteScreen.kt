@@ -32,6 +32,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -144,23 +145,26 @@ class SubmissionRouteScreen(
 
     Column(
         modifier =
-            Modifier.fillMaxSize().focusRequester(focusRequester).focusable().onPreviewKeyEvent {
-                event ->
-              if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
-              when (event.key) {
-                Key.DirectionLeft -> {
-                  screenModel.previous()
-                  true
-                }
+            Modifier.fillMaxSize()
+                .focusRequester(focusRequester)
+                .focusable()
+                .onPreviewKeyEvent { event ->
+                  if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                  when (event.key) {
+                    Key.DirectionLeft -> {
+                      screenModel.previous()
+                      true
+                    }
 
-                Key.DirectionRight -> {
-                  screenModel.next()
-                  true
-                }
+                    Key.DirectionRight -> {
+                      screenModel.next()
+                      true
+                    }
 
-                else -> false
-              }
-            }
+                    else -> false
+                  }
+                }
+                .testTag("submission-route")
     ) {
       if (!zoomOverlayVisible) {
         SubmissionRouteTopBar(

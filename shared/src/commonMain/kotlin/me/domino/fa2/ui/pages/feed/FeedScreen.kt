@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.AppSettingsService
@@ -45,7 +46,10 @@ fun FeedScreen(
   val settingsService = koinInject<AppSettingsService>()
   val settings by settingsService.settings.collectAsState()
 
-  Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+  Column(
+      modifier = Modifier.fillMaxSize().testTag("feed-screen"),
+      verticalArrangement = Arrangement.spacedBy(10.dp),
+  ) {
     when {
       state.loading && state.submissions.isEmpty() -> {
         WaterfallLoadingSkeleton(

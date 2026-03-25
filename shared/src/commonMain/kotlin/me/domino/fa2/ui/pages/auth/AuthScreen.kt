@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 
@@ -34,7 +35,7 @@ fun AuthScreen(
     onRetry: () -> Unit,
 ) {
   Column(
-      modifier = Modifier.fillMaxSize().padding(20.dp),
+      modifier = Modifier.fillMaxSize().padding(20.dp).testTag("auth-screen"),
       verticalArrangement = Arrangement.spacedBy(12.dp),
   ) {
     Text(text = "登录到 FurAffinity", style = MaterialTheme.typography.headlineSmall)

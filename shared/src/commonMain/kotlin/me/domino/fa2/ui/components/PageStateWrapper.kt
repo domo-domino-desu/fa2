@@ -12,6 +12,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import me.domino.fa2.data.model.PageState
 
@@ -35,6 +36,7 @@ fun <T> PageStateWrapper(
           title = "需要 Cloudflare 验证",
           body = "请先完成挑战并更新 cookie（含 cf_clearance）。",
           onRetry = onRetry,
+          modifier = Modifier.testTag("cf-challenge-status"),
       )
     }
 
@@ -65,6 +67,8 @@ private fun StatusCard(
     body: String,
     /** 重试回调。 */
     onRetry: (() -> Unit)?,
+    /** 组件修饰符。 */
+    modifier: Modifier = Modifier,
 ) {
   Surface(
       color = MaterialTheme.colorScheme.surface,
@@ -74,7 +78,7 @@ private fun StatusCard(
               width = 1.dp,
               color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
           ),
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+      modifier = modifier.fillMaxWidth().padding(horizontal = 12.dp),
   ) {
     Column(
         modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),

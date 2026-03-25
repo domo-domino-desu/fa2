@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import me.domino.fa2.app.challenge.CfChallengeController
@@ -38,7 +39,10 @@ fun CfChallengeOverlay(
 
   LaunchedEffect(adapter.port.lastLoadedUrl) { controller.syncUserAgentFromWebView(adapter.port) }
 
-  Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
+  Surface(
+      modifier = modifier.fillMaxSize().testTag("cf-challenge-status"),
+      color = MaterialTheme.colorScheme.surface,
+  ) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
