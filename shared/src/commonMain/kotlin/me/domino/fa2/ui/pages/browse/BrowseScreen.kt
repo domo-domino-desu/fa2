@@ -12,12 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -41,6 +41,7 @@ import me.domino.fa2.ui.components.FilterDialogTriggerField
 import me.domino.fa2.ui.components.FilterDropdownField
 import me.domino.fa2.ui.components.FilterOption
 import me.domino.fa2.ui.components.FilterOptionGroup
+import me.domino.fa2.ui.components.GroupedFilterDropdownField
 import me.domino.fa2.ui.components.GroupedTextPickerDialog
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
@@ -75,6 +76,8 @@ fun BrowseScreen(
   val taxonomyCatalog by taxonomyRepository.catalog.collectAsState()
   var filterPageVisible by remember { mutableStateOf(false) }
   val browseCategoryOptions = remember(taxonomyCatalog) { taxonomyRepository.categoryOptions() }
+  val browseCategoryOptionGroups =
+      remember(taxonomyCatalog) { taxonomyRepository.categoryOptionGroups() }
   val browseTypeOptions = remember(taxonomyCatalog) { taxonomyRepository.typeOptions() }
   val browseSpeciesOptions = remember(taxonomyCatalog) { taxonomyRepository.speciesOptions() }
   val browseTypeOptionGroups = remember(taxonomyCatalog) { taxonomyRepository.typeOptionGroups() }
@@ -157,6 +160,7 @@ fun BrowseScreen(
           onSetRatingMature = onSetRatingMature,
           onSetRatingAdult = onSetRatingAdult,
           categoryOptions = browseCategoryOptions,
+          categoryOptionGroups = browseCategoryOptionGroups,
           typeOptions = browseTypeOptions,
           speciesOptions = browseSpeciesOptions,
           typeOptionGroups = browseTypeOptionGroups,
@@ -174,32 +178,41 @@ fun BrowseScreen(
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
 private fun BrowseFilterSummaryBar(chips: List<String>, onOpenFilterPage: () -> Unit) {
-  Row(
+  Surface(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 1.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.SpaceBetween,
+      color = MaterialTheme.colorScheme.surface,
+      shape = RoundedCornerShape(14.dp),
+      onClick = onOpenFilterPage,
   ) {
-    FlowRow(
-        modifier = Modifier.weight(1f),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      chips.forEach { chip ->
-        Surface(
-            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.78f),
-            shape = CircleShape,
-        ) {
-          Text(
-              text = chip,
-              style = MaterialTheme.typography.labelMedium,
-              color = MaterialTheme.colorScheme.onSecondaryContainer,
-              modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
-          )
+      FlowRow(
+          modifier = Modifier.weight(1f),
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+          verticalArrangement = Arrangement.spacedBy(6.dp),
+      ) {
+        chips.forEach { chip ->
+          Surface(
+              color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.78f),
+              shape = CircleShape,
+          ) {
+            Text(
+                text = chip,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
+            )
+          }
         }
       }
-    }
-    IconButton(onClick = onOpenFilterPage) {
-      Icon(imageVector = FaMaterialSymbols.Outlined.FilterAlt, contentDescription = "打开筛选页面")
+      Icon(
+          imageVector = FaMaterialSymbols.Outlined.FilterAlt,
+          contentDescription = "打开筛选页面",
+          tint = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
     }
   }
 }
@@ -218,6 +231,7 @@ private fun BrowseFilterPage(
     onSetRatingMature: (Boolean) -> Unit,
     onSetRatingAdult: (Boolean) -> Unit,
     categoryOptions: List<FilterOption<Int>>,
+    categoryOptionGroups: List<FilterOptionGroup<Int>>,
     typeOptions: List<FilterOption<Int>>,
     speciesOptions: List<FilterOption<Int>>,
     typeOptionGroups: List<FilterOptionGroup<Int>>,
@@ -256,9 +270,9 @@ private fun BrowseFilterPage(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth(),
         ) {
-          FilterDropdownField(
+          GroupedFilterDropdownField(
               label = "类别",
-              options = categoryOptions,
+              groups = categoryOptionGroups,
               selected = filter.category,
               onSelected = onUpdateCategory,
               modifier = Modifier.weight(1f),

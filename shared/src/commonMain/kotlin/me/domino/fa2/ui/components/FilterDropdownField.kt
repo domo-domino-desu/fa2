@@ -105,7 +105,8 @@ fun <T> GroupedFilterDropdownField(
     modifier: Modifier = Modifier,
 ) {
   var expanded by remember { mutableStateOf(false) }
-  val options = groups.flatMap { group -> group.options }
+  val visibleGroups = groups.filter { group -> group.options.isNotEmpty() }
+  val options = visibleGroups.flatMap { group -> group.options }
   val selectedLabel = options.firstOrNull { option -> option.value == selected }?.label.orEmpty()
 
   ExposedDropdownMenuBox(
@@ -127,7 +128,7 @@ fun <T> GroupedFilterDropdownField(
     )
 
     ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-      groups.forEach { group ->
+      visibleGroups.forEachIndexed { index, group ->
         if (group.label.isNotBlank()) {
           DropdownMenuItem(
               text = {
@@ -148,6 +149,12 @@ fun <T> GroupedFilterDropdownField(
                 onSelected(option.value)
                 expanded = false
               },
+          )
+        }
+        if (index != visibleGroups.lastIndex) {
+          HorizontalDivider(
+              modifier = Modifier.padding(vertical = 4.dp),
+              color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
           )
         }
       }

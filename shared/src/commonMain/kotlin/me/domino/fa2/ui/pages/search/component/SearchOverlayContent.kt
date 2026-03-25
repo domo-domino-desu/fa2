@@ -31,6 +31,7 @@ import me.domino.fa2.ui.components.FilterDialogTriggerField
 import me.domino.fa2.ui.components.FilterDropdownField
 import me.domino.fa2.ui.components.FilterOption
 import me.domino.fa2.ui.components.FilterOptionGroup
+import me.domino.fa2.ui.components.GroupedFilterDropdownField
 import me.domino.fa2.ui.components.GroupedTextPickerDialog
 import me.domino.fa2.ui.layouts.SearchOverlayTopBar
 import me.domino.fa2.ui.pages.search.SearchFormState
@@ -53,6 +54,8 @@ internal fun SearchOverlayContent(
   val taxonomyCatalog by taxonomyRepository.catalog.collectAsState()
   val searchUiLabelsCatalog by searchUiLabelsRepository.catalog.collectAsState()
   val searchCategoryOptions = remember(taxonomyCatalog) { taxonomyRepository.categoryOptions() }
+  val searchCategoryOptionGroups =
+      remember(taxonomyCatalog) { taxonomyRepository.categoryOptionGroups() }
   val searchTypeOptions = remember(taxonomyCatalog) { taxonomyRepository.typeOptions() }
   val searchSpeciesOptions = remember(taxonomyCatalog) { taxonomyRepository.speciesOptions() }
   val searchTypeOptionGroups = remember(taxonomyCatalog) { taxonomyRepository.typeOptionGroups() }
@@ -100,6 +103,7 @@ internal fun SearchOverlayContent(
             onUpdateOrderDirection = actions.onUpdateOrderDirection,
             onUpdateRange = actions.onUpdateRange,
             categoryOptions = searchCategoryOptions,
+            categoryOptionGroups = searchCategoryOptionGroups,
             typeOptions = searchTypeOptions,
             speciesOptions = searchSpeciesOptions,
             typeOptionGroups = searchTypeOptionGroups,
@@ -171,6 +175,7 @@ private fun SearchTopFilterGrid(
     onUpdateOrderDirection: (String) -> Unit,
     onUpdateRange: (String) -> Unit,
     categoryOptions: List<FilterOption<Int>>,
+    categoryOptionGroups: List<FilterOptionGroup<Int>>,
     typeOptions: List<FilterOption<Int>>,
     speciesOptions: List<FilterOption<Int>>,
     orderByOptions: List<FilterOption<String>>,
@@ -195,9 +200,9 @@ private fun SearchTopFilterGrid(
           modifier = Modifier.fillMaxWidth(),
           verticalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        FilterDropdownField(
+        GroupedFilterDropdownField(
             label = "类别",
-            options = categoryOptions,
+            groups = categoryOptionGroups,
             selected = form.category,
             onSelected = onUpdateCategory,
             modifier = Modifier.fillMaxWidth(),
@@ -245,9 +250,9 @@ private fun SearchTopFilterGrid(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth(),
         ) {
-          FilterDropdownField(
+          GroupedFilterDropdownField(
               label = "类别",
-              options = categoryOptions,
+              groups = categoryOptionGroups,
               selected = form.category,
               onSelected = onUpdateCategory,
               modifier = Modifier.weight(1f),
