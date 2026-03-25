@@ -17,6 +17,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,7 +30,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.panpf.zoomimage.CoilZoomAsyncImage
+import me.domino.fa2.ui.components.CenterCircularWavyImageLoadingProgress
+import me.domino.fa2.ui.components.ImageLoadLifecycleState
 import me.domino.fa2.ui.components.NetworkImage
+import me.domino.fa2.ui.components.rememberImageLoadProgressState
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.util.isGifUrl
 
@@ -36,7 +43,8 @@ internal fun SubmissionZoomImageOverlay(imageUrl: String, onDismiss: () -> Unit)
       modifier =
           Modifier.fillMaxSize().background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.95f))
   ) {
-    val normalizedUrl = imageUrl.trim()
+    val normalizedUrl =
+        imageUrl.trim().let { url -> if (url.startsWith("//")) "https:$url" else url }
     if (isGifUrl(normalizedUrl)) {
       NetworkImage(
           url = normalizedUrl,
@@ -45,14 +53,30 @@ internal fun SubmissionZoomImageOverlay(imageUrl: String, onDismiss: () -> Unit)
           showLoadingPlaceholder = false,
       )
     } else {
-      CoilZoomAsyncImage(
-          model = normalizedUrl,
-          contentDescription = "查看原图",
-          modifier = Modifier.fillMaxSize().padding(12.dp),
-          contentScale = ContentScale.Fit,
-          filterQuality = FilterQuality.High,
-          onTap = { onDismiss() },
-      )
+      var loadLifecycleState by
+          remember(normalizedUrl) { mutableStateOf(ImageLoadLifecycleState.Idle) }
+      val progressState =
+          rememberImageLoadProgressState(
+              progressKey = normalizedUrl,
+              lifecycleState = loadLifecycleState,
+          )
+      Box(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+        CoilZoomAsyncImage(
+            model = normalizedUrl,
+            contentDescription = "查看原图",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Fit,
+            filterQuality = FilterQuality.High,
+            onLoading = { _ -> loadLifecycleState = ImageLoadLifecycleState.Loading },
+            onSuccess = { _ -> loadLifecycleState = ImageLoadLifecycleState.Success },
+            onError = { _ -> loadLifecycleState = ImageLoadLifecycleState.Error },
+            onTap = { onDismiss() },
+        )
+        CenterCircularWavyImageLoadingProgress(
+            progressState = progressState,
+            modifier = Modifier.align(Alignment.Center),
+        )
+      }
     }
     IconButton(
         onClick = onDismiss,

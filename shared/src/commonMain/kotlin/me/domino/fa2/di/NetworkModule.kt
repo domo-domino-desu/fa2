@@ -8,6 +8,7 @@ import me.domino.fa2.data.network.CookiePersistence
 import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.FaHtmlDataSource
 import me.domino.fa2.data.network.FaHttpClient
+import me.domino.fa2.data.network.ImageProgressTracker
 import me.domino.fa2.data.network.KSafeCookiePersistence
 import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.data.network.challenge.ChallengeAwareFaHtmlDataSource
@@ -37,6 +38,7 @@ fun networkModule(): Module = module {
   }
   single { FaCookiesStorage(get()) }
   single { UserAgentStorage(get()) }
+  single { ImageProgressTracker() }
 
   single<HttpClient> { HttpClient { expectSuccess = false } }
   single<TranslationPort> { KtorTranslationPort(get()) }

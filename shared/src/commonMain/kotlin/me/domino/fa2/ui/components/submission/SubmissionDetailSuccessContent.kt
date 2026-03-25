@@ -180,6 +180,8 @@ internal fun SubmissionDetailSuccessContent(
                   .then(if (shouldBlurBlockedMedia) Modifier.blur(26.dp) else Modifier),
           thumbnailUrl = thumbnailUrl,
           showLoadingPlaceholder = false,
+          showTopLinearLoadingProgress = true,
+          progressTrackingKey = mediaUrl,
       )
     }
     Column(

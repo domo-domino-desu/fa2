@@ -12,8 +12,11 @@ import coil3.disk.DiskCache
 import coil3.gif.GifDecoder
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import me.domino.fa2.data.network.ImageProgressTracker
+import me.domino.fa2.data.network.installCoilImageProgressSupport
 import me.domino.fa2.ui.host.Fa2App
 import okio.Path.Companion.toPath
+import org.koin.core.context.GlobalContext
 
 private const val coilDiskCacheMaxBytes = 1024L * 1024L * 1024L
 private val supportedFaHosts = setOf("furaffinity.net", "www.furaffinity.net")
@@ -35,8 +38,10 @@ class MainActivity : ComponentActivity() {
     enableEdgeToEdge()
     setContent {
       setSingletonImageLoaderFactory { platformContext ->
+        val progressTracker = GlobalContext.get().get<ImageProgressTracker>()
         ImageLoader.Builder(platformContext)
             .components { add(GifDecoder.Factory()) }
+            .installCoilImageProgressSupport(progressTracker)
             .diskCache {
               DiskCache.Builder()
                   .directory("${platformContext.cacheDir.absolutePath}/coil-image-cache".toPath())

@@ -3,9 +3,13 @@ package me.domino.fa2.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
@@ -45,6 +49,10 @@ fun NetworkImage(
     thumbnailUrl: String? = null,
     /** 是否展示加载占位层。 */
     showLoadingPlaceholder: Boolean = true,
+    /** 是否显示顶部直线进度条。 */
+    showTopLinearLoadingProgress: Boolean = false,
+    /** 自定义进度 key（默认使用主图 URL）。 */
+    progressTrackingKey: String? = null,
 ) {
   val platformContext = LocalPlatformContext.current
   val normalizedUrl = remember(url) { normalizeNetworkUrl(url).trim() }
@@ -59,6 +67,7 @@ fun NetworkImage(
           modifier = modifier,
           contentScale = contentScale,
           showLoadingPlaceholder = showLoadingPlaceholder,
+          showTopLinearLoadingProgress = false,
           thumbnailUrl = null,
       )
       return
@@ -77,53 +86,85 @@ fun NetworkImage(
       remember(platformContext, normalizedUrl) {
         ImageRequest.Builder(platformContext).data(normalizedUrl).build()
       }
+  val resolvedProgressKey =
+      remember(showTopLinearLoadingProgress, progressTrackingKey, normalizedUrl) {
+        if (!showTopLinearLoadingProgress) {
+          null
+        } else {
+          normalizeNetworkUrl(progressTrackingKey ?: normalizedUrl).trim().ifBlank { null }
+        }
+      }
+  var loadLifecycleState by
+      remember(resolvedProgressKey) { mutableStateOf(ImageLoadLifecycleState.Idle) }
+  val progressState =
+      if (showTopLinearLoadingProgress) {
+        rememberImageLoadProgressState(
+            progressKey = resolvedProgressKey,
+            lifecycleState = loadLifecycleState,
+        )
+      } else {
+        ImageLoadProgressState.Idle
+      }
 
-  SubcomposeAsyncImage(
-      model = request,
-      contentDescription = null,
-      modifier = modifier,
-      contentScale = contentScale,
-      filterQuality = FilterQuality.High,
-      loading = {
-        if (!normalizedThumbnailUrl.isNullOrBlank() && normalizedThumbnailUrl != normalizedUrl) {
-          NetworkImage(
-              url = normalizedThumbnailUrl,
-              modifier = Modifier.fillMaxSize(),
-              contentScale = contentScale,
-              showLoadingPlaceholder = showLoadingPlaceholder,
-              thumbnailUrl = null,
-          )
-        } else if (showLoadingPlaceholder) {
-          Box(
-              modifier =
-                  Modifier.fillMaxSize()
-                      .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
-          )
-        } else {
-          Box(modifier = Modifier.fillMaxSize())
-        }
-      },
-      error = {
-        if (!normalizedThumbnailUrl.isNullOrBlank() && normalizedThumbnailUrl != normalizedUrl) {
-          NetworkImage(
-              url = normalizedThumbnailUrl,
-              modifier = Modifier.fillMaxSize(),
-              contentScale = contentScale,
-              showLoadingPlaceholder = showLoadingPlaceholder,
-              thumbnailUrl = null,
-          )
-        } else if (showLoadingPlaceholder) {
-          Box(
-              modifier =
-                  Modifier.fillMaxSize()
-                      .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.75f))
-          )
-        } else {
-          Box(modifier = Modifier.fillMaxSize())
-        }
-      },
-      success = { SubcomposeAsyncImageContent(modifier = Modifier.fillMaxSize()) },
-  )
+  Box(modifier = modifier) {
+    SubcomposeAsyncImage(
+        model = request,
+        contentDescription = null,
+        modifier = Modifier.fillMaxSize(),
+        contentScale = contentScale,
+        filterQuality = FilterQuality.High,
+        onLoading = { _ -> loadLifecycleState = ImageLoadLifecycleState.Loading },
+        onSuccess = { _ -> loadLifecycleState = ImageLoadLifecycleState.Success },
+        onError = { _ -> loadLifecycleState = ImageLoadLifecycleState.Error },
+        loading = {
+          if (!normalizedThumbnailUrl.isNullOrBlank() && normalizedThumbnailUrl != normalizedUrl) {
+            NetworkImage(
+                url = normalizedThumbnailUrl,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = contentScale,
+                showLoadingPlaceholder = showLoadingPlaceholder,
+                showTopLinearLoadingProgress = false,
+                thumbnailUrl = null,
+            )
+          } else if (showLoadingPlaceholder) {
+            Box(
+                modifier =
+                    Modifier.fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
+            )
+          } else {
+            Box(modifier = Modifier.fillMaxSize())
+          }
+        },
+        error = {
+          if (!normalizedThumbnailUrl.isNullOrBlank() && normalizedThumbnailUrl != normalizedUrl) {
+            NetworkImage(
+                url = normalizedThumbnailUrl,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = contentScale,
+                showLoadingPlaceholder = showLoadingPlaceholder,
+                showTopLinearLoadingProgress = false,
+                thumbnailUrl = null,
+            )
+          } else if (showLoadingPlaceholder) {
+            Box(
+                modifier =
+                    Modifier.fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.75f))
+            )
+          } else {
+            Box(modifier = Modifier.fillMaxSize())
+          }
+        },
+        success = { SubcomposeAsyncImageContent(modifier = Modifier.fillMaxSize()) },
+    )
+    if (showTopLinearLoadingProgress) {
+      TopLinearImageLoadingProgress(
+          progressState = progressState,
+          modifier = Modifier.fillMaxWidth(),
+      )
+    }
+  }
 }
 
 /** 规范化网络地址，兼容 `//` 开头的 URL。 */
