@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import be.digitalia.compose.htmlconverter.htmlToAnnotatedString
@@ -20,6 +21,7 @@ fun HtmlText(
     color: Color = Color.Unspecified,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
     compactMode: Boolean = true,
     trimTrailingWhitespace: Boolean = false,
 ) {
@@ -39,6 +41,7 @@ fun HtmlText(
       color = color,
       maxLines = maxLines,
       overflow = overflow,
+      onTextLayout = onTextLayout,
   )
 }
 

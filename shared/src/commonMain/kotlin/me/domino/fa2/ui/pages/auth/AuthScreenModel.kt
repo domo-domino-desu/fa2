@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.AuthProbeResult
 import me.domino.fa2.data.repository.AuthRepository
+import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.logging.FaLog
 
 /** 登录页面状态模型。 */
@@ -20,8 +21,32 @@ class AuthScreenModel(
   /** Cookie 输入草稿流。 */
   private val cookieDraftState = MutableStateFlow("")
 
+  /** 当前选中的登录方式。 */
+  private val loginMethodState = MutableStateFlow(AuthLoginMethod.WebView)
+
+  /** WebView 登录交互状态。 */
+  private val webViewUiState =
+      MutableStateFlow(
+          AuthWebViewUiState(
+              isConfirming = false,
+              statusMessage = defaultWebViewStatusMessage,
+          )
+      )
+
+  /** 最近一次已同步的 WebView cookie 快照。 */
+  private var lastSyncedWebViewCookieSnapshot: String = ""
+
+  /** 最近一次已同步的 WebView UA。 */
+  private var lastSyncedWebViewUserAgent: String = ""
+
   /** 暴露 Cookie 输入草稿。 */
   fun cookieDraft(): StateFlow<String> = cookieDraftState.asStateFlow()
+
+  /** 暴露当前登录方式。 */
+  fun loginMethod(): StateFlow<AuthLoginMethod> = loginMethodState.asStateFlow()
+
+  /** 暴露 WebView 登录交互状态。 */
+  fun webViewState(): StateFlow<AuthWebViewUiState> = webViewUiState.asStateFlow()
 
   /**
    * 更新 Cookie 输入内容。
@@ -32,16 +57,26 @@ class AuthScreenModel(
     cookieDraftState.value = draft
   }
 
+  /**
+   * 选择登录方式。
+   *
+   * @param method 目标登录方式。
+   */
+  fun selectLoginMethod(method: AuthLoginMethod) {
+    loginMethodState.value = method
+  }
+
   /** 启动初始化：先读 KV，再决定是否进入认证无效态。 */
   fun bootstrap() {
     log.i { "认证初始化 -> 开始" }
     screenModelScope.launch {
       mutableState.value = AuthUiState.Loading
+      resetAuthInteractionState()
       val hasCookie = authRepository.restorePersistedSession()
-      cookieDraftState.value = authRepository.loadCookieHeader()
+      refreshCookieDraft()
       if (!hasCookie) {
         log.w { "认证初始化 -> 无可用Cookie" }
-        mutableState.value = AuthUiState.AuthInvalid(message = "未找到持久化 Cookie，请先输入 Cookie 登录。")
+        mutableState.value = AuthUiState.AuthInvalid(message = "未找到持久化 Cookie，请先登录。")
         return@launch
       }
       probeAndUpdate()
@@ -60,7 +95,7 @@ class AuthScreenModel(
       }
 
       authRepository.submitCookie(normalized)
-      cookieDraftState.value = authRepository.loadCookieHeader()
+      refreshCookieDraft()
       probeAndUpdate()
     }
   }
@@ -71,8 +106,88 @@ class AuthScreenModel(
     screenModelScope.launch { probeAndUpdate() }
   }
 
+  /**
+   * 将当前持久化会话注入到 WebView。
+   *
+   * @param port 会话 WebView 端口。
+   */
+  suspend fun prepareWebViewSession(port: SessionWebViewPort) {
+    log.d { "准备WebView会话 -> 开始" }
+    val cookieHeader = authRepository.loadCookieHeader()
+    sessionSyncUrls(port).forEach { url ->
+      port.injectCookieHeader(url = url, cookieHeader = cookieHeader)
+    }
+    syncUserAgentFromWebView(port)
+    updateWebViewUiState(statusMessage = defaultWebViewStatusMessage)
+  }
+
+  /**
+   * 从 WebView 同步 cookie 与 UA 到应用侧。
+   *
+   * @param port 会话 WebView 端口。
+   */
+  suspend fun syncWebViewSession(port: SessionWebViewPort) {
+    val changedCookie = syncCookieSnapshotFromWebView(port)
+    val changedUa = syncUserAgentFromWebView(port)
+    if (changedCookie || changedUa) {
+      updateWebViewUiState(statusMessage = "已同步 WebView 会话。")
+    }
+  }
+
+  /**
+   * 读取 WebView 登录结果并执行最终登录态探测。
+   *
+   * @param port 会话 WebView 端口。
+   */
+  suspend fun confirmWebViewLogin(port: SessionWebViewPort) {
+    log.i { "WebView登录确认 -> 开始" }
+    updateWebViewUiState(
+        isConfirming = true,
+        statusMessage = "正在读取 WebView 中的登录信息...",
+    )
+
+    val cookieChanged = syncCookieSnapshotFromWebView(port)
+    syncUserAgentFromWebView(port)
+
+    if (!cookieChanged && cookieDraftState.value.isBlank()) {
+      updateWebViewUiState(
+          isConfirming = true,
+          statusMessage = "暂未从 WebView 抓取到 Cookie，继续检查当前会话...",
+      )
+    } else {
+      updateWebViewUiState(
+          isConfirming = true,
+          statusMessage = "已同步 WebView Cookie，正在验证登录态...",
+      )
+    }
+
+    val nextState = probeAndUpdate()
+    when (nextState) {
+      is AuthUiState.Authenticated -> {
+        updateWebViewUiState(
+            isConfirming = false,
+            statusMessage = "登录成功，正在进入主页...",
+        )
+      }
+
+      is AuthUiState.AuthInvalid -> {
+        updateWebViewUiState(
+            isConfirming = false,
+            statusMessage = "登录未完成：${nextState.message}",
+        )
+      }
+
+      AuthUiState.Loading -> {
+        updateWebViewUiState(
+            isConfirming = false,
+            statusMessage = defaultWebViewStatusMessage,
+        )
+      }
+    }
+  }
+
   /** 执行一次登录态探测并更新 UI 状态。 */
-  private suspend fun probeAndUpdate() {
+  private suspend fun probeAndUpdate(): AuthUiState {
     val nextState =
         when (val result = authRepository.probeLogin()) {
           is AuthProbeResult.LoggedIn -> {
@@ -89,6 +204,80 @@ class AuthScreenModel(
         }
     mutableState.value = nextState
     log.i { "登录态探测 -> ${summarizeAuthUiState(nextState)}" }
+    return nextState
+  }
+
+  /** 重置认证交互状态。 */
+  private fun resetAuthInteractionState() {
+    loginMethodState.value = AuthLoginMethod.WebView
+    updateWebViewUiState(isConfirming = false, statusMessage = defaultWebViewStatusMessage)
+    lastSyncedWebViewCookieSnapshot = ""
+    lastSyncedWebViewUserAgent = ""
+  }
+
+  /** 刷新输入框草稿，并同步内部 cookie 快照。 */
+  private suspend fun refreshCookieDraft() {
+    val loadedCookie = authRepository.loadCookieHeader()
+    cookieDraftState.value = loadedCookie
+    lastSyncedWebViewCookieSnapshot = loadedCookie
+  }
+
+  /**
+   * 从 WebView 同步 cookie 快照。
+   *
+   * @return 本次是否写入了新快照。
+   */
+  private suspend fun syncCookieSnapshotFromWebView(port: SessionWebViewPort): Boolean {
+    val mergedCookieHeader = captureMergedWebViewCookieHeader(port)
+    if (mergedCookieHeader.isBlank() || mergedCookieHeader == lastSyncedWebViewCookieSnapshot) {
+      return false
+    }
+
+    authRepository.syncWebViewCookie(mergedCookieHeader)
+    refreshCookieDraft()
+    return true
+  }
+
+  /**
+   * 从 WebView 同步 UA。
+   *
+   * @return 本次是否写入了新 UA。
+   */
+  private suspend fun syncUserAgentFromWebView(port: SessionWebViewPort): Boolean {
+    val userAgent = port.readUserAgent()?.trim().orEmpty()
+    if (userAgent.isBlank() || userAgent == lastSyncedWebViewUserAgent) {
+      return false
+    }
+    authRepository.updateUserAgent(userAgent)
+    lastSyncedWebViewUserAgent = userAgent
+    return true
+  }
+
+  /** 合并抓取多个 URL 下的 cookie 快照。 */
+  private suspend fun captureMergedWebViewCookieHeader(port: SessionWebViewPort): String {
+    val merged = LinkedHashMap<String, String>()
+    sessionSyncUrls(port).forEach { url ->
+      parseCookieHeader(port.captureCookieHeader(url)).forEach { (name, value) ->
+        merged[name] = value
+      }
+    }
+    return merged.entries.joinToString("; ") { (name, value) -> "$name=$value" }
+  }
+
+  /** 当前会话同步需要覆盖的 URL。 */
+  private fun sessionSyncUrls(port: SessionWebViewPort): List<String> =
+      linkedSetOf(FaUrls.home, FaUrls.login, port.lastLoadedUrl ?: FaUrls.login).toList()
+
+  /** 更新 WebView 交互状态。 */
+  private fun updateWebViewUiState(
+      isConfirming: Boolean = webViewUiState.value.isConfirming,
+      statusMessage: String = webViewUiState.value.statusMessage,
+  ) {
+    webViewUiState.value =
+        AuthWebViewUiState(
+            isConfirming = isConfirming,
+            statusMessage = statusMessage,
+        )
   }
 
   private fun summarizeAuthUiState(state: AuthUiState): String =
@@ -98,6 +287,20 @@ class AuthScreenModel(
         is AuthUiState.AuthInvalid -> "认证无效"
       }
 }
+
+/** 登录方式。 */
+enum class AuthLoginMethod {
+  WebView,
+  Cookie,
+}
+
+/** WebView 登录交互状态。 */
+data class AuthWebViewUiState(
+    /** 当前是否正在执行最终确认。 */
+    val isConfirming: Boolean,
+    /** 展示给用户的状态说明。 */
+    val statusMessage: String,
+)
 
 /** 登录页状态定义。 */
 sealed interface AuthUiState {
@@ -124,3 +327,18 @@ sealed interface AuthUiState {
       val username: String?
   ) : AuthUiState
 }
+
+/** 解析 Cookie Header 为键值对集合。 */
+private fun parseCookieHeader(rawCookieHeader: String): List<Pair<String, String>> =
+    rawCookieHeader
+        .split(';')
+        .map { token -> token.trim() }
+        .filter { token -> token.isNotBlank() && token.contains('=') }
+        .mapNotNull { token ->
+          val name = token.substringBefore('=').trim()
+          val value = token.substringAfter('=', "").trim()
+          name.takeIf { it.isNotBlank() }?.let { nonBlankName -> nonBlankName to value }
+        }
+
+private const val defaultWebViewStatusMessage: String =
+    "请在左侧 WebView 中完成登录；如果遇到 Cloudflare，请先完成验证，再点击“完成登录”。"

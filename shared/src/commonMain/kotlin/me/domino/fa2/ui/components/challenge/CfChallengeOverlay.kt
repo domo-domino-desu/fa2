@@ -20,8 +20,8 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.app.challenge.CfChallengeController
 import me.domino.fa2.app.challenge.CfChallengeStatus
 import me.domino.fa2.app.challenge.CfChallengeUiState
-import me.domino.fa2.ui.pages.auth.CfChallengeWebView
-import me.domino.fa2.ui.pages.auth.rememberChallengeWebViewAdapter
+import me.domino.fa2.ui.pages.auth.SessionWebView
+import me.domino.fa2.ui.pages.auth.rememberSessionWebViewAdapter
 
 /** 全局 challenge 覆盖层：作为“插入流程”覆盖当前页面。 */
 @Composable
@@ -30,7 +30,7 @@ fun CfChallengeOverlay(
     controller: CfChallengeController,
     modifier: Modifier = Modifier,
 ) {
-  val adapter = rememberChallengeWebViewAdapter(initialUrl = state.triggerUrl)
+  val adapter = rememberSessionWebViewAdapter(initialUrl = state.triggerUrl)
   val scope = rememberCoroutineScope()
 
   LaunchedEffect(state.triggerUrl) {
@@ -74,7 +74,7 @@ fun CfChallengeOverlay(
           modifier = Modifier.padding(horizontal = 12.dp),
       )
 
-      CfChallengeWebView(
+      SessionWebView(
           adapter = adapter,
           modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp).padding(bottom = 12.dp),
       )

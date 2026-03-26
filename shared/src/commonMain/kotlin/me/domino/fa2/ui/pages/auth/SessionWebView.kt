@@ -16,10 +16,10 @@ import kotlinx.coroutines.withTimeoutOrNull
 /** 读取 UA 的超时时间（毫秒）。 */
 private const val userAgentEvalTimeoutMs = 1_500L
 
-/** challenge WebView 组合适配器。 */
-data class ChallengeWebViewAdapter(
+/** 通用会话 WebView 组合适配器。 */
+data class SessionWebViewAdapter(
     /** WebView 交互端口。 */
-    val port: CfChallengeWebViewPort,
+    val port: SessionWebViewPort,
     /** WebView 状态。 */
     val webViewState: WebViewState,
     /** WebView 导航器。 */
@@ -27,17 +27,17 @@ data class ChallengeWebViewAdapter(
 )
 
 /**
- * 记忆 challenge WebView 适配器。
+ * 记忆通用会话 WebView 适配器。
  *
  * @param initialUrl 初始地址。
  */
 @Composable
-fun rememberChallengeWebViewAdapter(initialUrl: String): ChallengeWebViewAdapter {
+fun rememberSessionWebViewAdapter(initialUrl: String): SessionWebViewAdapter {
   val webViewState = rememberWebViewState(initialUrl)
   val navigator = rememberWebViewNavigator()
   return remember(webViewState, navigator) {
-    ChallengeWebViewAdapter(
-        port = ComposeCfChallengeWebViewPort(webViewState = webViewState, navigator = navigator),
+    SessionWebViewAdapter(
+        port = ComposeSessionWebViewPort(webViewState = webViewState, navigator = navigator),
         webViewState = webViewState,
         navigator = navigator,
     )
@@ -45,23 +45,23 @@ fun rememberChallengeWebViewAdapter(initialUrl: String): ChallengeWebViewAdapter
 }
 
 /**
- * 渲染 challenge WebView。
+ * 渲染通用会话 WebView。
  *
  * @param adapter 适配器。
  * @param modifier 组件修饰符。
  */
 @Composable
-fun CfChallengeWebView(adapter: ChallengeWebViewAdapter, modifier: Modifier) {
+fun SessionWebView(adapter: SessionWebViewAdapter, modifier: Modifier) {
   WebView(state = adapter.webViewState, navigator = adapter.navigator, modifier = modifier)
 }
 
 /** Compose WebView 端口实现。 */
-private class ComposeCfChallengeWebViewPort(
+private class ComposeSessionWebViewPort(
     /** WebView 状态。 */
     private val webViewState: WebViewState,
     /** WebView 导航器。 */
     private val navigator: WebViewNavigator,
-) : CfChallengeWebViewPort {
+) : SessionWebViewPort {
   /** 当前最后加载地址。 */
   override val lastLoadedUrl: String?
     get() = webViewState.lastLoadedUrl

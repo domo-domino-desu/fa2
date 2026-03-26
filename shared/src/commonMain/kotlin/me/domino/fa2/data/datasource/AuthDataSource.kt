@@ -51,6 +51,17 @@ class AuthDataSource(
   suspend fun loadCookieHeader(): String = cookiesStorage.loadRawCookieHeader()
 
   /**
+   * 以 WebView 捕获结果覆盖当前 Cookie 快照。
+   *
+   * @param rawCookieHeader 从 WebView 抓取并合并后的 Cookie Header。
+   */
+  suspend fun syncWebViewCookie(rawCookieHeader: String) {
+    val normalized = rawCookieHeader.trim()
+    if (normalized.isBlank()) return
+    cookiesStorage.saveRawCookieHeader(normalized)
+  }
+
+  /**
    * 仅合并 Cloudflare 相关 cookie。
    *
    * @param rawCookieHeader 从 WebView 抓取的 Cookie Header。

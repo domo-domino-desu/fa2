@@ -7,6 +7,9 @@ object FaUrls {
   /** 首页地址。 */
   const val home: String = "https://www.furaffinity.net/"
 
+  /** 登录页地址。 */
+  const val login: String = "https://www.furaffinity.net/login"
+
   /** submissions 根路径。 */
   private const val submissionsRoot: String = "https://www.furaffinity.net/msg/submissions/"
 

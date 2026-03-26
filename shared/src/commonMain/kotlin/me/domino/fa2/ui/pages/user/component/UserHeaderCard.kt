@@ -22,6 +22,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -31,7 +35,7 @@ import me.domino.fa2.ui.components.HtmlText
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.SkeletonBlock
 
-private const val collapsedProfilePreviewChars = 720
+private const val collapsedProfilePreviewMaxLines = 14
 
 @Composable
 internal fun UserHeaderCard(
@@ -195,12 +199,24 @@ internal fun UserHeaderCard(
           )
 
           if (header.profileHtml.isNotBlank()) {
-            val shouldCollapse = header.profileHtml.length > collapsedProfilePreviewChars
+            var shouldCollapse by remember(header.profileHtml) { mutableStateOf(false) }
             HtmlText(
                 html = header.profileHtml,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface,
-                maxLines = if (state.profileExpanded || !shouldCollapse) Int.MAX_VALUE else 14,
+                maxLines =
+                    if (state.profileExpanded) Int.MAX_VALUE else collapsedProfilePreviewMaxLines,
+                onTextLayout = { layoutResult ->
+                  val nextShouldCollapse =
+                      if (state.profileExpanded) {
+                        layoutResult.lineCount > collapsedProfilePreviewMaxLines
+                      } else {
+                        layoutResult.hasVisualOverflow
+                      }
+                  if (shouldCollapse != nextShouldCollapse) {
+                    shouldCollapse = nextShouldCollapse
+                  }
+                },
             )
             if (shouldCollapse) {
               AssistChip(

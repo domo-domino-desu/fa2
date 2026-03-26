@@ -3,6 +3,7 @@ package me.domino.fa2.ui.pages.auth
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,6 +13,8 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,21 +28,117 @@ import androidx.compose.ui.unit.dp
 fun AuthScreen(
     /** 当前登录页面状态。 */
     state: AuthUiState.AuthInvalid,
+    /** 当前选中的登录方式。 */
+    loginMethod: AuthLoginMethod,
+    /** WebView 交互状态。 */
+    webViewUiState: AuthWebViewUiState,
+    /** WebView 适配器。 */
+    webViewAdapter: SessionWebViewAdapter,
     /** 当前 Cookie 输入值。 */
     cookieDraft: String,
+    /** 登录方式切换回调。 */
+    onLoginMethodChange: (AuthLoginMethod) -> Unit,
     /** 输入变更回调。 */
     onCookieDraftChange: (String) -> Unit,
-    /** 提交回调。 */
-    onSubmit: () -> Unit,
+    /** Cookie 提交回调。 */
+    onSubmitCookie: () -> Unit,
     /** 重试探测回调。 */
     onRetry: () -> Unit,
+    /** WebView 重载回调。 */
+    onReloadWebView: () -> Unit,
+    /** WebView 完成登录回调。 */
+    onConfirmWebViewLogin: () -> Unit,
 ) {
   Column(
       modifier = Modifier.fillMaxSize().padding(20.dp).testTag("auth-screen"),
       verticalArrangement = Arrangement.spacedBy(12.dp),
   ) {
     Text(text = "登录到 FurAffinity", style = MaterialTheme.typography.headlineSmall)
-    Text(state.message)
+    Text(text = state.message, color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+    TabRow(selectedTabIndex = loginMethod.ordinal, modifier = Modifier.fillMaxWidth()) {
+      Tab(
+          selected = loginMethod == AuthLoginMethod.WebView,
+          onClick = { onLoginMethodChange(AuthLoginMethod.WebView) },
+          text = { Text("WebView") },
+          modifier = Modifier.testTag("auth-tab-webview"),
+      )
+      Tab(
+          selected = loginMethod == AuthLoginMethod.Cookie,
+          onClick = { onLoginMethodChange(AuthLoginMethod.Cookie) },
+          text = { Text("Cookie") },
+          modifier = Modifier.testTag("auth-tab-cookie"),
+      )
+    }
+
+    when (loginMethod) {
+      AuthLoginMethod.WebView -> {
+        WebViewLoginTab(
+            webViewUiState = webViewUiState,
+            adapter = webViewAdapter,
+            onReload = onReloadWebView,
+            onConfirm = onConfirmWebViewLogin,
+        )
+      }
+
+      AuthLoginMethod.Cookie -> {
+        CookieLoginTab(
+            cookieDraft = cookieDraft,
+            onCookieDraftChange = onCookieDraftChange,
+            onSubmit = onSubmitCookie,
+            onRetry = onRetry,
+        )
+      }
+    }
+  }
+}
+
+/** WebView 登录内容。 */
+@Composable
+private fun WebViewLoginTab(
+    webViewUiState: AuthWebViewUiState,
+    adapter: SessionWebViewAdapter,
+    onReload: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+  Column(
+      modifier = Modifier.fillMaxSize().testTag("auth-webview-panel"),
+      verticalArrangement = Arrangement.spacedBy(12.dp),
+  ) {
+    Text(
+        text = "在内置页面中完成登录。页面里若出现 Cloudflare 验证，请先完成验证后再点击“完成登录”。",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+      Button(onClick = onReload) { Text("重载登录页") }
+      Button(enabled = !webViewUiState.isConfirming, onClick = onConfirm) {
+        Text(if (webViewUiState.isConfirming) "确认中..." else "完成登录")
+      }
+    }
+    Text(
+        text = webViewUiState.statusMessage,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    SessionWebView(adapter = adapter, modifier = Modifier.fillMaxWidth().weight(1f))
+  }
+}
+
+/** Cookie 登录内容。 */
+@Composable
+private fun CookieLoginTab(
+    cookieDraft: String,
+    onCookieDraftChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onRetry: () -> Unit,
+) {
+  Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Text(
+        text = "备用方案：直接粘贴浏览器中的 Cookie Header。",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
     OutlinedTextField(
         value = cookieDraft,
         onValueChange = onCookieDraftChange,
@@ -49,8 +148,10 @@ fun AuthScreen(
         minLines = 6,
         textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
     )
-    Button(onClick = onSubmit) { Text("保存并登录") }
-    Button(onClick = onRetry) { Text("重试现有登录态") }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+      Button(onClick = onSubmit) { Text("保存并登录") }
+      Button(onClick = onRetry) { Text("重试现有登录态") }
+    }
   }
 }
 

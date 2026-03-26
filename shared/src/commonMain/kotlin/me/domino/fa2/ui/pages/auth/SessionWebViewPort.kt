@@ -1,7 +1,7 @@
 package me.domino.fa2.ui.pages.auth
 
-/** CF challenge WebView 交互端口。 */
-interface CfChallengeWebViewPort {
+/** 通用会话 WebView 交互端口。 */
+interface SessionWebViewPort {
   /** 当前最后加载地址。 */
   val lastLoadedUrl: String?
 

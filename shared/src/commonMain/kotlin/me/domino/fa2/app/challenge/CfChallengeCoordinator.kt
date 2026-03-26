@@ -14,7 +14,7 @@ import me.domino.fa2.data.network.HtmlResponseResult
 import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.data.network.challenge.CfChallengeSignal
 import me.domino.fa2.data.network.challenge.ChallengeResolver
-import me.domino.fa2.ui.pages.auth.CfChallengeWebViewPort
+import me.domino.fa2.ui.pages.auth.SessionWebViewPort
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.isCloudflareCookieName
 import me.domino.fa2.util.logging.FaLog
@@ -62,7 +62,7 @@ class CfChallengeCoordinator(
     return resolved
   }
 
-  override suspend fun prepareWebViewSession(port: CfChallengeWebViewPort, triggerUrl: String) {
+  override suspend fun prepareWebViewSession(port: SessionWebViewPort, triggerUrl: String) {
     log.d { "验证会话 -> 准备WebView(url=${summarizeUrl(triggerUrl)})" }
     val cookieHeader = cookiesStorage.loadRawCookieHeader().orEmpty()
     for (url in linkedSetOf(FaUrls.home, triggerUrl)) {
@@ -70,7 +70,7 @@ class CfChallengeCoordinator(
     }
   }
 
-  override suspend fun syncUserAgentFromWebView(port: CfChallengeWebViewPort) {
+  override suspend fun syncUserAgentFromWebView(port: SessionWebViewPort) {
     val userAgent = readNonBlankUserAgent(port)
     if (userAgent.isBlank()) {
       log.w { "验证会话 -> 同步UA失败(空值)" }
@@ -81,7 +81,7 @@ class CfChallengeCoordinator(
   }
 
   override suspend fun confirmFromWebView(
-      port: CfChallengeWebViewPort,
+      port: SessionWebViewPort,
       triggerUrl: String,
   ): Boolean {
     log.i { "验证会话 -> 开始确认(url=${summarizeUrl(triggerUrl)})" }
@@ -203,7 +203,7 @@ class CfChallengeCoordinator(
 }
 
 private suspend fun captureCfCookieHeaderWithRetry(
-    port: CfChallengeWebViewPort,
+    port: SessionWebViewPort,
     urls: List<String>,
     maxAttempts: Int = 8,
     delayMs: Long = 450L,
@@ -224,7 +224,7 @@ private suspend fun captureCfCookieHeaderWithRetry(
 }
 
 private suspend fun readNonBlankUserAgent(
-    port: CfChallengeWebViewPort,
+    port: SessionWebViewPort,
     maxAttempts: Int = 3,
     delayMs: Long = 220L,
 ): String {

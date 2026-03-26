@@ -47,6 +47,16 @@ class AuthRepository(
   }
 
   /**
+   * 用 WebView 捕获到的完整 Cookie 快照更新当前会话。
+   *
+   * @param rawCookieHeader WebView 抓取结果。
+   */
+  suspend fun syncWebViewCookie(rawCookieHeader: String) {
+    log.i { "同步WebView Cookie -> 长度=${rawCookieHeader.length}" }
+    dataSource.syncWebViewCookie(rawCookieHeader)
+  }
+
+  /**
    * 合并 challenge 流程抓取到的 Cookie。
    *
    * @param rawCookieHeader WebView 抓取结果。

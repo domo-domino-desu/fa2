@@ -155,6 +155,26 @@ class MinimalFlowIntegrationTest {
     assertTrue(restored.contains("__cf_bm=from_webview"))
   }
 
+  /** WebView 捕获到的完整 cookie 快照会同时保留 auth 与 Cloudflare 项，并可跨重启恢复。 */
+  @Test
+  fun webViewCookieSyncPersistsAuthAndCloudflareAcrossRestart() = runTest {
+    val source = ScriptedHtmlDataSource()
+    val storage = newTestStorageConfig()
+    startTestKoin(source, storage)
+
+    val authDataSource: AuthDataSource = GlobalContext.get().get()
+    authDataSource.syncWebViewCookie("a=1; b=2; cf_clearance=from_webview; __cf_bm=from_webview")
+
+    val restoredAuthDataSource = newFreshAuthDataSource()
+    assertTrue(restoredAuthDataSource.restorePersistedSession())
+
+    val restored = restoredAuthDataSource.loadCookieHeader()
+    assertTrue(restored.contains("a=1"))
+    assertTrue(restored.contains("b=2"))
+    assertTrue(restored.contains("cf_clearance=from_webview"))
+    assertTrue(restored.contains("__cf_bm=from_webview"))
+  }
+
   /** Set-Cookie 合并结果会落入 KSafe，删除语义也会持久化。 */
   @Test
   fun setCookieMergePersistsAndDeletesAcrossRestart() = runTest {
