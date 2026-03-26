@@ -15,8 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -35,9 +35,10 @@ import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.components.HtmlText
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.SkeletonBlock
+import me.domino.fa2.ui.icons.FaMaterialSymbols
 import org.jetbrains.compose.resources.stringResource
 
-private const val collapsedProfilePreviewMaxLines = 14
+private const val collapsedProfilePreviewMaxLines = 5
 
 @Composable
 internal fun UserHeaderCard(
@@ -199,13 +200,10 @@ internal fun UserHeaderCard(
               }
             }
           }
-          Text(
-              text =
-                  listOf(header.userTitle, me.domino.fa2.i18n.registeredAtText(header.registeredAt))
-                      .filter { it.isNotBlank() }
-                      .joinToString(" · "),
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
+          UserMetadataAndContactsRow(
+              userTitle = header.userTitle,
+              registeredAtText = me.domino.fa2.i18n.registeredAtText(header.registeredAt),
+              contacts = header.contacts,
           )
 
           if (header.profileHtml.isNotBlank()) {
@@ -229,17 +227,9 @@ internal fun UserHeaderCard(
                 },
             )
             if (shouldCollapse) {
-              AssistChip(
+              UserProfileExpandToggle(
+                  expanded = state.profileExpanded,
                   onClick = onToggleProfileExpanded,
-                  label = {
-                    Text(
-                        if (state.profileExpanded) {
-                          stringResource(Res.string.collapse_profile)
-                        } else {
-                          stringResource(Res.string.expand_profile)
-                        }
-                    )
-                  },
               )
             }
           }
@@ -254,6 +244,32 @@ internal fun UserHeaderCard(
         }
       }
     }
+  }
+}
+
+@Composable
+private fun UserProfileExpandToggle(expanded: Boolean, onClick: () -> Unit) {
+  val contentDescription =
+      if (expanded) {
+        stringResource(Res.string.collapse_profile)
+      } else {
+        stringResource(Res.string.expand_profile)
+      }
+  Box(
+      modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 6.dp),
+      contentAlignment = Alignment.Center,
+  ) {
+    Icon(
+        imageVector =
+            if (expanded) {
+              FaMaterialSymbols.Outlined.ExpandLess
+            } else {
+              FaMaterialSymbols.Outlined.ExpandMore
+            },
+        contentDescription = contentDescription,
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.size(20.dp),
+    )
   }
 }
 

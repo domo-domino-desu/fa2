@@ -1,9 +1,13 @@
 package me.domino.fa2.data.settings
 
+import eu.anifantakis.lib.ksafe.KSafe
 import me.domino.fa2.data.local.KeyValueStorage
 
 /** 基于 KV 的设置持久化。 */
-class AppSettingsStorage(private val kv: KeyValueStorage) {
+class AppSettingsStorage(
+    private val kv: KeyValueStorage,
+    private val secretVault: KSafe,
+) {
   suspend fun load(): AppSettings {
     val uiLanguage =
         UiLanguageSetting.fromPersistedValue(kv.load(KEY_UI_LANGUAGE))
@@ -28,7 +32,7 @@ class AppSettingsStorage(private val kv: KeyValueStorage) {
     val rawOpenAiConfig =
         OpenAiTranslationConfig(
             baseUrl = kv.load(KEY_OPENAI_BASE_URL) ?: OpenAiTranslationConfig.defaultBaseUrl,
-            apiKey = kv.load(KEY_OPENAI_API_KEY).orEmpty(),
+            apiKey = secretVault.get(KEY_SECRET_OPENAI_API_KEY, defaultValue = ""),
             model = kv.load(KEY_OPENAI_MODEL) ?: OpenAiTranslationConfig.defaultModel,
             promptTemplate =
                 kv.load(KEY_OPENAI_PROMPT) ?: OpenAiTranslationConfig.defaultPromptTemplate,
@@ -87,7 +91,12 @@ class AppSettingsStorage(private val kv: KeyValueStorage) {
     kv.save(KEY_METADATA_DISPLAY_MODE, normalized.metadataDisplayMode.persistedValue)
     kv.save(KEY_TRANSLATION_PROVIDER, normalized.translationProvider.persistedValue)
     kv.save(KEY_OPENAI_BASE_URL, normalized.openAiTranslationConfig.baseUrl)
-    kv.save(KEY_OPENAI_API_KEY, normalized.openAiTranslationConfig.apiKey)
+    val apiKey = normalized.openAiTranslationConfig.apiKey.trim()
+    if (apiKey.isBlank()) {
+      secretVault.delete(KEY_SECRET_OPENAI_API_KEY)
+    } else {
+      secretVault.put(key = KEY_SECRET_OPENAI_API_KEY, value = apiKey)
+    }
     kv.save(KEY_OPENAI_MODEL, normalized.openAiTranslationConfig.model)
     kv.save(KEY_OPENAI_PROMPT, normalized.openAiTranslationConfig.promptTemplate)
     kv.save(KEY_TRANSLATION_CHUNK_WORD_LIMIT, normalized.translationChunkWordLimit.toString())
@@ -112,6 +121,7 @@ class AppSettingsStorage(private val kv: KeyValueStorage) {
     const val KEY_TRANSLATION_PROVIDER: String = "settings.submission.translation.provider"
     const val KEY_OPENAI_BASE_URL: String = "settings.submission.translation.openai.baseUrl"
     const val KEY_OPENAI_API_KEY: String = "settings.submission.translation.openai.apiKey"
+    const val KEY_SECRET_OPENAI_API_KEY: String = "settings_secret_openai_api_key"
     const val KEY_OPENAI_MODEL: String = "settings.submission.translation.openai.model"
     const val KEY_OPENAI_PROMPT: String = "settings.submission.translation.openai.prompt"
     const val KEY_TRANSLATION_CHUNK_WORD_LIMIT: String =

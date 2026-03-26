@@ -78,5 +78,6 @@ tasks
 tasks.named<Test>("desktopTest").configure {
   if (!enableDesktopE2e.get()) {
     exclude("me/domino/fa2/desktop/e2e/**")
+    failOnNoDiscoveredTests = false
   }
 }

@@ -84,121 +84,120 @@ internal fun TranslationSettingsSection(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-      SettingsDropdownField(
-          label = stringResource(Res.string.provider),
-          selected = draft.translationProvider,
-          options = AppSettings.supportedTranslationProviders,
-          optionLabel = { option -> translationProviderLabel(option) },
-          onSelect = { selected -> onDraftChange(draft.copy(translationProvider = selected)) },
-      )
-
       SettingsSwitchRow(
           label = stringResource(Res.string.enable_translation),
           checked = draft.translationEnabled,
           onCheckedChange = { enabled -> onDraftChange(draft.copy(translationEnabled = enabled)) },
       )
 
-      SettingsDropdownField(
-          label = stringResource(Res.string.translation_target_language),
-          selected = draft.translationTargetLanguage,
-          options = AppSettings.supportedTranslationTargetLanguages,
-          optionLabel = { option -> translationTargetLanguageLabel(option) },
-          onSelect = { selected ->
-            onDraftChange(draft.copy(translationTargetLanguage = selected))
-          },
-      )
+      if (draft.translationEnabled) {
+        SettingsDropdownField(
+            label = stringResource(Res.string.provider),
+            selected = draft.translationProvider,
+            options = AppSettings.supportedTranslationProviders,
+            optionLabel = { option -> translationProviderLabel(option) },
+            onSelect = { selected -> onDraftChange(draft.copy(translationProvider = selected)) },
+        )
 
-      SettingsDropdownField(
-          label = stringResource(Res.string.metadata_display),
-          selected = draft.metadataDisplayMode,
-          options = AppSettings.supportedMetadataDisplayModes,
-          optionLabel = { option -> metadataDisplayModeLabel(option) },
-          onSelect = { selected -> onDraftChange(draft.copy(metadataDisplayMode = selected)) },
-      )
+        SettingsDropdownField(
+            label = stringResource(Res.string.translation_target_language),
+            selected = draft.translationTargetLanguage,
+            options = AppSettings.supportedTranslationTargetLanguages,
+            optionLabel = { option -> translationTargetLanguageLabel(option) },
+            onSelect = { selected ->
+              onDraftChange(draft.copy(translationTargetLanguage = selected))
+            },
+        )
 
-      OutlinedTextField(
-          value = draft.chunkWordLimitInput,
-          onValueChange = { next ->
-            onDraftChange(draft.copy(chunkWordLimitInput = next.filter(Char::isDigit)))
-          },
-          label = { Text(stringResource(Res.string.chunk_word_limit)) },
-          supportingText = {
-            Text(
-                stringResource(
-                    Res.string.numeric_range,
-                    AppSettings.minTranslationChunkWordLimit,
-                    AppSettings.maxTranslationChunkWordLimit,
-                )
-            )
-          },
-          modifier = Modifier.fillMaxWidth(),
-      )
-
-      OutlinedTextField(
-          value = draft.maxConcurrencyInput,
-          onValueChange = { next ->
-            onDraftChange(draft.copy(maxConcurrencyInput = next.filter(Char::isDigit)))
-          },
-          label = { Text(stringResource(Res.string.max_concurrency)) },
-          supportingText = {
-            Text(
-                stringResource(
-                    Res.string.numeric_range,
-                    AppSettings.minTranslationMaxConcurrency,
-                    AppSettings.maxTranslationMaxConcurrency,
-                )
-            )
-          },
-          modifier = Modifier.fillMaxWidth(),
-      )
-
-      if (
-          draft.translationEnabled &&
-              draft.translationProvider == TranslationProvider.OPENAI_COMPATIBLE
-      ) {
-        OutlinedTextField(
-            value = draft.openAiBaseUrl,
-            onValueChange = { next -> onDraftChange(draft.copy(openAiBaseUrl = next)) },
-            label = { Text(stringResource(Res.string.base_url)) },
-            modifier = Modifier.fillMaxWidth(),
+        SettingsDropdownField(
+            label = stringResource(Res.string.metadata_display),
+            selected = draft.metadataDisplayMode,
+            options = AppSettings.supportedMetadataDisplayModes,
+            optionLabel = { option -> metadataDisplayModeLabel(option) },
+            onSelect = { selected -> onDraftChange(draft.copy(metadataDisplayMode = selected)) },
         )
 
         OutlinedTextField(
-            value = draft.openAiApiKey,
-            onValueChange = { next -> onDraftChange(draft.copy(openAiApiKey = next)) },
-            label = { Text(stringResource(Res.string.api_key)) },
-            visualTransformation =
-                if (showApiKey) {
-                  VisualTransformation.None
-                } else {
-                  PasswordVisualTransformation()
-                },
-            trailingIcon = {
-              TextButton(onClick = onToggleShowApiKey) {
-                Text(
-                    if (showApiKey) stringResource(Res.string.hide)
-                    else stringResource(Res.string.show)
-                )
-              }
+            value = draft.chunkWordLimitInput,
+            onValueChange = { next ->
+              onDraftChange(draft.copy(chunkWordLimitInput = next.filter(Char::isDigit)))
+            },
+            label = { Text(stringResource(Res.string.chunk_word_limit)) },
+            supportingText = {
+              Text(
+                  stringResource(
+                      Res.string.numeric_range,
+                      AppSettings.minTranslationChunkWordLimit,
+                      AppSettings.maxTranslationChunkWordLimit,
+                  )
+              )
             },
             modifier = Modifier.fillMaxWidth(),
         )
 
         OutlinedTextField(
-            value = draft.openAiModel,
-            onValueChange = { next -> onDraftChange(draft.copy(openAiModel = next)) },
-            label = { Text(stringResource(Res.string.model)) },
+            value = draft.maxConcurrencyInput,
+            onValueChange = { next ->
+              onDraftChange(draft.copy(maxConcurrencyInput = next.filter(Char::isDigit)))
+            },
+            label = { Text(stringResource(Res.string.max_concurrency)) },
+            supportingText = {
+              Text(
+                  stringResource(
+                      Res.string.numeric_range,
+                      AppSettings.minTranslationMaxConcurrency,
+                      AppSettings.maxTranslationMaxConcurrency,
+                  )
+              )
+            },
             modifier = Modifier.fillMaxWidth(),
         )
 
-        OutlinedTextField(
-            value = draft.openAiPromptTemplate,
-            onValueChange = { next -> onDraftChange(draft.copy(openAiPromptTemplate = next)) },
-            label = { Text(stringResource(Res.string.prompt_template)) },
-            supportingText = { Text(stringResource(Res.string.prompt_template_variables_hint)) },
-            minLines = 5,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        if (draft.translationProvider == TranslationProvider.OPENAI_COMPATIBLE) {
+          OutlinedTextField(
+              value = draft.openAiBaseUrl,
+              onValueChange = { next -> onDraftChange(draft.copy(openAiBaseUrl = next)) },
+              label = { Text(stringResource(Res.string.base_url)) },
+              modifier = Modifier.fillMaxWidth(),
+          )
+
+          OutlinedTextField(
+              value = draft.openAiApiKey,
+              onValueChange = { next -> onDraftChange(draft.copy(openAiApiKey = next)) },
+              label = { Text(stringResource(Res.string.api_key)) },
+              visualTransformation =
+                  if (showApiKey) {
+                    VisualTransformation.None
+                  } else {
+                    PasswordVisualTransformation()
+                  },
+              trailingIcon = {
+                TextButton(onClick = onToggleShowApiKey) {
+                  Text(
+                      if (showApiKey) stringResource(Res.string.hide)
+                      else stringResource(Res.string.show)
+                  )
+                }
+              },
+              modifier = Modifier.fillMaxWidth(),
+          )
+
+          OutlinedTextField(
+              value = draft.openAiModel,
+              onValueChange = { next -> onDraftChange(draft.copy(openAiModel = next)) },
+              label = { Text(stringResource(Res.string.model)) },
+              modifier = Modifier.fillMaxWidth(),
+          )
+
+          OutlinedTextField(
+              value = draft.openAiPromptTemplate,
+              onValueChange = { next -> onDraftChange(draft.copy(openAiPromptTemplate = next)) },
+              label = { Text(stringResource(Res.string.prompt_template)) },
+              supportingText = { Text(stringResource(Res.string.prompt_template_variables_hint)) },
+              minLines = 5,
+              modifier = Modifier.fillMaxWidth(),
+          )
+        }
       }
     }
   }

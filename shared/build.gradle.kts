@@ -137,6 +137,8 @@ symbolCraft {
       "content_copy",
       "date_range",
       "download",
+      "expand_less",
+      "expand_more",
       "explore",
       "file_present",
       "filter_alt",
@@ -144,7 +146,9 @@ symbolCraft {
       "image",
       "inventory_2",
       "keyboard_arrow_right",
+      "language",
       "logout",
+      "mail",
       "menu",
       "movie",
       "music_note",
@@ -164,6 +168,54 @@ symbolCraft {
 
   materialSymbol("favorite") {
     style(weight = 400, variant = SymbolVariant.OUTLINED, fill = SymbolFill.UNFILLED)
+  }
+
+  externalIcons(
+      *listOf(
+              "battle-net",
+              "bluesky",
+              "deviantart",
+              "discord",
+              "etsy",
+              "facebook",
+              "instagram",
+              "mastodon",
+              "patreon",
+              "pixiv",
+              "playstation",
+              "reddit",
+              "steam",
+              "telegram",
+              "tiktok",
+              "tumblr",
+              "twitch",
+              "twitter",
+              "xbox",
+              "youtube",
+          )
+          .toTypedArray(),
+      libraryName = "fontawesomebrands",
+  ) {
+    urlTemplate =
+        "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/brands/{name}.svg"
+  }
+
+  externalIcons(
+      *listOf(
+              "archiveofourown",
+              "battledotnet",
+              "furrynetwork",
+              "kofi",
+              "nintendo3ds",
+              "nintendoswitch",
+              "wattpad",
+              "weasyl",
+              "wiiu",
+          )
+          .toTypedArray(),
+      libraryName = "simpleicons",
+  ) {
+    urlTemplate = "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/{name}.svg"
   }
 }
 

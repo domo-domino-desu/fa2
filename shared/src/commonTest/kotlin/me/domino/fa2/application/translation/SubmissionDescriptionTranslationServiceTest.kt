@@ -1,6 +1,7 @@
 package me.domino.fa2.application.translation
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import eu.anifantakis.lib.ksafe.KSafe
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -196,7 +197,13 @@ class SubmissionDescriptionTranslationServiceTest {
         "${FileSystem.SYSTEM_TEMPORARY_DIRECTORY}/fa2-test-$randomSuffix.preferences_pb".toPath()
     val keyValueStorage =
         KeyValueStorage(PreferenceDataStoreFactory.createWithPath(produceFile = { tempPath }))
-    val settingsService = AppSettingsService(AppSettingsStorage(keyValueStorage))
+    val settingsService =
+        AppSettingsService(
+            AppSettingsStorage(
+                kv = keyValueStorage,
+                secretVault = KSafe(fileName = "fa2_test_settings_$randomSuffix"),
+            )
+        )
     val translationPort =
         object : TranslationPort {
           override suspend fun translate(request: TranslationRequest): String =

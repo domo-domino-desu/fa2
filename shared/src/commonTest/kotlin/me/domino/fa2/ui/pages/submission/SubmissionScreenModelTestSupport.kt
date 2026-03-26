@@ -1,6 +1,7 @@
 package me.domino.fa2.ui.pages.submission
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import eu.anifantakis.lib.ksafe.KSafe
 import kotlin.random.Random
 import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.data.local.KeyValueStorage
@@ -20,7 +21,13 @@ internal suspend fun createTestSubmissionTranslationService(
           .toPath()
   val keyValueStorage =
       KeyValueStorage(PreferenceDataStoreFactory.createWithPath(produceFile = { tempPath }))
-  val settingsService = AppSettingsService(AppSettingsStorage(keyValueStorage))
+  val settingsService =
+      AppSettingsService(
+          AppSettingsStorage(
+              kv = keyValueStorage,
+              secretVault = KSafe(fileName = "fa2_submission_settings_$randomSuffix"),
+          )
+      )
   val translationPort =
       object : TranslationPort {
         override suspend fun translate(request: TranslationRequest): String = translate(request)

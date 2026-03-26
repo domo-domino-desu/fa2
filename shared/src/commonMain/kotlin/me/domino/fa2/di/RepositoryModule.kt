@@ -1,5 +1,6 @@
 package me.domino.fa2.di
 
+import eu.anifantakis.lib.ksafe.KSafe
 import me.domino.fa2.application.attachmenttext.AttachmentTextService
 import me.domino.fa2.application.submissionseries.SubmissionSeriesResolver
 import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
@@ -22,12 +23,18 @@ import me.domino.fa2.data.settings.AppSettingsStorage
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.ui.search.SearchUiLabelsRepository
 import org.koin.core.module.Module
+import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
 /** Repository 依赖模块。 */
 fun repositoryModule(): Module = module {
-  single { AppSettingsStorage(get()) }
+  single {
+    AppSettingsStorage(
+        kv = get(),
+        secretVault = get<KSafe>(qualifier = named(KOIN_QUALIFIER_SETTINGS_SECRET_VAULT)),
+    )
+  }
   single { AppSettingsService(get()) }
   single { FaTaxonomyRepository() }
   single { SearchUiLabelsRepository() }

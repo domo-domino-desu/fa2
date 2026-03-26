@@ -23,7 +23,7 @@ import me.domino.fa2.ui.search.SearchUiTextKey
 class SearchGenderKeywordSyncTest {
   @Test
   fun parsesGendersFromKeywordsSegment() {
-    val genders = parseGendersFromQuery("wolf @keywords female trans_female")
+    val genders = parseGendersFromQuery("dragon @keywords female trans_female")
     assertTrue(SearchGender.Female in genders)
     assertTrue(SearchGender.TransFemale in genders)
     assertEquals(2, genders.size)
@@ -33,10 +33,10 @@ class SearchGenderKeywordSyncTest {
   fun rewritesKeywordsWhenGenderSelectionChanges() {
     val rewritten =
         rewriteQueryWithGenders(
-            query = "wolf @keywords female cute",
+            query = "dragon @keywords female cute",
             genders = setOf(SearchGender.TransFemale),
         )
-    assertEquals("wolf @keywords cute trans_female", rewritten)
+    assertEquals("dragon @keywords cute trans_female", rewritten)
   }
 
   @Test

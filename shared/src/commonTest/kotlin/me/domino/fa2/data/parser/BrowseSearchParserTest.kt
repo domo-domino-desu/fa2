@@ -27,7 +27,7 @@ class BrowseSearchParserTest {
     val html =
         TestFixtures.read("www.furaffinity.net:search:wolf-keywords-female-trans_female.html")
     val parser = GalleryParser()
-    val searchUrl = FaUrls.search(FaUrls.SearchParams(q = "wolf @keywords female trans_female"))
+    val searchUrl = FaUrls.search(FaUrls.SearchParams(q = "dragon @keywords female trans_female"))
 
     val page = parser.parseListing(html = html, baseUrl = searchUrl)
 

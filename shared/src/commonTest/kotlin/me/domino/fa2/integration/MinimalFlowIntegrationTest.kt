@@ -31,6 +31,7 @@ import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.data.repository.FeedRepository
 import me.domino.fa2.di.KOIN_QUALIFIER_COOKIE_VAULT
 import me.domino.fa2.di.KOIN_QUALIFIER_RAW_HTML_DATA_SOURCE
+import me.domino.fa2.di.KOIN_QUALIFIER_SETTINGS_SECRET_VAULT
 import me.domino.fa2.di.appModules
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.util.FaUrls
@@ -254,6 +255,9 @@ private fun testOverrideModule(
     PreferenceDataStoreFactory.createWithPath(produceFile = { storage.dataStorePath })
   }
   single(named(KOIN_QUALIFIER_COOKIE_VAULT)) { KSafe(fileName = storage.cookieVaultFileName) }
+  single(named(KOIN_QUALIFIER_SETTINGS_SECRET_VAULT)) {
+    KSafe(fileName = "${storage.cookieVaultFileName}_settings_secret_vault")
+  }
 }
 
 private fun newTestStorageConfig(): TestStorageConfig {
@@ -303,6 +307,8 @@ private class MinimalFlowTestHarness(
   fun dataStore(): DataStore<Preferences> = koin.get()
 
   fun cookieVault(): KSafe = koin.get(named(KOIN_QUALIFIER_COOKIE_VAULT))
+
+  fun settingsSecretVault(): KSafe = koin.get(named(KOIN_QUALIFIER_SETTINGS_SECRET_VAULT))
 
   fun createFreshCookiesStorage(): FaCookiesStorage {
     val cookiePersistence: CookiePersistence = koin.get()

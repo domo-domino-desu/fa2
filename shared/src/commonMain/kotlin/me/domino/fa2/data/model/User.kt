@@ -29,6 +29,18 @@ data class User(
     val watchedByListUrl: String = "",
     /** 已关注列表地址。 */
     val watchingListUrl: String = "",
+    /** 联系方式。 */
+    val contacts: List<UserContact> = emptyList(),
     /** 主页简介 HTML。 */
     val profileHtml: String = "",
+)
+
+@Serializable
+data class UserContact(
+    /** 联系方式标签。 */
+    val label: String,
+    /** 展示/复制文本。 */
+    val value: String,
+    /** 可打开链接。 */
+    val url: String = "",
 )

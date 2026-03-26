@@ -2,11 +2,15 @@ package me.domino.fa2.data.parser
 
 import com.fleeksoft.ksoup.Ksoup
 import me.domino.fa2.data.model.User
+import me.domino.fa2.data.model.UserContact
+import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.ensureUserPageAccessible
 import me.domino.fa2.util.toAbsoluteUrl
 
 /** User 主页头信息解析器。 */
 class UserParser {
+  private val domainLikeUrlRegex =
+      Regex(pattern = """^[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+(?::[0-9]+)?(?:/.*)?$""")
   private val backgroundUrlRegex =
       Regex(
           pattern = """background(?:-image)?\s*:\s*url\((['"]?)(.*?)\1\)""",
@@ -51,6 +55,7 @@ class UserParser {
     val watchState = parseWatchState(document, url)
     val watchlistInfo = parseWatchlistInfo(document, url)
     val profileBannerUrl = parseProfileBannerUrl(document = document, baseUrl = url)
+    val contacts = parseContacts(document, baseUrl = url)
     val profileNode =
         document.selectFirst("section.userpage-layout-profile .section-body.userpage-profile")
     val profileHtml = profileNode?.html()?.trim().orEmpty()
@@ -68,6 +73,7 @@ class UserParser {
         watchingCount = watchlistInfo.watchingCount,
         watchedByListUrl = watchlistInfo.watchedByListUrl,
         watchingListUrl = watchlistInfo.watchingListUrl,
+        contacts = contacts,
         profileHtml = profileHtml,
     )
   }
@@ -221,6 +227,83 @@ class UserParser {
         watchedByListUrl = watchedByUrl,
         watchingListUrl = watchingUrl,
     )
+  }
+
+  private fun parseContacts(
+      document: com.fleeksoft.ksoup.nodes.Document,
+      baseUrl: String,
+  ): List<UserContact> =
+      document.select("#userpage-contact .user-contact-item").mapNotNull { item ->
+        val infoNode = item.selectFirst(".user-contact-user-info") ?: return@mapNotNull null
+        val label =
+            infoNode.selectFirst("strong.highlight")?.text()?.trim()?.takeIf { it.isNotBlank() }
+                ?: return@mapNotNull null
+        val linkNode = infoNode.selectFirst("a[href]")
+        val linkText = linkNode?.text()?.trim().orEmpty()
+        val href = linkNode?.attr("href")?.trim().orEmpty()
+        val resolvedUrl =
+            normalizeContactUrl(href = href, displayText = linkText, baseUrl = baseUrl)
+        val resolvedValue =
+            when {
+              linkText.isNotBlank() -> linkText
+              else -> infoNode.text().removePrefix(label).trim()
+            }
+        resolvedValue
+            .takeIf { it.isNotBlank() || resolvedUrl.isNotBlank() }
+            ?.let { value ->
+              UserContact(
+                  label = label,
+                  value = value.ifBlank { resolvedUrl },
+                  url = resolvedUrl,
+              )
+            }
+      }
+
+  private fun normalizeContactUrl(href: String, displayText: String, baseUrl: String): String {
+    val normalizedHref = href.trim()
+    if (
+        normalizedHref.isBlank() ||
+            normalizedHref.startsWith('#') ||
+            normalizedHref.startsWith("javascript:", ignoreCase = true)
+    ) {
+      return normalizeDisplayUrl(displayText, baseUrl)
+    }
+    if (normalizedHref.startsWith("mailto:", ignoreCase = true)) {
+      return normalizedHref
+    }
+
+    val displayUrl = normalizeDisplayUrl(displayText, baseUrl)
+    if (displayUrl.isNotBlank()) {
+      return displayUrl
+    }
+
+    return toAbsoluteUrl(baseUrl, normalizedHref)
+  }
+
+  private fun normalizeDisplayUrl(displayText: String, baseUrl: String): String {
+    val normalizedText = displayText.trim()
+    if (normalizedText.isBlank()) return ""
+    if (normalizedText.startsWith("mailto:", ignoreCase = true)) return normalizedText
+    if (
+        normalizedText.startsWith("http://", ignoreCase = true) ||
+            normalizedText.startsWith("https://", ignoreCase = true)
+    ) {
+      return normalizedText
+    }
+    if (normalizedText.startsWith("www.", ignoreCase = true)) {
+      return "https://$normalizedText"
+    }
+    if (domainLikeUrlRegex.matches(normalizedText)) {
+      return "https://$normalizedText"
+    }
+    if (normalizedText.startsWith('/')) {
+      return toAbsoluteUrl(baseUrl, normalizedText)
+    }
+    return if (normalizedText.contains('/') && !normalizedText.contains(' ')) {
+      toAbsoluteUrl(FaUrls.home.ifBlank { baseUrl }, normalizedText)
+    } else {
+      ""
+    }
   }
 
   private fun parseWatchlistCount(rawLabel: String): Int? {

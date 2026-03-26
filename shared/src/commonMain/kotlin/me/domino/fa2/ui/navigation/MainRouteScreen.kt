@@ -15,6 +15,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
+import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.ui.components.PageStateWrapper
 import me.domino.fa2.ui.pages.about.AboutRouteScreen
 import me.domino.fa2.ui.pages.auth.AuthRouteScreen
@@ -33,6 +34,7 @@ import me.domino.fa2.ui.pages.search.SearchScreenModel
 import me.domino.fa2.ui.pages.settings.SettingsRouteScreen
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.pages.user.route.UserRouteScreen
+import me.domino.fa2.ui.pages.user.watchlist.UserWatchlistRouteScreen
 import org.koin.core.parameter.parametersOf
 
 /** 登录后的主路由页面。 */
@@ -255,6 +257,14 @@ class MainRouteScreen(
                     UserRouteScreen(
                         username = username,
                         initialChildRoute = UserChildRoute.Gallery,
+                    )
+                )
+              },
+              onOpenFollowing = {
+                navigator.push(
+                    UserWatchlistRouteScreen(
+                        username = username,
+                        category = WatchlistCategory.Watching,
                     )
                 )
               },

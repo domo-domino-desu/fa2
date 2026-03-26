@@ -36,15 +36,16 @@
   <string name="close">Close</string>
   <string name="reload">Reload</string>
   <string name="query">Query</string>
-  <string name="search_bar_placeholder">Enter keywords, for example wolf @keywords female</string>
-  <string name="search_query_example">wolf @keywords female trans_female</string>
+  <string name="search_bar_placeholder">Enter keywords, for example dragon @keywords female</string>
+  <string name="search_query_example">dragon @keywords female trans_female</string>
   <string name="search_hint">Tap the search bar to set filters and run a search.</string>
   <string name="load_failed">Load failed</string>
   <string name="retry">Retry</string>
   <string name="tap_to_retry">Tap to retry</string>
   <string name="unknown_error">Unknown error</string>
   <string name="cloudflare_challenge_title">Cloudflare verification required</string>
-  <string name="cloudflare_challenge_body">Complete the challenge and refresh cookies, including cf_clearance.</string>
+  <string name="cloudflare_challenge_body">Complete the challenge and refresh cookies, including
+    cf_clearance.</string>
   <string name="cloudflare_challenge_done">I've completed verification</string>
   <string name="challenge_verifying">Verifying...</string>
   <string name="challenge_validating_result">Validating challenge result...</string>
@@ -54,6 +55,7 @@
   <string name="account_center">Account Center</string>
   <string name="no_records">No records yet</string>
   <string name="settings_summary">Theme, waterfall width, and translation settings</string>
+  <string name="following_more_summary">Open the users this account is following</string>
   <string name="about_summary">View the open-source libraries and licenses used by this app</string>
   <string name="logout">Log Out</string>
   <string name="logout_failed">Log out failed</string>
@@ -65,6 +67,7 @@
   <string name="empty_submission_history">No browsing history yet.</string>
   <string name="link_copied">Link copied</string>
   <string name="tag_copied">Tag copied</string>
+  <string name="copied_to_clipboard">Copied to clipboard</string>
   <string name="copy_link">Copy link</string>
   <string name="share_link">Share link</string>
   <string name="sign_in_to_fur_affinity">Sign in to FurAffinity</string>
@@ -81,11 +84,14 @@
   <string name="checking_login_state">Checking login status...</string>
   <string name="missing_persisted_cookie">No persisted cookie found. Please sign in first.</string>
   <string name="empty_cookie_header">Cookie cannot be empty.</string>
-  <string name="default_web_view_login_status">Finish signing in through the WebView on the left. If Cloudflare appears, complete it first, then tap "Complete login".</string>
+  <string name="default_web_view_login_status">Finish signing in through the WebView on the left. If
+    Cloudflare appears, complete it first, then tap "Complete login".</string>
   <string name="web_view_session_synced">WebView session synced.</string>
   <string name="reading_web_view_login_info">Reading sign-in info from the WebView...</string>
-  <string name="no_cookie_captured_checking_session">No Cookie captured from the WebView yet. Checking the current session...</string>
-  <string name="cookie_synced_validating_login_state">WebView cookie synced. Verifying login status...</string>
+  <string name="no_cookie_captured_checking_session">No Cookie captured from the WebView yet.
+    Checking the current session...</string>
+  <string name="cookie_synced_validating_login_state">WebView cookie synced. Verifying login
+    status...</string>
   <string name="login_succeeded_entering_home">Sign-in succeeded. Entering home...</string>
   <string name="translation_empty">Translation is empty</string>
   <string name="translation_failed">Translation failed</string>
@@ -114,7 +120,8 @@
   <string name="loading_more_content">Loading more content...</string>
   <string name="auto_load_failed_manual_next_page">Auto-load failed. Load the next page manually.</string>
   <string name="continue_auto_load_next_page">Keep browsing to auto-load the next page.</string>
-  <string name="continue_auto_load_next_page_with_manual_fallback">Keep browsing to auto-load the next page, or load it manually if needed.</string>
+  <string name="continue_auto_load_next_page_with_manual_fallback">Keep browsing to auto-load the
+    next page, or load it manually if needed.</string>
   <string name="reached_end">Reached the end</string>
   <string name="reached_current_results_end">Reached the end of the current results</string>
   <string name="load_next_page">Load next page</string>
@@ -147,14 +154,16 @@
   <string name="collapse_profile">Collapse profile</string>
   <string name="expand_profile">Expand profile</string>
   <string name="empty_comment_html">&lt;p&gt;(No content)&lt;/p&gt;</string>
-  <string name="about_libraries_metadata_source">License and dependency metadata provided by AboutLibraries</string>
+  <string name="about_libraries_metadata_source">License and dependency metadata provided by
+    AboutLibraries</string>
   <string name="interrupted_loading">Loading interrupted</string>
   <string name="missing_tag_block_credentials">Missing tag-block credential</string>
   <string name="favorite">Favorite</string>
   <string name="unfavorite">Unfavorite</string>
   <string name="list_delimiter">, </string>
   <string name="save_failed">Save failed: %1$s</string>
-  <string name="challenge_awaiting_user_action">Complete the Cloudflare check in the WebView, then tap "I've completed verification".%1$s</string>
+  <string name="challenge_awaiting_user_action">Complete the Cloudflare check in the WebView, then
+    tap "I've completed verification".%1$s</string>
   <string name="record_count">%1$d items. Tap to view</string>
   <string name="login_incomplete">Sign-in not completed: %1$s</string>
   <string name="translate_content_description">Translate %1$s</string>
@@ -163,13 +172,17 @@
   <string name="comments_inline_count">%1$d comments</string>
   <string name="followers_count">Followers %1$s</string>
   <string name="following_count">Following %1$s</string>
-  <string name="waterfall_min_column_width_range">Range %1$d-%2$d; column count is derived automatically</string>
+  <string name="waterfall_min_column_width_range">Range %1$d-%2$d; column count is derived
+    automatically</string>
   <string name="numeric_range">Range %1$d-%2$d</string>
   <string name="refresh_details_failed">Failed to refresh details: %1$s</string>
-  <string name="action_submitted_but_refresh_needs_cloudflare">Action submitted, but refreshing now requires Cloudflare verification</string>
+  <string name="action_submitted_but_refresh_needs_cloudflare">Action submitted, but refreshing now
+    requires Cloudflare verification</string>
   <string name="action_submitted_but_refresh_failed">Action submitted, but refresh failed: %1$s</string>
-  <string name="favorite_submitted_but_refresh_needs_cloudflare">Favorite submitted, but state sync now requires Cloudflare verification</string>
-  <string name="favorite_submitted_but_refresh_failed">Favorite submitted, but state sync failed: %1$s</string>
+  <string name="favorite_submitted_but_refresh_needs_cloudflare">Favorite submitted, but state sync
+    now requires Cloudflare verification</string>
+  <string name="favorite_submitted_but_refresh_failed">Favorite submitted, but state sync failed:
+    %1$s</string>
   <string name="tag_blocked">Blocked tag: %1$s</string>
   <string name="tag_unblocked">Unblocked tag: %1$s</string>
   <string name="tag_block_failed">Tag block failed: %1$s</string>

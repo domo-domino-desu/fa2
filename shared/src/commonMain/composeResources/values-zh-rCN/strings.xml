@@ -36,9 +36,9 @@
   <string name="close">关闭</string>
   <string name="reload">重载</string>
   <string name="query">关键词</string>
-  <string name="search_bar_placeholder">输入关键字，例如 wolf @keywords female</string>
-  <string name="search_query_example">wolf @keywords female trans_female</string>
-  <string name="search_hint">点击搜索框设置条件后提交搜索。</string>
+  <string name="search_bar_placeholder">输入关键字，例如 dragon @keywords female</string>
+  <string name="search_query_example">dragon @keywords female trans_female</string>
+  <string name="search_hint">点击搜索框设置条件后提交搜索</string>
   <string name="load_failed">加载失败</string>
   <string name="retry">重试</string>
   <string name="tap_to_retry">点击重试</string>
@@ -54,6 +54,7 @@
   <string name="account_center">账号中心</string>
   <string name="no_records">暂无记录</string>
   <string name="settings_summary">主题、瀑布流列宽与翻译设置</string>
+  <string name="following_more_summary">打开当前账号已关注的用户列表</string>
   <string name="about_summary">查看本应用使用的开源库与许可证</string>
   <string name="logout">退出登录</string>
   <string name="logout_failed">退出登录失败</string>
@@ -65,6 +66,7 @@
   <string name="empty_submission_history">暂无浏览记录。</string>
   <string name="link_copied">链接已复制</string>
   <string name="tag_copied">标签已复制</string>
+  <string name="copied_to_clipboard">已复制到剪贴板</string>
   <string name="copy_link">复制链接</string>
   <string name="share_link">分享链接</string>
   <string name="sign_in_to_fur_affinity">登录到 FurAffinity</string>

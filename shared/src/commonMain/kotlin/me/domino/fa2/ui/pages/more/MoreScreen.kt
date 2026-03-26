@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.components.settings.SettingsAccountHeader
@@ -24,6 +25,8 @@ fun MoreScreen(
     state: MoreUiState,
     /** 打开当前用户页面。 */
     onOpenUser: () -> Unit,
+    /** 打开当前用户已关注列表。 */
+    onOpenFollowing: () -> Unit,
     /** 打开设置页。 */
     onOpenSettings: () -> Unit,
     /** 打开投稿浏览记录。 */
@@ -48,6 +51,7 @@ fun MoreScreen(
       MoreContent(
           state = state,
           onOpenUser = onOpenUser,
+          onOpenFollowing = onOpenFollowing,
           onOpenSettings = onOpenSettings,
           onOpenSubmissionHistory = onOpenSubmissionHistory,
           onOpenSearchHistory = onOpenSearchHistory,
@@ -65,6 +69,8 @@ private fun MoreContent(
     state: MoreUiState.Ready,
     /** 打开用户页回调。 */
     onOpenUser: () -> Unit,
+    /** 打开当前用户已关注列表。 */
+    onOpenFollowing: () -> Unit,
     /** 打开设置页回调。 */
     onOpenSettings: () -> Unit,
     /** 打开投稿浏览记录。 */
@@ -77,7 +83,7 @@ private fun MoreContent(
     onLogout: () -> Unit,
 ) {
   LazyColumn(
-      modifier = Modifier.fillMaxSize(),
+      modifier = Modifier.fillMaxSize().testTag("more-screen"),
       contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
       verticalArrangement = Arrangement.spacedBy(10.dp),
   ) {
@@ -91,6 +97,13 @@ private fun MoreContent(
     }
     item {
       SettingsGroup(titleHorizontalPadding = 0.dp, containerHorizontalPadding = 0.dp) {
+        SettingsListItem(
+            icon = FaMaterialSymbols.Filled.Favorite,
+            title = stringResource(Res.string.following),
+            subtitle = stringResource(Res.string.following_more_summary),
+            onClick = onOpenFollowing,
+            modifier = Modifier.testTag("more-following"),
+        )
         SettingsListItem(
             icon = FaMaterialSymbols.Filled.History,
             title = stringResource(Res.string.submission_history),

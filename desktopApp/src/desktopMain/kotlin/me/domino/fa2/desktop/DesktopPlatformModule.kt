@@ -10,6 +10,7 @@ import java.io.File
 import me.domino.fa2.data.local.AppDatabase
 import me.domino.fa2.data.local.AppDatabaseBuilderFactory
 import me.domino.fa2.di.KOIN_QUALIFIER_COOKIE_VAULT
+import me.domino.fa2.di.KOIN_QUALIFIER_SETTINGS_SECRET_VAULT
 import me.domino.fa2.i18n.SystemLanguageProvider
 import okio.Path.Companion.toPath
 import org.koin.core.module.Module
@@ -40,6 +41,9 @@ fun desktopPlatformModule(): Module = module {
     )
   }
   single(named(KOIN_QUALIFIER_COOKIE_VAULT)) { KSafe(fileName = KOIN_QUALIFIER_COOKIE_VAULT) }
+  single(named(KOIN_QUALIFIER_SETTINGS_SECRET_VAULT)) {
+    KSafe(fileName = KOIN_QUALIFIER_SETTINGS_SECRET_VAULT)
+  }
 }
 
 /** 解析数据库文件路径。 */

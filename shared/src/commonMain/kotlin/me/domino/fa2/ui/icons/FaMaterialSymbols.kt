@@ -12,6 +12,8 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.DateRangeW400
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.DoneW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.DownloadW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.DownloadW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ExpandLessW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ExpandMoreW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ExploreW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ExploreW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.FavoriteW400Outlined
@@ -69,6 +71,8 @@ object FaMaterialSymbols {
     val ContentCopy: ImageVector = GeneratedIcons.ContentCopyW400Outlined
     val DateRange: ImageVector = GeneratedIcons.DateRangeW400Outlined
     val Download: ImageVector = GeneratedIcons.DownloadW400Outlined
+    val ExpandLess: ImageVector = GeneratedIcons.ExpandLessW400Outlined
+    val ExpandMore: ImageVector = GeneratedIcons.ExpandMoreW400Outlined
     val Explore: ImageVector = GeneratedIcons.ExploreW400Outlined
     val Favorite: ImageVector = GeneratedIcons.FavoriteW400Outlined
     val FilterAlt: ImageVector = GeneratedIcons.FilterAltW400Outlined

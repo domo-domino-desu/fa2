@@ -13,6 +13,7 @@ import kotlin.random.Random
 import me.domino.fa2.data.local.AppDatabase
 import me.domino.fa2.data.local.AppDatabaseBuilderFactory
 import me.domino.fa2.di.KOIN_QUALIFIER_COOKIE_VAULT
+import me.domino.fa2.di.KOIN_QUALIFIER_SETTINGS_SECRET_VAULT
 import okio.Path.Companion.toPath
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
@@ -67,6 +68,7 @@ internal data class DesktopE2eTestProfile(
 internal data class DesktopE2eProfileStores(
     val dataStore: DataStore<Preferences>,
     val cookieVault: KSafe,
+    val settingsSecretVault: KSafe,
 )
 
 internal object DesktopE2eThrottle {
@@ -104,6 +106,7 @@ internal fun desktopE2eTestPlatformModule(
   }
   single<DataStore<Preferences>> { stores.dataStore }
   single(named(KOIN_QUALIFIER_COOKIE_VAULT)) { stores.cookieVault }
+  single(named(KOIN_QUALIFIER_SETTINGS_SECRET_VAULT)) { stores.settingsSecretVault }
 }
 
 internal fun createProfileStores(profile: DesktopE2eTestProfile): DesktopE2eProfileStores {
@@ -113,6 +116,8 @@ internal fun createProfileStores(profile: DesktopE2eTestProfile): DesktopE2eProf
   return DesktopE2eProfileStores(
       dataStore = createPreferencesDataStore(profile.dataStorePath),
       cookieVault = KSafe(fileName = profile.cookieVaultFileName),
+      settingsSecretVault =
+          KSafe(fileName = "${profile.cookieVaultFileName}_settings_secret_vault"),
   )
 }
 

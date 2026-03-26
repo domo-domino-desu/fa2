@@ -67,17 +67,18 @@ class DesktopLocalSessionE2eTest {
 
     DesktopE2eThrottle.pauseBeforeAction("open-more")
     composeRule.onNodeWithTag("nav-more", useUnmergedTree = true).performClick()
-    DesktopE2eChallengePolicy.waitUntilTextExistsOrSkip(
+    DesktopE2eChallengePolicy.waitUntilTagExistsOrSkip(
         rule = composeRule,
-        text = "账号中心",
-        description = "more screen content",
+        tag = "more-screen",
+        description = "more screen root",
     )
+    composeRule.onNodeWithTag("more-following", useUnmergedTree = true).assertExists()
 
     DesktopE2eThrottle.pauseBeforeAction("open-search")
     composeRule.onNodeWithTag("nav-search", useUnmergedTree = true).performClick()
     DesktopE2eChallengePolicy.waitUntilTextExistsOrSkip(
         rule = composeRule,
-        text = "点击搜索框设置条件后提交搜索。",
+        text = "点击搜索框设置条件后提交搜索",
         description = "search screen hint",
     )
 
