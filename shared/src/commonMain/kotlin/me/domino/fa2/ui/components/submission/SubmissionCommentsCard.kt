@@ -32,6 +32,7 @@ internal fun SubmissionCommentsCard(
     commentCount: Int,
     comments: List<PageComment>,
     onOpenAuthor: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   Surface(
       color = MaterialTheme.colorScheme.surface,
@@ -41,7 +42,7 @@ internal fun SubmissionCommentsCard(
               width = 1.dp,
               color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
           ),
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+      modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
   ) {
     Column(
         modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),

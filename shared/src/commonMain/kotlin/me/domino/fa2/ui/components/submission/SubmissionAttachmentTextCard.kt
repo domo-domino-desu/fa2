@@ -35,6 +35,7 @@ internal fun SubmissionAttachmentTextCard(
     onTranslate: () -> Unit,
     onToggleWrapText: () -> Unit,
     requestPagerFocus: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   val clickable =
       attachmentTextState is SubmissionAttachmentTextUiState.Idle ||
@@ -54,7 +55,7 @@ internal fun SubmissionAttachmentTextCard(
             onToggleWrapText()
             requestPagerFocus()
           },
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+          modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
           supportingText = {
             Text(
                 text = attachmentTextState.fileName,
@@ -73,7 +74,8 @@ internal fun SubmissionAttachmentTextCard(
 
   DetailSectionCardSurface(
       modifier =
-          Modifier.fillMaxWidth()
+          modifier
+              .fillMaxWidth()
               .padding(horizontal = 16.dp)
               .then(
                   if (clickable) Modifier.clickable(onClick = onLoadAttachmentText) else Modifier

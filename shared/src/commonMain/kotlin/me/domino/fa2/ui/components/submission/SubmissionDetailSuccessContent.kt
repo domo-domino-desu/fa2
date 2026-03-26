@@ -11,14 +11,18 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
@@ -59,8 +63,12 @@ internal fun SubmissionDetailSuccessContent(
     onWrapAttachmentText: () -> Unit,
     requestPagerFocus: () -> Unit,
 ) {
+  val coroutineScope = rememberCoroutineScope()
   val taxonomyRepository = LocalTaxonomyRepository.current
   val taxonomyCatalog = LocalTaxonomyCatalog.current
+  val commentsBringIntoViewRequester = remember(detail.id) { BringIntoViewRequester() }
+  val attachmentBringIntoViewRequester = remember(detail.id) { BringIntoViewRequester() }
+  val canScrollToAttachmentText = attachmentTextState != null
   val fileExtensionLabel =
       remember(detail.downloadUrl, detail.downloadFileName) {
         attachmentFileExtension(detail.downloadFileName)
@@ -68,7 +76,15 @@ internal fun SubmissionDetailSuccessContent(
             ?: extractDownloadFileExtension(detail.downloadUrl)
       }
   val metrics =
-      remember(detail) {
+      remember(
+          detail,
+          fileExtensionLabel,
+          canScrollToAttachmentText,
+          onCopySubmissionUrl,
+          commentsBringIntoViewRequester,
+          attachmentBringIntoViewRequester,
+          coroutineScope,
+      ) {
         buildList {
           add(
               SubmissionInfoMetric(
@@ -80,6 +96,9 @@ internal fun SubmissionDetailSuccessContent(
               SubmissionInfoMetric(
                   icon = FaMaterialSymbols.Outlined.Comment,
                   text = detail.commentCount.toString(),
+                  onClick = {
+                    coroutineScope.launch { commentsBringIntoViewRequester.bringIntoView() }
+                  },
               )
           )
           add(
@@ -101,6 +120,16 @@ internal fun SubmissionDetailSuccessContent(
                 SubmissionInfoMetric(
                     icon = FaMaterialSymbols.Outlined.FilePresent,
                     text = extension,
+                    onClick =
+                        if (canScrollToAttachmentText) {
+                          {
+                            coroutineScope.launch {
+                              attachmentBringIntoViewRequester.bringIntoView()
+                            }
+                          }
+                        } else {
+                          null
+                        },
                 )
             )
           }
@@ -246,12 +275,14 @@ internal fun SubmissionDetailSuccessContent(
           onTranslate = onTranslateAttachment,
           onToggleWrapText = onWrapAttachmentText,
           requestPagerFocus = requestPagerFocus,
+          modifier = Modifier.bringIntoViewRequester(attachmentBringIntoViewRequester),
       )
     }
     SubmissionCommentsCard(
         commentCount = detail.commentCount,
         comments = detail.comments,
         onOpenAuthor = onOpenAuthor,
+        modifier = Modifier.bringIntoViewRequester(commentsBringIntoViewRequester),
     )
     if (!favoriteErrorMessage.isNullOrBlank()) {
       Text(
