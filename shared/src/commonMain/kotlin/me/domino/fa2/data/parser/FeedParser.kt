@@ -5,7 +5,14 @@ import com.fleeksoft.ksoup.nodes.Element
 import me.domino.fa2.data.model.FeedPage
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.util.FaUrls
-import me.domino.fa2.util.ParserUtils
+import me.domino.fa2.util.TagBlockSettings
+import me.domino.fa2.util.isBlockedByTagSettings
+import me.domino.fa2.util.parseImageTags
+import me.domino.fa2.util.parsePositiveFloat
+import me.domino.fa2.util.parseSubmissionAvatarUrls
+import me.domino.fa2.util.parseSubmissionSid
+import me.domino.fa2.util.parseTagBlockSettings
+import me.domino.fa2.util.toAbsoluteUrl
 
 /** Feed 页面解析器。 */
 class FeedParser {
@@ -21,7 +28,7 @@ class FeedParser {
    */
   fun parse(html: String, baseUrl: String): FeedPage {
     val document = Ksoup.parse(html, baseUrl)
-    val tagBlockSettings = ParserUtils.parseTagBlockSettings(document)
+    val tagBlockSettings = parseTagBlockSettings(document)
     val figureNodes =
         submissionSelectors
             .asSequence()
@@ -29,7 +36,7 @@ class FeedParser {
             .firstOrNull { nodes -> nodes.isNotEmpty() }
             .orEmpty()
 
-    val avatarUrls = ParserUtils.parseSubmissionAvatarUrls(html)
+    val avatarUrls = parseSubmissionAvatarUrls(html)
     val submissions =
         figureNodes.mapNotNull { node ->
           parseSubmission(
@@ -46,7 +53,7 @@ class FeedParser {
               val rawTarget = node.attr("href").ifBlank { node.attr("action") }
               rawTarget.takeIf { it.isNotBlank() }
             }
-            ?.let { target -> ParserUtils.toAbsoluteUrl(baseUrl, target) }
+            ?.let { target -> toAbsoluteUrl(baseUrl, target) }
 
     return FeedPage(submissions = submissions, nextPageUrl = nextPageUrl)
   }
@@ -59,18 +66,18 @@ class FeedParser {
   private fun parseSubmission(
       node: Element,
       avatarUrls: Map<Int, String>,
-      tagBlockSettings: ParserUtils.TagBlockSettings,
+      tagBlockSettings: TagBlockSettings,
   ): SubmissionThumbnail? {
     val rawSubmissionUrl = node.selectFirst("a[href*=\"/view/\"]")?.attr("href").orEmpty()
     val submissionUrl =
-        ParserUtils.toAbsoluteUrl(
+        toAbsoluteUrl(
             baseUrl = "https://www.furaffinity.net/",
             maybeRelativeUrl = rawSubmissionUrl,
         )
 
     val id =
         node.attr("id").removePrefix("sid-").toIntOrNull()
-            ?: ParserUtils.parseSubmissionSid(submissionUrl)
+            ?: parseSubmissionSid(submissionUrl)
             ?: return null
 
     val image =
@@ -86,29 +93,26 @@ class FeedParser {
     val author = captionLinks.getOrNull(1)?.text()?.trim()?.takeIf { it.isNotBlank() } ?: "unknown"
 
     val width =
-        ParserUtils.parsePositiveFloat(image.attr("data-width"))
-            ?: ParserUtils.parsePositiveFloat(image.attr("width"))
+        parsePositiveFloat(image.attr("data-width"))
+            ?: parsePositiveFloat(image.attr("width"))
             ?: 1f
 
     val height =
-        ParserUtils.parsePositiveFloat(image.attr("data-height"))
-            ?: ParserUtils.parsePositiveFloat(image.attr("height"))
+        parsePositiveFloat(image.attr("data-height"))
+            ?: parsePositiveFloat(image.attr("height"))
             ?: 1f
 
     val thumbnailRaw = resolveThumbnailRawUrl(image)
     val thumbnailUrl =
-        ParserUtils.toAbsoluteUrl(
+        toAbsoluteUrl(
             baseUrl = "https://www.furaffinity.net/",
             maybeRelativeUrl = thumbnailRaw,
         )
     val resolvedSubmissionUrl = submissionUrl.ifBlank { FaUrls.submission(id) }
-    val imageTags = ParserUtils.parseImageTags(image)
+    val imageTags = parseImageTags(image)
     val categoryTag = imageTags.sorted().firstOrNull { tag -> tag.startsWith("c_") }.orEmpty()
     val isBlockedByTag =
-        ParserUtils.isBlockedByTagSettings(
-            imageTags = imageTags,
-            tagBlockSettings = tagBlockSettings,
-        )
+        isBlockedByTagSettings(imageTags = imageTags, tagBlockSettings = tagBlockSettings)
 
     return SubmissionThumbnail(
         id = id,

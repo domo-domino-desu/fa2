@@ -3,26 +3,24 @@ package me.domino.fa2.ui.pages.search
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import io.ktor.http.decodeURLQueryComponent
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.repository.SearchRepository
 import me.domino.fa2.data.search.SearchUiLabelsRepository
+import me.domino.fa2.data.search.SearchUiOptionKey
+import me.domino.fa2.data.search.SearchUiTextKey
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.ui.components.FilterOption
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.state.PaginationSnapshot
-import me.domino.fa2.ui.state.PaginationStateMachine
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.logging.FaLog
-import me.domino.fa2.util.logging.summarizePageState
 
-private const val searchAutoLoadThreshold = 10
+internal const val searchAutoLoadThreshold = 10
 
 enum class SearchGender(val token: String) {
   Male("male"),
@@ -81,334 +79,158 @@ class SearchScreenModel(
     private val searchUiLabelsRepository: SearchUiLabelsRepository,
 ) : StateScreenModel<SearchUiState>(SearchUiState()) {
   private val log = FaLog.withTag("SearchScreenModel")
-  private val paginationStateMachine =
-      PaginationStateMachine<SubmissionThumbnail, Int>(keyOf = { item -> item.id })
   private val mutablePageState =
       MutableStateFlow<PageState<SearchUiState>>(PageState.Success(state.value))
   val pageState: StateFlow<PageState<SearchUiState>> = mutablePageState.asStateFlow()
-  private var loadJob: Job? = null
-  private var appendJob: Job? = null
-  private var firstPageUrl: String? = null
+  private val workflow =
+      SearchScreenWorkflow(
+          repository = repository,
+          submissionListHolder = submissionListHolder,
+          historyRepository = historyRepository,
+          taxonomyRepository = taxonomyRepository,
+          searchUiLabelsRepository = searchUiLabelsRepository,
+          screenModelScope = screenModelScope,
+          log = log,
+          stateProvider = { state.value },
+          stateSink = { mutableState.value = it },
+          pageStateSink = { mutablePageState.value = it },
+      )
 
   fun openOverlay() {
-    mutableState.value = state.value.copy(overlayVisible = true)
+    workflow.openOverlay()
   }
 
   fun closeOverlay() {
-    mutableState.value = state.value.copy(overlayVisible = false)
+    workflow.closeOverlay()
   }
 
   fun updateQuery(query: String) {
-    val genders = parseGendersFromQuery(query)
-    mutableState.value =
-        state.value.copy(draft = state.value.draft.copy(query = query, selectedGenders = genders))
+    workflow.updateQuery(query)
   }
 
   fun toggleGender(gender: SearchGender, checked: Boolean) {
-    val current = state.value.draft
-    val updatedGenders =
-        current.selectedGenders
-            .toMutableSet()
-            .apply { if (checked) add(gender) else remove(gender) }
-            .toSet()
-    val rewrittenQuery = rewriteQueryWithGenders(query = current.query, genders = updatedGenders)
-    mutableState.value =
-        state.value.copy(
-            draft = current.copy(query = rewrittenQuery, selectedGenders = updatedGenders)
-        )
+    workflow.toggleGender(gender, checked)
   }
 
   fun updateCategory(category: Int) {
-    mutableState.value = state.value.copy(draft = state.value.draft.copy(category = category))
+    workflow.updateCategory(category)
   }
 
   fun updateType(type: Int) {
-    mutableState.value = state.value.copy(draft = state.value.draft.copy(type = type))
+    workflow.updateType(type)
   }
 
   fun updateSpecies(species: Int) {
-    mutableState.value = state.value.copy(draft = state.value.draft.copy(species = species))
+    workflow.updateSpecies(species)
   }
 
   fun updateOrderBy(orderBy: String) {
-    mutableState.value = state.value.copy(draft = state.value.draft.copy(orderBy = orderBy))
+    workflow.updateOrderBy(orderBy)
   }
 
   fun updateOrderDirection(orderDirection: String) {
-    mutableState.value =
-        state.value.copy(draft = state.value.draft.copy(orderDirection = orderDirection))
+    workflow.updateOrderDirection(orderDirection)
   }
 
   fun updateRange(range: String) {
-    mutableState.value = state.value.copy(draft = state.value.draft.copy(range = range))
+    workflow.updateRange(range)
   }
 
   fun updateRangeFrom(value: String) {
-    mutableState.value = state.value.copy(draft = state.value.draft.copy(rangeFrom = value))
+    workflow.updateRangeFrom(value)
   }
 
   fun updateRangeTo(value: String) {
-    mutableState.value = state.value.copy(draft = state.value.draft.copy(rangeTo = value))
+    workflow.updateRangeTo(value)
   }
 
   fun setRatingGeneral(enabled: Boolean) {
-    mutableState.value = state.value.copy(draft = state.value.draft.copy(ratingGeneral = enabled))
+    workflow.setRatingGeneral(enabled)
   }
 
   fun setRatingMature(enabled: Boolean) {
-    mutableState.value = state.value.copy(draft = state.value.draft.copy(ratingMature = enabled))
+    workflow.setRatingMature(enabled)
   }
 
   fun setRatingAdult(enabled: Boolean) {
-    mutableState.value = state.value.copy(draft = state.value.draft.copy(ratingAdult = enabled))
+    workflow.setRatingAdult(enabled)
   }
 
   fun setTypeArt(enabled: Boolean) {
-    mutableState.value = state.value.copy(draft = state.value.draft.copy(typeArt = enabled))
+    workflow.setTypeArt(enabled)
   }
 
   fun setTypeMusic(enabled: Boolean) {
-    mutableState.value = state.value.copy(draft = state.value.draft.copy(typeMusic = enabled))
+    workflow.setTypeMusic(enabled)
   }
 
   fun setTypeFlash(enabled: Boolean) {
-    mutableState.value = state.value.copy(draft = state.value.draft.copy(typeFlash = enabled))
+    workflow.setTypeFlash(enabled)
   }
 
   fun setTypeStory(enabled: Boolean) {
-    mutableState.value = state.value.copy(draft = state.value.draft.copy(typeStory = enabled))
+    workflow.setTypeStory(enabled)
   }
 
   fun setTypePhoto(enabled: Boolean) {
-    mutableState.value = state.value.copy(draft = state.value.draft.copy(typePhoto = enabled))
+    workflow.setTypePhoto(enabled)
   }
 
   fun setTypePoetry(enabled: Boolean) {
-    mutableState.value = state.value.copy(draft = state.value.draft.copy(typePoetry = enabled))
+    workflow.setTypePoetry(enabled)
   }
 
   fun applySearch() {
-    log.i { "应用Search -> 开始" }
-    val applied = state.value.draft.copy(query = state.value.draft.query.trim())
-    if (applied.query.isBlank()) {
-      log.w { "应用Search -> 跳过(空关键词)" }
-      return
-    }
-    val firstUrl = buildSearchUrl(form = applied, page = 1)
-    firstPageUrl = firstUrl
-    mutableState.value =
-        state.value.copy(
-            overlayVisible = false,
-            draft = applied,
-            applied = applied,
-            hasSearched = true,
-        )
-    mutablePageState.value = PageState.Loading
-    val filtersSummary =
-        buildSearchFiltersSummary(applied, taxonomyRepository, searchUiLabelsRepository)
-    screenModelScope.launch {
-      historyRepository.recordSearchQuery(
-          query = applied.query,
-          filtersSummary = filtersSummary,
-          searchUrl = firstUrl,
-      )
-    }
-    log.i { "应用Search -> 已提交(keywordLen=${applied.query.length})" }
-    load(forceRefresh = true)
+    workflow.applySearch()
   }
 
   fun applySearchFromUrl(url: String, fallbackQuery: String = "") {
-    val normalizedUrl = url.trim()
-    if (normalizedUrl.isBlank()) return
-    val restored = parseSearchFormFromUrl(url = normalizedUrl, fallbackQuery = fallbackQuery)
-    if (restored.query.isBlank()) return
-    log.i { "应用Search(历史) -> 开始" }
-    firstPageUrl = normalizedUrl
-    mutableState.value =
-        state.value.copy(
-            overlayVisible = false,
-            draft = restored,
-            applied = restored,
-            hasSearched = true,
-        )
-    mutablePageState.value = PageState.Loading
-    load(forceRefresh = true)
+    workflow.applySearchFromUrl(url = url, fallbackQuery = fallbackQuery)
   }
 
   fun refresh() {
-    if (firstPageUrl == null) {
-      log.d { "刷新Search -> 跳过(未搜索)" }
-      return
-    }
-    log.i { "刷新Search -> 开始" }
-    load(forceRefresh = true)
+    workflow.refresh()
   }
 
   fun onLastVisibleIndexChanged(lastVisibleIndex: Int) {
-    val snapshot = state.value
-    if (snapshot.submissions.isEmpty()) return
-    log.d { "自动加载Search -> 触发检查(last=$lastVisibleIndex,total=${snapshot.submissions.size})" }
-    if (lastVisibleIndex > snapshot.submissions.lastIndex - searchAutoLoadThreshold) {
-      loadMore(force = false)
-    }
+    workflow.onLastVisibleIndexChanged(lastVisibleIndex)
   }
 
   fun retryLoadMore() {
-    loadMore(force = true)
+    workflow.retryLoadMore()
   }
 
   fun setCurrentSubmission(sid: Int) {
-    submissionListHolder.setCurrentBySid(sid)
-  }
-
-  private fun load(forceRefresh: Boolean) {
-    val firstUrl = firstPageUrl ?: return
-    log.i { "加载Search -> 开始(forceRefresh=$forceRefresh)" }
-    if (loadJob?.isActive == true) {
-      log.d { "加载Search -> 跳过(已有任务)" }
-      return
-    }
-    val snapshot = state.value
-    mutableState.value =
-        snapshot.applyPagination(
-            paginationStateMachine.beginLoad(
-                snapshot = snapshot.toPaginationSnapshot(),
-                forceRefresh = forceRefresh,
-            )
-        )
-    if (snapshot.submissions.isEmpty()) {
-      mutablePageState.value = PageState.Loading
-    }
-    loadJob =
-        screenModelScope.launch {
-          val pageState =
-              if (forceRefresh) {
-                repository.refreshPage(firstUrl)
-              } else {
-                repository.loadPage(firstUrl)
-              }
-          val reduced =
-              paginationStateMachine.reduceFirstPage(
-                  snapshot = state.value.toPaginationSnapshot(),
-                  result = pageState,
-                  itemsOf = { page -> page.submissions },
-                  nextPageUrlOf = { page -> page.nextPageUrl },
-              )
-          val updated = state.value.applyPagination(reduced)
-          mutableState.value = updated
-          when (pageState) {
-            is PageState.Success -> {
-              syncSubmissionListHolder(updated)
-              mutablePageState.value = PageState.Success(updated)
-              log.i {
-                "加载Search -> ${summarizePageState(pageState)}(count=${updated.submissions.size})"
-              }
-            }
-
-            PageState.CfChallenge -> {
-              mutablePageState.value = PageState.CfChallenge
-              log.w { "加载Search -> Cloudflare验证" }
-            }
-
-            is PageState.MatureBlocked -> {
-              mutablePageState.value = PageState.MatureBlocked(pageState.reason)
-              log.w { "加载Search -> 受限(${pageState.reason})" }
-            }
-
-            is PageState.Error -> {
-              mutablePageState.value = PageState.Error(pageState.exception)
-              log.e(pageState.exception) { "加载Search -> 失败" }
-            }
-
-            PageState.Loading -> {
-              mutablePageState.value = PageState.Loading
-              log.d { "加载Search -> 加载中" }
-            }
-          }
-        }
-  }
-
-  private fun loadMore(force: Boolean) {
-    val snapshot = state.value
-    val nextUrl = snapshot.nextPageUrl ?: return
-    if (appendJob?.isActive == true) {
-      log.d { "自动加载Search -> 跳过(已有追加任务)" }
-      return
-    }
-    if (!paginationStateMachine.canLoadMore(snapshot.toPaginationSnapshot(), force = force)) {
-      log.d { "自动加载Search -> 跳过(条件未满足)" }
-      return
-    }
-    log.d { "自动加载Search -> 开始(force=$force)" }
-
-    mutableState.value =
-        snapshot.applyPagination(
-            paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot())
-        )
-
-    appendJob =
-        screenModelScope.launch {
-          val pageState = repository.loadPage(nextUrl)
-          val reduced =
-              paginationStateMachine.reduceAppend(
-                  snapshot = state.value.toPaginationSnapshot(),
-                  result = pageState,
-                  itemsOf = { page -> page.submissions },
-                  nextPageUrlOf = { page -> page.nextPageUrl },
-              )
-          val updated = state.value.applyPagination(reduced)
-          mutableState.value = updated
-          when (pageState) {
-            is PageState.Success -> {
-              syncSubmissionListHolder(updated)
-              mutablePageState.value = PageState.Success(updated)
-              log.d {
-                "自动加载Search -> ${summarizePageState(pageState)}(count=${updated.submissions.size})"
-              }
-            }
-
-            PageState.CfChallenge -> log.w { "自动加载Search -> Cloudflare验证" }
-            is PageState.MatureBlocked -> log.w { "自动加载Search -> 受限(${pageState.reason})" }
-            is PageState.Error -> log.e(pageState.exception) { "自动加载Search -> 失败" }
-            PageState.Loading -> log.d { "自动加载Search -> 加载中" }
-          }
-        }
-  }
-
-  private fun buildSearchUrl(form: SearchFormState, page: Int): String =
-      FaUrls.search(
-          FaUrls.SearchParams(
-              q = form.query,
-              page = page,
-              category = form.category,
-              arttype = form.type,
-              species = form.species,
-              orderBy = form.orderBy,
-              orderDirection = form.orderDirection,
-              range = form.range,
-              rangeFrom = form.rangeFrom,
-              rangeTo = form.rangeTo,
-              ratingGeneral = form.ratingGeneral,
-              ratingMature = form.ratingMature,
-              ratingAdult = form.ratingAdult,
-              typeArt = form.typeArt,
-              typeMusic = form.typeMusic,
-              typeFlash = form.typeFlash,
-              typeStory = form.typeStory,
-              typePhoto = form.typePhoto,
-              typePoetry = form.typePoetry,
-          )
-      )
-
-  private fun syncSubmissionListHolder(state: SearchUiState) {
-    submissionListHolder.replace(
-        submissions = state.submissions,
-        nextPageUrl = state.nextPageUrl,
-    )
+    workflow.setCurrentSubmission(sid)
   }
 }
 
-private fun SearchUiState.toPaginationSnapshot(): PaginationSnapshot<SubmissionThumbnail> =
+internal fun buildSearchUrl(form: SearchFormState, page: Int): String =
+    FaUrls.search(
+        FaUrls.SearchParams(
+            q = form.query,
+            page = page,
+            category = form.category,
+            arttype = form.type,
+            species = form.species,
+            orderBy = form.orderBy,
+            orderDirection = form.orderDirection,
+            range = form.range,
+            rangeFrom = form.rangeFrom,
+            rangeTo = form.rangeTo,
+            ratingGeneral = form.ratingGeneral,
+            ratingMature = form.ratingMature,
+            ratingAdult = form.ratingAdult,
+            typeArt = form.typeArt,
+            typeMusic = form.typeMusic,
+            typeFlash = form.typeFlash,
+            typeStory = form.typeStory,
+            typePhoto = form.typePhoto,
+            typePoetry = form.typePoetry,
+        )
+    )
+
+internal fun SearchUiState.toPaginationSnapshot(): PaginationSnapshot<SubmissionThumbnail> =
     PaginationSnapshot(
         items = submissions,
         nextPageUrl = nextPageUrl,
@@ -419,7 +241,7 @@ private fun SearchUiState.toPaginationSnapshot(): PaginationSnapshot<SubmissionT
         appendErrorMessage = appendErrorMessage,
     )
 
-private fun SearchUiState.applyPagination(
+internal fun SearchUiState.applyPagination(
     snapshot: PaginationSnapshot<SubmissionThumbnail>
 ): SearchUiState =
     copy(
@@ -511,14 +333,14 @@ internal fun buildSearchFiltersSummary(
   if (form.orderBy != defaults.orderBy) {
     summary +=
         searchUiLabelsRepository.formatLabelValue(
-            searchUiLabelsRepository.summarySortLabel(),
+            searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_SORT),
             orderByOptions.labelOf(form.orderBy),
         )
   }
   if (form.orderDirection != defaults.orderDirection) {
     summary +=
         searchUiLabelsRepository.formatLabelValue(
-            searchUiLabelsRepository.summaryDirectionLabel(),
+            searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_DIRECTION),
             orderDirectionOptions.labelOf(form.orderDirection),
         )
   }
@@ -530,28 +352,29 @@ internal fun buildSearchFiltersSummary(
       val detail =
           when {
             from.isNotBlank() && to.isNotBlank() ->
-                "${searchUiLabelsRepository.fromLabel()} $from " +
-                    "${searchUiLabelsRepository.toLabel()} $to"
-            from.isNotBlank() -> "${searchUiLabelsRepository.fromLabel()} $from"
-            to.isNotBlank() -> "${searchUiLabelsRepository.toLabel()} $to"
+                "${searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_FROM)} $from " +
+                    "${searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_TO)} $to"
+            from.isNotBlank() ->
+                "${searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_FROM)} $from"
+            to.isNotBlank() -> "${searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_TO)} $to"
             else -> ""
           }
       summary +=
           if (detail.isBlank()) {
             searchUiLabelsRepository.formatLabelValue(
-                searchUiLabelsRepository.summaryDateLabel(),
+                searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_DATE),
                 label,
             )
           } else {
             searchUiLabelsRepository.formatLabelValue(
-                searchUiLabelsRepository.summaryDateLabel(),
+                searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_DATE),
                 "$label（$detail）",
             )
           }
     } else {
       summary +=
           searchUiLabelsRepository.formatLabelValue(
-              searchUiLabelsRepository.summaryDateLabel(),
+              searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_DATE),
               label,
           )
     }
@@ -583,17 +406,25 @@ internal fun buildSearchFiltersSummary(
           form.typePoetry != defaults.typePoetry
   ) {
     val types = buildList {
-      if (form.typeArt) add(searchUiLabelsRepository.submissionTypeLabel("art"))
-      if (form.typeMusic) add(searchUiLabelsRepository.submissionTypeLabel("music"))
-      if (form.typeFlash) add(searchUiLabelsRepository.submissionTypeLabel("flash"))
-      if (form.typeStory) add(searchUiLabelsRepository.submissionTypeLabel("story"))
-      if (form.typePhoto) add(searchUiLabelsRepository.submissionTypeLabel("photo"))
-      if (form.typePoetry) add(searchUiLabelsRepository.submissionTypeLabel("poetry"))
+      if (form.typeArt)
+          add(searchUiLabelsRepository.optionLabel(SearchUiOptionKey.SUBMISSION_TYPE, "art"))
+      if (form.typeMusic)
+          add(searchUiLabelsRepository.optionLabel(SearchUiOptionKey.SUBMISSION_TYPE, "music"))
+      if (form.typeFlash)
+          add(searchUiLabelsRepository.optionLabel(SearchUiOptionKey.SUBMISSION_TYPE, "flash"))
+      if (form.typeStory)
+          add(searchUiLabelsRepository.optionLabel(SearchUiOptionKey.SUBMISSION_TYPE, "story"))
+      if (form.typePhoto)
+          add(searchUiLabelsRepository.optionLabel(SearchUiOptionKey.SUBMISSION_TYPE, "photo"))
+      if (form.typePoetry)
+          add(searchUiLabelsRepository.optionLabel(SearchUiOptionKey.SUBMISSION_TYPE, "poetry"))
     }
     summary +=
         searchUiLabelsRepository.formatLabelValue(
-            searchUiLabelsRepository.summarySubmissionTypesLabel(),
-            types.ifEmpty { listOf(searchUiLabelsRepository.noneLabel()) }.joinToString("、"),
+            searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_SUBMISSION_TYPES),
+            types
+                .ifEmpty { listOf(searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_NONE)) }
+                .joinToString("、"),
         )
   }
 
@@ -601,11 +432,13 @@ internal fun buildSearchFiltersSummary(
     val genders =
         SearchGender.entries
             .filter { gender -> gender in form.selectedGenders }
-            .joinToString("、") { gender -> searchUiLabelsRepository.genderLabel(gender.token) }
+            .joinToString("、") { gender ->
+              searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, gender.token)
+            }
     if (genders.isNotBlank()) {
       summary +=
           searchUiLabelsRepository.formatLabelValue(
-              searchUiLabelsRepository.summaryGendersLabel(),
+              searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_GENDERS),
               genders,
           )
     }
@@ -617,7 +450,7 @@ internal fun buildSearchFiltersSummary(
 private fun <T> List<FilterOption<T>>.labelOf(value: T): String =
     firstOrNull { option -> option.value == value }?.label ?: value.toString()
 
-private fun parseSearchFormFromUrl(url: String, fallbackQuery: String): SearchFormState {
+internal fun parseSearchFormFromUrl(url: String, fallbackQuery: String): SearchFormState {
   val rawQuery = url.substringAfter('?', "").substringBefore('#')
   val params: Map<String, List<String>> =
       rawQuery

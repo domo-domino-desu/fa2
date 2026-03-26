@@ -17,20 +17,18 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
 import me.domino.fa2.ui.components.submission.WaterfallLoadingSkeleton
+import me.domino.fa2.ui.host.LocalAppSettings
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.search.component.SearchHint
 import me.domino.fa2.ui.pages.search.component.SearchOverlayContent
 import me.domino.fa2.ui.pages.search.component.SearchStatusCard
-import org.koin.compose.koinInject
+import me.domino.fa2.ui.pages.search.component.rememberSearchOverlayUiData
 
 @Composable
 fun SearchScreen(
@@ -38,8 +36,8 @@ fun SearchScreen(
     actions: SearchScreenActions,
     waterfallState: LazyStaggeredGridState,
 ) {
-  val settingsService = koinInject<AppSettingsService>()
-  val settings by settingsService.settings.collectAsState()
+  val settings = LocalAppSettings.current
+  val overlayUiData = rememberSearchOverlayUiData()
   val canSearch = state.draft.query.trim().isNotBlank()
 
   Box(modifier = Modifier.fillMaxSize()) {
@@ -101,6 +99,7 @@ fun SearchScreen(
           form = state.draft,
           actions = actions,
           canSearch = canSearch,
+          uiData = overlayUiData,
           modifier = Modifier.fillMaxSize(),
       )
     }

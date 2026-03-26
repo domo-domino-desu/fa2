@@ -98,131 +98,101 @@ class SearchUiLabelsRepository {
     }
   }
 
-  fun summarySortLabel(): String = preparedCatalog?.summary?.sort.orFallback("排序")
+  fun text(key: SearchUiTextKey): String =
+      when (key) {
+        SearchUiTextKey.SUMMARY_SORT -> preparedCatalog?.summary?.sort.orFallback("排序")
+        SearchUiTextKey.SUMMARY_DIRECTION -> preparedCatalog?.summary?.direction.orFallback("方向")
+        SearchUiTextKey.SUMMARY_DATE -> preparedCatalog?.summary?.date.orFallback("日期")
+        SearchUiTextKey.SUMMARY_GENDERS -> preparedCatalog?.summary?.genders.orFallback("性别")
+        SearchUiTextKey.SUMMARY_SUBMISSION_TYPES ->
+            preparedCatalog?.summary?.submissionTypes.orFallback("投稿类型")
+        SearchUiTextKey.FILTER_SORT_CRITERIA ->
+            preparedCatalog?.filters?.sortCriteria.orFallback("排序依据")
+        SearchUiTextKey.FILTER_SORT_DIRECTION ->
+            preparedCatalog?.filters?.sortDirection.orFallback("排序方向")
+        SearchUiTextKey.FILTER_DATE -> preparedCatalog?.filters?.dateFilter.orFallback("日期范围")
+        SearchUiTextKey.FILTER_GENDER_KEYWORDS ->
+            preparedCatalog?.filters?.genderKeywords.orFallback("性别关键词")
+        SearchUiTextKey.FILTER_SUBMISSION_TYPES ->
+            preparedCatalog?.filters?.submissionTypes.orFallback("投稿类型")
+        SearchUiTextKey.PHRASE_ANY -> preparedCatalog?.phrases?.any.orFallback("任意")
+        SearchUiTextKey.PHRASE_NONE -> preparedCatalog?.phrases?.none.orFallback("无")
+        SearchUiTextKey.PHRASE_FROM -> preparedCatalog?.phrases?.from.orFallback("自")
+        SearchUiTextKey.PHRASE_TO -> preparedCatalog?.phrases?.to.orFallback("至")
+        SearchUiTextKey.LABEL_VALUE_SEPARATOR ->
+            preparedCatalog?.punctuation?.labelValueSeparator.orFallback("：")
+      }
 
-  fun summaryDirectionLabel(): String = preparedCatalog?.summary?.direction.orFallback("方向")
-
-  fun summaryDateLabel(): String = preparedCatalog?.summary?.date.orFallback("日期")
-
-  fun summaryGendersLabel(): String = preparedCatalog?.summary?.genders.orFallback("性别")
-
-  fun summarySubmissionTypesLabel(): String =
-      preparedCatalog?.summary?.submissionTypes.orFallback("投稿类型")
-
-  fun filterSortCriteriaLabel(): String = preparedCatalog?.filters?.sortCriteria.orFallback("排序依据")
-
-  fun filterSortDirectionLabel(): String =
-      preparedCatalog?.filters?.sortDirection.orFallback("排序方向")
-
-  fun filterDateLabel(): String = preparedCatalog?.filters?.dateFilter.orFallback("日期范围")
-
-  fun filterGenderKeywordsLabel(): String =
-      preparedCatalog?.filters?.genderKeywords.orFallback("性别关键词")
-
-  fun filterSubmissionTypesLabel(): String =
-      preparedCatalog?.filters?.submissionTypes.orFallback("投稿类型")
-
-  fun orderByLabel(value: String): String =
-      preparedCatalog
-          ?.options
-          ?.orderBy
+  fun optionLabel(key: SearchUiOptionKey, value: String): String =
+      optionMap(key)
           .labelOf(
               key = value,
-              fallback =
-                  when (value) {
-                    "relevancy" -> "相关度"
-                    "date" -> "日期"
-                    "popularity" -> "热度"
-                    else -> value
-                  },
+              fallback = optionFallback(key = key, value = value),
           )
-
-  fun orderDirectionLabel(value: String): String =
-      preparedCatalog
-          ?.options
-          ?.orderDirection
-          .labelOf(
-              key = value,
-              fallback =
-                  when (value) {
-                    "desc" -> "降序"
-                    "asc" -> "升序"
-                    else -> value
-                  },
-          )
-
-  fun rangeLabel(value: String): String =
-      preparedCatalog
-          ?.options
-          ?.range
-          .labelOf(
-              key = value,
-              fallback =
-                  when (value) {
-                    "1day" -> "1 天"
-                    "3days" -> "3 天"
-                    "7days" -> "7 天"
-                    "30days" -> "30 天"
-                    "90days" -> "90 天"
-                    "1year" -> "1 年"
-                    "3years" -> "3 年"
-                    "5years" -> "5 年"
-                    "all" -> "全部时间"
-                    "manual" -> "自定义"
-                    else -> value
-                  },
-          )
-
-  fun genderLabel(value: String): String =
-      preparedCatalog
-          ?.options
-          ?.genders
-          .labelOf(
-              key = value,
-              fallback =
-                  when (value) {
-                    "" -> "任意"
-                    "male" -> "雄性"
-                    "female" -> "雌性"
-                    "trans_male" -> "跨性别雄性"
-                    "trans_female" -> "跨性别雌性"
-                    "intersex" -> "两性兼有"
-                    "non_binary" -> "非二元性别"
-                    else -> value
-                  },
-          )
-
-  fun anyLabel(): String = preparedCatalog?.phrases?.any.orFallback("任意")
-
-  fun submissionTypeLabel(value: String): String =
-      preparedCatalog
-          ?.options
-          ?.submissionTypes
-          .labelOf(
-              key = value,
-              fallback =
-                  when (value) {
-                    "art" -> "艺术"
-                    "music" -> "音乐"
-                    "flash" -> "Flash"
-                    "story" -> "故事"
-                    "photo" -> "摄影"
-                    "poetry" -> "诗歌"
-                    else -> value
-                  },
-          )
-
-  fun noneLabel(): String = preparedCatalog?.phrases?.none.orFallback("无")
-
-  fun fromLabel(): String = preparedCatalog?.phrases?.from.orFallback("自")
-
-  fun toLabel(): String = preparedCatalog?.phrases?.to.orFallback("至")
-
-  fun labelValueSeparator(): String =
-      preparedCatalog?.punctuation?.labelValueSeparator.orFallback("：")
 
   fun formatLabelValue(label: String, value: String): String =
-      "$label${labelValueSeparator()}$value"
+      "$label${text(SearchUiTextKey.LABEL_VALUE_SEPARATOR)}$value"
+
+  private fun optionMap(key: SearchUiOptionKey): Map<String, String>? =
+      when (key) {
+        SearchUiOptionKey.ORDER_BY -> preparedCatalog?.options?.orderBy
+        SearchUiOptionKey.ORDER_DIRECTION -> preparedCatalog?.options?.orderDirection
+        SearchUiOptionKey.RANGE -> preparedCatalog?.options?.range
+        SearchUiOptionKey.GENDER -> preparedCatalog?.options?.genders
+        SearchUiOptionKey.SUBMISSION_TYPE -> preparedCatalog?.options?.submissionTypes
+      }
+
+  private fun optionFallback(key: SearchUiOptionKey, value: String): String =
+      when (key) {
+        SearchUiOptionKey.ORDER_BY ->
+            when (value) {
+              "relevancy" -> "相关度"
+              "date" -> "日期"
+              "popularity" -> "热度"
+              else -> value
+            }
+        SearchUiOptionKey.ORDER_DIRECTION ->
+            when (value) {
+              "desc" -> "降序"
+              "asc" -> "升序"
+              else -> value
+            }
+        SearchUiOptionKey.RANGE ->
+            when (value) {
+              "1day" -> "1 天"
+              "3days" -> "3 天"
+              "7days" -> "7 天"
+              "30days" -> "30 天"
+              "90days" -> "90 天"
+              "1year" -> "1 年"
+              "3years" -> "3 年"
+              "5years" -> "5 年"
+              "all" -> "全部时间"
+              "manual" -> "自定义"
+              else -> value
+            }
+        SearchUiOptionKey.GENDER ->
+            when (value) {
+              "" -> "任意"
+              "male" -> "雄性"
+              "female" -> "雌性"
+              "trans_male" -> "跨性别雄性"
+              "trans_female" -> "跨性别雌性"
+              "intersex" -> "两性兼有"
+              "non_binary" -> "非二元性别"
+              else -> value
+            }
+        SearchUiOptionKey.SUBMISSION_TYPE ->
+            when (value) {
+              "art" -> "艺术"
+              "music" -> "音乐"
+              "flash" -> "Flash"
+              "story" -> "故事"
+              "photo" -> "摄影"
+              "poetry" -> "诗歌"
+              else -> value
+            }
+      }
 }
 
 private fun String?.orFallback(fallback: String): String =

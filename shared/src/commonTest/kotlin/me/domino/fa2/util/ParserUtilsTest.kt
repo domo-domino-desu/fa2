@@ -11,7 +11,7 @@ class ParserUtilsTest {
   fun skipsAvatarUrlsWhenAvatarMtimeIsMissing() {
     val html = TestFixtures.read("www.furaffinity.net:gallery:tiaamaito:.html")
 
-    val avatars = ParserUtils.parseSubmissionAvatarUrls(html)
+    val avatars = parseSubmissionAvatarUrls(html)
 
     assertFalse(avatars.values.any { value -> value.contains("/0/") })
   }
@@ -19,7 +19,7 @@ class ParserUtilsTest {
   @Test
   fun derivesThumbnailUrlFromFullImageUrl() {
     val result =
-        ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
+        deriveSubmissionThumbnailUrlFromFullImage(
             sid = 49338772,
             fullImageUrl =
                 "https://d.furaffinity.net/art/annetpeas/1665402309/1665402309.annetpeas_the_hookah_fa.png",
@@ -31,7 +31,7 @@ class ParserUtilsTest {
   @Test
   fun derivesThumbnailUrlFromLegacyFacdnHost() {
     val result =
-        ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
+        deriveSubmissionThumbnailUrlFromFullImage(
             sid = 14977134,
             fullImageUrl =
                 "http://d.facdn.net/art/waccoon/1411105444/1411105444.waccoon_my_picture.jpg",
@@ -43,7 +43,7 @@ class ParserUtilsTest {
   @Test
   fun derivesThumbnailUrlWhenFullUrlContainsQuery() {
     val result =
-        ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
+        deriveSubmissionThumbnailUrlFromFullImage(
             sid = 52209828,
             fullImageUrl =
                 "https://d.furaffinity.net/art/minmohere/1684537865/1684537865.minmohere_5-18-23blupee.png?token=abc",
@@ -55,7 +55,7 @@ class ParserUtilsTest {
   @Test
   fun returnsNullWhenFullImageUrlDoesNotMatchPattern() {
     val result =
-        ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
+        deriveSubmissionThumbnailUrlFromFullImage(
             sid = 49338772,
             fullImageUrl = "https://example.com/image.png",
         )
@@ -66,7 +66,7 @@ class ParserUtilsTest {
   @Test
   fun returnsNullForNonFaHostEvenIfPathLooksSimilar() {
     val result =
-        ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
+        deriveSubmissionThumbnailUrlFromFullImage(
             sid = 123456,
             fullImageUrl = "https://example.com/art/user/1665402309/1665402309.file.png",
         )

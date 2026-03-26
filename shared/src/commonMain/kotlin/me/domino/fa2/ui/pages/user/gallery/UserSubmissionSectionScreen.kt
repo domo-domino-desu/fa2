@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.user
+package me.domino.fa2.ui.pages.user.gallery
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -42,6 +42,16 @@ import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
 import me.domino.fa2.ui.components.submission.WaterfallLoadingSkeleton
+import me.domino.fa2.ui.pages.user.profile.UserBodyScrollPosition
+import me.domino.fa2.ui.pages.user.profile.UserChildRouteTabs
+import me.domino.fa2.ui.pages.user.profile.UserSectionTopDefaults
+import me.domino.fa2.ui.pages.user.profile.UserSharedTopScrollState
+import me.domino.fa2.ui.pages.user.profile.handleUserSectionTabSelection
+import me.domino.fa2.ui.pages.user.profile.resolveUserBodyScrollPosition
+import me.domino.fa2.ui.pages.user.profile.resolveUserSharedTopScrollState
+import me.domino.fa2.ui.pages.user.profile.shouldStickUserSectionTabs
+import me.domino.fa2.ui.pages.user.profile.userSubmissionSectionScrollLayout
+import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import org.koin.compose.koinInject
 
 /** User 投稿子页。 */

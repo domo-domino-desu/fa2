@@ -1,3 +1,5 @@
+import org.gradle.api.Project
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Copy
 
 plugins {
@@ -12,17 +14,7 @@ android {
 
   val appVersionName = providers.gradleProperty("APP_VERSION_NAME").get()
   val appVersionCode = providers.gradleProperty("APP_VERSION_CODE").map(String::toInt).get()
-
-  val signingStoreFilePath =
-      providers
-          .gradleProperty("ANDROID_SIGNING_STORE_FILE")
-          .orElse(rootProject.file("dummy.keystore").absolutePath)
-          .get()
-  val signingStorePassword =
-      providers.gradleProperty("ANDROID_SIGNING_STORE_PASSWORD").orElse("123456").get()
-  val signingKeyAlias = providers.gradleProperty("ANDROID_SIGNING_KEY_ALIAS").orElse("dummy").get()
-  val signingKeyPassword =
-      providers.gradleProperty("ANDROID_SIGNING_KEY_PASSWORD").orElse("123456").get()
+  val releaseSigning = providers.resolveAndroidReleaseSigning(project)
 
   defaultConfig {
     applicationId = "me.domino.fa2.android"
@@ -35,10 +27,10 @@ android {
 
   signingConfigs {
     create("release") {
-      storeFile = file(signingStoreFilePath)
-      storePassword = signingStorePassword
-      keyAlias = signingKeyAlias
-      keyPassword = signingKeyPassword
+      storeFile = file(releaseSigning.storeFilePath)
+      storePassword = releaseSigning.storePassword
+      keyAlias = releaseSigning.keyAlias
+      keyPassword = releaseSigning.keyPassword
     }
   }
 
@@ -109,3 +101,21 @@ tasks.named("preBuild").configure {
   dependsOn(copyAboutLibrariesJsonToAssets)
   dependsOn(rootProject.tasks.named("generateAppIcons"))
 }
+
+private data class AndroidReleaseSigning(
+    val storeFilePath: String,
+    val storePassword: String,
+    val keyAlias: String,
+    val keyPassword: String,
+)
+
+private fun ProviderFactory.resolveAndroidReleaseSigning(project: Project): AndroidReleaseSigning =
+    AndroidReleaseSigning(
+        storeFilePath =
+            gradleProperty("ANDROID_SIGNING_STORE_FILE")
+                .orElse(project.rootProject.file("dummy.keystore").absolutePath)
+                .get(),
+        storePassword = gradleProperty("ANDROID_SIGNING_STORE_PASSWORD").orElse("123456").get(),
+        keyAlias = gradleProperty("ANDROID_SIGNING_KEY_ALIAS").orElse("dummy").get(),
+        keyPassword = gradleProperty("ANDROID_SIGNING_KEY_PASSWORD").orElse("123456").get(),
+    )

@@ -14,16 +14,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
 import me.domino.fa2.ui.components.submission.WaterfallLoadingSkeleton
-import org.koin.compose.koinInject
+import me.domino.fa2.ui.host.LocalAppSettings
 
 /** Feed 页面。 */
 @Composable
@@ -43,8 +40,7 @@ fun FeedScreen(
     /** 外部托管的瀑布流状态。 */
     waterfallState: LazyStaggeredGridState,
 ) {
-  val settingsService = koinInject<AppSettingsService>()
-  val settings by settingsService.settings.collectAsState()
+  val settings = LocalAppSettings.current
 
   Column(
       modifier = Modifier.fillMaxSize().testTag("feed-screen"),

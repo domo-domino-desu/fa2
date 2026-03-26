@@ -2,7 +2,6 @@ package me.domino.fa2.ui.pages.submission
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import kotlin.random.Random
-import kotlinx.coroutines.runBlocking
 import me.domino.fa2.data.local.KeyValueStorage
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.settings.AppSettingsStorage
@@ -12,7 +11,7 @@ import me.domino.fa2.data.translation.TranslationRequest
 import okio.FileSystem
 import okio.Path.Companion.toPath
 
-internal fun createTestSubmissionTranslationService(
+internal suspend fun createTestSubmissionTranslationService(
     translate: suspend (TranslationRequest) -> String = { request -> request.sourceText }
 ): SubmissionDescriptionTranslationService {
   val randomSuffix = Random.nextLong().toString().replace('-', '0')
@@ -26,7 +25,7 @@ internal fun createTestSubmissionTranslationService(
       object : TranslationPort {
         override suspend fun translate(request: TranslationRequest): String = translate(request)
       }
-  runBlocking { settingsService.ensureLoaded() }
+  settingsService.ensureLoaded()
 
   return SubmissionDescriptionTranslationService(
       translationPort = translationPort,

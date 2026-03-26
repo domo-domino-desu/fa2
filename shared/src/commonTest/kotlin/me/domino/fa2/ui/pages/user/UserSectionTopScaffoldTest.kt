@@ -4,6 +4,16 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import me.domino.fa2.ui.pages.user.profile.UserBodyScrollPosition
+import me.domino.fa2.ui.pages.user.profile.UserSharedTopScrollState
+import me.domino.fa2.ui.pages.user.profile.handleUserSectionTabSelection
+import me.domino.fa2.ui.pages.user.profile.resolveInitialUserScrollPosition
+import me.domino.fa2.ui.pages.user.profile.resolveUserBodyScrollPosition
+import me.domino.fa2.ui.pages.user.profile.resolveUserSharedTopScrollState
+import me.domino.fa2.ui.pages.user.profile.shouldStickUserSectionTabs
+import me.domino.fa2.ui.pages.user.profile.userJournalsScrollLayout
+import me.domino.fa2.ui.pages.user.profile.userSubmissionSectionScrollLayout
+import me.domino.fa2.ui.pages.user.route.UserChildRoute
 
 class UserSectionTopScaffoldTest {
   private val layoutWithHeader = userJournalsScrollLayout(hasHeader = true)

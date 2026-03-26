@@ -19,7 +19,7 @@ import me.domino.fa2.ui.components.PageStateWrapper
 import me.domino.fa2.ui.layouts.BrowseRouteTopBar
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.navigation.goBackHome
-import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
+import me.domino.fa2.ui.navigation.openSubmissionFromList
 import org.koin.core.parameter.parametersOf
 
 /** 独立 Browse 路由页面（用于从投稿详情跳转）。 */
@@ -65,8 +65,11 @@ class BrowseRouteScreen(private val initialFilter: BrowseFilterState) : Screen {
             onRefresh = screenModel::refresh,
             onRetry = screenModel::refresh,
             onOpenSubmission = { item ->
-              screenModel.setCurrentSubmission(item.id)
-              navigator.push(SubmissionRouteScreen(initialSid = item.id, holderTag = holderTag))
+              navigator.openSubmissionFromList(
+                  sid = item.id,
+                  holderTag = holderTag,
+                  onSelect = screenModel::setCurrentSubmission,
+              )
             },
             onLastVisibleIndexChanged = screenModel::onLastVisibleIndexChanged,
             onRetryLoadMore = screenModel::retryLoadMore,

@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -24,15 +22,15 @@ import androidx.compose.ui.unit.dp
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
-import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.ui.components.NetworkImage
+import me.domino.fa2.ui.host.LocalTaxonomyCatalog
+import me.domino.fa2.ui.host.LocalTaxonomyRepository
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.SubmissionAttachmentTextUiState
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
-import me.domino.fa2.util.ParserUtils
 import me.domino.fa2.util.attachmenttext.attachmentFileExtension
+import me.domino.fa2.util.deriveSubmissionThumbnailUrlFromFullImage
 import me.domino.fa2.util.sanitizeDetailAspectRatio
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -59,8 +57,8 @@ internal fun SubmissionDetailSuccessContent(
     onTranslateAttachment: () -> Unit,
     requestPagerFocus: () -> Unit,
 ) {
-  val taxonomyRepository = koinInject<FaTaxonomyRepository>()
-  val taxonomyCatalog by taxonomyRepository.catalog.collectAsState()
+  val taxonomyRepository = LocalTaxonomyRepository.current
+  val taxonomyCatalog = LocalTaxonomyCatalog.current
   val fileExtensionLabel =
       remember(detail.downloadUrl, detail.downloadFileName) {
         attachmentFileExtension(detail.downloadFileName)
@@ -114,7 +112,7 @@ internal fun SubmissionDetailSuccessContent(
       }
 
   val derivedThumbnailUrl =
-      ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
+      deriveSubmissionThumbnailUrlFromFullImage(
               sid = item.id,
               fullImageUrl = detail.fullImageUrl,
           )

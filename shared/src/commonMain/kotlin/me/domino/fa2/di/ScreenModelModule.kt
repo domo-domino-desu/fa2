@@ -10,13 +10,13 @@ import me.domino.fa2.ui.pages.search.SearchScreenModel
 import me.domino.fa2.ui.pages.submission.SubmissionPagerDetailSourceImpl
 import me.domino.fa2.ui.pages.submission.SubmissionPagerFeedSourceImpl
 import me.domino.fa2.ui.pages.submission.SubmissionScreenModel
-import me.domino.fa2.ui.pages.user.JournalDetailScreenModel
-import me.domino.fa2.ui.pages.user.UserChildRoute
-import me.domino.fa2.ui.pages.user.UserJournalsScreenModel
-import me.domino.fa2.ui.pages.user.UserScreenModel
-import me.domino.fa2.ui.pages.user.UserSubmissionSectionScreenModel
-import me.domino.fa2.ui.pages.user.UserSubmissionSectionUiState
-import me.domino.fa2.ui.pages.user.UserWatchlistScreenModel
+import me.domino.fa2.ui.pages.user.gallery.UserSubmissionSectionScreenModel
+import me.domino.fa2.ui.pages.user.gallery.UserSubmissionSectionUiState
+import me.domino.fa2.ui.pages.user.journal.JournalDetailScreenModel
+import me.domino.fa2.ui.pages.user.journal.UserJournalsScreenModel
+import me.domino.fa2.ui.pages.user.profile.UserScreenModel
+import me.domino.fa2.ui.pages.user.route.UserChildRoute
+import me.domino.fa2.ui.pages.user.watchlist.UserWatchlistScreenModel
 import org.koin.core.module.Module
 import org.koin.dsl.module
 

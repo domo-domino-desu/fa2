@@ -5,8 +5,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import me.domino.fa2.ui.components.FilterOption
-import me.domino.fa2.ui.components.FilterOptionGroup
 import me.domino.fa2.util.logging.FaLog
 
 class FaTaxonomyRepository {
@@ -34,18 +32,18 @@ class FaTaxonomyRepository {
     }
   }
 
-  fun categoryOptions(): List<FilterOption<Int>> = options(FaTaxonomySectionKey.CATEGORY)
+  fun categoryOptions(): List<FaTaxonomyChoice<Int>> = options(FaTaxonomySectionKey.CATEGORY)
 
-  fun typeOptions(): List<FilterOption<Int>> = options(FaTaxonomySectionKey.TYPE)
+  fun typeOptions(): List<FaTaxonomyChoice<Int>> = options(FaTaxonomySectionKey.TYPE)
 
-  fun speciesOptions(): List<FilterOption<Int>> = options(FaTaxonomySectionKey.SPECIES)
+  fun speciesOptions(): List<FaTaxonomyChoice<Int>> = options(FaTaxonomySectionKey.SPECIES)
 
-  fun categoryOptionGroups(): List<FilterOptionGroup<Int>> =
+  fun categoryOptionGroups(): List<FaTaxonomyChoiceGroup<Int>> =
       optionGroups(FaTaxonomySectionKey.CATEGORY)
 
-  fun typeOptionGroups(): List<FilterOptionGroup<Int>> = optionGroups(FaTaxonomySectionKey.TYPE)
+  fun typeOptionGroups(): List<FaTaxonomyChoiceGroup<Int>> = optionGroups(FaTaxonomySectionKey.TYPE)
 
-  fun speciesOptionGroups(): List<FilterOptionGroup<Int>> =
+  fun speciesOptionGroups(): List<FaTaxonomyChoiceGroup<Int>> =
       optionGroups(FaTaxonomySectionKey.SPECIES)
 
   fun categoryDisplayNameById(id: Int): String? = displayNameById(FaTaxonomySectionKey.CATEGORY, id)
@@ -83,10 +81,10 @@ class FaTaxonomyRepository {
   fun speciesDisplayNameByEnglishLabel(label: String): String? =
       displayNameByEnglishLabel(FaTaxonomySectionKey.SPECIES, label)
 
-  private fun options(sectionKey: FaTaxonomySectionKey): List<FilterOption<Int>> =
+  private fun options(sectionKey: FaTaxonomySectionKey): List<FaTaxonomyChoice<Int>> =
       preparedCatalog?.section(sectionKey)?.options.orEmpty()
 
-  private fun optionGroups(sectionKey: FaTaxonomySectionKey): List<FilterOptionGroup<Int>> =
+  private fun optionGroups(sectionKey: FaTaxonomySectionKey): List<FaTaxonomyChoiceGroup<Int>> =
       preparedCatalog?.section(sectionKey)?.optionGroups.orEmpty()
 
   private fun displayNameById(sectionKey: FaTaxonomySectionKey, id: Int): String? =
@@ -130,8 +128,8 @@ private data class PreparedFaTaxonomyCatalog(
 }
 
 private data class PreparedFaTaxonomySection(
-    val optionGroups: List<FilterOptionGroup<Int>>,
-    val options: List<FilterOption<Int>>,
+    val optionGroups: List<FaTaxonomyChoiceGroup<Int>>,
+    val options: List<FaTaxonomyChoice<Int>>,
     val itemsById: Map<Int, PreparedFaTaxonomyEntry>,
     val itemsByKey: Map<String, PreparedFaTaxonomyEntry>,
     val englishLabelToId: Map<String, Int>,
@@ -158,12 +156,12 @@ private data class PreparedFaTaxonomySection(
                   entriesById[item.id] = entry
                   entriesByKey[itemKey] = entry
                   englishLabelToId[normalizeEnglishLabel(item.displayName.en)] = item.id
-                  FilterOption(value = item.id, label = item.displayName.preferred())
+                  FaTaxonomyChoice(value = item.id, label = item.displayName.preferred())
                 }
             if (options.isEmpty()) {
               null
             } else {
-              FilterOptionGroup(label = group.displayName.preferred(), options = options)
+              FaTaxonomyChoiceGroup(label = group.displayName.preferred(), options = options)
             }
           }
 
@@ -184,7 +182,7 @@ private data class PreparedFaTaxonomySection(
 
       return PreparedFaTaxonomySection(
           optionGroups = optionGroups,
-          options = optionGroups.flatMap(FilterOptionGroup<Int>::options),
+          options = optionGroups.flatMap(FaTaxonomyChoiceGroup<Int>::options),
           itemsById = entriesById,
           itemsByKey = entriesByKey,
           englishLabelToId = englishLabelToId,

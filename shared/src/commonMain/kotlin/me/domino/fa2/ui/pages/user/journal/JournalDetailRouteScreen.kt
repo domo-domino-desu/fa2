@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.user
+package me.domino.fa2.ui.pages.user.journal
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -45,6 +45,8 @@ import me.domino.fa2.ui.components.TranslatableHtmlBlockContent
 import me.domino.fa2.ui.components.TranslateActionButton
 import me.domino.fa2.ui.layouts.JournalDetailRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
+import me.domino.fa2.ui.pages.user.route.UserChildRoute
+import me.domino.fa2.ui.pages.user.route.UserRouteScreen
 import me.domino.fa2.ui.state.rememberSubmissionDescriptionTranslationState
 import me.domino.fa2.util.FaUrls
 import org.koin.compose.koinInject

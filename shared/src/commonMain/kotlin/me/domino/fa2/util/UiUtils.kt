@@ -22,6 +22,7 @@ internal fun sanitizeDetailAspectRatio(
 
 /** 判断是否为 gif 链接。 */
 internal fun isGifUrl(url: String): Boolean {
-  val normalized = url.trim().lowercase()
-  return normalized.contains(".gif")
+  val pathSegment =
+      url.trim().substringBefore('#').substringBefore('?').substringAfterLast('/').lowercase()
+  return pathSegment.endsWith(".gif")
 }

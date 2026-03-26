@@ -9,7 +9,15 @@ import me.domino.fa2.data.model.GalleryPage
 import me.domino.fa2.data.model.SubmissionListingPage
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.util.FaUrls
-import me.domino.fa2.util.ParserUtils
+import me.domino.fa2.util.TagBlockSettings
+import me.domino.fa2.util.ensureUserPageAccessible
+import me.domino.fa2.util.isBlockedByTagSettings
+import me.domino.fa2.util.parseImageTags
+import me.domino.fa2.util.parsePositiveFloat
+import me.domino.fa2.util.parseSubmissionAvatarUrls
+import me.domino.fa2.util.parseSubmissionSid
+import me.domino.fa2.util.parseTagBlockSettings
+import me.domino.fa2.util.toAbsoluteUrl
 
 /** User 投稿类分页解析器（Gallery/Favorites/Scraps）。 */
 class GalleryParser {
@@ -20,7 +28,7 @@ class GalleryParser {
   /** 解析投稿分页。 */
   fun parse(html: String, baseUrl: String, defaultAuthor: String): GalleryPage {
     val document = Ksoup.parse(html, baseUrl)
-    ParserUtils.ensureUserPageAccessible(document)
+    ensureUserPageAccessible(document)
     val submissions =
         parseSubmissions(
             html = html,
@@ -62,14 +70,14 @@ class GalleryParser {
       defaultAuthor: String,
       document: com.fleeksoft.ksoup.nodes.Document,
   ): List<SubmissionThumbnail> {
-    val tagBlockSettings = ParserUtils.parseTagBlockSettings(document)
+    val tagBlockSettings = parseTagBlockSettings(document)
     val profileAvatarUrl =
         document
             .selectFirst("userpage-nav-avatar img")
             ?.attr("src")
             ?.trim()
             ?.takeIf { it.isNotBlank() }
-            ?.let { raw -> ParserUtils.toAbsoluteUrl(baseUrl, raw) }
+            ?.let { raw -> toAbsoluteUrl(baseUrl, raw) }
             .orEmpty()
     val figures =
         figureSelectors
@@ -77,7 +85,7 @@ class GalleryParser {
             .map { selector -> document.select(selector) }
             .firstOrNull { nodes -> nodes.isNotEmpty() }
             .orEmpty()
-    val avatarUrls = ParserUtils.parseSubmissionAvatarUrls(html)
+    val avatarUrls = parseSubmissionAvatarUrls(html)
     val map = LinkedHashMap<Int, SubmissionThumbnail>()
     figures.forEach { node ->
       val parsed =
@@ -100,17 +108,17 @@ class GalleryParser {
       defaultAuthor: String,
       avatarUrls: Map<Int, String>,
       fallbackAuthorAvatarUrl: String,
-      tagBlockSettings: ParserUtils.TagBlockSettings,
+      tagBlockSettings: TagBlockSettings,
   ): SubmissionThumbnail? {
     val rawSubmissionUrl = node.selectFirst("a[href*='/view/']")?.attr("href").orEmpty()
     val submissionUrl =
-        ParserUtils.toAbsoluteUrl(
+        toAbsoluteUrl(
             baseUrl = "https://www.furaffinity.net/",
             maybeRelativeUrl = rawSubmissionUrl,
         )
     val id =
         node.attr("id").removePrefix("sid-").toIntOrNull()
-            ?: ParserUtils.parseSubmissionSid(submissionUrl)
+            ?: parseSubmissionSid(submissionUrl)
             ?: return null
 
     val image =
@@ -135,28 +143,25 @@ class GalleryParser {
             }
 
     val width =
-        ParserUtils.parsePositiveFloat(image.attr("data-width"))
-            ?: ParserUtils.parsePositiveFloat(image.attr("width"))
+        parsePositiveFloat(image.attr("data-width"))
+            ?: parsePositiveFloat(image.attr("width"))
             ?: 1f
     val height =
-        ParserUtils.parsePositiveFloat(image.attr("data-height"))
-            ?: ParserUtils.parsePositiveFloat(image.attr("height"))
+        parsePositiveFloat(image.attr("data-height"))
+            ?: parsePositiveFloat(image.attr("height"))
             ?: 1f
 
     val thumbnailRaw = resolveThumbnailRawUrl(image)
     val thumbnailUrl =
-        ParserUtils.toAbsoluteUrl(
+        toAbsoluteUrl(
             baseUrl = "https://www.furaffinity.net/",
             maybeRelativeUrl = thumbnailRaw,
         )
     val resolvedSubmissionUrl = submissionUrl.ifBlank { FaUrls.submission(id) }
-    val imageTags = ParserUtils.parseImageTags(image)
+    val imageTags = parseImageTags(image)
     val categoryTag = imageTags.sorted().firstOrNull { tag -> tag.startsWith("c_") }.orEmpty()
     val isBlockedByTag =
-        ParserUtils.isBlockedByTagSettings(
-            imageTags = imageTags,
-            tagBlockSettings = tagBlockSettings,
-        )
+        isBlockedByTagSettings(imageTags = imageTags, tagBlockSettings = tagBlockSettings)
 
     return SubmissionThumbnail(
         id = id,
@@ -236,7 +241,7 @@ class GalleryParser {
             ?.attr("href")
             ?.trim()
             ?.takeIf { href -> href.isNotBlank() }
-            ?.let { href -> ParserUtils.toAbsoluteUrl(currentUrl, href) } ?: currentUrl
+            ?.let { href -> toAbsoluteUrl(currentUrl, href) } ?: currentUrl
 
     val activeByClass =
         node.hasClass("active") ||
@@ -289,7 +294,7 @@ class GalleryParser {
           .attr("href")
           .trim()
           .takeIf { value -> value.isNotBlank() }
-          ?.let { raw -> ParserUtils.toAbsoluteUrl(baseUrl, raw) }
+          ?.let { raw -> toAbsoluteUrl(baseUrl, raw) }
     }
   }
 
@@ -301,7 +306,7 @@ class GalleryParser {
         if (actionRaw.isBlank()) {
           baseUrl
         } else {
-          ParserUtils.toAbsoluteUrl(baseUrl, actionRaw)
+          toAbsoluteUrl(baseUrl, actionRaw)
         }
     val params =
         formNode.select("input[name], select[name], textarea[name]").mapNotNull { input ->

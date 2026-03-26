@@ -32,7 +32,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
@@ -49,11 +48,11 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
-import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.ThumbnailImage
+import me.domino.fa2.ui.host.LocalTaxonomyCatalog
+import me.domino.fa2.ui.host.LocalTaxonomyRepository
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import org.koin.compose.koinInject
 
 /** 瀑布流卡片最小宽度。 */
 private const val defaultWaterfallCardMinWidthDp = 220
@@ -100,8 +99,8 @@ fun SubmissionWaterfall(
     /** 被屏蔽投稿在瀑布流中的展示策略。 */
     blockedSubmissionMode: BlockedSubmissionWaterfallMode = BlockedSubmissionWaterfallMode.SHOW,
 ) {
-  val taxonomyRepository = koinInject<FaTaxonomyRepository>()
-  val taxonomyCatalog by taxonomyRepository.catalog.collectAsState()
+  val taxonomyRepository = LocalTaxonomyRepository.current
+  val taxonomyCatalog = LocalTaxonomyCatalog.current
   val blockedRevealState = remember { mutableStateMapOf<Int, Boolean>() }
   val sourceIndexById =
       remember(items) { items.withIndex().associate { (index, item) -> item.id to index } }

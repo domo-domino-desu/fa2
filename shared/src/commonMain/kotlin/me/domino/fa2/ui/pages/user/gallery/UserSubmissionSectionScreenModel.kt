@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.user
+package me.domino.fa2.ui.pages.user.gallery
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
@@ -11,6 +11,7 @@ import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.FavoritesRepository
 import me.domino.fa2.data.repository.GalleryRepository
 import me.domino.fa2.ui.navigation.SubmissionListHolder
+import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.state.PaginationSnapshot
 import me.domino.fa2.ui.state.PaginationStateMachine
 import me.domino.fa2.util.logging.FaLog

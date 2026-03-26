@@ -12,7 +12,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import me.domino.fa2.ui.components.PageStateWrapper
 import me.domino.fa2.ui.navigation.SubmissionListHolder
-import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
+import me.domino.fa2.ui.navigation.openSubmissionFromList
 import org.koin.core.parameter.parametersOf
 
 /** Feed 路由页面。 */
@@ -40,8 +40,10 @@ class FeedRouteScreen : Screen {
           onRetry = { screenModel.load(forceRefresh = true) },
           onRefresh = screenModel::refresh,
           onOpenSubmission = { item ->
-            screenModel.setCurrentSubmission(item.id)
-            navigator.push(SubmissionRouteScreen(initialSid = item.id))
+            navigator.openSubmissionFromList(
+                sid = item.id,
+                onSelect = screenModel::setCurrentSubmission,
+            )
           },
           onLastVisibleIndexChanged = screenModel::onLastVisibleIndexChanged,
           onRetryLoadMore = screenModel::retryLoadMore,

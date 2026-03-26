@@ -16,7 +16,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,20 +25,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.search.SearchUiLabelsRepository
-import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
+import me.domino.fa2.data.search.SearchUiOptionKey
+import me.domino.fa2.data.search.SearchUiTextKey
 import me.domino.fa2.ui.components.FilterDialogTriggerField
 import me.domino.fa2.ui.components.FilterDropdownField
 import me.domino.fa2.ui.components.FilterOption
 import me.domino.fa2.ui.components.FilterOptionGroup
 import me.domino.fa2.ui.components.GroupedFilterDropdownField
 import me.domino.fa2.ui.components.GroupedTextPickerDialog
+import me.domino.fa2.ui.components.toFilterOption
+import me.domino.fa2.ui.components.toFilterOptionGroup
+import me.domino.fa2.ui.host.LocalSearchUiLabelsCatalog
+import me.domino.fa2.ui.host.LocalSearchUiLabelsRepository
+import me.domino.fa2.ui.host.LocalTaxonomyCatalog
+import me.domino.fa2.ui.host.LocalTaxonomyRepository
 import me.domino.fa2.ui.layouts.SearchOverlayTopBar
 import me.domino.fa2.ui.pages.search.SearchFormState
 import me.domino.fa2.ui.pages.search.SearchScreenActions
 import me.domino.fa2.ui.pages.search.orderByOptions
 import me.domino.fa2.ui.pages.search.orderDirectionOptions
 import me.domino.fa2.ui.pages.search.rangeOptions
-import org.koin.compose.koinInject
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,27 +52,9 @@ internal fun SearchOverlayContent(
     form: SearchFormState,
     actions: SearchScreenActions,
     canSearch: Boolean,
+    uiData: SearchOverlayUiData,
     modifier: Modifier = Modifier,
 ) {
-  val taxonomyRepository = koinInject<FaTaxonomyRepository>()
-  val searchUiLabelsRepository = koinInject<SearchUiLabelsRepository>()
-  val taxonomyCatalog by taxonomyRepository.catalog.collectAsState()
-  val searchUiLabelsCatalog by searchUiLabelsRepository.catalog.collectAsState()
-  val searchCategoryOptions = remember(taxonomyCatalog) { taxonomyRepository.categoryOptions() }
-  val searchCategoryOptionGroups =
-      remember(taxonomyCatalog) { taxonomyRepository.categoryOptionGroups() }
-  val searchTypeOptions = remember(taxonomyCatalog) { taxonomyRepository.typeOptions() }
-  val searchSpeciesOptions = remember(taxonomyCatalog) { taxonomyRepository.speciesOptions() }
-  val searchTypeOptionGroups = remember(taxonomyCatalog) { taxonomyRepository.typeOptionGroups() }
-  val searchSpeciesOptionGroups =
-      remember(taxonomyCatalog) { taxonomyRepository.speciesOptionGroups() }
-  val searchOrderByOptions =
-      remember(searchUiLabelsCatalog) { orderByOptions(searchUiLabelsRepository) }
-  val searchOrderDirectionOptions =
-      remember(searchUiLabelsCatalog) { orderDirectionOptions(searchUiLabelsRepository) }
-  val searchRangeOptions =
-      remember(searchUiLabelsCatalog) { rangeOptions(searchUiLabelsRepository) }
-
   Surface(
       modifier = modifier.background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.24f)),
       color = MaterialTheme.colorScheme.surface,
@@ -102,16 +89,16 @@ internal fun SearchOverlayContent(
             onUpdateOrderBy = actions.onUpdateOrderBy,
             onUpdateOrderDirection = actions.onUpdateOrderDirection,
             onUpdateRange = actions.onUpdateRange,
-            categoryOptions = searchCategoryOptions,
-            categoryOptionGroups = searchCategoryOptionGroups,
-            typeOptions = searchTypeOptions,
-            speciesOptions = searchSpeciesOptions,
-            typeOptionGroups = searchTypeOptionGroups,
-            speciesOptionGroups = searchSpeciesOptionGroups,
-            orderByOptions = searchOrderByOptions,
-            orderDirectionOptions = searchOrderDirectionOptions,
-            rangeOptions = searchRangeOptions,
-            searchUiLabelsRepository = searchUiLabelsRepository,
+            categoryOptions = uiData.categoryOptions,
+            categoryOptionGroups = uiData.categoryOptionGroups,
+            typeOptions = uiData.typeOptions,
+            speciesOptions = uiData.speciesOptions,
+            typeOptionGroups = uiData.typeOptionGroups,
+            speciesOptionGroups = uiData.speciesOptionGroups,
+            orderByOptions = uiData.orderByOptions,
+            orderDirectionOptions = uiData.orderDirectionOptions,
+            rangeOptions = uiData.rangeOptions,
+            searchUiLabelsRepository = uiData.searchUiLabelsRepository,
         )
 
         if (form.range == "manual") {
@@ -124,9 +111,11 @@ internal fun SearchOverlayContent(
         }
 
         GenderKeywordsSection(
-            title = searchUiLabelsRepository.filterGenderKeywordsLabel(),
+            title = uiData.searchUiLabelsRepository.text(SearchUiTextKey.FILTER_GENDER_KEYWORDS),
             selectedGenders = form.selectedGenders,
-            labelForGender = { gender -> searchUiLabelsRepository.genderLabel(gender.token) },
+            labelForGender = { gender ->
+              uiData.searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, gender.token)
+            },
             onToggleGender = actions.onToggleGender,
         )
 
@@ -140,13 +129,37 @@ internal fun SearchOverlayContent(
         )
 
         SubmissionTypeSection(
-            title = searchUiLabelsRepository.filterSubmissionTypesLabel(),
-            artLabel = searchUiLabelsRepository.submissionTypeLabel("art"),
-            musicLabel = searchUiLabelsRepository.submissionTypeLabel("music"),
-            flashLabel = searchUiLabelsRepository.submissionTypeLabel("flash"),
-            storyLabel = searchUiLabelsRepository.submissionTypeLabel("story"),
-            photoLabel = searchUiLabelsRepository.submissionTypeLabel("photo"),
-            poetryLabel = searchUiLabelsRepository.submissionTypeLabel("poetry"),
+            title = uiData.searchUiLabelsRepository.text(SearchUiTextKey.FILTER_SUBMISSION_TYPES),
+            artLabel =
+                uiData.searchUiLabelsRepository.optionLabel(
+                    SearchUiOptionKey.SUBMISSION_TYPE,
+                    "art",
+                ),
+            musicLabel =
+                uiData.searchUiLabelsRepository.optionLabel(
+                    SearchUiOptionKey.SUBMISSION_TYPE,
+                    "music",
+                ),
+            flashLabel =
+                uiData.searchUiLabelsRepository.optionLabel(
+                    SearchUiOptionKey.SUBMISSION_TYPE,
+                    "flash",
+                ),
+            storyLabel =
+                uiData.searchUiLabelsRepository.optionLabel(
+                    SearchUiOptionKey.SUBMISSION_TYPE,
+                    "story",
+                ),
+            photoLabel =
+                uiData.searchUiLabelsRepository.optionLabel(
+                    SearchUiOptionKey.SUBMISSION_TYPE,
+                    "photo",
+                ),
+            poetryLabel =
+                uiData.searchUiLabelsRepository.optionLabel(
+                    SearchUiOptionKey.SUBMISSION_TYPE,
+                    "poetry",
+                ),
             typeArt = form.typeArt,
             typeMusic = form.typeMusic,
             typeFlash = form.typeFlash,
@@ -162,6 +175,49 @@ internal fun SearchOverlayContent(
         )
       }
     }
+  }
+}
+
+internal data class SearchOverlayUiData(
+    val categoryOptions: List<FilterOption<Int>>,
+    val categoryOptionGroups: List<FilterOptionGroup<Int>>,
+    val typeOptions: List<FilterOption<Int>>,
+    val speciesOptions: List<FilterOption<Int>>,
+    val typeOptionGroups: List<FilterOptionGroup<Int>>,
+    val speciesOptionGroups: List<FilterOptionGroup<Int>>,
+    val orderByOptions: List<FilterOption<String>>,
+    val orderDirectionOptions: List<FilterOption<String>>,
+    val rangeOptions: List<FilterOption<String>>,
+    val searchUiLabelsRepository: SearchUiLabelsRepository,
+)
+
+@Composable
+internal fun rememberSearchOverlayUiData(): SearchOverlayUiData {
+  val taxonomyRepository = LocalTaxonomyRepository.current
+  val searchUiLabelsRepository = LocalSearchUiLabelsRepository.current
+  val taxonomyCatalog = LocalTaxonomyCatalog.current
+  val searchUiLabelsCatalog = LocalSearchUiLabelsCatalog.current
+
+  return remember(
+      taxonomyCatalog,
+      searchUiLabelsCatalog,
+      taxonomyRepository,
+      searchUiLabelsRepository,
+  ) {
+    SearchOverlayUiData(
+        categoryOptions = taxonomyRepository.categoryOptions().map { it.toFilterOption() },
+        categoryOptionGroups =
+            taxonomyRepository.categoryOptionGroups().map { it.toFilterOptionGroup() },
+        typeOptions = taxonomyRepository.typeOptions().map { it.toFilterOption() },
+        speciesOptions = taxonomyRepository.speciesOptions().map { it.toFilterOption() },
+        typeOptionGroups = taxonomyRepository.typeOptionGroups().map { it.toFilterOptionGroup() },
+        speciesOptionGroups =
+            taxonomyRepository.speciesOptionGroups().map { it.toFilterOptionGroup() },
+        orderByOptions = orderByOptions(searchUiLabelsRepository),
+        orderDirectionOptions = orderDirectionOptions(searchUiLabelsRepository),
+        rangeOptions = rangeOptions(searchUiLabelsRepository),
+        searchUiLabelsRepository = searchUiLabelsRepository,
+    )
   }
 }
 
@@ -220,21 +276,21 @@ private fun SearchTopFilterGrid(
             modifier = Modifier.fillMaxWidth(),
         )
         FilterDropdownField(
-            label = searchUiLabelsRepository.filterSortCriteriaLabel(),
+            label = searchUiLabelsRepository.text(SearchUiTextKey.FILTER_SORT_CRITERIA),
             options = orderByOptions,
             selected = form.orderBy,
             onSelected = onUpdateOrderBy,
             modifier = Modifier.fillMaxWidth(),
         )
         FilterDropdownField(
-            label = searchUiLabelsRepository.filterSortDirectionLabel(),
+            label = searchUiLabelsRepository.text(SearchUiTextKey.FILTER_SORT_DIRECTION),
             options = orderDirectionOptions,
             selected = form.orderDirection,
             onSelected = onUpdateOrderDirection,
             modifier = Modifier.fillMaxWidth(),
         )
         FilterDropdownField(
-            label = searchUiLabelsRepository.filterDateLabel(),
+            label = searchUiLabelsRepository.text(SearchUiTextKey.FILTER_DATE),
             options = rangeOptions,
             selected = form.range,
             onSelected = onUpdateRange,
@@ -275,7 +331,7 @@ private fun SearchTopFilterGrid(
               modifier = Modifier.weight(1f),
           )
           FilterDropdownField(
-              label = searchUiLabelsRepository.filterSortCriteriaLabel(),
+              label = searchUiLabelsRepository.text(SearchUiTextKey.FILTER_SORT_CRITERIA),
               options = orderByOptions,
               selected = form.orderBy,
               onSelected = onUpdateOrderBy,
@@ -287,14 +343,14 @@ private fun SearchTopFilterGrid(
             modifier = Modifier.fillMaxWidth(),
         ) {
           FilterDropdownField(
-              label = searchUiLabelsRepository.filterSortDirectionLabel(),
+              label = searchUiLabelsRepository.text(SearchUiTextKey.FILTER_SORT_DIRECTION),
               options = orderDirectionOptions,
               selected = form.orderDirection,
               onSelected = onUpdateOrderDirection,
               modifier = Modifier.weight(1f),
           )
           FilterDropdownField(
-              label = searchUiLabelsRepository.filterDateLabel(),
+              label = searchUiLabelsRepository.text(SearchUiTextKey.FILTER_DATE),
               options = rangeOptions,
               selected = form.range,
               onSelected = onUpdateRange,

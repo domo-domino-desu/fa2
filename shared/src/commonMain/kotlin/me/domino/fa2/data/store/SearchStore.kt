@@ -1,81 +1,41 @@
 package me.domino.fa2.data.store
 
-import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import me.domino.fa2.data.datasource.SearchDataSource
 import me.domino.fa2.data.local.dao.PageCacheDao
-import me.domino.fa2.data.local.entity.PageCacheEntity
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionListingPage
-import org.mobilenativefoundation.store.store5.Fetcher
-import org.mobilenativefoundation.store.store5.SourceOfTruth
-import org.mobilenativefoundation.store.store5.Store
-import org.mobilenativefoundation.store.store5.StoreBuilder
-import org.mobilenativefoundation.store.store5.StoreReadRequest
 
 /** Search 列表存储层。 */
 class SearchStore(
     private val dataSource: SearchDataSource,
     private val pageCacheDao: PageCacheDao,
 ) {
-  private val store: Store<String, SubmissionListingPage> = buildStore()
+  private val cachedStore =
+      CachedPageStoreSupport(
+          storeName = "search-fetcher",
+          pageCacheDao = pageCacheDao,
+          pageTypeOf = { PAGE_TYPE_SEARCH },
+          cacheKeyFor = ::cacheKeyFor,
+          fetch = { url -> dataSource.fetchPage(url).requireStoreValue() },
+          encode = { page -> storeJson.encodeToString(page) },
+          decode = { json ->
+            runCatching { storeJson.decodeFromString<SubmissionListingPage>(json) }.getOrNull()
+          },
+      )
 
   fun stream(requestUrl: String): Flow<PageState<SubmissionListingPage>> {
     val key = normalizeRequestUrl(requestUrl)
-    return store
-        .stream(StoreReadRequest.cached(key, true))
-        .map(::toPageState)
-        .flowWithInitialLoading()
+    return cachedStore.stream(key)
   }
 
   suspend fun loadPageOnce(requestUrl: String): PageState<SubmissionListingPage> =
-      stream(requestUrl = requestUrl).first { state -> state !is PageState.Loading }
+      cachedStore.loadOnce(normalizeRequestUrl(requestUrl))
 
-  suspend fun refreshPage(requestUrl: String): PageState<SubmissionListingPage> {
-    val key = normalizeRequestUrl(requestUrl)
-    store.clear(key)
-    return loadPageOnce(requestUrl)
-  }
-
-  private fun buildStore(): Store<String, SubmissionListingPage> {
-    val fetcher =
-        Fetcher.of<String, SubmissionListingPage>(name = "search-fetcher") { url ->
-          dataSource.fetchPage(url).requireStoreValue()
-        }
-    val sourceOfTruth =
-        SourceOfTruth.of<String, SubmissionListingPage, SubmissionListingPage>(
-            reader = { key ->
-              pageCacheDao.observeByKey(cacheKeyFor(key)).map { entity ->
-                readCacheIfValid(
-                    entity = entity,
-                    expectedPageType = PAGE_TYPE_SEARCH,
-                    decode = ::decodePage,
-                )
-              }
-            },
-            writer = { key, page ->
-              pageCacheDao.upsert(
-                  PageCacheEntity(
-                      cacheKey = cacheKeyFor(key),
-                      pageType = PAGE_TYPE_SEARCH,
-                      dataJson = storeJson.encodeToString(page),
-                      cachedAtMs = Clock.System.now().toEpochMilliseconds(),
-                  )
-              )
-            },
-            delete = { key -> pageCacheDao.delete(cacheKeyFor(key)) },
-            deleteAll = { pageCacheDao.deleteAll() },
-        )
-    return StoreBuilder.from(fetcher = fetcher, sourceOfTruth = sourceOfTruth).build()
-  }
-
-  private fun decodePage(entity: PageCacheEntity): SubmissionListingPage? =
-      runCatching { storeJson.decodeFromString<SubmissionListingPage>(entity.dataJson) }.getOrNull()
+  suspend fun refreshPage(requestUrl: String): PageState<SubmissionListingPage> =
+      cachedStore.refresh(normalizeRequestUrl(requestUrl))
 
   private fun normalizeRequestUrl(url: String): String = url.trim()
 
@@ -84,10 +44,4 @@ class SearchStore(
   companion object {
     private const val PAGE_TYPE_SEARCH: String = "search_page_v1"
   }
-}
-
-private fun Flow<PageState<SubmissionListingPage>?>.flowWithInitialLoading():
-    Flow<PageState<SubmissionListingPage>> = flow {
-  emit(PageState.Loading)
-  collect { state -> if (state != null) emit(state) }
 }

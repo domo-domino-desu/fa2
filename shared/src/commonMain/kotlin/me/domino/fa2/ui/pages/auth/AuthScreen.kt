@@ -9,12 +9,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,6 +27,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 
 /** 登录页主界面。 */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthScreen(
     /** 当前登录页面状态。 */
@@ -56,19 +60,31 @@ fun AuthScreen(
     Text(text = "登录到 FurAffinity", style = MaterialTheme.typography.headlineSmall)
     Text(text = state.message, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-    TabRow(selectedTabIndex = loginMethod.ordinal, modifier = Modifier.fillMaxWidth()) {
-      Tab(
-          selected = loginMethod == AuthLoginMethod.WebView,
-          onClick = { onLoginMethodChange(AuthLoginMethod.WebView) },
-          text = { Text("WebView") },
-          modifier = Modifier.testTag("auth-tab-webview"),
-      )
-      Tab(
-          selected = loginMethod == AuthLoginMethod.Cookie,
-          onClick = { onLoginMethodChange(AuthLoginMethod.Cookie) },
-          text = { Text("Cookie") },
-          modifier = Modifier.testTag("auth-tab-cookie"),
-      )
+    Surface(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
+      SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+        val loginMethods = AuthLoginMethod.entries
+        loginMethods.forEachIndexed { index, method ->
+          SegmentedButton(
+              selected = loginMethod == method,
+              onClick = { onLoginMethodChange(method) },
+              shape = SegmentedButtonDefaults.itemShape(index = index, count = loginMethods.size),
+              modifier =
+                  Modifier.testTag(
+                      when (method) {
+                        AuthLoginMethod.WebView -> "auth-tab-webview"
+                        AuthLoginMethod.Cookie -> "auth-tab-cookie"
+                      }
+                  ),
+          ) {
+            Text(
+                when (method) {
+                  AuthLoginMethod.WebView -> "WebView"
+                  AuthLoginMethod.Cookie -> "Cookie"
+                }
+            )
+          }
+        }
+      }
     }
 
     when (loginMethod) {
@@ -105,11 +121,6 @@ private fun WebViewLoginTab(
       modifier = Modifier.fillMaxSize().testTag("auth-webview-panel"),
       verticalArrangement = Arrangement.spacedBy(12.dp),
   ) {
-    Text(
-        text = "在内置页面中完成登录。页面里若出现 Cloudflare 验证，请先完成验证后再点击“完成登录”。",
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
       Button(onClick = onReload) { Text("重载登录页") }
       Button(enabled = !webViewUiState.isConfirming, onClick = onConfirm) {
@@ -135,7 +146,7 @@ private fun CookieLoginTab(
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
     Text(
-        text = "备用方案：直接粘贴浏览器中的 Cookie Header。",
+        text = "直接粘贴浏览器中的 Cookie Header。",
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )

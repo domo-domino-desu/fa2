@@ -4,14 +4,15 @@ import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Element
 import me.domino.fa2.data.model.JournalPage
 import me.domino.fa2.data.model.JournalSummary
-import me.domino.fa2.util.ParserUtils
+import me.domino.fa2.util.ensureUserPageAccessible
+import me.domino.fa2.util.toAbsoluteUrl
 
 /** Journals 列表解析器。 */
 class JournalsParser {
   /** 解析 journals 列表页。 */
   fun parse(html: String, baseUrl: String): JournalPage {
     val document = Ksoup.parse(html, baseUrl)
-    ParserUtils.ensureUserPageAccessible(document)
+    ensureUserPageAccessible(document)
 
     val sections = document.select("div.content section[id^='jid:']")
     val journals = sections.mapNotNull(::parseJournalSummary)
@@ -24,7 +25,7 @@ class JournalsParser {
               val raw = node.attr("href").ifBlank { node.attr("action") }
               raw.trim().takeIf { it.isNotBlank() }
             }
-            ?.let { raw -> ParserUtils.toAbsoluteUrl(baseUrl, raw) }
+            ?.let { raw -> toAbsoluteUrl(baseUrl, raw) }
 
     return JournalPage(journals = journals, nextPageUrl = nextPageUrl)
   }
@@ -52,7 +53,7 @@ class JournalsParser {
             ?.attr("href")
             ?.trim()
             ?.takeIf { it.isNotBlank() }
-            ?.let { href -> ParserUtils.toAbsoluteUrl("https://www.furaffinity.net/", href) }
+            ?.let { href -> toAbsoluteUrl("https://www.furaffinity.net/", href) }
             ?: "https://www.furaffinity.net/journal/$sid/"
 
     val bodyText =

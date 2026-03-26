@@ -11,7 +11,7 @@ import me.domino.fa2.data.datasource.JournalsDataSource
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.network.FaHtmlDataSource
 import me.domino.fa2.data.network.HtmlResponseResult
-import me.domino.fa2.data.network.endpoint.FavoriteEndpoint
+import me.domino.fa2.data.network.endpoint.FavoritesEndpoint
 import me.domino.fa2.data.network.endpoint.GalleryEndpoint
 import me.domino.fa2.data.network.endpoint.JournalEndpoint
 import me.domino.fa2.data.network.endpoint.JournalsEndpoint
@@ -95,7 +95,7 @@ class UserSectionRepositoriesTest {
                 GalleryDataSource(endpoint = GalleryEndpoint(source), parser = GalleryParser()),
             favoritesDataSource =
                 FavoritesDataSource(
-                    endpoint = FavoriteEndpoint(source),
+                    endpoint = FavoritesEndpoint(source),
                     parser = GalleryParser(),
                 ),
             pageCacheDao = pageCacheDao,

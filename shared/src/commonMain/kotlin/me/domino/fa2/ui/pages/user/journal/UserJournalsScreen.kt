@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.user
+package me.domino.fa2.ui.pages.user.journal
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -38,6 +38,16 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.JournalSummary
 import me.domino.fa2.ui.components.SkeletonBlock
+import me.domino.fa2.ui.pages.user.profile.UserBodyScrollPosition
+import me.domino.fa2.ui.pages.user.profile.UserChildRouteTabs
+import me.domino.fa2.ui.pages.user.profile.UserSectionTopDefaults
+import me.domino.fa2.ui.pages.user.profile.UserSharedTopScrollState
+import me.domino.fa2.ui.pages.user.profile.handleUserSectionTabSelection
+import me.domino.fa2.ui.pages.user.profile.resolveUserBodyScrollPosition
+import me.domino.fa2.ui.pages.user.profile.resolveUserSharedTopScrollState
+import me.domino.fa2.ui.pages.user.profile.shouldStickUserSectionTabs
+import me.domino.fa2.ui.pages.user.profile.userJournalsScrollLayout
+import me.domino.fa2.ui.pages.user.route.UserChildRoute
 
 /** Journals 子页。 */
 @Composable

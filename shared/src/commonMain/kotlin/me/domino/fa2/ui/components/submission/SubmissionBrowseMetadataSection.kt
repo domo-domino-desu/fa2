@@ -14,8 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import me.domino.fa2.data.search.SearchUiLabelsRepository
-import org.koin.compose.koinInject
+import me.domino.fa2.ui.host.LocalSearchUiLabelsRepository
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -81,7 +80,7 @@ internal fun SubmissionBrowseMetadataSection(
 
 @Composable
 private fun SubmissionBrowseMetadataField(label: String, value: String, onClick: (() -> Unit)?) {
-  val searchUiLabelsRepository = koinInject<SearchUiLabelsRepository>()
+  val searchUiLabelsRepository = LocalSearchUiLabelsRepository.current
   if (value.isBlank()) return
   Surface(
       color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.72f),

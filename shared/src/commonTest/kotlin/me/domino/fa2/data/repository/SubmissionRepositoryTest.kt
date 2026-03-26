@@ -13,7 +13,7 @@ import me.domino.fa2.data.network.HtmlResponseResult
 import me.domino.fa2.data.network.endpoint.AttachmentDownloadPayload
 import me.domino.fa2.data.network.endpoint.AttachmentDownloadResult
 import me.domino.fa2.data.network.endpoint.AttachmentDownloadSource
-import me.domino.fa2.data.network.endpoint.FavoriteEndpoint
+import me.domino.fa2.data.network.endpoint.FavoritesEndpoint
 import me.domino.fa2.data.network.endpoint.GalleryEndpoint
 import me.domino.fa2.data.network.endpoint.SocialActionEndpoint
 import me.domino.fa2.data.network.endpoint.SubmissionEndpoint
@@ -140,7 +140,7 @@ class SubmissionRepositoryTest {
                 GalleryDataSource(endpoint = GalleryEndpoint(source), parser = GalleryParser()),
             favoritesDataSource =
                 FavoritesDataSource(
-                    endpoint = FavoriteEndpoint(source),
+                    endpoint = FavoritesEndpoint(source),
                     parser = GalleryParser(),
                 ),
             pageCacheDao = pageCacheDao,

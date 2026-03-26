@@ -2,7 +2,8 @@ package me.domino.fa2.data.parser
 
 import com.fleeksoft.ksoup.Ksoup
 import me.domino.fa2.data.model.User
-import me.domino.fa2.util.ParserUtils
+import me.domino.fa2.util.ensureUserPageAccessible
+import me.domino.fa2.util.toAbsoluteUrl
 
 /** User 主页头信息解析器。 */
 class UserParser {
@@ -20,7 +21,7 @@ class UserParser {
   /** 解析用户主页头部信息。 */
   fun parse(html: String, url: String): User {
     val document = Ksoup.parse(html, url)
-    ParserUtils.ensureUserPageAccessible(document)
+    ensureUserPageAccessible(document)
 
     val username = parseUsername(document)
     val displayName =
@@ -33,7 +34,7 @@ class UserParser {
             ?.attr("src")
             ?.trim()
             ?.takeIf { it.isNotBlank() }
-            ?.let { raw -> ParserUtils.toAbsoluteUrl(url, raw) } ?: ""
+            ?.let { raw -> toAbsoluteUrl(url, raw) } ?: ""
 
     val userTitle = parseUserTitle(document)
     val registeredAt =
@@ -118,7 +119,7 @@ class UserParser {
     if (href.isBlank()) {
       return WatchState(isWatching = false, actionUrl = "")
     }
-    val absoluteUrl = ParserUtils.toAbsoluteUrl(baseUrl, href)
+    val absoluteUrl = toAbsoluteUrl(baseUrl, href)
     val label = actionNode.text().trim().replace(" ", "").lowercase()
     val isWatching =
         absoluteUrl.contains("/unwatch/") || label.startsWith("-watch") || label.contains("unwatch")
@@ -137,7 +138,7 @@ class UserParser {
             ?.trim()
             .orEmpty()
     if (fromDesktopBannerSource.isNotBlank()) {
-      return ParserUtils.toAbsoluteUrl(baseUrl, fromDesktopBannerSource)
+      return toAbsoluteUrl(baseUrl, fromDesktopBannerSource)
     }
 
     val fromBannerImage =
@@ -150,7 +151,7 @@ class UserParser {
             ?.trim()
             .orEmpty()
     if (fromBannerImage.isNotBlank()) {
-      return ParserUtils.toAbsoluteUrl(baseUrl, fromBannerImage)
+      return toAbsoluteUrl(baseUrl, fromBannerImage)
     }
 
     val fromAnyBannerSource =
@@ -161,14 +162,14 @@ class UserParser {
             ?.trim()
             .orEmpty()
     if (fromAnyBannerSource.isNotBlank()) {
-      return ParserUtils.toAbsoluteUrl(baseUrl, fromAnyBannerSource)
+      return toAbsoluteUrl(baseUrl, fromAnyBannerSource)
     }
 
     val inlineStyle = document.selectFirst("userpage-nav-header")?.attr("style")?.trim().orEmpty()
 
     val fromInlineStyle = extractBackgroundUrl(inlineStyle)
     if (!fromInlineStyle.isNullOrBlank()) {
-      return ParserUtils.toAbsoluteUrl(baseUrl, fromInlineStyle)
+      return toAbsoluteUrl(baseUrl, fromInlineStyle)
     }
 
     val fromEmbeddedStyle =
@@ -182,7 +183,7 @@ class UserParser {
             .mapNotNull { css -> extractBackgroundUrl(css) }
             .firstOrNull()
     if (!fromEmbeddedStyle.isNullOrBlank()) {
-      return ParserUtils.toAbsoluteUrl(baseUrl, fromEmbeddedStyle)
+      return toAbsoluteUrl(baseUrl, fromEmbeddedStyle)
     }
 
     return ""
@@ -200,7 +201,7 @@ class UserParser {
             .orEmpty()
             .trim()
             .takeIf { it.isNotBlank() }
-            ?.let { href -> ParserUtils.toAbsoluteUrl(baseUrl, href) }
+            ?.let { href -> toAbsoluteUrl(baseUrl, href) }
             .orEmpty()
     val watchingUrl =
         watchingNode
@@ -208,7 +209,7 @@ class UserParser {
             .orEmpty()
             .trim()
             .takeIf { it.isNotBlank() }
-            ?.let { href -> ParserUtils.toAbsoluteUrl(baseUrl, href) }
+            ?.let { href -> toAbsoluteUrl(baseUrl, href) }
             .orEmpty()
 
     val watchedByCount = watchedByNode?.text().orEmpty().let(::parseWatchlistCount)

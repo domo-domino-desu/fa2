@@ -37,4 +37,12 @@ class LogSummariesTest {
         summarizeHtmlResult(HtmlResponseResult.Error(503, "HTTP 503 for /browse/")),
     )
   }
+
+  @Test
+  fun summarizeUrlOnlyTrimsWhitespace() {
+    assertEquals(
+        "https://www.furaffinity.net/view/1/",
+        summarizeUrl("  https://www.furaffinity.net/view/1/  "),
+    )
+  }
 }

@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.user
+package me.domino.fa2.ui.pages.user.watchlist
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope

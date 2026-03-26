@@ -4,14 +4,15 @@ import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Element
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
-import me.domino.fa2.util.ParserUtils
+import me.domino.fa2.util.ensureUserPageAccessible
+import me.domino.fa2.util.toAbsoluteUrl
 
 /** watchlist 列表解析器。 */
 class WatchlistParser {
   /** 解析 watchlist 分页。 */
   fun parse(html: String, baseUrl: String): WatchlistPage {
     val document = Ksoup.parse(html, baseUrl)
-    ParserUtils.ensureUserPageAccessible(document)
+    ensureUserPageAccessible(document)
 
     val users = parseUsers(document, baseUrl)
     val nextPageUrl = parseNextPageUrl(document, baseUrl)
@@ -32,7 +33,7 @@ class WatchlistParser {
 
   private fun parseWatchlistUser(anchor: Element, baseUrl: String): WatchlistUser? {
     val rawHref = anchor.attr("href").trim().takeIf { href -> href.isNotBlank() } ?: return null
-    val profileUrl = ParserUtils.toAbsoluteUrl(baseUrl, rawHref)
+    val profileUrl = toAbsoluteUrl(baseUrl, rawHref)
     val username =
         rawHref.substringAfter("/user/", "").substringBefore('/').trim().ifBlank { null }
             ?: return null
@@ -59,7 +60,7 @@ class WatchlistParser {
             ?: return null
     val action =
         nextForm.attr("action").trim().takeIf { value -> value.isNotBlank() } ?: return null
-    val absoluteAction = ParserUtils.toAbsoluteUrl(baseUrl, action)
+    val absoluteAction = toAbsoluteUrl(baseUrl, action)
     val nextPage =
         nextForm.selectFirst("input[name=page]")?.attr("value")?.trim()?.takeIf { value ->
           value.isNotBlank()

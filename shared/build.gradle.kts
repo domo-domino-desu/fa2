@@ -56,6 +56,8 @@ kotlin {
       }
     }
 
+    val jvmSharedMain by creating { dependsOn(commonMain) }
+
     val commonTest by getting {
       dependencies {
         implementation(kotlin("test"))
@@ -67,6 +69,7 @@ kotlin {
     }
 
     val desktopMain by getting {
+      dependsOn(jvmSharedMain)
       dependencies {
         implementation(libs.ktor.client.okhttp)
         implementation(libs.slf4j.simple)
@@ -75,6 +78,7 @@ kotlin {
     }
 
     val androidMain by getting {
+      dependsOn(jvmSharedMain)
       dependencies {
         implementation(libs.androidx.activity.compose)
         implementation(libs.coil.gif)
@@ -160,14 +164,20 @@ symbolCraft {
   }
 }
 
-tasks
-    .matching {
-      // KMP task names are mixed here: desktop uses compileKotlinDesktop/kspKotlinDesktop,
-      // while Android uses compileAndroidMain/kspAndroidMain. Make all Kotlin compilation
-      // entry points regenerate SymbolCraft icons in clean environments such as CI.
-      it.name.startsWith("ksp") ||
-          it.name.startsWith("compileKotlin") ||
-          it.name.startsWith("compileCommonMainKotlinMetadata") ||
-          it.name.startsWith("compileAndroid")
-    }
-    .configureEach { dependsOn("generateSymbolCraftIcons") }
+val symbolCraftConsumerTasks =
+    setOf(
+        "compileCommonMainKotlinMetadata",
+        "kspCommonMainKotlinMetadata",
+        "compileAndroidMain",
+        "kspAndroidMain",
+        "compileKotlinDesktop",
+        "kspKotlinDesktop",
+        "compileDevKotlinDesktop",
+        "kspDevKotlinDesktop",
+    )
+
+tasks.configureEach {
+  if (name in symbolCraftConsumerTasks) {
+    dependsOn("generateSymbolCraftIcons")
+  }
+}

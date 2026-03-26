@@ -56,6 +56,20 @@ class SubmissionParserTest {
     assertTrue(detail.tagBlockNonce.isNotBlank())
     assertTrue(detail.downloadUrl?.startsWith("https://") == true)
     assertTrue(detail.submissionUrl.endsWith("/view/48519387/"))
+    assertTrue(detail.comments.isNotEmpty())
+    assertTrue(detail.comments.any { comment -> comment.depth > 0 })
+  }
+
+  @Test
+  fun detectsFavoritedStateFromUnfavAction() {
+    val html = TestFixtures.read("www.furaffinity.net:view:49338772-nocomment.html")
+    val parser = SubmissionParser()
+    val mutated = html.replace("/fav/49338772/", "/unfav/49338772/").replace(">+Fav<", ">-Fav<")
+
+    val detail = parser.parse(html = mutated, url = FaUrls.submission(49338772))
+
+    assertEquals(true, detail.isFavorited)
+    assertTrue(detail.favoriteActionUrl.contains("/unfav/"))
   }
 
   @Test

@@ -1,28 +1,17 @@
 package me.domino.fa2.ui.pages.submission
 
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -31,7 +20,6 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
@@ -47,21 +35,17 @@ import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.ui.components.LocalShowToast
-import me.domino.fa2.ui.components.PageStateWrapper
 import me.domino.fa2.ui.components.platform.rememberPlatformTextCopier
 import me.domino.fa2.ui.components.platform.rememberPlatformUrlDownloader
-import me.domino.fa2.ui.components.submission.SubmissionPager
-import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.layouts.SubmissionRouteTopBar
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.pages.browse.BrowseFilterState
 import me.domino.fa2.ui.pages.browse.BrowseRouteScreen
 import me.domino.fa2.ui.pages.search.SearchRouteScreen
-import me.domino.fa2.ui.pages.user.UserChildRoute
-import me.domino.fa2.ui.pages.user.UserRouteScreen
+import me.domino.fa2.ui.pages.user.route.UserChildRoute
+import me.domino.fa2.ui.pages.user.route.UserRouteScreen
 import me.domino.fa2.util.FaUrls
-import me.domino.fa2.util.ParserUtils
+import me.domino.fa2.util.deriveSubmissionThumbnailUrlFromFullImage
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
@@ -77,31 +61,10 @@ class SubmissionRouteScreen(
   override val key: String = "submission:$holderTag:$initialSid:${seedSubmissionUrl.orEmpty()}"
 
   /** 页面内容。 */
-  @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
   @Composable
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
-    val submissionListHolder =
-        navigator.rememberNavigatorScreenModel<SubmissionListHolder>(tag = holderTag) {
-          SubmissionListHolder()
-        }
-    if (seedSubmissionUrl != null && !submissionListHolder.setCurrentBySid(initialSid)) {
-      submissionListHolder.replace(
-          submissions =
-              listOf(
-                  SubmissionThumbnail(
-                      id = initialSid,
-                      submissionUrl = seedSubmissionUrl,
-                      title = "Submission #$initialSid",
-                      author = "",
-                      thumbnailUrl = "",
-                      thumbnailAspectRatio = 1f,
-                      categoryTag = "",
-                  )
-              ),
-          nextPageUrl = null,
-      )
-    }
+    val submissionListHolder = rememberSubmissionListHolder(navigator = navigator)
     val screenModel =
         koinScreenModel<SubmissionScreenModel> { parametersOf(initialSid, submissionListHolder) }
     val settingsService = koinInject<AppSettingsService>()
@@ -123,7 +86,7 @@ class SubmissionRouteScreen(
           }
         }
     val topBarActions = resolveTopBarActions(initialSid = initialSid, state = state)
-    val zoomOverlayVisible = remember { androidx.compose.runtime.mutableStateOf(false) }
+    val zoomOverlayVisible = remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { requestPagerFocus() }
     LaunchedEffect(screenModel, showToast) {
@@ -161,155 +124,108 @@ class SubmissionRouteScreen(
                 }
                 .testTag("submission-route")
     ) {
-      if (!zoomOverlayVisible.value) {
-        SubmissionRouteTopBar(
-            onBack = { navigator.pop() },
-            onGoHome = { navigator.goBackHome() },
-            shareUrl = topBarActions.shareUrl,
-            downloadUrl = topBarActions.downloadUrl,
-            onDownload = {
-              topBarActions.downloadUrl?.let { downloadUrl ->
-                coroutineScope.launch {
-                  if (!downloadUrlHandler(downloadUrl)) {
-                    uriHandler.openUri(downloadUrl)
-                  }
-                }
-              }
-            },
-            onTitleClick = screenModel::requestCurrentPageScrollToTop,
-        )
-      }
-      PageStateWrapper(state = pageState, onRetry = screenModel::retryCurrentDetail) {
-        when (val snapshot = state) {
-          SubmissionPagerUiState.Empty -> {
-            Text(
-                text = "当前没有可浏览内容。",
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-          }
-
-          is SubmissionPagerUiState.Data -> {
-            SubmissionImagePrefetchEffect(snapshot = snapshot)
-            Box(modifier = Modifier.fillMaxSize()) {
-              SubmissionPager(
-                  submissions = snapshot.submissions,
-                  detailBySid = snapshot.detailBySid,
-                  initialIndex = snapshot.currentIndex,
-                  onRetryCurrentDetail = screenModel::retryCurrentDetail,
-                  onPageChanged = screenModel::onPageChanged,
-                  onOpenAuthor = { author ->
-                    val normalized = author.trim()
-                    if (normalized.isNotBlank()) {
-                      navigator.push(
-                          UserRouteScreen(
-                              username = normalized,
-                              initialChildRoute = UserChildRoute.Gallery,
-                          )
-                      )
-                    }
-                  },
-                  onSearchKeyword = { query ->
-                    val normalized = query.trim()
-                    if (normalized.isNotBlank()) {
-                      navigator.push(SearchRouteScreen(initialQuery = normalized))
-                    }
-                  },
-                  onKeywordLongPress = { tag ->
-                    val normalizedTag = tag.trim()
-                    if (normalizedTag.isNotBlank() && copyTextToClipboard(normalizedTag)) {
-                      showToast("标签已复制")
-                    }
-                  },
-                  onOpenBrowseFilter = { category, type, species ->
-                    navigator.push(
-                        BrowseRouteScreen(
-                            initialFilter =
-                                BrowseFilterState(
-                                    category = category,
-                                    type = type,
-                                    species = species,
-                                )
-                        )
-                    )
-                  },
-                  onCopySubmissionUrl = { submissionUrl ->
-                    val normalizedUrl = submissionUrl.trim()
-                    if (normalizedUrl.isNotBlank() && copyTextToClipboard(normalizedUrl)) {
-                      showToast("链接已复制")
-                    }
-                  },
-                  onLoadAttachmentText = screenModel::loadAttachmentTextCurrent,
-                  onTranslateDescription = screenModel::translateDescriptionCurrent,
-                  onTranslateAttachment = screenModel::translateAttachmentCurrent,
-                  scrollOffsetOfSid = screenModel::scrollOffsetForSid,
-                  requestPagerFocus = requestPagerFocus,
-                  onZoomOverlayVisibilityChanged = { visible ->
-                    zoomOverlayVisible.value = visible
-                  },
-                  onPageScrollOffsetChanged = screenModel::setCurrentPageScrollOffset,
-                  scrollToTopVersionBySid = snapshot.scrollToTopVersionBySid,
-                  blockedSubmissionMode = settings.blockedSubmissionPagerMode,
-              )
-
-              val currentItem = snapshot.submissions.getOrNull(snapshot.currentIndex)
-              val detailState =
-                  currentItem?.let { item ->
-                    snapshot.detailBySid[item.id] as? SubmissionDetailUiState.Success
-                  }
-              if (
-                  !zoomOverlayVisible.value &&
-                      detailState != null &&
-                      detailState.detail.favoriteActionUrl.isNotBlank()
-              ) {
-                FloatingActionButton(
-                    onClick = {
-                      screenModel.toggleFavoriteCurrent()
-                      requestPagerFocus()
-                    },
-                    modifier =
-                        Modifier.align(Alignment.BottomEnd).padding(20.dp).focusProperties {
-                          canFocus = false
-                        },
-                    containerColor =
-                        if (detailState.detail.isFavorited) {
-                          MaterialTheme.colorScheme.primaryContainer
-                        } else {
-                          MaterialTheme.colorScheme.surface
-                        },
-                ) {
-                  if (detailState.favoriteUpdating) {
-                    LoadingIndicator(
-                        modifier = Modifier.size(22.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                  } else {
-                    Icon(
-                        imageVector =
-                            if (detailState.detail.isFavorited) {
-                              FaMaterialSymbols.Filled.Favorite
-                            } else {
-                              FaMaterialSymbols.Filled.FavoriteBorder
-                            },
-                        contentDescription =
-                            if (detailState.detail.isFavorited) {
-                              "Unfavorite"
-                            } else {
-                              "Favorite"
-                            },
-                    )
-                  }
-                }
+      SubmissionRouteChrome(
+          state = state,
+          pageState = pageState,
+          topBarActions = topBarActions,
+          zoomOverlayVisible = zoomOverlayVisible.value,
+          blockedSubmissionMode = settings.blockedSubmissionPagerMode,
+          onBack = { navigator.pop() },
+          onGoHome = { navigator.goBackHome() },
+          onDownload = { downloadUrl ->
+            coroutineScope.launch {
+              if (!downloadUrlHandler(downloadUrl)) {
+                uriHandler.openUri(downloadUrl)
               }
             }
-          }
-        }
-      }
+          },
+          onRequestScrollToTop = screenModel::requestCurrentPageScrollToTop,
+          onRetryPage = screenModel::retryCurrentDetail,
+          onRetryCurrentDetail = screenModel::retryCurrentDetail,
+          onPageChanged = screenModel::onPageChanged,
+          onOpenAuthor = { author ->
+            val normalized = author.trim()
+            if (normalized.isNotBlank()) {
+              navigator.push(
+                  UserRouteScreen(
+                      username = normalized,
+                      initialChildRoute = UserChildRoute.Gallery,
+                  )
+              )
+            }
+          },
+          onSearchKeyword = { query ->
+            val normalized = query.trim()
+            if (normalized.isNotBlank()) {
+              navigator.push(SearchRouteScreen(initialQuery = normalized))
+            }
+          },
+          onKeywordLongPress = { tag ->
+            val normalizedTag = tag.trim()
+            if (normalizedTag.isNotBlank() && copyTextToClipboard(normalizedTag)) {
+              showToast("标签已复制")
+            }
+          },
+          onOpenBrowseFilter = { category, type, species ->
+            navigator.push(
+                BrowseRouteScreen(
+                    initialFilter =
+                        BrowseFilterState(
+                            category = category,
+                            type = type,
+                            species = species,
+                        )
+                )
+            )
+          },
+          onCopySubmissionUrl = { submissionUrl ->
+            val normalizedUrl = submissionUrl.trim()
+            if (normalizedUrl.isNotBlank() && copyTextToClipboard(normalizedUrl)) {
+              showToast("链接已复制")
+            }
+          },
+          onLoadAttachmentText = screenModel::loadAttachmentTextCurrent,
+          onTranslateDescription = screenModel::translateDescriptionCurrent,
+          onTranslateAttachment = screenModel::translateAttachmentCurrent,
+          scrollOffsetOfSid = screenModel::scrollOffsetForSid,
+          requestPagerFocus = requestPagerFocus,
+          onZoomOverlayVisibilityChanged = { visible -> zoomOverlayVisible.value = visible },
+          onPageScrollOffsetChanged = screenModel::setCurrentPageScrollOffset,
+          onToggleFavorite = screenModel::toggleFavoriteCurrent,
+      )
     }
+  }
+
+  @Composable
+  private fun rememberSubmissionListHolder(
+      navigator: cafe.adriel.voyager.navigator.Navigator,
+  ): SubmissionListHolder {
+    val submissionListHolder =
+        navigator.rememberNavigatorScreenModel<SubmissionListHolder>(tag = holderTag) {
+          SubmissionListHolder()
+        }
+    if (seedSubmissionUrl != null && !submissionListHolder.setCurrentBySid(initialSid)) {
+      submissionListHolder.replace(
+          submissions =
+              listOf(
+                  SubmissionThumbnail(
+                      id = initialSid,
+                      submissionUrl = seedSubmissionUrl,
+                      title = "Submission #$initialSid",
+                      author = "",
+                      thumbnailUrl = "",
+                      thumbnailAspectRatio = 1f,
+                      categoryTag = "",
+                  )
+              ),
+          nextPageUrl = null,
+      )
+    }
+    return submissionListHolder
   }
 }
 
-private data class SubmissionTopBarActions(val shareUrl: String, val downloadUrl: String?)
+internal data class SubmissionTopBarActions(val shareUrl: String, val downloadUrl: String?)
 
 private fun resolveTopBarActions(
     initialSid: Int,
@@ -339,7 +255,7 @@ private fun resolveTopBarActions(
 }
 
 @Composable
-private fun SubmissionImagePrefetchEffect(snapshot: SubmissionPagerUiState.Data) {
+internal fun SubmissionImagePrefetchEffect(snapshot: SubmissionPagerUiState.Data) {
   val platformContext = LocalPlatformContext.current
   val prefetchedUrls = remember { mutableSetOf<String>() }
 
@@ -362,7 +278,7 @@ private fun SubmissionImagePrefetchEffect(snapshot: SubmissionPagerUiState.Data)
               ?.detail
               ?.fullImageUrl
               ?.let { fullImageUrl ->
-                ParserUtils.deriveSubmissionThumbnailUrlFromFullImage(
+                deriveSubmissionThumbnailUrlFromFullImage(
                     sid = item.id,
                     fullImageUrl = fullImageUrl,
                 )

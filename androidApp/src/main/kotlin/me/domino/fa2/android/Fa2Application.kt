@@ -3,6 +3,7 @@ package me.domino.fa2.android
 import android.app.Application
 import co.touchlab.kermit.Severity
 import me.domino.fa2.di.startAppKoin
+import me.domino.fa2.ui.pages.about.AboutLibrariesAndroidContextHolder
 import me.domino.fa2.util.attachmenttext.initializeAttachmentTextPlatform
 import me.domino.fa2.util.logging.FaLog
 
@@ -11,6 +12,7 @@ class Fa2Application : Application() {
   /** 应用启动回调。 */
   override fun onCreate() {
     super.onCreate()
+    AboutLibrariesAndroidContextHolder.initialize(applicationContext)
     initializeAttachmentTextPlatform(applicationContext)
     FaLog.init(
         if (BuildConfig.DEBUG) {

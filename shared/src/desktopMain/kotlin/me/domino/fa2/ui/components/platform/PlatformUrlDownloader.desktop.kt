@@ -6,16 +6,22 @@ import java.awt.EventQueue
 import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
-import java.net.URI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import me.domino.fa2.data.network.endpoint.AttachmentDownloadResult
+import me.domino.fa2.data.network.endpoint.AttachmentDownloadSource
+import org.koin.compose.koinInject
 
 @Composable
 actual fun rememberPlatformUrlDownloader(): suspend (String) -> Boolean {
-  return remember { { url -> downloadUrlWithSaveDialog(url) } }
+  val downloadSource = koinInject<AttachmentDownloadSource>()
+  return remember(downloadSource) { { url -> downloadUrlWithSaveDialog(url, downloadSource) } }
 }
 
-private suspend fun downloadUrlWithSaveDialog(url: String): Boolean {
+private suspend fun downloadUrlWithSaveDialog(
+    url: String,
+    downloadSource: AttachmentDownloadSource,
+): Boolean {
   val normalized = url.trim()
   if (normalized.isBlank()) return false
   val target =
@@ -23,16 +29,18 @@ private suspend fun downloadUrlWithSaveDialog(url: String): Boolean {
   return withContext(Dispatchers.IO) {
     runCatching {
           target.parentFile?.mkdirs()
-          val connection =
-              URI(normalized).toURL().openConnection().apply {
-                connectTimeout = 15_000
-                readTimeout = 30_000
-              }
-          connection.getInputStream().use { input ->
-            target.outputStream().use { output -> input.copyTo(output) }
+          when (val result = downloadSource.fetch(url = normalized, fileName = target.name)) {
+            is AttachmentDownloadResult.Success -> {
+              target.outputStream().use { output -> output.write(result.payload.bytes) }
+              true
+            }
+
+            is AttachmentDownloadResult.Blocked,
+            is AttachmentDownloadResult.Challenge,
+            is AttachmentDownloadResult.Failed -> false
           }
         }
-        .isSuccess
+        .getOrDefault(false)
   }
 }
 

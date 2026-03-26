@@ -23,7 +23,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,8 +34,8 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.search.SearchUiLabelsRepository
-import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
+import me.domino.fa2.data.search.SearchUiOptionKey
+import me.domino.fa2.data.search.SearchUiTextKey
 import me.domino.fa2.ui.components.FilterDialogTriggerField
 import me.domino.fa2.ui.components.FilterDropdownField
 import me.domino.fa2.ui.components.FilterOption
@@ -46,9 +45,15 @@ import me.domino.fa2.ui.components.GroupedTextPickerDialog
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
 import me.domino.fa2.ui.components.submission.WaterfallLoadingSkeleton
+import me.domino.fa2.ui.components.toFilterOption
+import me.domino.fa2.ui.components.toFilterOptionGroup
+import me.domino.fa2.ui.host.LocalAppSettings
+import me.domino.fa2.ui.host.LocalSearchUiLabelsCatalog
+import me.domino.fa2.ui.host.LocalSearchUiLabelsRepository
+import me.domino.fa2.ui.host.LocalTaxonomyCatalog
+import me.domino.fa2.ui.host.LocalTaxonomyRepository
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.layouts.BrowseFilterOverlayTopBar
-import org.koin.compose.koinInject
 
 @Composable
 fun BrowseScreen(
@@ -68,21 +73,30 @@ fun BrowseScreen(
     onRetryLoadMore: () -> Unit,
     waterfallState: LazyStaggeredGridState,
 ) {
-  val settingsService = koinInject<AppSettingsService>()
-  val searchUiLabelsRepository = koinInject<SearchUiLabelsRepository>()
-  val taxonomyRepository = koinInject<FaTaxonomyRepository>()
-  val settings by settingsService.settings.collectAsState()
-  val searchUiLabelsCatalog by searchUiLabelsRepository.catalog.collectAsState()
-  val taxonomyCatalog by taxonomyRepository.catalog.collectAsState()
+  val settings = LocalAppSettings.current
+  val searchUiLabelsRepository = LocalSearchUiLabelsRepository.current
+  val taxonomyRepository = LocalTaxonomyRepository.current
+  val searchUiLabelsCatalog = LocalSearchUiLabelsCatalog.current
+  val taxonomyCatalog = LocalTaxonomyCatalog.current
   var filterPageVisible by remember { mutableStateOf(false) }
-  val browseCategoryOptions = remember(taxonomyCatalog) { taxonomyRepository.categoryOptions() }
+  val browseCategoryOptions =
+      remember(taxonomyCatalog) { taxonomyRepository.categoryOptions().map { it.toFilterOption() } }
   val browseCategoryOptionGroups =
-      remember(taxonomyCatalog) { taxonomyRepository.categoryOptionGroups() }
-  val browseTypeOptions = remember(taxonomyCatalog) { taxonomyRepository.typeOptions() }
-  val browseSpeciesOptions = remember(taxonomyCatalog) { taxonomyRepository.speciesOptions() }
-  val browseTypeOptionGroups = remember(taxonomyCatalog) { taxonomyRepository.typeOptionGroups() }
+      remember(taxonomyCatalog) {
+        taxonomyRepository.categoryOptionGroups().map { it.toFilterOptionGroup() }
+      }
+  val browseTypeOptions =
+      remember(taxonomyCatalog) { taxonomyRepository.typeOptions().map { it.toFilterOption() } }
+  val browseSpeciesOptions =
+      remember(taxonomyCatalog) { taxonomyRepository.speciesOptions().map { it.toFilterOption() } }
+  val browseTypeOptionGroups =
+      remember(taxonomyCatalog) {
+        taxonomyRepository.typeOptionGroups().map { it.toFilterOptionGroup() }
+      }
   val browseSpeciesOptionGroups =
-      remember(taxonomyCatalog) { taxonomyRepository.speciesOptionGroups() }
+      remember(taxonomyCatalog) {
+        taxonomyRepository.speciesOptionGroups().map { it.toFilterOptionGroup() }
+      }
   val browseGenderOptions =
       remember(searchUiLabelsCatalog) { buildBrowseGenderOptions(searchUiLabelsRepository) }
 
@@ -295,7 +309,7 @@ private fun BrowseFilterPage(
               modifier = Modifier.weight(1f),
           )
           FilterDropdownField(
-              label = searchUiLabelsRepository.summaryGendersLabel(),
+              label = searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_GENDERS),
               options = genderOptions,
               selected = filter.gender,
               onSelected = onUpdateGender,
@@ -394,13 +408,31 @@ private fun buildBrowseGenderOptions(
     searchUiLabelsRepository: SearchUiLabelsRepository
 ): List<FilterOption<String>> =
     listOf(
-        FilterOption("", searchUiLabelsRepository.anyLabel()),
-        FilterOption("male", searchUiLabelsRepository.genderLabel("male")),
-        FilterOption("female", searchUiLabelsRepository.genderLabel("female")),
-        FilterOption("trans_male", searchUiLabelsRepository.genderLabel("trans_male")),
-        FilterOption("trans_female", searchUiLabelsRepository.genderLabel("trans_female")),
-        FilterOption("intersex", searchUiLabelsRepository.genderLabel("intersex")),
-        FilterOption("non_binary", searchUiLabelsRepository.genderLabel("non_binary")),
+        FilterOption("", searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_ANY)),
+        FilterOption(
+            "male",
+            searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, "male"),
+        ),
+        FilterOption(
+            "female",
+            searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, "female"),
+        ),
+        FilterOption(
+            "trans_male",
+            searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, "trans_male"),
+        ),
+        FilterOption(
+            "trans_female",
+            searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, "trans_female"),
+        ),
+        FilterOption(
+            "intersex",
+            searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, "intersex"),
+        ),
+        FilterOption(
+            "non_binary",
+            searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, "non_binary"),
+        ),
     )
 
 private fun buildBrowseFilterChips(
@@ -420,7 +452,7 @@ private fun buildBrowseFilterChips(
       speciesOptions.firstOrNull { it.value == filter.species }?.label ?: filter.species.toString()
   val genderLabel =
       genderOptions.firstOrNull { it.value == filter.gender }?.label
-          ?: searchUiLabelsRepository.anyLabel()
+          ?: searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_ANY)
   val ratingLabel =
       buildList {
             if (filter.ratingGeneral) add("General")
@@ -433,7 +465,7 @@ private fun buildBrowseFilterChips(
       "类别：$categoryLabel",
       "分类：$typeLabel",
       "物种：$speciesLabel",
-      "${searchUiLabelsRepository.summaryGendersLabel()}：$genderLabel",
+      "${searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_GENDERS)}：$genderLabel",
       "分级：$ratingLabel",
   )
 }

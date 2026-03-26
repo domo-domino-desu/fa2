@@ -25,12 +25,14 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.ui.layouts.SettingsRouteTopBar
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(onBack: () -> Unit, onGoHome: () -> Unit) {
-  val settingsService = koinInject<AppSettingsService>()
+fun SettingsScreen(
+    settingsService: AppSettingsService,
+    onBack: () -> Unit,
+    onGoHome: () -> Unit,
+) {
   val scope = rememberCoroutineScope()
 
   val loaded by settingsService.isLoaded.collectAsState()

@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.user
+package me.domino.fa2.ui.pages.user.route
 
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
@@ -20,6 +20,14 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.navigation.rootNavigator
 import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
+import me.domino.fa2.ui.pages.user.gallery.UserSubmissionSectionScreen
+import me.domino.fa2.ui.pages.user.gallery.UserSubmissionSectionScreenModel
+import me.domino.fa2.ui.pages.user.journal.JournalDetailRouteScreen
+import me.domino.fa2.ui.pages.user.journal.UserJournalsScreen
+import me.domino.fa2.ui.pages.user.journal.UserJournalsScreenModel
+import me.domino.fa2.ui.pages.user.profile.resolveInitialUserScrollPosition
+import me.domino.fa2.ui.pages.user.profile.userJournalsScrollLayout
+import me.domino.fa2.ui.pages.user.profile.userSubmissionSectionScrollLayout
 import org.koin.core.parameter.parametersOf
 
 /** User 子路由 screen。 */

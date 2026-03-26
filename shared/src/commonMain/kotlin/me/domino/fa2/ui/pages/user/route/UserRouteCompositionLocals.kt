@@ -1,7 +1,10 @@
-package me.domino.fa2.ui.pages.user
+package me.domino.fa2.ui.pages.user.route
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
+import me.domino.fa2.ui.pages.user.gallery.UserSubmissionSectionUiState
+import me.domino.fa2.ui.pages.user.profile.UserBodyScrollPosition
+import me.domino.fa2.ui.pages.user.profile.UserSharedTopScrollState
 
 internal val LocalUserHeaderContent = staticCompositionLocalOf<(@Composable () -> Unit)?> { null }
 internal val LocalUserHeaderRefreshAction = staticCompositionLocalOf<(() -> Unit)?> { null }

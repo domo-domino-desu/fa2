@@ -5,6 +5,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.search.SearchUiLabelsRepository
+import me.domino.fa2.data.search.SearchUiOptionKey
+import me.domino.fa2.data.search.SearchUiTextKey
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 
 /** Search gender 与 query 同步测试。 */
@@ -66,25 +68,27 @@ class SearchGenderKeywordSyncTest {
     assertTrue(summary.contains("类别：数字绘画"))
     assertTrue(
         summary.contains(
-            "${searchUiLabelsRepository.summarySortLabel()}：" +
-                searchUiLabelsRepository.orderByLabel("date")
+            "${searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_SORT)}：" +
+                searchUiLabelsRepository.optionLabel(SearchUiOptionKey.ORDER_BY, "date")
         )
     )
     assertTrue(
         summary.contains(
-            "${searchUiLabelsRepository.summaryDateLabel()}：" +
-                searchUiLabelsRepository.rangeLabel("manual") +
-                "（${searchUiLabelsRepository.fromLabel()} 2024-01-01）"
+            "${searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_DATE)}：" +
+                searchUiLabelsRepository.optionLabel(SearchUiOptionKey.RANGE, "manual") +
+                "（${searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_FROM)} 2024-01-01）"
         )
     )
     assertTrue(summary.contains("分级：General, Mature"))
     assertTrue(
         summary.contains(
-            "${searchUiLabelsRepository.summaryGendersLabel()}：" +
-                searchUiLabelsRepository.genderLabel("female")
+            "${searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_GENDERS)}：" +
+                searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, "female")
         )
     )
-    assertTrue(!summary.contains("${searchUiLabelsRepository.summaryDirectionLabel()}："))
+    assertTrue(
+        !summary.contains("${searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_DIRECTION)}：")
+    )
     assertTrue(!summary.contains("类型："))
     assertTrue(!summary.contains("物种："))
   }

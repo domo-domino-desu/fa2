@@ -31,9 +31,8 @@ import me.domino.fa2.ui.pages.search.SearchScreen
 import me.domino.fa2.ui.pages.search.SearchScreenActions
 import me.domino.fa2.ui.pages.search.SearchScreenModel
 import me.domino.fa2.ui.pages.settings.SettingsRouteScreen
-import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
-import me.domino.fa2.ui.pages.user.UserChildRoute
-import me.domino.fa2.ui.pages.user.UserRouteScreen
+import me.domino.fa2.ui.pages.user.route.UserChildRoute
+import me.domino.fa2.ui.pages.user.route.UserRouteScreen
 import org.koin.core.parameter.parametersOf
 
 /** 登录后的主路由页面。 */
@@ -153,12 +152,10 @@ class MainRouteScreen(
                 onRetry = { feedScreenModel.load(forceRefresh = true) },
                 onRefresh = feedScreenModel::refresh,
                 onOpenSubmission = { item ->
-                  feedScreenModel.setCurrentSubmission(item.id)
-                  navigator.push(
-                      SubmissionRouteScreen(
-                          initialSid = item.id,
-                          holderTag = "submission-list-holder:feed",
-                      )
+                  navigator.openSubmissionFromList(
+                      sid = item.id,
+                      holderTag = "submission-list-holder:feed",
+                      onSelect = feedScreenModel::setCurrentSubmission,
                   )
                 },
                 onLastVisibleIndexChanged = feedScreenModel::onLastVisibleIndexChanged,
@@ -186,12 +183,10 @@ class MainRouteScreen(
                 onRefresh = browseScreenModel::refresh,
                 onRetry = browseScreenModel::refresh,
                 onOpenSubmission = { item ->
-                  browseScreenModel.setCurrentSubmission(item.id)
-                  navigator.push(
-                      SubmissionRouteScreen(
-                          initialSid = item.id,
-                          holderTag = "submission-list-holder:browse",
-                      )
+                  navigator.openSubmissionFromList(
+                      sid = item.id,
+                      holderTag = "submission-list-holder:browse",
+                      onSelect = browseScreenModel::setCurrentSubmission,
                   )
                 },
                 onLastVisibleIndexChanged = browseScreenModel::onLastVisibleIndexChanged,
@@ -238,12 +233,10 @@ class MainRouteScreen(
                         onRefresh = searchScreenModel::refresh,
                         onRetry = searchScreenModel::refresh,
                         onOpenSubmission = { item ->
-                          searchScreenModel.setCurrentSubmission(item.id)
-                          navigator.push(
-                              SubmissionRouteScreen(
-                                  initialSid = item.id,
-                                  holderTag = "submission-list-holder:search",
-                              )
+                          navigator.openSubmissionFromList(
+                              sid = item.id,
+                              holderTag = "submission-list-holder:search",
+                              onSelect = searchScreenModel::setCurrentSubmission,
                           )
                         },
                         onLastVisibleIndexChanged = searchScreenModel::onLastVisibleIndexChanged,

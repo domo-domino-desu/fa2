@@ -4,6 +4,10 @@ import eu.anifantakis.lib.ksafe.KSafe
 import io.ktor.client.HttpClient
 import me.domino.fa2.app.challenge.CfChallengeController
 import me.domino.fa2.app.challenge.CfChallengeCoordinator
+import me.domino.fa2.app.challenge.ChallengeCookiePolicy
+import me.domino.fa2.app.challenge.ChallengeProbeVerifier
+import me.domino.fa2.app.challenge.ChallengeSessionStore
+import me.domino.fa2.app.challenge.CloudflareChallengeCookiePolicy
 import me.domino.fa2.data.network.CookiePersistence
 import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.FaHtmlDataSource
@@ -16,7 +20,7 @@ import me.domino.fa2.data.network.challenge.ChallengeResolver
 import me.domino.fa2.data.network.endpoint.AttachmentDownloadEndpoint
 import me.domino.fa2.data.network.endpoint.AttachmentDownloadSource
 import me.domino.fa2.data.network.endpoint.BrowseEndpoint
-import me.domino.fa2.data.network.endpoint.FavoriteEndpoint
+import me.domino.fa2.data.network.endpoint.FavoritesEndpoint
 import me.domino.fa2.data.network.endpoint.FeedEndpoint
 import me.domino.fa2.data.network.endpoint.GalleryEndpoint
 import me.domino.fa2.data.network.endpoint.HomeEndpoint
@@ -44,25 +48,34 @@ fun networkModule(): Module = module {
 
   single<HttpClient> { HttpClient { expectSuccess = false } }
   single<TranslationPort> { KtorTranslationPort(get()) }
-  single<FaHtmlDataSource>(qualifier = named("rawHtmlDataSource")) {
+  single<FaHtmlDataSource>(qualifier = named(KOIN_QUALIFIER_RAW_HTML_DATA_SOURCE)) {
     FaHttpClient(client = get(), cookiesStorage = get(), userAgentStorage = get())
+  }
+  single<ChallengeCookiePolicy> { CloudflareChallengeCookiePolicy() }
+  single { ChallengeSessionStore() }
+  single {
+    ChallengeProbeVerifier(
+        rawHtmlDataSource = get(qualifier = named(KOIN_QUALIFIER_RAW_HTML_DATA_SOURCE))
+    )
   }
   single {
     CfChallengeCoordinator(
+        sessionStore = get(),
         cookiesStorage = get(),
         userAgentStorage = get(),
-        rawHtmlDataSource = get(qualifier = named("rawHtmlDataSource")),
+        cookiePolicy = get(),
+        probeVerifier = get(),
     )
   }
   single<CfChallengeController> { get<CfChallengeCoordinator>() }
   single<ChallengeResolver> { get<CfChallengeCoordinator>() }
   single<FaHtmlDataSource> {
     ChallengeAwareFaHtmlDataSource(
-        delegate = get(qualifier = named("rawHtmlDataSource")),
+        delegate = get(qualifier = named(KOIN_QUALIFIER_RAW_HTML_DATA_SOURCE)),
         challengeResolver = get(),
     )
   }
-  single<HttpClient>(qualifier = named("socialActionClient")) {
+  single<HttpClient>(qualifier = named(KOIN_QUALIFIER_SOCIAL_ACTION_CLIENT)) {
     get<HttpClient>().config { followRedirects = false }
   }
   single<AttachmentDownloadSource> {
@@ -82,12 +95,12 @@ fun networkModule(): Module = module {
   single { UserEndpoint(get()) }
   single { WatchlistEndpoint(get()) }
   single { GalleryEndpoint(get()) }
-  single { FavoriteEndpoint(get()) }
+  single { FavoritesEndpoint(get()) }
   single { JournalsEndpoint(get()) }
   single { JournalEndpoint(get()) }
   single {
     SocialActionEndpoint(
-        client = get(qualifier = named("socialActionClient")),
+        client = get(qualifier = named(KOIN_QUALIFIER_SOCIAL_ACTION_CLIENT)),
         cookiesStorage = get(),
         userAgentStorage = get(),
         challengeResolver = get(),

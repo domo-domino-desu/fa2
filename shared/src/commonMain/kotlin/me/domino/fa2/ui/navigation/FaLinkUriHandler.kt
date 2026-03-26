@@ -5,17 +5,19 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import kotlin.random.Random
 import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
-import me.domino.fa2.ui.pages.user.JournalDetailRouteScreen
-import me.domino.fa2.ui.pages.user.UserChildRoute
-import me.domino.fa2.ui.pages.user.UserRouteScreen
+import me.domino.fa2.ui.pages.user.journal.JournalDetailRouteScreen
+import me.domino.fa2.ui.pages.user.route.UserChildRoute
+import me.domino.fa2.ui.pages.user.route.UserRouteScreen
 import me.domino.fa2.util.FaUrls
-import me.domino.fa2.util.ParserUtils
+import me.domino.fa2.util.parseJournalId
+import me.domino.fa2.util.parseSubmissionSid
+import me.domino.fa2.util.toAbsoluteUrl
 
 /** FA 站内链接在应用内打开（push 新页面）； 其他链接透传给系统处理器。 */
 class FaLinkUriHandler(private val navigator: Navigator, private val fallback: UriHandler) :
     UriHandler {
   override fun openUri(uri: String) {
-    val normalized = ParserUtils.toAbsoluteUrl(FaUrls.home, uri)
+    val normalized = toAbsoluteUrl(FaUrls.home, uri)
     val target = resolveFaTarget(normalized)
     if (target == null) {
       fallback.openUri(normalized)
@@ -29,7 +31,7 @@ private fun resolveFaTarget(url: String): Screen? {
   if (!isFaUrl(url)) return null
   val path = extractPath(url)
 
-  val submissionSid = ParserUtils.parseSubmissionSid(url)
+  val submissionSid = parseSubmissionSid(url)
   if (submissionSid != null) {
     return SubmissionRouteScreen(
         initialSid = submissionSid,
@@ -38,7 +40,7 @@ private fun resolveFaTarget(url: String): Screen? {
     )
   }
 
-  val journalId = ParserUtils.parseJournalId(url)
+  val journalId = parseJournalId(url)
   if (journalId != null) {
     return JournalDetailRouteScreen(journalId = journalId, journalUrl = url)
   }
@@ -106,9 +108,9 @@ private fun extractUsername(path: String, prefix: String): String? =
 private fun extractInitialFolderUrl(path: String): String? =
     path
         .takeIf { value -> value.contains("/folder/") }
-        ?.let { relative -> ParserUtils.toAbsoluteUrl(FaUrls.home, relative) }
+        ?.let { relative -> toAbsoluteUrl(FaUrls.home, relative) }
 
 private fun extractInitialScrapsUrl(url: String, path: String): String =
-    url.trim().takeIf { it.isNotBlank() } ?: ParserUtils.toAbsoluteUrl(FaUrls.home, path)
+    url.trim().takeIf { it.isNotBlank() } ?: toAbsoluteUrl(FaUrls.home, path)
 
 private fun nextFaRouteNonce(): Int = Random.nextInt(1, Int.MAX_VALUE)

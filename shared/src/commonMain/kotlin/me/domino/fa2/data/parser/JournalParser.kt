@@ -5,7 +5,9 @@ import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.nodes.Element
 import me.domino.fa2.data.model.JournalDetail
 import me.domino.fa2.data.model.PageComment
-import me.domino.fa2.util.ParserUtils
+import me.domino.fa2.util.ensureUserPageAccessible
+import me.domino.fa2.util.parseJournalId
+import me.domino.fa2.util.toAbsoluteUrl
 
 /** Journal 详情解析器。 */
 class JournalParser {
@@ -14,7 +16,7 @@ class JournalParser {
   /** 解析单篇日志。 */
   fun parse(html: String, url: String): JournalDetail {
     val document = Ksoup.parse(html, url)
-    ParserUtils.ensureUserPageAccessible(document)
+    ensureUserPageAccessible(document)
 
     val bodyNode =
         document.selectFirst("div.journal-content")
@@ -52,14 +54,14 @@ class JournalParser {
         } ?: url
 
     val journalId =
-        ParserUtils.parseJournalId(journalUrl)
-            ?: ParserUtils.parseJournalId(url)
+        parseJournalId(journalUrl)
+            ?: parseJournalId(url)
             ?: throw IllegalStateException("Cannot parse journal id from url: $url")
 
     return JournalDetail(
         id = journalId,
         title = title,
-        journalUrl = ParserUtils.toAbsoluteUrl(url, journalUrl),
+        journalUrl = toAbsoluteUrl(url, journalUrl),
         timestampNatural = timestampNatural,
         timestampRaw = timestampRaw,
         rating = rating,
@@ -109,7 +111,7 @@ class JournalParser {
             ?.attr("src")
             ?.trim()
             ?.takeIf { it.isNotBlank() }
-            ?.let { raw -> ParserUtils.toAbsoluteUrl(pageUrl, raw) }
+            ?.let { raw -> toAbsoluteUrl(pageUrl, raw) }
             .orEmpty()
 
     val timestampNode = commentNode.selectFirst("comment-date .popup_date")

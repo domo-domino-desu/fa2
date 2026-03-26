@@ -2,6 +2,9 @@ package me.domino.fa2.ui.pages.user
 
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
+import me.domino.fa2.ui.pages.user.route.UserChildRoute
+import me.domino.fa2.ui.pages.user.route.UserChildRouteScreen
+import me.domino.fa2.ui.pages.user.route.UserRouteScreen
 
 class UserChildRouteScreenKeyTest {
   @Test

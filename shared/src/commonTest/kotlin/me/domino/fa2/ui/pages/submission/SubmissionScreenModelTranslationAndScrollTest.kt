@@ -21,11 +21,11 @@ import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
 import me.domino.fa2.util.FaUrls
-import me.domino.fa2.util.ParserUtils
 import me.domino.fa2.util.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.util.attachmenttext.AttachmentTextFormat
 import me.domino.fa2.util.attachmenttext.AttachmentTextParagraph
 import me.domino.fa2.util.attachmenttext.AttachmentTextProgress
+import me.domino.fa2.util.parseSubmissionSid
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SubmissionScreenModelTranslationAndScrollTest {
@@ -247,7 +247,7 @@ private class MutableSubmissionDetailSource(
 
   override suspend fun loadByUrl(url: String): PageState<Submission> {
     val sid =
-        ParserUtils.parseSubmissionSid(url)
+        parseSubmissionSid(url)
             ?: return PageState.Error(IllegalArgumentException("Invalid submission url: $url"))
     return loadBySid(sid)
   }

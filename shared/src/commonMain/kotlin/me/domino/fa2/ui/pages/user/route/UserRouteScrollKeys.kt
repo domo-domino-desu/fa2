@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.user
+package me.domino.fa2.ui.pages.user.route
 
 internal fun buildUserJournalsScrollKey(username: String): String =
     "user-scroll:${username.lowercase()}:journals"
