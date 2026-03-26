@@ -49,6 +49,10 @@ data class SubmissionTranslationVariantUiState(
     val hasTriggered: Boolean = false,
 )
 
+internal fun SubmissionTranslationVariantUiState.canReuseTranslationResult(): Boolean =
+    hasTriggered &&
+        blocks.none { block -> block.status == SubmissionDescriptionTranslationStatus.FAILURE }
+
 internal fun SubmissionTranslationUiState.variantOf(
     mode: SubmissionTranslationSourceMode
 ): SubmissionTranslationVariantUiState =

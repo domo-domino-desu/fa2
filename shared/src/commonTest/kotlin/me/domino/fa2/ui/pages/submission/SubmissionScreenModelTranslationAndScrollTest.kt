@@ -6,6 +6,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -289,6 +290,76 @@ class SubmissionScreenModelTranslationAndScrollTest {
         assertEquals(true, restoredRawTranslatedState.showTranslation)
         assertEquals("HELLO\nWORLD", restoredRawTranslatedState.blocks.single().translated)
         assertEquals(listOf("hello\nworld", "hello world"), translatedRequests)
+      }
+
+  @Test
+  fun retriesDescriptionTranslationAfterFailureIsDismissed() =
+      runTest(dispatcher.scheduler) {
+        val holder = SubmissionListHolder()
+        holder.replace(submissions = listOf(translationTestThumbnail(1)), nextPageUrl = null)
+        val detailSource =
+            MutableSubmissionDetailSource(
+                submissions =
+                    mutableMapOf(
+                        1 to translationTestSubmission(1, descriptionHtml = "<p>hello</p>")
+                    )
+            )
+        var requestCount = 0
+        val model =
+            SubmissionScreenModel(
+                initialSid = 1,
+                holder = holder,
+                feedSource = NoopFeedSourceForTranslationTest(),
+                submissionSource = detailSource,
+                translationService =
+                    createTestSubmissionTranslationService { request ->
+                      requestCount += 1
+                      if (requestCount == 1) {
+                        error("boom")
+                      }
+                      request.sourceText.uppercase()
+                    },
+            )
+
+        runCurrent()
+
+        model.translateDescriptionCurrent()
+        advanceUntilIdle()
+
+        val failedState =
+            ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
+                    as SubmissionDetailUiState.Success)
+                .descriptionTranslationState
+        assertEquals(true, failedState.showTranslation)
+        assertEquals(
+            SubmissionDescriptionTranslationStatus.FAILURE,
+            failedState.blocks.single().status,
+        )
+
+        model.translateDescriptionCurrent()
+        runCurrent()
+
+        val hiddenState =
+            ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
+                    as SubmissionDetailUiState.Success)
+                .descriptionTranslationState
+        assertEquals(false, hiddenState.showTranslation)
+
+        model.translateDescriptionCurrent()
+        advanceUntilIdle()
+
+        val retriedState =
+            ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
+                    as SubmissionDetailUiState.Success)
+                .descriptionTranslationState
+        assertEquals(2, requestCount)
+        assertEquals(true, retriedState.showTranslation)
+        assertEquals(
+            SubmissionDescriptionTranslationStatus.SUCCESS,
+            retriedState.blocks.single().status,
+        )
+        assertEquals("HELLO", retriedState.blocks.single().translated)
+        assertTrue(retriedState.hasTriggered)
       }
 
   @Test

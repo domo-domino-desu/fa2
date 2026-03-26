@@ -2,16 +2,17 @@ package me.domino.fa2.domain.translation
 
 internal class SubmissionTranslationResultAligner {
   fun parseChunkTranslation(translated: String, expectedBlockCount: Int): List<String> {
-    val bySeparator = translated.split(batchSeparator)
+    val normalizedTranslation = translated.replace(fullWidthPercentChar, asciiPercentChar)
+    val bySeparator = normalizedTranslation.split(batchSeparator)
     if (bySeparator.size == expectedBlockCount) return bySeparator
 
-    val byMarkerLine = splitBySeparatorLine(translated)
+    val byMarkerLine = splitBySeparatorLine(normalizedTranslation)
     if (byMarkerLine.size == expectedBlockCount) return byMarkerLine
 
-    val byLineBreak = translated.replace("\r\n", "\n").split('\n')
+    val byLineBreak = normalizedTranslation.replace("\r\n", "\n").split('\n')
     if (byLineBreak.size == expectedBlockCount) return byLineBreak
 
-    if (expectedBlockCount == 1) return listOf(translated)
+    if (expectedBlockCount == 1) return listOf(normalizedTranslation)
     if (byLineBreak.isEmpty()) return List(expectedBlockCount) { "" }
 
     if (byLineBreak.size < expectedBlockCount) {
@@ -30,6 +31,7 @@ internal class SubmissionTranslationResultAligner {
 
   fun normalizeTranslationText(text: String): String =
       text
+          .replace(fullWidthPercentChar, asciiPercentChar)
           .replace(invisibleCharsRegex, "")
           .replace("\u00A0", " ")
           .replace(Regex("[\\t\\x0B\\f\\r ]+"), " ")
@@ -64,6 +66,8 @@ internal class SubmissionTranslationResultAligner {
   companion object {
     internal const val batchSeparator: String = "\n\n%%\n\n"
     private const val separatorMarker = "%%"
+    private const val asciiPercentChar = '%'
+    private const val fullWidthPercentChar = '％'
     private val leadingSeparatorMarkerRegex = Regex("""^\s*%%(?:\s|$)+""")
     private val trailingSeparatorMarkerRegex = Regex("""(?:\s|^)%%\s*$""")
     private val invisibleCharsRegex = Regex("[\\u200B-\\u200D\\uFEFF]")

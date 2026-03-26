@@ -424,5 +424,5 @@ private fun translationActionTint(active: Boolean): Color =
     if (active) {
       MaterialTheme.colorScheme.primary
     } else {
-      MaterialTheme.colorScheme.primary.copy(alpha = 0.68f)
+      MaterialTheme.colorScheme.outline
     }

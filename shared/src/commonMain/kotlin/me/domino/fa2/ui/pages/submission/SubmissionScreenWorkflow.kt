@@ -655,7 +655,7 @@ internal class SubmissionScreenWorkflow(
     val sourceMode = translationState.sourceMode
     val activeVariant = translationState.variantOf(sourceMode)
     if (activeVariant.translating) return
-    if (activeVariant.hasTriggered) {
+    if (activeVariant.canReuseTranslationResult()) {
       detailBySid[sid] =
           currentState.withTranslationState(
               target = target,

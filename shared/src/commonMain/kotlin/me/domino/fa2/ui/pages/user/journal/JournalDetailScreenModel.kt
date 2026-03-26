@@ -12,6 +12,7 @@ import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.repository.JournalDetailRepository
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationSourceMode
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
+import me.domino.fa2.ui.pages.submission.canReuseTranslationResult
 import me.domino.fa2.ui.pages.submission.markPendingBlocksAsFailed
 import me.domino.fa2.ui.pages.submission.resolveTranslationState
 import me.domino.fa2.ui.pages.submission.toPendingState
@@ -126,7 +127,7 @@ class JournalDetailScreenModel(
     val sourceMode = translationState.sourceMode
     val activeVariant = translationState.variantOf(sourceMode)
     if (activeVariant.translating) return
-    if (activeVariant.hasTriggered) {
+    if (activeVariant.canReuseTranslationResult()) {
       mutableState.value =
           current.copy(bodyTranslationState = translationState.copy(showTranslation = true))
       return
