@@ -38,8 +38,12 @@ internal fun SubmissionDetailContent(
     onLoadAttachmentText: () -> Unit,
     /** 触发描述翻译。 */
     onTranslateDescription: () -> Unit,
+    /** 切换描述重新换行。 */
+    onWrapDescriptionText: () -> Unit,
     /** 触发附件翻译。 */
     onTranslateAttachment: () -> Unit,
+    /** 切换附件重新换行。 */
+    onWrapAttachmentText: () -> Unit,
     /** 请求 pager 容器重新获取焦点。 */
     requestPagerFocus: () -> Unit,
 ) {
@@ -72,10 +76,12 @@ internal fun SubmissionDetailContent(
           onRevealBlockedMedia = onRevealBlockedMedia,
           descriptionTranslationState = state.descriptionTranslationState,
           onTranslateDescription = onTranslateDescription,
+          onWrapDescriptionText = onWrapDescriptionText,
           attachmentTextState = state.attachmentTextState,
           attachmentTranslationState = state.attachmentTranslationState,
           onLoadAttachmentText = onLoadAttachmentText,
           onTranslateAttachment = onTranslateAttachment,
+          onWrapAttachmentText = onWrapAttachmentText,
           requestPagerFocus = requestPagerFocus,
       )
     }

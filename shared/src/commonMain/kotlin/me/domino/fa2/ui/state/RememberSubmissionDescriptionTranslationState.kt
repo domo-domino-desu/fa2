@@ -146,6 +146,7 @@ data class SubmissionDescriptionTranslationController(
 
 data class SubmissionDescriptionDisplayBlock(
     val originalHtml: String,
+    val originalText: String? = null,
     val translated: String?,
     val status: SubmissionDescriptionTranslationStatus,
 )

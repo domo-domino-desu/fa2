@@ -57,8 +57,12 @@ fun SubmissionPager(
     onLoadAttachmentText: () -> Unit,
     /** 触发描述翻译。 */
     onTranslateDescription: () -> Unit,
+    /** 切换描述重新换行。 */
+    onWrapDescriptionText: () -> Unit,
     /** 触发附件翻译。 */
     onTranslateAttachment: () -> Unit,
+    /** 切换附件重新换行。 */
+    onWrapAttachmentText: () -> Unit,
     /** 查询各 sid 当前保存的滚动偏移。 */
     scrollOffsetOfSid: (Int) -> Int,
     /** 请求 pager 容器重新获取焦点。 */
@@ -142,7 +146,9 @@ fun SubmissionPager(
                 onRevealBlockedMedia = { blockedMediaRevealState[item.id] = true },
                 onLoadAttachmentText = onLoadAttachmentText,
                 onTranslateDescription = onTranslateDescription,
+                onWrapDescriptionText = onWrapDescriptionText,
                 onTranslateAttachment = onTranslateAttachment,
+                onWrapAttachmentText = onWrapAttachmentText,
                 requestPagerFocus = requestPagerFocus,
             )
           }

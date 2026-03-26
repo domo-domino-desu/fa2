@@ -1,6 +1,5 @@
 package me.domino.fa2.ui.pages.user.journal
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,19 +36,16 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.ui.components.DetailSectionCardSurface
 import me.domino.fa2.ui.components.HtmlText
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.SkeletonBlock
-import me.domino.fa2.ui.components.TranslatableHtmlBlockContent
-import me.domino.fa2.ui.components.TranslateActionButton
+import me.domino.fa2.ui.components.TranslatableBlocksCard
 import me.domino.fa2.ui.layouts.JournalDetailRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.pages.user.route.UserRouteScreen
-import me.domino.fa2.ui.state.rememberSubmissionDescriptionTranslationState
 import me.domino.fa2.util.FaUrls
-import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 /** Journal 详情路由页面。 */
@@ -65,7 +61,6 @@ class JournalDetailRouteScreen(
     val navigator = LocalNavigator.currentOrThrow
     val screenModel =
         koinScreenModel<JournalDetailScreenModel> { parametersOf(journalId, journalUrl) }
-    val translationService = koinInject<SubmissionDescriptionTranslationService>()
     val listState: LazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val state by screenModel.state.collectAsState()
@@ -98,9 +93,10 @@ class JournalDetailRouteScreen(
 
         is JournalDetailUiState.Success -> {
           JournalDetailContent(
-              detail = snapshot.detail,
-              translationService = translationService,
+              state = snapshot,
               listState = listState,
+              onTranslate = screenModel::translateCurrent,
+              onToggleWrapText = screenModel::toggleWrapTextCurrent,
               onOpenAuthor = { author ->
                 val normalized = author.trim()
                 if (normalized.isNotBlank()) {
@@ -138,39 +134,28 @@ private fun JournalDetailSkeleton() {
 
 @Composable
 private fun JournalDetailErrorCard(message: String, onRetry: () -> Unit) {
-  Surface(
-      color = MaterialTheme.colorScheme.surface,
-      shape = RoundedCornerShape(14.dp),
-      border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+  DetailSectionCardSurface(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)
   ) {
-    Column(
-        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-      Text(text = "加载失败", style = MaterialTheme.typography.titleMedium)
-      Text(
-          text = message,
-          style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-      )
-      Button(onClick = onRetry) { Text("重试") }
-    }
+    Text(text = "加载失败", style = MaterialTheme.typography.titleMedium)
+    Text(
+        text = message,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Button(onClick = onRetry) { Text("重试") }
   }
 }
 
 @Composable
 private fun JournalDetailContent(
-    detail: me.domino.fa2.data.model.JournalDetail,
-    translationService: SubmissionDescriptionTranslationService,
+    state: JournalDetailUiState.Success,
     listState: LazyListState,
+    onTranslate: () -> Unit,
+    onToggleWrapText: () -> Unit,
     onOpenAuthor: (String) -> Unit,
 ) {
-  val translationController =
-      rememberSubmissionDescriptionTranslationState(
-          descriptionHtml = detail.bodyHtml,
-          service = translationService,
-      )
+  val detail = state.detail
 
   LazyColumn(
       state = listState,
@@ -178,52 +163,26 @@ private fun JournalDetailContent(
       verticalArrangement = Arrangement.spacedBy(10.dp),
   ) {
     item {
-      Surface(
-          color = MaterialTheme.colorScheme.surface,
-          shape = RoundedCornerShape(14.dp),
-          border =
-              BorderStroke(
-                  1.dp,
-                  MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
-              ),
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-      ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-          Row(
-              modifier = Modifier.fillMaxWidth(),
-              horizontalArrangement = Arrangement.SpaceBetween,
-              verticalAlignment = Alignment.Top,
-          ) {
+      TranslatableBlocksCard(
+          title = detail.title,
+          translationState = state.bodyTranslationState,
+          emptyText = "暂无正文",
+          onTranslate = onTranslate,
+          onToggleWrapText = onToggleWrapText,
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+          titleMaxLines = 2,
+          supportingText = {
             Text(
-                text = detail.title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.weight(1f).padding(end = 10.dp),
+                text = "${detail.timestampNatural} · ${detail.rating} · ${detail.commentCount} 评论",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            TranslateActionButton(
-                translating = translationController.translating,
-                label = "日志",
-                onTranslate = { translationController.translate() },
-            )
-          }
-          Text(
-              text = "${detail.timestampNatural} · ${detail.rating} · ${detail.commentCount} 评论",
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-          TranslatableHtmlBlockContent(
-              blocks = translationController.blocks,
-              emptyText = "暂无正文",
-              originalTextStyle = MaterialTheme.typography.bodyMedium,
-              originalTextColor = MaterialTheme.colorScheme.onSurface,
-              translatedTextStyle = MaterialTheme.typography.bodyMedium,
-              translatedTextColor = MaterialTheme.colorScheme.onSurface,
-          )
-        }
-      }
+          },
+          originalTextStyle = MaterialTheme.typography.bodyMedium,
+          originalTextColor = MaterialTheme.colorScheme.onSurface,
+          translatedTextStyle = MaterialTheme.typography.bodyMedium,
+          translatedTextColor = MaterialTheme.colorScheme.onSurface,
+      )
     }
     item {
       JournalCommentsCard(
@@ -241,36 +200,26 @@ private fun JournalCommentsCard(
     comments: List<me.domino.fa2.data.model.PageComment>,
     onOpenAuthor: (String) -> Unit,
 ) {
-  Surface(
-      color = MaterialTheme.colorScheme.surface,
-      shape = RoundedCornerShape(14.dp),
-      border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-  ) {
-    Column(
-        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
+  DetailSectionCardSurface(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+    Text(
+        text = "评论 · $commentCount",
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.SemiBold,
+    )
+    if (comments.isEmpty()) {
       Text(
-          text = "评论 · $commentCount",
-          style = MaterialTheme.typography.titleMedium,
-          fontWeight = FontWeight.SemiBold,
+          text = "暂无可展示评论",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-      if (comments.isEmpty()) {
-        Text(
-            text = "暂无可展示评论",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      } else {
-        comments.take(40).forEachIndexed { index, comment ->
-          JournalCommentItem(comment = comment, onOpenAuthor = onOpenAuthor)
-          if (index != minOf(comments.lastIndex, 39)) {
-            HorizontalDivider(
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            )
-          }
+    } else {
+      comments.take(40).forEachIndexed { index, comment ->
+        JournalCommentItem(comment = comment, onOpenAuthor = onOpenAuthor)
+        if (index != minOf(comments.lastIndex, 39)) {
+          HorizontalDivider(
+              thickness = 1.dp,
+              color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+          )
         }
       }
     }

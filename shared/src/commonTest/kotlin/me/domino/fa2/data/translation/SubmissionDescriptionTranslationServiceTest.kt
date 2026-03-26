@@ -149,8 +149,8 @@ class SubmissionDescriptionTranslationServiceTest {
   }
 
   @Test
-  fun stripsTrailingSeparatorMarkerFromTranslatedBlock() = runTest {
-    val service = createService(translationOutput = "译文内容\n%%")
+  fun stripsLeadingAndTrailingSeparatorMarkersFromTranslatedBlock() = runTest {
+    val service = createService(translationOutput = "%%\n译文内容\n%%")
     val results = mutableListOf<SubmissionDescriptionBlockResult>()
 
     service.translateBlocks(

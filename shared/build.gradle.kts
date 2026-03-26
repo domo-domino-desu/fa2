@@ -155,6 +155,7 @@ symbolCraft {
       "translate",
       "vertical_align_top",
       "visibility",
+      "wrap_text",
   ) {
     style(weight = 400, variant = SymbolVariant.OUTLINED, fill = SymbolFill.UNFILLED)
   }

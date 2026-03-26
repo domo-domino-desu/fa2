@@ -6,6 +6,7 @@ import me.domino.fa2.data.repository.BrowseRepository
 import me.domino.fa2.data.repository.FavoritesRepository
 import me.domino.fa2.data.repository.FeedRepository
 import me.domino.fa2.data.repository.GalleryRepository
+import me.domino.fa2.data.repository.JournalDetailRepository
 import me.domino.fa2.data.repository.JournalRepository
 import me.domino.fa2.data.repository.JournalsRepository
 import me.domino.fa2.data.repository.SearchRepository
@@ -18,6 +19,7 @@ import me.domino.fa2.data.settings.AppSettingsStorage
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
 import org.koin.core.module.Module
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 /** Repository 依赖模块。 */
@@ -37,6 +39,6 @@ fun repositoryModule(): Module = module {
   single { GalleryRepository(get()) }
   single { FavoritesRepository(get()) }
   single { JournalsRepository(get()) }
-  single { JournalRepository(get()) }
+  single { JournalRepository(get()) } bind JournalDetailRepository::class
   single { WatchlistRepository(get()) }
 }

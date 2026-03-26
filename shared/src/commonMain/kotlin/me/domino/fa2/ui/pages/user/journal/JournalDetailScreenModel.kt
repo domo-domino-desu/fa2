@@ -2,10 +2,22 @@ package me.domino.fa2.ui.pages.user.journal
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.JournalDetail
 import me.domino.fa2.data.model.PageState
-import me.domino.fa2.data.repository.JournalRepository
+import me.domino.fa2.data.repository.JournalDetailRepository
+import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.ui.pages.submission.SubmissionTranslationSourceMode
+import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
+import me.domino.fa2.ui.pages.submission.markPendingBlocksAsFailed
+import me.domino.fa2.ui.pages.submission.resolveTranslationState
+import me.domino.fa2.ui.pages.submission.toPendingState
+import me.domino.fa2.ui.pages.submission.variantOf
+import me.domino.fa2.ui.pages.submission.withBlockResult
+import me.domino.fa2.ui.pages.submission.withVariant
 import me.domino.fa2.util.logging.FaLog
 import me.domino.fa2.util.logging.summarizePageState
 
@@ -17,7 +29,9 @@ sealed interface JournalDetailUiState {
   /** 成功态。 */
   data class Success(
       /** 详情数据。 */
-      val detail: JournalDetail
+      val detail: JournalDetail,
+      /** 正文翻译状态。 */
+      val bodyTranslationState: SubmissionTranslationUiState,
   ) : JournalDetailUiState
 
   /** 错误态。 */
@@ -34,9 +48,12 @@ class JournalDetailScreenModel(
     /** Journal URL（兜底）。 */
     private val journalUrl: String?,
     /** Journal 仓储。 */
-    private val repository: JournalRepository,
+    private val repository: JournalDetailRepository,
+    /** 正文翻译编排服务。 */
+    private val translationService: SubmissionDescriptionTranslationService,
 ) : StateScreenModel<JournalDetailUiState>(JournalDetailUiState.Loading) {
   private val log = FaLog.withTag("JournalDetailScreenModel")
+  private var translationJob: Job? = null
 
   init {
     load()
@@ -45,6 +62,7 @@ class JournalDetailScreenModel(
   /** 加载日志详情。 */
   fun load() {
     log.i { "加载Journal详情 -> 开始(id=$journalId,url=${journalUrl ?: "-"})" }
+    val previousSuccess = state.value as? JournalDetailUiState.Success
     mutableState.value = JournalDetailUiState.Loading
     screenModelScope.launch {
       val result =
@@ -61,7 +79,8 @@ class JournalDetailScreenModel(
 
       mutableState.value =
           when (result) {
-            is PageState.Success -> JournalDetailUiState.Success(result.data)
+            is PageState.Success ->
+                buildSuccessState(detail = result.data, previous = previousSuccess)
             PageState.CfChallenge -> JournalDetailUiState.Error("需要 Cloudflare 验证")
             is PageState.MatureBlocked -> JournalDetailUiState.Error(result.reason)
             is PageState.Error ->
@@ -91,5 +110,134 @@ class JournalDetailScreenModel(
         }
       }
     }
+  }
+
+  fun translateCurrent() {
+    val current = state.value as? JournalDetailUiState.Success ?: return
+    val translationState = current.bodyTranslationState
+    if (translationState.showTranslation) {
+      if (translationState.translating) return
+      mutableState.value =
+          current.copy(bodyTranslationState = translationState.copy(showTranslation = false))
+      return
+    }
+    if (translationState.sourceBlocks.isEmpty()) return
+
+    val sourceMode = translationState.sourceMode
+    val activeVariant = translationState.variantOf(sourceMode)
+    if (activeVariant.translating) return
+    if (activeVariant.hasTriggered) {
+      mutableState.value =
+          current.copy(bodyTranslationState = translationState.copy(showTranslation = true))
+      return
+    }
+
+    translationJob?.cancel()
+    val pendingVariant = activeVariant.toPendingState(sourceMode = sourceMode)
+    val pendingState =
+        translationState
+            .withVariant(mode = sourceMode, variant = pendingVariant)
+            .copy(showTranslation = true)
+    mutableState.value = current.copy(bodyTranslationState = pendingState)
+
+    translationJob =
+        screenModelScope.launch {
+          try {
+            translationService.translateBlocks(pendingVariant.sourceBlocks) { index, result ->
+              val latest = state.value as? JournalDetailUiState.Success ?: return@translateBlocks
+              val latestTranslationState = latest.bodyTranslationState
+              if (latestTranslationState.sourceKey != pendingState.sourceKey) {
+                return@translateBlocks
+              }
+              mutableState.value =
+                  latest.copy(
+                      bodyTranslationState =
+                          latestTranslationState.withVariant(
+                              mode = sourceMode,
+                              variant =
+                                  latestTranslationState
+                                      .variantOf(sourceMode)
+                                      .withBlockResult(
+                                          index = index,
+                                          result = result,
+                                      ),
+                          ),
+                  )
+            }
+          } catch (cancelled: CancellationException) {
+            throw cancelled
+          } catch (_: Throwable) {
+            val latest = state.value as? JournalDetailUiState.Success ?: return@launch
+            val latestTranslationState = latest.bodyTranslationState
+            if (latestTranslationState.sourceKey == pendingState.sourceKey) {
+              mutableState.value =
+                  latest.copy(
+                      bodyTranslationState =
+                          latestTranslationState.withVariant(
+                              mode = sourceMode,
+                              variant =
+                                  latestTranslationState
+                                      .variantOf(sourceMode)
+                                      .markPendingBlocksAsFailed(),
+                          ),
+                  )
+            }
+          } finally {
+            val currentJob = currentCoroutineContext()[Job]
+            if (translationJob === currentJob) {
+              translationJob = null
+            }
+            val latest = state.value as? JournalDetailUiState.Success ?: return@launch
+            val latestTranslationState = latest.bodyTranslationState
+            if (latestTranslationState.sourceKey == pendingState.sourceKey) {
+              mutableState.value =
+                  latest.copy(
+                      bodyTranslationState =
+                          latestTranslationState.withVariant(
+                              mode = sourceMode,
+                              variant =
+                                  latestTranslationState
+                                      .variantOf(sourceMode)
+                                      .copy(translating = false),
+                          ),
+                  )
+            }
+          }
+        }
+  }
+
+  fun toggleWrapTextCurrent() {
+    val current = state.value as? JournalDetailUiState.Success ?: return
+    val translationState = current.bodyTranslationState
+    if (translationState.showTranslation || translationState.translating) return
+
+    val nextMode =
+        when (translationState.sourceMode) {
+          SubmissionTranslationSourceMode.RAW -> SubmissionTranslationSourceMode.WRAPPED
+          SubmissionTranslationSourceMode.WRAPPED -> SubmissionTranslationSourceMode.RAW
+        }
+    mutableState.value =
+        current.copy(bodyTranslationState = translationState.copy(sourceMode = nextMode))
+  }
+
+  private fun buildSuccessState(
+      detail: JournalDetail,
+      previous: JournalDetailUiState.Success?,
+  ): JournalDetailUiState.Success {
+    val bodyTranslationState =
+        resolveTranslationState(
+            sourceHtml = detail.bodyHtml,
+            sourceFileName = null,
+            previous = previous?.bodyTranslationState,
+            translationService = translationService,
+        )
+    if (previous?.bodyTranslationState?.sourceKey != bodyTranslationState.sourceKey) {
+      translationJob?.cancel()
+      translationJob = null
+    }
+    return JournalDetailUiState.Success(
+        detail = detail,
+        bodyTranslationState = bodyTranslationState,
+    )
   }
 }

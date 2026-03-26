@@ -10,14 +10,10 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.data.translation.SubmissionDescriptionBlock
-import me.domino.fa2.data.translation.SubmissionDescriptionBlockResult
 import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.state.PaginationSnapshot
 import me.domino.fa2.ui.state.PaginationStateMachine
-import me.domino.fa2.ui.state.SubmissionDescriptionDisplayBlock
-import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.attachmenttext.AttachmentTextExtractor
 import me.domino.fa2.util.attachmenttext.AttachmentTextProgress
@@ -125,8 +121,16 @@ internal class SubmissionScreenWorkflow(
     translateCurrent(target = SubmissionTranslationTarget.DESCRIPTION)
   }
 
+  fun toggleDescriptionWrapCurrent() {
+    toggleWrapCurrent(target = SubmissionTranslationTarget.DESCRIPTION)
+  }
+
   fun translateAttachmentCurrent() {
     translateCurrent(target = SubmissionTranslationTarget.ATTACHMENT)
+  }
+
+  fun toggleAttachmentWrapCurrent() {
+    toggleWrapCurrent(target = SubmissionTranslationTarget.ATTACHMENT)
   }
 
   fun loadAttachmentTextCurrent() {
@@ -636,19 +640,46 @@ internal class SubmissionScreenWorkflow(
     val sid = current.id
     val currentState = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return
     val translationState = currentState.translationStateOf(target) ?: return
-    if (translationState.translating || translationState.sourceBlocks.isEmpty()) return
+    if (translationState.showTranslation) {
+      if (translationState.translating) return
+      detailBySid[sid] =
+          currentState.withTranslationState(
+              target = target,
+              state = translationState.copy(showTranslation = false),
+          )
+      publishState()
+      return
+    }
+    if (translationState.sourceBlocks.isEmpty()) return
+
+    val sourceMode = translationState.sourceMode
+    val activeVariant = translationState.variantOf(sourceMode)
+    if (activeVariant.translating) return
+    if (activeVariant.hasTriggered) {
+      detailBySid[sid] =
+          currentState.withTranslationState(
+              target = target,
+              state = translationState.copy(showTranslation = true),
+          )
+      publishState()
+      return
+    }
 
     val jobKey = SubmissionTranslationJobKey(sid = sid, target = target)
     cancelTranslationJob(sid, target)
 
-    val pendingState = translationState.toPendingState()
+    val pendingVariant = activeVariant.toPendingState(sourceMode = sourceMode)
+    val pendingState =
+        translationState
+            .withVariant(mode = sourceMode, variant = pendingVariant)
+            .copy(showTranslation = true)
     detailBySid[sid] = currentState.withTranslationState(target = target, state = pendingState)
     publishState()
 
     val job =
         screenModelScope.launch {
           try {
-            translationService.translateBlocks(pendingState.sourceBlocks) { index, result ->
+            translationService.translateBlocks(pendingVariant.sourceBlocks) { index, result ->
               val latestState =
                   detailBySid[sid] as? SubmissionDetailUiState.Success ?: return@translateBlocks
               val latestTranslationState =
@@ -656,9 +687,15 @@ internal class SubmissionScreenWorkflow(
               if (latestTranslationState.sourceKey != pendingState.sourceKey) return@translateBlocks
 
               val updatedState =
-                  latestTranslationState.withBlockResult(
-                      index = index,
-                      result = result,
+                  latestTranslationState.withVariant(
+                      mode = sourceMode,
+                      variant =
+                          latestTranslationState
+                              .variantOf(sourceMode)
+                              .withBlockResult(
+                                  index = index,
+                                  result = result,
+                              ),
                   )
               detailBySid[sid] =
                   latestState.withTranslationState(target = target, state = updatedState)
@@ -673,7 +710,14 @@ internal class SubmissionScreenWorkflow(
               detailBySid[sid] =
                   latestState.withTranslationState(
                       target = target,
-                      state = latestTranslationState.markPendingBlocksAsFailed(),
+                      state =
+                          latestTranslationState.withVariant(
+                              mode = sourceMode,
+                              variant =
+                                  latestTranslationState
+                                      .variantOf(sourceMode)
+                                      .markPendingBlocksAsFailed(),
+                          ),
                   )
               publishState()
             }
@@ -689,13 +733,40 @@ internal class SubmissionScreenWorkflow(
               detailBySid[sid] =
                   latestState.withTranslationState(
                       target = target,
-                      state = latestTranslationState.copy(translating = false),
+                      state =
+                          latestTranslationState.withVariant(
+                              mode = sourceMode,
+                              variant =
+                                  latestTranslationState
+                                      .variantOf(sourceMode)
+                                      .copy(translating = false),
+                          ),
                   )
               publishState()
             }
           }
         }
     translationJobs[jobKey] = job
+  }
+
+  private fun toggleWrapCurrent(target: SubmissionTranslationTarget) {
+    val current = holder.current() ?: return
+    val sid = current.id
+    val currentState = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return
+    val translationState = currentState.translationStateOf(target) ?: return
+    if (translationState.showTranslation || translationState.translating) return
+
+    val nextMode =
+        when (translationState.sourceMode) {
+          SubmissionTranslationSourceMode.RAW -> SubmissionTranslationSourceMode.WRAPPED
+          SubmissionTranslationSourceMode.WRAPPED -> SubmissionTranslationSourceMode.RAW
+        }
+    detailBySid[sid] =
+        currentState.withTranslationState(
+            target = target,
+            state = translationState.copy(sourceMode = nextMode),
+        )
+    publishState()
   }
 
   private fun cancelTranslationJob(sid: Int, target: SubmissionTranslationTarget) {
@@ -915,26 +986,6 @@ private fun resolveAttachmentTextState(
   }
 }
 
-private fun resolveTranslationState(
-    sourceHtml: String,
-    sourceFileName: String?,
-    previous: SubmissionTranslationUiState?,
-    translationService: SubmissionDescriptionTranslationService,
-): SubmissionTranslationUiState {
-  val sourceBlocks = translationService.extractBlocks(sourceHtml)
-  val sourceKey =
-      buildTranslationSourceKey(sourceHtml = sourceHtml, sourceFileName = sourceFileName)
-  if (previous?.sourceKey == sourceKey) return previous
-
-  return SubmissionTranslationUiState(
-      sourceKey = sourceKey,
-      sourceHtml = sourceHtml,
-      sourceBlocks = sourceBlocks,
-      blocks = sourceBlocks.toIdleDisplayBlocks(),
-      sourceFileName = sourceFileName,
-  )
-}
-
 private fun resolveAttachmentTranslationState(
     attachmentTextState: SubmissionAttachmentTextUiState?,
     previous: SubmissionTranslationUiState?,
@@ -948,79 +999,6 @@ private fun resolveAttachmentTranslationState(
       translationService = translationService,
   )
 }
-
-private fun buildTranslationSourceKey(sourceHtml: String, sourceFileName: String?): String =
-    listOfNotNull(sourceFileName?.trim()?.takeIf { it.isNotBlank() }, sourceHtml)
-        .joinToString("\n@@\n")
-
-private fun List<SubmissionDescriptionBlock>.toIdleDisplayBlocks():
-    List<SubmissionDescriptionDisplayBlock> = map { block ->
-  SubmissionDescriptionDisplayBlock(
-      originalHtml = block.originalHtml,
-      translated = null,
-      status = SubmissionDescriptionTranslationStatus.IDLE,
-  )
-}
-
-private fun SubmissionTranslationUiState.toPendingState(): SubmissionTranslationUiState =
-    copy(
-        blocks =
-            sourceBlocks.map { block ->
-              SubmissionDescriptionDisplayBlock(
-                  originalHtml = block.originalHtml,
-                  translated = null,
-                  status = SubmissionDescriptionTranslationStatus.PENDING,
-              )
-            },
-        translating = true,
-        hasTriggered = true,
-    )
-
-private fun SubmissionTranslationUiState.withBlockResult(
-    index: Int,
-    result: SubmissionDescriptionBlockResult,
-): SubmissionTranslationUiState =
-    copy(
-        blocks =
-            blocks.mapIndexed { currentIndex, block ->
-              if (currentIndex != index) {
-                block
-              } else {
-                when (result) {
-                  is SubmissionDescriptionBlockResult.Success ->
-                      block.copy(
-                          translated = result.translatedText,
-                          status = SubmissionDescriptionTranslationStatus.SUCCESS,
-                      )
-
-                  SubmissionDescriptionBlockResult.EmptyResult ->
-                      block.copy(
-                          translated = null,
-                          status = SubmissionDescriptionTranslationStatus.EMPTY,
-                      )
-
-                  is SubmissionDescriptionBlockResult.Failure ->
-                      block.copy(
-                          translated = null,
-                          status = SubmissionDescriptionTranslationStatus.FAILURE,
-                      )
-                }
-              }
-            }
-    )
-
-private fun SubmissionTranslationUiState.markPendingBlocksAsFailed(): SubmissionTranslationUiState =
-    copy(
-        blocks =
-            blocks.map { block ->
-              if (block.status == SubmissionDescriptionTranslationStatus.PENDING) {
-                block.copy(status = SubmissionDescriptionTranslationStatus.FAILURE)
-              } else {
-                block
-              }
-            },
-        translating = false,
-    )
 
 private fun SubmissionDetailUiState.Success.translationStateOf(
     target: SubmissionTranslationTarget

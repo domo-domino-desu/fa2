@@ -38,7 +38,10 @@ internal class SubmissionTranslationResultAligner {
           .trim()
 
   fun sanitizeTranslatedBlockText(text: String): String =
-      normalizeTranslationText(text).replace(trailingSeparatorMarkerRegex, "").trimEnd()
+      normalizeTranslationText(text)
+          .replace(leadingSeparatorMarkerRegex, "")
+          .replace(trailingSeparatorMarkerRegex, "")
+          .trim()
 
   private fun splitBySeparatorLine(translated: String): List<String> {
     val normalized = translated.replace("\r\n", "\n")
@@ -61,6 +64,7 @@ internal class SubmissionTranslationResultAligner {
   companion object {
     internal const val batchSeparator: String = "\n\n%%\n\n"
     private const val separatorMarker = "%%"
+    private val leadingSeparatorMarkerRegex = Regex("""^\s*%%(?:\s|$)+""")
     private val trailingSeparatorMarkerRegex = Regex("""(?:\s|^)%%\s*$""")
     private val invisibleCharsRegex = Regex("[\\u200B-\\u200D\\uFEFF]")
   }

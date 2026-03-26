@@ -51,10 +51,12 @@ internal fun SubmissionDetailSuccessContent(
     onRevealBlockedMedia: () -> Unit,
     descriptionTranslationState: SubmissionTranslationUiState,
     onTranslateDescription: () -> Unit,
+    onWrapDescriptionText: () -> Unit,
     attachmentTextState: SubmissionAttachmentTextUiState?,
     attachmentTranslationState: SubmissionTranslationUiState?,
     onLoadAttachmentText: () -> Unit,
     onTranslateAttachment: () -> Unit,
+    onWrapAttachmentText: () -> Unit,
     requestPagerFocus: () -> Unit,
 ) {
   val taxonomyRepository = LocalTaxonomyRepository.current
@@ -233,6 +235,7 @@ internal fun SubmissionDetailSuccessContent(
     SubmissionDescriptionCard(
         translationState = descriptionTranslationState,
         onTranslate = onTranslateDescription,
+        onToggleWrapText = onWrapDescriptionText,
         requestPagerFocus = requestPagerFocus,
     )
     attachmentTextState?.let { state ->
@@ -241,6 +244,7 @@ internal fun SubmissionDetailSuccessContent(
           translationState = attachmentTranslationState,
           onLoadAttachmentText = onLoadAttachmentText,
           onTranslate = onTranslateAttachment,
+          onToggleWrapText = onWrapAttachmentText,
           requestPagerFocus = requestPagerFocus,
       )
     }

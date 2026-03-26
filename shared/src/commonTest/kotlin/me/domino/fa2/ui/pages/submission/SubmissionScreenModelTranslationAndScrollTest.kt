@@ -189,6 +189,109 @@ class SubmissionScreenModelTranslationAndScrollTest {
       }
 
   @Test
+  fun togglesDescriptionWrapAndCachesRawAndWrappedTranslationsSeparately() =
+      runTest(dispatcher.scheduler) {
+        val holder = SubmissionListHolder()
+        holder.replace(submissions = listOf(translationTestThumbnail(1)), nextPageUrl = null)
+        val detailSource =
+            MutableSubmissionDetailSource(
+                submissions =
+                    mutableMapOf(
+                        1 to translationTestSubmission(1, descriptionHtml = "<p>hello<br>world</p>")
+                    )
+            )
+        val translatedRequests = mutableListOf<String>()
+        val model =
+            SubmissionScreenModel(
+                initialSid = 1,
+                holder = holder,
+                feedSource = NoopFeedSourceForTranslationTest(),
+                submissionSource = detailSource,
+                translationService =
+                    createTestSubmissionTranslationService { request ->
+                      translatedRequests += request.sourceText
+                      request.sourceText.uppercase()
+                    },
+            )
+
+        runCurrent()
+
+        val initialState =
+            ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
+                    as SubmissionDetailUiState.Success)
+                .descriptionTranslationState
+        assertEquals(SubmissionTranslationSourceMode.RAW, initialState.sourceMode)
+        assertEquals(false, initialState.showTranslation)
+        assertEquals("hello\nworld", initialState.sourceBlocks.single().sourceText)
+
+        model.translateDescriptionCurrent()
+        advanceUntilIdle()
+
+        val rawTranslatedState =
+            ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
+                    as SubmissionDetailUiState.Success)
+                .descriptionTranslationState
+        assertEquals(true, rawTranslatedState.showTranslation)
+        assertEquals(false, rawTranslatedState.isWrapped)
+        assertEquals(
+            SubmissionDescriptionTranslationStatus.SUCCESS,
+            rawTranslatedState.blocks.single().status,
+        )
+        assertEquals("HELLO\nWORLD", rawTranslatedState.blocks.single().translated)
+        assertEquals(listOf("hello\nworld"), translatedRequests)
+
+        model.translateDescriptionCurrent()
+        runCurrent()
+        model.toggleDescriptionWrapCurrent()
+        runCurrent()
+
+        val wrappedIdleState =
+            ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
+                    as SubmissionDetailUiState.Success)
+                .descriptionTranslationState
+        assertEquals(SubmissionTranslationSourceMode.WRAPPED, wrappedIdleState.sourceMode)
+        assertEquals(false, wrappedIdleState.showTranslation)
+        assertEquals("hello world", wrappedIdleState.sourceBlocks.single().sourceText)
+        assertEquals("hello world", wrappedIdleState.blocks.single().originalText)
+        assertEquals(
+            SubmissionDescriptionTranslationStatus.IDLE,
+            wrappedIdleState.blocks.single().status,
+        )
+
+        model.translateDescriptionCurrent()
+        advanceUntilIdle()
+
+        val wrappedTranslatedState =
+            ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
+                    as SubmissionDetailUiState.Success)
+                .descriptionTranslationState
+        assertEquals(true, wrappedTranslatedState.showTranslation)
+        assertEquals(true, wrappedTranslatedState.isWrapped)
+        assertEquals(
+            SubmissionDescriptionTranslationStatus.SUCCESS,
+            wrappedTranslatedState.blocks.single().status,
+        )
+        assertEquals("HELLO WORLD", wrappedTranslatedState.blocks.single().translated)
+        assertEquals(listOf("hello\nworld", "hello world"), translatedRequests)
+
+        model.translateDescriptionCurrent()
+        runCurrent()
+        model.toggleDescriptionWrapCurrent()
+        runCurrent()
+        model.translateDescriptionCurrent()
+        advanceUntilIdle()
+
+        val restoredRawTranslatedState =
+            ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
+                    as SubmissionDetailUiState.Success)
+                .descriptionTranslationState
+        assertEquals(SubmissionTranslationSourceMode.RAW, restoredRawTranslatedState.sourceMode)
+        assertEquals(true, restoredRawTranslatedState.showTranslation)
+        assertEquals("HELLO\nWORLD", restoredRawTranslatedState.blocks.single().translated)
+        assertEquals(listOf("hello\nworld", "hello world"), translatedRequests)
+      }
+
+  @Test
   fun remembersScrollOffsetsAndAdvancesScrollToTopVersionForCurrentSid() =
       runTest(dispatcher.scheduler) {
         val holder = SubmissionListHolder()

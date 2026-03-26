@@ -40,6 +40,7 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.TagW400Outlin
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.TranslateW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VerticalAlignTopW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VisibilityW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.WrapTextW400Outlined
 
 object FaMaterialSymbols {
   object Filled {
@@ -82,6 +83,7 @@ object FaMaterialSymbols {
     val Translate: ImageVector = GeneratedIcons.TranslateW400Outlined
     val VerticalAlignTop: ImageVector = GeneratedIcons.VerticalAlignTopW400Outlined
     val Visibility: ImageVector = GeneratedIcons.VisibilityW400Outlined
+    val WrapText: ImageVector = GeneratedIcons.WrapTextW400Outlined
   }
 
   object AutoMirrored {

@@ -74,7 +74,11 @@ class SubmissionScreenModel(
 
   fun translateDescriptionCurrent() = workflow.translateDescriptionCurrent()
 
+  fun toggleDescriptionWrapCurrent() = workflow.toggleDescriptionWrapCurrent()
+
   fun translateAttachmentCurrent() = workflow.translateAttachmentCurrent()
+
+  fun toggleAttachmentWrapCurrent() = workflow.toggleAttachmentWrapCurrent()
 
   fun loadAttachmentTextCurrent() = workflow.loadAttachmentTextCurrent()
 

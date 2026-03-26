@@ -66,7 +66,12 @@ fun screenModelModule(): Module = module {
   }
   factory { (username: String) -> UserJournalsScreenModel(username = username, repository = get()) }
   factory { (journalId: Int, journalUrl: String?) ->
-    JournalDetailScreenModel(journalId = journalId, journalUrl = journalUrl, repository = get())
+    JournalDetailScreenModel(
+        journalId = journalId,
+        journalUrl = journalUrl,
+        repository = get(),
+        translationService = get(),
+    )
   }
   factory { (username: String, category: WatchlistCategory, initialUrl: String?) ->
     UserWatchlistScreenModel(
