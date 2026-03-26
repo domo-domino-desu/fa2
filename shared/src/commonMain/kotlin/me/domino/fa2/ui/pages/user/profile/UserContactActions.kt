@@ -76,7 +76,7 @@ private fun UserContactIconAction(contact: UserContact) {
       tint = MaterialTheme.colorScheme.onSurfaceVariant,
       modifier =
           Modifier.size(14.dp)
-              .offset(y = 2.dp)
+              .offset(y = 1.dp)
               .combinedClickable(
                   onClick = {
                     activateUserContact(
