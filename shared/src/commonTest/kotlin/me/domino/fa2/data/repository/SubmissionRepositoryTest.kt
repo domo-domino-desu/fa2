@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
+import me.domino.fa2.application.attachmenttext.AttachmentTextService
 import me.domino.fa2.data.datasource.FavoritesDataSource
 import me.domino.fa2.data.datasource.GalleryDataSource
 import me.domino.fa2.data.datasource.SubmissionDataSource
@@ -21,10 +22,10 @@ import me.domino.fa2.data.parser.GalleryParser
 import me.domino.fa2.data.parser.SubmissionParser
 import me.domino.fa2.data.store.GalleryStore
 import me.domino.fa2.data.store.SubmissionStore
+import me.domino.fa2.domain.attachmenttext.AttachmentTextFormat
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.util.FaUrls
-import me.domino.fa2.util.attachmenttext.AttachmentTextFormat
 
 /** SubmissionRepository 详情链路测试。 */
 class SubmissionRepositoryTest {
@@ -149,7 +150,13 @@ class SubmissionRepositoryTest {
         submissionStore = store,
         socialActionEndpoint = SocialActionEndpoint(source),
         galleryStore = galleryStore,
-        attachmentDownloadSource = attachmentDownloadSource,
+        attachmentTextService =
+            AttachmentTextService(
+                attachmentDownloadSource
+                    ?: FakeAttachmentDownloadSource(
+                        AttachmentDownloadResult.Failed("unused in this test")
+                    )
+            ),
     )
   }
 }

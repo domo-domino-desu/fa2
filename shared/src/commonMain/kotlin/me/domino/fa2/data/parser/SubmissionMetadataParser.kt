@@ -2,7 +2,7 @@ package me.domino.fa2.data.parser
 
 import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.nodes.Element
-import me.domino.fa2.util.attachmenttext.deriveAttachmentFileName
+import me.domino.fa2.domain.attachmenttext.deriveAttachmentFileName
 import me.domino.fa2.util.toAbsoluteUrl
 
 internal class SubmissionMetadataParser {

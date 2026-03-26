@@ -8,9 +8,9 @@ import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.repository.SearchRepository
-import me.domino.fa2.data.search.SearchUiLabelsRepository
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.ui.navigation.SubmissionListHolder
+import me.domino.fa2.ui.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.state.PaginationStateMachine
 import me.domino.fa2.util.logging.summarizePageState
 

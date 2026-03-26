@@ -1,6 +1,6 @@
 package me.domino.fa2.ui.pages.submission
 
-import me.domino.fa2.data.translation.SubmissionDescriptionBlock
+import me.domino.fa2.domain.translation.SubmissionDescriptionBlock
 import me.domino.fa2.ui.state.SubmissionDescriptionDisplayBlock
 import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
 

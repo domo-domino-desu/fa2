@@ -5,12 +5,12 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
+import me.domino.fa2.application.challenge.port.CfChallengeSignal
+import me.domino.fa2.application.challenge.port.ChallengeResolver
 import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.HtmlResponseResult
 import me.domino.fa2.data.network.UserAgentStorage
-import me.domino.fa2.data.network.challenge.CfChallengeSignal
-import me.domino.fa2.data.network.challenge.ChallengeResolver
-import me.domino.fa2.util.attachmenttext.extensionIn
+import me.domino.fa2.domain.attachmenttext.extensionIn
 
 interface AttachmentDownloadSource {
   suspend fun fetch(url: String, fileName: String): AttachmentDownloadResult

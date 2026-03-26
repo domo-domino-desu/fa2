@@ -17,9 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import me.domino.fa2.app.challenge.CfChallengeController
-import me.domino.fa2.app.challenge.CfChallengeStatus
-import me.domino.fa2.app.challenge.CfChallengeUiState
+import me.domino.fa2.application.challenge.CfChallengeController
+import me.domino.fa2.application.challenge.CfChallengeStatus
+import me.domino.fa2.application.challenge.CfChallengeUiState
 import me.domino.fa2.ui.pages.auth.SessionWebView
 import me.domino.fa2.ui.pages.auth.rememberSessionWebViewAdapter
 

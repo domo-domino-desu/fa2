@@ -1,8 +1,8 @@
 package me.domino.fa2.ui.pages.submission
 
-import me.domino.fa2.data.translation.SubmissionDescriptionBlock
-import me.domino.fa2.data.translation.SubmissionDescriptionBlockResult
-import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.domain.translation.SubmissionDescriptionBlock
+import me.domino.fa2.domain.translation.SubmissionDescriptionBlockResult
 import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
 
 internal fun resolveTranslationState(

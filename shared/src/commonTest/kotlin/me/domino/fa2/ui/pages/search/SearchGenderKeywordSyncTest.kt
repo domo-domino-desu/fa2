@@ -4,10 +4,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.search.SearchUiLabelsRepository
-import me.domino.fa2.data.search.SearchUiOptionKey
-import me.domino.fa2.data.search.SearchUiTextKey
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
+import me.domino.fa2.ui.search.SearchUiLabelsRepository
+import me.domino.fa2.ui.search.SearchUiOptionKey
+import me.domino.fa2.ui.search.SearchUiTextKey
 
 /** Search gender 与 query 同步测试。 */
 class SearchGenderKeywordSyncTest {

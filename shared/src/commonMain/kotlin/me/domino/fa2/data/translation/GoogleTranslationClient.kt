@@ -6,6 +6,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
+import me.domino.fa2.domain.translation.TranslationRequest
 
 internal class GoogleTranslationClient(
     private val transport: TranslationHttpTransport,

@@ -29,7 +29,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
 import me.domino.fa2.ui.state.SubmissionDescriptionDisplayBlock

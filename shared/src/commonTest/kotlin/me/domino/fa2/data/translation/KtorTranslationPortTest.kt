@@ -5,6 +5,7 @@ import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.settings.OpenAiTranslationConfig
 import me.domino.fa2.data.settings.TranslationProvider
+import me.domino.fa2.domain.translation.TranslationRequest
 
 class KtorTranslationPortTest {
   @Test

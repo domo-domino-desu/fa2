@@ -24,9 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.search.SearchUiLabelsRepository
-import me.domino.fa2.data.search.SearchUiOptionKey
-import me.domino.fa2.data.search.SearchUiTextKey
 import me.domino.fa2.ui.components.FilterDialogTriggerField
 import me.domino.fa2.ui.components.FilterDropdownField
 import me.domino.fa2.ui.components.FilterOption
@@ -45,6 +42,9 @@ import me.domino.fa2.ui.pages.search.SearchScreenActions
 import me.domino.fa2.ui.pages.search.orderByOptions
 import me.domino.fa2.ui.pages.search.orderDirectionOptions
 import me.domino.fa2.ui.pages.search.rangeOptions
+import me.domino.fa2.ui.search.SearchUiLabelsRepository
+import me.domino.fa2.ui.search.SearchUiOptionKey
+import me.domino.fa2.ui.search.SearchUiTextKey
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)

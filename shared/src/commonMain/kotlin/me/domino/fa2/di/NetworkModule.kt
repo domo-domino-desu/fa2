@@ -2,12 +2,13 @@ package me.domino.fa2.di
 
 import eu.anifantakis.lib.ksafe.KSafe
 import io.ktor.client.HttpClient
-import me.domino.fa2.app.challenge.CfChallengeController
-import me.domino.fa2.app.challenge.CfChallengeCoordinator
-import me.domino.fa2.app.challenge.ChallengeCookiePolicy
-import me.domino.fa2.app.challenge.ChallengeProbeVerifier
-import me.domino.fa2.app.challenge.ChallengeSessionStore
-import me.domino.fa2.app.challenge.CloudflareChallengeCookiePolicy
+import me.domino.fa2.application.challenge.CfChallengeController
+import me.domino.fa2.application.challenge.CfChallengeCoordinator
+import me.domino.fa2.application.challenge.ChallengeCookiePolicy
+import me.domino.fa2.application.challenge.ChallengeProbeVerifier
+import me.domino.fa2.application.challenge.ChallengeSessionStore
+import me.domino.fa2.application.challenge.CloudflareChallengeCookiePolicy
+import me.domino.fa2.application.challenge.port.ChallengeResolver
 import me.domino.fa2.data.network.CookiePersistence
 import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.FaHtmlDataSource
@@ -16,7 +17,6 @@ import me.domino.fa2.data.network.ImageProgressTracker
 import me.domino.fa2.data.network.KSafeCookiePersistence
 import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.data.network.challenge.ChallengeAwareFaHtmlDataSource
-import me.domino.fa2.data.network.challenge.ChallengeResolver
 import me.domino.fa2.data.network.endpoint.AttachmentDownloadEndpoint
 import me.domino.fa2.data.network.endpoint.AttachmentDownloadSource
 import me.domino.fa2.data.network.endpoint.BrowseEndpoint
@@ -32,7 +32,7 @@ import me.domino.fa2.data.network.endpoint.SubmissionEndpoint
 import me.domino.fa2.data.network.endpoint.UserEndpoint
 import me.domino.fa2.data.network.endpoint.WatchlistEndpoint
 import me.domino.fa2.data.translation.KtorTranslationPort
-import me.domino.fa2.data.translation.TranslationPort
+import me.domino.fa2.domain.translation.TranslationPort
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -72,7 +72,7 @@ fun networkModule(): Module = module {
   single<FaHtmlDataSource> {
     ChallengeAwareFaHtmlDataSource(
         delegate = get(qualifier = named(KOIN_QUALIFIER_RAW_HTML_DATA_SOURCE)),
-        challengeResolver = get(),
+        challengeResolver = get<ChallengeResolver>(),
     )
   }
   single<HttpClient>(qualifier = named(KOIN_QUALIFIER_SOCIAL_ACTION_CLIENT)) {
@@ -83,7 +83,7 @@ fun networkModule(): Module = module {
         client = get(),
         cookiesStorage = get(),
         userAgentStorage = get(),
-        challengeResolver = get(),
+        challengeResolver = get<ChallengeResolver>(),
     )
   }
 
@@ -103,7 +103,7 @@ fun networkModule(): Module = module {
         client = get(qualifier = named(KOIN_QUALIFIER_SOCIAL_ACTION_CLIENT)),
         cookiesStorage = get(),
         userAgentStorage = get(),
-        challengeResolver = get(),
+        challengeResolver = get<ChallengeResolver>(),
     )
   }
 }

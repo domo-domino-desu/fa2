@@ -16,10 +16,10 @@ import me.domino.fa2.data.model.FeedPage
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
+import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.util.FaUrls
-import me.domino.fa2.util.attachmenttext.AttachmentTextDocument
-import me.domino.fa2.util.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.util.parseSubmissionSid
 
 @OptIn(ExperimentalCoroutinesApi::class)

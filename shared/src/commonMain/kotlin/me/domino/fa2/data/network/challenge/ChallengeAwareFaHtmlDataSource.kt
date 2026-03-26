@@ -1,5 +1,7 @@
 package me.domino.fa2.data.network.challenge
 
+import me.domino.fa2.application.challenge.port.CfChallengeSignal
+import me.domino.fa2.application.challenge.port.ChallengeResolver
 import me.domino.fa2.data.network.FaHtmlDataSource
 import me.domino.fa2.data.network.HtmlResponseResult
 import me.domino.fa2.util.logging.FaLog

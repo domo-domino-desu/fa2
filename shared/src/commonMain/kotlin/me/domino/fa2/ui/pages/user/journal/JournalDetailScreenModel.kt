@@ -6,10 +6,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
+import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.data.model.JournalDetail
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.repository.JournalDetailRepository
-import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationSourceMode
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
 import me.domino.fa2.ui.pages.submission.markPendingBlocksAsFailed

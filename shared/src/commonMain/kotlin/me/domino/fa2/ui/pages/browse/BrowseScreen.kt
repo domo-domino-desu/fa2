@@ -33,9 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.data.search.SearchUiLabelsRepository
-import me.domino.fa2.data.search.SearchUiOptionKey
-import me.domino.fa2.data.search.SearchUiTextKey
 import me.domino.fa2.ui.components.FilterDialogTriggerField
 import me.domino.fa2.ui.components.FilterDropdownField
 import me.domino.fa2.ui.components.FilterOption
@@ -54,6 +51,9 @@ import me.domino.fa2.ui.host.LocalTaxonomyCatalog
 import me.domino.fa2.ui.host.LocalTaxonomyRepository
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.layouts.BrowseFilterOverlayTopBar
+import me.domino.fa2.ui.search.SearchUiLabelsRepository
+import me.domino.fa2.ui.search.SearchUiOptionKey
+import me.domino.fa2.ui.search.SearchUiTextKey
 
 @Composable
 fun BrowseScreen(

@@ -1,7 +1,7 @@
 package me.domino.fa2.data.network.endpoint
 
-import me.domino.fa2.data.network.challenge.CfChallengeSignal
-import me.domino.fa2.data.network.challenge.ChallengeResolver
+import me.domino.fa2.application.challenge.port.CfChallengeSignal
+import me.domino.fa2.application.challenge.port.ChallengeResolver
 
 internal sealed interface SocialActionChallengeDecision {
   data object Retry : SocialActionChallengeDecision

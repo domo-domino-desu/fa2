@@ -13,6 +13,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import me.domino.fa2.data.settings.OpenAiTranslationConfig
+import me.domino.fa2.domain.translation.TranslationRequest
 
 internal class OpenAiCompatibleTranslationClient(
     private val transport: TranslationHttpTransport,

@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.data.model.PageState
-import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.util.logging.FaLog
 

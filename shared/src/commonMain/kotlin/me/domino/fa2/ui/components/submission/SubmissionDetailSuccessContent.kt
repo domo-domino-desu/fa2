@@ -22,13 +22,13 @@ import androidx.compose.ui.unit.dp
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
+import me.domino.fa2.domain.attachmenttext.attachmentFileExtension
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.host.LocalTaxonomyCatalog
 import me.domino.fa2.ui.host.LocalTaxonomyRepository
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.SubmissionAttachmentTextUiState
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
-import me.domino.fa2.util.attachmenttext.attachmentFileExtension
 import me.domino.fa2.util.deriveSubmissionThumbnailUrlFromFullImage
 import me.domino.fa2.util.sanitizeDetailAspectRatio
 

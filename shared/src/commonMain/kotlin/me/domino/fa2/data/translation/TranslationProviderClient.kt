@@ -1,5 +1,7 @@
 package me.domino.fa2.data.translation
 
+import me.domino.fa2.domain.translation.TranslationRequest
+
 internal interface TranslationProviderClient {
   suspend fun translate(request: TranslationRequest): String
 }

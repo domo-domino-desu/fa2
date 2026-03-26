@@ -2,12 +2,12 @@ package me.domino.fa2.ui.pages.submission
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import kotlin.random.Random
+import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.data.local.KeyValueStorage
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.settings.AppSettingsStorage
-import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
-import me.domino.fa2.data.translation.TranslationPort
-import me.domino.fa2.data.translation.TranslationRequest
+import me.domino.fa2.domain.translation.TranslationPort
+import me.domino.fa2.domain.translation.TranslationRequest
 import okio.FileSystem
 import okio.Path.Companion.toPath
 

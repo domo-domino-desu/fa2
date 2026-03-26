@@ -11,9 +11,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.translation.SubmissionDescriptionBlock
-import me.domino.fa2.data.translation.SubmissionDescriptionBlockResult
-import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.domain.translation.SubmissionDescriptionBlock
+import me.domino.fa2.domain.translation.SubmissionDescriptionBlockResult
 
 /** 投稿描述翻译 UI 状态控制器。 */
 @Composable

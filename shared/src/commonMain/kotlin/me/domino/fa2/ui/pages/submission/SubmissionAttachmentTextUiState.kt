@@ -1,7 +1,7 @@
 package me.domino.fa2.ui.pages.submission
 
-import me.domino.fa2.util.attachmenttext.AttachmentTextDocument
-import me.domino.fa2.util.attachmenttext.AttachmentTextProgress
+import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
+import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 
 sealed interface SubmissionAttachmentTextUiState {
   data class Idle(val fileName: String) : SubmissionAttachmentTextUiState

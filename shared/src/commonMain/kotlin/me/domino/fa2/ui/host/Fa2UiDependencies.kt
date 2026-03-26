@@ -6,12 +6,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
-import me.domino.fa2.data.search.SearchUiLabelsCatalog
-import me.domino.fa2.data.search.SearchUiLabelsRepository
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.taxonomy.FaTaxonomyCatalog
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
+import me.domino.fa2.ui.search.SearchUiLabelsCatalog
+import me.domino.fa2.ui.search.SearchUiLabelsRepository
 import org.koin.compose.koinInject
 
 internal val LocalAppSettings = staticCompositionLocalOf { AppSettings() }

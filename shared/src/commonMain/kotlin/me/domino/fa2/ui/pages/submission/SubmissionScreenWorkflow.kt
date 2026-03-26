@@ -7,17 +7,17 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import me.domino.fa2.application.attachmenttext.AttachmentTextExtractor
+import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.data.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
+import me.domino.fa2.domain.attachmenttext.deriveAttachmentFileName
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.state.PaginationSnapshot
 import me.domino.fa2.ui.state.PaginationStateMachine
 import me.domino.fa2.util.FaUrls
-import me.domino.fa2.util.attachmenttext.AttachmentTextExtractor
-import me.domino.fa2.util.attachmenttext.AttachmentTextProgress
-import me.domino.fa2.util.attachmenttext.deriveAttachmentFileName
 import me.domino.fa2.util.logging.summarizePageState
 
 private const val pagerAppendThreshold = 2

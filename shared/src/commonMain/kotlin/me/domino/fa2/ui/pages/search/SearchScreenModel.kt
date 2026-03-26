@@ -10,12 +10,12 @@ import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.repository.SearchRepository
-import me.domino.fa2.data.search.SearchUiLabelsRepository
-import me.domino.fa2.data.search.SearchUiOptionKey
-import me.domino.fa2.data.search.SearchUiTextKey
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.ui.components.FilterOption
 import me.domino.fa2.ui.navigation.SubmissionListHolder
+import me.domino.fa2.ui.search.SearchUiLabelsRepository
+import me.domino.fa2.ui.search.SearchUiOptionKey
+import me.domino.fa2.ui.search.SearchUiTextKey
 import me.domino.fa2.ui.state.PaginationSnapshot
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.logging.FaLog

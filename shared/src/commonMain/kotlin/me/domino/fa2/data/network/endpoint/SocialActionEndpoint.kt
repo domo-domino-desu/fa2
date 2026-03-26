@@ -1,10 +1,10 @@
 package me.domino.fa2.data.network.endpoint
 
 import io.ktor.client.HttpClient
+import me.domino.fa2.application.challenge.port.ChallengeResolver
 import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.FaHtmlDataSource
 import me.domino.fa2.data.network.UserAgentStorage
-import me.domino.fa2.data.network.challenge.ChallengeResolver
 
 /** 社交动作端点（Fav/Watch 等）。 */
 class SocialActionEndpoint
