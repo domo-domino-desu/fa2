@@ -165,17 +165,17 @@ internal fun UserHeaderCard(
                     verticalArrangement = Arrangement.spacedBy(5.dp),
                 ) {
                   UserHeaderStatPill(
+                      text = stringResource(Res.string.shouts_count, header.shoutCount.toString()),
+                      onClick = onOpenShouts,
+                      enabled = header.shoutCount > 0,
+                  )
+                  UserHeaderStatPill(
                       text =
                           stringResource(
                               Res.string.followers_count,
                               (header.watchedByCount ?: "--").toString(),
                           ),
                       onClick = onOpenWatchedBy,
-                  )
-                  UserHeaderStatPill(
-                      text = stringResource(Res.string.shouts_count, header.shoutCount.toString()),
-                      onClick = onOpenShouts,
-                      enabled = header.shoutCount > 0,
                   )
                   UserHeaderStatPill(
                       text =
