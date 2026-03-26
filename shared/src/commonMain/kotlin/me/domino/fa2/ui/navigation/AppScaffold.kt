@@ -21,7 +21,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.icons.FaMaterialSymbols
+import org.jetbrains.compose.resources.stringResource
 
 /** 顶层导航目标。 */
 enum class TopLevelDestination {
@@ -70,6 +72,7 @@ fun AppScaffold(
 ) {
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
     val useRail = navigationShellTypeFor(maxWidth) == NavigationShellType.SideRail
+    val destinations = topLevelDestinations()
 
     if (useRail) {
       Row(modifier = Modifier.fillMaxSize()) {
@@ -77,7 +80,7 @@ fun AppScaffold(
             modifier = Modifier.fillMaxHeight(),
             containerColor = MaterialTheme.colorScheme.surface,
         ) {
-          TOP_LEVEL_DESTINATIONS.forEach { destination ->
+          destinations.forEach { destination ->
             val selected = currentTopLevelDestination == destination.destination
             NavigationRailItem(
                 selected = selected,
@@ -96,7 +99,7 @@ fun AppScaffold(
           containerColor = MaterialTheme.colorScheme.surface,
           bottomBar = {
             NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-              TOP_LEVEL_DESTINATIONS.forEach { destination ->
+              destinations.forEach { destination ->
                 val selected = currentTopLevelDestination == destination.destination
                 NavigationBarItem(
                     selected = selected,
@@ -130,32 +133,33 @@ private data class TopLevelDestinationItem(
 )
 
 /** 顶层导航条目集合。 */
-private val TOP_LEVEL_DESTINATIONS: List<TopLevelDestinationItem> =
+@Composable
+private fun topLevelDestinations(): List<TopLevelDestinationItem> =
     listOf(
         TopLevelDestinationItem(
             destination = TopLevelDestination.FEED,
-            label = "动态",
+            label = stringResource(Res.string.feed),
             testTag = "nav-feed",
             selectedIcon = FaMaterialSymbols.Filled.Home,
             unselectedIcon = FaMaterialSymbols.Outlined.Home,
         ),
         TopLevelDestinationItem(
             destination = TopLevelDestination.BROWSE,
-            label = "浏览",
+            label = stringResource(Res.string.browse),
             testTag = "nav-browse",
             selectedIcon = FaMaterialSymbols.Filled.Explore,
             unselectedIcon = FaMaterialSymbols.Outlined.Explore,
         ),
         TopLevelDestinationItem(
             destination = TopLevelDestination.SEARCH,
-            label = "搜索",
+            label = stringResource(Res.string.search),
             testTag = "nav-search",
             selectedIcon = FaMaterialSymbols.Filled.Search,
             unselectedIcon = FaMaterialSymbols.Outlined.Search,
         ),
         TopLevelDestinationItem(
             destination = TopLevelDestination.MORE,
-            label = "更多",
+            label = stringResource(Res.string.more),
             testTag = "nav-more",
             selectedIcon = FaMaterialSymbols.Filled.Menu,
             unselectedIcon = FaMaterialSymbols.Outlined.Menu,

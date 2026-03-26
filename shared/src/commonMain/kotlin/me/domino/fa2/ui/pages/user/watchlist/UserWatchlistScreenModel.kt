@@ -2,12 +2,16 @@ package me.domino.fa2.ui.pages.user.watchlist
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistUser
 import me.domino.fa2.data.repository.WatchlistRepository
+import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.i18n.SystemLanguageProvider
+import me.domino.fa2.i18n.appString
 import me.domino.fa2.ui.state.PaginationSnapshot
 import me.domino.fa2.ui.state.PaginationStateMachine
 import me.domino.fa2.util.logging.FaLog
@@ -43,10 +47,16 @@ class UserWatchlistScreenModel(
     private val category: WatchlistCategory,
     private val repository: WatchlistRepository,
     private val initialPageUrl: String? = null,
+    private val settingsService: AppSettingsService? = null,
+    private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) : StateScreenModel<UserWatchlistUiState>(UserWatchlistUiState()) {
   private val log = FaLog.withTag("UserWatchlistScreenModel")
   private val paginationStateMachine =
-      PaginationStateMachine<WatchlistUser, String>(keyOf = { item -> item.username.lowercase() })
+      PaginationStateMachine<WatchlistUser, String>(
+          keyOf = { item -> item.username.lowercase() },
+          challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
+          appendFallbackErrorMessage = { appString(Res.string.load_failed_please_retry) },
+      )
   private var loadJob: Job? = null
   private var appendJob: Job? = null
 

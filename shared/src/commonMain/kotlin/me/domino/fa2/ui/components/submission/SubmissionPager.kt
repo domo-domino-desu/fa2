@@ -23,12 +23,14 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.flow.distinctUntilChanged
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.platform.PlatformVerticalScrollbar
 import me.domino.fa2.ui.pages.submission.SubmissionDetailUiState
+import org.jetbrains.compose.resources.stringResource
 
 /** 投稿详情左右滑浏览容器。 */
 @Composable
@@ -77,7 +79,10 @@ fun SubmissionPager(
     blockedSubmissionMode: BlockedSubmissionPagerMode,
 ) {
   if (submissions.isEmpty()) {
-    Text(text = "当前没有可浏览的投稿。", modifier = Modifier.padding(16.dp))
+    Text(
+        text = stringResource(Res.string.no_browsable_submissions),
+        modifier = Modifier.padding(16.dp),
+    )
     return
   }
 

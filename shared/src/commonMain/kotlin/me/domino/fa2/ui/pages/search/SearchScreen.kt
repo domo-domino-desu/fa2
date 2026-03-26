@@ -20,15 +20,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
 import me.domino.fa2.ui.components.submission.WaterfallLoadingSkeleton
+import me.domino.fa2.ui.host.LocalAppI18n
 import me.domino.fa2.ui.host.LocalAppSettings
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.search.component.SearchHint
 import me.domino.fa2.ui.pages.search.component.SearchOverlayContent
 import me.domino.fa2.ui.pages.search.component.SearchStatusCard
 import me.domino.fa2.ui.pages.search.component.rememberSearchOverlayUiData
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SearchScreen(
@@ -36,6 +39,7 @@ fun SearchScreen(
     actions: SearchScreenActions,
     waterfallState: LazyStaggeredGridState,
 ) {
+  val appI18n = LocalAppI18n.current
   val settings = LocalAppSettings.current
   val overlayUiData = rememberSearchOverlayUiData()
   val canSearch = state.draft.query.trim().isNotBlank()
@@ -51,7 +55,10 @@ fun SearchScreen(
       )
 
       if (!state.hasSearched) {
-        SearchHint(text = "点击搜索框设置条件后提交搜索。", modifier = Modifier.fillMaxSize())
+        SearchHint(
+            text = stringResource(Res.string.search_hint),
+            modifier = Modifier.fillMaxSize(),
+        )
       } else {
         when {
           state.loading && state.submissions.isEmpty() -> {
@@ -64,7 +71,7 @@ fun SearchScreen(
 
           !state.errorMessage.isNullOrBlank() && state.submissions.isEmpty() -> {
             SearchStatusCard(
-                title = "搜索失败",
+                title = stringResource(Res.string.load_failed),
                 body = state.errorMessage.orEmpty(),
                 onRetry = actions.onRetry,
             )
@@ -110,6 +117,7 @@ fun SearchScreen(
 
 @Composable
 private fun SearchBarShell(query: String, overlayVisible: Boolean, onToggleOverlay: () -> Unit) {
+  val appI18n = LocalAppI18n.current
   Surface(
       color = MaterialTheme.colorScheme.surface,
       shadowElevation = 2.dp,
@@ -125,7 +133,7 @@ private fun SearchBarShell(query: String, overlayVisible: Boolean, onToggleOverl
             value = query,
             onValueChange = {},
             readOnly = true,
-            placeholder = { Text("输入关键字，例如 wolf @keywords female") },
+            placeholder = { Text(stringResource(Res.string.search_bar_placeholder)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth().height(56.dp),
             trailingIcon = {
@@ -136,7 +144,12 @@ private fun SearchBarShell(query: String, overlayVisible: Boolean, onToggleOverl
                       } else {
                         FaMaterialSymbols.Filled.Search
                       },
-                  contentDescription = if (overlayVisible) "关闭搜索遮罩" else "打开搜索遮罩",
+                  contentDescription =
+                      if (overlayVisible) {
+                        stringResource(Res.string.close_search_overlay)
+                      } else {
+                        stringResource(Res.string.open_search_overlay)
+                      },
               )
             },
         )

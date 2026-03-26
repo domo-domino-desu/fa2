@@ -28,6 +28,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.SingletonImageLoader
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -46,6 +47,7 @@ import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.pages.user.route.UserRouteScreen
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.deriveSubmissionThumbnailUrlFromFullImage
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
@@ -78,6 +80,8 @@ class SubmissionRouteScreen(
     val showToast = LocalShowToast.current
     val coroutineScope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
+    val tagCopiedText = stringResource(Res.string.tag_copied)
+    val linkCopiedText = stringResource(Res.string.link_copied)
     val requestPagerFocus =
         remember(focusRequester) {
           {
@@ -163,7 +167,7 @@ class SubmissionRouteScreen(
           onKeywordLongPress = { tag ->
             val normalizedTag = tag.trim()
             if (normalizedTag.isNotBlank() && copyTextToClipboard(normalizedTag)) {
-              showToast("标签已复制")
+              showToast(tagCopiedText)
             }
           },
           onOpenBrowseFilter = { category, type, species ->
@@ -181,14 +185,30 @@ class SubmissionRouteScreen(
           onCopySubmissionUrl = { submissionUrl ->
             val normalizedUrl = submissionUrl.trim()
             if (normalizedUrl.isNotBlank() && copyTextToClipboard(normalizedUrl)) {
-              showToast("链接已复制")
+              showToast(linkCopiedText)
             }
           },
           onLoadAttachmentText = screenModel::loadAttachmentTextCurrent,
-          onTranslateDescription = screenModel::translateDescriptionCurrent,
-          onWrapDescriptionText = screenModel::toggleDescriptionWrapCurrent,
-          onTranslateAttachment = screenModel::translateAttachmentCurrent,
-          onWrapAttachmentText = screenModel::toggleAttachmentWrapCurrent,
+          onTranslateDescription = {
+            if (settings.translationEnabled) {
+              screenModel.translateDescriptionCurrent()
+            }
+          },
+          onWrapDescriptionText = {
+            if (settings.translationEnabled) {
+              screenModel.toggleDescriptionWrapCurrent()
+            }
+          },
+          onTranslateAttachment = {
+            if (settings.translationEnabled) {
+              screenModel.translateAttachmentCurrent()
+            }
+          },
+          onWrapAttachmentText = {
+            if (settings.translationEnabled) {
+              screenModel.toggleAttachmentWrapCurrent()
+            }
+          },
           scrollOffsetOfSid = screenModel::scrollOffsetForSid,
           requestPagerFocus = requestPagerFocus,
           onZoomOverlayVisibilityChanged = { visible -> zoomOverlayVisible.value = visible },
@@ -213,7 +233,7 @@ class SubmissionRouteScreen(
                   SubmissionThumbnail(
                       id = initialSid,
                       submissionUrl = seedSubmissionUrl,
-                      title = "Submission #$initialSid",
+                      title = stringResource(Res.string.submission_fallback_title, initialSid),
                       author = "",
                       thumbnailUrl = "",
                       thumbnailAspectRatio = 1f,

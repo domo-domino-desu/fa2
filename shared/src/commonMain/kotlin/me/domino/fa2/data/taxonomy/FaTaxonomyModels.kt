@@ -1,15 +1,6 @@
 package me.domino.fa2.data.taxonomy
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
-@Serializable
-data class LocalizedDisplayName(
-    val en: String = "",
-    @SerialName("zh-Hans") val zhHans: String = "",
-) {
-  fun preferred(): String = zhHans.ifBlank { en }
-}
 
 @Serializable
 data class FaTaxonomyCatalog(
@@ -33,7 +24,7 @@ data class FaTaxonomySection(
 @Serializable
 data class FaTaxonomyGroup(
     val key: String,
-    val displayName: LocalizedDisplayName,
+    val displayName: Map<String, String> = emptyMap(),
     val itemKeys: List<String> = emptyList(),
     val icon: String? = null,
 )
@@ -41,7 +32,7 @@ data class FaTaxonomyGroup(
 @Serializable
 data class FaTaxonomyItem(
     val id: Int,
-    val displayName: LocalizedDisplayName,
+    val displayName: Map<String, String> = emptyMap(),
     val groupKey: String? = null,
     val icon: String? = null,
 )

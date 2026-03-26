@@ -23,6 +23,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import me.domino.fa2.ui.components.FilterDialogTriggerField
 import me.domino.fa2.ui.components.FilterDropdownField
@@ -32,6 +33,7 @@ import me.domino.fa2.ui.components.GroupedFilterDropdownField
 import me.domino.fa2.ui.components.GroupedTextPickerDialog
 import me.domino.fa2.ui.components.toFilterOption
 import me.domino.fa2.ui.components.toFilterOptionGroup
+import me.domino.fa2.ui.host.LocalAppI18n
 import me.domino.fa2.ui.host.LocalSearchUiLabelsCatalog
 import me.domino.fa2.ui.host.LocalSearchUiLabelsRepository
 import me.domino.fa2.ui.host.LocalTaxonomyCatalog
@@ -43,8 +45,10 @@ import me.domino.fa2.ui.pages.search.orderByOptions
 import me.domino.fa2.ui.pages.search.orderDirectionOptions
 import me.domino.fa2.ui.pages.search.rangeOptions
 import me.domino.fa2.ui.search.SearchUiLabelsRepository
+import me.domino.fa2.ui.search.SearchUiMetadataKey
 import me.domino.fa2.ui.search.SearchUiOptionKey
 import me.domino.fa2.ui.search.SearchUiTextKey
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,6 +59,7 @@ internal fun SearchOverlayContent(
     uiData: SearchOverlayUiData,
     modifier: Modifier = Modifier,
 ) {
+  val appI18n = LocalAppI18n.current
   Surface(
       modifier = modifier.background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.24f)),
       color = MaterialTheme.colorScheme.surface,
@@ -76,8 +81,8 @@ internal fun SearchOverlayContent(
         OutlinedTextField(
             value = form.query,
             onValueChange = actions.onUpdateQuery,
-            label = { Text("Query") },
-            placeholder = { Text("wolf @keywords female trans_female") },
+            label = { Text(stringResource(Res.string.query)) },
+            placeholder = { Text(stringResource(Res.string.search_query_example)) },
             modifier = Modifier.fillMaxWidth(),
         )
 
@@ -111,15 +116,46 @@ internal fun SearchOverlayContent(
         }
 
         GenderKeywordsSection(
-            title = uiData.searchUiLabelsRepository.text(SearchUiTextKey.FILTER_GENDER_KEYWORDS),
+            title =
+                uiData.searchUiLabelsRepository.text(
+                    SearchUiTextKey.FILTER_GENDER_KEYWORDS,
+                    appI18n.uiLanguage,
+                ),
             selectedGenders = form.selectedGenders,
             labelForGender = { gender ->
-              uiData.searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, gender.token)
+              uiData.searchUiLabelsRepository.metadataOptionLabel(
+                  SearchUiOptionKey.GENDER,
+                  gender.token,
+                  appI18n.metadata,
+              )
             },
             onToggleGender = actions.onToggleGender,
         )
 
         RatingsSection(
+            title =
+                uiData.searchUiLabelsRepository.metadataLabel(
+                    SearchUiMetadataKey.RATING,
+                    appI18n.metadata,
+                ),
+            generalLabel =
+                uiData.searchUiLabelsRepository.metadataOptionLabel(
+                    SearchUiOptionKey.RATING,
+                    "general",
+                    appI18n.metadata,
+                ),
+            matureLabel =
+                uiData.searchUiLabelsRepository.metadataOptionLabel(
+                    SearchUiOptionKey.RATING,
+                    "mature",
+                    appI18n.metadata,
+                ),
+            adultLabel =
+                uiData.searchUiLabelsRepository.metadataOptionLabel(
+                    SearchUiOptionKey.RATING,
+                    "adult",
+                    appI18n.metadata,
+                ),
             general = form.ratingGeneral,
             mature = form.ratingMature,
             adult = form.ratingAdult,
@@ -129,36 +165,46 @@ internal fun SearchOverlayContent(
         )
 
         SubmissionTypeSection(
-            title = uiData.searchUiLabelsRepository.text(SearchUiTextKey.FILTER_SUBMISSION_TYPES),
+            title =
+                uiData.searchUiLabelsRepository.text(
+                    SearchUiTextKey.FILTER_SUBMISSION_TYPES,
+                    appI18n.uiLanguage,
+                ),
             artLabel =
                 uiData.searchUiLabelsRepository.optionLabel(
                     SearchUiOptionKey.SUBMISSION_TYPE,
                     "art",
+                    appI18n.uiLanguage,
                 ),
             musicLabel =
                 uiData.searchUiLabelsRepository.optionLabel(
                     SearchUiOptionKey.SUBMISSION_TYPE,
                     "music",
+                    appI18n.uiLanguage,
                 ),
             flashLabel =
                 uiData.searchUiLabelsRepository.optionLabel(
                     SearchUiOptionKey.SUBMISSION_TYPE,
                     "flash",
+                    appI18n.uiLanguage,
                 ),
             storyLabel =
                 uiData.searchUiLabelsRepository.optionLabel(
                     SearchUiOptionKey.SUBMISSION_TYPE,
                     "story",
+                    appI18n.uiLanguage,
                 ),
             photoLabel =
                 uiData.searchUiLabelsRepository.optionLabel(
                     SearchUiOptionKey.SUBMISSION_TYPE,
                     "photo",
+                    appI18n.uiLanguage,
                 ),
             poetryLabel =
                 uiData.searchUiLabelsRepository.optionLabel(
                     SearchUiOptionKey.SUBMISSION_TYPE,
                     "poetry",
+                    appI18n.uiLanguage,
                 ),
             typeArt = form.typeArt,
             typeMusic = form.typeMusic,
@@ -193,6 +239,7 @@ internal data class SearchOverlayUiData(
 
 @Composable
 internal fun rememberSearchOverlayUiData(): SearchOverlayUiData {
+  val appI18n = LocalAppI18n.current
   val taxonomyRepository = LocalTaxonomyRepository.current
   val searchUiLabelsRepository = LocalSearchUiLabelsRepository.current
   val taxonomyCatalog = LocalTaxonomyCatalog.current
@@ -203,19 +250,27 @@ internal fun rememberSearchOverlayUiData(): SearchOverlayUiData {
       searchUiLabelsCatalog,
       taxonomyRepository,
       searchUiLabelsRepository,
+      appI18n,
   ) {
     SearchOverlayUiData(
-        categoryOptions = taxonomyRepository.categoryOptions().map { it.toFilterOption() },
+        categoryOptions =
+            taxonomyRepository.categoryOptions(appI18n.metadata).map { it.toFilterOption() },
         categoryOptionGroups =
-            taxonomyRepository.categoryOptionGroups().map { it.toFilterOptionGroup() },
-        typeOptions = taxonomyRepository.typeOptions().map { it.toFilterOption() },
-        speciesOptions = taxonomyRepository.speciesOptions().map { it.toFilterOption() },
-        typeOptionGroups = taxonomyRepository.typeOptionGroups().map { it.toFilterOptionGroup() },
+            taxonomyRepository.categoryOptionGroups(appI18n.metadata).map {
+              it.toFilterOptionGroup()
+            },
+        typeOptions = taxonomyRepository.typeOptions(appI18n.metadata).map { it.toFilterOption() },
+        speciesOptions =
+            taxonomyRepository.speciesOptions(appI18n.metadata).map { it.toFilterOption() },
+        typeOptionGroups =
+            taxonomyRepository.typeOptionGroups(appI18n.metadata).map { it.toFilterOptionGroup() },
         speciesOptionGroups =
-            taxonomyRepository.speciesOptionGroups().map { it.toFilterOptionGroup() },
-        orderByOptions = orderByOptions(searchUiLabelsRepository),
-        orderDirectionOptions = orderDirectionOptions(searchUiLabelsRepository),
-        rangeOptions = rangeOptions(searchUiLabelsRepository),
+            taxonomyRepository.speciesOptionGroups(appI18n.metadata).map {
+              it.toFilterOptionGroup()
+            },
+        orderByOptions = orderByOptions(searchUiLabelsRepository, appI18n.uiLanguage),
+        orderDirectionOptions = orderDirectionOptions(searchUiLabelsRepository, appI18n.uiLanguage),
+        rangeOptions = rangeOptions(searchUiLabelsRepository, appI18n.uiLanguage),
         searchUiLabelsRepository = searchUiLabelsRepository,
     )
   }
@@ -241,6 +296,7 @@ private fun SearchTopFilterGrid(
     speciesOptionGroups: List<FilterOptionGroup<Int>>,
     searchUiLabelsRepository: SearchUiLabelsRepository,
 ) {
+  val appI18n = LocalAppI18n.current
   var typePickerVisible by remember { mutableStateOf(false) }
   var speciesPickerVisible by remember { mutableStateOf(false) }
   val selectedTypeLabel =
@@ -257,40 +313,61 @@ private fun SearchTopFilterGrid(
           verticalArrangement = Arrangement.spacedBy(8.dp),
       ) {
         GroupedFilterDropdownField(
-            label = "类别",
+            label =
+                searchUiLabelsRepository.metadataLabel(
+                    SearchUiMetadataKey.CATEGORY,
+                    appI18n.metadata,
+                ),
             groups = categoryOptionGroups,
             selected = form.category,
             onSelected = onUpdateCategory,
             modifier = Modifier.fillMaxWidth(),
         )
         FilterDialogTriggerField(
-            label = "分类",
+            label =
+                searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.TYPE, appI18n.metadata),
             valueLabel = selectedTypeLabel,
             onOpenPicker = { typePickerVisible = true },
             modifier = Modifier.fillMaxWidth(),
         )
         FilterDialogTriggerField(
-            label = "物种",
+            label =
+                searchUiLabelsRepository.metadataLabel(
+                    SearchUiMetadataKey.SPECIES,
+                    appI18n.metadata,
+                ),
             valueLabel = selectedSpeciesLabel,
             onOpenPicker = { speciesPickerVisible = true },
             modifier = Modifier.fillMaxWidth(),
         )
         FilterDropdownField(
-            label = searchUiLabelsRepository.text(SearchUiTextKey.FILTER_SORT_CRITERIA),
+            label =
+                searchUiLabelsRepository.text(
+                    SearchUiTextKey.FILTER_SORT_CRITERIA,
+                    appI18n.uiLanguage,
+                ),
             options = orderByOptions,
             selected = form.orderBy,
             onSelected = onUpdateOrderBy,
             modifier = Modifier.fillMaxWidth(),
         )
         FilterDropdownField(
-            label = searchUiLabelsRepository.text(SearchUiTextKey.FILTER_SORT_DIRECTION),
+            label =
+                searchUiLabelsRepository.text(
+                    SearchUiTextKey.FILTER_SORT_DIRECTION,
+                    appI18n.uiLanguage,
+                ),
             options = orderDirectionOptions,
             selected = form.orderDirection,
             onSelected = onUpdateOrderDirection,
             modifier = Modifier.fillMaxWidth(),
         )
         FilterDropdownField(
-            label = searchUiLabelsRepository.text(SearchUiTextKey.FILTER_DATE),
+            label =
+                searchUiLabelsRepository.text(
+                    SearchUiTextKey.FILTER_DATE,
+                    appI18n.uiLanguage,
+                ),
             options = rangeOptions,
             selected = form.range,
             onSelected = onUpdateRange,
@@ -307,14 +384,22 @@ private fun SearchTopFilterGrid(
             modifier = Modifier.fillMaxWidth(),
         ) {
           GroupedFilterDropdownField(
-              label = "类别",
+              label =
+                  searchUiLabelsRepository.metadataLabel(
+                      SearchUiMetadataKey.CATEGORY,
+                      appI18n.metadata,
+                  ),
               groups = categoryOptionGroups,
               selected = form.category,
               onSelected = onUpdateCategory,
               modifier = Modifier.weight(1f),
           )
           FilterDialogTriggerField(
-              label = "分类",
+              label =
+                  searchUiLabelsRepository.metadataLabel(
+                      SearchUiMetadataKey.TYPE,
+                      appI18n.metadata,
+                  ),
               valueLabel = selectedTypeLabel,
               onOpenPicker = { typePickerVisible = true },
               modifier = Modifier.weight(1f),
@@ -325,13 +410,21 @@ private fun SearchTopFilterGrid(
             modifier = Modifier.fillMaxWidth(),
         ) {
           FilterDialogTriggerField(
-              label = "物种",
+              label =
+                  searchUiLabelsRepository.metadataLabel(
+                      SearchUiMetadataKey.SPECIES,
+                      appI18n.metadata,
+                  ),
               valueLabel = selectedSpeciesLabel,
               onOpenPicker = { speciesPickerVisible = true },
               modifier = Modifier.weight(1f),
           )
           FilterDropdownField(
-              label = searchUiLabelsRepository.text(SearchUiTextKey.FILTER_SORT_CRITERIA),
+              label =
+                  searchUiLabelsRepository.text(
+                      SearchUiTextKey.FILTER_SORT_CRITERIA,
+                      appI18n.uiLanguage,
+                  ),
               options = orderByOptions,
               selected = form.orderBy,
               onSelected = onUpdateOrderBy,
@@ -343,14 +436,22 @@ private fun SearchTopFilterGrid(
             modifier = Modifier.fillMaxWidth(),
         ) {
           FilterDropdownField(
-              label = searchUiLabelsRepository.text(SearchUiTextKey.FILTER_SORT_DIRECTION),
+              label =
+                  searchUiLabelsRepository.text(
+                      SearchUiTextKey.FILTER_SORT_DIRECTION,
+                      appI18n.uiLanguage,
+                  ),
               options = orderDirectionOptions,
               selected = form.orderDirection,
               onSelected = onUpdateOrderDirection,
               modifier = Modifier.weight(1f),
           )
           FilterDropdownField(
-              label = searchUiLabelsRepository.text(SearchUiTextKey.FILTER_DATE),
+              label =
+                  searchUiLabelsRepository.text(
+                      SearchUiTextKey.FILTER_DATE,
+                      appI18n.uiLanguage,
+                  ),
               options = rangeOptions,
               selected = form.range,
               onSelected = onUpdateRange,
@@ -363,7 +464,7 @@ private fun SearchTopFilterGrid(
 
   if (typePickerVisible) {
     GroupedTextPickerDialog(
-        title = "分类",
+        title = searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.TYPE, appI18n.metadata),
         groups = typeOptionGroups,
         selected = form.type,
         onSelected = onUpdateType,
@@ -373,7 +474,11 @@ private fun SearchTopFilterGrid(
 
   if (speciesPickerVisible) {
     GroupedTextPickerDialog(
-        title = "物种",
+        title =
+            searchUiLabelsRepository.metadataLabel(
+                SearchUiMetadataKey.SPECIES,
+                appI18n.metadata,
+            ),
         groups = speciesOptionGroups,
         selected = form.species,
         onSelected = onUpdateSpecies,

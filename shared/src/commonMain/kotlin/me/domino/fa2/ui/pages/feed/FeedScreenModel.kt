@@ -2,6 +2,7 @@ package me.domino.fa2.ui.pages.feed
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,6 +11,9 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.FeedRepository
+import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.i18n.SystemLanguageProvider
+import me.domino.fa2.i18n.appString
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.state.PaginationSnapshot
 import me.domino.fa2.ui.state.PaginationStateMachine
@@ -38,10 +42,16 @@ class FeedScreenModel(
     private val repository: FeedRepository,
     /** 投稿列表共享持有器。 */
     private val submissionListHolder: SubmissionListHolder,
+    private val settingsService: AppSettingsService? = null,
+    private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) : StateScreenModel<FeedUiState>(FeedUiState()) {
   private val log = FaLog.withTag("FeedScreenModel")
   private val paginationStateMachine =
-      PaginationStateMachine<SubmissionThumbnail, Int>(keyOf = { item -> item.id })
+      PaginationStateMachine<SubmissionThumbnail, Int>(
+          keyOf = { item -> item.id },
+          challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
+          appendFallbackErrorMessage = { appString(Res.string.load_failed_please_retry) },
+      )
 
   private val mutablePageState = MutableStateFlow<PageState<FeedUiState>>(PageState.Loading)
   val pageState: StateFlow<PageState<FeedUiState>> = mutablePageState.asStateFlow()

@@ -22,13 +22,13 @@ import org.koin.dsl.module
 
 /** ScreenModel 依赖模块。 */
 fun screenModelModule(): Module = module {
-  factory { AuthScreenModel(get()) }
-  factory { (holder: SubmissionListHolder) -> FeedScreenModel(get(), holder) }
-  factory { (holder: SubmissionListHolder) -> BrowseScreenModel(get(), holder) }
+  factory { AuthScreenModel(get(), get(), get()) }
+  factory { (holder: SubmissionListHolder) -> FeedScreenModel(get(), holder, get(), get()) }
+  factory { (holder: SubmissionListHolder) -> BrowseScreenModel(get(), holder, get(), get()) }
   factory { (holder: SubmissionListHolder) ->
-    SearchScreenModel(get(), holder, get(), get(), get())
+    SearchScreenModel(get(), holder, get(), get(), get(), get(), get())
   }
-  factory { (username: String) -> MoreScreenModel(username, get(), get()) }
+  factory { (username: String) -> MoreScreenModel(username, get(), get(), get(), get()) }
   factory { (initialSid: Int, holder: SubmissionListHolder) ->
     SubmissionScreenModel(
         initialSid = initialSid,
@@ -36,6 +36,8 @@ fun screenModelModule(): Module = module {
         feedSource = SubmissionPagerFeedSourceImpl(get()),
         submissionSource = SubmissionPagerDetailSourceImpl(get()),
         translationService = get(),
+        settingsService = get(),
+        systemLanguageProvider = get(),
     )
   }
   factory { (username: String, initialChildRoute: UserChildRoute, initialFolderUrl: String?) ->
@@ -44,6 +46,8 @@ fun screenModelModule(): Module = module {
         repository = get(),
         initialChildRoute = initialChildRoute,
         initialFolderUrl = initialFolderUrl,
+        settingsService = get(),
+        systemLanguageProvider = get(),
     )
   }
   factory {
@@ -62,15 +66,26 @@ fun screenModelModule(): Module = module {
         submissionListHolder = holder,
         initialFolderUrl = initialFolderUrl,
         initialSnapshot = initialSnapshot,
+        settingsService = get(),
+        systemLanguageProvider = get(),
     )
   }
-  factory { (username: String) -> UserJournalsScreenModel(username = username, repository = get()) }
+  factory { (username: String) ->
+    UserJournalsScreenModel(
+        username = username,
+        repository = get(),
+        settingsService = get(),
+        systemLanguageProvider = get(),
+    )
+  }
   factory { (journalId: Int, journalUrl: String?) ->
     JournalDetailScreenModel(
         journalId = journalId,
         journalUrl = journalUrl,
         repository = get(),
         translationService = get(),
+        settingsService = get(),
+        systemLanguageProvider = get(),
     )
   }
   factory { (username: String, category: WatchlistCategory, initialUrl: String?) ->
@@ -79,6 +94,8 @@ fun screenModelModule(): Module = module {
         category = category,
         repository = get(),
         initialPageUrl = initialUrl,
+        settingsService = get(),
+        systemLanguageProvider = get(),
     )
   }
 }

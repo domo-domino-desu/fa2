@@ -18,11 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.ui.components.PageStateWrapper
 import me.domino.fa2.ui.components.submission.SubmissionPager
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.layouts.SubmissionRouteTopBar
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -72,7 +74,7 @@ internal fun SubmissionRouteChrome(
       when (val snapshot = state) {
         SubmissionPagerUiState.Empty -> {
           Text(
-              text = "当前没有可浏览内容。",
+              text = stringResource(Res.string.no_browsable_content),
               modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
               style = MaterialTheme.typography.bodyMedium,
           )
@@ -146,9 +148,9 @@ internal fun SubmissionRouteChrome(
                           },
                       contentDescription =
                           if (detailState.detail.isFavorited) {
-                            "Unfavorite"
+                            stringResource(Res.string.unfavorite)
                           } else {
-                            "Favorite"
+                            stringResource(Res.string.favorite)
                           },
                   )
                 }

@@ -2,6 +2,7 @@ package me.domino.fa2.ui.pages.user.gallery
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.GalleryFolderGroup
@@ -10,6 +11,9 @@ import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.FavoritesRepository
 import me.domino.fa2.data.repository.GalleryRepository
+import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.i18n.SystemLanguageProvider
+import me.domino.fa2.i18n.appString
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.state.PaginationSnapshot
@@ -56,6 +60,8 @@ class UserSubmissionSectionScreenModel(
     private val favoritesRepository: FavoritesRepository,
     /** 投稿共享持有器。 */
     private val submissionListHolder: SubmissionListHolder,
+    private val settingsService: AppSettingsService? = null,
+    private val systemLanguageProvider: SystemLanguageProvider? = null,
     /** 初始文件夹 URL（可选）。 */
     initialFolderUrl: String? = null,
     /** 初始快照（可选）。 */
@@ -72,7 +78,11 @@ class UserSubmissionSectionScreenModel(
     ) {
   private val log = FaLog.withTag("UserSubmissionSectionScreenModel")
   private val paginationStateMachine =
-      PaginationStateMachine<SubmissionThumbnail, Int>(keyOf = { item -> item.id })
+      PaginationStateMachine<SubmissionThumbnail, Int>(
+          keyOf = { item -> item.id },
+          challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
+          appendFallbackErrorMessage = { appString(Res.string.load_failed_please_retry) },
+      )
   private var loadJob: Job? = null
   private var appendJob: Job? = null
   private var basePageUrlOverride: String? = initialFolderUrl?.trim()?.takeIf { it.isNotBlank() }

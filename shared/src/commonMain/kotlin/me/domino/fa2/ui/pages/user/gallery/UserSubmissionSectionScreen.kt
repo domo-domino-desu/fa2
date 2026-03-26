@@ -35,6 +35,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.GalleryFolderGroup
@@ -52,6 +53,7 @@ import me.domino.fa2.ui.pages.user.profile.resolveUserSharedTopScrollState
 import me.domino.fa2.ui.pages.user.profile.shouldStickUserSectionTabs
 import me.domino.fa2.ui.pages.user.profile.userSubmissionSectionScrollLayout
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 /** User 投稿子页。 */
@@ -213,7 +215,11 @@ internal fun UserSubmissionSectionScreen(
             headerContent = headerContent,
             preItemsContent = topItemsContent,
         ) {
-          UserStatusCard(title = "加载失败", body = blockingMessage, onRetry = onRetry)
+          UserStatusCard(
+              title = stringResource(Res.string.load_failed),
+              body = blockingMessage,
+              onRetry = onRetry,
+          )
         }
       }
 
@@ -249,7 +255,7 @@ internal fun UserSubmissionSectionScreen(
                       span = StaggeredGridItemSpan.FullLine,
                   ) {
                     UserStatusCard(
-                        title = "加载失败",
+                        title = stringResource(Res.string.load_failed),
                         body = inlineError,
                         onRetry = onRetry,
                     )
@@ -325,7 +331,7 @@ private fun UserStatusCard(title: String, body: String, onRetry: () -> Unit) {
           style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-      Button(onClick = onRetry) { Text("重试") }
+      Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
     }
   }
 }

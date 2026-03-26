@@ -17,8 +17,10 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.produceLibraries
+import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.layouts.AboutRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
+import org.jetbrains.compose.resources.stringResource
 
 /** 开源许可页面。 */
 class AboutRouteScreen : Screen {
@@ -29,7 +31,6 @@ class AboutRouteScreen : Screen {
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
     val libraries by produceLibraries { loadAboutLibrariesJson() }
-
     Column(modifier = Modifier.fillMaxSize()) {
       AboutRouteTopBar(onBack = { navigator.pop() }, onGoHome = { navigator.goBackHome() })
 
@@ -40,7 +41,7 @@ class AboutRouteScreen : Screen {
           footer = {
             item {
               Text(
-                  text = "许可证与依赖元数据来源：AboutLibraries",
+                  text = stringResource(Res.string.about_libraries_metadata_source),
                   style = MaterialTheme.typography.bodySmall,
                   color = MaterialTheme.colorScheme.onSurfaceVariant,
                   modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),

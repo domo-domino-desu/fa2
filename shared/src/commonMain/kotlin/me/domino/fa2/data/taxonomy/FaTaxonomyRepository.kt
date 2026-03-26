@@ -5,6 +5,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import me.domino.fa2.i18n.AppLanguage
+import me.domino.fa2.i18n.MetadataDisplayPreferences
+import me.domino.fa2.i18n.defaultMetadataDisplayPreferences
+import me.domino.fa2.i18n.localizedFor
+import me.domino.fa2.i18n.localizedOrOriginal
 import me.domino.fa2.util.logging.FaLog
 
 class FaTaxonomyRepository {
@@ -32,25 +37,44 @@ class FaTaxonomyRepository {
     }
   }
 
-  fun categoryOptions(): List<FaTaxonomyChoice<Int>> = options(FaTaxonomySectionKey.CATEGORY)
+  fun categoryOptions(
+      metadata: MetadataDisplayPreferences = defaultMetadataDisplayPreferences
+  ): List<FaTaxonomyChoice<Int>> = options(FaTaxonomySectionKey.CATEGORY, metadata)
 
-  fun typeOptions(): List<FaTaxonomyChoice<Int>> = options(FaTaxonomySectionKey.TYPE)
+  fun typeOptions(
+      metadata: MetadataDisplayPreferences = defaultMetadataDisplayPreferences
+  ): List<FaTaxonomyChoice<Int>> = options(FaTaxonomySectionKey.TYPE, metadata)
 
-  fun speciesOptions(): List<FaTaxonomyChoice<Int>> = options(FaTaxonomySectionKey.SPECIES)
+  fun speciesOptions(
+      metadata: MetadataDisplayPreferences = defaultMetadataDisplayPreferences
+  ): List<FaTaxonomyChoice<Int>> = options(FaTaxonomySectionKey.SPECIES, metadata)
 
-  fun categoryOptionGroups(): List<FaTaxonomyChoiceGroup<Int>> =
-      optionGroups(FaTaxonomySectionKey.CATEGORY)
+  fun categoryOptionGroups(
+      metadata: MetadataDisplayPreferences = defaultMetadataDisplayPreferences
+  ): List<FaTaxonomyChoiceGroup<Int>> = optionGroups(FaTaxonomySectionKey.CATEGORY, metadata)
 
-  fun typeOptionGroups(): List<FaTaxonomyChoiceGroup<Int>> = optionGroups(FaTaxonomySectionKey.TYPE)
+  fun typeOptionGroups(
+      metadata: MetadataDisplayPreferences = defaultMetadataDisplayPreferences
+  ): List<FaTaxonomyChoiceGroup<Int>> = optionGroups(FaTaxonomySectionKey.TYPE, metadata)
 
-  fun speciesOptionGroups(): List<FaTaxonomyChoiceGroup<Int>> =
-      optionGroups(FaTaxonomySectionKey.SPECIES)
+  fun speciesOptionGroups(
+      metadata: MetadataDisplayPreferences = defaultMetadataDisplayPreferences
+  ): List<FaTaxonomyChoiceGroup<Int>> = optionGroups(FaTaxonomySectionKey.SPECIES, metadata)
 
-  fun categoryDisplayNameById(id: Int): String? = displayNameById(FaTaxonomySectionKey.CATEGORY, id)
+  fun categoryDisplayNameById(
+      id: Int,
+      metadata: MetadataDisplayPreferences = defaultMetadataDisplayPreferences,
+  ): String? = displayNameById(FaTaxonomySectionKey.CATEGORY, id, metadata)
 
-  fun typeDisplayNameById(id: Int): String? = displayNameById(FaTaxonomySectionKey.TYPE, id)
+  fun typeDisplayNameById(
+      id: Int,
+      metadata: MetadataDisplayPreferences = defaultMetadataDisplayPreferences,
+  ): String? = displayNameById(FaTaxonomySectionKey.TYPE, id, metadata)
 
-  fun speciesDisplayNameById(id: Int): String? = displayNameById(FaTaxonomySectionKey.SPECIES, id)
+  fun speciesDisplayNameById(
+      id: Int,
+      metadata: MetadataDisplayPreferences = defaultMetadataDisplayPreferences,
+  ): String? = displayNameById(FaTaxonomySectionKey.SPECIES, id, metadata)
 
   fun categoryCardIconById(id: Int): String? = cardIconById(FaTaxonomySectionKey.CATEGORY, id)
 
@@ -72,23 +96,41 @@ class FaTaxonomyRepository {
   fun findSpeciesIdByEnglishLabel(label: String): Int? =
       findIdByEnglishLabel(FaTaxonomySectionKey.SPECIES, label)
 
-  fun categoryDisplayNameByEnglishLabel(label: String): String? =
-      displayNameByEnglishLabel(FaTaxonomySectionKey.CATEGORY, label)
+  fun categoryDisplayNameByEnglishLabel(
+      label: String,
+      metadata: MetadataDisplayPreferences = defaultMetadataDisplayPreferences,
+  ): String? = displayNameByEnglishLabel(FaTaxonomySectionKey.CATEGORY, label, metadata)
 
-  fun typeDisplayNameByEnglishLabel(label: String): String? =
-      displayNameByEnglishLabel(FaTaxonomySectionKey.TYPE, label)
+  fun typeDisplayNameByEnglishLabel(
+      label: String,
+      metadata: MetadataDisplayPreferences = defaultMetadataDisplayPreferences,
+  ): String? = displayNameByEnglishLabel(FaTaxonomySectionKey.TYPE, label, metadata)
 
-  fun speciesDisplayNameByEnglishLabel(label: String): String? =
-      displayNameByEnglishLabel(FaTaxonomySectionKey.SPECIES, label)
+  fun speciesDisplayNameByEnglishLabel(
+      label: String,
+      metadata: MetadataDisplayPreferences = defaultMetadataDisplayPreferences,
+  ): String? = displayNameByEnglishLabel(FaTaxonomySectionKey.SPECIES, label, metadata)
 
-  private fun options(sectionKey: FaTaxonomySectionKey): List<FaTaxonomyChoice<Int>> =
-      preparedCatalog?.section(sectionKey)?.options.orEmpty()
+  private fun options(
+      sectionKey: FaTaxonomySectionKey,
+      metadata: MetadataDisplayPreferences,
+  ): List<FaTaxonomyChoice<Int>> =
+      preparedCatalog?.section(sectionKey)?.choicesFor(metadata).orEmpty()
 
-  private fun optionGroups(sectionKey: FaTaxonomySectionKey): List<FaTaxonomyChoiceGroup<Int>> =
-      preparedCatalog?.section(sectionKey)?.optionGroups.orEmpty()
+  private fun optionGroups(
+      sectionKey: FaTaxonomySectionKey,
+      metadata: MetadataDisplayPreferences,
+  ): List<FaTaxonomyChoiceGroup<Int>> =
+      preparedCatalog?.section(sectionKey)?.choiceGroupsFor(metadata).orEmpty()
 
-  private fun displayNameById(sectionKey: FaTaxonomySectionKey, id: Int): String? =
-      preparedCatalog?.section(sectionKey)?.itemsById?.get(id)?.item?.displayName?.preferred()
+  private fun displayNameById(
+      sectionKey: FaTaxonomySectionKey,
+      id: Int,
+      metadata: MetadataDisplayPreferences,
+  ): String? =
+      preparedCatalog?.section(sectionKey)?.itemsById?.get(id)?.item?.displayName?.let { display ->
+        metadata.localizedOrOriginal(display, original = display.originalEnglishLabel())
+      }
 
   private fun cardIconById(sectionKey: FaTaxonomySectionKey, id: Int): String? =
       preparedCatalog?.section(sectionKey)?.itemsById?.get(id)?.icon
@@ -99,9 +141,13 @@ class FaTaxonomyRepository {
   private fun findIdByEnglishLabel(sectionKey: FaTaxonomySectionKey, label: String): Int? =
       preparedCatalog?.section(sectionKey)?.englishLabelToId?.get(normalizeEnglishLabel(label))
 
-  private fun displayNameByEnglishLabel(sectionKey: FaTaxonomySectionKey, label: String): String? {
+  private fun displayNameByEnglishLabel(
+      sectionKey: FaTaxonomySectionKey,
+      label: String,
+      metadata: MetadataDisplayPreferences,
+  ): String? {
     val id = findIdByEnglishLabel(sectionKey, label) ?: return null
-    return displayNameById(sectionKey, id)
+    return displayNameById(sectionKey, id, metadata)
   }
 }
 
@@ -128,12 +174,17 @@ private data class PreparedFaTaxonomyCatalog(
 }
 
 private data class PreparedFaTaxonomySection(
-    val optionGroups: List<FaTaxonomyChoiceGroup<Int>>,
-    val options: List<FaTaxonomyChoice<Int>>,
+    val optionGroups: List<PreparedFaTaxonomyChoiceGroup>,
     val itemsById: Map<Int, PreparedFaTaxonomyEntry>,
     val itemsByKey: Map<String, PreparedFaTaxonomyEntry>,
     val englishLabelToId: Map<String, Int>,
 ) {
+  fun choicesFor(metadata: MetadataDisplayPreferences): List<FaTaxonomyChoice<Int>> =
+      optionGroups.flatMap { group -> group.asChoiceGroup(metadata).options }
+
+  fun choiceGroupsFor(metadata: MetadataDisplayPreferences): List<FaTaxonomyChoiceGroup<Int>> =
+      optionGroups.map { group -> group.asChoiceGroup(metadata) }
+
   companion object {
     fun from(section: FaTaxonomySection): PreparedFaTaxonomySection {
       val groupsByKey = section.groups.associateBy(FaTaxonomyGroup::key)
@@ -155,13 +206,22 @@ private data class PreparedFaTaxonomySection(
                       )
                   entriesById[item.id] = entry
                   entriesByKey[itemKey] = entry
-                  englishLabelToId[normalizeEnglishLabel(item.displayName.en)] = item.id
-                  FaTaxonomyChoice(value = item.id, label = item.displayName.preferred())
+                  englishLabelToId[normalizeEnglishLabel(item.displayName.originalEnglishLabel())] =
+                      item.id
+                  PreparedFaTaxonomyChoice(
+                      value = item.id,
+                      originalLabel = item.displayName.originalEnglishLabel(),
+                      localized = item.displayName,
+                  )
                 }
             if (options.isEmpty()) {
               null
             } else {
-              FaTaxonomyChoiceGroup(label = group.displayName.preferred(), options = options)
+              PreparedFaTaxonomyChoiceGroup(
+                  originalLabel = group.displayName.originalEnglishLabel(),
+                  localized = group.displayName,
+                  options = options,
+              )
             }
           }
 
@@ -177,12 +237,11 @@ private data class PreparedFaTaxonomySection(
             )
         entriesById[item.id] = entry
         entriesByKey[itemKey] = entry
-        englishLabelToId[normalizeEnglishLabel(item.displayName.en)] = item.id
+        englishLabelToId[normalizeEnglishLabel(item.displayName.originalEnglishLabel())] = item.id
       }
 
       return PreparedFaTaxonomySection(
           optionGroups = optionGroups,
-          options = optionGroups.flatMap(FaTaxonomyChoiceGroup<Int>::options),
           itemsById = entriesById,
           itemsByKey = entriesByKey,
           englishLabelToId = englishLabelToId,
@@ -198,5 +257,31 @@ private data class PreparedFaTaxonomyEntry(
     val icon: String?,
 )
 
+private data class PreparedFaTaxonomyChoice(
+    val value: Int,
+    val originalLabel: String,
+    val localized: Map<String, String>,
+) {
+  fun asChoice(metadata: MetadataDisplayPreferences): FaTaxonomyChoice<Int> =
+      FaTaxonomyChoice(
+          value = value,
+          label = metadata.localizedOrOriginal(localized, originalLabel),
+      )
+}
+
+private data class PreparedFaTaxonomyChoiceGroup(
+    val originalLabel: String,
+    val localized: Map<String, String>,
+    val options: List<PreparedFaTaxonomyChoice>,
+) {
+  fun asChoiceGroup(metadata: MetadataDisplayPreferences): FaTaxonomyChoiceGroup<Int> =
+      FaTaxonomyChoiceGroup(
+          label = metadata.localizedOrOriginal(localized, originalLabel),
+          options = options.map { option -> option.asChoice(metadata) },
+      )
+}
+
 private fun normalizeEnglishLabel(label: String): String =
     label.trim().lowercase().replace(Regex("\\s+"), " ")
+
+private fun Map<String, String>.originalEnglishLabel(): String = localizedFor(AppLanguage.EN)

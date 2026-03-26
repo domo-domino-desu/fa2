@@ -29,12 +29,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
 import me.domino.fa2.ui.state.SubmissionDescriptionDisplayBlock
 import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
 import me.domino.fa2.ui.state.rememberSubmissionDescriptionTranslationState
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -42,6 +44,7 @@ internal fun TranslateActionButton(
     translating: Boolean,
     label: String,
     onTranslate: () -> Unit,
+    enabled: Boolean = true,
     active: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
@@ -49,7 +52,7 @@ internal fun TranslateActionButton(
       modifier =
           modifier
               .padding(1.dp)
-              .clickable(enabled = !translating) { onTranslate() }
+              .clickable(enabled = enabled && !translating) { onTranslate() }
               .focusProperties { canFocus = false },
   ) {
     if (translating) {
@@ -60,7 +63,7 @@ internal fun TranslateActionButton(
     } else {
       Icon(
           imageVector = FaMaterialSymbols.Outlined.Translate,
-          contentDescription = "翻译$label",
+          contentDescription = stringResource(Res.string.translate_content_description, label),
           modifier = Modifier.size(16.dp),
           tint = translationActionTint(active = active),
       )
@@ -72,16 +75,20 @@ internal fun TranslateActionButton(
 internal fun WrapTextActionButton(
     label: String,
     onWrapText: () -> Unit,
+    enabled: Boolean = true,
     active: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
   Box(
       modifier =
-          modifier.padding(1.dp).clickable { onWrapText() }.focusProperties { canFocus = false },
+          modifier
+              .padding(1.dp)
+              .clickable(enabled = enabled) { onWrapText() }
+              .focusProperties { canFocus = false },
   ) {
     Icon(
         imageVector = FaMaterialSymbols.Outlined.WrapText,
-        contentDescription = "重新换行$label",
+        contentDescription = stringResource(Res.string.wrap_text_content_description, label),
         modifier = Modifier.size(16.dp),
         tint = translationActionTint(active = active),
     )
@@ -99,6 +106,7 @@ internal fun TranslatableSectionTitleRow(
     showWrapText: Boolean = false,
     wrapTextActive: Boolean = false,
     onWrapText: (() -> Unit)? = null,
+    translationEnabled: Boolean = true,
 ) {
   val titleContent: @Composable () -> Unit = {
     Text(
@@ -119,13 +127,15 @@ internal fun TranslatableSectionTitleRow(
           translating = translating,
           label = title,
           onTranslate = onTranslate,
+          enabled = translationEnabled,
           active = translateActive,
           modifier = Modifier.padding(start = 4.dp, top = 1.dp),
       )
-      if (showWrapText && onWrapText != null) {
+      if (translationEnabled && showWrapText && onWrapText != null) {
         WrapTextActionButton(
             label = title,
             onWrapText = onWrapText,
+            enabled = translationEnabled,
             active = wrapTextActive,
             modifier = Modifier.padding(start = 4.dp, top = 1.dp),
         )
@@ -215,6 +225,7 @@ internal fun TranslatableBlocksCard(
     emptyText: String,
     onTranslate: () -> Unit,
     onToggleWrapText: () -> Unit,
+    translationEnabled: Boolean = true,
     modifier: Modifier = Modifier,
     titleMaxLines: Int = 1,
     supportingText: (@Composable ColumnScope.() -> Unit)? = null,
@@ -223,21 +234,28 @@ internal fun TranslatableBlocksCard(
     translatedTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
     translatedTextColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
+  val effectiveTranslationState =
+      if (translationEnabled) {
+        translationState
+      } else {
+        translationState.copy(showTranslation = false)
+      }
   DetailSectionCardSurface(modifier = modifier) {
     TranslatableSectionTitleRow(
         title = title,
-        translating = translationState.translating,
+        translating = effectiveTranslationState.translating,
         onTranslate = onTranslate,
         modifier = Modifier.fillMaxWidth(),
         titleMaxLines = titleMaxLines,
-        translateActive = translationState.showTranslation,
-        showWrapText = !translationState.showTranslation,
-        wrapTextActive = translationState.isWrapped,
+        translateActive = effectiveTranslationState.showTranslation,
+        showWrapText = !effectiveTranslationState.showTranslation,
+        wrapTextActive = effectiveTranslationState.isWrapped,
         onWrapText = onToggleWrapText,
+        translationEnabled = translationEnabled,
     )
     supportingText?.invoke(this)
     TranslatableHtmlBlockContent(
-        blocks = translationState.blocks,
+        blocks = effectiveTranslationState.blocks,
         emptyText = emptyText,
         originalTextStyle = originalTextStyle,
         originalTextColor = originalTextColor,
@@ -350,7 +368,7 @@ internal fun TranslatableHtmlBlockContent(
 
         SubmissionDescriptionTranslationStatus.EMPTY -> {
           Text(
-              text = "翻译结果为空",
+              text = stringResource(Res.string.translation_empty),
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
@@ -358,7 +376,7 @@ internal fun TranslatableHtmlBlockContent(
 
         SubmissionDescriptionTranslationStatus.FAILURE -> {
           Text(
-              text = "翻译失败",
+              text = stringResource(Res.string.translation_failed),
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.error,
           )
@@ -388,6 +406,7 @@ internal fun TranslatableHtmlBlockSection(
     originalTextColor: Color,
     translatedTextStyle: TextStyle,
     translatedTextColor: Color,
+    translationEnabled: Boolean = true,
     modifier: Modifier = Modifier,
     onTranslateRequested: () -> Unit = {},
 ) {
@@ -402,10 +421,13 @@ internal fun TranslatableHtmlBlockSection(
         title = title,
         translating = translationController.translating,
         onTranslate = {
-          translationController.translate()
-          onTranslateRequested()
+          if (translationEnabled) {
+            translationController.translate()
+            onTranslateRequested()
+          }
         },
         modifier = Modifier.fillMaxWidth(),
+        translationEnabled = translationEnabled,
     )
 
     TranslatableHtmlBlockContent(

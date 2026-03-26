@@ -1,13 +1,23 @@
 package me.domino.fa2.ui.pages.settings
 
+import fa2.shared.generated.resources.*
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
+import me.domino.fa2.data.settings.MetadataDisplayMode
 import me.domino.fa2.data.settings.OpenAiTranslationConfig
 import me.domino.fa2.data.settings.ThemeMode
 import me.domino.fa2.data.settings.TranslationProvider
+import me.domino.fa2.data.settings.TranslationTargetLanguage
+import me.domino.fa2.data.settings.UiLanguageSetting
+import me.domino.fa2.i18n.appString
+import me.domino.fa2.i18n.mustBeInRangeText
 
 internal data class SettingsDraft(
+    val uiLanguage: UiLanguageSetting,
+    val translationEnabled: Boolean,
+    val translationTargetLanguage: TranslationTargetLanguage,
+    val metadataDisplayMode: MetadataDisplayMode,
     val translationProvider: TranslationProvider,
     val themeMode: ThemeMode,
     val blockedSubmissionWaterfallMode: BlockedSubmissionWaterfallMode,
@@ -26,6 +36,10 @@ internal data class SettingsDraft(
     val waterfallWidth = waterfallMinCardWidthInput.toIntOrNull() ?: return null
 
     return AppSettings(
+        uiLanguage = uiLanguage,
+        translationEnabled = translationEnabled,
+        translationTargetLanguage = translationTargetLanguage,
+        metadataDisplayMode = metadataDisplayMode,
         translationProvider = translationProvider,
         themeMode = themeMode,
         blockedSubmissionWaterfallMode = blockedSubmissionWaterfallMode,
@@ -49,50 +63,94 @@ internal data class SettingsDraft(
   }
 
   fun validate(): String? {
-    val chunkWordLimit = chunkWordLimitInput.toIntOrNull() ?: return "Chunk Word Limit 必须是数字"
-    val maxConcurrency = maxConcurrencyInput.toIntOrNull() ?: return "Max Concurrency 必须是数字"
-    val waterfallWidth = waterfallMinCardWidthInput.toIntOrNull() ?: return "瀑布流最小列宽必须是数字"
+    val chunkWordLimitLabel = appString(Res.string.chunk_word_limit)
+    val maxConcurrencyLabel = appString(Res.string.max_concurrency)
+    val waterfallMinColumnWidthLabel = appString(Res.string.waterfall_min_column_width_dp)
+    val themeModeLabel = appString(Res.string.theme_mode)
+    val appLanguageLabel = appString(Res.string.app_language)
+    val translationTargetLanguageLabel = appString(Res.string.translation_target_language)
+    val metadataDisplayLabel = appString(Res.string.metadata_display)
+    val blurInWaterfallsLabel = appString(Res.string.blur_blocked_submissions_in_waterfalls)
+    val blurInDetailPagesLabel = appString(Res.string.blur_blocked_submissions_in_detail_pages)
+    val baseUrlLabel = appString(Res.string.base_url)
+    val apiKeyLabel = appString(Res.string.api_key)
+    val modelLabel = appString(Res.string.model)
+    val promptTemplateLabel = appString(Res.string.prompt_template)
+
+    val chunkWordLimit =
+        chunkWordLimitInput.toIntOrNull()
+            ?: return appString(Res.string.must_be_number, chunkWordLimitLabel)
+    val maxConcurrency =
+        maxConcurrencyInput.toIntOrNull()
+            ?: return appString(Res.string.must_be_number, maxConcurrencyLabel)
+    val waterfallWidth =
+        waterfallMinCardWidthInput.toIntOrNull()
+            ?: return appString(Res.string.must_be_number, waterfallMinColumnWidthLabel)
 
     if (themeMode !in AppSettings.supportedThemeModes) {
-      return "主题模式不受支持"
+      return appString(Res.string.unsupported_setting, themeModeLabel)
+    }
+    if (uiLanguage !in AppSettings.supportedUiLanguages) {
+      return appString(Res.string.unsupported_setting, appLanguageLabel)
+    }
+    if (translationTargetLanguage !in AppSettings.supportedTranslationTargetLanguages) {
+      return appString(Res.string.unsupported_setting, translationTargetLanguageLabel)
+    }
+    if (metadataDisplayMode !in AppSettings.supportedMetadataDisplayModes) {
+      return appString(Res.string.unsupported_setting, metadataDisplayLabel)
     }
     if (blockedSubmissionWaterfallMode !in AppSettings.supportedBlockedSubmissionWaterfallModes) {
-      return "瀑布流屏蔽策略不受支持"
+      return appString(Res.string.unsupported_setting, blurInWaterfallsLabel)
     }
     if (blockedSubmissionPagerMode !in AppSettings.supportedBlockedSubmissionPagerModes) {
-      return "左右滑屏蔽策略不受支持"
+      return appString(Res.string.unsupported_setting, blurInDetailPagesLabel)
     }
 
     if (
         chunkWordLimit !in
             AppSettings.minTranslationChunkWordLimit..AppSettings.maxTranslationChunkWordLimit
     ) {
-      return "Chunk Word Limit 需在 ${AppSettings.minTranslationChunkWordLimit}-${AppSettings.maxTranslationChunkWordLimit}"
+      return mustBeInRangeText(
+          chunkWordLimitLabel,
+          AppSettings.minTranslationChunkWordLimit,
+          AppSettings.maxTranslationChunkWordLimit,
+      )
     }
 
     if (
         maxConcurrency !in
             AppSettings.minTranslationMaxConcurrency..AppSettings.maxTranslationMaxConcurrency
     ) {
-      return "Max Concurrency 需在 ${AppSettings.minTranslationMaxConcurrency}-${AppSettings.maxTranslationMaxConcurrency}"
+      return mustBeInRangeText(
+          maxConcurrencyLabel,
+          AppSettings.minTranslationMaxConcurrency,
+          AppSettings.maxTranslationMaxConcurrency,
+      )
     }
 
     if (
         waterfallWidth !in
             AppSettings.minWaterfallMinCardWidthDp..AppSettings.maxWaterfallMinCardWidthDp
     ) {
-      return "瀑布流最小列宽需在 ${AppSettings.minWaterfallMinCardWidthDp}-${AppSettings.maxWaterfallMinCardWidthDp} dp"
+      return mustBeInRangeText(
+          waterfallMinColumnWidthLabel,
+          AppSettings.minWaterfallMinCardWidthDp,
+          AppSettings.maxWaterfallMinCardWidthDp,
+          suffix = "dp",
+      )
     }
 
-    if (translationProvider == TranslationProvider.OPENAI_COMPATIBLE) {
+    if (translationEnabled && translationProvider == TranslationProvider.OPENAI_COMPATIBLE) {
       val baseUrl = openAiBaseUrl.trim()
-      if (baseUrl.isBlank()) return "Base URL 不能为空"
+      if (baseUrl.isBlank()) return appString(Res.string.cannot_be_empty, baseUrlLabel)
       if (!baseUrl.startsWith("https://") && !baseUrl.startsWith("http://")) {
-        return "Base URL 必须以 http:// 或 https:// 开头"
+        return appString(Res.string.must_start_with_http_or_https, baseUrlLabel)
       }
-      if (openAiApiKey.isBlank()) return "API Key 不能为空"
-      if (openAiModel.isBlank()) return "Model 不能为空"
-      if (openAiPromptTemplate.isBlank()) return "Prompt Template 不能为空"
+      if (openAiApiKey.isBlank()) return appString(Res.string.cannot_be_empty, apiKeyLabel)
+      if (openAiModel.isBlank()) return appString(Res.string.cannot_be_empty, modelLabel)
+      if (openAiPromptTemplate.isBlank()) {
+        return appString(Res.string.cannot_be_empty, promptTemplateLabel)
+      }
     }
 
     return null
@@ -101,6 +159,10 @@ internal data class SettingsDraft(
   companion object {
     fun fromSettings(settings: AppSettings): SettingsDraft =
         SettingsDraft(
+            uiLanguage = settings.uiLanguage,
+            translationEnabled = settings.translationEnabled,
+            translationTargetLanguage = settings.translationTargetLanguage,
+            metadataDisplayMode = settings.metadataDisplayMode,
             translationProvider = settings.translationProvider,
             themeMode = settings.themeMode,
             blockedSubmissionWaterfallMode = settings.blockedSubmissionWaterfallMode,

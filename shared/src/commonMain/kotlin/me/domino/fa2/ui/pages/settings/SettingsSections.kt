@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
@@ -19,23 +20,34 @@ import me.domino.fa2.data.settings.TranslationProvider
 import me.domino.fa2.ui.components.settings.SettingsDropdownField
 import me.domino.fa2.ui.components.settings.SettingsGroup
 import me.domino.fa2.ui.components.settings.SettingsSwitchRow
+import me.domino.fa2.ui.host.LocalAppI18n
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun AppearanceSettingsSection(
     draft: SettingsDraft,
     onDraftChange: (SettingsDraft) -> Unit,
 ) {
-  SettingsGroup(title = "外观", framed = false) {
+  val appI18n = LocalAppI18n.current
+  SettingsGroup(title = stringResource(Res.string.appearance), framed = false) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       SettingsDropdownField(
-          label = "主题模式",
+          label = stringResource(Res.string.theme_mode),
           selected = draft.themeMode,
           options = AppSettings.supportedThemeModes,
-          optionLabel = ::themeModeLabel,
+          optionLabel = { option -> themeModeLabel(option) },
           onSelect = { selected -> onDraftChange(draft.copy(themeMode = selected)) },
+      )
+
+      SettingsDropdownField(
+          label = stringResource(Res.string.app_language),
+          selected = draft.uiLanguage,
+          options = AppSettings.supportedUiLanguages,
+          optionLabel = { option -> uiLanguageLabel(option) },
+          onSelect = { selected -> onDraftChange(draft.copy(uiLanguage = selected)) },
       )
 
       OutlinedTextField(
@@ -43,10 +55,14 @@ internal fun AppearanceSettingsSection(
           onValueChange = { next ->
             onDraftChange(draft.copy(waterfallMinCardWidthInput = next.filter(Char::isDigit)))
           },
-          label = { Text("瀑布流单列最小宽度 (dp)") },
+          label = { Text(stringResource(Res.string.waterfall_min_column_width_dp)) },
           supportingText = {
             Text(
-                "范围 ${AppSettings.minWaterfallMinCardWidthDp}-${AppSettings.maxWaterfallMinCardWidthDp}，在此基础上自动布局列数"
+                stringResource(
+                    Res.string.waterfall_min_column_width_range,
+                    AppSettings.minWaterfallMinCardWidthDp,
+                    AppSettings.maxWaterfallMinCardWidthDp,
+                )
             )
           },
           modifier = Modifier.fillMaxWidth(),
@@ -62,17 +78,42 @@ internal fun TranslationSettingsSection(
     showApiKey: Boolean,
     onToggleShowApiKey: () -> Unit,
 ) {
-  SettingsGroup(title = "翻译", framed = false) {
+  val appI18n = LocalAppI18n.current
+  SettingsGroup(title = stringResource(Res.string.translation), framed = false) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       SettingsDropdownField(
-          label = "Provider",
+          label = stringResource(Res.string.provider),
           selected = draft.translationProvider,
           options = AppSettings.supportedTranslationProviders,
-          optionLabel = ::translationProviderLabel,
+          optionLabel = { option -> translationProviderLabel(option) },
           onSelect = { selected -> onDraftChange(draft.copy(translationProvider = selected)) },
+      )
+
+      SettingsSwitchRow(
+          label = stringResource(Res.string.enable_translation),
+          checked = draft.translationEnabled,
+          onCheckedChange = { enabled -> onDraftChange(draft.copy(translationEnabled = enabled)) },
+      )
+
+      SettingsDropdownField(
+          label = stringResource(Res.string.translation_target_language),
+          selected = draft.translationTargetLanguage,
+          options = AppSettings.supportedTranslationTargetLanguages,
+          optionLabel = { option -> translationTargetLanguageLabel(option) },
+          onSelect = { selected ->
+            onDraftChange(draft.copy(translationTargetLanguage = selected))
+          },
+      )
+
+      SettingsDropdownField(
+          label = stringResource(Res.string.metadata_display),
+          selected = draft.metadataDisplayMode,
+          options = AppSettings.supportedMetadataDisplayModes,
+          optionLabel = { option -> metadataDisplayModeLabel(option) },
+          onSelect = { selected -> onDraftChange(draft.copy(metadataDisplayMode = selected)) },
       )
 
       OutlinedTextField(
@@ -80,10 +121,14 @@ internal fun TranslationSettingsSection(
           onValueChange = { next ->
             onDraftChange(draft.copy(chunkWordLimitInput = next.filter(Char::isDigit)))
           },
-          label = { Text("Chunk Word Limit") },
+          label = { Text(stringResource(Res.string.chunk_word_limit)) },
           supportingText = {
             Text(
-                "范围 ${AppSettings.minTranslationChunkWordLimit}-${AppSettings.maxTranslationChunkWordLimit}"
+                stringResource(
+                    Res.string.numeric_range,
+                    AppSettings.minTranslationChunkWordLimit,
+                    AppSettings.maxTranslationChunkWordLimit,
+                )
             )
           },
           modifier = Modifier.fillMaxWidth(),
@@ -94,27 +139,34 @@ internal fun TranslationSettingsSection(
           onValueChange = { next ->
             onDraftChange(draft.copy(maxConcurrencyInput = next.filter(Char::isDigit)))
           },
-          label = { Text("Max Concurrency") },
+          label = { Text(stringResource(Res.string.max_concurrency)) },
           supportingText = {
             Text(
-                "范围 ${AppSettings.minTranslationMaxConcurrency}-${AppSettings.maxTranslationMaxConcurrency}"
+                stringResource(
+                    Res.string.numeric_range,
+                    AppSettings.minTranslationMaxConcurrency,
+                    AppSettings.maxTranslationMaxConcurrency,
+                )
             )
           },
           modifier = Modifier.fillMaxWidth(),
       )
 
-      if (draft.translationProvider == TranslationProvider.OPENAI_COMPATIBLE) {
+      if (
+          draft.translationEnabled &&
+              draft.translationProvider == TranslationProvider.OPENAI_COMPATIBLE
+      ) {
         OutlinedTextField(
             value = draft.openAiBaseUrl,
             onValueChange = { next -> onDraftChange(draft.copy(openAiBaseUrl = next)) },
-            label = { Text("Base URL") },
+            label = { Text(stringResource(Res.string.base_url)) },
             modifier = Modifier.fillMaxWidth(),
         )
 
         OutlinedTextField(
             value = draft.openAiApiKey,
             onValueChange = { next -> onDraftChange(draft.copy(openAiApiKey = next)) },
-            label = { Text("API Key") },
+            label = { Text(stringResource(Res.string.api_key)) },
             visualTransformation =
                 if (showApiKey) {
                   VisualTransformation.None
@@ -122,7 +174,12 @@ internal fun TranslationSettingsSection(
                   PasswordVisualTransformation()
                 },
             trailingIcon = {
-              TextButton(onClick = onToggleShowApiKey) { Text(if (showApiKey) "隐藏" else "显示") }
+              TextButton(onClick = onToggleShowApiKey) {
+                Text(
+                    if (showApiKey) stringResource(Res.string.hide)
+                    else stringResource(Res.string.show)
+                )
+              }
             },
             modifier = Modifier.fillMaxWidth(),
         )
@@ -130,15 +187,15 @@ internal fun TranslationSettingsSection(
         OutlinedTextField(
             value = draft.openAiModel,
             onValueChange = { next -> onDraftChange(draft.copy(openAiModel = next)) },
-            label = { Text("Model") },
+            label = { Text(stringResource(Res.string.model)) },
             modifier = Modifier.fillMaxWidth(),
         )
 
         OutlinedTextField(
             value = draft.openAiPromptTemplate,
             onValueChange = { next -> onDraftChange(draft.copy(openAiPromptTemplate = next)) },
-            label = { Text("Prompt Template") },
-            supportingText = { Text("支持 [INPUT] [TARGET_LANG] [SEPARATOR]") },
+            label = { Text(stringResource(Res.string.prompt_template)) },
+            supportingText = { Text(stringResource(Res.string.prompt_template_variables_hint)) },
             minLines = 5,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -152,13 +209,13 @@ internal fun BlockedContentSettingsSection(
     draft: SettingsDraft,
     onDraftChange: (SettingsDraft) -> Unit,
 ) {
-  SettingsGroup(title = "屏蔽内容", framed = false) {
+  SettingsGroup(title = stringResource(Res.string.blocked_content), framed = false) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       SettingsSwitchRow(
-          label = "瀑布流中模糊显示被屏蔽的投稿",
+          label = stringResource(Res.string.blur_blocked_submissions_in_waterfalls),
           checked =
               draft.blockedSubmissionWaterfallMode == BlockedSubmissionWaterfallMode.BLUR_THEN_OPEN,
           onCheckedChange = { enabled ->
@@ -175,7 +232,7 @@ internal fun BlockedContentSettingsSection(
           },
       )
       SettingsSwitchRow(
-          label = "详情页中模糊显示被屏蔽的投稿",
+          label = stringResource(Res.string.blur_blocked_submissions_in_detail_pages),
           checked = draft.blockedSubmissionPagerMode == BlockedSubmissionPagerMode.BLUR_THEN_OPEN,
           onCheckedChange = { enabled ->
             onDraftChange(

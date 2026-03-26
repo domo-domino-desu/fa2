@@ -1,6 +1,7 @@
 package me.domino.fa2.ui.pages.search
 
 import co.touchlab.kermit.Logger
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -8,7 +9,11 @@ import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.repository.SearchRepository
+import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
+import me.domino.fa2.i18n.AppI18nSnapshot
+import me.domino.fa2.i18n.SystemLanguageProvider
+import me.domino.fa2.i18n.appString
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.state.PaginationStateMachine
@@ -137,13 +142,17 @@ internal class SearchQueryStateCoordinator(
 
 internal class SearchHistoryCoordinator(
     private val historyRepository: ActivityHistoryRepository,
+    private val settingsService: AppSettingsService,
+    private val systemLanguageProvider: SystemLanguageProvider,
     private val taxonomyRepository: FaTaxonomyRepository,
     private val searchUiLabelsRepository: SearchUiLabelsRepository,
 ) {
   suspend fun recordAppliedSearch(request: SearchAppliedRequest) {
+    val appI18n = AppI18nSnapshot.from(settingsService.settings.value, systemLanguageProvider)
     val filtersSummary =
         buildSearchFiltersSummary(
             request.applied,
+            appI18n,
             taxonomyRepository,
             searchUiLabelsRepository,
         )
@@ -299,6 +308,8 @@ internal class SearchScreenWorkflow(
     repository: SearchRepository,
     submissionListHolder: SubmissionListHolder,
     historyRepository: ActivityHistoryRepository,
+    settingsService: AppSettingsService,
+    systemLanguageProvider: SystemLanguageProvider,
     taxonomyRepository: FaTaxonomyRepository,
     searchUiLabelsRepository: SearchUiLabelsRepository,
     private val screenModelScope: CoroutineScope,
@@ -315,6 +326,8 @@ internal class SearchScreenWorkflow(
   private val historyCoordinator =
       SearchHistoryCoordinator(
           historyRepository = historyRepository,
+          settingsService = settingsService,
+          systemLanguageProvider = systemLanguageProvider,
           taxonomyRepository = taxonomyRepository,
           searchUiLabelsRepository = searchUiLabelsRepository,
       )
@@ -324,7 +337,11 @@ internal class SearchScreenWorkflow(
           submissionListHolder = submissionListHolder,
           log = log,
           paginationStateMachine =
-              PaginationStateMachine<SubmissionThumbnail, Int>(keyOf = { item -> item.id }),
+              PaginationStateMachine<SubmissionThumbnail, Int>(
+                  keyOf = { item -> item.id },
+                  challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
+                  appendFallbackErrorMessage = { appString(Res.string.load_failed_please_retry) },
+              ),
           screenModelScope = screenModelScope,
           stateProvider = stateProvider,
           stateSink = stateSink,

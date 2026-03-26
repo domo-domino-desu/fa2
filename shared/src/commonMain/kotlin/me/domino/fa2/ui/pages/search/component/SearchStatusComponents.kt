@@ -14,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun SearchHint(text: String, modifier: Modifier = Modifier) {
@@ -48,7 +50,7 @@ internal fun SearchStatusCard(title: String, body: String, onRetry: () -> Unit) 
           style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-      Button(onClick = onRetry) { Text("重试") }
+      Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
     }
   }
 }

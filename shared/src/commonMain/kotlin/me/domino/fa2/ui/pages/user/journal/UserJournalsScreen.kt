@@ -34,6 +34,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.JournalSummary
@@ -48,6 +49,7 @@ import me.domino.fa2.ui.pages.user.profile.resolveUserSharedTopScrollState
 import me.domino.fa2.ui.pages.user.profile.shouldStickUserSectionTabs
 import me.domino.fa2.ui.pages.user.profile.userJournalsScrollLayout
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
+import org.jetbrains.compose.resources.stringResource
 
 /** Journals 子页。 */
 @Composable
@@ -202,7 +204,7 @@ internal fun UserJournalsScreen(
           !state.errorMessage.isNullOrBlank() && state.journals.isEmpty() -> {
             item(key = "journals-blocking-error") {
               UserJournalsStatusCard(
-                  title = "加载失败",
+                  title = stringResource(Res.string.load_failed),
                   body = state.errorMessage.orEmpty(),
                   onRetry = onRetry,
               )
@@ -217,7 +219,7 @@ internal fun UserJournalsScreen(
             if (!inlineError.isNullOrBlank()) {
               item(key = "journals-inline-error") {
                 UserJournalsStatusCard(
-                    title = "加载失败",
+                    title = stringResource(Res.string.load_failed),
                     body = inlineError,
                     onRetry = onRetry,
                 )
@@ -298,7 +300,8 @@ private fun JournalSummaryCard(item: JournalSummary, onClick: () -> Unit) {
           fontWeight = FontWeight.SemiBold,
       )
       Text(
-          text = "${item.timestampNatural} · ${item.commentCount} 评论",
+          text =
+              "${item.timestampNatural} · ${stringResource(Res.string.comments_inline_count, item.commentCount)}",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
@@ -333,10 +336,11 @@ private fun UserJournalsFooter(
       Text(
           text =
               when {
-                isLoadingMore -> "正在自动加载更多内容"
-                !appendErrorMessage.isNullOrBlank() && hasMore -> "自动加载失败，可手动加载下一页"
-                hasMore -> "继续浏览将自动加载下一页"
-                else -> "已经到达末页"
+                isLoadingMore -> stringResource(Res.string.loading_more_content)
+                !appendErrorMessage.isNullOrBlank() && hasMore ->
+                    stringResource(Res.string.auto_load_failed_manual_next_page)
+                hasMore -> stringResource(Res.string.continue_auto_load_next_page)
+                else -> stringResource(Res.string.reached_end)
               },
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -344,7 +348,16 @@ private fun UserJournalsFooter(
       if (hasMore && !isLoadingMore) {
         AssistChip(
             onClick = onRetryLoadMore,
-            label = { Text(text = if (appendErrorMessage.isNullOrBlank()) "加载下一页" else "手动加载") },
+            label = {
+              Text(
+                  text =
+                      if (appendErrorMessage.isNullOrBlank()) {
+                        stringResource(Res.string.load_next_page)
+                      } else {
+                        stringResource(Res.string.manual_load)
+                      }
+              )
+            },
         )
       }
     }
@@ -373,7 +386,7 @@ private fun UserJournalsStatusCard(title: String, body: String, onRetry: () -> U
           style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-      Button(onClick = onRetry) { Text("重试") }
+      Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
     }
   }
 }

@@ -10,10 +10,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.components.settings.SettingsAccountHeader
 import me.domino.fa2.ui.components.settings.SettingsGroup
 import me.domino.fa2.ui.components.settings.SettingsListItem
 import me.domino.fa2.ui.icons.FaMaterialSymbols
+import org.jetbrains.compose.resources.stringResource
 
 /** More 页面。 */
 @Composable
@@ -36,7 +38,7 @@ fun MoreScreen(
   when (state) {
     MoreUiState.Loading -> {
       Text(
-          text = "正在加载账号信息...",
+          text = stringResource(Res.string.loading_account_info),
           style = MaterialTheme.typography.bodyMedium,
           modifier = Modifier.padding(horizontal = 12.dp, vertical = 14.dp),
       )
@@ -82,7 +84,7 @@ private fun MoreContent(
     item {
       SettingsAccountHeader(
           title = state.username,
-          subtitle = "账号中心",
+          subtitle = stringResource(Res.string.account_center),
           onClick = onOpenUser,
           modifier = Modifier.padding(top = 4.dp),
       )
@@ -91,46 +93,46 @@ private fun MoreContent(
       SettingsGroup(titleHorizontalPadding = 0.dp, containerHorizontalPadding = 0.dp) {
         SettingsListItem(
             icon = FaMaterialSymbols.Filled.History,
-            title = "浏览记录",
+            title = stringResource(Res.string.submission_history),
             subtitle =
                 if (state.submissionHistoryCount > 0) {
-                  "共 ${state.submissionHistoryCount} 条，点击查看"
+                  stringResource(Res.string.record_count, state.submissionHistoryCount)
                 } else {
-                  "暂无记录"
+                  stringResource(Res.string.no_records)
                 },
             onClick = onOpenSubmissionHistory,
         )
         SettingsListItem(
             icon = FaMaterialSymbols.Filled.Search,
-            title = "搜索记录",
+            title = stringResource(Res.string.search_history),
             subtitle =
                 if (state.searchHistoryCount > 0) {
-                  "共 ${state.searchHistoryCount} 条，点击查看"
+                  stringResource(Res.string.record_count, state.searchHistoryCount)
                 } else {
-                  "暂无记录"
+                  stringResource(Res.string.no_records)
                 },
             onClick = onOpenSearchHistory,
         )
         SettingsListItem(
             icon = FaMaterialSymbols.Filled.Settings,
-            title = "设置",
-            subtitle = "主题、瀑布流列宽与翻译设置",
+            title = stringResource(Res.string.settings),
+            subtitle = stringResource(Res.string.settings_summary),
             onClick = onOpenSettings,
         )
         SettingsListItem(
             icon = FaMaterialSymbols.Filled.Info,
-            title = "开源许可",
-            subtitle = "查看本应用使用的开源库与许可证",
+            title = stringResource(Res.string.about),
+            subtitle = stringResource(Res.string.about_summary),
             onClick = onOpenAbout,
         )
         SettingsListItem(
             icon = FaMaterialSymbols.AutoMirrored.Filled.Logout,
-            title = "退出登录",
+            title = stringResource(Res.string.logout),
             subtitle =
                 if (state.loggingOut) {
-                  "正在清除 Cookie..."
+                  stringResource(Res.string.clearing_cookie)
                 } else {
-                  "清除 Cookie"
+                  stringResource(Res.string.clear_cookie)
                 },
             onClick = {
               if (!state.loggingOut) {

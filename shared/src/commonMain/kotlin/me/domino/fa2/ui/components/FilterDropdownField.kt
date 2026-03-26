@@ -41,7 +41,9 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.icons.FaMaterialSymbols
+import org.jetbrains.compose.resources.stringResource
 
 /** 通用筛选下拉项。 */
 data class FilterOption<T>(val value: T, val label: String)
@@ -232,7 +234,7 @@ fun <T> GroupedTextPickerDialog(
                 IconButton(onClick = onDismissRequest) {
                   Icon(
                       imageVector = FaMaterialSymbols.Filled.Close,
-                      contentDescription = "关闭",
+                      contentDescription = stringResource(Res.string.close),
                       tint = MaterialTheme.colorScheme.onSurfaceVariant,
                   )
                 }

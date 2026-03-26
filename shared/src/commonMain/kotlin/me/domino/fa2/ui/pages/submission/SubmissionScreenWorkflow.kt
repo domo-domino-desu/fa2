@@ -1,6 +1,7 @@
 package me.domino.fa2.ui.pages.submission
 
 import co.touchlab.kermit.Logger
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -12,8 +13,11 @@ import me.domino.fa2.application.translation.SubmissionDescriptionTranslationSer
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.domain.attachmenttext.deriveAttachmentFileName
+import me.domino.fa2.i18n.SystemLanguageProvider
+import me.domino.fa2.i18n.appString
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.state.PaginationSnapshot
 import me.domino.fa2.ui.state.PaginationStateMachine
@@ -39,6 +43,8 @@ internal class SubmissionScreenWorkflow(
     private val feedSource: SubmissionPagerFeedSource,
     private val submissionSource: SubmissionPagerDetailSource,
     private val translationService: SubmissionDescriptionTranslationService,
+    private val settingsService: AppSettingsService? = null,
+    private val systemLanguageProvider: SystemLanguageProvider? = null,
     private val screenModelScope: CoroutineScope,
     private val log: Logger,
     private val stateSink: (SubmissionPagerUiState) -> Unit,
@@ -46,7 +52,11 @@ internal class SubmissionScreenWorkflow(
     private val toastSink: (String) -> Unit,
 ) {
   private val paginationStateMachine =
-      PaginationStateMachine<SubmissionThumbnail, Int>(keyOf = { item -> item.id })
+      PaginationStateMachine<SubmissionThumbnail, Int>(
+          keyOf = { item -> item.id },
+          challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
+          appendFallbackErrorMessage = { appString(Res.string.load_failed_please_retry) },
+      )
 
   private val detailBySid: MutableMap<Int, SubmissionDetailUiState> = mutableMapOf()
   private val scrollOffsetBySid: MutableMap<Int, Int> = mutableMapOf()
@@ -160,7 +170,7 @@ internal class SubmissionScreenWorkflow(
               attachmentTextState =
                   SubmissionAttachmentTextUiState.Error(
                       fileName = fileName,
-                      message = "缺少附件下载地址",
+                      message = appString(Res.string.missing_attachment_download_url),
                   ),
               attachmentTranslationState = null,
           )
@@ -174,7 +184,12 @@ internal class SubmissionScreenWorkflow(
             attachmentTextState =
                 SubmissionAttachmentTextUiState.Loading(
                     fileName = fileName,
-                    progress = initialAttachmentTextProgress(fileName),
+                    progress =
+                        initialAttachmentTextProgress(
+                            fileName = fileName,
+                            settingsService = settingsService,
+                            systemLanguageProvider = systemLanguageProvider,
+                        ),
                 ),
             attachmentTranslationState = null,
         )
@@ -225,7 +240,7 @@ internal class SubmissionScreenWorkflow(
                     attachmentTextState =
                         SubmissionAttachmentTextUiState.Error(
                             fileName = fileName,
-                            message = "需要 Cloudflare 验证",
+                            message = appString(Res.string.cloudflare_challenge_title),
                         ),
                     attachmentTranslationState = null,
                 )
@@ -319,7 +334,8 @@ internal class SubmissionScreenWorkflow(
                               favoriteActionUrl = guessNextFavoriteActionUrl(actionUrl)
                           ),
                       favoriteUpdating = false,
-                      favoriteErrorMessage = "收藏已提交，但状态同步需要 Cloudflare 验证",
+                      favoriteErrorMessage =
+                          appString(Res.string.favorite_submitted_but_refresh_needs_cloudflare),
                   )
               log.w { "收藏操作 -> 已提交, 但刷新需要Cloudflare验证(sid=$sid)" }
             }
@@ -332,7 +348,11 @@ internal class SubmissionScreenWorkflow(
                               favoriteActionUrl = guessNextFavoriteActionUrl(actionUrl)
                           ),
                       favoriteUpdating = false,
-                      favoriteErrorMessage = "收藏已提交，但状态同步失败：${refreshed.reason}",
+                      favoriteErrorMessage =
+                          appString(
+                              Res.string.favorite_submitted_but_refresh_failed,
+                              refreshed.reason,
+                          ),
                   )
               log.w { "收藏操作 -> 已提交, 但刷新受限(sid=$sid,reason=${refreshed.reason})" }
             }
@@ -346,7 +366,10 @@ internal class SubmissionScreenWorkflow(
                           ),
                       favoriteUpdating = false,
                       favoriteErrorMessage =
-                          "收藏已提交，但状态同步失败：${refreshed.exception.message ?: refreshed.exception}",
+                          appString(
+                              Res.string.favorite_submitted_but_refresh_failed,
+                              refreshed.exception.message ?: refreshed.exception.toString(),
+                          ),
                   )
               log.e(refreshed.exception) { "收藏操作 -> 已提交, 但刷新失败(sid=$sid)" }
             }
@@ -360,7 +383,7 @@ internal class SubmissionScreenWorkflow(
               currentState.copy(
                   detail = originalDetail,
                   favoriteUpdating = false,
-                  favoriteErrorMessage = "需要 Cloudflare 验证",
+                  favoriteErrorMessage = appString(Res.string.cloudflare_challenge_title),
               )
           log.w { "收藏操作 -> Cloudflare验证(sid=$sid)" }
         }
@@ -424,9 +447,12 @@ internal class SubmissionScreenWorkflow(
 
             val refreshedNonce = refreshed.data.tagBlockNonce.trim()
             if (refreshedNonce.isBlank()) {
-              detailBySid[sid] = refreshedState.copy(favoriteErrorMessage = "当前页面缺少标签屏蔽凭据")
+              detailBySid[sid] =
+                  refreshedState.copy(
+                      favoriteErrorMessage = appString(Res.string.missing_tag_block_credentials)
+                  )
               publishState()
-              emitToast("缺少标签屏蔽凭据")
+              emitToast(appString(Res.string.missing_tag_block_credentials))
               log.w { "标签屏蔽 -> 缺少凭据(sid=$sid)" }
               return@launch
             }
@@ -440,25 +466,43 @@ internal class SubmissionScreenWorkflow(
           }
 
           PageState.CfChallenge -> {
-            detailBySid[sid] = currentState.copy(favoriteErrorMessage = "刷新详情失败：需要 Cloudflare 验证")
+            detailBySid[sid] =
+                currentState.copy(
+                    favoriteErrorMessage =
+                        appString(
+                            Res.string.refresh_details_failed,
+                            appString(Res.string.cloudflare_challenge_title),
+                        )
+                )
             publishState()
-            emitToast("刷新详情失败：需要 Cloudflare 验证")
+            emitToast(
+                appString(
+                    Res.string.refresh_details_failed,
+                    appString(Res.string.cloudflare_challenge_title),
+                )
+            )
             log.w { "标签屏蔽 -> 刷新详情需Cloudflare验证(sid=$sid)" }
           }
 
           is PageState.MatureBlocked -> {
             detailBySid[sid] =
-                currentState.copy(favoriteErrorMessage = "刷新详情失败：${refreshed.reason}")
+                currentState.copy(
+                    favoriteErrorMessage =
+                        appString(Res.string.refresh_details_failed, refreshed.reason)
+                )
             publishState()
-            emitToast("刷新详情失败：${refreshed.reason}")
+            emitToast(appString(Res.string.refresh_details_failed, refreshed.reason))
             log.w { "标签屏蔽 -> 刷新详情受限(sid=$sid,reason=${refreshed.reason})" }
           }
 
           is PageState.Error -> {
             val message = refreshed.exception.message ?: refreshed.exception.toString()
-            detailBySid[sid] = currentState.copy(favoriteErrorMessage = "刷新详情失败：$message")
+            detailBySid[sid] =
+                currentState.copy(
+                    favoriteErrorMessage = appString(Res.string.refresh_details_failed, message)
+                )
             publishState()
-            emitToast("刷新详情失败：$message")
+            emitToast(appString(Res.string.refresh_details_failed, message))
             log.e(refreshed.exception) { "标签屏蔽 -> 刷新详情失败(sid=$sid)" }
           }
 
@@ -512,21 +556,27 @@ internal class SubmissionScreenWorkflow(
                 blockedKeywords = latestBlocked.toSet(),
                 favoriteErrorMessage = null,
             )
-        emitToast(if (toAdd) "已屏蔽标签：$tagName" else "已解除屏蔽：$tagName")
+        emitToast(
+            if (toAdd) appString(Res.string.tag_blocked, tagName)
+            else appString(Res.string.tag_unblocked, tagName)
+        )
         log.i { "标签屏蔽 -> 成功(sid=$sid,tag=$tagName,toAdd=$toAdd)" }
       }
 
       PageState.CfChallenge -> {
         val latest = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return
-        detailBySid[sid] = latest.copy(favoriteErrorMessage = "需要 Cloudflare 验证")
-        emitToast("屏蔽失败：需要 Cloudflare 验证")
+        detailBySid[sid] =
+            latest.copy(favoriteErrorMessage = appString(Res.string.cloudflare_challenge_title))
+        emitToast(
+            appString(Res.string.tag_block_failed, appString(Res.string.cloudflare_challenge_title))
+        )
         log.w { "标签屏蔽 -> Cloudflare验证(sid=$sid,tag=$tagName)" }
       }
 
       is PageState.MatureBlocked -> {
         val latest = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return
         detailBySid[sid] = latest.copy(favoriteErrorMessage = blocked.reason)
-        emitToast("屏蔽失败：${blocked.reason}")
+        emitToast(appString(Res.string.tag_block_failed, blocked.reason))
         log.w { "标签屏蔽 -> 受限(sid=$sid,tag=$tagName,reason=${blocked.reason})" }
       }
 
@@ -536,7 +586,12 @@ internal class SubmissionScreenWorkflow(
             latest.copy(
                 favoriteErrorMessage = blocked.exception.message ?: blocked.exception.toString()
             )
-        emitToast("屏蔽失败：${blocked.exception.message ?: blocked.exception}")
+        emitToast(
+            appString(
+                Res.string.tag_block_failed,
+                blocked.exception.message ?: blocked.exception.toString(),
+            )
+        )
         log.e(blocked.exception) { "标签屏蔽 -> 失败(sid=$sid,tag=$tagName)" }
       }
 
@@ -549,7 +604,9 @@ internal class SubmissionScreenWorkflow(
     val size = holder.size()
     if (size == 0) {
       stateSink(SubmissionPagerUiState.Empty)
-      pageStateSink(PageState.Error(IllegalStateException("当前没有可浏览内容。")))
+      pageStateSink(
+          PageState.Error(IllegalStateException(appString(Res.string.no_browsable_content)))
+      )
       return
     }
 
@@ -878,7 +935,7 @@ internal class SubmissionScreenWorkflow(
 
             PageState.CfChallenge -> {
               log.w { "加载投稿详情 -> Cloudflare验证(sid=$sid)" }
-              SubmissionDetailUiState.Error("需要 Cloudflare 验证")
+              SubmissionDetailUiState.Error(appString(Res.string.cloudflare_challenge_title))
             }
 
             is PageState.MatureBlocked -> {
@@ -893,7 +950,7 @@ internal class SubmissionScreenWorkflow(
 
             PageState.Loading -> {
               log.w { "加载投稿详情 -> 加载中断(sid=$sid)" }
-              SubmissionDetailUiState.Error("加载中断")
+              SubmissionDetailUiState.Error(appString(Res.string.interrupted_loading))
             }
           }
       detailBySid[sid] = detailState
@@ -1017,14 +1074,19 @@ private fun SubmissionDetailUiState.Success.withTranslationState(
       SubmissionTranslationTarget.ATTACHMENT -> copy(attachmentTranslationState = state)
     }
 
-private fun initialAttachmentTextProgress(fileName: String): AttachmentTextProgress =
-    AttachmentTextProgress(
-        overallFraction = 0f,
-        stageIndex = 1,
-        stageCount = 1,
-        stageId = "download_attachment",
-        stageLabel = "下载附件",
-        stageFraction = 0f,
-        message = "准备下载附件",
-        currentItemLabel = fileName,
-    )
+private fun initialAttachmentTextProgress(
+    fileName: String,
+    settingsService: AppSettingsService?,
+    systemLanguageProvider: SystemLanguageProvider?,
+): AttachmentTextProgress {
+  return AttachmentTextProgress(
+      overallFraction = 0f,
+      stageIndex = 1,
+      stageCount = 1,
+      stageId = "download_attachment",
+      stageLabel = appString(Res.string.download_attachment),
+      stageFraction = 0f,
+      message = appString(Res.string.preparing_attachment_download),
+      currentItemLabel = fileName,
+  )
+}

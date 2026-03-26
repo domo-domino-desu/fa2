@@ -21,10 +21,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.i18n.appString
 import me.domino.fa2.ui.layouts.SettingsRouteTopBar
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,17 +67,17 @@ fun SettingsScreen(
 
   fun resetDraftToPersisted() {
     draft = SettingsDraft.fromSettings(settings)
-    saveStatusText = "已恢复为已保存配置"
+    saveStatusText = appString(Res.string.restored_saved_settings)
   }
 
   fun saveDraft() {
     val target = draft.toAppSettingsOrNull()
     if (target == null) {
-      saveStatusText = "保存失败：请输入合法数字"
+      saveStatusText = appString(Res.string.save_failed_enter_valid_numbers)
       return
     }
     if (validationMessage != null) {
-      saveStatusText = "保存失败：$validationMessage"
+      saveStatusText = appString(Res.string.save_failed, validationMessage)
       return
     }
 
@@ -82,9 +85,10 @@ fun SettingsScreen(
     saveStatusText = null
     scope.launch {
       runCatching { settingsService.updateSettings(target) }
-          .onSuccess { saveStatusText = "设置已保存" }
+          .onSuccess { saveStatusText = appString(Res.string.settings_saved) }
           .onFailure { error ->
-            saveStatusText = "保存失败：${error.message ?: error::class.simpleName.orEmpty()}"
+            val detail = error.message ?: error::class.simpleName.orEmpty()
+            saveStatusText = appString(Res.string.save_failed, detail)
           }
       saving = false
     }
@@ -113,7 +117,10 @@ fun SettingsScreen(
                   .padding(innerPadding)
                   .padding(horizontal = 16.dp, vertical = 12.dp)
       ) {
-        Text(text = "正在加载设置...", style = MaterialTheme.typography.bodyMedium)
+        Text(
+            text = stringResource(Res.string.loading_settings),
+            style = MaterialTheme.typography.bodyMedium,
+        )
       }
       return@Scaffold
     }

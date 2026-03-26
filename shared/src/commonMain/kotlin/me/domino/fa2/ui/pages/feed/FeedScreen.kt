@@ -17,10 +17,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
 import me.domino.fa2.ui.components.submission.WaterfallLoadingSkeleton
 import me.domino.fa2.ui.host.LocalAppSettings
+import org.jetbrains.compose.resources.stringResource
 
 /** Feed 页面。 */
 @Composable
@@ -57,7 +59,7 @@ fun FeedScreen(
 
       !state.errorMessage.isNullOrBlank() && state.submissions.isEmpty() -> {
         FeedStatusCard(
-            title = "加载失败",
+            title = stringResource(Res.string.load_failed),
             body = state.errorMessage.orEmpty(),
             onRetry = onRetry,
         )
@@ -68,7 +70,11 @@ fun FeedScreen(
     state.errorMessage
         ?.takeIf { message -> message.isNotBlank() && state.submissions.isNotEmpty() }
         ?.let { inlineErrorMessage ->
-          FeedStatusCard(title = "加载失败", body = inlineErrorMessage, onRetry = onRetry)
+          FeedStatusCard(
+              title = stringResource(Res.string.load_failed),
+              body = inlineErrorMessage,
+              onRetry = onRetry,
+          )
         }
 
     PullToRefreshBox(
@@ -115,7 +121,7 @@ private fun FeedStatusCard(title: String, body: String, onRetry: () -> Unit) {
           style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-      Button(onClick = onRetry) { Text("重试") }
+      Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
     }
   }
 }

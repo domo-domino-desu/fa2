@@ -5,6 +5,22 @@ import me.domino.fa2.data.local.KeyValueStorage
 /** 基于 KV 的设置持久化。 */
 class AppSettingsStorage(private val kv: KeyValueStorage) {
   suspend fun load(): AppSettings {
+    val uiLanguage =
+        UiLanguageSetting.fromPersistedValue(kv.load(KEY_UI_LANGUAGE))
+            ?: AppSettings.defaultUiLanguage
+
+    val translationEnabled =
+        kv.load(KEY_TRANSLATION_ENABLED)?.toBooleanStrictOrNull()
+            ?: AppSettings.defaultTranslationEnabled
+
+    val translationTargetLanguage =
+        TranslationTargetLanguage.fromPersistedValue(kv.load(KEY_TRANSLATION_TARGET_LANGUAGE))
+            ?: AppSettings.defaultTranslationTargetLanguage
+
+    val metadataDisplayMode =
+        MetadataDisplayMode.fromPersistedValue(kv.load(KEY_METADATA_DISPLAY_MODE))
+            ?: AppSettings.defaultMetadataDisplayMode
+
     val provider =
         TranslationProvider.fromPersistedValue(kv.load(KEY_TRANSLATION_PROVIDER))
             ?: AppSettings.defaultTranslationProvider
@@ -44,6 +60,10 @@ class AppSettingsStorage(private val kv: KeyValueStorage) {
 
     return AppSettings.normalize(
         AppSettings(
+            uiLanguage = uiLanguage,
+            translationEnabled = translationEnabled,
+            translationTargetLanguage = translationTargetLanguage,
+            metadataDisplayMode = metadataDisplayMode,
             translationProvider = provider,
             openAiTranslationConfig = rawOpenAiConfig,
             translationChunkWordLimit = rawChunkWordLimit,
@@ -58,6 +78,13 @@ class AppSettingsStorage(private val kv: KeyValueStorage) {
 
   suspend fun save(settings: AppSettings) {
     val normalized = AppSettings.normalize(settings)
+    kv.save(KEY_UI_LANGUAGE, normalized.uiLanguage.persistedValue)
+    kv.save(KEY_TRANSLATION_ENABLED, normalized.translationEnabled.toString())
+    kv.save(
+        KEY_TRANSLATION_TARGET_LANGUAGE,
+        normalized.translationTargetLanguage.persistedValue,
+    )
+    kv.save(KEY_METADATA_DISPLAY_MODE, normalized.metadataDisplayMode.persistedValue)
     kv.save(KEY_TRANSLATION_PROVIDER, normalized.translationProvider.persistedValue)
     kv.save(KEY_OPENAI_BASE_URL, normalized.openAiTranslationConfig.baseUrl)
     kv.save(KEY_OPENAI_API_KEY, normalized.openAiTranslationConfig.apiKey)
@@ -78,6 +105,10 @@ class AppSettingsStorage(private val kv: KeyValueStorage) {
   }
 
   companion object {
+    const val KEY_UI_LANGUAGE: String = "settings.i18n.uiLanguage"
+    const val KEY_TRANSLATION_ENABLED: String = "settings.translation.enabled"
+    const val KEY_TRANSLATION_TARGET_LANGUAGE: String = "settings.translation.targetLanguage"
+    const val KEY_METADATA_DISPLAY_MODE: String = "settings.translation.metadataDisplayMode"
     const val KEY_TRANSLATION_PROVIDER: String = "settings.submission.translation.provider"
     const val KEY_OPENAI_BASE_URL: String = "settings.submission.translation.openai.baseUrl"
     const val KEY_OPENAI_API_KEY: String = "settings.submission.translation.openai.apiKey"

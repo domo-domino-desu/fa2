@@ -13,6 +13,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun SubmissionDetailErrorContent(message: String, onRetry: () -> Unit) {
@@ -26,13 +28,16 @@ internal fun SubmissionDetailErrorContent(message: String, onRetry: () -> Unit) 
         modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      Text(text = "详情加载失败", style = MaterialTheme.typography.titleMedium)
       Text(
-          text = message.ifBlank { "未知错误" },
+          text = stringResource(Res.string.detail_load_failed),
+          style = MaterialTheme.typography.titleMedium,
+      )
+      Text(
+          text = message.ifBlank { stringResource(Res.string.unknown_error) },
           style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-      Button(onClick = onRetry) { Text("重试") }
+      Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
     }
   }
 }

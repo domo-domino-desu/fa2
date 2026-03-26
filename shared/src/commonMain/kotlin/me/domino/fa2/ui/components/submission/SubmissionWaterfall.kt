@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.flow.distinctUntilChanged
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
@@ -53,6 +54,7 @@ import me.domino.fa2.ui.components.ThumbnailImage
 import me.domino.fa2.ui.host.LocalTaxonomyCatalog
 import me.domino.fa2.ui.host.LocalTaxonomyRepository
 import me.domino.fa2.ui.icons.FaMaterialSymbols
+import org.jetbrains.compose.resources.stringResource
 
 /** 瀑布流卡片最小宽度。 */
 private const val defaultWaterfallCardMinWidthDp = 220
@@ -323,10 +325,12 @@ private fun LazyStaggeredGridScope.paginationFooter(
         Text(
             text =
                 when {
-                  loadingMore -> "正在自动加载更多内容"
-                  !appendErrorMessage.isNullOrBlank() && canLoadMore -> "自动加载失败，可手动加载下一页"
-                  canLoadMore -> "继续浏览将自动加载下一页，未触发可手动加载"
-                  else -> "已经到达当前结果的末尾"
+                  loadingMore -> stringResource(Res.string.loading_more_content)
+                  !appendErrorMessage.isNullOrBlank() && canLoadMore ->
+                      stringResource(Res.string.auto_load_failed_manual_next_page)
+                  canLoadMore ->
+                      stringResource(Res.string.continue_auto_load_next_page_with_manual_fallback)
+                  else -> stringResource(Res.string.reached_current_results_end)
                 },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -335,7 +339,14 @@ private fun LazyStaggeredGridScope.paginationFooter(
           AssistChip(
               onClick = onRetryLoadMore,
               label = {
-                Text(text = if (!appendErrorMessage.isNullOrBlank()) "手动加载下一页" else "加载下一页")
+                Text(
+                    text =
+                        if (!appendErrorMessage.isNullOrBlank()) {
+                          stringResource(Res.string.manual_load_next_page)
+                        } else {
+                          stringResource(Res.string.load_next_page)
+                        }
+                )
               },
           )
         } else if (loadingMore) {
@@ -348,7 +359,7 @@ private fun LazyStaggeredGridScope.paginationFooter(
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = "加载中…",
+                text = stringResource(Res.string.loading),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
             )

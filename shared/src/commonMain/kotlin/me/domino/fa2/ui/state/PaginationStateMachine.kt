@@ -14,8 +14,8 @@ data class PaginationSnapshot<Item>(
 
 class PaginationStateMachine<Item, Key>(
     private val keyOf: (Item) -> Key,
-    private val challengeMessage: String = "需要 Cloudflare 验证",
-    private val appendFallbackErrorMessage: String = "加载失败，请重试。",
+    private val challengeMessage: () -> String,
+    private val appendFallbackErrorMessage: () -> String,
 ) {
   fun beginLoad(
       snapshot: PaginationSnapshot<Item>,
@@ -68,7 +68,7 @@ class PaginationStateMachine<Item, Key>(
                 loading = false,
                 refreshing = false,
                 isLoadingMore = false,
-                errorMessage = challengeMessage,
+                errorMessage = challengeMessage(),
                 appendErrorMessage = null,
             )
 
@@ -107,7 +107,7 @@ class PaginationStateMachine<Item, Key>(
             )
 
         PageState.CfChallenge ->
-            snapshot.copy(isLoadingMore = false, appendErrorMessage = challengeMessage)
+            snapshot.copy(isLoadingMore = false, appendErrorMessage = challengeMessage())
 
         is PageState.MatureBlocked ->
             snapshot.copy(isLoadingMore = false, appendErrorMessage = result.reason)
@@ -121,7 +121,7 @@ class PaginationStateMachine<Item, Key>(
         PageState.Loading ->
             snapshot.copy(
                 isLoadingMore = false,
-                appendErrorMessage = appendFallbackErrorMessage,
+                appendErrorMessage = appendFallbackErrorMessage(),
             )
       }
 

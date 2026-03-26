@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.util.logging.FaLog
 
@@ -25,6 +27,8 @@ class SubmissionScreenModel(
     private val submissionSource: SubmissionPagerDetailSource,
     /** 描述/附件翻译编排服务。 */
     private val translationService: SubmissionDescriptionTranslationService,
+    private val settingsService: AppSettingsService? = null,
+    private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) : StateScreenModel<SubmissionPagerUiState>(SubmissionPagerUiState.Empty) {
   private val log = FaLog.withTag("SubmissionScreenModel")
   private val mutablePageState =
@@ -41,6 +45,8 @@ class SubmissionScreenModel(
           feedSource = feedSource,
           submissionSource = submissionSource,
           translationService = translationService,
+          settingsService = settingsService,
+          systemLanguageProvider = systemLanguageProvider,
           screenModelScope = screenModelScope,
           log = log,
           stateSink = { mutableState.value = it },

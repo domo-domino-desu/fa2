@@ -1,41 +1,84 @@
 package me.domino.fa2.ui.pages.search
 
+import me.domino.fa2.i18n.AppLanguage
 import me.domino.fa2.ui.components.FilterOption
 import me.domino.fa2.ui.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.search.SearchUiOptionKey
 
-internal fun orderByOptions(labelsRepository: SearchUiLabelsRepository) =
+internal fun orderByOptions(
+    labelsRepository: SearchUiLabelsRepository,
+    language: AppLanguage,
+) =
     listOf(
         FilterOption(
             "relevancy",
-            labelsRepository.optionLabel(SearchUiOptionKey.ORDER_BY, "relevancy"),
+            labelsRepository.optionLabel(SearchUiOptionKey.ORDER_BY, "relevancy", language),
         ),
-        FilterOption("date", labelsRepository.optionLabel(SearchUiOptionKey.ORDER_BY, "date")),
+        FilterOption(
+            "date",
+            labelsRepository.optionLabel(SearchUiOptionKey.ORDER_BY, "date", language),
+        ),
         FilterOption(
             "popularity",
-            labelsRepository.optionLabel(SearchUiOptionKey.ORDER_BY, "popularity"),
+            labelsRepository.optionLabel(SearchUiOptionKey.ORDER_BY, "popularity", language),
         ),
     )
 
-internal fun orderDirectionOptions(labelsRepository: SearchUiLabelsRepository) =
+internal fun orderDirectionOptions(
+    labelsRepository: SearchUiLabelsRepository,
+    language: AppLanguage,
+) =
     listOf(
         FilterOption(
             "desc",
-            labelsRepository.optionLabel(SearchUiOptionKey.ORDER_DIRECTION, "desc"),
+            labelsRepository.optionLabel(SearchUiOptionKey.ORDER_DIRECTION, "desc", language),
         ),
-        FilterOption("asc", labelsRepository.optionLabel(SearchUiOptionKey.ORDER_DIRECTION, "asc")),
+        FilterOption(
+            "asc",
+            labelsRepository.optionLabel(SearchUiOptionKey.ORDER_DIRECTION, "asc", language),
+        ),
     )
 
-internal fun rangeOptions(labelsRepository: SearchUiLabelsRepository) =
+internal fun rangeOptions(
+    labelsRepository: SearchUiLabelsRepository,
+    language: AppLanguage,
+) =
     listOf(
-        FilterOption("1day", labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "1day")),
-        FilterOption("3days", labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "3days")),
-        FilterOption("7days", labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "7days")),
-        FilterOption("30days", labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "30days")),
-        FilterOption("90days", labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "90days")),
-        FilterOption("1year", labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "1year")),
-        FilterOption("3years", labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "3years")),
-        FilterOption("5years", labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "5years")),
-        FilterOption("all", labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "all")),
-        FilterOption("manual", labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "manual")),
+        FilterOption(
+            "1day",
+            labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "1day", language),
+        ),
+        FilterOption(
+            "3days",
+            labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "3days", language),
+        ),
+        FilterOption(
+            "7days",
+            labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "7days", language),
+        ),
+        FilterOption(
+            "30days",
+            labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "30days", language),
+        ),
+        FilterOption(
+            "90days",
+            labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "90days", language),
+        ),
+        FilterOption(
+            "1year",
+            labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "1year", language),
+        ),
+        FilterOption(
+            "3years",
+            labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "3years", language),
+        ),
+        FilterOption(
+            "5years",
+            labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "5years", language),
+        ),
+        FilterOption("all", labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "all", language)),
+        FilterOption(
+            "manual",
+            labelsRepository.optionLabel(SearchUiOptionKey.RANGE, "manual", language),
+        ),
     )

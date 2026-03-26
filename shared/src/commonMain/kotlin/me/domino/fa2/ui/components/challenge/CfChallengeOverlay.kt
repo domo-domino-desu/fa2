@@ -16,12 +16,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import me.domino.fa2.application.challenge.CfChallengeController
 import me.domino.fa2.application.challenge.CfChallengeStatus
 import me.domino.fa2.application.challenge.CfChallengeUiState
+import me.domino.fa2.i18n.challengeAwaitingUserActionText
+import me.domino.fa2.i18n.challengeVerificationFailedText
 import me.domino.fa2.ui.pages.auth.SessionWebView
 import me.domino.fa2.ui.pages.auth.rememberSessionWebViewAdapter
+import org.jetbrains.compose.resources.stringResource
 
 /** 全局 challenge 覆盖层：作为“插入流程”覆盖当前页面。 */
 @Composable
@@ -51,8 +55,12 @@ fun CfChallengeOverlay(
           modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
           horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        Button(onClick = { adapter.port.loadUrl(state.triggerUrl) }) { Text("重载") }
-        Button(onClick = { scope.launch { controller.cancel() } }) { Text("取消") }
+        Button(onClick = { adapter.port.loadUrl(state.triggerUrl) }) {
+          Text(stringResource(Res.string.reload))
+        }
+        Button(onClick = { scope.launch { controller.cancel() } }) {
+          Text(stringResource(Res.string.cancel))
+        }
         Button(
             enabled = state.status !is CfChallengeStatus.Verifying,
             onClick = {
@@ -64,7 +72,13 @@ fun CfChallengeOverlay(
               }
             },
         ) {
-          Text(if (state.status is CfChallengeStatus.Verifying) "验证中..." else "我已完成验证")
+          Text(
+              if (state.status is CfChallengeStatus.Verifying) {
+                stringResource(Res.string.challenge_verifying)
+              } else {
+                stringResource(Res.string.cloudflare_challenge_done)
+              }
+          )
         }
       }
 
@@ -82,13 +96,10 @@ fun CfChallengeOverlay(
   }
 }
 
+@Composable
 private fun challengeStatusMessage(state: CfChallengeUiState.Active): String =
     when (val status = state.status) {
-      CfChallengeStatus.AwaitingUserAction -> {
-        val rayText = state.cfRay?.let { value -> "\nCF-Ray: $value" }.orEmpty()
-        "请在 WebView 中完成 Cloudflare 验证后点击“我已完成验证”。$rayText"
-      }
-
-      CfChallengeStatus.Verifying -> "正在校验 challenge 结果..."
-      is CfChallengeStatus.VerificationFailed -> "验证失败：${status.detail}"
+      CfChallengeStatus.AwaitingUserAction -> challengeAwaitingUserActionText(state.cfRay)
+      CfChallengeStatus.Verifying -> stringResource(Res.string.challenge_validating_result)
+      is CfChallengeStatus.VerificationFailed -> challengeVerificationFailedText(status.detail)
     }

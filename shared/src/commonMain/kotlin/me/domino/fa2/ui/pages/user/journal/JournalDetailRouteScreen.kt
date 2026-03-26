@@ -35,17 +35,21 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import me.domino.fa2.ui.components.DetailSectionCardSurface
 import me.domino.fa2.ui.components.HtmlText
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.SkeletonBlock
 import me.domino.fa2.ui.components.TranslatableBlocksCard
+import me.domino.fa2.ui.host.LocalAppI18n
+import me.domino.fa2.ui.host.LocalAppSettings
 import me.domino.fa2.ui.layouts.JournalDetailRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.pages.user.route.UserRouteScreen
 import me.domino.fa2.util.FaUrls
+import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
 
 /** Journal 详情路由页面。 */
@@ -61,6 +65,8 @@ class JournalDetailRouteScreen(
     val navigator = LocalNavigator.currentOrThrow
     val screenModel =
         koinScreenModel<JournalDetailScreenModel> { parametersOf(journalId, journalUrl) }
+    val appI18n = LocalAppI18n.current
+    val settings = LocalAppSettings.current
     val listState: LazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val state by screenModel.state.collectAsState()
@@ -88,15 +94,29 @@ class JournalDetailRouteScreen(
         }
 
         is JournalDetailUiState.Error -> {
-          JournalDetailErrorCard(message = snapshot.message, onRetry = screenModel::load)
+          JournalDetailErrorCard(
+              title = stringResource(Res.string.load_failed),
+              retryText = stringResource(Res.string.retry),
+              message = snapshot.message,
+              onRetry = screenModel::load,
+          )
         }
 
         is JournalDetailUiState.Success -> {
           JournalDetailContent(
               state = snapshot,
               listState = listState,
-              onTranslate = screenModel::translateCurrent,
-              onToggleWrapText = screenModel::toggleWrapTextCurrent,
+              onTranslate = {
+                if (settings.translationEnabled) {
+                  screenModel.translateCurrent()
+                }
+              },
+              onToggleWrapText = {
+                if (settings.translationEnabled) {
+                  screenModel.toggleWrapTextCurrent()
+                }
+              },
+              translationEnabled = settings.translationEnabled,
               onOpenAuthor = { author ->
                 val normalized = author.trim()
                 if (normalized.isNotBlank()) {
@@ -133,17 +153,22 @@ private fun JournalDetailSkeleton() {
 }
 
 @Composable
-private fun JournalDetailErrorCard(message: String, onRetry: () -> Unit) {
+private fun JournalDetailErrorCard(
+    title: String,
+    retryText: String,
+    message: String,
+    onRetry: () -> Unit,
+) {
   DetailSectionCardSurface(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)
   ) {
-    Text(text = "加载失败", style = MaterialTheme.typography.titleMedium)
+    Text(text = title, style = MaterialTheme.typography.titleMedium)
     Text(
         text = message,
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-    Button(onClick = onRetry) { Text("重试") }
+    Button(onClick = onRetry) { Text(retryText) }
   }
 }
 
@@ -153,8 +178,10 @@ private fun JournalDetailContent(
     listState: LazyListState,
     onTranslate: () -> Unit,
     onToggleWrapText: () -> Unit,
+    translationEnabled: Boolean,
     onOpenAuthor: (String) -> Unit,
 ) {
+  val appI18n = LocalAppI18n.current
   val detail = state.detail
 
   LazyColumn(
@@ -166,14 +193,17 @@ private fun JournalDetailContent(
       TranslatableBlocksCard(
           title = detail.title,
           translationState = state.bodyTranslationState,
-          emptyText = "暂无正文",
+          emptyText = stringResource(Res.string.no_content),
           onTranslate = onTranslate,
           onToggleWrapText = onToggleWrapText,
+          translationEnabled = translationEnabled,
           modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
           titleMaxLines = 2,
           supportingText = {
             Text(
-                text = "${detail.timestampNatural} · ${detail.rating} · ${detail.commentCount} 评论",
+                text =
+                    "${detail.timestampNatural} · ${detail.rating} · " +
+                        stringResource(Res.string.comments_inline_count, detail.commentCount),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -188,6 +218,7 @@ private fun JournalDetailContent(
       JournalCommentsCard(
           commentCount = detail.commentCount,
           comments = detail.comments,
+          emptyText = stringResource(Res.string.no_displayable_comments),
           onOpenAuthor = onOpenAuthor,
       )
     }
@@ -198,17 +229,18 @@ private fun JournalDetailContent(
 private fun JournalCommentsCard(
     commentCount: Int,
     comments: List<me.domino.fa2.data.model.PageComment>,
+    emptyText: String,
     onOpenAuthor: (String) -> Unit,
 ) {
   DetailSectionCardSurface(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
     Text(
-        text = "评论 · $commentCount",
+        text = stringResource(Res.string.comments, commentCount),
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold,
     )
     if (comments.isEmpty()) {
       Text(
-          text = "暂无可展示评论",
+          text = emptyText,
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
@@ -286,7 +318,7 @@ private fun JournalCommentItem(
     }
     SelectionContainer {
       HtmlText(
-          html = comment.bodyHtml.ifBlank { "<p>（无内容）</p>" },
+          html = comment.bodyHtml.ifBlank { stringResource(Res.string.empty_comment_html) },
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurface,
       )

@@ -17,7 +17,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.icons.FaMaterialSymbols
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +37,7 @@ private fun RouteTopBar(
             IconButton(onClick = onTitleClick) {
               Icon(
                   imageVector = FaMaterialSymbols.Outlined.VerticalAlignTop,
-                  contentDescription = "回到顶部",
+                  contentDescription = stringResource(Res.string.scroll_to_top),
               )
             }
           } else {
@@ -66,7 +68,12 @@ private fun RouteTopBar(
 
 @Composable
 fun AboutRouteTopBar(onBack: () -> Unit, onGoHome: () -> Unit, onTitleClick: (() -> Unit)? = null) {
-  RouteTopBar(title = "开源许可", onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick)
+  RouteTopBar(
+      title = stringResource(Res.string.about),
+      onBack = onBack,
+      onGoHome = onGoHome,
+      onTitleClick = onTitleClick,
+  )
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -82,10 +89,18 @@ fun SettingsRouteTopBar(
     onSaveDraft: () -> Unit,
     onTitleClick: (() -> Unit)? = null,
 ) {
-  RouteTopBar(title = "设置", onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick) {
+  RouteTopBar(
+      title = stringResource(Res.string.settings),
+      onBack = onBack,
+      onGoHome = onGoHome,
+      onTitleClick = onTitleClick,
+  ) {
     if (showActions) {
       IconButton(onClick = onResetDraft, enabled = !saving && hasUnsavedChanges) {
-        Icon(imageVector = FaMaterialSymbols.Filled.RestartAlt, contentDescription = "回滚到已保存配置")
+        Icon(
+            imageVector = FaMaterialSymbols.Filled.RestartAlt,
+            contentDescription = stringResource(Res.string.rollback_saved_settings),
+        )
       }
       IconButton(
           onClick = onSaveDraft,
@@ -97,7 +112,10 @@ fun SettingsRouteTopBar(
               color = MaterialTheme.colorScheme.primary,
           )
         } else {
-          Icon(imageVector = FaMaterialSymbols.Filled.Save, contentDescription = "保存设置")
+          Icon(
+              imageVector = FaMaterialSymbols.Filled.Save,
+              contentDescription = stringResource(Res.string.save_settings),
+          )
         }
       }
     }
@@ -110,7 +128,12 @@ fun SearchHistoryRouteTopBar(
     onGoHome: () -> Unit,
     onTitleClick: (() -> Unit)? = null,
 ) {
-  RouteTopBar(title = "搜索记录", onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick)
+  RouteTopBar(
+      title = stringResource(Res.string.search_history),
+      onBack = onBack,
+      onGoHome = onGoHome,
+      onTitleClick = onTitleClick,
+  )
 }
 
 @Composable
@@ -119,7 +142,12 @@ fun SubmissionHistoryRouteTopBar(
     onGoHome: () -> Unit,
     onTitleClick: (() -> Unit)? = null,
 ) {
-  RouteTopBar(title = "浏览记录", onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick)
+  RouteTopBar(
+      title = stringResource(Res.string.submission_history),
+      onBack = onBack,
+      onGoHome = onGoHome,
+      onTitleClick = onTitleClick,
+  )
 }
 
 @Composable
@@ -128,7 +156,12 @@ fun BrowseRouteTopBar(
     onGoHome: () -> Unit,
     onTitleClick: (() -> Unit)? = null,
 ) {
-  RouteTopBar(title = "Browse", onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick)
+  RouteTopBar(
+      title = stringResource(Res.string.browse),
+      onBack = onBack,
+      onGoHome = onGoHome,
+      onTitleClick = onTitleClick,
+  )
 }
 
 @Composable
@@ -137,7 +170,12 @@ fun SearchRouteTopBar(
     onGoHome: () -> Unit,
     onTitleClick: (() -> Unit)? = null,
 ) {
-  RouteTopBar(title = "Search", onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick)
+  RouteTopBar(
+      title = stringResource(Res.string.search),
+      onBack = onBack,
+      onGoHome = onGoHome,
+      onTitleClick = onTitleClick,
+  )
 }
 
 @Composable
@@ -148,7 +186,7 @@ fun JournalDetailRouteTopBar(
     onTitleClick: (() -> Unit)? = null,
 ) {
   RouteTopBar(
-      title = "Journal",
+      title = stringResource(Res.string.journal),
       onBack = onBack,
       onGoHome = onGoHome,
       onTitleClick = onTitleClick,
@@ -195,7 +233,10 @@ fun SubmissionRouteTopBar(
   RouteTopBar(title = "", onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick) {
     if (!downloadUrl.isNullOrBlank()) {
       IconButton(onClick = onDownload) {
-        Icon(imageVector = FaMaterialSymbols.Filled.Download, contentDescription = "下载")
+        Icon(
+            imageVector = FaMaterialSymbols.Filled.Download,
+            contentDescription = stringResource(Res.string.download),
+        )
       }
     }
     TopBarShareAction(url = shareUrl)
@@ -212,7 +253,7 @@ fun BrowseFilterOverlayTopBar(
   TopAppBar(
       title = {
         Text(
-            text = "浏览筛选",
+            text = stringResource(Res.string.browse_filters),
             style = MaterialTheme.typography.titleMedium,
             modifier =
                 if (onTitleClick != null) {
@@ -226,13 +267,16 @@ fun BrowseFilterOverlayTopBar(
         IconButton(onClick = onClose) {
           Icon(
               imageVector = FaMaterialSymbols.Filled.Close,
-              contentDescription = "关闭筛选页面",
+              contentDescription = stringResource(Res.string.close_filters_page),
           )
         }
       },
       actions = {
         IconButton(onClick = onApply) {
-          Icon(imageVector = FaMaterialSymbols.Filled.Done, contentDescription = "应用筛选")
+          Icon(
+              imageVector = FaMaterialSymbols.Filled.Done,
+              contentDescription = stringResource(Res.string.apply_filters),
+          )
         }
       },
       colors =
@@ -255,7 +299,7 @@ fun SearchOverlayTopBar(
   TopAppBar(
       title = {
         Text(
-            text = "搜索筛选",
+            text = stringResource(Res.string.search_filters),
             style = MaterialTheme.typography.titleMedium,
             modifier =
                 if (onTitleClick != null) {
@@ -269,13 +313,16 @@ fun SearchOverlayTopBar(
         IconButton(onClick = onClose) {
           Icon(
               imageVector = FaMaterialSymbols.Filled.Close,
-              contentDescription = "关闭搜索遮罩",
+              contentDescription = stringResource(Res.string.close_search_overlay),
           )
         }
       },
       actions = {
         IconButton(onClick = onApplySearch, enabled = canSearch) {
-          Icon(imageVector = FaMaterialSymbols.Filled.Search, contentDescription = "执行搜索")
+          Icon(
+              imageVector = FaMaterialSymbols.Filled.Search,
+              contentDescription = stringResource(Res.string.run_search),
+          )
         }
       },
       colors =

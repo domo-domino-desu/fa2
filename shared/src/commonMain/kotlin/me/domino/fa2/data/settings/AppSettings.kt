@@ -2,6 +2,10 @@ package me.domino.fa2.data.settings
 
 /** 全局应用设置。 */
 data class AppSettings(
+    val uiLanguage: UiLanguageSetting = defaultUiLanguage,
+    val translationEnabled: Boolean = defaultTranslationEnabled,
+    val translationTargetLanguage: TranslationTargetLanguage = defaultTranslationTargetLanguage,
+    val metadataDisplayMode: MetadataDisplayMode = defaultMetadataDisplayMode,
     val translationProvider: TranslationProvider = defaultTranslationProvider,
     val openAiTranslationConfig: OpenAiTranslationConfig = OpenAiTranslationConfig(),
     val translationChunkWordLimit: Int = defaultTranslationChunkWordLimit,
@@ -13,6 +17,12 @@ data class AppSettings(
     val blockedSubmissionPagerMode: BlockedSubmissionPagerMode = defaultBlockedSubmissionPagerMode,
 ) {
   companion object {
+    val supportedUiLanguages: List<UiLanguageSetting> =
+        listOf(UiLanguageSetting.SYSTEM, UiLanguageSetting.ZH_HANS, UiLanguageSetting.EN)
+    val supportedTranslationTargetLanguages: List<TranslationTargetLanguage> =
+        listOf(TranslationTargetLanguage.ZH_CN, TranslationTargetLanguage.EN)
+    val supportedMetadataDisplayModes: List<MetadataDisplayMode> =
+        listOf(MetadataDisplayMode.ORIGINAL, MetadataDisplayMode.TRANSLATED)
     val supportedTranslationProviders: List<TranslationProvider> =
         listOf(
             TranslationProvider.GOOGLE,
@@ -29,6 +39,11 @@ data class AppSettings(
     val supportedBlockedSubmissionPagerModes: List<BlockedSubmissionPagerMode> =
         listOf(BlockedSubmissionPagerMode.SHOW, BlockedSubmissionPagerMode.BLUR_THEN_OPEN)
 
+    val defaultUiLanguage: UiLanguageSetting = UiLanguageSetting.SYSTEM
+    const val defaultTranslationEnabled: Boolean = true
+    val defaultTranslationTargetLanguage: TranslationTargetLanguage =
+        TranslationTargetLanguage.ZH_CN
+    val defaultMetadataDisplayMode: MetadataDisplayMode = MetadataDisplayMode.TRANSLATED
     val defaultTranslationProvider: TranslationProvider = TranslationProvider.GOOGLE
     const val defaultTranslationChunkWordLimit: Int = 1024
     const val defaultTranslationMaxConcurrency: Int = 3
@@ -50,6 +65,16 @@ data class AppSettings(
 
     fun normalize(raw: AppSettings): AppSettings =
         raw.copy(
+            uiLanguage =
+                raw.uiLanguage.takeIf { language -> language in supportedUiLanguages }
+                    ?: defaultUiLanguage,
+            translationTargetLanguage =
+                raw.translationTargetLanguage.takeIf { language ->
+                  language in supportedTranslationTargetLanguages
+                } ?: defaultTranslationTargetLanguage,
+            metadataDisplayMode =
+                raw.metadataDisplayMode.takeIf { mode -> mode in supportedMetadataDisplayModes }
+                    ?: defaultMetadataDisplayMode,
             openAiTranslationConfig =
                 OpenAiTranslationConfig.normalize(raw.openAiTranslationConfig),
             translationChunkWordLimit =
@@ -76,6 +101,37 @@ data class AppSettings(
                   mode in supportedBlockedSubmissionPagerModes
                 } ?: defaultBlockedSubmissionPagerMode,
         )
+  }
+}
+
+enum class UiLanguageSetting(val persistedValue: String) {
+  SYSTEM("system"),
+  ZH_HANS("zh-Hans"),
+  EN("en");
+
+  companion object {
+    fun fromPersistedValue(raw: String?): UiLanguageSetting? =
+        entries.firstOrNull { it.persistedValue == raw?.trim() }
+  }
+}
+
+enum class TranslationTargetLanguage(val persistedValue: String, val languageCode: String) {
+  ZH_CN("zh-CN", "zh-CN"),
+  EN("en", "en");
+
+  companion object {
+    fun fromPersistedValue(raw: String?): TranslationTargetLanguage? =
+        entries.firstOrNull { it.persistedValue == raw?.trim() }
+  }
+}
+
+enum class MetadataDisplayMode(val persistedValue: String) {
+  ORIGINAL("original"),
+  TRANSLATED("translated");
+
+  companion object {
+    fun fromPersistedValue(raw: String?): MetadataDisplayMode? =
+        entries.firstOrNull { it.persistedValue == raw?.trim() }
   }
 }
 

@@ -10,6 +10,7 @@ import java.io.File
 import me.domino.fa2.data.local.AppDatabase
 import me.domino.fa2.data.local.AppDatabaseBuilderFactory
 import me.domino.fa2.di.KOIN_QUALIFIER_COOKIE_VAULT
+import me.domino.fa2.i18n.SystemLanguageProvider
 import okio.Path.Companion.toPath
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
@@ -17,6 +18,11 @@ import org.koin.dsl.module
 
 /** Desktop 平台依赖模块。 */
 fun desktopPlatformModule(): Module = module {
+  single<SystemLanguageProvider> {
+    object : SystemLanguageProvider {
+      override fun currentLanguageTag(): String = java.util.Locale.getDefault().toLanguageTag()
+    }
+  }
   single<AppDatabaseBuilderFactory> {
     AppDatabaseBuilderFactory {
       val dbFile = resolveDatabaseFile()

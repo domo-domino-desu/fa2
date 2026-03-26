@@ -14,7 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import me.domino.fa2.data.model.PageState
+import org.jetbrains.compose.resources.stringResource
 
 /** 统一渲染 `PageState` 的基础组件。 */
 @Composable
@@ -33,21 +35,28 @@ fun <T> PageStateWrapper(
 
     PageState.CfChallenge -> {
       StatusCard(
-          title = "需要 Cloudflare 验证",
-          body = "请先完成挑战并更新 cookie（含 cf_clearance）。",
+          title = stringResource(Res.string.cloudflare_challenge_title),
+          body = stringResource(Res.string.cloudflare_challenge_body),
           onRetry = onRetry,
           modifier = Modifier.testTag("cf-challenge-status"),
       )
     }
 
     is PageState.MatureBlocked -> {
-      StatusCard(title = "页面被拦截", body = state.reason, onRetry = onRetry)
+      StatusCard(
+          title = stringResource(Res.string.page_blocked),
+          body = state.reason,
+          onRetry = onRetry,
+      )
     }
 
     is PageState.Error -> {
       StatusCard(
-          title = "加载失败",
-          body = state.exception.message ?: state.exception::class.simpleName ?: "未知错误",
+          title = stringResource(Res.string.load_failed),
+          body =
+              state.exception.message
+                  ?: state.exception::class.simpleName
+                  ?: stringResource(Res.string.unknown_error),
           onRetry = onRetry,
       )
     }
@@ -91,7 +100,7 @@ private fun StatusCard(
           color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
       if (onRetry != null) {
-        Button(onClick = onRetry) { Text("重试") }
+        Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
       }
     }
   }

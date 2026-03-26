@@ -31,9 +31,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.components.HtmlText
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.SkeletonBlock
+import org.jetbrains.compose.resources.stringResource
 
 private const val collapsedProfilePreviewMaxLines = 14
 
@@ -106,11 +108,11 @@ internal fun UserHeaderCard(
 
           if (header == null) {
             Text(
-                text = state.errorMessage ?: "加载用户信息失败",
+                text = state.errorMessage ?: stringResource(Res.string.load_failed),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error,
             )
-            Button(onClick = onRetry) { Text("重试") }
+            Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
             return@Surface
           }
 
@@ -160,11 +162,19 @@ internal fun UserHeaderCard(
                     verticalArrangement = Arrangement.spacedBy(5.dp),
                 ) {
                   UserHeaderStatPill(
-                      text = "关注者 ${header.watchedByCount ?: "--"}",
+                      text =
+                          stringResource(
+                              Res.string.followers_count,
+                              (header.watchedByCount ?: "--").toString(),
+                          ),
                       onClick = onOpenWatchedBy,
                   )
                   UserHeaderStatPill(
-                      text = "已关注 ${header.watchingCount ?: "--"}",
+                      text =
+                          stringResource(
+                              Res.string.following_count,
+                              (header.watchingCount ?: "--").toString(),
+                          ),
                       onClick = onOpenWatching,
                   )
                 }
@@ -179,11 +189,11 @@ internal fun UserHeaderCard(
               ) {
                 Text(
                     if (state.watchUpdating) {
-                      "处理中..."
+                      stringResource(Res.string.processing)
                     } else if (header.isWatching) {
-                      "Unwatch"
+                      stringResource(Res.string.unwatch)
                     } else {
-                      "Watch"
+                      stringResource(Res.string.watch)
                     }
                 )
               }
@@ -191,7 +201,7 @@ internal fun UserHeaderCard(
           }
           Text(
               text =
-                  listOf(header.userTitle, "Registered: ${header.registeredAt}")
+                  listOf(header.userTitle, me.domino.fa2.i18n.registeredAtText(header.registeredAt))
                       .filter { it.isNotBlank() }
                       .joinToString(" · "),
               style = MaterialTheme.typography.bodySmall,
@@ -221,7 +231,15 @@ internal fun UserHeaderCard(
             if (shouldCollapse) {
               AssistChip(
                   onClick = onToggleProfileExpanded,
-                  label = { Text(if (state.profileExpanded) "收起简介" else "展开简介") },
+                  label = {
+                    Text(
+                        if (state.profileExpanded) {
+                          stringResource(Res.string.collapse_profile)
+                        } else {
+                          stringResource(Res.string.expand_profile)
+                        }
+                    )
+                  },
               )
             }
           }

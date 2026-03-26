@@ -2,11 +2,15 @@ package me.domino.fa2.ui.pages.user.profile
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.User
 import me.domino.fa2.data.repository.UserRepository
+import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.i18n.SystemLanguageProvider
+import me.domino.fa2.i18n.appString
 import me.domino.fa2.ui.pages.user.gallery.UserSubmissionSectionUiState
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.util.logging.FaLog
@@ -40,6 +44,8 @@ class UserScreenModel(
     initialChildRoute: UserChildRoute = UserChildRoute.Gallery,
     /** 初始 folder URL（可选）。 */
     initialFolderUrl: String? = null,
+    private val settingsService: AppSettingsService? = null,
+    private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) :
     StateScreenModel<UserUiState>(
         UserUiState(
@@ -96,7 +102,10 @@ class UserScreenModel(
 
             PageState.CfChallenge -> {
               mutableState.value =
-                  state.value.copy(loading = false, errorMessage = "需要 Cloudflare 验证")
+                  state.value.copy(
+                      loading = false,
+                      errorMessage = appString(Res.string.cloudflare_challenge_title),
+                  )
               log.w { "加载用户 -> Cloudflare验证" }
             }
 
@@ -204,7 +213,8 @@ class UserScreenModel(
                   state.value.copy(
                       loading = false,
                       watchUpdating = false,
-                      errorMessage = "操作已提交，但刷新需要 Cloudflare 验证",
+                      errorMessage =
+                          appString(Res.string.action_submitted_but_refresh_needs_cloudflare),
                   )
               log.w { "关注操作 -> 已提交, 但刷新需要Cloudflare验证" }
             }
@@ -214,7 +224,11 @@ class UserScreenModel(
                   state.value.copy(
                       loading = false,
                       watchUpdating = false,
-                      errorMessage = "操作已提交，但刷新失败：${refreshed.reason}",
+                      errorMessage =
+                          appString(
+                              Res.string.action_submitted_but_refresh_failed,
+                              refreshed.reason,
+                          ),
                   )
               log.w { "关注操作 -> 已提交, 但刷新受限(${refreshed.reason})" }
             }
@@ -225,7 +239,10 @@ class UserScreenModel(
                       loading = false,
                       watchUpdating = false,
                       errorMessage =
-                          "操作已提交，但刷新失败：${refreshed.exception.message ?: refreshed.exception}",
+                          appString(
+                              Res.string.action_submitted_but_refresh_failed,
+                              refreshed.exception.message ?: refreshed.exception.toString(),
+                          ),
                   )
               log.e(refreshed.exception) { "关注操作 -> 已提交, 但刷新失败" }
             }
@@ -239,7 +256,7 @@ class UserScreenModel(
               state.value.copy(
                   header = header,
                   watchUpdating = false,
-                  errorMessage = "需要 Cloudflare 验证",
+                  errorMessage = appString(Res.string.cloudflare_challenge_title),
               )
           log.w { "关注操作 -> Cloudflare验证" }
         }

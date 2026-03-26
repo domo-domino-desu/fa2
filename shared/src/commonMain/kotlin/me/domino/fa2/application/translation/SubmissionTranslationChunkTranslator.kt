@@ -28,6 +28,7 @@ internal class SubmissionTranslationChunkTranslator(
                       TranslationRequest(
                           provider = settings.translationProvider,
                           sourceText = payload,
+                          targetLanguageCode = settings.translationTargetLanguage.languageCode,
                           openAiConfig =
                               settings.openAiTranslationConfig.takeIf {
                                 settings.translationProvider ==

@@ -2,6 +2,7 @@ package me.domino.fa2.ui.pages.search
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import fa2.shared.generated.resources.*
 import io.ktor.http.decodeURLQueryComponent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,10 +11,15 @@ import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.repository.SearchRepository
+import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
+import me.domino.fa2.i18n.AppI18nSnapshot
+import me.domino.fa2.i18n.SystemLanguageProvider
+import me.domino.fa2.i18n.appString
 import me.domino.fa2.ui.components.FilterOption
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.search.SearchUiLabelsRepository
+import me.domino.fa2.ui.search.SearchUiMetadataKey
 import me.domino.fa2.ui.search.SearchUiOptionKey
 import me.domino.fa2.ui.search.SearchUiTextKey
 import me.domino.fa2.ui.state.PaginationSnapshot
@@ -75,6 +81,8 @@ class SearchScreenModel(
     private val repository: SearchRepository,
     private val submissionListHolder: SubmissionListHolder,
     private val historyRepository: ActivityHistoryRepository,
+    private val settingsService: AppSettingsService,
+    private val systemLanguageProvider: SystemLanguageProvider,
     private val taxonomyRepository: FaTaxonomyRepository,
     private val searchUiLabelsRepository: SearchUiLabelsRepository,
 ) : StateScreenModel<SearchUiState>(SearchUiState()) {
@@ -87,6 +95,8 @@ class SearchScreenModel(
           repository = repository,
           submissionListHolder = submissionListHolder,
           historyRepository = historyRepository,
+          settingsService = settingsService,
+          systemLanguageProvider = systemLanguageProvider,
           taxonomyRepository = taxonomyRepository,
           searchUiLabelsRepository = searchUiLabelsRepository,
           screenModelScope = screenModelScope,
@@ -308,40 +318,62 @@ internal fun rewriteQueryWithGenders(query: String, genders: Set<SearchGender>):
 
 internal fun buildSearchFiltersSummary(
     form: SearchFormState,
+    appI18n: AppI18nSnapshot,
     taxonomyRepository: FaTaxonomyRepository,
     searchUiLabelsRepository: SearchUiLabelsRepository,
 ): String {
   val defaults = SearchFormState()
   val summary = mutableListOf<String>()
-  val orderByOptions = orderByOptions(searchUiLabelsRepository)
-  val orderDirectionOptions = orderDirectionOptions(searchUiLabelsRepository)
-  val rangeOptions = rangeOptions(searchUiLabelsRepository)
+  val orderByOptions = orderByOptions(searchUiLabelsRepository, appI18n.uiLanguage)
+  val orderDirectionOptions = orderDirectionOptions(searchUiLabelsRepository, appI18n.uiLanguage)
+  val rangeOptions = rangeOptions(searchUiLabelsRepository, appI18n.uiLanguage)
 
   if (form.category != defaults.category) {
     val label =
-        taxonomyRepository.categoryDisplayNameById(form.category) ?: form.category.toString()
-    summary += searchUiLabelsRepository.formatLabelValue("类别", label)
+        taxonomyRepository.categoryDisplayNameById(form.category, appI18n.metadata)
+            ?: form.category.toString()
+    summary +=
+        searchUiLabelsRepository.formatLabelValue(
+            searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.CATEGORY, appI18n.metadata),
+            label,
+            appI18n.uiLanguage,
+        )
   }
   if (form.type != defaults.type) {
-    val label = taxonomyRepository.typeDisplayNameById(form.type) ?: form.type.toString()
-    summary += searchUiLabelsRepository.formatLabelValue("分类", label)
+    val label =
+        taxonomyRepository.typeDisplayNameById(form.type, appI18n.metadata) ?: form.type.toString()
+    summary +=
+        searchUiLabelsRepository.formatLabelValue(
+            searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.TYPE, appI18n.metadata),
+            label,
+            appI18n.uiLanguage,
+        )
   }
   if (form.species != defaults.species) {
-    val label = taxonomyRepository.speciesDisplayNameById(form.species) ?: form.species.toString()
-    summary += searchUiLabelsRepository.formatLabelValue("物种", label)
+    val label =
+        taxonomyRepository.speciesDisplayNameById(form.species, appI18n.metadata)
+            ?: form.species.toString()
+    summary +=
+        searchUiLabelsRepository.formatLabelValue(
+            searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.SPECIES, appI18n.metadata),
+            label,
+            appI18n.uiLanguage,
+        )
   }
   if (form.orderBy != defaults.orderBy) {
     summary +=
         searchUiLabelsRepository.formatLabelValue(
-            searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_SORT),
+            searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_SORT, appI18n.uiLanguage),
             orderByOptions.labelOf(form.orderBy),
+            appI18n.uiLanguage,
         )
   }
   if (form.orderDirection != defaults.orderDirection) {
     summary +=
         searchUiLabelsRepository.formatLabelValue(
-            searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_DIRECTION),
+            searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_DIRECTION, appI18n.uiLanguage),
             orderDirectionOptions.labelOf(form.orderDirection),
+            appI18n.uiLanguage,
         )
   }
   if (form.range != defaults.range) {
@@ -352,30 +384,34 @@ internal fun buildSearchFiltersSummary(
       val detail =
           when {
             from.isNotBlank() && to.isNotBlank() ->
-                "${searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_FROM)} $from " +
-                    "${searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_TO)} $to"
+                "${searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_FROM, appI18n.uiLanguage)} $from " +
+                    "${searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_TO, appI18n.uiLanguage)} $to"
             from.isNotBlank() ->
-                "${searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_FROM)} $from"
-            to.isNotBlank() -> "${searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_TO)} $to"
+                "${searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_FROM, appI18n.uiLanguage)} $from"
+            to.isNotBlank() ->
+                "${searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_TO, appI18n.uiLanguage)} $to"
             else -> ""
           }
       summary +=
           if (detail.isBlank()) {
             searchUiLabelsRepository.formatLabelValue(
-                searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_DATE),
+                searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_DATE, appI18n.uiLanguage),
                 label,
+                appI18n.uiLanguage,
             )
           } else {
             searchUiLabelsRepository.formatLabelValue(
-                searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_DATE),
-                "$label（$detail）",
+                searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_DATE, appI18n.uiLanguage),
+                "$label${appString(Res.string.parenthetical_format, detail)}",
+                appI18n.uiLanguage,
             )
           }
     } else {
       summary +=
           searchUiLabelsRepository.formatLabelValue(
-              searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_DATE),
+              searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_DATE, appI18n.uiLanguage),
               label,
+              appI18n.uiLanguage,
           )
     }
   }
@@ -386,14 +422,46 @@ internal fun buildSearchFiltersSummary(
           form.ratingAdult != defaults.ratingAdult
   ) {
     val ratings = buildList {
-      if (form.ratingGeneral) add("General")
-      if (form.ratingMature) add("Mature")
-      if (form.ratingAdult) add("Adult")
+      if (form.ratingGeneral)
+          add(
+              searchUiLabelsRepository.metadataOptionLabel(
+                  SearchUiOptionKey.RATING,
+                  "general",
+                  appI18n.metadata,
+              )
+          )
+      if (form.ratingMature)
+          add(
+              searchUiLabelsRepository.metadataOptionLabel(
+                  SearchUiOptionKey.RATING,
+                  "mature",
+                  appI18n.metadata,
+              )
+          )
+      if (form.ratingAdult)
+          add(
+              searchUiLabelsRepository.metadataOptionLabel(
+                  SearchUiOptionKey.RATING,
+                  "adult",
+                  appI18n.metadata,
+              )
+          )
     }
     summary +=
         searchUiLabelsRepository.formatLabelValue(
-            "分级",
-            ratings.ifEmpty { listOf("None") }.joinToString(", "),
+            searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.RATING, appI18n.metadata),
+            ratings
+                .ifEmpty {
+                  listOf(
+                      searchUiLabelsRepository.metadataOptionLabel(
+                          SearchUiOptionKey.RATING,
+                          "none",
+                          appI18n.metadata,
+                      )
+                  )
+                }
+                .joinToString(", "),
+            appI18n.uiLanguage,
         )
   }
 
@@ -407,24 +475,71 @@ internal fun buildSearchFiltersSummary(
   ) {
     val types = buildList {
       if (form.typeArt)
-          add(searchUiLabelsRepository.optionLabel(SearchUiOptionKey.SUBMISSION_TYPE, "art"))
+          add(
+              searchUiLabelsRepository.optionLabel(
+                  SearchUiOptionKey.SUBMISSION_TYPE,
+                  "art",
+                  appI18n.uiLanguage,
+              )
+          )
       if (form.typeMusic)
-          add(searchUiLabelsRepository.optionLabel(SearchUiOptionKey.SUBMISSION_TYPE, "music"))
+          add(
+              searchUiLabelsRepository.optionLabel(
+                  SearchUiOptionKey.SUBMISSION_TYPE,
+                  "music",
+                  appI18n.uiLanguage,
+              )
+          )
       if (form.typeFlash)
-          add(searchUiLabelsRepository.optionLabel(SearchUiOptionKey.SUBMISSION_TYPE, "flash"))
+          add(
+              searchUiLabelsRepository.optionLabel(
+                  SearchUiOptionKey.SUBMISSION_TYPE,
+                  "flash",
+                  appI18n.uiLanguage,
+              )
+          )
       if (form.typeStory)
-          add(searchUiLabelsRepository.optionLabel(SearchUiOptionKey.SUBMISSION_TYPE, "story"))
+          add(
+              searchUiLabelsRepository.optionLabel(
+                  SearchUiOptionKey.SUBMISSION_TYPE,
+                  "story",
+                  appI18n.uiLanguage,
+              )
+          )
       if (form.typePhoto)
-          add(searchUiLabelsRepository.optionLabel(SearchUiOptionKey.SUBMISSION_TYPE, "photo"))
+          add(
+              searchUiLabelsRepository.optionLabel(
+                  SearchUiOptionKey.SUBMISSION_TYPE,
+                  "photo",
+                  appI18n.uiLanguage,
+              )
+          )
       if (form.typePoetry)
-          add(searchUiLabelsRepository.optionLabel(SearchUiOptionKey.SUBMISSION_TYPE, "poetry"))
+          add(
+              searchUiLabelsRepository.optionLabel(
+                  SearchUiOptionKey.SUBMISSION_TYPE,
+                  "poetry",
+                  appI18n.uiLanguage,
+              )
+          )
     }
     summary +=
         searchUiLabelsRepository.formatLabelValue(
-            searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_SUBMISSION_TYPES),
+            searchUiLabelsRepository.text(
+                SearchUiTextKey.SUMMARY_SUBMISSION_TYPES,
+                appI18n.uiLanguage,
+            ),
             types
-                .ifEmpty { listOf(searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_NONE)) }
-                .joinToString("、"),
+                .ifEmpty {
+                  listOf(
+                      searchUiLabelsRepository.text(
+                          SearchUiTextKey.PHRASE_NONE,
+                          appI18n.uiLanguage,
+                      )
+                  )
+                }
+                .joinToString(appString(Res.string.list_delimiter)),
+            appI18n.uiLanguage,
         )
   }
 
@@ -432,14 +547,19 @@ internal fun buildSearchFiltersSummary(
     val genders =
         SearchGender.entries
             .filter { gender -> gender in form.selectedGenders }
-            .joinToString("、") { gender ->
-              searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, gender.token)
+            .joinToString(appString(Res.string.list_delimiter)) { gender ->
+              searchUiLabelsRepository.metadataOptionLabel(
+                  SearchUiOptionKey.GENDER,
+                  gender.token,
+                  appI18n.metadata,
+              )
             }
     if (genders.isNotBlank()) {
       summary +=
           searchUiLabelsRepository.formatLabelValue(
-              searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_GENDERS),
+              searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.GENDER, appI18n.metadata),
               genders,
+              appI18n.uiLanguage,
           )
     }
   }

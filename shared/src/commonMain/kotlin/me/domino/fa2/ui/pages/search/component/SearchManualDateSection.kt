@@ -22,9 +22,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.search.util.epochMillisToIsoDate
 import me.domino.fa2.ui.pages.search.util.isoDateToEpochMillisOrNull
+import org.jetbrains.compose.resources.stringResource
 
 private enum class ManualDateFieldTarget {
   From,
@@ -69,10 +71,12 @@ internal fun ManualDateRangeSection(
                 pickerTarget = null
               }
           ) {
-            Text("确定")
+            Text(stringResource(Res.string.confirm))
           }
         },
-        dismissButton = { TextButton(onClick = { pickerTarget = null }) { Text("取消") } },
+        dismissButton = {
+          TextButton(onClick = { pickerTarget = null }) { Text(stringResource(Res.string.cancel)) }
+        },
     ) {
       DatePicker(state = datePickerState, showModeToggle = false)
     }
@@ -87,13 +91,13 @@ internal fun ManualDateRangeSection(
       ) {
         ManualDateField(
             value = rangeFrom,
-            label = "From (YYYY-MM-DD)",
+            label = stringResource(Res.string.date_from_label),
             onClick = { pickerTarget = ManualDateFieldTarget.From },
             modifier = Modifier.fillMaxWidth(),
         )
         ManualDateField(
             value = rangeTo,
-            label = "To (YYYY-MM-DD)",
+            label = stringResource(Res.string.date_to_label),
             onClick = { pickerTarget = ManualDateFieldTarget.To },
             modifier = Modifier.fillMaxWidth(),
         )
@@ -105,13 +109,13 @@ internal fun ManualDateRangeSection(
       ) {
         ManualDateField(
             value = rangeFrom,
-            label = "From (YYYY-MM-DD)",
+            label = stringResource(Res.string.date_from_label),
             onClick = { pickerTarget = ManualDateFieldTarget.From },
             modifier = Modifier.weight(1f),
         )
         ManualDateField(
             value = rangeTo,
-            label = "To (YYYY-MM-DD)",
+            label = stringResource(Res.string.date_to_label),
             onClick = { pickerTarget = ManualDateFieldTarget.To },
             modifier = Modifier.weight(1f),
         )
@@ -133,9 +137,12 @@ private fun ManualDateField(
         onValueChange = {},
         readOnly = true,
         label = { Text(label) },
-        placeholder = { Text("YYYY-MM-DD") },
+        placeholder = { Text(stringResource(Res.string.date_placeholder)) },
         trailingIcon = {
-          Icon(imageVector = FaMaterialSymbols.Outlined.DateRange, contentDescription = "选择日期")
+          Icon(
+              imageVector = FaMaterialSymbols.Outlined.DateRange,
+              contentDescription = stringResource(Res.string.select_date),
+          )
         },
         modifier = Modifier.fillMaxWidth(),
     )

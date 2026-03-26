@@ -5,6 +5,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
+import me.domino.fa2.data.settings.AppSettings
+import me.domino.fa2.data.settings.MetadataDisplayMode
+import me.domino.fa2.data.settings.TranslationTargetLanguage
+import me.domino.fa2.data.settings.UiLanguageSetting
+import me.domino.fa2.i18n.AppI18nSnapshot
+import me.domino.fa2.i18n.SystemLanguageProvider
 
 class FaTaxonomyRepositoryTest {
   @Test
@@ -35,4 +41,65 @@ class FaTaxonomyRepositoryTest {
     assertEquals("image", repository.categoryCardIconByTag("c_wallpaper"))
     assertEquals("category", repository.categoryCardIconByTag("c_other"))
   }
+
+  @Test
+  fun translatedMetadataFollowsUiLanguageInsteadOfTranslationTargetLanguage() = runTest {
+    val repository = FaTaxonomyRepository()
+
+    repository.ensureLoaded()
+
+    val enMetadata =
+        AppI18nSnapshot.from(
+                settings =
+                    AppSettings(
+                        uiLanguage = UiLanguageSetting.EN,
+                        translationEnabled = true,
+                        translationTargetLanguage = TranslationTargetLanguage.ZH_CN,
+                        metadataDisplayMode = MetadataDisplayMode.TRANSLATED,
+                    ),
+                systemLanguageProvider = FakeSystemLanguageProvider("zh-Hans"),
+            )
+            .metadata
+    val zhMetadata =
+        AppI18nSnapshot.from(
+                settings =
+                    AppSettings(
+                        uiLanguage = UiLanguageSetting.ZH_HANS,
+                        translationEnabled = true,
+                        translationTargetLanguage = TranslationTargetLanguage.EN,
+                        metadataDisplayMode = MetadataDisplayMode.TRANSLATED,
+                    ),
+                systemLanguageProvider = FakeSystemLanguageProvider("en"),
+            )
+            .metadata
+
+    assertEquals("Artwork (Digital)", repository.categoryDisplayNameById(2, enMetadata))
+    assertEquals("数字绘画", repository.categoryDisplayNameById(2, zhMetadata))
+  }
+
+  @Test
+  fun disabledTranslationForcesMetadataBackToEnglish() = runTest {
+    val repository = FaTaxonomyRepository()
+
+    repository.ensureLoaded()
+
+    val metadata =
+        AppI18nSnapshot.from(
+                settings =
+                    AppSettings(
+                        uiLanguage = UiLanguageSetting.ZH_HANS,
+                        translationEnabled = false,
+                        translationTargetLanguage = TranslationTargetLanguage.ZH_CN,
+                        metadataDisplayMode = MetadataDisplayMode.TRANSLATED,
+                    ),
+                systemLanguageProvider = FakeSystemLanguageProvider("zh-Hans"),
+            )
+            .metadata
+
+    assertEquals("Artwork (Digital)", repository.categoryDisplayNameById(2, metadata))
+  }
+}
+
+private class FakeSystemLanguageProvider(private val languageTag: String) : SystemLanguageProvider {
+  override fun currentLanguageTag(): String = languageTag
 }

@@ -18,13 +18,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import kotlin.math.roundToInt
 import me.domino.fa2.ui.components.DetailSectionCardSurface
 import me.domino.fa2.ui.components.TranslatableBlocksCard
 import me.domino.fa2.ui.components.TranslatableSectionTitleRow
+import me.domino.fa2.ui.host.LocalAppI18n
+import me.domino.fa2.ui.host.LocalAppSettings
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.SubmissionAttachmentTextUiState
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -37,6 +41,8 @@ internal fun SubmissionAttachmentTextCard(
     requestPagerFocus: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+  val appI18n = LocalAppI18n.current
+  val translationEnabled = LocalAppSettings.current.translationEnabled
   val clickable =
       attachmentTextState is SubmissionAttachmentTextUiState.Idle ||
           attachmentTextState is SubmissionAttachmentTextUiState.Error
@@ -44,9 +50,9 @@ internal fun SubmissionAttachmentTextCard(
   if (attachmentTextState is SubmissionAttachmentTextUiState.Success) {
     translationState?.let { state ->
       TranslatableBlocksCard(
-          title = "附件文本",
+          title = stringResource(Res.string.attachment_text),
           translationState = state,
-          emptyText = "附件内容为空",
+          emptyText = stringResource(Res.string.attachment_text_empty),
           onTranslate = {
             onTranslate()
             requestPagerFocus()
@@ -55,6 +61,7 @@ internal fun SubmissionAttachmentTextCard(
             onToggleWrapText()
             requestPagerFocus()
           },
+          translationEnabled = translationEnabled,
           modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
           supportingText = {
             Text(
@@ -98,7 +105,7 @@ internal fun SubmissionAttachmentTextCard(
               verticalArrangement = Arrangement.spacedBy(2.dp),
           ) {
             Text(
-                text = progress?.message ?: "准备解析附件",
+                text = progress?.message ?: stringResource(Res.string.preparing_attachment),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -137,7 +144,7 @@ internal fun SubmissionAttachmentTextCard(
             )
           }
           Text(
-              text = "点击解析附件中的可翻译文本",
+              text = stringResource(Res.string.extract_attachment_text),
               style = MaterialTheme.typography.bodyMedium,
               color = MaterialTheme.colorScheme.onSurface,
           )
@@ -152,7 +159,7 @@ internal fun SubmissionAttachmentTextCard(
             color = MaterialTheme.colorScheme.error,
         )
         Text(
-            text = "点击重试",
+            text = stringResource(Res.string.tap_to_retry),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -170,10 +177,11 @@ private fun AttachmentCardHeader(
     onTranslate: (() -> Unit)? = null,
     onToggleWrapText: (() -> Unit)? = null,
 ) {
+  val translationEnabled = LocalAppSettings.current.translationEnabled
   Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
     if (translationState != null && onTranslate != null) {
       TranslatableSectionTitleRow(
-          title = "附件文本",
+          title = stringResource(Res.string.attachment_text),
           translating = translationState.translating,
           onTranslate = onTranslate,
           modifier = Modifier.fillMaxWidth(),
@@ -181,10 +189,11 @@ private fun AttachmentCardHeader(
           showWrapText = !translationState.showTranslation,
           wrapTextActive = translationState.isWrapped,
           onWrapText = onToggleWrapText,
+          translationEnabled = translationEnabled,
       )
     } else {
       Text(
-          text = "附件文本",
+          text = stringResource(Res.string.attachment_text),
           style = MaterialTheme.typography.titleMedium,
           fontWeight = FontWeight.SemiBold,
       )

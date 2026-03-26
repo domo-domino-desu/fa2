@@ -44,6 +44,22 @@ class AppSettingsService(private val storage: AppSettingsStorage) {
     }
   }
 
+  suspend fun updateUiLanguage(uiLanguage: UiLanguageSetting) {
+    updateSettings(mutableSettings.value.copy(uiLanguage = uiLanguage))
+  }
+
+  suspend fun updateTranslationEnabled(enabled: Boolean) {
+    updateSettings(mutableSettings.value.copy(translationEnabled = enabled))
+  }
+
+  suspend fun updateTranslationTargetLanguage(language: TranslationTargetLanguage) {
+    updateSettings(mutableSettings.value.copy(translationTargetLanguage = language))
+  }
+
+  suspend fun updateMetadataDisplayMode(mode: MetadataDisplayMode) {
+    updateSettings(mutableSettings.value.copy(metadataDisplayMode = mode))
+  }
+
   suspend fun updateTranslationProvider(provider: TranslationProvider) {
     updateSettings(mutableSettings.value.copy(translationProvider = provider))
   }

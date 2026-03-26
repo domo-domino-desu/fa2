@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 
 /** 登录页主界面。 */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,7 +59,10 @@ fun AuthScreen(
       modifier = Modifier.fillMaxSize().padding(20.dp).testTag("auth-screen"),
       verticalArrangement = Arrangement.spacedBy(12.dp),
   ) {
-    Text(text = "登录到 FurAffinity", style = MaterialTheme.typography.headlineSmall)
+    Text(
+        text = stringResource(Res.string.sign_in_to_fur_affinity),
+        style = MaterialTheme.typography.headlineSmall,
+    )
     Text(text = state.message, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
     Surface(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
@@ -78,8 +83,8 @@ fun AuthScreen(
           ) {
             Text(
                 when (method) {
-                  AuthLoginMethod.WebView -> "WebView"
-                  AuthLoginMethod.Cookie -> "Cookie"
+                  AuthLoginMethod.WebView -> stringResource(Res.string.web_view)
+                  AuthLoginMethod.Cookie -> stringResource(Res.string.cookie)
                 }
             )
           }
@@ -122,9 +127,12 @@ private fun WebViewLoginTab(
       verticalArrangement = Arrangement.spacedBy(12.dp),
   ) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      Button(onClick = onReload) { Text("重载登录页") }
+      Button(onClick = onReload) { Text(stringResource(Res.string.reload_login_page)) }
       Button(enabled = !webViewUiState.isConfirming, onClick = onConfirm) {
-        Text(if (webViewUiState.isConfirming) "确认中..." else "完成登录")
+        Text(
+            if (webViewUiState.isConfirming) stringResource(Res.string.confirming_login)
+            else stringResource(Res.string.complete_login)
+        )
       }
     }
     Text(
@@ -146,22 +154,22 @@ private fun CookieLoginTab(
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
     Text(
-        text = "直接粘贴浏览器中的 Cookie Header。",
+        text = stringResource(Res.string.paste_cookie_header_directly),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     OutlinedTextField(
         value = cookieDraft,
         onValueChange = onCookieDraftChange,
-        label = { Text("Cookie Header") },
-        placeholder = { Text("a=...; b=...") },
+        label = { Text(stringResource(Res.string.cookie_header)) },
+        placeholder = { Text(stringResource(Res.string.cookie_header_placeholder)) },
         modifier = Modifier.fillMaxWidth(),
         minLines = 6,
         textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
     )
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      Button(onClick = onSubmit) { Text("保存并登录") }
-      Button(onClick = onRetry) { Text("重试现有登录态") }
+      Button(onClick = onSubmit) { Text(stringResource(Res.string.save_and_login)) }
+      Button(onClick = onRetry) { Text(stringResource(Res.string.retry_existing_session)) }
     }
   }
 }
@@ -180,7 +188,7 @@ fun AuthLoadingScreen() {
           color = MaterialTheme.colorScheme.primary,
       )
       Text(
-          text = "正在检查登录态…",
+          text = stringResource(Res.string.checking_login_state),
           style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
       )

@@ -29,12 +29,14 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.SearchHistoryRecord
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.ui.layouts.SearchHistoryRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.pages.search.SearchRouteScreen
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 /** 搜索历史页面（关键词 + 条件摘要）。 */
@@ -64,7 +66,7 @@ class SearchHistoryRouteScreen : Screen {
       when {
         loading -> {
           Text(
-              text = "正在加载搜索记录...",
+              text = stringResource(Res.string.loading_search_history),
               style = MaterialTheme.typography.bodyMedium,
               modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
           )
@@ -72,7 +74,7 @@ class SearchHistoryRouteScreen : Screen {
 
         histories.isEmpty() -> {
           Text(
-              text = "暂无搜索记录。",
+              text = stringResource(Res.string.empty_search_history),
               style = MaterialTheme.typography.bodyMedium,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
               modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),

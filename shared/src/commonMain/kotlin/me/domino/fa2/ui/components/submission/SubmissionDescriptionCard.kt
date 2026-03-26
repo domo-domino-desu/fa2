@@ -6,8 +6,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.components.TranslatableBlocksCard
+import me.domino.fa2.ui.host.LocalAppSettings
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun SubmissionDescriptionCard(
@@ -16,10 +19,11 @@ internal fun SubmissionDescriptionCard(
     onToggleWrapText: () -> Unit,
     requestPagerFocus: () -> Unit,
 ) {
+  val translationEnabled = LocalAppSettings.current.translationEnabled
   TranslatableBlocksCard(
-      title = "描述",
+      title = stringResource(Res.string.description),
       translationState = translationState,
-      emptyText = "暂无描述",
+      emptyText = stringResource(Res.string.no_description),
       onTranslate = {
         onTranslate()
         requestPagerFocus()
@@ -28,6 +32,7 @@ internal fun SubmissionDescriptionCard(
         onToggleWrapText()
         requestPagerFocus()
       },
+      translationEnabled = translationEnabled,
       modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
       originalTextStyle = MaterialTheme.typography.bodyMedium,
       originalTextColor = MaterialTheme.colorScheme.onSurfaceVariant,

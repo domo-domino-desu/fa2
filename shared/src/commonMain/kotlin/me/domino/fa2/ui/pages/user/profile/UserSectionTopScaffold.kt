@@ -13,8 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import kotlin.math.max
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
+import org.jetbrains.compose.resources.stringResource
 
 internal object UserSectionTopDefaults {
   val tabsHorizontalPaddingInList: Dp = 12.dp
@@ -191,7 +193,13 @@ internal fun UserChildRouteTabs(
                     count = UserChildRoute.entries.size,
                 ),
         ) {
-          Text(route.title)
+          Text(
+              when (route) {
+                UserChildRoute.Gallery -> stringResource(Res.string.gallery)
+                UserChildRoute.Favorites -> stringResource(Res.string.favorites)
+                UserChildRoute.Journals -> stringResource(Res.string.journals)
+              }
+          )
         }
       }
     }

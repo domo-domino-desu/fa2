@@ -39,6 +39,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.WatchlistCategory
@@ -50,6 +51,7 @@ import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.pages.user.route.UserRouteScreen
 import me.domino.fa2.util.FaUrls
+import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
 
 /** 用户关注列表路由页面。 */
@@ -84,8 +86,8 @@ class UserWatchlistRouteScreen(
     }
     val topBarTitle =
         when (category) {
-          WatchlistCategory.WatchedBy -> "关注者"
-          WatchlistCategory.Watching -> "已关注"
+          WatchlistCategory.WatchedBy -> stringResource(Res.string.followers)
+          WatchlistCategory.Watching -> stringResource(Res.string.following)
         }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -115,7 +117,7 @@ class UserWatchlistRouteScreen(
             !state.errorMessage.isNullOrBlank() && state.users.isEmpty() -> {
               item(key = "watchlist-error") {
                 WatchlistStatusCard(
-                    title = "加载失败",
+                    title = stringResource(Res.string.load_failed),
                     body = state.errorMessage.orEmpty(),
                     onRetry = { screenModel.load(forceRefresh = true) },
                 )
@@ -130,7 +132,7 @@ class UserWatchlistRouteScreen(
               if (!inlineError.isNullOrBlank()) {
                 item(key = "watchlist-inline-error") {
                   WatchlistStatusCard(
-                      title = "加载失败",
+                      title = stringResource(Res.string.load_failed),
                       body = inlineError,
                       onRetry = { screenModel.load(forceRefresh = true) },
                   )
@@ -244,10 +246,11 @@ private fun WatchlistFooter(
       Text(
           text =
               when {
-                isLoadingMore -> "正在自动加载更多用户"
-                !appendErrorMessage.isNullOrBlank() && hasMore -> "自动加载失败，可手动加载下一页"
-                hasMore -> "继续浏览将自动加载下一页"
-                else -> "已经到达末页"
+                isLoadingMore -> stringResource(Res.string.loading_more_content)
+                !appendErrorMessage.isNullOrBlank() && hasMore ->
+                    stringResource(Res.string.auto_load_failed_manual_next_page)
+                hasMore -> stringResource(Res.string.continue_auto_load_next_page)
+                else -> stringResource(Res.string.reached_end)
               },
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -255,7 +258,16 @@ private fun WatchlistFooter(
       if (hasMore && !isLoadingMore) {
         AssistChip(
             onClick = onRetryLoadMore,
-            label = { Text(text = if (appendErrorMessage.isNullOrBlank()) "加载下一页" else "手动加载") },
+            label = {
+              Text(
+                  text =
+                      if (appendErrorMessage.isNullOrBlank()) {
+                        stringResource(Res.string.load_next_page)
+                      } else {
+                        stringResource(Res.string.manual_load)
+                      }
+              )
+            },
         )
       }
     }
@@ -279,7 +291,7 @@ private fun WatchlistStatusCard(title: String, body: String, onRetry: () -> Unit
           style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-      Button(onClick = onRetry) { Text("重试") }
+      Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
     }
   }
 }

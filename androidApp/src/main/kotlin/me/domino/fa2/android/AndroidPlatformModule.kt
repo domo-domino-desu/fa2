@@ -10,6 +10,7 @@ import java.io.File
 import me.domino.fa2.data.local.AppDatabase
 import me.domino.fa2.data.local.AppDatabaseBuilderFactory
 import me.domino.fa2.di.KOIN_QUALIFIER_COOKIE_VAULT
+import me.domino.fa2.i18n.SystemLanguageProvider
 import okio.Path.Companion.toPath
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
@@ -21,6 +22,11 @@ fun androidPlatformModule(
     context: Context
 ): Module = module {
   single<Context> { context.applicationContext }
+  single<SystemLanguageProvider> {
+    object : SystemLanguageProvider {
+      override fun currentLanguageTag(): String = java.util.Locale.getDefault().toLanguageTag()
+    }
+  }
 
   single<AppDatabaseBuilderFactory> {
     val appContext = context.applicationContext

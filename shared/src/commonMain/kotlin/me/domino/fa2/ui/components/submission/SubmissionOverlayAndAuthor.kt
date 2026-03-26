@@ -30,12 +30,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.panpf.zoomimage.CoilZoomAsyncImage
+import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.components.CenterCircularWavyImageLoadingProgress
 import me.domino.fa2.ui.components.ImageLoadLifecycleState
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.rememberImageLoadProgressState
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.util.isGifUrl
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun SubmissionZoomImageOverlay(imageUrl: String, onDismiss: () -> Unit) {
@@ -63,7 +65,7 @@ internal fun SubmissionZoomImageOverlay(imageUrl: String, onDismiss: () -> Unit)
       Box(modifier = Modifier.fillMaxSize().padding(12.dp)) {
         CoilZoomAsyncImage(
             model = normalizedUrl,
-            contentDescription = "查看原图",
+            contentDescription = stringResource(Res.string.original_image),
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit,
             filterQuality = FilterQuality.High,
@@ -85,7 +87,7 @@ internal fun SubmissionZoomImageOverlay(imageUrl: String, onDismiss: () -> Unit)
     ) {
       Icon(
           imageVector = FaMaterialSymbols.Filled.Close,
-          contentDescription = "关闭预览",
+          contentDescription = stringResource(Res.string.close_preview),
           tint = MaterialTheme.colorScheme.onSurface,
       )
     }

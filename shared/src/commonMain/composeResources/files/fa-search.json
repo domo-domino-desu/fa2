@@ -1,65 +1,231 @@
 {
-  "version": 1,
+  "version": 2,
   "summary": {
-    "sort": "排序",
-    "direction": "方向",
-    "date": "日期",
-    "genders": "性别",
-    "submissionTypes": "投稿类型"
+    "sort": {
+      "en": "Sort Criteria",
+      "zh-Hans": "排序"
+    },
+    "direction": {
+      "en": "Order",
+      "zh-Hans": "方向"
+    },
+    "date": {
+      "en": "Date Filter",
+      "zh-Hans": "日期"
+    },
+    "genders": {
+      "en": "Gender",
+      "zh-Hans": "性别"
+    },
+    "submissionTypes": {
+      "en": "Type",
+      "zh-Hans": "投稿类型"
+    }
   },
   "filters": {
-    "sortCriteria": "排序依据",
-    "sortDirection": "排序方向",
-    "dateFilter": "日期范围",
-    "genderKeywords": "性别关键词",
-    "submissionTypes": "投稿类型"
+    "sortCriteria": {
+      "en": "Sort Criteria",
+      "zh-Hans": "排序依据"
+    },
+    "sortDirection": {
+      "en": "Order",
+      "zh-Hans": "排序方向"
+    },
+    "dateFilter": {
+      "en": "Date Filter",
+      "zh-Hans": "日期范围"
+    },
+    "genderKeywords": {
+      "en": "Gender Filter",
+      "zh-Hans": "性别关键词"
+    },
+    "submissionTypes": {
+      "en": "Type Filter",
+      "zh-Hans": "投稿类型"
+    }
+  },
+  "metadata": {
+    "category": {
+      "en": "Category",
+      "zh-Hans": "类别"
+    },
+    "type": {
+      "en": "Type",
+      "zh-Hans": "分类"
+    },
+    "species": {
+      "en": "Species",
+      "zh-Hans": "物种"
+    },
+    "gender": {
+      "en": "Gender",
+      "zh-Hans": "性别"
+    },
+    "rating": {
+      "en": "Rating",
+      "zh-Hans": "分级"
+    }
   },
   "options": {
     "orderBy": {
-      "relevancy": "相关度",
-      "date": "日期",
-      "popularity": "热度"
+      "relevancy": {
+        "en": "relevancy",
+        "zh-Hans": "相关度"
+      },
+      "date": {
+        "en": "date",
+        "zh-Hans": "日期"
+      },
+      "popularity": {
+        "en": "popularity",
+        "zh-Hans": "热度"
+      }
     },
     "orderDirection": {
-      "desc": "降序",
-      "asc": "升序"
+      "desc": {
+        "en": "descending",
+        "zh-Hans": "降序"
+      },
+      "asc": {
+        "en": "ascending",
+        "zh-Hans": "升序"
+      }
     },
     "range": {
-      "1day": "1 天",
-      "3days": "3 天",
-      "7days": "7 天",
-      "30days": "30 天",
-      "90days": "90 天",
-      "1year": "1 年",
-      "3years": "3 年",
-      "5years": "5 年",
-      "all": "全部时间",
-      "manual": "自定义"
+      "1day": {
+        "en": "1 day",
+        "zh-Hans": "1 天"
+      },
+      "3days": {
+        "en": "3 days",
+        "zh-Hans": "3 天"
+      },
+      "7days": {
+        "en": "7 days",
+        "zh-Hans": "7 天"
+      },
+      "30days": {
+        "en": "30 days",
+        "zh-Hans": "30 天"
+      },
+      "90days": {
+        "en": "90 days",
+        "zh-Hans": "90 天"
+      },
+      "1year": {
+        "en": "1 year",
+        "zh-Hans": "1 年"
+      },
+      "3years": {
+        "en": "3 years",
+        "zh-Hans": "3 年"
+      },
+      "5years": {
+        "en": "5 years",
+        "zh-Hans": "5 年"
+      },
+      "all": {
+        "en": "All Time",
+        "zh-Hans": "全部时间"
+      },
+      "manual": {
+        "en": "Custom",
+        "zh-Hans": "自定义"
+      }
     },
     "genders": {
-      "male": "雄性",
-      "female": "雌性",
-      "trans_male": "跨性别雄性",
-      "trans_female": "跨性别雌性",
-      "intersex": "两性兼有",
-      "non_binary": "非二元性别"
+      "male": {
+        "en": "Male",
+        "zh-Hans": "雄性"
+      },
+      "female": {
+        "en": "Female",
+        "zh-Hans": "雌性"
+      },
+      "trans_male": {
+        "en": "Trans_Male",
+        "zh-Hans": "跨性别雄性"
+      },
+      "trans_female": {
+        "en": "Trans_Female",
+        "zh-Hans": "跨性别雌性"
+      },
+      "intersex": {
+        "en": "Intersex",
+        "zh-Hans": "两性兼有"
+      },
+      "non_binary": {
+        "en": "Non_Binary",
+        "zh-Hans": "非二元性别"
+      }
+    },
+    "ratings": {
+      "general": {
+        "en": "General",
+        "zh-Hans": "全年龄"
+      },
+      "mature": {
+        "en": "Mature",
+        "zh-Hans": "成熟"
+      },
+      "adult": {
+        "en": "Adult",
+        "zh-Hans": "成人"
+      },
+      "none": {
+        "en": "None",
+        "zh-Hans": "无"
+      }
     },
     "submissionTypes": {
-      "art": "艺术",
-      "music": "音乐",
-      "flash": "Flash",
-      "story": "故事",
-      "photo": "摄影",
-      "poetry": "诗歌"
+      "art": {
+        "en": "Art",
+        "zh-Hans": "艺术"
+      },
+      "music": {
+        "en": "Music",
+        "zh-Hans": "音乐"
+      },
+      "flash": {
+        "en": "Flash",
+        "zh-Hans": "Flash"
+      },
+      "story": {
+        "en": "Story",
+        "zh-Hans": "故事"
+      },
+      "photo": {
+        "en": "Photos",
+        "zh-Hans": "摄影"
+      },
+      "poetry": {
+        "en": "Poetry",
+        "zh-Hans": "诗歌"
+      }
     }
   },
   "phrases": {
-    "any": "任意",
-    "none": "无",
-    "from": "自",
-    "to": "至"
+    "any": {
+      "en": "Any",
+      "zh-Hans": "任意"
+    },
+    "none": {
+      "en": "None",
+      "zh-Hans": "无"
+    },
+    "from": {
+      "en": "From",
+      "zh-Hans": "自"
+    },
+    "to": {
+      "en": "To",
+      "zh-Hans": "至"
+    }
   },
   "punctuation": {
-    "labelValueSeparator": "："
+    "labelValueSeparator": {
+      "en": ": ",
+      "zh-Hans": "："
+    }
   }
 }

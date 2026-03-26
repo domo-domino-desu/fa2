@@ -2,9 +2,13 @@ package me.domino.fa2.ui.pages.more
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.repository.AuthRepository
+import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.i18n.SystemLanguageProvider
+import me.domino.fa2.i18n.appString
 import me.domino.fa2.util.logging.FaLog
 
 /** More 页面状态模型。 */
@@ -15,6 +19,8 @@ class MoreScreenModel(
     private val authRepository: AuthRepository,
     /** 历史记录仓储。 */
     private val historyRepository: ActivityHistoryRepository,
+    private val settingsService: AppSettingsService? = null,
+    private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) : StateScreenModel<MoreUiState>(MoreUiState.Loading) {
   private val log = FaLog.withTag("MoreScreenModel")
 
@@ -74,7 +80,7 @@ class MoreScreenModel(
             mutableState.value =
                 snapshot.copy(
                     loggingOut = false,
-                    errorMessage = throwable.message ?: "退出登录失败",
+                    errorMessage = throwable.message ?: appString(Res.string.logout_failed),
                     loggedOut = false,
                 )
             log.e(throwable) { "退出登录 -> 失败" }

@@ -22,17 +22,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.domain.attachmenttext.attachmentFileExtension
+import me.domino.fa2.i18n.appString
 import me.domino.fa2.ui.components.NetworkImage
+import me.domino.fa2.ui.host.LocalAppI18n
+import me.domino.fa2.ui.host.LocalSearchUiLabelsRepository
 import me.domino.fa2.ui.host.LocalTaxonomyCatalog
 import me.domino.fa2.ui.host.LocalTaxonomyRepository
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.SubmissionAttachmentTextUiState
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
+import me.domino.fa2.ui.search.SearchUiOptionKey
 import me.domino.fa2.util.deriveSubmissionThumbnailUrlFromFullImage
 import me.domino.fa2.util.sanitizeDetailAspectRatio
 
@@ -64,6 +69,8 @@ internal fun SubmissionDetailSuccessContent(
     requestPagerFocus: () -> Unit,
 ) {
   val coroutineScope = rememberCoroutineScope()
+  val appI18n = LocalAppI18n.current
+  val searchUiLabelsRepository = LocalSearchUiLabelsRepository.current
   val taxonomyRepository = LocalTaxonomyRepository.current
   val taxonomyCatalog = LocalTaxonomyCatalog.current
   val commentsBringIntoViewRequester = remember(detail.id) { BringIntoViewRequester() }
@@ -110,7 +117,7 @@ internal fun SubmissionDetailSuccessContent(
           add(
               SubmissionInfoMetric(
                   icon = FaMaterialSymbols.Outlined.Tag,
-                  text = "ID ${detail.id}",
+                  text = appString(Res.string.submission_id, detail.id),
                   onClick = { onCopySubmissionUrl(detail.submissionUrl) },
               )
           )
@@ -160,16 +167,32 @@ internal fun SubmissionDetailSuccessContent(
         )
       }
   val localizedCategory =
-      remember(detail.category, taxonomyCatalog) {
-        taxonomyRepository.categoryDisplayNameByEnglishLabel(detail.category) ?: detail.category
+      remember(detail.category, taxonomyCatalog, appI18n) {
+        taxonomyRepository.categoryDisplayNameByEnglishLabel(detail.category, appI18n.metadata)
+            ?: detail.category
       }
   val localizedType =
-      remember(detail.type, taxonomyCatalog) {
-        taxonomyRepository.typeDisplayNameByEnglishLabel(detail.type) ?: detail.type
+      remember(detail.type, taxonomyCatalog, appI18n) {
+        taxonomyRepository.typeDisplayNameByEnglishLabel(detail.type, appI18n.metadata)
+            ?: detail.type
       }
   val localizedSpecies =
-      remember(detail.species, taxonomyCatalog) {
-        taxonomyRepository.speciesDisplayNameByEnglishLabel(detail.species) ?: detail.species
+      remember(detail.species, taxonomyCatalog, appI18n) {
+        taxonomyRepository.speciesDisplayNameByEnglishLabel(detail.species, appI18n.metadata)
+            ?: detail.species
+      }
+  val localizedRating =
+      remember(detail.rating, searchUiLabelsRepository, appI18n) {
+        val ratingKey = detail.rating.trim().lowercase()
+        if (ratingKey.isBlank()) {
+          detail.rating
+        } else {
+          searchUiLabelsRepository.metadataOptionLabel(
+              SearchUiOptionKey.RATING,
+              ratingKey,
+              appI18n.metadata,
+          )
+        }
       }
   val filteredKeywordChips =
       remember(detail) {
@@ -248,7 +271,7 @@ internal fun SubmissionDetailSuccessContent(
         onOpenAuthor = onOpenAuthor,
     )
     SubmissionBrowseMetadataSection(
-        rating = detail.rating,
+        rating = localizedRating,
         category = localizedCategory,
         type = localizedType,
         species = localizedSpecies,

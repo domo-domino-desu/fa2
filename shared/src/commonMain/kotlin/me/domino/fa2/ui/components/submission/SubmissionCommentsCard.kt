@@ -23,9 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import me.domino.fa2.data.model.PageComment
 import me.domino.fa2.ui.components.HtmlText
 import me.domino.fa2.ui.components.NetworkImage
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun SubmissionCommentsCard(
@@ -49,14 +51,14 @@ internal fun SubmissionCommentsCard(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       Text(
-          text = "评论 · $commentCount",
+          text = stringResource(Res.string.comments, commentCount),
           style = MaterialTheme.typography.titleMedium,
           fontWeight = FontWeight.SemiBold,
       )
 
       if (comments.isEmpty()) {
         Text(
-            text = "暂无可展示评论",
+            text = stringResource(Res.string.no_displayable_comments),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -132,7 +134,7 @@ private fun SubmissionCommentItem(comment: PageComment, onOpenAuthor: (String) -
     }
     SelectionContainer {
       HtmlText(
-          html = comment.bodyHtml.ifBlank { "<p>（无内容）</p>" },
+          html = comment.bodyHtml.ifBlank { stringResource(Res.string.empty_comment_html) },
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurface,
       )

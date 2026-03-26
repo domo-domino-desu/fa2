@@ -2,6 +2,7 @@ package me.domino.fa2.ui.pages.auth
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -9,13 +10,18 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.application.challenge.port.SessionWebViewPort
 import me.domino.fa2.data.model.AuthProbeResult
 import me.domino.fa2.data.repository.AuthRepository
+import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.i18n.SystemLanguageProvider
+import me.domino.fa2.i18n.appString
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.logging.FaLog
 
 /** 登录页面状态模型。 */
 class AuthScreenModel(
     /** 认证仓储。 */
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val settingsService: AppSettingsService? = null,
+    private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) : StateScreenModel<AuthUiState>(AuthUiState.Loading) {
   private val log = FaLog.withTag("AuthScreenModel")
 
@@ -30,7 +36,7 @@ class AuthScreenModel(
       MutableStateFlow(
           AuthWebViewUiState(
               isConfirming = false,
-              statusMessage = defaultWebViewStatusMessage,
+              statusMessage = appString(Res.string.default_web_view_login_status),
           )
       )
 
@@ -77,7 +83,8 @@ class AuthScreenModel(
       refreshCookieDraft()
       if (!hasCookie) {
         log.w { "认证初始化 -> 无可用Cookie" }
-        mutableState.value = AuthUiState.AuthInvalid(message = "未找到持久化 Cookie，请先登录。")
+        mutableState.value =
+            AuthUiState.AuthInvalid(message = appString(Res.string.missing_persisted_cookie))
         return@launch
       }
       probeAndUpdate()
@@ -91,7 +98,8 @@ class AuthScreenModel(
       val normalized = cookieDraftState.value.trim()
       if (normalized.isBlank()) {
         log.w { "提交Cookie -> 失败(空输入)" }
-        mutableState.value = AuthUiState.AuthInvalid(message = "Cookie 不能为空。")
+        mutableState.value =
+            AuthUiState.AuthInvalid(message = appString(Res.string.empty_cookie_header))
         return@launch
       }
 
@@ -119,7 +127,7 @@ class AuthScreenModel(
       port.injectCookieHeader(url = url, cookieHeader = cookieHeader)
     }
     syncUserAgentFromWebView(port)
-    updateWebViewUiState(statusMessage = defaultWebViewStatusMessage)
+    updateWebViewUiState(statusMessage = appString(Res.string.default_web_view_login_status))
   }
 
   /**
@@ -131,7 +139,7 @@ class AuthScreenModel(
     val changedCookie = syncCookieSnapshotFromWebView(port)
     val changedUa = syncUserAgentFromWebView(port)
     if (changedCookie || changedUa) {
-      updateWebViewUiState(statusMessage = "已同步 WebView 会话。")
+      updateWebViewUiState(statusMessage = appString(Res.string.web_view_session_synced))
     }
   }
 
@@ -144,7 +152,7 @@ class AuthScreenModel(
     log.i { "WebView登录确认 -> 开始" }
     updateWebViewUiState(
         isConfirming = true,
-        statusMessage = "正在读取 WebView 中的登录信息...",
+        statusMessage = appString(Res.string.reading_web_view_login_info),
     )
 
     val cookieChanged = syncCookieSnapshotFromWebView(port)
@@ -153,12 +161,12 @@ class AuthScreenModel(
     if (!cookieChanged && cookieDraftState.value.isBlank()) {
       updateWebViewUiState(
           isConfirming = true,
-          statusMessage = "暂未从 WebView 抓取到 Cookie，继续检查当前会话...",
+          statusMessage = appString(Res.string.no_cookie_captured_checking_session),
       )
     } else {
       updateWebViewUiState(
           isConfirming = true,
-          statusMessage = "已同步 WebView Cookie，正在验证登录态...",
+          statusMessage = appString(Res.string.cookie_synced_validating_login_state),
       )
     }
 
@@ -167,21 +175,21 @@ class AuthScreenModel(
       is AuthUiState.Authenticated -> {
         updateWebViewUiState(
             isConfirming = false,
-            statusMessage = "登录成功，正在进入主页...",
+            statusMessage = appString(Res.string.login_succeeded_entering_home),
         )
       }
 
       is AuthUiState.AuthInvalid -> {
         updateWebViewUiState(
             isConfirming = false,
-            statusMessage = "登录未完成：${nextState.message}",
+            statusMessage = appString(Res.string.login_incomplete, nextState.message),
         )
       }
 
       AuthUiState.Loading -> {
         updateWebViewUiState(
             isConfirming = false,
-            statusMessage = defaultWebViewStatusMessage,
+            statusMessage = appString(Res.string.default_web_view_login_status),
         )
       }
     }
@@ -211,7 +219,10 @@ class AuthScreenModel(
   /** 重置认证交互状态。 */
   private fun resetAuthInteractionState() {
     loginMethodState.value = AuthLoginMethod.WebView
-    updateWebViewUiState(isConfirming = false, statusMessage = defaultWebViewStatusMessage)
+    updateWebViewUiState(
+        isConfirming = false,
+        statusMessage = appString(Res.string.default_web_view_login_status),
+    )
     lastSyncedWebViewCookieSnapshot = ""
     lastSyncedWebViewUserAgent = ""
   }
@@ -340,6 +351,3 @@ private fun parseCookieHeader(rawCookieHeader: String): List<Pair<String, String
           val value = token.substringAfter('=', "").trim()
           name.takeIf { it.isNotBlank() }?.let { nonBlankName -> nonBlankName to value }
         }
-
-private const val defaultWebViewStatusMessage: String =
-    "请在左侧 WebView 中完成登录；如果遇到 Cloudflare，请先完成验证，再点击“完成登录”。"

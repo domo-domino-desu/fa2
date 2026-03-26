@@ -4,17 +4,15 @@ package me.domino.fa2.ui.pages.user.route
 enum class UserChildRoute(
     /** 路由键。 */
     val routeKey: String,
-    /** 展示标题。 */
-    val title: String,
 ) {
   /** Gallery。 */
-  Gallery(routeKey = "gallery", title = "Gallery"),
+  Gallery(routeKey = "gallery"),
 
   /** Favorites。 */
-  Favorites(routeKey = "favorites", title = "Favorites"),
+  Favorites(routeKey = "favorites"),
 
   /** Journals。 */
-  Journals(routeKey = "journals", title = "Journals");
+  Journals(routeKey = "journals");
 
   /** 是否为投稿瀑布流子页。 */
   val isSubmissionSection: Boolean

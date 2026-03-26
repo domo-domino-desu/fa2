@@ -31,8 +31,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.i18n.AppLanguage
+import me.domino.fa2.i18n.MetadataDisplayPreferences
 import me.domino.fa2.ui.components.FilterDialogTriggerField
 import me.domino.fa2.ui.components.FilterDropdownField
 import me.domino.fa2.ui.components.FilterOption
@@ -44,6 +47,7 @@ import me.domino.fa2.ui.components.submission.SubmissionWaterfall
 import me.domino.fa2.ui.components.submission.WaterfallLoadingSkeleton
 import me.domino.fa2.ui.components.toFilterOption
 import me.domino.fa2.ui.components.toFilterOptionGroup
+import me.domino.fa2.ui.host.LocalAppI18n
 import me.domino.fa2.ui.host.LocalAppSettings
 import me.domino.fa2.ui.host.LocalSearchUiLabelsCatalog
 import me.domino.fa2.ui.host.LocalSearchUiLabelsRepository
@@ -52,8 +56,10 @@ import me.domino.fa2.ui.host.LocalTaxonomyRepository
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.layouts.BrowseFilterOverlayTopBar
 import me.domino.fa2.ui.search.SearchUiLabelsRepository
+import me.domino.fa2.ui.search.SearchUiMetadataKey
 import me.domino.fa2.ui.search.SearchUiOptionKey
 import me.domino.fa2.ui.search.SearchUiTextKey
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun BrowseScreen(
@@ -73,6 +79,7 @@ fun BrowseScreen(
     onRetryLoadMore: () -> Unit,
     waterfallState: LazyStaggeredGridState,
 ) {
+  val appI18n = LocalAppI18n.current
   val settings = LocalAppSettings.current
   val searchUiLabelsRepository = LocalSearchUiLabelsRepository.current
   val taxonomyRepository = LocalTaxonomyRepository.current
@@ -80,25 +87,33 @@ fun BrowseScreen(
   val taxonomyCatalog = LocalTaxonomyCatalog.current
   var filterPageVisible by remember { mutableStateOf(false) }
   val browseCategoryOptions =
-      remember(taxonomyCatalog) { taxonomyRepository.categoryOptions().map { it.toFilterOption() } }
+      remember(taxonomyCatalog, appI18n) {
+        taxonomyRepository.categoryOptions(appI18n.metadata).map { it.toFilterOption() }
+      }
   val browseCategoryOptionGroups =
-      remember(taxonomyCatalog) {
-        taxonomyRepository.categoryOptionGroups().map { it.toFilterOptionGroup() }
+      remember(taxonomyCatalog, appI18n) {
+        taxonomyRepository.categoryOptionGroups(appI18n.metadata).map { it.toFilterOptionGroup() }
       }
   val browseTypeOptions =
-      remember(taxonomyCatalog) { taxonomyRepository.typeOptions().map { it.toFilterOption() } }
+      remember(taxonomyCatalog, appI18n) {
+        taxonomyRepository.typeOptions(appI18n.metadata).map { it.toFilterOption() }
+      }
   val browseSpeciesOptions =
-      remember(taxonomyCatalog) { taxonomyRepository.speciesOptions().map { it.toFilterOption() } }
+      remember(taxonomyCatalog, appI18n) {
+        taxonomyRepository.speciesOptions(appI18n.metadata).map { it.toFilterOption() }
+      }
   val browseTypeOptionGroups =
-      remember(taxonomyCatalog) {
-        taxonomyRepository.typeOptionGroups().map { it.toFilterOptionGroup() }
+      remember(taxonomyCatalog, appI18n) {
+        taxonomyRepository.typeOptionGroups(appI18n.metadata).map { it.toFilterOptionGroup() }
       }
   val browseSpeciesOptionGroups =
-      remember(taxonomyCatalog) {
-        taxonomyRepository.speciesOptionGroups().map { it.toFilterOptionGroup() }
+      remember(taxonomyCatalog, appI18n) {
+        taxonomyRepository.speciesOptionGroups(appI18n.metadata).map { it.toFilterOptionGroup() }
       }
   val browseGenderOptions =
-      remember(searchUiLabelsCatalog) { buildBrowseGenderOptions(searchUiLabelsRepository) }
+      remember(searchUiLabelsCatalog, appI18n) {
+        buildBrowseGenderOptions(searchUiLabelsRepository, appI18n.metadata, appI18n.uiLanguage)
+      }
 
   val filterBar: @Composable () -> Unit = {
     BrowseFilterSummaryBar(
@@ -110,6 +125,8 @@ fun BrowseScreen(
                 speciesOptions = browseSpeciesOptions,
                 genderOptions = browseGenderOptions,
                 searchUiLabelsRepository = searchUiLabelsRepository,
+                metadata = appI18n.metadata,
+                uiLanguage = appI18n.uiLanguage,
             ),
         onOpenFilterPage = { filterPageVisible = true },
     )
@@ -134,7 +151,11 @@ fun BrowseScreen(
           verticalArrangement = Arrangement.spacedBy(10.dp),
       ) {
         filterBar()
-        BrowseStatusCard(title = "加载失败", body = state.errorMessage.orEmpty(), onRetry = onRetry)
+        BrowseStatusCard(
+            title = stringResource(Res.string.load_failed),
+            body = state.errorMessage.orEmpty(),
+            onRetry = onRetry,
+        )
       }
     } else {
       PullToRefreshBox(
@@ -224,7 +245,7 @@ private fun BrowseFilterSummaryBar(chips: List<String>, onOpenFilterPage: () -> 
       }
       Icon(
           imageVector = FaMaterialSymbols.Outlined.FilterAlt,
-          contentDescription = "打开筛选页面",
+          contentDescription = stringResource(Res.string.open_filters),
           tint = MaterialTheme.colorScheme.onSurfaceVariant,
       )
     }
@@ -254,6 +275,7 @@ private fun BrowseFilterPage(
     searchUiLabelsRepository: SearchUiLabelsRepository,
     modifier: Modifier = Modifier,
 ) {
+  val appI18n = LocalAppI18n.current
   var typePickerVisible by remember { mutableStateOf(false) }
   var speciesPickerVisible by remember { mutableStateOf(false) }
   val selectedTypeLabel =
@@ -285,14 +307,22 @@ private fun BrowseFilterPage(
             modifier = Modifier.fillMaxWidth(),
         ) {
           GroupedFilterDropdownField(
-              label = "类别",
+              label =
+                  searchUiLabelsRepository.metadataLabel(
+                      SearchUiMetadataKey.CATEGORY,
+                      appI18n.metadata,
+                  ),
               groups = categoryOptionGroups,
               selected = filter.category,
               onSelected = onUpdateCategory,
               modifier = Modifier.weight(1f),
           )
           FilterDialogTriggerField(
-              label = "分类",
+              label =
+                  searchUiLabelsRepository.metadataLabel(
+                      SearchUiMetadataKey.TYPE,
+                      appI18n.metadata,
+                  ),
               valueLabel = selectedTypeLabel,
               onOpenPicker = { typePickerVisible = true },
               modifier = Modifier.weight(1f),
@@ -303,13 +333,21 @@ private fun BrowseFilterPage(
             modifier = Modifier.fillMaxWidth(),
         ) {
           FilterDialogTriggerField(
-              label = "物种",
+              label =
+                  searchUiLabelsRepository.metadataLabel(
+                      SearchUiMetadataKey.SPECIES,
+                      appI18n.metadata,
+                  ),
               valueLabel = selectedSpeciesLabel,
               onOpenPicker = { speciesPickerVisible = true },
               modifier = Modifier.weight(1f),
           )
           FilterDropdownField(
-              label = searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_GENDERS),
+              label =
+                  searchUiLabelsRepository.metadataLabel(
+                      SearchUiMetadataKey.GENDER,
+                      appI18n.metadata,
+                  ),
               options = genderOptions,
               selected = filter.gender,
               onSelected = onUpdateGender,
@@ -317,6 +355,29 @@ private fun BrowseFilterPage(
           )
         }
         RatingRow(
+            title =
+                searchUiLabelsRepository.metadataLabel(
+                    SearchUiMetadataKey.RATING,
+                    appI18n.metadata,
+                ),
+            generalLabel =
+                searchUiLabelsRepository.metadataOptionLabel(
+                    SearchUiOptionKey.RATING,
+                    "general",
+                    appI18n.metadata,
+                ),
+            matureLabel =
+                searchUiLabelsRepository.metadataOptionLabel(
+                    SearchUiOptionKey.RATING,
+                    "mature",
+                    appI18n.metadata,
+                ),
+            adultLabel =
+                searchUiLabelsRepository.metadataOptionLabel(
+                    SearchUiOptionKey.RATING,
+                    "adult",
+                    appI18n.metadata,
+                ),
             general = filter.ratingGeneral,
             mature = filter.ratingMature,
             adult = filter.ratingAdult,
@@ -330,7 +391,7 @@ private fun BrowseFilterPage(
 
   if (typePickerVisible) {
     GroupedTextPickerDialog(
-        title = "分类",
+        title = searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.TYPE, appI18n.metadata),
         groups = typeOptionGroups,
         selected = filter.type,
         onSelected = onUpdateType,
@@ -340,7 +401,11 @@ private fun BrowseFilterPage(
 
   if (speciesPickerVisible) {
     GroupedTextPickerDialog(
-        title = "物种",
+        title =
+            searchUiLabelsRepository.metadataLabel(
+                SearchUiMetadataKey.SPECIES,
+                appI18n.metadata,
+            ),
         groups = speciesOptionGroups,
         selected = filter.species,
         onSelected = onUpdateSpecies,
@@ -351,6 +416,10 @@ private fun BrowseFilterPage(
 
 @Composable
 private fun RatingRow(
+    title: String,
+    generalLabel: String,
+    matureLabel: String,
+    adultLabel: String,
     general: Boolean,
     mature: Boolean,
     adult: Boolean,
@@ -358,14 +427,17 @@ private fun RatingRow(
     onSetMature: (Boolean) -> Unit,
     onSetAdult: (Boolean) -> Unit,
 ) {
-  Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.spacedBy(12.dp),
-      verticalAlignment = Alignment.CenterVertically,
-  ) {
-    RatingCheckbox("General", general, onSetGeneral)
-    RatingCheckbox("Mature", mature, onSetMature)
-    RatingCheckbox("Adult", adult, onSetAdult)
+  Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Text(text = title, style = MaterialTheme.typography.titleSmall)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+      RatingCheckbox(generalLabel, general, onSetGeneral)
+      RatingCheckbox(matureLabel, mature, onSetMature)
+      RatingCheckbox(adultLabel, adult, onSetAdult)
+    }
   }
 }
 
@@ -399,39 +471,65 @@ private fun BrowseStatusCard(title: String, body: String, onRetry: () -> Unit) {
           style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-      Button(onClick = onRetry) { Text("重试") }
+      Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
     }
   }
 }
 
 private fun buildBrowseGenderOptions(
-    searchUiLabelsRepository: SearchUiLabelsRepository
+    searchUiLabelsRepository: SearchUiLabelsRepository,
+    metadata: MetadataDisplayPreferences,
+    uiLanguage: AppLanguage,
 ): List<FilterOption<String>> =
     listOf(
-        FilterOption("", searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_ANY)),
+        FilterOption("", searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_ANY, uiLanguage)),
         FilterOption(
             "male",
-            searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, "male"),
+            searchUiLabelsRepository.metadataOptionLabel(
+                SearchUiOptionKey.GENDER,
+                "male",
+                metadata,
+            ),
         ),
         FilterOption(
             "female",
-            searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, "female"),
+            searchUiLabelsRepository.metadataOptionLabel(
+                SearchUiOptionKey.GENDER,
+                "female",
+                metadata,
+            ),
         ),
         FilterOption(
             "trans_male",
-            searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, "trans_male"),
+            searchUiLabelsRepository.metadataOptionLabel(
+                SearchUiOptionKey.GENDER,
+                "trans_male",
+                metadata,
+            ),
         ),
         FilterOption(
             "trans_female",
-            searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, "trans_female"),
+            searchUiLabelsRepository.metadataOptionLabel(
+                SearchUiOptionKey.GENDER,
+                "trans_female",
+                metadata,
+            ),
         ),
         FilterOption(
             "intersex",
-            searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, "intersex"),
+            searchUiLabelsRepository.metadataOptionLabel(
+                SearchUiOptionKey.GENDER,
+                "intersex",
+                metadata,
+            ),
         ),
         FilterOption(
             "non_binary",
-            searchUiLabelsRepository.optionLabel(SearchUiOptionKey.GENDER, "non_binary"),
+            searchUiLabelsRepository.metadataOptionLabel(
+                SearchUiOptionKey.GENDER,
+                "non_binary",
+                metadata,
+            ),
         ),
     )
 
@@ -442,6 +540,8 @@ private fun buildBrowseFilterChips(
     speciesOptions: List<FilterOption<Int>>,
     genderOptions: List<FilterOption<String>>,
     searchUiLabelsRepository: SearchUiLabelsRepository,
+    metadata: MetadataDisplayPreferences,
+    uiLanguage: AppLanguage,
 ): List<String> {
   val categoryLabel =
       categoryOptions.firstOrNull { it.value == filter.category }?.label
@@ -452,20 +552,63 @@ private fun buildBrowseFilterChips(
       speciesOptions.firstOrNull { it.value == filter.species }?.label ?: filter.species.toString()
   val genderLabel =
       genderOptions.firstOrNull { it.value == filter.gender }?.label
-          ?: searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_ANY)
+          ?: searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_ANY, uiLanguage)
   val ratingLabel =
       buildList {
-            if (filter.ratingGeneral) add("General")
-            if (filter.ratingMature) add("Mature")
-            if (filter.ratingAdult) add("Adult")
+            if (filter.ratingGeneral)
+                add(
+                    searchUiLabelsRepository.metadataOptionLabel(
+                        SearchUiOptionKey.RATING,
+                        "general",
+                        metadata,
+                    )
+                )
+            if (filter.ratingMature)
+                add(
+                    searchUiLabelsRepository.metadataOptionLabel(
+                        SearchUiOptionKey.RATING,
+                        "mature",
+                        metadata,
+                    )
+                )
+            if (filter.ratingAdult)
+                add(
+                    searchUiLabelsRepository.metadataOptionLabel(
+                        SearchUiOptionKey.RATING,
+                        "adult",
+                        metadata,
+                    )
+                )
           }
           .joinToString(" + ")
-          .ifBlank { "None" }
+          .ifBlank {
+            searchUiLabelsRepository.metadataOptionLabel(SearchUiOptionKey.RATING, "none", metadata)
+          }
   return listOf(
-      "类别：$categoryLabel",
-      "分类：$typeLabel",
-      "物种：$speciesLabel",
-      "${searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_GENDERS)}：$genderLabel",
-      "分级：$ratingLabel",
+      searchUiLabelsRepository.formatLabelValue(
+          searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.CATEGORY, metadata),
+          categoryLabel,
+          uiLanguage,
+      ),
+      searchUiLabelsRepository.formatLabelValue(
+          searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.TYPE, metadata),
+          typeLabel,
+          uiLanguage,
+      ),
+      searchUiLabelsRepository.formatLabelValue(
+          searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.SPECIES, metadata),
+          speciesLabel,
+          uiLanguage,
+      ),
+      searchUiLabelsRepository.formatLabelValue(
+          searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.GENDER, metadata),
+          genderLabel,
+          uiLanguage,
+      ),
+      searchUiLabelsRepository.formatLabelValue(
+          searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.RATING, metadata),
+          ratingLabel,
+          uiLanguage,
+      ),
   )
 }

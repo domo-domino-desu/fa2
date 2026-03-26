@@ -18,10 +18,19 @@ enum class SearchUiTextKey {
   LABEL_VALUE_SEPARATOR,
 }
 
+enum class SearchUiMetadataKey {
+  CATEGORY,
+  TYPE,
+  SPECIES,
+  GENDER,
+  RATING,
+}
+
 enum class SearchUiOptionKey {
   ORDER_BY,
   ORDER_DIRECTION,
   RANGE,
   GENDER,
+  RATING,
   SUBMISSION_TYPE,
 }

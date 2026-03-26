@@ -2,6 +2,7 @@ package me.domino.fa2.ui.pages.user.journal
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import fa2.shared.generated.resources.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
@@ -10,6 +11,9 @@ import me.domino.fa2.application.translation.SubmissionDescriptionTranslationSer
 import me.domino.fa2.data.model.JournalDetail
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.repository.JournalDetailRepository
+import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.i18n.SystemLanguageProvider
+import me.domino.fa2.i18n.appString
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationSourceMode
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
 import me.domino.fa2.ui.pages.submission.canReuseTranslationResult
@@ -52,6 +56,8 @@ class JournalDetailScreenModel(
     private val repository: JournalDetailRepository,
     /** 正文翻译编排服务。 */
     private val translationService: SubmissionDescriptionTranslationService,
+    private val settingsService: AppSettingsService? = null,
+    private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) : StateScreenModel<JournalDetailUiState>(JournalDetailUiState.Loading) {
   private val log = FaLog.withTag("JournalDetailScreenModel")
   private var translationJob: Job? = null
@@ -82,12 +88,14 @@ class JournalDetailScreenModel(
           when (result) {
             is PageState.Success ->
                 buildSuccessState(detail = result.data, previous = previousSuccess)
-            PageState.CfChallenge -> JournalDetailUiState.Error("需要 Cloudflare 验证")
+            PageState.CfChallenge ->
+                JournalDetailUiState.Error(appString(Res.string.cloudflare_challenge_title))
             is PageState.MatureBlocked -> JournalDetailUiState.Error(result.reason)
             is PageState.Error ->
                 JournalDetailUiState.Error(result.exception.message ?: result.exception.toString())
 
-            PageState.Loading -> JournalDetailUiState.Error("加载中断")
+            PageState.Loading ->
+                JournalDetailUiState.Error(appString(Res.string.interrupted_loading))
           }
       when (result) {
         is PageState.Success -> {

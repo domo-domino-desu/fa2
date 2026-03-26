@@ -57,6 +57,10 @@ internal fun GenderKeywordsSection(
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
 internal fun RatingsSection(
+    title: String,
+    generalLabel: String,
+    matureLabel: String,
+    adultLabel: String,
     general: Boolean,
     mature: Boolean,
     adult: Boolean,
@@ -65,14 +69,14 @@ internal fun RatingsSection(
     onSetAdult: (Boolean) -> Unit,
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-    Text("分级", style = MaterialTheme.typography.titleSmall)
+    Text(title, style = MaterialTheme.typography.titleSmall)
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-      RatingItem("General", general, onSetGeneral)
-      RatingItem("Mature", mature, onSetMature)
-      RatingItem("Adult", adult, onSetAdult)
+      RatingItem(generalLabel, general, onSetGeneral)
+      RatingItem(matureLabel, mature, onSetMature)
+      RatingItem(adultLabel, adult, onSetAdult)
     }
   }
 }
