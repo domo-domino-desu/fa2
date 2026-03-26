@@ -16,9 +16,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,6 +48,7 @@ internal fun UserHeaderCard(
     onToggleProfileExpanded: () -> Unit,
     onToggleWatch: () -> Unit,
     onOpenWatchedBy: () -> Unit,
+    onOpenShouts: () -> Unit,
     onOpenWatching: () -> Unit,
 ) {
   val header = state.header
@@ -171,6 +173,11 @@ internal fun UserHeaderCard(
                       onClick = onOpenWatchedBy,
                   )
                   UserHeaderStatPill(
+                      text = stringResource(Res.string.shouts_count, header.shoutCount.toString()),
+                      onClick = onOpenShouts,
+                      enabled = header.shoutCount > 0,
+                  )
+                  UserHeaderStatPill(
                       text =
                           stringResource(
                               Res.string.following_count,
@@ -184,20 +191,11 @@ internal fun UserHeaderCard(
 
             val hasWatchAction = header.watchActionUrl.isNotBlank()
             if (hasWatchAction) {
-              OutlinedButton(
+              UserWatchActionButton(
+                  isWatching = header.isWatching,
+                  updating = state.watchUpdating,
                   onClick = onToggleWatch,
-                  enabled = !state.watchUpdating,
-              ) {
-                Text(
-                    if (state.watchUpdating) {
-                      stringResource(Res.string.processing)
-                    } else if (header.isWatching) {
-                      stringResource(Res.string.unwatch)
-                    } else {
-                      stringResource(Res.string.watch)
-                    }
-                )
-              }
+              )
             }
           }
           UserMetadataAndContactsRow(
@@ -256,7 +254,8 @@ private fun UserProfileExpandToggle(expanded: Boolean, onClick: () -> Unit) {
         stringResource(Res.string.expand_profile)
       }
   Box(
-      modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 6.dp),
+      modifier =
+          Modifier.fillMaxWidth().clickable(onClick = onClick).padding(top = 4.dp, bottom = 1.dp),
       contentAlignment = Alignment.Center,
   ) {
     Icon(
@@ -274,17 +273,81 @@ private fun UserProfileExpandToggle(expanded: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun UserHeaderStatPill(text: String, onClick: () -> Unit) {
+private fun UserHeaderStatPill(
+    text: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    leadingIcon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+) {
   Surface(
       color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.92f),
       shape = CircleShape,
-      modifier = Modifier.clickable(onClick = onClick),
+      modifier = Modifier.clickable(enabled = enabled, onClick = onClick),
   ) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSecondaryContainer,
+    Row(
         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-    )
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+      if (leadingIcon != null) {
+        Icon(
+            imageVector = leadingIcon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.size(12.dp),
+        )
+      }
+      Text(
+          text = text,
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSecondaryContainer,
+      )
+    }
+  }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun UserWatchActionButton(
+    isWatching: Boolean,
+    updating: Boolean,
+    onClick: () -> Unit,
+) {
+  val contentDescription =
+      when {
+        updating -> stringResource(Res.string.processing)
+        isWatching -> stringResource(Res.string.unwatch)
+        else -> stringResource(Res.string.watch)
+      }
+  Surface(
+      onClick = onClick,
+      enabled = !updating,
+      shape = RoundedCornerShape(18.dp),
+      color =
+          if (isWatching) {
+            MaterialTheme.colorScheme.primaryContainer
+          } else {
+            MaterialTheme.colorScheme.surface
+          },
+      modifier = Modifier.size(52.dp),
+  ) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+      if (updating) {
+        LoadingIndicator(
+            modifier = Modifier.size(22.dp),
+            color = MaterialTheme.colorScheme.primary,
+        )
+      } else {
+        Icon(
+            imageVector =
+                if (isWatching) {
+                  FaMaterialSymbols.Filled.Notifications
+                } else {
+                  FaMaterialSymbols.Outlined.Notifications
+                },
+            contentDescription = contentDescription,
+        )
+      }
+    }
   }
 }

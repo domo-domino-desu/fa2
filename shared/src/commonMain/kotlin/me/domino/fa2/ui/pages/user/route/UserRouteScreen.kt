@@ -25,6 +25,7 @@ import me.domino.fa2.ui.layouts.UserRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.pages.user.profile.UserHeaderCard
 import me.domino.fa2.ui.pages.user.profile.UserScreenModel
+import me.domino.fa2.ui.pages.user.shout.UserShoutsRouteScreen
 import me.domino.fa2.ui.pages.user.watchlist.UserWatchlistRouteScreen
 import me.domino.fa2.util.FaUrls
 import org.koin.core.parameter.parametersOf
@@ -102,6 +103,9 @@ class UserRouteScreen(
                                 initialUrl = initialUrl,
                             )
                         )
+                      },
+                      onOpenShouts = {
+                        parentNavigator.push(UserShoutsRouteScreen(username = username))
                       },
                   )
                 },

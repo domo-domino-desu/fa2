@@ -1,6 +1,8 @@
 package me.domino.fa2.data.parser
 
 import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Element
+import me.domino.fa2.data.model.PageComment
 import me.domino.fa2.data.model.User
 import me.domino.fa2.data.model.UserContact
 import me.domino.fa2.util.FaUrls
@@ -55,6 +57,7 @@ class UserParser {
     val watchState = parseWatchState(document, url)
     val watchlistInfo = parseWatchlistInfo(document, url)
     val profileBannerUrl = parseProfileBannerUrl(document = document, baseUrl = url)
+    val shouts = parseShouts(document, pageUrl = url)
     val contacts = parseContacts(document, baseUrl = url)
     val profileNode =
         document.selectFirst("section.userpage-layout-profile .section-body.userpage-profile")
@@ -73,6 +76,8 @@ class UserParser {
         watchingCount = watchlistInfo.watchingCount,
         watchedByListUrl = watchlistInfo.watchedByListUrl,
         watchingListUrl = watchlistInfo.watchingListUrl,
+        shoutCount = shouts.size,
+        shouts = shouts,
         contacts = contacts,
         profileHtml = profileHtml,
     )
@@ -258,6 +263,71 @@ class UserParser {
               )
             }
       }
+
+  private fun parseShouts(
+      document: com.fleeksoft.ksoup.nodes.Document,
+      pageUrl: String,
+  ): List<PageComment> =
+      document.select(".userpage-shouts-container div.comment_container").mapNotNull { node ->
+        parseShoutNode(shoutNode = node, pageUrl = pageUrl)
+      }
+
+  private fun parseShoutNode(shoutNode: Element, pageUrl: String): PageComment? {
+    val shoutId =
+        shoutNode
+            .selectFirst("a.comment_anchor")
+            ?.id()
+            ?.substringAfter("shout-")
+            ?.trim()
+            ?.toLongOrNull() ?: return null
+
+    val profileLink = shoutNode.selectFirst("comment-username a[href*='/user/']")
+    val authorFromHref =
+        profileLink?.attr("href")?.substringAfter("/user/")?.substringBefore('/')?.trim().orEmpty()
+    val authorFromLabel =
+        shoutNode
+            .selectFirst(".c-usernameBlock__userName")
+            ?.text()
+            ?.trim()
+            ?.replace("~", "")
+            ?.replace("@", "")
+            .orEmpty()
+    val author = authorFromHref.ifBlank { authorFromLabel }.ifBlank { "unknown" }
+
+    val displayName =
+        shoutNode.selectFirst(".c-usernameBlock__displayName")?.text()?.trim().takeUnless {
+          it.isNullOrBlank()
+        } ?: author
+
+    val avatarUrl =
+        shoutNode
+            .selectFirst("img.comment_useravatar")
+            ?.attr("src")
+            ?.trim()
+            ?.takeIf { it.isNotBlank() }
+            ?.let { raw -> toAbsoluteUrl(pageUrl, raw) }
+            .orEmpty()
+
+    val timestampNode = shoutNode.selectFirst("comment-date .popup_date")
+    val timestampRaw = timestampNode?.attr("title")?.trim()?.takeIf { it.isNotBlank() }
+    val timestampNatural = timestampNode?.text()?.trim().orEmpty().ifBlank { "未知时间" }
+
+    val bodyHtml =
+        shoutNode.selectFirst("comment-user-text .user-submitted-links")?.html()?.trim()?.takeIf {
+          it.isNotBlank()
+        } ?: shoutNode.selectFirst("comment-user-text")?.html()?.trim().orEmpty()
+
+    return PageComment(
+        id = shoutId,
+        author = author,
+        authorDisplayName = displayName,
+        authorAvatarUrl = avatarUrl,
+        timestampNatural = timestampNatural,
+        timestampRaw = timestampRaw,
+        bodyHtml = bodyHtml,
+        depth = 0,
+    )
+  }
 
   private fun normalizeContactUrl(href: String, displayText: String, baseUrl: String): String {
     val normalizedHref = href.trim()

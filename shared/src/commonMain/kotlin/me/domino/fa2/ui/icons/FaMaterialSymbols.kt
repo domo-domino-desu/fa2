@@ -32,6 +32,8 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.MenuW400Outli
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.MenuW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.MovieW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.MusicNoteW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.NotificationsW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.NotificationsW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.RestartAltW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SaveW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SearchW400Outlined
@@ -58,6 +60,7 @@ object FaMaterialSymbols {
     val Home: ImageVector = GeneratedIcons.HomeW400Outlinedfill1
     val Info: ImageVector = GeneratedIcons.InfoW400Outlinedfill1
     val Menu: ImageVector = GeneratedIcons.MenuW400Outlinedfill1
+    val Notifications: ImageVector = GeneratedIcons.NotificationsW400Outlinedfill1
     val RestartAlt: ImageVector = GeneratedIcons.RestartAltW400Outlinedfill1
     val Save: ImageVector = GeneratedIcons.SaveW400Outlinedfill1
     val Search: ImageVector = GeneratedIcons.SearchW400Outlinedfill1
@@ -82,6 +85,7 @@ object FaMaterialSymbols {
     val Menu: ImageVector = GeneratedIcons.MenuW400Outlined
     val Movie: ImageVector = GeneratedIcons.MovieW400Outlined
     val MusicNote: ImageVector = GeneratedIcons.MusicNoteW400Outlined
+    val Notifications: ImageVector = GeneratedIcons.NotificationsW400Outlined
     val FilePresent: ImageVector = GeneratedIcons.FilePresentW400Outlined
     val Search: ImageVector = GeneratedIcons.SearchW400Outlined
     val Share: ImageVector = GeneratedIcons.ShareW400Outlined

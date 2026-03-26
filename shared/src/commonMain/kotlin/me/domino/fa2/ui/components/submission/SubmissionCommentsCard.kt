@@ -34,8 +34,12 @@ internal fun SubmissionCommentsCard(
     commentCount: Int,
     comments: List<PageComment>,
     onOpenAuthor: (String) -> Unit,
+    title: String? = null,
+    emptyText: String? = null,
     modifier: Modifier = Modifier,
 ) {
+  val resolvedTitle = title ?: stringResource(Res.string.comments, commentCount)
+  val resolvedEmptyText = emptyText ?: stringResource(Res.string.no_displayable_comments)
   Surface(
       color = MaterialTheme.colorScheme.surface,
       shape = RoundedCornerShape(14.dp),
@@ -51,14 +55,14 @@ internal fun SubmissionCommentsCard(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       Text(
-          text = stringResource(Res.string.comments, commentCount),
+          text = resolvedTitle,
           style = MaterialTheme.typography.titleMedium,
           fontWeight = FontWeight.SemiBold,
       )
 
       if (comments.isEmpty()) {
         Text(
-            text = stringResource(Res.string.no_displayable_comments),
+            text = resolvedEmptyText,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

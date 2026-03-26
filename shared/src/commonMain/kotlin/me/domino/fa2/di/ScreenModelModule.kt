@@ -16,6 +16,7 @@ import me.domino.fa2.ui.pages.user.journal.JournalDetailScreenModel
 import me.domino.fa2.ui.pages.user.journal.UserJournalsScreenModel
 import me.domino.fa2.ui.pages.user.profile.UserScreenModel
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
+import me.domino.fa2.ui.pages.user.shout.UserShoutsScreenModel
 import me.domino.fa2.ui.pages.user.watchlist.UserWatchlistScreenModel
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -76,6 +77,12 @@ fun screenModelModule(): Module = module {
         repository = get(),
         settingsService = get(),
         systemLanguageProvider = get(),
+    )
+  }
+  factory { (username: String) ->
+    UserShoutsScreenModel(
+        username = username,
+        repository = get(),
     )
   }
   factory { (journalId: Int, journalUrl: String?) ->

@@ -29,6 +29,10 @@ data class User(
     val watchedByListUrl: String = "",
     /** 已关注列表地址。 */
     val watchingListUrl: String = "",
+    /** 留言数量。 */
+    val shoutCount: Int = 0,
+    /** 留言列表。 */
+    val shouts: List<PageComment> = emptyList(),
     /** 联系方式。 */
     val contacts: List<UserContact> = emptyList(),
     /** 主页简介 HTML。 */

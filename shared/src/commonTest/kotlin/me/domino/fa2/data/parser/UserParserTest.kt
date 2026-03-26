@@ -26,8 +26,12 @@ class UserParserTest {
     )
     assertEquals(2257, header.watchedByCount)
     assertEquals(120, header.watchingCount)
+    assertEquals(12, header.shoutCount)
+    assertEquals(12, header.shouts.size)
     assertTrue(header.watchedByListUrl.contains("/watchlist/to/terriniss"))
     assertTrue(header.watchingListUrl.contains("/watchlist/by/terriniss"))
+    assertEquals("mengshi", header.shouts.first().author.lowercase())
+    assertTrue(header.shouts.first().bodyHtml.contains("Love your gallery", ignoreCase = true))
     assertTrue(header.contacts.any { it.label.equals("Twitter", ignoreCase = true) })
     assertTrue(
         header.contacts.any { contact ->

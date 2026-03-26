@@ -99,6 +99,7 @@
   <string name="select_date">选择日期</string>
   <string name="detail_load_failed">详情加载失败</string>
   <string name="no_displayable_comments">暂无可展示评论</string>
+  <string name="no_displayable_shouts">暂无可展示留言</string>
   <string name="no_content">暂无正文</string>
   <string name="no_browsable_content">当前没有可浏览内容。</string>
   <string name="description">描述</string>
@@ -125,6 +126,7 @@
   <string name="loading">加载中…</string>
   <string name="followers">关注者</string>
   <string name="following">已关注</string>
+  <string name="shouts">留言</string>
   <string name="processing">处理中...</string>
   <string name="chunk_word_limit">分块词数上限</string>
   <string name="max_concurrency">最大并发数</string>
@@ -165,6 +167,7 @@
   <string name="comments_inline_count">%1$d 评论</string>
   <string name="followers_count">关注者 %1$s</string>
   <string name="following_count">已关注 %1$s</string>
+  <string name="shouts_count">%1$s 留言</string>
   <string name="waterfall_min_column_width_range">范围 %1$d-%2$d，在此基础上自动布局列数</string>
   <string name="numeric_range">范围 %1$d-%2$d</string>
   <string name="refresh_details_failed">刷新详情失败：%1$s</string>
