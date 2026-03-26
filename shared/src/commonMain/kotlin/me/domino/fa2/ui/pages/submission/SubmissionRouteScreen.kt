@@ -40,6 +40,7 @@ import me.domino.fa2.ui.components.platform.rememberPlatformTextCopier
 import me.domino.fa2.ui.components.platform.rememberPlatformUrlDownloader
 import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.navigation.goBackHome
+import me.domino.fa2.ui.navigation.openSubmissionSeries
 import me.domino.fa2.ui.pages.browse.BrowseFilterState
 import me.domino.fa2.ui.pages.browse.BrowseRouteScreen
 import me.domino.fa2.ui.pages.search.SearchRouteScreen
@@ -59,8 +60,13 @@ class SubmissionRouteScreen(
     private val holderTag: String = "submission-list-holder",
     /** 当 holder 不含 sid 时的占位链接。 */
     private val seedSubmissionUrl: String? = null,
+    /** 独立 submission 系列的初始列表。 */
+    private val seedSubmissions: List<SubmissionThumbnail>? = null,
+    /** 独立 submission 系列 key。 */
+    private val seedSeriesKey: String? = null,
 ) : Screen {
-  override val key: String = "submission:$holderTag:$initialSid:${seedSubmissionUrl.orEmpty()}"
+  override val key: String =
+      "submission:$holderTag:$initialSid:${seedSubmissionUrl.orEmpty()}:${seedSeriesKey.orEmpty()}"
 
   /** 页面内容。 */
   @Composable
@@ -209,6 +215,7 @@ class SubmissionRouteScreen(
               screenModel.toggleAttachmentWrapCurrent()
             }
           },
+          onOpenSubmissionSeries = { series -> navigator.openSubmissionSeries(series) },
           scrollOffsetOfSid = screenModel::scrollOffsetForSid,
           requestPagerFocus = requestPagerFocus,
           onZoomOverlayVisibilityChanged = { visible -> zoomOverlayVisible.value = visible },
@@ -226,7 +233,12 @@ class SubmissionRouteScreen(
         navigator.rememberNavigatorScreenModel<SubmissionListHolder>(tag = holderTag) {
           SubmissionListHolder()
         }
-    if (seedSubmissionUrl != null && !submissionListHolder.setCurrentBySid(initialSid)) {
+    if (seedSubmissions != null && !submissionListHolder.setCurrentBySid(initialSid)) {
+      submissionListHolder.replace(
+          submissions = seedSubmissions,
+          nextPageUrl = null,
+      )
+    } else if (seedSubmissionUrl != null && !submissionListHolder.setCurrentBySid(initialSid)) {
       submissionListHolder.replace(
           submissions =
               listOf(

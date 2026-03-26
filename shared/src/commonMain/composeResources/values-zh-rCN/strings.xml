@@ -196,4 +196,8 @@
   <string name="theme_mode_system">跟随系统</string>
   <string name="theme_mode_light">亮色主题</string>
   <string name="theme_mode_dark">暗色主题</string>
+  <string name="series_probe_detect_content_description">探测投稿系列</string>
+  <string name="series_probe_loading">正在探测投稿系列</string>
+  <string name="series_probe_open_first_content_description">打开该系列的第一篇投稿</string>
+  <string name="series_probe_not_found">未找到有效的投稿系列</string>
 </resources>

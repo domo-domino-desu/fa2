@@ -196,4 +196,8 @@
   <string name="theme_mode_system">System</string>
   <string name="theme_mode_light">Light</string>
   <string name="theme_mode_dark">Dark</string>
+  <string name="series_probe_detect_content_description">Detect submission series</string>
+  <string name="series_probe_loading">Detecting submission series</string>
+  <string name="series_probe_open_first_content_description">Open the first submission in the series</string>
+  <string name="series_probe_not_found">No valid submission series was found</string>
 </resources>

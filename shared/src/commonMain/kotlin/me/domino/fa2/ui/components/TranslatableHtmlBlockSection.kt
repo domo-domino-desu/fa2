@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,16 +21,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
+import kotlin.math.roundToInt
 import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
@@ -226,6 +234,7 @@ internal fun TranslatableBlocksCard(
     onTranslate: () -> Unit,
     onToggleWrapText: () -> Unit,
     translationEnabled: Boolean = true,
+    seriesProbeConfig: SubmissionSeriesProbeConfig? = null,
     modifier: Modifier = Modifier,
     titleMaxLines: Int = 1,
     supportingText: (@Composable ColumnScope.() -> Unit)? = null,
@@ -240,6 +249,14 @@ internal fun TranslatableBlocksCard(
       } else {
         translationState.copy(showTranslation = false)
       }
+  val effectiveSeriesProbeConfig =
+      remember(seriesProbeConfig, translationState.sourceKey) {
+        seriesProbeConfig?.copy(
+            sourceKey = translationState.sourceKey,
+            sourceBlocks = translationState.rawVariant.sourceBlocks,
+        )
+      }
+  val blockTrailingActions = rememberSubmissionSeriesTrailingActions(effectiveSeriesProbeConfig)
   DetailSectionCardSurface(modifier = modifier) {
     TranslatableSectionTitleRow(
         title = title,
@@ -261,6 +278,7 @@ internal fun TranslatableBlocksCard(
         originalTextColor = originalTextColor,
         translatedTextStyle = translatedTextStyle,
         translatedTextColor = translatedTextColor,
+        blockTrailingActions = blockTrailingActions,
     )
   }
 }
@@ -273,6 +291,7 @@ internal fun TranslatableHtmlBlockContent(
     originalTextColor: Color,
     translatedTextStyle: TextStyle,
     translatedTextColor: Color,
+    blockTrailingActions: Map<Int, SubmissionSeriesTrailingAction> = emptyMap(),
     modifier: Modifier = Modifier,
     selectable: Boolean = true,
 ) {
@@ -291,49 +310,15 @@ internal fun TranslatableHtmlBlockContent(
           block.status == SubmissionDescriptionTranslationStatus.SUCCESS &&
               block.translated.orEmpty().isNotBlank()
       val originalText = block.originalText
-      if (selectable) {
-        SelectionContainer {
-          if (originalText != null) {
-            Text(
-                text =
-                    if (shouldTrimOriginalTrailingWhitespace) {
-                      originalText.trimEnd()
-                    } else {
-                      originalText
-                    },
-                style = originalTextStyle,
-                color = originalTextColor,
-            )
-          } else {
-            HtmlText(
-                html = block.originalHtml,
-                style = originalTextStyle,
-                color = originalTextColor,
-                trimTrailingWhitespace = shouldTrimOriginalTrailingWhitespace,
-            )
-          }
-        }
-      } else {
-        if (originalText != null) {
-          Text(
-              text =
-                  if (shouldTrimOriginalTrailingWhitespace) {
-                    originalText.trimEnd()
-                  } else {
-                    originalText
-                  },
-              style = originalTextStyle,
-              color = originalTextColor,
-          )
-        } else {
-          HtmlText(
-              html = block.originalHtml,
-              style = originalTextStyle,
-              color = originalTextColor,
-              trimTrailingWhitespace = shouldTrimOriginalTrailingWhitespace,
-          )
-        }
-      }
+      OriginalBlockWithTrailingAction(
+          originalText = originalText,
+          originalHtml = block.originalHtml,
+          shouldTrimOriginalTrailingWhitespace = shouldTrimOriginalTrailingWhitespace,
+          textStyle = originalTextStyle,
+          textColor = originalTextColor,
+          selectable = selectable,
+          trailingAction = blockTrailingActions[index],
+      )
 
       when (block.status) {
         SubmissionDescriptionTranslationStatus.IDLE -> Unit
@@ -392,6 +377,138 @@ internal fun TranslatableHtmlBlockContent(
         )
       }
     }
+  }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun OriginalBlockWithTrailingAction(
+    originalText: String?,
+    originalHtml: String,
+    shouldTrimOriginalTrailingWhitespace: Boolean,
+    textStyle: TextStyle,
+    textColor: Color,
+    selectable: Boolean,
+    trailingAction: SubmissionSeriesTrailingAction?,
+) {
+  if (trailingAction == null) {
+    OriginalBlockText(
+        originalText = originalText,
+        originalHtml = originalHtml,
+        shouldTrimOriginalTrailingWhitespace = shouldTrimOriginalTrailingWhitespace,
+        textStyle = textStyle,
+        textColor = textColor,
+        selectable = selectable,
+    )
+    return
+  }
+
+  val iconSize = 16.dp
+  val iconGap = 6.dp
+  val reservedEndSpace = iconSize + iconGap + 2.dp
+  var layoutResult by
+      remember(originalText, originalHtml) { mutableStateOf<TextLayoutResult?>(null) }
+
+  Box(modifier = Modifier.fillMaxWidth()) {
+    Box(modifier = Modifier.fillMaxWidth().padding(end = reservedEndSpace)) {
+      OriginalBlockText(
+          originalText = originalText,
+          originalHtml = originalHtml,
+          shouldTrimOriginalTrailingWhitespace = shouldTrimOriginalTrailingWhitespace,
+          textStyle = textStyle,
+          textColor = textColor,
+          selectable = selectable,
+          onTextLayout = { result -> layoutResult = result },
+      )
+    }
+    val lastLayout = layoutResult
+    Box(
+        modifier =
+            Modifier.offset {
+                  val result = lastLayout
+                  if (result == null || result.lineCount <= 0) {
+                    IntOffset.Zero
+                  } else {
+                    val lastLine = result.lineCount - 1
+                    val x = (result.getLineRight(lastLine) + iconGap.toPx()).roundToInt()
+                    val y =
+                        (result.getLineBottom(lastLine) - iconSize.toPx())
+                            .roundToInt()
+                            .coerceAtLeast(0)
+                    IntOffset(x = x, y = y)
+                  }
+                }
+                .clickable(
+                    enabled = trailingAction.state != SubmissionSeriesTrailingActionState.LOADING,
+                    onClick = trailingAction.onClick,
+                )
+                .focusProperties { canFocus = false },
+    ) {
+      when (trailingAction.state) {
+        SubmissionSeriesTrailingActionState.IDLE ->
+            Icon(
+                imageVector = FaMaterialSymbols.Outlined.Troubleshoot,
+                contentDescription = trailingAction.contentDescription,
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+
+        SubmissionSeriesTrailingActionState.LOADING ->
+            LoadingIndicator(
+                modifier = Modifier.size(16.dp),
+                color = MaterialTheme.colorScheme.primary,
+            )
+
+        SubmissionSeriesTrailingActionState.RESOLVED ->
+            Icon(
+                imageVector = FaMaterialSymbols.Outlined.ArrowCircleRight,
+                contentDescription = trailingAction.contentDescription,
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+      }
+    }
+  }
+}
+
+@Composable
+private fun OriginalBlockText(
+    originalText: String?,
+    originalHtml: String,
+    shouldTrimOriginalTrailingWhitespace: Boolean,
+    textStyle: TextStyle,
+    textColor: Color,
+    selectable: Boolean,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+) {
+  val content: @Composable () -> Unit = {
+    if (originalText != null) {
+      Text(
+          text =
+              if (shouldTrimOriginalTrailingWhitespace) {
+                originalText.trimEnd()
+              } else {
+                originalText
+              },
+          style = textStyle,
+          color = textColor,
+          onTextLayout = onTextLayout,
+      )
+    } else {
+      HtmlText(
+          html = originalHtml,
+          style = textStyle,
+          color = textColor,
+          trimTrailingWhitespace = shouldTrimOriginalTrailingWhitespace,
+          onTextLayout = onTextLayout,
+      )
+    }
+  }
+
+  if (selectable) {
+    SelectionContainer { content() }
+  } else {
+    content()
   }
 }
 

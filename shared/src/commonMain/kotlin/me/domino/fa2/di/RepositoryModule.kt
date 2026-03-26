@@ -1,6 +1,7 @@
 package me.domino.fa2.di
 
 import me.domino.fa2.application.attachmenttext.AttachmentTextService
+import me.domino.fa2.application.submissionseries.SubmissionSeriesResolver
 import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.repository.AuthRepository
@@ -12,6 +13,7 @@ import me.domino.fa2.data.repository.JournalDetailRepository
 import me.domino.fa2.data.repository.JournalRepository
 import me.domino.fa2.data.repository.JournalsRepository
 import me.domino.fa2.data.repository.SearchRepository
+import me.domino.fa2.data.repository.SubmissionDetailRepository
 import me.domino.fa2.data.repository.SubmissionRepository
 import me.domino.fa2.data.repository.UserRepository
 import me.domino.fa2.data.repository.WatchlistRepository
@@ -36,7 +38,8 @@ fun repositoryModule(): Module = module {
   single { FeedRepository(get()) }
   single { BrowseRepository(get()) }
   single { SearchRepository(get()) }
-  single { SubmissionRepository(get(), get(), get(), get()) }
+  single { SubmissionRepository(get(), get(), get(), get()) } bind SubmissionDetailRepository::class
+  single { SubmissionSeriesResolver(get()) }
   single { UserRepository(get(), get()) }
   single { GalleryRepository(get()) }
   single { FavoritesRepository(get()) }

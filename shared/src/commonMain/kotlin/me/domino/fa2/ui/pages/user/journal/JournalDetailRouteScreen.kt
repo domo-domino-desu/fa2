@@ -37,15 +37,18 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
+import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.ui.components.DetailSectionCardSurface
 import me.domino.fa2.ui.components.HtmlText
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.SkeletonBlock
+import me.domino.fa2.ui.components.SubmissionSeriesProbeConfig
 import me.domino.fa2.ui.components.TranslatableBlocksCard
 import me.domino.fa2.ui.host.LocalAppI18n
 import me.domino.fa2.ui.host.LocalAppSettings
 import me.domino.fa2.ui.layouts.JournalDetailRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
+import me.domino.fa2.ui.navigation.openSubmissionSeries
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.pages.user.route.UserRouteScreen
 import me.domino.fa2.util.FaUrls
@@ -117,6 +120,7 @@ class JournalDetailRouteScreen(
                 }
               },
               translationEnabled = settings.translationEnabled,
+              onOpenSubmissionSeries = { series -> navigator.openSubmissionSeries(series) },
               onOpenAuthor = { author ->
                 val normalized = author.trim()
                 if (normalized.isNotBlank()) {
@@ -179,6 +183,7 @@ private fun JournalDetailContent(
     onTranslate: () -> Unit,
     onToggleWrapText: () -> Unit,
     translationEnabled: Boolean,
+    onOpenSubmissionSeries: (SubmissionSeriesResolvedSeries) -> Unit,
     onOpenAuthor: (String) -> Unit,
 ) {
   val appI18n = LocalAppI18n.current
@@ -196,6 +201,11 @@ private fun JournalDetailContent(
           emptyText = stringResource(Res.string.no_content),
           onTranslate = onTranslate,
           onToggleWrapText = onToggleWrapText,
+          seriesProbeConfig =
+              SubmissionSeriesProbeConfig(
+                  baseUrl = detail.journalUrl,
+                  onOpenSeries = onOpenSubmissionSeries,
+              ),
           translationEnabled = translationEnabled,
           modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
           titleMaxLines = 2,

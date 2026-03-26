@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.flow.distinctUntilChanged
+import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
@@ -65,6 +66,8 @@ fun SubmissionPager(
     onTranslateAttachment: () -> Unit,
     /** 切换附件重新换行。 */
     onWrapAttachmentText: () -> Unit,
+    /** 打开投稿系列。 */
+    onOpenSubmissionSeries: (SubmissionSeriesResolvedSeries) -> Unit,
     /** 查询各 sid 当前保存的滚动偏移。 */
     scrollOffsetOfSid: (Int) -> Int,
     /** 请求 pager 容器重新获取焦点。 */
@@ -154,6 +157,7 @@ fun SubmissionPager(
                 onWrapDescriptionText = onWrapDescriptionText,
                 onTranslateAttachment = onTranslateAttachment,
                 onWrapAttachmentText = onWrapAttachmentText,
+                onOpenSubmissionSeries = onOpenSubmissionSeries,
                 requestPagerFocus = requestPagerFocus,
             )
           }

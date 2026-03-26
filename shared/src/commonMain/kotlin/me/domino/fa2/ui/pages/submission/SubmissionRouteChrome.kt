@@ -19,6 +19,7 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
+import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.ui.components.PageStateWrapper
 import me.domino.fa2.ui.components.submission.SubmissionPager
@@ -51,6 +52,7 @@ internal fun SubmissionRouteChrome(
     onWrapDescriptionText: () -> Unit,
     onTranslateAttachment: () -> Unit,
     onWrapAttachmentText: () -> Unit,
+    onOpenSubmissionSeries: (SubmissionSeriesResolvedSeries) -> Unit,
     scrollOffsetOfSid: (Int) -> Int,
     requestPagerFocus: () -> Unit,
     onZoomOverlayVisibilityChanged: (Boolean) -> Unit,
@@ -99,6 +101,7 @@ internal fun SubmissionRouteChrome(
                 onWrapDescriptionText = onWrapDescriptionText,
                 onTranslateAttachment = onTranslateAttachment,
                 onWrapAttachmentText = onWrapAttachmentText,
+                onOpenSubmissionSeries = onOpenSubmissionSeries,
                 scrollOffsetOfSid = scrollOffsetOfSid,
                 requestPagerFocus = requestPagerFocus,
                 onZoomOverlayVisibilityChanged = onZoomOverlayVisibilityChanged,

@@ -1,6 +1,7 @@
 package me.domino.fa2.ui.components.submission
 
 import androidx.compose.runtime.Composable
+import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.ui.pages.submission.SubmissionDetailUiState
@@ -44,6 +45,8 @@ internal fun SubmissionDetailContent(
     onTranslateAttachment: () -> Unit,
     /** 切换附件重新换行。 */
     onWrapAttachmentText: () -> Unit,
+    /** 打开投稿系列。 */
+    onOpenSubmissionSeries: (SubmissionSeriesResolvedSeries) -> Unit,
     /** 请求 pager 容器重新获取焦点。 */
     requestPagerFocus: () -> Unit,
 ) {
@@ -82,6 +85,7 @@ internal fun SubmissionDetailContent(
           onLoadAttachmentText = onLoadAttachmentText,
           onTranslateAttachment = onTranslateAttachment,
           onWrapAttachmentText = onWrapAttachmentText,
+          onOpenSubmissionSeries = onOpenSubmissionSeries,
           requestPagerFocus = requestPagerFocus,
       )
     }

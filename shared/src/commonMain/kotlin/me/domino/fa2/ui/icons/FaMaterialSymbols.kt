@@ -3,6 +3,7 @@ package me.domino.fa2.ui.icons
 import androidx.compose.ui.graphics.vector.ImageVector
 import me.domino.fa2.generated.symbols.icons.materialsymbols.Icons as GeneratedIcons
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ArrowBackW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ArrowCircleRightW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.CategoryW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.CloseW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.CommentW400Outlined
@@ -38,6 +39,7 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ShareW400Outl
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SubjectW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.TagW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.TranslateW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.TroubleshootW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VerticalAlignTopW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VisibilityW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.WrapTextW400Outlined
@@ -61,6 +63,7 @@ object FaMaterialSymbols {
   }
 
   object Outlined {
+    val ArrowCircleRight: ImageVector = GeneratedIcons.ArrowCircleRightW400Outlined
     val Category: ImageVector = GeneratedIcons.CategoryW400Outlined
     val Comment: ImageVector = GeneratedIcons.CommentW400Outlined
     val ContentCopy: ImageVector = GeneratedIcons.ContentCopyW400Outlined
@@ -80,6 +83,7 @@ object FaMaterialSymbols {
     val Share: ImageVector = GeneratedIcons.ShareW400Outlined
     val Subject: ImageVector = GeneratedIcons.SubjectW400Outlined
     val Tag: ImageVector = GeneratedIcons.TagW400Outlined
+    val Troubleshoot: ImageVector = GeneratedIcons.TroubleshootW400Outlined
     val Translate: ImageVector = GeneratedIcons.TranslateW400Outlined
     val VerticalAlignTop: ImageVector = GeneratedIcons.VerticalAlignTopW400Outlined
     val Visibility: ImageVector = GeneratedIcons.VisibilityW400Outlined

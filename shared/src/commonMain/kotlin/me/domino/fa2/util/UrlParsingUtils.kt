@@ -3,6 +3,7 @@ package me.domino.fa2.util
 private val submissionRegex = Regex("""/view/(\d+)/?""")
 private val submissionsFromSidRegex = Regex("""new~(\d+)@""")
 private val journalRegex = Regex("""/journal/(\d+)/?""")
+private val faHosts = setOf("www.furaffinity.net", "furaffinity.net")
 
 /**
  * 将相对 URL 转为绝对 URL（KMP 纯字符串实现）。
@@ -77,3 +78,21 @@ fun parseSubmissionsFromSid(url: String): Int? =
  */
 fun parseJournalId(url: String): Int? =
     journalRegex.find(url)?.groupValues?.getOrNull(1)?.toIntOrNull()
+
+/**
+ * 规范化 FA submission 链接。
+ *
+ * @param baseUrl 当前页面 URL，用于解析相对路径。
+ * @param maybeSubmissionUrl 可能为相对路径的 submission 链接。
+ */
+fun normalizeFaSubmissionUrl(baseUrl: String, maybeSubmissionUrl: String): String? {
+  val absoluteUrl = toAbsoluteUrl(baseUrl, maybeSubmissionUrl).trim()
+  if (absoluteUrl.isBlank()) return null
+
+  val host =
+      absoluteUrl.substringAfter("://", missingDelimiterValue = "").substringBefore('/').lowercase()
+  if (host !in faHosts) return null
+
+  val sid = parseSubmissionSid(absoluteUrl) ?: return null
+  return FaUrls.submission(sid)
+}

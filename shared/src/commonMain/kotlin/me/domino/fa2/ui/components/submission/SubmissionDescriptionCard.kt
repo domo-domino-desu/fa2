@@ -7,6 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
+import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
+import me.domino.fa2.ui.components.SubmissionSeriesProbeConfig
 import me.domino.fa2.ui.components.TranslatableBlocksCard
 import me.domino.fa2.ui.host.LocalAppSettings
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
@@ -15,8 +17,10 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun SubmissionDescriptionCard(
     translationState: SubmissionTranslationUiState,
+    submissionUrl: String,
     onTranslate: () -> Unit,
     onToggleWrapText: () -> Unit,
+    onOpenSubmissionSeries: (SubmissionSeriesResolvedSeries) -> Unit,
     requestPagerFocus: () -> Unit,
 ) {
   val translationEnabled = LocalAppSettings.current.translationEnabled
@@ -32,6 +36,11 @@ internal fun SubmissionDescriptionCard(
         onToggleWrapText()
         requestPagerFocus()
       },
+      seriesProbeConfig =
+          SubmissionSeriesProbeConfig(
+              baseUrl = submissionUrl,
+              onOpenSeries = onOpenSubmissionSeries,
+          ),
       translationEnabled = translationEnabled,
       modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
       originalTextStyle = MaterialTheme.typography.bodyMedium,

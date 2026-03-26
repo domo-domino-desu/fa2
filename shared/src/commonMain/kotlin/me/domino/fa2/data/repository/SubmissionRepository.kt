@@ -14,16 +14,23 @@ import me.domino.fa2.util.logging.summarizePageState
 import me.domino.fa2.util.logging.summarizeUrl
 
 /** Submission 仓储。 */
+interface SubmissionDetailRepository {
+  suspend fun loadSubmissionDetailBySid(sid: Int): PageState<Submission>
+
+  suspend fun loadSubmissionDetailByUrl(url: String): PageState<Submission>
+}
+
+/** Submission 仓储。 */
 class SubmissionRepository(
     private val submissionStore: SubmissionStore,
     private val socialActionEndpoint: SocialActionEndpoint,
     private val galleryStore: GalleryStore,
     private val attachmentTextService: AttachmentTextService,
-) {
+) : SubmissionDetailRepository {
   private val log = FaLog.withTag("SubmissionRepository")
 
   /** 按 sid 加载 submission 详情。 */
-  suspend fun loadSubmissionDetailBySid(sid: Int): PageState<Submission> {
+  override suspend fun loadSubmissionDetailBySid(sid: Int): PageState<Submission> {
     log.d { "加载投稿详情 -> sid=$sid" }
     val state = submissionStore.loadBySid(sid)
     log.d { "加载投稿详情 -> ${summarizePageState(state)}" }
@@ -31,7 +38,7 @@ class SubmissionRepository(
   }
 
   /** 按 URL 加载 submission 详情。 */
-  suspend fun loadSubmissionDetailByUrl(url: String): PageState<Submission> {
+  override suspend fun loadSubmissionDetailByUrl(url: String): PageState<Submission> {
     log.d { "加载投稿详情 -> url=${summarizeUrl(url)}" }
     val state = submissionStore.loadByUrl(url)
     log.d { "加载投稿详情 -> ${summarizePageState(state)}" }

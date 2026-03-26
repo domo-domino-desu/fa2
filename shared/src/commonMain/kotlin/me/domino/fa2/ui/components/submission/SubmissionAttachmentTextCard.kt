@@ -20,7 +20,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import kotlin.math.roundToInt
+import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.ui.components.DetailSectionCardSurface
+import me.domino.fa2.ui.components.SubmissionSeriesProbeConfig
 import me.domino.fa2.ui.components.TranslatableBlocksCard
 import me.domino.fa2.ui.components.TranslatableSectionTitleRow
 import me.domino.fa2.ui.host.LocalAppI18n
@@ -35,9 +37,11 @@ import org.jetbrains.compose.resources.stringResource
 internal fun SubmissionAttachmentTextCard(
     attachmentTextState: SubmissionAttachmentTextUiState,
     translationState: SubmissionTranslationUiState?,
+    submissionUrl: String,
     onLoadAttachmentText: () -> Unit,
     onTranslate: () -> Unit,
     onToggleWrapText: () -> Unit,
+    onOpenSubmissionSeries: (SubmissionSeriesResolvedSeries) -> Unit,
     requestPagerFocus: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -61,6 +65,11 @@ internal fun SubmissionAttachmentTextCard(
             onToggleWrapText()
             requestPagerFocus()
           },
+          seriesProbeConfig =
+              SubmissionSeriesProbeConfig(
+                  baseUrl = submissionUrl,
+                  onOpenSeries = onOpenSubmissionSeries,
+              ),
           translationEnabled = translationEnabled,
           modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
           supportingText = {

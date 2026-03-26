@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
+import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
@@ -66,6 +67,7 @@ internal fun SubmissionDetailSuccessContent(
     onLoadAttachmentText: () -> Unit,
     onTranslateAttachment: () -> Unit,
     onWrapAttachmentText: () -> Unit,
+    onOpenSubmissionSeries: (SubmissionSeriesResolvedSeries) -> Unit,
     requestPagerFocus: () -> Unit,
 ) {
   val coroutineScope = rememberCoroutineScope()
@@ -286,17 +288,21 @@ internal fun SubmissionDetailSuccessContent(
     )
     SubmissionDescriptionCard(
         translationState = descriptionTranslationState,
+        submissionUrl = detail.submissionUrl,
         onTranslate = onTranslateDescription,
         onToggleWrapText = onWrapDescriptionText,
+        onOpenSubmissionSeries = onOpenSubmissionSeries,
         requestPagerFocus = requestPagerFocus,
     )
     attachmentTextState?.let { state ->
       SubmissionAttachmentTextCard(
           attachmentTextState = state,
           translationState = attachmentTranslationState,
+          submissionUrl = detail.submissionUrl,
           onLoadAttachmentText = onLoadAttachmentText,
           onTranslate = onTranslateAttachment,
           onToggleWrapText = onWrapAttachmentText,
+          onOpenSubmissionSeries = onOpenSubmissionSeries,
           requestPagerFocus = requestPagerFocus,
           modifier = Modifier.bringIntoViewRequester(attachmentBringIntoViewRequester),
       )
