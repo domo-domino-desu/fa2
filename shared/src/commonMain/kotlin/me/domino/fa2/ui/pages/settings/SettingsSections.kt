@@ -67,6 +67,14 @@ internal fun AppearanceSettingsSection(
           },
           modifier = Modifier.fillMaxWidth(),
       )
+
+      SettingsSwitchRow(
+          label = stringResource(Res.string.return_to_current_submission_in_waterfall),
+          checked = draft.returnToCurrentSubmissionInWaterfall,
+          onCheckedChange = { enabled ->
+            onDraftChange(draft.copy(returnToCurrentSubmissionInWaterfall = enabled))
+          },
+      )
     }
   }
 }

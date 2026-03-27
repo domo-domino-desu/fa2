@@ -14,7 +14,6 @@ import me.domino.fa2.data.repository.BrowseRepository
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.appString
-import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.state.PaginationSnapshot
 import me.domino.fa2.ui.state.PaginationStateMachine
 import me.domino.fa2.util.FaUrls
@@ -51,7 +50,6 @@ data class BrowseUiState(
 /** Browse 页面状态模型。 */
 class BrowseScreenModel(
     private val repository: BrowseRepository,
-    private val submissionListHolder: SubmissionListHolder,
     private val settingsService: AppSettingsService? = null,
     private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) : StateScreenModel<BrowseUiState>(BrowseUiState()) {
@@ -135,10 +133,6 @@ class BrowseScreenModel(
     loadMore(force = true)
   }
 
-  fun setCurrentSubmission(sid: Int) {
-    submissionListHolder.setCurrentBySid(sid)
-  }
-
   private fun load(forceRefresh: Boolean) {
     log.i { "加载Browse -> 开始(forceRefresh=$forceRefresh)" }
     if (loadJob?.isActive == true) return
@@ -173,7 +167,6 @@ class BrowseScreenModel(
           mutableState.value = updated
           when (pageState) {
             is PageState.Success -> {
-              syncSubmissionListHolder(updated)
               mutablePageState.value = PageState.Success(updated)
               log.i { "加载Browse -> 成功(count=${updated.submissions.size})" }
             }
@@ -227,7 +220,6 @@ class BrowseScreenModel(
           mutableState.value = updated
           when (pageState) {
             is PageState.Success -> {
-              syncSubmissionListHolder(updated)
               mutablePageState.value = PageState.Success(updated)
               log.d {
                 "自动加载Browse -> ${summarizePageState(pageState)}(count=${updated.submissions.size})"
@@ -253,13 +245,6 @@ class BrowseScreenModel(
           ratingMature = filter.ratingMature,
           ratingAdult = filter.ratingAdult,
       )
-
-  private fun syncSubmissionListHolder(state: BrowseUiState) {
-    submissionListHolder.replace(
-        submissions = state.submissions,
-        nextPageUrl = state.nextPageUrl,
-    )
-  }
 }
 
 private fun BrowseUiState.toPaginationSnapshot(): PaginationSnapshot<SubmissionThumbnail> =

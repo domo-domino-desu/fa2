@@ -119,14 +119,19 @@
   <string name="original_image">View original image</string>
   <string name="close_preview">Close preview</string>
   <string name="loading_more_content">Loading more content...</string>
+  <string name="loading_previous_page_content">Loading the previous page...</string>
   <string name="auto_load_failed_manual_next_page">Auto-load failed. Load the next page manually.</string>
+  <string name="auto_load_failed_manual_previous_page">Auto-load failed. Load the previous page manually.</string>
   <string name="continue_auto_load_next_page">Keep browsing to auto-load the next page.</string>
+  <string name="continue_auto_load_previous_page_with_manual_fallback">Load the previous page here.</string>
   <string name="continue_auto_load_next_page_with_manual_fallback">Keep browsing to auto-load the
     next page, or load it manually if needed.</string>
   <string name="reached_end">Reached the end</string>
   <string name="reached_current_results_end">Reached the end of the current results</string>
+  <string name="load_previous_page">Load previous page</string>
   <string name="load_next_page">Load next page</string>
   <string name="manual_load">Manual load</string>
+  <string name="manual_load_previous_page">Load previous page manually</string>
   <string name="manual_load_next_page">Load next page manually</string>
   <string name="loading">Loading...</string>
   <string name="followers">Followers</string>
@@ -149,6 +154,7 @@
   <string name="blocked_content">Blocked Content</string>
   <string name="blur_blocked_submissions_in_waterfalls">Blur blocked submissions in waterfalls</string>
   <string name="blur_blocked_submissions_in_detail_pages">Blur blocked submissions in detail pages</string>
+  <string name="return_to_current_submission_in_waterfall">When leaving a submission, move the waterfall to the current submission</string>
   <string name="show">Show</string>
   <string name="hide">Hide</string>
   <string name="watch">Watch</string>
@@ -216,4 +222,15 @@
   <string name="series_probe_loading">Detecting submission series</string>
   <string name="series_probe_open_first_content_description">Open the first submission in the series</string>
   <string name="series_probe_not_found">No valid submission series was found</string>
+  <string name="waterfall_page_navigation">Page navigation</string>
+  <string name="waterfall_first_page">First</string>
+  <string name="waterfall_previous_page">Prev</string>
+  <string name="waterfall_next_page">Next</string>
+  <string name="waterfall_last_page">Last</string>
+  <string name="waterfall_page_number">Page %1$d</string>
+  <string name="waterfall_page_number_with_total">Page %1$d/%2$d</string>
+  <string name="waterfall_page_number_unknown">Page</string>
+  <string name="jump_to_page">Jump to page</string>
+  <string name="target_page_number">Target page number</string>
+  <string name="target_page_number_with_range">Target page number (1-%1$d)</string>
 </resources>

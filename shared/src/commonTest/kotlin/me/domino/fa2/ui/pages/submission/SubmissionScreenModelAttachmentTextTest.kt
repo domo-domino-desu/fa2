@@ -12,7 +12,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import me.domino.fa2.data.model.FeedPage
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
@@ -20,7 +19,6 @@ import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.domain.attachmenttext.AttachmentTextFormat
 import me.domino.fa2.domain.attachmenttext.AttachmentTextParagraph
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
-import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.parseSubmissionSid
 
@@ -41,18 +39,15 @@ class SubmissionScreenModelAttachmentTextTest {
   @Test
   fun loadsAttachmentTextAndReusesSuccessState() =
       runTest(dispatcher.scheduler) {
-        val holder = SubmissionListHolder()
-        holder.replace(submissions = listOf(testThumbnail(1)), nextPageUrl = null)
         val detailSource =
             AttachmentRecordingDetailSource(
                 attachmentResults =
                     ArrayDeque(listOf(PageState.Success(testAttachmentDocument("hello"))))
             )
         val model =
-            SubmissionScreenModel(
+            createSubmissionScreenModelForTest(
                 initialSid = 1,
-                holder = holder,
-                feedSource = NoopFeedSourceForAttachmentTest(),
+                items = listOf(testThumbnail(1)),
                 submissionSource = detailSource,
                 translationService = createTestSubmissionTranslationService(),
             )
@@ -75,8 +70,6 @@ class SubmissionScreenModelAttachmentTextTest {
   @Test
   fun retriesAttachmentTextAfterFailure() =
       runTest(dispatcher.scheduler) {
-        val holder = SubmissionListHolder()
-        holder.replace(submissions = listOf(testThumbnail(2)), nextPageUrl = null)
         val detailSource =
             AttachmentRecordingDetailSource(
                 attachmentResults =
@@ -88,10 +81,9 @@ class SubmissionScreenModelAttachmentTextTest {
                     )
             )
         val model =
-            SubmissionScreenModel(
+            createSubmissionScreenModelForTest(
                 initialSid = 2,
-                holder = holder,
-                feedSource = NoopFeedSourceForAttachmentTest(),
+                items = listOf(testThumbnail(2)),
                 submissionSource = detailSource,
                 translationService = createTestSubmissionTranslationService(),
             )
@@ -167,11 +159,6 @@ private class AttachmentRecordingDetailSource(
       nonce: String,
       toAdd: Boolean,
   ): PageState<Unit> = PageState.Success(Unit)
-}
-
-private class NoopFeedSourceForAttachmentTest : SubmissionPagerFeedSource {
-  override suspend fun loadPageByNextUrl(nextPageUrl: String): PageState<FeedPage> =
-      PageState.Error(IllegalStateException("No feed prefetch expected in this test"))
 }
 
 private fun testAttachmentDocument(text: String): AttachmentTextDocument =

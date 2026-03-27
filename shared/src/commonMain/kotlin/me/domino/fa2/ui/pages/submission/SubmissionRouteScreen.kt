@@ -22,7 +22,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.SingletonImageLoader
@@ -32,13 +31,16 @@ import fa2.shared.generated.resources.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.ActivityHistoryRepository
+import me.domino.fa2.data.repository.SubmissionRepository
 import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.ui.components.LocalShowToast
+import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.platform.rememberPlatformTextCopier
 import me.domino.fa2.ui.components.platform.rememberPlatformUrlDownloader
-import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.navigation.openSubmissionSeries
 import me.domino.fa2.ui.pages.browse.BrowseFilterState
@@ -50,14 +52,13 @@ import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.deriveSubmissionThumbnailUrlFromFullImage
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import org.koin.core.parameter.parametersOf
 
 /** 投稿详情浏览路由页面。 */
 class SubmissionRouteScreen(
     /** 初始投稿 ID。 */
     private val initialSid: Int,
-    /** 列表共享持有器 tag。 */
-    private val holderTag: String = "submission-list-holder",
+    /** 共享 context id。 */
+    private val contextId: String,
     /** 当 holder 不含 sid 时的占位链接。 */
     private val seedSubmissionUrl: String? = null,
     /** 独立 submission 系列的初始列表。 */
@@ -66,16 +67,67 @@ class SubmissionRouteScreen(
     private val seedSeriesKey: String? = null,
 ) : Screen {
   override val key: String =
-      "submission:$holderTag:$initialSid:${seedSubmissionUrl.orEmpty()}:${seedSeriesKey.orEmpty()}"
+      "submission:$contextId:$initialSid:${seedSubmissionUrl.orEmpty()}:${seedSeriesKey.orEmpty()}"
 
   /** 页面内容。 */
   @Composable
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
-    val submissionListHolder = rememberSubmissionListHolder(navigator = navigator)
-    val screenModel =
-        koinScreenModel<SubmissionScreenModel> { parametersOf(initialSid, submissionListHolder) }
+    val submissionRepository = koinInject<SubmissionRepository>()
+    val translationService = koinInject<SubmissionDescriptionTranslationService>()
+    val systemLanguageProvider = koinInject<SystemLanguageProvider>()
     val settingsService = koinInject<AppSettingsService>()
+    val contextScreenModel =
+        navigator.rememberNavigatorScreenModel<SubmissionContextScreenModel>(
+            tag = "submission-context"
+        ) {
+          SubmissionContextScreenModel()
+        }
+    val fallbackSubmissionTitle = stringResource(Res.string.submission_fallback_title, initialSid)
+    LaunchedEffect(contextId, initialSid, seedSubmissionUrl, seedSubmissions, seedSeriesKey) {
+      when {
+        seedSubmissions != null ->
+            contextScreenModel.ensureSeedContext(
+                contextId = contextId,
+                sourceKind = SubmissionContextSourceKind.SEQUENCE,
+                items = seedSubmissions,
+                selectedSid = initialSid,
+            )
+
+        seedSubmissionUrl != null ->
+            contextScreenModel.ensureSeedContext(
+                contextId = contextId,
+                sourceKind = SubmissionContextSourceKind.DETACHED,
+                items =
+                    listOf(
+                        SubmissionThumbnail(
+                            id = initialSid,
+                            submissionUrl = seedSubmissionUrl,
+                            title = fallbackSubmissionTitle,
+                            author = "",
+                            thumbnailUrl = "",
+                            thumbnailAspectRatio = 1f,
+                            categoryTag = "",
+                        )
+                    ),
+                selectedSid = initialSid,
+            )
+      }
+    }
+    val screenModel =
+        navigator.rememberNavigatorScreenModel<SubmissionScreenModel>(
+            tag = "submission-screen:$contextId"
+        ) {
+          SubmissionScreenModel(
+              initialSid = initialSid,
+              contextId = contextId,
+              contextScreenModel = contextScreenModel,
+              submissionSource = SubmissionPagerDetailSourceImpl(submissionRepository),
+              translationService = translationService,
+              settingsService = settingsService,
+              systemLanguageProvider = systemLanguageProvider,
+          )
+        }
     val settings by settingsService.settings.collectAsState()
     val historyRepository = koinInject<ActivityHistoryRepository>()
     val state by screenModel.state.collectAsState()
@@ -110,6 +162,14 @@ class SubmissionRouteScreen(
     LaunchedEffect(currentHistoryItem?.id) {
       currentHistoryItem?.let { item -> historyRepository.recordSubmissionVisit(item) }
     }
+    val handleBackNavigation = {
+      if (settings.returnToCurrentSubmissionInWaterfall) {
+        contextScreenModel.requestScrollToSelectedSubmission(contextId)
+      }
+      navigator.pop()
+      Unit
+    }
+    PlatformBackHandler(enabled = true, onBack = handleBackNavigation)
 
     Column(
         modifier =
@@ -140,7 +200,7 @@ class SubmissionRouteScreen(
           topBarActions = topBarActions,
           zoomOverlayVisible = zoomOverlayVisible.value,
           blockedSubmissionMode = settings.blockedSubmissionPagerMode,
-          onBack = { navigator.pop() },
+          onBack = handleBackNavigation,
           onGoHome = { navigator.goBackHome() },
           onDownload = { downloadUrl ->
             coroutineScope.launch {
@@ -223,39 +283,6 @@ class SubmissionRouteScreen(
           onToggleFavorite = screenModel::toggleFavoriteCurrent,
       )
     }
-  }
-
-  @Composable
-  private fun rememberSubmissionListHolder(
-      navigator: cafe.adriel.voyager.navigator.Navigator,
-  ): SubmissionListHolder {
-    val submissionListHolder =
-        navigator.rememberNavigatorScreenModel<SubmissionListHolder>(tag = holderTag) {
-          SubmissionListHolder()
-        }
-    if (seedSubmissions != null && !submissionListHolder.setCurrentBySid(initialSid)) {
-      submissionListHolder.replace(
-          submissions = seedSubmissions,
-          nextPageUrl = null,
-      )
-    } else if (seedSubmissionUrl != null && !submissionListHolder.setCurrentBySid(initialSid)) {
-      submissionListHolder.replace(
-          submissions =
-              listOf(
-                  SubmissionThumbnail(
-                      id = initialSid,
-                      submissionUrl = seedSubmissionUrl,
-                      title = stringResource(Res.string.submission_fallback_title, initialSid),
-                      author = "",
-                      thumbnailUrl = "",
-                      thumbnailAspectRatio = 1f,
-                      categoryTag = "",
-                  )
-              ),
-          nextPageUrl = null,
-      )
-    }
-    return submissionListHolder
   }
 }
 

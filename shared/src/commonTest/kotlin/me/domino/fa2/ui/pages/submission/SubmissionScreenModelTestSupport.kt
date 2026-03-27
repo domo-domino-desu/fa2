@@ -5,10 +5,12 @@ import eu.anifantakis.lib.ksafe.KSafe
 import kotlin.random.Random
 import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.data.local.KeyValueStorage
+import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.settings.AppSettingsStorage
 import me.domino.fa2.domain.translation.TranslationPort
 import me.domino.fa2.domain.translation.TranslationRequest
+import me.domino.fa2.i18n.SystemLanguageProvider
 import okio.FileSystem
 import okio.Path.Companion.toPath
 
@@ -37,5 +39,32 @@ internal suspend fun createTestSubmissionTranslationService(
   return SubmissionDescriptionTranslationService(
       translationPort = translationPort,
       settingsService = settingsService,
+  )
+}
+
+internal fun createSubmissionScreenModelForTest(
+    initialSid: Int,
+    items: List<SubmissionThumbnail>,
+    submissionSource: SubmissionPagerDetailSource,
+    translationService: SubmissionDescriptionTranslationService,
+    settingsService: AppSettingsService? = null,
+    systemLanguageProvider: SystemLanguageProvider? = null,
+    contextId: String = "test-context:$initialSid",
+): SubmissionScreenModel {
+  val contextScreenModel = SubmissionContextScreenModel()
+  contextScreenModel.ensureSeedContext(
+      contextId = contextId,
+      sourceKind = SubmissionContextSourceKind.SEQUENCE,
+      items = items,
+      selectedSid = initialSid,
+  )
+  return SubmissionScreenModel(
+      initialSid = initialSid,
+      contextId = contextId,
+      contextScreenModel = contextScreenModel,
+      submissionSource = submissionSource,
+      translationService = translationService,
+      settingsService = settingsService,
+      systemLanguageProvider = systemLanguageProvider,
   )
 }

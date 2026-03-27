@@ -95,4 +95,8 @@ class AppSettingsService(private val storage: AppSettingsStorage) {
   suspend fun updateBlockedSubmissionPagerMode(mode: BlockedSubmissionPagerMode) {
     updateSettings(mutableSettings.value.copy(blockedSubmissionPagerMode = mode))
   }
+
+  suspend fun updateReturnToCurrentSubmissionInWaterfall(enabled: Boolean) {
+    updateSettings(mutableSettings.value.copy(returnToCurrentSubmissionInWaterfall = enabled))
+  }
 }

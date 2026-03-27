@@ -45,17 +45,24 @@ class FeedParser {
               tagBlockSettings = tagBlockSettings,
           )
         }
+    val currentPageUrl = normalizeCurrentPageUrl(baseUrl)
     val nextPageUrl =
-        document
-            .select("a, form")
-            .firstOrNull(::isNextButton)
-            ?.let { node ->
-              val rawTarget = node.attr("href").ifBlank { node.attr("action") }
-              rawTarget.takeIf { it.isNotBlank() }
-            }
-            ?.let { target -> toAbsoluteUrl(baseUrl, target) }
+        resolveNavigationTarget(document = document, baseUrl = baseUrl, type = NavType.NEXT)
+    val previousPageUrl =
+        resolveNavigationTarget(document = document, baseUrl = baseUrl, type = NavType.PREVIOUS)
+    val firstPageUrl =
+        resolveNavigationTarget(document = document, baseUrl = baseUrl, type = NavType.FIRST)
+    val lastPageUrl =
+        resolveNavigationTarget(document = document, baseUrl = baseUrl, type = NavType.LAST)
 
-    return FeedPage(submissions = submissions, nextPageUrl = nextPageUrl)
+    return FeedPage(
+        submissions = submissions,
+        nextPageUrl = nextPageUrl,
+        previousPageUrl = previousPageUrl,
+        firstPageUrl = firstPageUrl,
+        lastPageUrl = lastPageUrl,
+        currentPageUrl = currentPageUrl,
+    )
   }
 
   /**
@@ -160,5 +167,39 @@ class FeedParser {
     val rel = node.attr("rel").trim().lowercase()
     val aria = node.attr("aria-label").trim().lowercase()
     return rel == "next" || aria.startsWith("next") || label.startsWith("next")
+  }
+
+  private fun resolveNavigationTarget(
+      document: com.fleeksoft.ksoup.nodes.Document,
+      baseUrl: String,
+      type: NavType,
+  ): String? =
+      document
+          .select("a, form")
+          .firstOrNull { node -> matchesNavigationType(node = node, type = type) }
+          ?.let { node ->
+            val rawTarget = node.attr("href").ifBlank { node.attr("action") }.trim()
+            rawTarget.takeIf { it.isNotBlank() }?.let { target -> toAbsoluteUrl(baseUrl, target) }
+          }
+
+  private fun matchesNavigationType(node: Element, type: NavType): Boolean {
+    val label = node.text().trim().lowercase()
+    val rel = node.attr("rel").trim().lowercase()
+    val aria = node.attr("aria-label").trim().lowercase()
+    return when (type) {
+      NavType.PREVIOUS -> rel == "prev" || aria.startsWith("prev") || label.startsWith("prev")
+      NavType.NEXT -> rel == "next" || aria.startsWith("next") || label.startsWith("next")
+      NavType.FIRST -> aria.startsWith("newest") || label.startsWith("newest")
+      NavType.LAST -> aria.startsWith("oldest") || label.startsWith("oldest")
+    }
+  }
+
+  private fun normalizeCurrentPageUrl(baseUrl: String): String = toAbsoluteUrl(baseUrl, baseUrl)
+
+  private enum class NavType {
+    PREVIOUS,
+    NEXT,
+    FIRST,
+    LAST,
   }
 }

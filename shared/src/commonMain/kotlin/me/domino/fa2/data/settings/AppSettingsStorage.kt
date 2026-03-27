@@ -61,6 +61,9 @@ class AppSettingsStorage(
     val blockedSubmissionPagerMode =
         BlockedSubmissionPagerMode.fromPersistedValue(kv.load(KEY_BLOCKED_SUBMISSION_PAGER_MODE))
             ?: AppSettings.defaultBlockedSubmissionPagerMode
+    val returnToCurrentSubmissionInWaterfall =
+        kv.load(KEY_RETURN_TO_CURRENT_SUBMISSION_IN_WATERFALL)?.toBooleanStrictOrNull()
+            ?: AppSettings.defaultReturnToCurrentSubmissionInWaterfall
 
     return AppSettings.normalize(
         AppSettings(
@@ -76,6 +79,7 @@ class AppSettingsStorage(
             waterfallMinCardWidthDp = rawWaterfallMinCardWidthDp,
             blockedSubmissionWaterfallMode = blockedSubmissionWaterfallMode,
             blockedSubmissionPagerMode = blockedSubmissionPagerMode,
+            returnToCurrentSubmissionInWaterfall = returnToCurrentSubmissionInWaterfall,
         )
     )
   }
@@ -111,6 +115,10 @@ class AppSettingsStorage(
         KEY_BLOCKED_SUBMISSION_PAGER_MODE,
         normalized.blockedSubmissionPagerMode.persistedValue,
     )
+    kv.save(
+        KEY_RETURN_TO_CURRENT_SUBMISSION_IN_WATERFALL,
+        normalized.returnToCurrentSubmissionInWaterfall.toString(),
+    )
   }
 
   companion object {
@@ -134,5 +142,7 @@ class AppSettingsStorage(
     const val KEY_BLOCKED_SUBMISSION_WATERFALL_MODE: String =
         "settings.blockedSubmission.waterfall.mode"
     const val KEY_BLOCKED_SUBMISSION_PAGER_MODE: String = "settings.blockedSubmission.pager.mode"
+    const val KEY_RETURN_TO_CURRENT_SUBMISSION_IN_WATERFALL: String =
+        "settings.submission.returnToCurrentInWaterfall"
   }
 }

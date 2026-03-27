@@ -13,4 +13,10 @@ class FeedDataSource(private val endpoint: FeedEndpoint, private val parser: Fee
       endpoint.fetch(fromSid).toPageState { success ->
         parser.parse(html = success.body, baseUrl = success.url)
       }
+
+  /** 按完整 URL 拉取 feed 分页。 */
+  suspend fun fetchPageByUrl(url: String): PageState<FeedPage> =
+      endpoint.fetchByUrl(url).toPageState { success ->
+        parser.parse(html = success.body, baseUrl = success.url)
+      }
 }

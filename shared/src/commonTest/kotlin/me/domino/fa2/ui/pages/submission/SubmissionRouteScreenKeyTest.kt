@@ -11,14 +11,14 @@ class SubmissionRouteScreenKeyTest {
     val first =
         SubmissionRouteScreen(
             initialSid = 1,
-            holderTag = "submission-series:test",
+            contextId = "submission-series:test",
             seedSubmissions = listOf(testSeedThumbnail(1)),
             seedSeriesKey = "series-a",
         )
     val second =
         SubmissionRouteScreen(
             initialSid = 1,
-            holderTag = "submission-series:test",
+            contextId = "submission-series:test",
             seedSubmissions = listOf(testSeedThumbnail(1)),
             seedSeriesKey = "series-b",
         )
@@ -27,9 +27,9 @@ class SubmissionRouteScreenKeyTest {
   }
 
   @Test
-  fun keyDiffersByHolderTag() {
-    val first = SubmissionRouteScreen(initialSid = 1, holderTag = "holder-a")
-    val second = SubmissionRouteScreen(initialSid = 1, holderTag = "holder-b")
+  fun keyDiffersByContextId() {
+    val first = SubmissionRouteScreen(initialSid = 1, contextId = "holder-a")
+    val second = SubmissionRouteScreen(initialSid = 1, contextId = "holder-b")
 
     assertNotEquals(first.key, second.key)
   }

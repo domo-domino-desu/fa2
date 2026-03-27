@@ -115,13 +115,18 @@
   <string name="original_image">查看原图</string>
   <string name="close_preview">关闭预览</string>
   <string name="loading_more_content">正在自动加载更多内容</string>
+  <string name="loading_previous_page_content">正在加载上一页</string>
   <string name="auto_load_failed_manual_next_page">自动加载失败，可手动加载下一页</string>
+  <string name="auto_load_failed_manual_previous_page">自动加载失败，可手动加载上一页</string>
   <string name="continue_auto_load_next_page">继续浏览将自动加载下一页</string>
+  <string name="continue_auto_load_previous_page_with_manual_fallback">在这里加载上一页</string>
   <string name="continue_auto_load_next_page_with_manual_fallback">继续浏览将自动加载下一页，未触发可手动加载</string>
   <string name="reached_end">已经到达末页</string>
   <string name="reached_current_results_end">已经到达当前结果的末尾</string>
+  <string name="load_previous_page">加载上一页</string>
   <string name="load_next_page">加载下一页</string>
   <string name="manual_load">手动加载</string>
+  <string name="manual_load_previous_page">手动加载上一页</string>
   <string name="manual_load_next_page">手动加载下一页</string>
   <string name="loading">加载中…</string>
   <string name="followers">关注者</string>
@@ -144,6 +149,7 @@
   <string name="blocked_content">屏蔽内容</string>
   <string name="blur_blocked_submissions_in_waterfalls">瀑布流中模糊显示被屏蔽的投稿</string>
   <string name="blur_blocked_submissions_in_detail_pages">详情页中模糊显示被屏蔽的投稿</string>
+  <string name="return_to_current_submission_in_waterfall">退出投稿详情时，将瀑布流定位到当前投稿</string>
   <string name="show">显示</string>
   <string name="hide">隐藏</string>
   <string name="watch">Watch</string>
@@ -205,4 +211,15 @@
   <string name="series_probe_loading">正在探测投稿系列</string>
   <string name="series_probe_open_first_content_description">打开该系列的第一篇投稿</string>
   <string name="series_probe_not_found">未找到有效的投稿系列</string>
+  <string name="waterfall_page_navigation">分页导航</string>
+  <string name="waterfall_first_page">始</string>
+  <string name="waterfall_previous_page">上</string>
+  <string name="waterfall_next_page">下</string>
+  <string name="waterfall_last_page">末</string>
+  <string name="waterfall_page_number">第 %1$d 页</string>
+  <string name="waterfall_page_number_with_total">第 %1$d/%2$d 页</string>
+  <string name="waterfall_page_number_unknown">页码</string>
+  <string name="jump_to_page">跳页</string>
+  <string name="target_page_number">目标页码</string>
+  <string name="target_page_number_with_range">目标页码（1-%1$d）</string>
 </resources>

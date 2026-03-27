@@ -9,15 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonGroup
+import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,7 +27,7 @@ import fa2.shared.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 
 /** 登录页主界面。 */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AuthScreen(
     /** 当前登录页面状态。 */
@@ -59,36 +57,33 @@ fun AuthScreen(
       modifier = Modifier.fillMaxSize().padding(20.dp).testTag("auth-screen"),
       verticalArrangement = Arrangement.spacedBy(12.dp),
   ) {
+    val webViewLabel = stringResource(Res.string.web_view)
+    val cookieLabel = stringResource(Res.string.cookie)
     Text(
         text = stringResource(Res.string.sign_in_to_fur_affinity),
         style = MaterialTheme.typography.headlineSmall,
     )
     Text(text = state.message, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-    Surface(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
-      SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-        val loginMethods = AuthLoginMethod.entries
-        loginMethods.forEachIndexed { index, method ->
-          SegmentedButton(
-              selected = loginMethod == method,
-              onClick = { onLoginMethodChange(method) },
-              shape = SegmentedButtonDefaults.itemShape(index = index, count = loginMethods.size),
-              modifier =
-                  Modifier.testTag(
-                      when (method) {
-                        AuthLoginMethod.WebView -> "auth-tab-webview"
-                        AuthLoginMethod.Cookie -> "auth-tab-cookie"
-                      }
-                  ),
-          ) {
-            Text(
-                when (method) {
-                  AuthLoginMethod.WebView -> stringResource(Res.string.web_view)
-                  AuthLoginMethod.Cookie -> stringResource(Res.string.cookie)
-                }
-            )
-          }
-        }
+    ButtonGroup(
+        overflowIndicator = { menuState ->
+          ButtonGroupDefaults.OverflowIndicator(menuState = menuState)
+        },
+        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+    ) {
+      AuthLoginMethod.entries.forEach { method ->
+        val selected = loginMethod == method
+        val label = if (method == AuthLoginMethod.WebView) webViewLabel else cookieLabel
+        toggleableItem(
+            checked = selected,
+            onCheckedChange = { checked ->
+              if (checked && !selected) {
+                onLoginMethodChange(method)
+              }
+            },
+            label = label,
+            weight = 1f,
+        )
       }
     }
 

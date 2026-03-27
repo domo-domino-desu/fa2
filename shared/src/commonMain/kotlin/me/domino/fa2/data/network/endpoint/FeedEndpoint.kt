@@ -16,4 +16,7 @@ class FeedEndpoint(
    */
   suspend fun fetch(fromSid: Int? = null): HtmlResponseResult =
       dataSource.get(FaUrls.submissions(fromSid))
+
+  /** 按完整 URL 拉取 submissions 页面。 */
+  suspend fun fetchByUrl(url: String): HtmlResponseResult = dataSource.get(url)
 }

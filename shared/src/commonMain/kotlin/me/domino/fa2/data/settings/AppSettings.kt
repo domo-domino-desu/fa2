@@ -15,6 +15,7 @@ data class AppSettings(
     val blockedSubmissionWaterfallMode: BlockedSubmissionWaterfallMode =
         defaultBlockedSubmissionWaterfallMode,
     val blockedSubmissionPagerMode: BlockedSubmissionPagerMode = defaultBlockedSubmissionPagerMode,
+    val returnToCurrentSubmissionInWaterfall: Boolean = defaultReturnToCurrentSubmissionInWaterfall,
 ) {
   companion object {
     val supportedUiLanguages: List<UiLanguageSetting> =
@@ -53,6 +54,7 @@ data class AppSettings(
         BlockedSubmissionWaterfallMode.BLUR_THEN_OPEN
     val defaultBlockedSubmissionPagerMode: BlockedSubmissionPagerMode =
         BlockedSubmissionPagerMode.BLUR_THEN_OPEN
+    const val defaultReturnToCurrentSubmissionInWaterfall: Boolean = false
 
     const val minTranslationChunkWordLimit: Int = 50
     const val maxTranslationChunkWordLimit: Int = 10000

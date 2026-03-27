@@ -54,6 +54,14 @@ class FeedRepository(private val feedStore: FeedStore) {
     return state
   }
 
+  /** 按完整 URL 读取分页。 */
+  suspend fun loadPageByUrl(url: String): PageState<FeedPage> {
+    log.d { "加载Feed分页(url) -> url=${summarizeUrl(url)}" }
+    val state = feedStore.loadPageByUrl(url)
+    log.d { "加载Feed分页(url) -> ${summarizePageState(state)}" }
+    return state
+  }
+
   /** 预取指定分页。 */
   suspend fun prefetchPage(fromSid: Int?) {
     val requestUrl = FaUrls.submissions(fromSid)

@@ -17,7 +17,6 @@ import me.domino.fa2.i18n.AppI18nSnapshot
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.appString
 import me.domino.fa2.ui.components.FilterOption
-import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.search.SearchUiMetadataKey
 import me.domino.fa2.ui.search.SearchUiOptionKey
@@ -65,6 +64,7 @@ data class SearchUiState(
     val applied: SearchFormState? = null,
     val hasSearched: Boolean = false,
     val submissions: List<SubmissionThumbnail> = emptyList(),
+    val totalCount: Int? = null,
     val nextPageUrl: String? = null,
     val loading: Boolean = false,
     val refreshing: Boolean = false,
@@ -79,7 +79,6 @@ data class SearchUiState(
 /** Search 页面状态模型。 */
 class SearchScreenModel(
     private val repository: SearchRepository,
-    private val submissionListHolder: SubmissionListHolder,
     private val historyRepository: ActivityHistoryRepository,
     private val settingsService: AppSettingsService,
     private val systemLanguageProvider: SystemLanguageProvider,
@@ -93,7 +92,6 @@ class SearchScreenModel(
   private val workflow =
       SearchScreenWorkflow(
           repository = repository,
-          submissionListHolder = submissionListHolder,
           historyRepository = historyRepository,
           settingsService = settingsService,
           systemLanguageProvider = systemLanguageProvider,
@@ -208,10 +206,6 @@ class SearchScreenModel(
 
   fun retryLoadMore() {
     workflow.retryLoadMore()
-  }
-
-  fun setCurrentSubmission(sid: Int) {
-    workflow.setCurrentSubmission(sid)
   }
 }
 

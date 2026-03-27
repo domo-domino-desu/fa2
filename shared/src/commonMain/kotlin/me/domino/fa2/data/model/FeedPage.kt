@@ -14,4 +14,12 @@ data class FeedPage(
     val submissions: List<SubmissionThumbnail>,
     /** 下一页地址；为空表示已经是末页。 */
     val nextPageUrl: String?,
+    /** 上一页地址。 */
+    val previousPageUrl: String? = null,
+    /** 最前页地址。 */
+    val firstPageUrl: String? = null,
+    /** 最末页地址。 */
+    val lastPageUrl: String? = null,
+    /** 当前页地址。 */
+    val currentPageUrl: String? = null,
 )

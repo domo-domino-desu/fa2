@@ -15,7 +15,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import me.domino.fa2.data.model.FeedPage
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
@@ -23,7 +22,6 @@ import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.domain.attachmenttext.AttachmentTextFormat
 import me.domino.fa2.domain.attachmenttext.AttachmentTextParagraph
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
-import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.parseSubmissionSid
@@ -45,11 +43,7 @@ class SubmissionScreenModelTranslationAndScrollTest {
   @Test
   fun cachesDescriptionTranslationAcrossPageChangesAndResetsWhenDescriptionChanges() =
       runTest(dispatcher.scheduler) {
-        val holder = SubmissionListHolder()
-        holder.replace(
-            submissions = listOf(translationTestThumbnail(1), translationTestThumbnail(2)),
-            nextPageUrl = null,
-        )
+        val items = listOf(translationTestThumbnail(1), translationTestThumbnail(2))
         val detailSource =
             MutableSubmissionDetailSource(
                 submissions =
@@ -59,10 +53,9 @@ class SubmissionScreenModelTranslationAndScrollTest {
                     )
             )
         val model =
-            SubmissionScreenModel(
+            createSubmissionScreenModelForTest(
                 initialSid = 1,
-                holder = holder,
-                feedSource = NoopFeedSourceForTranslationTest(),
+                items = items,
                 submissionSource = detailSource,
                 translationService =
                     createTestSubmissionTranslationService { request ->
@@ -121,8 +114,6 @@ class SubmissionScreenModelTranslationAndScrollTest {
   @Test
   fun resetsAttachmentTranslationWhenAttachmentSourceChanges() =
       runTest(dispatcher.scheduler) {
-        val holder = SubmissionListHolder()
-        holder.replace(submissions = listOf(translationTestThumbnail(1)), nextPageUrl = null)
         val detailSource =
             MutableSubmissionDetailSource(
                 submissions =
@@ -141,10 +132,9 @@ class SubmissionScreenModelTranslationAndScrollTest {
                     ),
             )
         val model =
-            SubmissionScreenModel(
+            createSubmissionScreenModelForTest(
                 initialSid = 1,
-                holder = holder,
-                feedSource = NoopFeedSourceForTranslationTest(),
+                items = listOf(translationTestThumbnail(1)),
                 submissionSource = detailSource,
                 translationService =
                     createTestSubmissionTranslationService { request ->
@@ -192,8 +182,6 @@ class SubmissionScreenModelTranslationAndScrollTest {
   @Test
   fun togglesDescriptionWrapAndCachesRawAndWrappedTranslationsSeparately() =
       runTest(dispatcher.scheduler) {
-        val holder = SubmissionListHolder()
-        holder.replace(submissions = listOf(translationTestThumbnail(1)), nextPageUrl = null)
         val detailSource =
             MutableSubmissionDetailSource(
                 submissions =
@@ -203,10 +191,9 @@ class SubmissionScreenModelTranslationAndScrollTest {
             )
         val translatedRequests = mutableListOf<String>()
         val model =
-            SubmissionScreenModel(
+            createSubmissionScreenModelForTest(
                 initialSid = 1,
-                holder = holder,
-                feedSource = NoopFeedSourceForTranslationTest(),
+                items = listOf(translationTestThumbnail(1)),
                 submissionSource = detailSource,
                 translationService =
                     createTestSubmissionTranslationService { request ->
@@ -295,8 +282,6 @@ class SubmissionScreenModelTranslationAndScrollTest {
   @Test
   fun retriesDescriptionTranslationAfterFailureIsDismissed() =
       runTest(dispatcher.scheduler) {
-        val holder = SubmissionListHolder()
-        holder.replace(submissions = listOf(translationTestThumbnail(1)), nextPageUrl = null)
         val detailSource =
             MutableSubmissionDetailSource(
                 submissions =
@@ -306,10 +291,9 @@ class SubmissionScreenModelTranslationAndScrollTest {
             )
         var requestCount = 0
         val model =
-            SubmissionScreenModel(
+            createSubmissionScreenModelForTest(
                 initialSid = 1,
-                holder = holder,
-                feedSource = NoopFeedSourceForTranslationTest(),
+                items = listOf(translationTestThumbnail(1)),
                 submissionSource = detailSource,
                 translationService =
                     createTestSubmissionTranslationService { request ->
@@ -365,11 +349,7 @@ class SubmissionScreenModelTranslationAndScrollTest {
   @Test
   fun remembersScrollOffsetsAndAdvancesScrollToTopVersionForCurrentSid() =
       runTest(dispatcher.scheduler) {
-        val holder = SubmissionListHolder()
-        holder.replace(
-            submissions = listOf(translationTestThumbnail(1), translationTestThumbnail(2)),
-            nextPageUrl = null,
-        )
+        val items = listOf(translationTestThumbnail(1), translationTestThumbnail(2))
         val detailSource =
             MutableSubmissionDetailSource(
                 submissions =
@@ -379,10 +359,9 @@ class SubmissionScreenModelTranslationAndScrollTest {
                     )
             )
         val model =
-            SubmissionScreenModel(
+            createSubmissionScreenModelForTest(
                 initialSid = 1,
-                holder = holder,
-                feedSource = NoopFeedSourceForTranslationTest(),
+                items = items,
                 submissionSource = detailSource,
                 translationService = createTestSubmissionTranslationService(),
             )
@@ -456,11 +435,6 @@ private class MutableSubmissionDetailSource(
       nonce: String,
       toAdd: Boolean,
   ): PageState<Unit> = PageState.Success(Unit)
-}
-
-private class NoopFeedSourceForTranslationTest : SubmissionPagerFeedSource {
-  override suspend fun loadPageByNextUrl(nextPageUrl: String): PageState<FeedPage> =
-      PageState.Error(IllegalStateException("No feed fetch expected in this test"))
 }
 
 private fun translationTestAttachmentDocument(text: String): AttachmentTextDocument =

@@ -22,7 +22,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,7 +41,11 @@ import me.domino.fa2.data.model.GalleryFolderGroup
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
+import me.domino.fa2.ui.components.submission.SubmissionWaterfallPageControls
+import me.domino.fa2.ui.components.submission.SubmissionWaterfallViewportSnapshot
 import me.domino.fa2.ui.components.submission.WaterfallLoadingSkeleton
+import me.domino.fa2.ui.components.submission.WaterfallRefreshBox
+import me.domino.fa2.ui.pages.submission.WaterfallScrollRequest
 import me.domino.fa2.ui.pages.user.profile.UserBodyScrollPosition
 import me.domino.fa2.ui.pages.user.profile.UserChildRouteTabs
 import me.domino.fa2.ui.pages.user.profile.UserSectionTopDefaults
@@ -89,9 +92,36 @@ internal fun UserSubmissionSectionScreen(
     headerContent: (@Composable () -> Unit)? = null,
     /** 外部托管滚动状态（可选）。 */
     waterfallState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
+    /** 分页导航控件。 */
+    pageControls: SubmissionWaterfallPageControls? = null,
+    /** 顶部是否可加载上一页。 */
+    canLoadPreviousPageAtTop: Boolean = false,
+    /** 顶部上一页加载状态。 */
+    loadingPreviousPage: Boolean = false,
+    /** 顶部上一页加载错误。 */
+    prependErrorMessage: String? = null,
+    /** 顶部加载上一页。 */
+    onLoadPreviousPageAtTop: (() -> Unit)? = null,
+    /** 第一页。 */
+    onLoadFirstPage: (() -> Unit)? = null,
+    /** 上一页。 */
+    onLoadPreviousPage: (() -> Unit)? = null,
+    /** 跳页。 */
+    onJumpToPage: ((Int) -> Unit)? = null,
+    /** 下一页。 */
+    onLoadNextPage: (() -> Unit)? = null,
+    /** 最后一页。 */
+    onLoadLastPage: (() -> Unit)? = null,
+    /** 待消费滚动请求。 */
+    pendingScrollRequest: WaterfallScrollRequest? = null,
+    /** 消费滚动请求。 */
+    onConsumeScrollRequest: ((Long) -> Unit)? = null,
+    /** 视口变化。 */
+    onViewportChanged: ((SubmissionWaterfallViewportSnapshot) -> Unit)? = null,
 ) {
   val settingsService = koinInject<AppSettingsService>()
   val settings by settingsService.settings.collectAsState()
+  val refreshEnabled = pageControls?.showFirstPage != true || !pageControls.canLoadFirstPage
   val scope = rememberCoroutineScope()
   val sectionGridContentPadding =
       PaddingValues(start = 12.dp, top = 0.dp, end = 12.dp, bottom = 12.dp)
@@ -191,6 +221,11 @@ internal fun UserSubmissionSectionScreen(
           )
         }
       }
+  val waterfallItemIndexOffset =
+      (if (headerContent != null) 1 else 0) +
+          1 +
+          (if (state.folderGroups.isNotEmpty()) 1 else 0) +
+          (if (!state.errorMessage.isNullOrBlank() && state.submissions.isNotEmpty()) 1 else 0)
 
   Box(modifier = Modifier.fillMaxSize()) {
     val blockingMessage =
@@ -229,11 +264,7 @@ internal fun UserSubmissionSectionScreen(
               value.isNotBlank() && state.submissions.isNotEmpty()
             }
 
-        PullToRefreshBox(
-            isRefreshing = state.refreshing,
-            onRefresh = onRefresh,
-            modifier = Modifier.fillMaxSize(),
-        ) {
+        val waterfallContent: @Composable () -> Unit = {
           SubmissionWaterfall(
               items = state.submissions,
               onItemClick = onOpenSubmission,
@@ -246,6 +277,20 @@ internal fun UserSubmissionSectionScreen(
               minCardWidthDp = settings.waterfallMinCardWidthDp,
               contentPadding = sectionGridContentPadding,
               blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
+              itemIndexOffset = waterfallItemIndexOffset,
+              pageControls = pageControls,
+              canLoadPreviousPageAtTop = canLoadPreviousPageAtTop,
+              loadingPreviousPage = loadingPreviousPage,
+              prependErrorMessage = prependErrorMessage,
+              onLoadPreviousPageAtTop = onLoadPreviousPageAtTop,
+              onLoadFirstPage = onLoadFirstPage,
+              onLoadPreviousPage = onLoadPreviousPage,
+              onJumpToPage = onJumpToPage,
+              onLoadNextPage = onLoadNextPage,
+              onLoadLastPage = onLoadLastPage,
+              pendingScrollRequest = pendingScrollRequest,
+              onConsumeScrollRequest = onConsumeScrollRequest,
+              onViewportChanged = onViewportChanged,
               headerContent = headerContent,
               preItemsContent = {
                 topItemsContent()
@@ -263,6 +308,14 @@ internal fun UserSubmissionSectionScreen(
                 }
               },
           )
+        }
+        WaterfallRefreshBox(
+            enabled = refreshEnabled,
+            refreshing = state.refreshing,
+            onRefresh = onRefresh,
+            modifier = Modifier.fillMaxSize(),
+        ) {
+          waterfallContent()
         }
       }
     }

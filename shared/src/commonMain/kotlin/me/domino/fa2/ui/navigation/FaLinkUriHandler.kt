@@ -35,7 +35,7 @@ private fun resolveFaTarget(url: String): Screen? {
   if (submissionSid != null) {
     return SubmissionRouteScreen(
         initialSid = submissionSid,
-        holderTag = "submission-direct:${submissionSid}:${nextFaRouteNonce()}",
+        contextId = "submission-direct:${submissionSid}:${nextFaRouteNonce()}",
         seedSubmissionUrl = url,
     )
   }

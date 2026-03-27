@@ -17,9 +17,16 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
-import me.domino.fa2.ui.navigation.SubmissionListHolder
+import me.domino.fa2.data.repository.FavoritesRepository
+import me.domino.fa2.data.repository.GalleryRepository
 import me.domino.fa2.ui.navigation.rootNavigator
+import me.domino.fa2.ui.pages.submission.SubmissionContextScreenModel
+import me.domino.fa2.ui.pages.submission.SubmissionContextSourceKind
+import me.domino.fa2.ui.pages.submission.SubmissionLoadedPage
 import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
+import me.domino.fa2.ui.pages.submission.UserSubmissionSourceAdapter
+import me.domino.fa2.ui.pages.submission.pageNumberForSid
+import me.domino.fa2.ui.pages.submission.toWaterfallPageControls
 import me.domino.fa2.ui.pages.user.gallery.UserSubmissionSectionScreen
 import me.domino.fa2.ui.pages.user.gallery.UserSubmissionSectionScreenModel
 import me.domino.fa2.ui.pages.user.journal.JournalDetailRouteScreen
@@ -28,6 +35,8 @@ import me.domino.fa2.ui.pages.user.journal.UserJournalsScreenModel
 import me.domino.fa2.ui.pages.user.profile.resolveInitialUserScrollPosition
 import me.domino.fa2.ui.pages.user.profile.userJournalsScrollLayout
 import me.domino.fa2.ui.pages.user.profile.userSubmissionSectionScrollLayout
+import me.domino.fa2.util.FaUrls
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 /** User 子路由 screen。 */
@@ -137,11 +146,15 @@ class UserChildRouteScreen(
       else -> {
         val localNavigator = LocalNavigator.currentOrThrow
         val rootNavigator = localNavigator.rootNavigator()
-        val holderTag = "user-submission-holder:${username.lowercase()}:${route.routeKey}"
-        val submissionListHolder =
-            rootNavigator.rememberNavigatorScreenModel<SubmissionListHolder>(tag = holderTag) {
-              SubmissionListHolder()
+        val contextScreenModel =
+            rootNavigator.rememberNavigatorScreenModel<SubmissionContextScreenModel>(
+                tag = "submission-context"
+            ) {
+              SubmissionContextScreenModel()
             }
+        val galleryRepository = koinInject<GalleryRepository>()
+        val favoritesRepository = koinInject<FavoritesRepository>()
+        val holderTag = "user-submission-holder:${username.lowercase()}:${route.routeKey}"
         val scrollKey =
             remember(username, route, routeInitialFolderUrl) {
               buildUserSubmissionScrollKey(
@@ -156,12 +169,21 @@ class UserChildRouteScreen(
               parametersOf(
                   username,
                   route,
-                  submissionListHolder,
                   routeInitialFolderUrl,
                   initialSnapshot,
               )
             }
         val state by screenModel.state.collectAsState()
+        val contextState by contextScreenModel.state(holderTag).collectAsState()
+        val rootPageUrl =
+            remember(username, route, routeInitialFolderUrl) {
+              routeInitialFolderUrl
+                  ?: when (route) {
+                    UserChildRoute.Gallery -> FaUrls.gallery(username)
+                    UserChildRoute.Favorites -> FaUrls.favorites(username)
+                    UserChildRoute.Journals -> holderTag
+                  }
+            }
         LaunchedEffect(
             scrollKey,
             state.submissions,
@@ -169,6 +191,39 @@ class UserChildRouteScreen(
             state.folderGroups,
         ) {
           updateSubmissionSnapshot(scrollKey, state)
+          if (state.submissions.isEmpty()) return@LaunchedEffect
+          contextScreenModel.syncRootPage(
+              contextId = holderTag,
+              sourceKind =
+                  when (route) {
+                    UserChildRoute.Gallery -> SubmissionContextSourceKind.GALLERY
+                    UserChildRoute.Favorites -> SubmissionContextSourceKind.FAVORITES
+                    UserChildRoute.Journals -> SubmissionContextSourceKind.GALLERY
+                  },
+              adapter =
+                  UserSubmissionSourceAdapter(
+                      route = route,
+                      username = username,
+                      initialPageUrl = routeInitialFolderUrl,
+                      galleryRepository = galleryRepository,
+                      favoritesRepository = favoritesRepository,
+                  ),
+              page =
+                  SubmissionLoadedPage(
+                      pageId = rootPageUrl,
+                      requestKey = rootPageUrl,
+                      items = state.submissions,
+                      pageNumber = 1,
+                      nextRequestKey = state.nextPageUrl,
+                      firstRequestKey =
+                          when (route) {
+                            UserChildRoute.Gallery -> rootPageUrl
+                            UserChildRoute.Favorites -> rootPageUrl
+                            UserChildRoute.Journals -> routeInitialFolderUrl
+                          },
+                  ),
+              revisionKey = buildUserSubmissionScrollKey(username, route, routeInitialFolderUrl),
+          )
         }
         key(scrollKey) {
           val layout =
@@ -185,9 +240,12 @@ class UserChildRouteScreen(
               }
           val waterfallState =
               rememberLazyStaggeredGridState(
-                  initialFirstVisibleItemIndex = initialScrollPosition.firstVisibleItemIndex,
+                  initialFirstVisibleItemIndex =
+                      contextState?.waterfallViewport?.firstVisibleItemIndex
+                          ?: initialScrollPosition.firstVisibleItemIndex,
                   initialFirstVisibleItemScrollOffset =
-                      initialScrollPosition.firstVisibleItemScrollOffset,
+                      contextState?.waterfallViewport?.firstVisibleItemScrollOffset
+                          ?: initialScrollPosition.firstVisibleItemScrollOffset,
               )
           val scope = rememberCoroutineScope()
           LaunchedEffect(waterfallState, updateCurrentRouteScrollToTopAction) {
@@ -199,27 +257,43 @@ class UserChildRouteScreen(
               remember(scrollKey) {
                 mutableStateOf(initialScrollPosition.deferredBodyScrollPosition)
               }
+          val pageControls = contextState?.toWaterfallPageControls()
 
           UserSubmissionSectionScreen(
               route = route,
-              state = state,
+              state =
+                  contextState?.let { snapshot ->
+                    state.copy(
+                        submissions = snapshot.flatItems.ifEmpty { state.submissions },
+                        nextPageUrl = if (snapshot.hasNextPage) "context:next" else null,
+                        isLoadingMore = snapshot.loading.appendLoading,
+                        appendErrorMessage = snapshot.loading.appendErrorMessage,
+                    )
+                  } ?: state,
               onRetry = { screenModel.load(forceRefresh = true) },
               onRefresh = {
                 refreshHeader?.invoke()
                 screenModel.load(forceRefresh = true)
               },
               onOpenSubmission = { item ->
-                screenModel.setCurrentSubmission(item.id)
+                contextScreenModel.selectSubmission(holderTag, item.id)
                 rootNavigator.push(
-                    SubmissionRouteScreen(initialSid = item.id, holderTag = holderTag)
+                    SubmissionRouteScreen(initialSid = item.id, contextId = holderTag)
                 )
               },
               onOpenFolder = { folderUrl ->
                 updateFolderUrl(route, folderUrl)
                 screenModel.openFolder(folderUrl)
               },
-              onLastVisibleIndexChanged = screenModel::onLastVisibleIndexChanged,
-              onRetryLoadMore = screenModel::retryLoadMore,
+              onLastVisibleIndexChanged = { lastVisibleIndex ->
+                val items = contextState?.flatItems ?: state.submissions
+                if (items.isNotEmpty() && lastVisibleIndex > items.lastIndex - 10) {
+                  contextScreenModel.loadNextPageIfNeeded(holderTag)
+                }
+              },
+              onRetryLoadMore = {
+                contextScreenModel.loadNextPageIfNeeded(holderTag, force = true)
+              },
               onSelectRoute = { target ->
                 if (target != route) {
                   localNavigator.replaceAll(
@@ -238,6 +312,33 @@ class UserChildRouteScreen(
               onSharedTopScrollChanged = updateSharedTopScrollState,
               onBodyScrollPositionChanged = { position ->
                 updateBodyScrollPosition(scrollKey, position)
+              },
+              pageControls = pageControls,
+              canLoadPreviousPageAtTop = contextState?.hasPreviousPage == true,
+              loadingPreviousPage = contextState?.loading?.prependLoading == true,
+              prependErrorMessage = contextState?.loading?.prependErrorMessage,
+              onLoadPreviousPageAtTop = {
+                contextScreenModel.loadPreviousPageIfNeeded(holderTag, force = true)
+              },
+              onLoadFirstPage = { contextScreenModel.navigateToFirstPage(holderTag) },
+              onLoadPreviousPage = { contextScreenModel.navigateToPreviousPage(holderTag) },
+              onJumpToPage = { pageNumber ->
+                contextScreenModel.navigateToPage(holderTag, pageNumber)
+              },
+              onLoadNextPage = { contextScreenModel.navigateToNextPage(holderTag) },
+              onLoadLastPage = { contextScreenModel.navigateToLastPage(holderTag) },
+              pendingScrollRequest = contextState?.waterfallViewport?.scrollRequest,
+              onConsumeScrollRequest = { version ->
+                contextScreenModel.consumeWaterfallScrollRequest(holderTag, version)
+              },
+              onViewportChanged = { viewport ->
+                contextScreenModel.updateWaterfallViewport(
+                    contextId = holderTag,
+                    firstVisibleItemIndex = viewport.firstVisibleItemIndex,
+                    firstVisibleItemScrollOffset = viewport.firstVisibleItemScrollOffset,
+                    anchorSid = viewport.anchorSid,
+                    currentPageNumber = contextState?.pageNumberForSid(viewport.anchorSid),
+                )
               },
           )
         }

@@ -12,13 +12,11 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import me.domino.fa2.data.model.FeedPage
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
-import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.parseSubmissionSid
 
@@ -52,17 +50,11 @@ class SubmissionScreenModelPrefetchTest {
   @Test
   fun prefetchesNext3AndPrevious1AfterDebounce() =
       runTest(dispatcher.scheduler) {
-        val holder = SubmissionListHolder()
-        holder.replace(
-            submissions = (1..8).map { sid -> testThumbnail(sid) },
-            nextPageUrl = null,
-        )
-
+        val items = (1..8).map { sid -> testThumbnail(sid) }
         val detailSource = RecordingDetailSource()
-        SubmissionScreenModel(
+        createSubmissionScreenModelForTest(
             initialSid = 4,
-            holder = holder,
-            feedSource = NoopFeedSource(),
+            items = items,
             submissionSource = detailSource,
             translationService = createTestSubmissionTranslationService(),
         )
@@ -91,11 +83,6 @@ private fun testThumbnail(sid: Int): SubmissionThumbnail =
         thumbnailAspectRatio = 1f,
         categoryTag = "c_all",
     )
-
-private class NoopFeedSource : SubmissionPagerFeedSource {
-  override suspend fun loadPageByNextUrl(nextPageUrl: String): PageState<FeedPage> =
-      PageState.Error(IllegalStateException("No feed prefetch expected in this test"))
-}
 
 private class RecordingDetailSource : SubmissionPagerDetailSource {
   val sidPrefetchRequests: MutableList<Int> = mutableListOf()

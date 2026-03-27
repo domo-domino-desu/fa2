@@ -15,7 +15,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +22,10 @@ import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
+import me.domino.fa2.ui.components.submission.SubmissionWaterfallPageControls
+import me.domino.fa2.ui.components.submission.SubmissionWaterfallViewportSnapshot
 import me.domino.fa2.ui.components.submission.WaterfallLoadingSkeleton
+import me.domino.fa2.ui.components.submission.WaterfallRefreshBox
 import me.domino.fa2.ui.host.LocalAppI18n
 import me.domino.fa2.ui.host.LocalAppSettings
 import me.domino.fa2.ui.icons.FaMaterialSymbols
@@ -31,6 +33,7 @@ import me.domino.fa2.ui.pages.search.component.SearchHint
 import me.domino.fa2.ui.pages.search.component.SearchOverlayContent
 import me.domino.fa2.ui.pages.search.component.SearchStatusCard
 import me.domino.fa2.ui.pages.search.component.rememberSearchOverlayUiData
+import me.domino.fa2.ui.pages.submission.WaterfallScrollRequest
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -38,9 +41,23 @@ fun SearchScreen(
     state: SearchUiState,
     actions: SearchScreenActions,
     waterfallState: LazyStaggeredGridState,
+    pageControls: SubmissionWaterfallPageControls? = null,
+    canLoadPreviousPageAtTop: Boolean = false,
+    loadingPreviousPage: Boolean = false,
+    prependErrorMessage: String? = null,
+    onLoadPreviousPageAtTop: (() -> Unit)? = null,
+    onLoadFirstPage: (() -> Unit)? = null,
+    onLoadPreviousPage: (() -> Unit)? = null,
+    onJumpToPage: ((Int) -> Unit)? = null,
+    onLoadNextPage: (() -> Unit)? = null,
+    onLoadLastPage: (() -> Unit)? = null,
+    pendingScrollRequest: WaterfallScrollRequest? = null,
+    onConsumeScrollRequest: ((Long) -> Unit)? = null,
+    onViewportChanged: ((SubmissionWaterfallViewportSnapshot) -> Unit)? = null,
 ) {
   val appI18n = LocalAppI18n.current
   val settings = LocalAppSettings.current
+  val refreshEnabled = pageControls?.showFirstPage != true || !pageControls.canLoadFirstPage
   val overlayUiData = rememberSearchOverlayUiData()
   val canSearch = state.draft.query.trim().isNotBlank()
 
@@ -78,11 +95,7 @@ fun SearchScreen(
           }
 
           else -> {
-            PullToRefreshBox(
-                isRefreshing = state.refreshing,
-                onRefresh = actions.onRefresh,
-                modifier = Modifier.fillMaxSize(),
-            ) {
+            val waterfallContent: @Composable () -> Unit = {
               SubmissionWaterfall(
                   items = state.submissions,
                   onItemClick = actions.onOpenSubmission,
@@ -94,7 +107,28 @@ fun SearchScreen(
                   state = waterfallState,
                   minCardWidthDp = settings.waterfallMinCardWidthDp,
                   blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
+                  pageControls = pageControls,
+                  canLoadPreviousPageAtTop = canLoadPreviousPageAtTop,
+                  loadingPreviousPage = loadingPreviousPage,
+                  prependErrorMessage = prependErrorMessage,
+                  onLoadPreviousPageAtTop = onLoadPreviousPageAtTop,
+                  onLoadFirstPage = onLoadFirstPage,
+                  onLoadPreviousPage = onLoadPreviousPage,
+                  onJumpToPage = onJumpToPage,
+                  onLoadNextPage = onLoadNextPage,
+                  onLoadLastPage = onLoadLastPage,
+                  pendingScrollRequest = pendingScrollRequest,
+                  onConsumeScrollRequest = onConsumeScrollRequest,
+                  onViewportChanged = onViewportChanged,
               )
+            }
+            WaterfallRefreshBox(
+                enabled = refreshEnabled,
+                refreshing = state.refreshing,
+                onRefresh = actions.onRefresh,
+                modifier = Modifier.fillMaxSize(),
+            ) {
+              waterfallContent()
             }
           }
         }

@@ -28,10 +28,12 @@ import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
 import me.domino.fa2.ui.layouts.SubmissionHistoryRouteTopBar
-import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.navigation.rootNavigator
+import me.domino.fa2.ui.pages.submission.SubmissionContextScreenModel
+import me.domino.fa2.ui.pages.submission.SubmissionContextSourceKind
 import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
+import me.domino.fa2.ui.pages.submission.WaterfallViewportState
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -45,15 +47,26 @@ class SubmissionHistoryRouteScreen : Screen {
     val historyRepository = koinInject<ActivityHistoryRepository>()
     val settingsService = koinInject<AppSettingsService>()
     val settings by settingsService.settings.collectAsState()
-    val waterfallState = rememberLazyStaggeredGridState()
     val coroutineScope = rememberCoroutineScope()
     var loading by remember { mutableStateOf(true) }
     var submissions by remember { mutableStateOf<List<SubmissionThumbnail>>(emptyList()) }
     val holderTag = "submission-list-holder:history"
-    val submissionListHolder =
-        rootNavigator.rememberNavigatorScreenModel<SubmissionListHolder>(tag = holderTag) {
-          SubmissionListHolder()
+    val contextScreenModel =
+        rootNavigator.rememberNavigatorScreenModel<SubmissionContextScreenModel>(
+            tag = "submission-context"
+        ) {
+          SubmissionContextScreenModel()
         }
+    val contextState by contextScreenModel.state(holderTag).collectAsState()
+    val initialViewport =
+        remember(contextScreenModel, holderTag) {
+          contextScreenModel.snapshot(holderTag)?.waterfallViewport ?: WaterfallViewportState()
+        }
+    val waterfallState =
+        rememberLazyStaggeredGridState(
+            initialFirstVisibleItemIndex = initialViewport.firstVisibleItemIndex,
+            initialFirstVisibleItemScrollOffset = initialViewport.firstVisibleItemScrollOffset,
+        )
 
     LaunchedEffect(Unit) {
       submissions = historyRepository.loadSubmissionHistory()
@@ -61,7 +74,14 @@ class SubmissionHistoryRouteScreen : Screen {
     }
 
     LaunchedEffect(submissions) {
-      submissionListHolder.replace(submissions = submissions, nextPageUrl = null)
+      if (submissions.isNotEmpty()) {
+        contextScreenModel.ensureSeedContext(
+            contextId = holderTag,
+            sourceKind = SubmissionContextSourceKind.HISTORY,
+            items = submissions,
+            selectedSid = submissions.firstOrNull()?.id,
+        )
+      }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -93,8 +113,8 @@ class SubmissionHistoryRouteScreen : Screen {
           SubmissionWaterfall(
               items = submissions,
               onItemClick = { item ->
-                submissionListHolder.setCurrentBySid(item.id)
-                navigator.push(SubmissionRouteScreen(initialSid = item.id, holderTag = holderTag))
+                contextScreenModel.selectSubmission(holderTag, item.id)
+                navigator.push(SubmissionRouteScreen(initialSid = item.id, contextId = holderTag))
               },
               onLastVisibleIndexChanged = {},
               canLoadMore = false,
@@ -104,6 +124,19 @@ class SubmissionHistoryRouteScreen : Screen {
               state = waterfallState,
               minCardWidthDp = settings.waterfallMinCardWidthDp,
               blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
+              pendingScrollRequest = contextState?.waterfallViewport?.scrollRequest,
+              onConsumeScrollRequest = { version ->
+                contextScreenModel.consumeWaterfallScrollRequest(holderTag, version)
+              },
+              onViewportChanged = { viewport ->
+                contextScreenModel.updateWaterfallViewport(
+                    contextId = holderTag,
+                    firstVisibleItemIndex = viewport.firstVisibleItemIndex,
+                    firstVisibleItemScrollOffset = viewport.firstVisibleItemScrollOffset,
+                    anchorSid = viewport.anchorSid,
+                    currentPageNumber = null,
+                )
+              },
           )
         }
       }

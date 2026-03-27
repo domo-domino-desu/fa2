@@ -54,6 +54,18 @@ class FeedStore(
     return loadPageOnce(fromSid = fromSid)
   }
 
+  /** 按完整 URL 读取 feed 页。 */
+  suspend fun loadPageByUrl(url: String): PageState<FeedPage> {
+    val normalizedUrl = url.trim()
+    val defaultFirstUrl = me.domino.fa2.util.FaUrls.submissions()
+    return when {
+      normalizedUrl == defaultFirstUrl -> loadPageOnce(fromSid = null)
+      parseSubmissionsFromSid(normalizedUrl) != null ->
+          loadPageOnce(fromSid = parseSubmissionsFromSid(normalizedUrl))
+      else -> dataSource.fetchPageByUrl(normalizedUrl)
+    }
+  }
+
   /** 强制刷新指定页缓存。 */
   suspend fun prefetchPage(fromSid: Int?) {
     cachedStore.prefetch(FeedPageKey(fromSid = fromSid))

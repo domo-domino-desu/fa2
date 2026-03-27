@@ -18,9 +18,6 @@ import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.domain.attachmenttext.deriveAttachmentFileName
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.appString
-import me.domino.fa2.ui.navigation.SubmissionListHolder
-import me.domino.fa2.ui.state.PaginationSnapshot
-import me.domino.fa2.ui.state.PaginationStateMachine
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.logging.summarizePageState
 
@@ -39,8 +36,7 @@ private data class SubmissionTranslationJobKey(
 
 internal class SubmissionScreenWorkflow(
     private val initialSid: Int,
-    private val holder: SubmissionListHolder,
-    private val feedSource: SubmissionPagerFeedSource,
+    private val contextController: SubmissionPagerContextController,
     private val submissionSource: SubmissionPagerDetailSource,
     private val translationService: SubmissionDescriptionTranslationService,
     private val settingsService: AppSettingsService? = null,
@@ -51,43 +47,31 @@ internal class SubmissionScreenWorkflow(
     private val pageStateSink: (PageState<SubmissionPagerUiState>) -> Unit,
     private val toastSink: (String) -> Unit,
 ) {
-  private val paginationStateMachine =
-      PaginationStateMachine<SubmissionThumbnail, Int>(
-          keyOf = { item -> item.id },
-          challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
-          appendFallbackErrorMessage = { appString(Res.string.load_failed_please_retry) },
-      )
-
   private val detailBySid: MutableMap<Int, SubmissionDetailUiState> = mutableMapOf()
   private val scrollOffsetBySid: MutableMap<Int, Int> = mutableMapOf()
   private val scrollToTopVersionBySid: MutableMap<Int, Long> = mutableMapOf()
   private val translationJobs: MutableMap<SubmissionTranslationJobKey, Job> = mutableMapOf()
-  private var appendJob: Job? = null
   private var prefetchJob: Job? = null
-  private var nextPageUrl: String? = null
-  private var isLoadingMore: Boolean = false
-  private var appendErrorMessage: String? = null
   private val prefetchedSuccessSids: MutableSet<Int> = mutableSetOf()
   private val prefetchingSids: MutableSet<Int> = mutableSetOf()
 
   fun initialize() {
     log.i { "初始化投稿详情页 -> 开始(initialSid=$initialSid)" }
-    holder.setCurrentBySid(initialSid)
-    nextPageUrl = holder.nextPageUrl()
+    contextController.initializeSelection(initialSid)
     publishState()
     loadCurrentAndSchedulePrefetch()
     appendIfNearEnd(force = false)
   }
 
   fun previous() {
-    holder.setCurrentIndex(holder.currentIndex() - 1)
+    contextController.setCurrentIndex(contextController.currentIndex() - 1)
     publishState()
     loadCurrentAndSchedulePrefetch()
   }
 
   fun next() {
-    if (holder.next() != null) {
-      holder.setCurrentIndex(holder.currentIndex() + 1)
+    if (contextController.hasNextCached()) {
+      contextController.setCurrentIndex(contextController.currentIndex() + 1)
       publishState()
       loadCurrentAndSchedulePrefetch()
       appendIfNearEnd(force = false)
@@ -97,7 +81,7 @@ internal class SubmissionScreenWorkflow(
   }
 
   fun onPageChanged(index: Int) {
-    holder.setCurrentIndex(index)
+    contextController.setCurrentIndex(index)
     publishState()
     loadCurrentAndSchedulePrefetch()
     appendIfNearEnd(force = false)
@@ -114,7 +98,7 @@ internal class SubmissionScreenWorkflow(
   fun scrollToTopVersionForSid(sid: Int): Long = scrollToTopVersionBySid[sid] ?: 0L
 
   fun requestCurrentPageScrollToTop() {
-    val current = holder.current() ?: return
+    val current = contextController.current() ?: return
     val sid = current.id
     scrollOffsetBySid[sid] = 0
     scrollToTopVersionBySid[sid] = (scrollToTopVersionBySid[sid] ?: 0L) + 1L
@@ -122,7 +106,7 @@ internal class SubmissionScreenWorkflow(
   }
 
   fun retryCurrentDetail() {
-    val current = holder.current() ?: return
+    val current = contextController.current() ?: return
     log.i { "重试详情加载 -> sid=${current.id}" }
     loadDetail(current = current, force = true)
   }
@@ -144,7 +128,7 @@ internal class SubmissionScreenWorkflow(
   }
 
   fun loadAttachmentTextCurrent() {
-    val current = holder.current() ?: return
+    val current = contextController.current() ?: return
     val sid = current.id
     val currentState = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return
     val attachmentState = currentState.attachmentTextState ?: return
@@ -272,7 +256,7 @@ internal class SubmissionScreenWorkflow(
   }
 
   fun toggleFavoriteCurrent() {
-    val current = holder.current() ?: return
+    val current = contextController.current() ?: return
     val sid = current.id
     val currentState = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return
     if (currentState.favoriteUpdating) return
@@ -421,7 +405,7 @@ internal class SubmissionScreenWorkflow(
       log.w { "标签屏蔽 -> 跳过(空标签)" }
       return
     }
-    val current = holder.current() ?: return
+    val current = contextController.current() ?: return
     val sid = current.id
     val currentState = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return
     val nonce = currentState.detail.tagBlockNonce.trim()
@@ -527,6 +511,12 @@ internal class SubmissionScreenWorkflow(
     appendIfNearEnd(force = true)
   }
 
+  fun onContextChanged() {
+    publishState()
+    loadCurrentAndSchedulePrefetch()
+    appendIfNearEnd(force = false)
+  }
+
   private suspend fun executeTagBlockRequest(
       sid: Int,
       tagName: String,
@@ -601,7 +591,7 @@ internal class SubmissionScreenWorkflow(
   }
 
   private fun publishState() {
-    val size = holder.size()
+    val size = contextController.size()
     if (size == 0) {
       stateSink(SubmissionPagerUiState.Empty)
       pageStateSink(
@@ -610,10 +600,10 @@ internal class SubmissionScreenWorkflow(
       return
     }
 
-    val index = holder.currentIndex()
+    val index = contextController.currentIndex()
     val items = buildList {
       for (cursor in 0 until size) {
-        val item = holder.getAt(cursor) ?: continue
+        val item = contextController.getAt(cursor) ?: continue
         add(item)
       }
     }
@@ -624,18 +614,18 @@ internal class SubmissionScreenWorkflow(
             detailBySid = detailBySid.toMap(),
             scrollToTopVersionBySid = scrollToTopVersionBySid.toMap(),
             currentIndex = index.coerceIn(0, (items.lastIndex).coerceAtLeast(0)),
-            hasPrevious = holder.previous() != null,
-            hasNext = holder.next() != null || !nextPageUrl.isNullOrBlank(),
-            hasMore = !nextPageUrl.isNullOrBlank(),
-            isLoadingMore = isLoadingMore,
-            appendErrorMessage = appendErrorMessage,
+            hasPrevious = contextController.hasPreviousCached(),
+            hasNext = contextController.hasNextCached() || contextController.hasMorePages(),
+            hasMore = contextController.hasMorePages(),
+            isLoadingMore = contextController.isLoadingMore(),
+            appendErrorMessage = contextController.appendErrorMessage(),
         )
     stateSink(uiState)
     pageStateSink(PageState.Success(uiState))
   }
 
   private fun loadCurrentAndSchedulePrefetch() {
-    val current = holder.current() ?: return
+    val current = contextController.current() ?: return
     loadDetail(current = current, force = false)
     scheduleDetailPrefetch()
   }
@@ -682,18 +672,18 @@ internal class SubmissionScreenWorkflow(
   }
 
   private fun computePrefetchCandidateSids(): List<Int> {
-    val totalSize = holder.size()
+    val totalSize = contextController.size()
     if (totalSize == 0) return emptyList()
     val targetIndices =
         computeSubmissionPrefetchIndices(
-            currentIndex = holder.currentIndex(),
+            currentIndex = contextController.currentIndex(),
             lastIndex = totalSize - 1,
         )
-    return targetIndices.mapNotNull { index -> holder.getAt(index)?.id }
+    return targetIndices.mapNotNull { index -> contextController.getAt(index)?.id }
   }
 
   private fun translateCurrent(target: SubmissionTranslationTarget) {
-    val current = holder.current() ?: return
+    val current = contextController.current() ?: return
     val sid = current.id
     val currentState = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return
     val translationState = currentState.translationStateOf(target) ?: return
@@ -807,7 +797,7 @@ internal class SubmissionScreenWorkflow(
   }
 
   private fun toggleWrapCurrent(target: SubmissionTranslationTarget) {
-    val current = holder.current() ?: return
+    val current = contextController.current() ?: return
     val sid = current.id
     val currentState = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return
     val translationState = currentState.translationStateOf(target) ?: return
@@ -832,75 +822,14 @@ internal class SubmissionScreenWorkflow(
   }
 
   private fun appendIfNearEnd(force: Boolean) {
-    val currentSize = holder.size()
+    val currentSize = contextController.size()
     if (currentSize <= 0) return
-    val isNearEnd = holder.currentIndex() >= currentSize - 1 - pagerAppendThreshold
+    val isNearEnd = contextController.currentIndex() >= currentSize - 1 - pagerAppendThreshold
     if (!force && !isNearEnd) return
-
-    val targetNextPageUrl = nextPageUrl ?: return
-    log.d { "自动加载投稿列表 -> 触发检查(force=$force,current=${holder.currentIndex()},size=$currentSize)" }
-    if (appendJob?.isActive == true) {
-      log.d { "自动加载投稿列表 -> 跳过(已有追加任务)" }
-      return
+    log.d {
+      "自动加载投稿列表 -> 触发检查(force=$force,current=${contextController.currentIndex()},size=$currentSize)"
     }
-    val snapshot = toPaginationSnapshot()
-    if (!paginationStateMachine.canLoadMore(snapshot, force = force)) {
-      log.d { "自动加载投稿列表 -> 跳过(条件未满足)" }
-      return
-    }
-    log.d { "自动加载投稿列表 -> 开始(force=$force)" }
-
-    applyPaginationSnapshot(paginationStateMachine.beginAppend(snapshot))
-    publishState()
-
-    appendJob =
-        screenModelScope.launch {
-          val next = feedSource.loadPageByNextUrl(targetNextPageUrl)
-          val reduced =
-              paginationStateMachine.reduceAppend(
-                  snapshot = toPaginationSnapshot(),
-                  result = next,
-                  itemsOf = { page -> page.submissions },
-                  nextPageUrlOf = { page -> page.nextPageUrl },
-              )
-          applyPaginationSnapshot(reduced)
-          publishState()
-          when (next) {
-            is PageState.Success -> {
-              scheduleDetailPrefetch()
-              log.d { "自动加载投稿列表 -> ${summarizePageState(next)}(count=${reduced.items.size})" }
-            }
-
-            PageState.CfChallenge -> log.w { "自动加载投稿列表 -> Cloudflare验证" }
-            is PageState.MatureBlocked -> log.w { "自动加载投稿列表 -> 受限(${next.reason})" }
-            is PageState.Error -> log.e(next.exception) { "自动加载投稿列表 -> 失败" }
-            PageState.Loading -> log.d { "自动加载投稿列表 -> 加载中" }
-          }
-        }
-  }
-
-  private fun toPaginationSnapshot(): PaginationSnapshot<SubmissionThumbnail> =
-      PaginationSnapshot(
-          items =
-              buildList {
-                for (cursor in 0 until holder.size()) {
-                  val item = holder.getAt(cursor) ?: continue
-                  add(item)
-                }
-              },
-          nextPageUrl = nextPageUrl,
-          loading = false,
-          refreshing = false,
-          isLoadingMore = isLoadingMore,
-          errorMessage = null,
-          appendErrorMessage = appendErrorMessage,
-      )
-
-  private fun applyPaginationSnapshot(snapshot: PaginationSnapshot<SubmissionThumbnail>) {
-    holder.replace(submissions = snapshot.items, nextPageUrl = snapshot.nextPageUrl)
-    nextPageUrl = snapshot.nextPageUrl
-    isLoadingMore = snapshot.isLoadingMore
-    appendErrorMessage = snapshot.appendErrorMessage
+    contextController.requestAppend(force = force)
   }
 
   private fun loadDetail(current: SubmissionThumbnail, force: Boolean) {

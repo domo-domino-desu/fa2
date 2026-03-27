@@ -12,7 +12,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -20,8 +19,12 @@ import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
+import me.domino.fa2.ui.components.submission.SubmissionWaterfallPageControls
+import me.domino.fa2.ui.components.submission.SubmissionWaterfallViewportSnapshot
 import me.domino.fa2.ui.components.submission.WaterfallLoadingSkeleton
+import me.domino.fa2.ui.components.submission.WaterfallRefreshBox
 import me.domino.fa2.ui.host.LocalAppSettings
+import me.domino.fa2.ui.pages.submission.WaterfallScrollRequest
 import org.jetbrains.compose.resources.stringResource
 
 /** Feed 页面。 */
@@ -41,8 +44,35 @@ fun FeedScreen(
     onRetryLoadMore: () -> Unit,
     /** 外部托管的瀑布流状态。 */
     waterfallState: LazyStaggeredGridState,
+    /** 分页导航控件。 */
+    pageControls: SubmissionWaterfallPageControls? = null,
+    /** 顶部是否可加载上一页。 */
+    canLoadPreviousPageAtTop: Boolean = false,
+    /** 顶部上一页加载状态。 */
+    loadingPreviousPage: Boolean = false,
+    /** 顶部上一页加载错误。 */
+    prependErrorMessage: String? = null,
+    /** 顶部加载上一页。 */
+    onLoadPreviousPageAtTop: (() -> Unit)? = null,
+    /** 第一页。 */
+    onLoadFirstPage: (() -> Unit)? = null,
+    /** 上一页。 */
+    onLoadPreviousPage: (() -> Unit)? = null,
+    /** 跳页。 */
+    onJumpToPage: ((Int) -> Unit)? = null,
+    /** 下一页。 */
+    onLoadNextPage: (() -> Unit)? = null,
+    /** 最后一页。 */
+    onLoadLastPage: (() -> Unit)? = null,
+    /** 待消费滚动请求。 */
+    pendingScrollRequest: WaterfallScrollRequest? = null,
+    /** 消费滚动请求。 */
+    onConsumeScrollRequest: ((Long) -> Unit)? = null,
+    /** 视口变化。 */
+    onViewportChanged: ((SubmissionWaterfallViewportSnapshot) -> Unit)? = null,
 ) {
   val settings = LocalAppSettings.current
+  val refreshEnabled = pageControls?.showFirstPage != true || !pageControls.canLoadFirstPage
 
   Column(
       modifier = Modifier.fillMaxSize().testTag("feed-screen"),
@@ -77,11 +107,7 @@ fun FeedScreen(
           )
         }
 
-    PullToRefreshBox(
-        isRefreshing = state.refreshing,
-        onRefresh = onRefresh,
-        modifier = Modifier.fillMaxSize(),
-    ) {
+    val waterfallContent: @Composable () -> Unit = {
       SubmissionWaterfall(
           items = state.submissions,
           onItemClick = onOpenSubmission,
@@ -93,7 +119,28 @@ fun FeedScreen(
           state = waterfallState,
           minCardWidthDp = settings.waterfallMinCardWidthDp,
           blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
+          pageControls = pageControls,
+          canLoadPreviousPageAtTop = canLoadPreviousPageAtTop,
+          loadingPreviousPage = loadingPreviousPage,
+          prependErrorMessage = prependErrorMessage,
+          onLoadPreviousPageAtTop = onLoadPreviousPageAtTop,
+          onLoadFirstPage = onLoadFirstPage,
+          onLoadPreviousPage = onLoadPreviousPage,
+          onJumpToPage = onJumpToPage,
+          onLoadNextPage = onLoadNextPage,
+          onLoadLastPage = onLoadLastPage,
+          pendingScrollRequest = pendingScrollRequest,
+          onConsumeScrollRequest = onConsumeScrollRequest,
+          onViewportChanged = onViewportChanged,
       )
+    }
+    WaterfallRefreshBox(
+        enabled = refreshEnabled,
+        refreshing = state.refreshing,
+        onRefresh = onRefresh,
+        modifier = Modifier.fillMaxSize(),
+    ) {
+      waterfallContent()
     }
   }
 }

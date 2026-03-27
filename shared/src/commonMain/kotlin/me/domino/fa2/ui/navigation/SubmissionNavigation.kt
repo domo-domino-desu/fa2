@@ -7,18 +7,16 @@ import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
 
 internal fun Navigator.openSubmissionFromList(
     sid: Int,
-    holderTag: String = "submission-list-holder",
-    onSelect: (Int) -> Unit,
+    contextId: String,
 ) {
-  onSelect(sid)
-  push(SubmissionRouteScreen(initialSid = sid, holderTag = holderTag))
+  push(SubmissionRouteScreen(initialSid = sid, contextId = contextId))
 }
 
 internal fun Navigator.openSubmissionSeries(series: SubmissionSeriesResolvedSeries) {
   push(
       SubmissionRouteScreen(
           initialSid = series.firstSid,
-          holderTag = "submission-series:${series.candidateKey}:${nextSubmissionRouteNonce()}",
+          contextId = "submission-series:${series.candidateKey}:${nextSubmissionRouteNonce()}",
           seedSubmissions = series.toSeedThumbnails(),
           seedSeriesKey = series.candidateKey,
       )

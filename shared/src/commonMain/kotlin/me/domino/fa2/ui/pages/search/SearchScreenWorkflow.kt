@@ -14,7 +14,6 @@ import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.i18n.AppI18nSnapshot
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.appString
-import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.state.PaginationStateMachine
 import me.domino.fa2.util.logging.summarizePageState
@@ -166,7 +165,6 @@ internal class SearchHistoryCoordinator(
 
 internal class SearchPaginationCoordinator(
     private val repository: SearchRepository,
-    private val submissionListHolder: SubmissionListHolder,
     private val log: Logger,
     private val paginationStateMachine: PaginationStateMachine<SubmissionThumbnail, Int>,
     private val screenModelScope: CoroutineScope,
@@ -210,11 +208,16 @@ internal class SearchPaginationCoordinator(
                   itemsOf = { page -> page.submissions },
                   nextPageUrlOf = { page -> page.nextPageUrl },
               )
-          val updated = stateProvider().applyPagination(reduced)
+          val updated =
+              stateProvider()
+                  .applyPagination(reduced)
+                  .copy(
+                      totalCount =
+                          (pageState as? PageState.Success)?.data?.totalCount ?: snapshot.totalCount
+                  )
           stateSink(updated)
           when (pageState) {
             is PageState.Success -> {
-              syncSubmissionListHolder(updated)
               pageStateSink(PageState.Success(updated))
               log.i {
                 "加载Search -> ${summarizePageState(pageState)}(count=${updated.submissions.size})"
@@ -273,11 +276,16 @@ internal class SearchPaginationCoordinator(
                   itemsOf = { page -> page.submissions },
                   nextPageUrlOf = { page -> page.nextPageUrl },
               )
-          val updated = stateProvider().applyPagination(reduced)
+          val updated =
+              stateProvider()
+                  .applyPagination(reduced)
+                  .copy(
+                      totalCount =
+                          (pageState as? PageState.Success)?.data?.totalCount ?: snapshot.totalCount
+                  )
           stateSink(updated)
           when (pageState) {
             is PageState.Success -> {
-              syncSubmissionListHolder(updated)
               pageStateSink(PageState.Success(updated))
               log.d {
                 "自动加载Search -> ${summarizePageState(pageState)}(count=${updated.submissions.size})"
@@ -291,22 +299,10 @@ internal class SearchPaginationCoordinator(
           }
         }
   }
-
-  fun syncCurrentSubmission(sid: Int) {
-    submissionListHolder.setCurrentBySid(sid)
-  }
-
-  private fun syncSubmissionListHolder(state: SearchUiState) {
-    submissionListHolder.replace(
-        submissions = state.submissions,
-        nextPageUrl = state.nextPageUrl,
-    )
-  }
 }
 
 internal class SearchScreenWorkflow(
     repository: SearchRepository,
-    submissionListHolder: SubmissionListHolder,
     historyRepository: ActivityHistoryRepository,
     settingsService: AppSettingsService,
     systemLanguageProvider: SystemLanguageProvider,
@@ -334,7 +330,6 @@ internal class SearchScreenWorkflow(
   private val paginationCoordinator =
       SearchPaginationCoordinator(
           repository = repository,
-          submissionListHolder = submissionListHolder,
           log = log,
           paginationStateMachine =
               PaginationStateMachine<SubmissionThumbnail, Int>(
@@ -445,9 +440,5 @@ internal class SearchScreenWorkflow(
 
   fun retryLoadMore() {
     paginationCoordinator.loadMore(force = true)
-  }
-
-  fun setCurrentSubmission(sid: Int) {
-    paginationCoordinator.syncCurrentSubmission(sid)
   }
 }

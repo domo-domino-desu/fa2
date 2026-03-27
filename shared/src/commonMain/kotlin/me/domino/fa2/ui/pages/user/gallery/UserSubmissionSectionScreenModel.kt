@@ -14,7 +14,6 @@ import me.domino.fa2.data.repository.GalleryRepository
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.appString
-import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.state.PaginationSnapshot
 import me.domino.fa2.ui.state.PaginationStateMachine
@@ -58,8 +57,6 @@ class UserSubmissionSectionScreenModel(
     private val galleryRepository: GalleryRepository,
     /** Favorites 仓储。 */
     private val favoritesRepository: FavoritesRepository,
-    /** 投稿共享持有器。 */
-    private val submissionListHolder: SubmissionListHolder,
     private val settingsService: AppSettingsService? = null,
     private val systemLanguageProvider: SystemLanguageProvider? = null,
     /** 初始文件夹 URL（可选）。 */
@@ -88,9 +85,7 @@ class UserSubmissionSectionScreenModel(
   private var basePageUrlOverride: String? = initialFolderUrl?.trim()?.takeIf { it.isNotBlank() }
 
   init {
-    if (state.value.submissions.isNotEmpty()) {
-      syncSubmissionListHolder(state.value)
-    } else {
+    if (state.value.submissions.isEmpty()) {
       load()
     }
   }
@@ -153,7 +148,6 @@ class UserSubmissionSectionScreenModel(
           mutableState.value = updated
           when (val next = firstPageState) {
             is PageState.Success -> {
-              syncSubmissionListHolder(updated)
               log.i { "加载用户投稿分区 -> ${summarizePageState(next)}(count=${updated.submissions.size})" }
             }
 
@@ -180,11 +174,6 @@ class UserSubmissionSectionScreenModel(
   /** 手动重试加载更多。 */
   fun retryLoadMore() {
     loadMore(force = true)
-  }
-
-  /** 设置当前投稿。 */
-  fun setCurrentSubmission(sid: Int) {
-    submissionListHolder.setCurrentBySid(sid)
   }
 
   /** 打开指定文件夹。 */
@@ -230,7 +219,6 @@ class UserSubmissionSectionScreenModel(
           mutableState.value = updated
           when (next) {
             is PageState.Success -> {
-              syncSubmissionListHolder(updated)
               log.d {
                 "自动加载用户投稿分区 -> ${summarizePageState(next)}(count=${updated.submissions.size})"
               }
@@ -270,13 +258,6 @@ class UserSubmissionSectionScreenModel(
       UserChildRoute.Journals ->
           PageState.Error(IllegalStateException("Invalid route for submissions: $route"))
     }
-  }
-
-  private fun syncSubmissionListHolder(state: UserSubmissionSectionUiState) {
-    submissionListHolder.replace(
-        submissions = state.submissions,
-        nextPageUrl = state.nextPageUrl,
-    )
   }
 }
 

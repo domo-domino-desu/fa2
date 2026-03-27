@@ -37,11 +37,13 @@ class GalleryParser {
             document = document,
         )
     val nextPageUrl = parseNextPageUrl(document = document, baseUrl = baseUrl)
+    val currentPageNumber = parseCurrentPageNumber(document = document, baseUrl = baseUrl)
     val folderGroups = parseFolderGroups(document, baseUrl)
 
     return GalleryPage(
         submissions = submissions,
         nextPageUrl = nextPageUrl,
+        currentPageNumber = currentPageNumber,
         folderGroups = folderGroups,
     )
   }
@@ -61,7 +63,14 @@ class GalleryParser {
             document = document,
         )
     val nextPageUrl = parseNextPageUrl(document = document, baseUrl = baseUrl)
-    return SubmissionListingPage(submissions = submissions, nextPageUrl = nextPageUrl)
+    val currentPageNumber = parseCurrentPageNumber(document = document, baseUrl = baseUrl)
+    val totalCount = parseListingTotalCount(document)
+    return SubmissionListingPage(
+        submissions = submissions,
+        nextPageUrl = nextPageUrl,
+        currentPageNumber = currentPageNumber,
+        totalCount = totalCount,
+    )
   }
 
   private fun parseSubmissions(
@@ -329,5 +338,40 @@ class GalleryParser {
         }
     val separator = if ('?' in actionUrl) '&' else '?'
     return "$actionUrl$separator$query"
+  }
+
+  private fun parseCurrentPageNumber(
+      document: com.fleeksoft.ksoup.nodes.Document,
+      baseUrl: String,
+  ): Int? {
+    val textCandidates =
+        listOfNotNull(
+            document.selectFirst(".page-number strong")?.text(),
+            document.selectFirst(".pagination strong.highlight")?.text(),
+            document.selectFirst(".navigation-page-name")?.text(),
+        )
+    textCandidates.forEach { text ->
+      pageNumberRegex.find(text)?.groupValues?.getOrNull(1)?.toIntOrNull()?.let {
+        return it
+      }
+    }
+    return pageQueryRegex.find(baseUrl)?.groupValues?.getOrNull(1)?.toIntOrNull()
+  }
+
+  private fun parseListingTotalCount(document: com.fleeksoft.ksoup.nodes.Document): Int? {
+    val queryStatsText = document.selectFirst("#query-stats")?.text().orEmpty()
+    if (queryStatsText.isBlank()) return null
+    return searchTotalCountRegex
+        .find(queryStatsText)
+        ?.groupValues
+        ?.getOrNull(1)
+        ?.replace(",", "")
+        ?.toIntOrNull()
+  }
+
+  companion object {
+    private val pageNumberRegex = Regex("""Page\s*#?\s*(\d+)""", RegexOption.IGNORE_CASE)
+    private val pageQueryRegex = Regex("""(?:\?|&)page=(\d+)""", RegexOption.IGNORE_CASE)
+    private val searchTotalCountRegex = Regex("""of\s+([\d,]+)\)""", RegexOption.IGNORE_CASE)
   }
 }

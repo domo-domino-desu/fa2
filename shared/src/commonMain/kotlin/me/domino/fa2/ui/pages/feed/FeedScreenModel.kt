@@ -14,7 +14,6 @@ import me.domino.fa2.data.repository.FeedRepository
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.appString
-import me.domino.fa2.ui.navigation.SubmissionListHolder
 import me.domino.fa2.ui.state.PaginationSnapshot
 import me.domino.fa2.ui.state.PaginationStateMachine
 import me.domino.fa2.util.logging.FaLog
@@ -40,8 +39,6 @@ data class FeedUiState(
 class FeedScreenModel(
     /** Feed 仓储。 */
     private val repository: FeedRepository,
-    /** 投稿列表共享持有器。 */
-    private val submissionListHolder: SubmissionListHolder,
     private val settingsService: AppSettingsService? = null,
     private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) : StateScreenModel<FeedUiState>(FeedUiState()) {
@@ -109,7 +106,6 @@ class FeedScreenModel(
           mutableState.value = updated
           when (val next = firstPageState) {
             is PageState.Success -> {
-              syncSubmissionListHolder(updated)
               mutablePageState.value = PageState.Success(updated)
               log.i { "加载Feed -> 成功(count=${updated.submissions.size})" }
             }
@@ -165,15 +161,6 @@ class FeedScreenModel(
   }
 
   /**
-   * 按 sid 设置当前详情索引。
-   *
-   * @param sid 投稿 ID。
-   */
-  fun setCurrentSubmission(sid: Int) {
-    submissionListHolder.setCurrentBySid(sid)
-  }
-
-  /**
    * 追加下一页。
    *
    * @param force 是否忽略 appendError 直接重试。
@@ -215,7 +202,6 @@ class FeedScreenModel(
           mutableState.value = updated
           when (val next = pageState) {
             is PageState.Success -> {
-              syncSubmissionListHolder(updated)
               mutablePageState.value = PageState.Success(updated)
               log.d { "自动加载Feed -> ${summarizePageState(next)}(count=${updated.submissions.size})" }
             }
@@ -226,13 +212,6 @@ class FeedScreenModel(
             PageState.Loading -> log.d { "自动加载Feed -> 加载中" }
           }
         }
-  }
-
-  private fun syncSubmissionListHolder(state: FeedUiState) {
-    submissionListHolder.replace(
-        submissions = state.submissions,
-        nextPageUrl = state.nextPageUrl,
-    )
   }
 }
 
