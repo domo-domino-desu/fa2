@@ -381,33 +381,21 @@ fun SubmissionWaterfall(
       effectiveItemIndexOffset,
   ) {
     val request = pendingScrollRequest ?: return@LaunchedEffect
-    val visibleLaneCount =
-        state.layoutInfo.visibleItemsInfo
-            .mapNotNull { info -> (info.key as? Int)?.let { info.offset.x } }
-            .distinct()
-            .size
-            .coerceAtLeast(1)
-    val leadingCandidateSids = request.targetPageLeadingSids.take(visibleLaneCount)
-    val visibleCandidateSid =
-        leadingCandidateSids
-            .takeIf { it.isNotEmpty() }
-            ?.let { candidateSids ->
-              state.layoutInfo.visibleItemsInfo
-                  .mapNotNull { info ->
-                    val sid = info.key as? Int ?: return@mapNotNull null
-                    sid.takeIf { candidateSids.contains(it) }
-                        ?.let { matchedSid -> matchedSid to info.offset.y }
-                  }
-                  .maxByOrNull { (_, top) -> top }
-                  ?.first
-            }
     val targetSid =
-        visibleCandidateSid
-            ?: leadingCandidateSids.lastOrNull { sid -> items.any { item -> item.id == sid } }
-            ?: request.targetPageLeadingSids.firstOrNull { sid ->
-              items.any { item -> item.id == sid }
-            }
-            ?: request.sid
+        resolveWaterfallScrollTargetSid(
+            request = request,
+            itemIds = items.mapTo(linkedSetOf()) { item -> item.id },
+            visibleItems =
+                state.layoutInfo.visibleItemsInfo.mapNotNull { info ->
+                  (info.key as? Int)?.let { sid ->
+                    WaterfallVisibleItem(
+                        sid = sid,
+                        laneOffsetX = info.offset.x,
+                        itemOffsetY = info.offset.y,
+                    )
+                  }
+                },
+        )
     val itemIndex = items.indexOfFirst { item -> item.id == targetSid }
     if (itemIndex < 0) return@LaunchedEffect
     val targetIndex =
@@ -819,6 +807,35 @@ private fun categoryBadgeIcon(iconToken: String): ImageVector =
       "category" -> FaMaterialSymbols.Outlined.Category
       else -> FaMaterialSymbols.Outlined.Category
     }
+
+internal fun resolveWaterfallScrollTargetSid(
+    request: me.domino.fa2.ui.pages.submission.WaterfallScrollRequest,
+    itemIds: Set<Int>,
+    visibleItems: List<WaterfallVisibleItem>,
+): Int {
+  val visibleLaneCount =
+      visibleItems.map { item -> item.laneOffsetX }.distinct().size.coerceAtLeast(1)
+  val visibleCandidateSid =
+      request.targetPageLeadingSids
+          .mapNotNull { candidateSid ->
+            visibleItems
+                .firstOrNull { item -> item.sid == candidateSid }
+                ?.let { visibleItem -> candidateSid to visibleItem.itemOffsetY }
+          }
+          .maxByOrNull { (_, top) -> top }
+          ?.first
+  val fallbackLeadingCandidateSids = request.targetPageLeadingSids.take(visibleLaneCount)
+  return visibleCandidateSid
+      ?: fallbackLeadingCandidateSids.lastOrNull { sid -> sid in itemIds }
+      ?: request.targetPageLeadingSids.firstOrNull { sid -> sid in itemIds }
+      ?: request.sid
+}
+
+internal data class WaterfallVisibleItem(
+    val sid: Int,
+    val laneOffsetX: Int,
+    val itemOffsetY: Int,
+)
 
 /** 统一分页状态 Footer。 */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
