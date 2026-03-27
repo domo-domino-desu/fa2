@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +27,7 @@ import fa2.shared.generated.resources.retry
 import fa2.shared.generated.resources.shouts
 import fa2.shared.generated.resources.shouts_count
 import kotlinx.coroutines.launch
+import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
 import me.domino.fa2.ui.components.SkeletonBlock
 import me.domino.fa2.ui.components.submission.SubmissionCommentsCard
 import me.domino.fa2.ui.layouts.UserRouteTopBar
@@ -121,6 +121,6 @@ private fun UserShoutsError(message: String, onRetry: () -> Unit) {
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-    Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
+    ExpressiveFilledTonalButton(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
   }
 }

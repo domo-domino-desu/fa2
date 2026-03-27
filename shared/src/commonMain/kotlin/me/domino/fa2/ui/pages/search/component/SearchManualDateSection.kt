@@ -14,7 +14,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
+import me.domino.fa2.ui.components.ExpressiveTextButton
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.search.util.epochMillisToIsoDate
 import me.domino.fa2.ui.pages.search.util.isoDateToEpochMillisOrNull
@@ -56,7 +56,7 @@ internal fun ManualDateRangeSection(
     DatePickerDialog(
         onDismissRequest = { pickerTarget = null },
         confirmButton = {
-          TextButton(
+          ExpressiveTextButton(
               onClick = {
                 val selected =
                     datePickerState.selectedDateMillis?.let { millis ->
@@ -75,7 +75,9 @@ internal fun ManualDateRangeSection(
           }
         },
         dismissButton = {
-          TextButton(onClick = { pickerTarget = null }) { Text(stringResource(Res.string.cancel)) }
+          ExpressiveTextButton(onClick = { pickerTarget = null }) {
+            Text(stringResource(Res.string.cancel))
+          }
         },
     ) {
       DatePicker(state = datePickerState, showModeToggle = false)

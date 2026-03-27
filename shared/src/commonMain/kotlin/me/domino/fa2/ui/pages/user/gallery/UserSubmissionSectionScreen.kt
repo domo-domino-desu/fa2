@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -384,7 +383,9 @@ private fun UserStatusCard(title: String, body: String, onRetry: () -> Unit) {
           style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-      Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
+      me.domino.fa2.ui.components.ExpressiveFilledTonalButton(onClick = onRetry) {
+        Text(stringResource(Res.string.retry))
+      }
     }
   }
 }

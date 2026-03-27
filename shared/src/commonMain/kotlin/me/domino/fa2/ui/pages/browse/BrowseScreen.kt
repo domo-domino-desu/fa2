@@ -14,7 +14,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -506,7 +505,9 @@ private fun BrowseStatusCard(title: String, body: String, onRetry: () -> Unit) {
           style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-      Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
+      me.domino.fa2.ui.components.ExpressiveFilledTonalButton(onClick = onRetry) {
+        Text(stringResource(Res.string.retry))
+      }
     }
   }
 }

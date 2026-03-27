@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -18,6 +17,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
 import me.domino.fa2.ui.components.submission.SubmissionWaterfallPageControls
 import me.domino.fa2.ui.components.submission.SubmissionWaterfallViewportSnapshot
@@ -168,7 +168,7 @@ private fun FeedStatusCard(title: String, body: String, onRetry: () -> Unit) {
           style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-      Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
+      ExpressiveFilledTonalButton(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
     }
   }
 }

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -17,6 +16,7 @@ import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
 import me.domino.fa2.data.settings.TranslationProvider
+import me.domino.fa2.ui.components.ExpressiveTextButton
 import me.domino.fa2.ui.components.settings.SettingsDropdownField
 import me.domino.fa2.ui.components.settings.SettingsGroup
 import me.domino.fa2.ui.components.settings.SettingsSwitchRow
@@ -180,7 +180,7 @@ internal fun TranslationSettingsSection(
                     PasswordVisualTransformation()
                   },
               trailingIcon = {
-                TextButton(onClick = onToggleShowApiKey) {
+                ExpressiveTextButton(onClick = onToggleShowApiKey) {
                   Text(
                       if (showApiKey) stringResource(Res.string.hide)
                       else stringResource(Res.string.show)

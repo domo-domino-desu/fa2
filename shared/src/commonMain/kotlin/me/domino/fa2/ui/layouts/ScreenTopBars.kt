@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,10 +17,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
+import me.domino.fa2.ui.components.ExpressiveIconButton
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun RouteTopBar(
     title: String,
@@ -34,7 +34,7 @@ private fun RouteTopBar(
       title = {
         if (title.isBlank()) {
           if (onTitleClick != null) {
-            IconButton(onClick = onTitleClick) {
+            ExpressiveIconButton(onClick = onTitleClick) {
               Icon(
                   imageVector = FaMaterialSymbols.Outlined.VerticalAlignTop,
                   contentDescription = stringResource(Res.string.scroll_to_top),
@@ -63,6 +63,7 @@ private fun RouteTopBar(
               containerColor = MaterialTheme.colorScheme.surface,
               scrolledContainerColor = MaterialTheme.colorScheme.surface,
           ),
+      contentPadding = TopAppBarDefaults.ContentPadding,
   )
 }
 
@@ -96,13 +97,13 @@ fun SettingsRouteTopBar(
       onTitleClick = onTitleClick,
   ) {
     if (showActions) {
-      IconButton(onClick = onResetDraft, enabled = !saving && hasUnsavedChanges) {
+      ExpressiveIconButton(onClick = onResetDraft, enabled = !saving && hasUnsavedChanges) {
         Icon(
             imageVector = FaMaterialSymbols.Filled.RestartAlt,
             contentDescription = stringResource(Res.string.rollback_saved_settings),
         )
       }
-      IconButton(
+      ExpressiveIconButton(
           onClick = onSaveDraft,
           enabled = !saving && validationMessage == null && hasUnsavedChanges,
       ) {
@@ -232,7 +233,7 @@ fun SubmissionRouteTopBar(
 ) {
   RouteTopBar(title = "", onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick) {
     if (!downloadUrl.isNullOrBlank()) {
-      IconButton(onClick = onDownload) {
+      ExpressiveIconButton(onClick = onDownload) {
         Icon(
             imageVector = FaMaterialSymbols.Filled.Download,
             contentDescription = stringResource(Res.string.download),
@@ -243,7 +244,7 @@ fun SubmissionRouteTopBar(
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BrowseFilterOverlayTopBar(
     onClose: () -> Unit,
@@ -264,7 +265,7 @@ fun BrowseFilterOverlayTopBar(
         )
       },
       navigationIcon = {
-        IconButton(onClick = onClose) {
+        ExpressiveIconButton(onClick = onClose) {
           Icon(
               imageVector = FaMaterialSymbols.Filled.Close,
               contentDescription = stringResource(Res.string.close_filters_page),
@@ -272,7 +273,7 @@ fun BrowseFilterOverlayTopBar(
         }
       },
       actions = {
-        IconButton(onClick = onApply) {
+        ExpressiveIconButton(onClick = onApply) {
           Icon(
               imageVector = FaMaterialSymbols.Filled.Done,
               contentDescription = stringResource(Res.string.apply_filters),
@@ -285,10 +286,11 @@ fun BrowseFilterOverlayTopBar(
               scrolledContainerColor = MaterialTheme.colorScheme.surface,
           ),
       windowInsets = WindowInsets(0, 0, 0, 0),
+      contentPadding = TopAppBarDefaults.ContentPadding,
   )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SearchOverlayTopBar(
     onClose: () -> Unit,
@@ -310,7 +312,7 @@ fun SearchOverlayTopBar(
         )
       },
       navigationIcon = {
-        IconButton(onClick = onClose) {
+        ExpressiveIconButton(onClick = onClose) {
           Icon(
               imageVector = FaMaterialSymbols.Filled.Close,
               contentDescription = stringResource(Res.string.close_search_overlay),
@@ -318,7 +320,7 @@ fun SearchOverlayTopBar(
         }
       },
       actions = {
-        IconButton(onClick = onApplySearch, enabled = canSearch) {
+        ExpressiveIconButton(onClick = onApplySearch, enabled = canSearch) {
           Icon(
               imageVector = FaMaterialSymbols.Filled.Search,
               contentDescription = stringResource(Res.string.run_search),
@@ -331,5 +333,6 @@ fun SearchOverlayTopBar(
               scrolledContainerColor = MaterialTheme.colorScheme.surface,
           ),
       windowInsets = WindowInsets(0, 0, 0, 0),
+      contentPadding = TopAppBarDefaults.ContentPadding,
   )
 }

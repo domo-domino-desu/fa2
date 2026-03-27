@@ -15,9 +15,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -33,6 +34,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
+import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
+import me.domino.fa2.ui.components.ExpressiveIconButton
 import me.domino.fa2.ui.components.HtmlText
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.SkeletonBlock
@@ -115,7 +118,9 @@ internal fun UserHeaderCard(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error,
             )
-            Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
+            ExpressiveFilledTonalButton(onClick = onRetry) {
+              Text(stringResource(Res.string.retry))
+            }
             return@Surface
           }
 
@@ -254,21 +259,22 @@ private fun UserProfileExpandToggle(expanded: Boolean, onClick: () -> Unit) {
         stringResource(Res.string.expand_profile)
       }
   Box(
-      modifier =
-          Modifier.fillMaxWidth().clickable(onClick = onClick).padding(top = 4.dp, bottom = 1.dp),
+      modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 1.dp),
       contentAlignment = Alignment.Center,
   ) {
-    Icon(
-        imageVector =
-            if (expanded) {
-              FaMaterialSymbols.Outlined.ExpandLess
-            } else {
-              FaMaterialSymbols.Outlined.ExpandMore
-            },
-        contentDescription = contentDescription,
-        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.size(20.dp),
-    )
+    ExpressiveIconButton(onClick = onClick) {
+      Icon(
+          imageVector =
+              if (expanded) {
+                FaMaterialSymbols.Outlined.ExpandLess
+              } else {
+                FaMaterialSymbols.Outlined.ExpandMore
+              },
+          contentDescription = contentDescription,
+          tint = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.size(20.dp),
+      )
+    }
   }
 }
 
@@ -319,35 +325,32 @@ private fun UserWatchActionButton(
         isWatching -> stringResource(Res.string.unwatch)
         else -> stringResource(Res.string.watch)
       }
-  Surface(
-      onClick = onClick,
+  FilledTonalIconToggleButton(
+      checked = isWatching,
+      onCheckedChange = { onClick() },
       enabled = !updating,
-      shape = RoundedCornerShape(18.dp),
-      color =
-          if (isWatching) {
-            MaterialTheme.colorScheme.primaryContainer
-          } else {
-            MaterialTheme.colorScheme.surface
-          },
       modifier = Modifier.size(52.dp),
+      colors =
+          IconButtonDefaults.filledTonalIconToggleButtonColors(
+              checkedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+              containerColor = MaterialTheme.colorScheme.surfaceVariant,
+          ),
   ) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-      if (updating) {
-        LoadingIndicator(
-            modifier = Modifier.size(22.dp),
-            color = MaterialTheme.colorScheme.primary,
-        )
-      } else {
-        Icon(
-            imageVector =
-                if (isWatching) {
-                  FaMaterialSymbols.Filled.Notifications
-                } else {
-                  FaMaterialSymbols.Outlined.Notifications
-                },
-            contentDescription = contentDescription,
-        )
-      }
+    if (updating) {
+      LoadingIndicator(
+          modifier = Modifier.size(22.dp),
+          color = MaterialTheme.colorScheme.primary,
+      )
+    } else {
+      Icon(
+          imageVector =
+              if (isWatching) {
+                FaMaterialSymbols.Filled.Notifications
+              } else {
+                FaMaterialSymbols.Outlined.Notifications
+              },
+          contentDescription = contentDescription,
+      )
     }
   }
 }

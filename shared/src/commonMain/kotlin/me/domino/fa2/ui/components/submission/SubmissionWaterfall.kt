@@ -1,5 +1,10 @@
 package me.domino.fa2.ui.components.submission
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,21 +28,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.ButtonGroup
-import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,12 +59,16 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.flow.distinctUntilChanged
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
+import me.domino.fa2.ui.components.ExpressiveButton
+import me.domino.fa2.ui.components.ExpressiveTextButton
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.ThumbnailImage
 import me.domino.fa2.ui.host.LocalTaxonomyCatalog
@@ -86,6 +91,8 @@ private const val maxCardAspectRatio = 2.2f
 
 /** 投稿卡片默认宽高比。 */
 private const val fallbackCardAspectRatio = 1f
+
+private val waterfallFabMenuButtonHeight = 40.dp
 
 private val waterfallFabAddIcon: ImageVector by lazy {
   ImageVector.Builder(
@@ -115,9 +122,9 @@ private val waterfallFabAddIcon: ImageVector by lazy {
       .build()
 }
 
-private val waterfallFabChevronLeftIcon: ImageVector by lazy {
+private val waterfallFabChevronUpIcon: ImageVector by lazy {
   ImageVector.Builder(
-          name = "WaterfallFabChevronLeft",
+          name = "WaterfallFabChevronUp",
           defaultWidth = 24.dp,
           defaultHeight = 24.dp,
           viewportWidth = 24f,
@@ -125,21 +132,21 @@ private val waterfallFabChevronLeftIcon: ImageVector by lazy {
       )
       .apply {
         path(fill = SolidColor(Color.Black), pathFillType = PathFillType.NonZero) {
-          moveTo(15.41f, 7.41f)
-          lineTo(14f, 6f)
-          lineTo(8f, 12f)
-          lineTo(14f, 18f)
-          lineTo(15.41f, 16.59f)
-          lineTo(10.83f, 12f)
+          moveTo(12f, 8.83f)
+          lineTo(16.59f, 13.41f)
+          lineTo(18f, 12f)
+          lineTo(12f, 6f)
+          lineTo(6f, 12f)
+          lineTo(7.41f, 13.41f)
           close()
         }
       }
       .build()
 }
 
-private val waterfallFabChevronRightIcon: ImageVector by lazy {
+private val waterfallFabChevronDownIcon: ImageVector by lazy {
   ImageVector.Builder(
-          name = "WaterfallFabChevronRight",
+          name = "WaterfallFabChevronDown",
           defaultWidth = 24.dp,
           defaultHeight = 24.dp,
           viewportWidth = 24f,
@@ -147,21 +154,21 @@ private val waterfallFabChevronRightIcon: ImageVector by lazy {
       )
       .apply {
         path(fill = SolidColor(Color.Black), pathFillType = PathFillType.NonZero) {
-          moveTo(8.59f, 16.59f)
-          lineTo(10f, 18f)
-          lineTo(16f, 12f)
-          lineTo(10f, 6f)
-          lineTo(8.59f, 7.41f)
-          lineTo(13.17f, 12f)
+          moveTo(7.41f, 10.59f)
+          lineTo(12f, 15.17f)
+          lineTo(16.59f, 10.59f)
+          lineTo(18f, 12f)
+          lineTo(12f, 18f)
+          lineTo(6f, 12f)
           close()
         }
       }
       .build()
 }
 
-private val waterfallFabDoubleChevronLeftIcon: ImageVector by lazy {
+private val waterfallFabDoubleChevronUpIcon: ImageVector by lazy {
   ImageVector.Builder(
-          name = "WaterfallFabDoubleChevronLeft",
+          name = "WaterfallFabDoubleChevronUp",
           defaultWidth = 24.dp,
           defaultHeight = 24.dp,
           viewportWidth = 24f,
@@ -169,28 +176,28 @@ private val waterfallFabDoubleChevronLeftIcon: ImageVector by lazy {
       )
       .apply {
         path(fill = SolidColor(Color.Black), pathFillType = PathFillType.NonZero) {
-          moveTo(18.41f, 7.41f)
-          lineTo(17f, 6f)
-          lineTo(11f, 12f)
-          lineTo(17f, 18f)
-          lineTo(18.41f, 16.59f)
-          lineTo(13.83f, 12f)
+          moveTo(12f, 11.66f)
+          lineTo(16.59f, 16.24f)
+          lineTo(18f, 14.83f)
+          lineTo(12f, 8.83f)
+          lineTo(6f, 14.83f)
+          lineTo(7.41f, 16.24f)
           close()
-          moveTo(12.41f, 7.41f)
-          lineTo(11f, 6f)
-          lineTo(5f, 12f)
-          lineTo(11f, 18f)
-          lineTo(12.41f, 16.59f)
-          lineTo(7.83f, 12f)
+          moveTo(12f, 5.66f)
+          lineTo(16.59f, 10.24f)
+          lineTo(18f, 8.83f)
+          lineTo(12f, 2.83f)
+          lineTo(6f, 8.83f)
+          lineTo(7.41f, 10.24f)
           close()
         }
       }
       .build()
 }
 
-private val waterfallFabDoubleChevronRightIcon: ImageVector by lazy {
+private val waterfallFabDoubleChevronDownIcon: ImageVector by lazy {
   ImageVector.Builder(
-          name = "WaterfallFabDoubleChevronRight",
+          name = "WaterfallFabDoubleChevronDown",
           defaultWidth = 24.dp,
           defaultHeight = 24.dp,
           viewportWidth = 24f,
@@ -198,19 +205,19 @@ private val waterfallFabDoubleChevronRightIcon: ImageVector by lazy {
       )
       .apply {
         path(fill = SolidColor(Color.Black), pathFillType = PathFillType.NonZero) {
-          moveTo(5.59f, 16.59f)
-          lineTo(7f, 18f)
-          lineTo(13f, 12f)
-          lineTo(7f, 6f)
-          lineTo(5.59f, 7.41f)
-          lineTo(10.17f, 12f)
+          moveTo(7.41f, 7.76f)
+          lineTo(12f, 12.34f)
+          lineTo(16.59f, 7.76f)
+          lineTo(18f, 9.17f)
+          lineTo(12f, 15.17f)
+          lineTo(6f, 9.17f)
           close()
-          moveTo(11.59f, 16.59f)
-          lineTo(13f, 18f)
-          lineTo(19f, 12f)
-          lineTo(13f, 6f)
-          lineTo(11.59f, 7.41f)
-          lineTo(16.17f, 12f)
+          moveTo(7.41f, 13.76f)
+          lineTo(12f, 18.34f)
+          lineTo(16.59f, 13.76f)
+          lineTo(18f, 15.17f)
+          lineTo(12f, 21.17f)
+          lineTo(6f, 15.17f)
           close()
         }
       }
@@ -252,7 +259,10 @@ private data class SubmissionWaterfallFabAction(
     val contentDescription: String,
     val enabled: Boolean,
     val onClick: () -> Unit,
-)
+) {
+  val isIconOnly: Boolean
+    get() = icon != null && label == null
+}
 
 /** 通用投稿瀑布流组件。 */
 @Composable
@@ -500,7 +510,7 @@ fun SubmissionWaterfall(
             )
           },
           confirmButton = {
-            AssistChip(
+            ExpressiveButton(
                 onClick = {
                   parsedPageNumber?.let { pageNumber ->
                     onJumpToPage?.invoke(pageNumber)
@@ -508,14 +518,14 @@ fun SubmissionWaterfall(
                   }
                 },
                 enabled = parsedPageNumber != null,
-                label = { Text(stringResource(Res.string.confirm)) },
-            )
+            ) {
+              Text(stringResource(Res.string.confirm))
+            }
           },
           dismissButton = {
-            AssistChip(
-                onClick = { jumpDialogVisible = false },
-                label = { Text(stringResource(Res.string.cancel)) },
-            )
+            ExpressiveTextButton(onClick = { jumpDialogVisible = false }) {
+              Text(stringResource(Res.string.cancel))
+            }
           },
       )
     }
@@ -540,7 +550,7 @@ private fun SubmissionWaterfallPageFab(
     if (effectiveControls.showFirstPage) {
       add(
           SubmissionWaterfallFabAction(
-              icon = waterfallFabDoubleChevronLeftIcon,
+              icon = waterfallFabDoubleChevronUpIcon,
               contentDescription = stringResource(Res.string.waterfall_first_page),
               enabled = effectiveControls.canLoadFirstPage && !effectiveControls.loading,
               onClick = { onLoadFirstPage?.invoke() },
@@ -550,7 +560,7 @@ private fun SubmissionWaterfallPageFab(
     if (effectiveControls.showPreviousPage) {
       add(
           SubmissionWaterfallFabAction(
-              icon = waterfallFabChevronLeftIcon,
+              icon = waterfallFabChevronUpIcon,
               contentDescription = stringResource(Res.string.waterfall_previous_page),
               enabled = effectiveControls.canLoadPreviousPage && !effectiveControls.loading,
               onClick = { onLoadPreviousPage?.invoke() },
@@ -576,10 +586,9 @@ private fun SubmissionWaterfallPageFab(
           SubmissionWaterfallFabAction(
               label =
                   when {
-                    currentPageNumber != null && lastPageNumber != null ->
-                        "$currentPageNumber/$lastPageNumber"
-                    currentPageNumber != null -> currentPageNumber.toString()
-                    else -> "?"
+                    currentPageNumber != null ->
+                        stringResource(Res.string.waterfall_page_number, currentPageNumber)
+                    else -> stringResource(Res.string.waterfall_page_number_unknown)
                   },
               contentDescription = description,
               enabled =
@@ -593,7 +602,7 @@ private fun SubmissionWaterfallPageFab(
     if (effectiveControls.showNextPage) {
       add(
           SubmissionWaterfallFabAction(
-              icon = waterfallFabChevronRightIcon,
+              icon = waterfallFabChevronDownIcon,
               contentDescription = stringResource(Res.string.waterfall_next_page),
               enabled = effectiveControls.canLoadNextPage && !effectiveControls.loading,
               onClick = { onLoadNextPage?.invoke() },
@@ -603,7 +612,7 @@ private fun SubmissionWaterfallPageFab(
     if (effectiveControls.showLastPage) {
       add(
           SubmissionWaterfallFabAction(
-              icon = waterfallFabDoubleChevronRightIcon,
+              icon = waterfallFabDoubleChevronDownIcon,
               contentDescription = stringResource(Res.string.waterfall_last_page),
               enabled = effectiveControls.canLoadLastPage && !effectiveControls.loading,
               onClick = { onLoadLastPage?.invoke() },
@@ -611,72 +620,91 @@ private fun SubmissionWaterfallPageFab(
       )
     }
   }
-  Column(
+  FloatingActionButtonMenu(
+      expanded = expanded,
       modifier = modifier,
-      horizontalAlignment = Alignment.End,
-      verticalArrangement = Arrangement.spacedBy(10.dp),
+      button = {
+        ToggleFloatingActionButton(
+            checked = expanded,
+            onCheckedChange = onExpandedChange,
+        ) {
+          Icon(
+              imageVector =
+                  if (checkedProgress >= 0.5f) FaMaterialSymbols.Filled.Close
+                  else waterfallFabAddIcon,
+              contentDescription = stringResource(Res.string.waterfall_page_navigation),
+          )
+        }
+      },
   ) {
-    if (expanded) {
-      ButtonGroup(
-          overflowIndicator = { menuState ->
-            ButtonGroupDefaults.OverflowIndicator(menuState = menuState)
-          },
-      ) {
-        actions.forEach { action ->
-          if (action.label != null) {
-            clickableItem(
-                onClick = action.onClick,
-                label = action.label,
-                enabled = action.enabled,
-            )
+    actions.forEach { action ->
+      val containerColor =
+          if (action.enabled) {
+            MaterialTheme.colorScheme.primaryContainer
           } else {
-            val icon = action.icon ?: return@forEach
-            customItem(
-                buttonGroupContent = {
-                  FilledTonalIconButton(
-                      onClick = action.onClick,
-                      enabled = action.enabled,
-                      colors =
-                          IconButtonDefaults.filledTonalIconButtonColors(
-                              disabledContainerColor = MaterialTheme.colorScheme.outline,
-                              disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                          ),
-                  ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = action.contentDescription,
-                    )
-                  }
-                },
-                menuContent = { menuState ->
-                  DropdownMenuItem(
-                      text = { Text(action.contentDescription) },
-                      leadingIcon = {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                        )
-                      },
-                      enabled = action.enabled,
-                      onClick = {
-                        action.onClick()
-                        menuState.dismiss()
-                      },
-                  )
-                },
-            )
+            MaterialTheme.colorScheme.surfaceVariant
+          }
+      val contentColor =
+          if (action.enabled) {
+            MaterialTheme.colorScheme.onPrimaryContainer
+          } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+          }
+      if (action.isIconOnly) {
+        AnimatedVisibility(
+            visible = expanded,
+            enter = fadeIn() + scaleIn(),
+            exit = fadeOut() + scaleOut(),
+        ) {
+          Surface(
+              onClick = { action.onClick() },
+              enabled = action.enabled,
+              modifier =
+                  Modifier.size(waterfallFabMenuButtonHeight).semantics {
+                    contentDescription = action.contentDescription
+                  },
+              shape = CircleShape,
+              color = containerColor,
+              contentColor = contentColor,
+              tonalElevation = 0.dp,
+              shadowElevation = 0.dp,
+          ) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+              action.icon?.let { icon -> Icon(imageVector = icon, contentDescription = null) }
+            }
+          }
+        }
+      } else {
+        AnimatedVisibility(
+            visible = expanded,
+            enter = fadeIn() + scaleIn(),
+            exit = fadeOut() + scaleOut(),
+        ) {
+          Surface(
+              onClick = { action.onClick() },
+              enabled = action.enabled,
+              modifier = Modifier.semantics { contentDescription = action.contentDescription },
+              shape = RoundedCornerShape(waterfallFabMenuButtonHeight / 2),
+              color = containerColor,
+              contentColor = contentColor,
+              tonalElevation = 0.dp,
+              shadowElevation = 0.dp,
+          ) {
+            Box(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+              action.label?.let { label ->
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                )
+              }
+            }
           }
         }
       }
-    }
-
-    FloatingActionButton(
-        onClick = { onExpandedChange(!expanded) },
-    ) {
-      Icon(
-          imageVector = if (expanded) FaMaterialSymbols.Filled.Close else waterfallFabAddIcon,
-          contentDescription = stringResource(Res.string.waterfall_page_navigation),
-      )
     }
   }
 }

@@ -1,9 +1,9 @@
 package me.domino.fa2.ui.layouts
 
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import fa2.shared.generated.resources.*
+import me.domino.fa2.ui.components.ExpressiveIconButton
 import me.domino.fa2.ui.components.LocalShowToast
 import me.domino.fa2.ui.components.platform.rememberPlatformShareActionUsesCopyIcon
 import me.domino.fa2.ui.components.platform.rememberPlatformTextCopier
@@ -22,10 +22,10 @@ fun TopBarShareAction(url: String) {
   val linkCopiedText = stringResource(Res.string.link_copied)
   val copyLinkText = stringResource(Res.string.copy_link)
   val shareLinkText = stringResource(Res.string.share_link)
-  IconButton(
+  ExpressiveIconButton(
       onClick = {
-        if (normalizedUrl.isBlank()) return@IconButton
-        if (shareText(normalizedUrl)) return@IconButton
+        if (normalizedUrl.isBlank()) return@ExpressiveIconButton
+        if (shareText(normalizedUrl)) return@ExpressiveIconButton
         if (copyTextToClipboard(normalizedUrl)) {
           showToast(linkCopiedText)
         }

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -23,6 +22,9 @@ import me.domino.fa2.application.challenge.CfChallengeStatus
 import me.domino.fa2.application.challenge.CfChallengeUiState
 import me.domino.fa2.i18n.challengeAwaitingUserActionText
 import me.domino.fa2.i18n.challengeVerificationFailedText
+import me.domino.fa2.ui.components.ExpressiveButton
+import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
+import me.domino.fa2.ui.components.ExpressiveTextButton
 import me.domino.fa2.ui.pages.auth.SessionWebView
 import me.domino.fa2.ui.pages.auth.rememberSessionWebViewAdapter
 import org.jetbrains.compose.resources.stringResource
@@ -55,13 +57,13 @@ fun CfChallengeOverlay(
           modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
           horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        Button(onClick = { adapter.port.loadUrl(state.triggerUrl) }) {
+        ExpressiveFilledTonalButton(onClick = { adapter.port.loadUrl(state.triggerUrl) }) {
           Text(stringResource(Res.string.reload))
         }
-        Button(onClick = { scope.launch { controller.cancel() } }) {
+        ExpressiveTextButton(onClick = { scope.launch { controller.cancel() } }) {
           Text(stringResource(Res.string.cancel))
         }
-        Button(
+        ExpressiveButton(
             enabled = state.status !is CfChallengeStatus.Verifying,
             onClick = {
               scope.launch {

@@ -8,13 +8,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ShortNavigationBar
+import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.WideNavigationRail
+import androidx.compose.material3.WideNavigationRailItem
+import androidx.compose.material3.WideNavigationRailValue
+import androidx.compose.material3.rememberWideNavigationRailState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -76,32 +77,32 @@ fun AppScaffold(
 
     if (useRail) {
       Row(modifier = Modifier.fillMaxSize()) {
-        NavigationRail(
+        WideNavigationRail(
             modifier = Modifier.fillMaxHeight(),
-            containerColor = MaterialTheme.colorScheme.surface,
+            state = rememberWideNavigationRailState(WideNavigationRailValue.Collapsed),
         ) {
           destinations.forEach { destination ->
             val selected = currentTopLevelDestination == destination.destination
-            NavigationRailItem(
+            WideNavigationRailItem(
                 selected = selected,
                 onClick = { onTopLevelDestinationClick(destination.destination, selected) },
+                railExpanded = false,
                 modifier = Modifier.testTag(destination.testTag),
                 icon = { TopLevelDestinationIcon(destination, selected) },
                 label = { TopLevelDestinationLabel(destination) },
             )
           }
         }
-        VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.8f))
         Box(modifier = Modifier.fillMaxSize()) { content() }
       }
     } else {
       Scaffold(
           containerColor = MaterialTheme.colorScheme.surface,
           bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
+            ShortNavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
               destinations.forEach { destination ->
                 val selected = currentTopLevelDestination == destination.destination
-                NavigationBarItem(
+                ShortNavigationBarItem(
                     selected = selected,
                     onClick = { onTopLevelDestinationClick(destination.destination, selected) },
                     modifier = Modifier.testTag(destination.testTag),

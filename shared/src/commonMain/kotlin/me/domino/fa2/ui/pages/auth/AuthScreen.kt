@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,6 +23,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
+import me.domino.fa2.ui.components.ExpressiveButton
+import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
 import org.jetbrains.compose.resources.stringResource
 
 /** 登录页主界面。 */
@@ -122,8 +123,10 @@ private fun WebViewLoginTab(
       verticalArrangement = Arrangement.spacedBy(12.dp),
   ) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      Button(onClick = onReload) { Text(stringResource(Res.string.reload_login_page)) }
-      Button(enabled = !webViewUiState.isConfirming, onClick = onConfirm) {
+      ExpressiveFilledTonalButton(onClick = onReload) {
+        Text(stringResource(Res.string.reload_login_page))
+      }
+      ExpressiveButton(enabled = !webViewUiState.isConfirming, onClick = onConfirm) {
         Text(
             if (webViewUiState.isConfirming) stringResource(Res.string.confirming_login)
             else stringResource(Res.string.complete_login)
@@ -163,8 +166,10 @@ private fun CookieLoginTab(
         textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
     )
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      Button(onClick = onSubmit) { Text(stringResource(Res.string.save_and_login)) }
-      Button(onClick = onRetry) { Text(stringResource(Res.string.retry_existing_session)) }
+      ExpressiveButton(onClick = onSubmit) { Text(stringResource(Res.string.save_and_login)) }
+      ExpressiveFilledTonalButton(onClick = onRetry) {
+        Text(stringResource(Res.string.retry_existing_session))
+      }
     }
   }
 }

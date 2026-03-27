@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -32,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.github.panpf.zoomimage.CoilZoomAsyncImage
 import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.components.CenterCircularWavyImageLoadingProgress
+import me.domino.fa2.ui.components.ExpressiveIconButton
 import me.domino.fa2.ui.components.ImageLoadLifecycleState
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.rememberImageLoadProgressState
@@ -80,7 +80,7 @@ internal fun SubmissionZoomImageOverlay(imageUrl: String, onDismiss: () -> Unit)
         )
       }
     }
-    IconButton(
+    ExpressiveIconButton(
         onClick = onDismiss,
         modifier =
             Modifier.align(Alignment.TopEnd).padding(12.dp).focusProperties { canFocus = false },

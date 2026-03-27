@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -386,7 +385,9 @@ private fun UserJournalsStatusCard(title: String, body: String, onRetry: () -> U
           style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-      Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
+      me.domino.fa2.ui.components.ExpressiveFilledTonalButton(onClick = onRetry) {
+        Text(stringResource(Res.string.retry))
+      }
     }
   }
 }
