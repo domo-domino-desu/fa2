@@ -56,10 +56,13 @@ internal fun TranslateActionButton(
     active: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-  ExpressiveIconButton(
-      onClick = onTranslate,
-      enabled = enabled && !translating,
-      modifier = modifier.padding(1.dp).focusProperties { canFocus = false },
+  Box(
+      modifier =
+          modifier
+              .padding(1.dp)
+              .focusProperties { canFocus = false }
+              .clickable(enabled = enabled && !translating, onClick = onTranslate),
+      contentAlignment = Alignment.Center,
   ) {
     if (translating) {
       LoadingIndicator(
@@ -85,10 +88,13 @@ internal fun WrapTextActionButton(
     active: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-  ExpressiveIconButton(
-      onClick = onWrapText,
-      enabled = enabled,
-      modifier = modifier.padding(1.dp).focusProperties { canFocus = false },
+  Box(
+      modifier =
+          modifier
+              .padding(1.dp)
+              .focusProperties { canFocus = false }
+              .clickable(enabled = enabled, onClick = onWrapText),
+      contentAlignment = Alignment.Center,
   ) {
     Icon(
         imageVector = FaMaterialSymbols.Outlined.WrapText,
