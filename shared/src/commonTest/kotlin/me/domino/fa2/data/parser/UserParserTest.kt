@@ -39,6 +39,20 @@ class UserParserTest {
               contact.url.contains("twitter.com", ignoreCase = true)
         }
     )
+    assertEquals(20, header.galleryPreviews.size)
+    assertEquals(20, header.favoritesPreviews.size)
+    assertEquals(60087990, header.galleryPreviews.first().id)
+    assertEquals("[OPEN] Adopts FixPrice - FluffyBeans", header.galleryPreviews.first().title)
+    assertEquals("Terriniss", header.galleryPreviews.first().author)
+    assertTrue(header.galleryPreviews.first().thumbnailUrl.contains("60087990@300-1741039738"))
+    assertTrue(header.galleryPreviews.first().authorAvatarUrl.isNotBlank())
+    assertEquals(57803262, header.favoritesPreviews.first().id)
+    assertEquals(
+        "Auction. CLOSED. Adopt Alkior from Closed Species Alivante",
+        header.favoritesPreviews.first().title,
+    )
+    assertEquals("inn_art", header.favoritesPreviews.first().author)
+    assertTrue(header.favoritesPreviews.first().thumbnailUrl.contains("57803262@300-1724011901"))
   }
 
   @Test

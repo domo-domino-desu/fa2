@@ -14,6 +14,12 @@ private val submissionDataJson = Json { ignoreUnknownKeys = true }
 private val fullImageTimestampRegex = Regex("""(?:^|/)art/[^/]+/(\d{9,})/""")
 private val fullImageAllowedHosts = setOf("d.furaffinity.net", "d.facdn.net")
 
+data class SubmissionDataSummary(
+    val title: String = "",
+    val author: String = "",
+    val authorLowercase: String = "",
+)
+
 /** 根据原图 URL 推导缩略图 URL。 需要 submission sid 与原图路径中的时间戳目录（`/art/{author}/{timestamp}/...`）。 */
 fun deriveSubmissionThumbnailUrlFromFullImage(
     sid: Int,
@@ -31,6 +37,31 @@ fun deriveSubmissionThumbnailUrlFromFullImage(
         value.isNotBlank()
       } ?: return null
   return "https://t.furaffinity.net/$sid@$size-$timestamp.jpg"
+}
+
+/** 解析页面中提交项对应的标题与作者信息。 依赖页面内 `#js-submissionData` JSON，返回 `sid -> summary`。 */
+fun parseSubmissionDataSummaries(html: String): Map<Int, SubmissionDataSummary> {
+  val root = parseSubmissionDataRoot(html) ?: return emptyMap()
+
+  return buildMap(capacity = root.size) {
+    root.forEach { (sidRaw, entryElement) ->
+      val sid = sidRaw.toIntOrNull() ?: return@forEach
+      val entry = entryElement.jsonObject
+      val title = entry["title"]?.jsonPrimitive?.contentOrNull?.trim().orEmpty()
+      val author = entry["username"]?.jsonPrimitive?.contentOrNull?.trim().orEmpty()
+      val authorLowercase =
+          entry["lower"]?.jsonPrimitive?.contentOrNull?.trim()?.ifBlank { null }
+              ?: author.lowercase()
+      put(
+          sid,
+          SubmissionDataSummary(
+              title = title,
+              author = author,
+              authorLowercase = authorLowercase,
+          ),
+      )
+    }
+  }
 }
 
 /** 解析页面中提交项对应的作者头像地址。 依赖页面内 `#js-submissionData` JSON，返回 `sid -> avatarUrl`。 */

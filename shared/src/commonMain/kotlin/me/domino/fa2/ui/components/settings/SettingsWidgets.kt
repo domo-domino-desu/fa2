@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -42,7 +43,13 @@ fun SettingsAccountHeader(
 ) {
   Surface(
       modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
+      shape = RoundedCornerShape(14.dp),
       color = MaterialTheme.colorScheme.surface,
+      border =
+          BorderStroke(
+              width = 1.dp,
+              color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+          ),
   ) {
     Row(
         modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),

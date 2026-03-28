@@ -513,6 +513,14 @@ class MainRouteScreen(
                     )
                 )
               },
+              onOpenFavorites = {
+                navigator.push(
+                    UserRouteScreen(
+                        username = username,
+                        initialChildRoute = UserChildRoute.Favorites,
+                    )
+                )
+              },
               onOpenSettings = { navigator.push(SettingsRouteScreen()) },
               onOpenSubmissionHistory = { navigator.push(SubmissionHistoryRouteScreen()) },
               onOpenSearchHistory = { navigator.push(SearchHistoryRouteScreen()) },

@@ -53,11 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -93,136 +89,6 @@ private const val maxCardAspectRatio = 2.2f
 private const val fallbackCardAspectRatio = 1f
 
 private val waterfallFabMenuButtonHeight = 40.dp
-
-private val waterfallFabAddIcon: ImageVector by lazy {
-  ImageVector.Builder(
-          name = "WaterfallFabAdd",
-          defaultWidth = 24.dp,
-          defaultHeight = 24.dp,
-          viewportWidth = 24f,
-          viewportHeight = 24f,
-      )
-      .apply {
-        path(fill = SolidColor(Color.Black), pathFillType = PathFillType.NonZero) {
-          moveTo(19f, 13f)
-          horizontalLineTo(13f)
-          verticalLineTo(19f)
-          horizontalLineTo(11f)
-          verticalLineTo(13f)
-          horizontalLineTo(5f)
-          verticalLineTo(11f)
-          horizontalLineTo(11f)
-          verticalLineTo(5f)
-          horizontalLineTo(13f)
-          verticalLineTo(11f)
-          horizontalLineTo(19f)
-          close()
-        }
-      }
-      .build()
-}
-
-private val waterfallFabChevronUpIcon: ImageVector by lazy {
-  ImageVector.Builder(
-          name = "WaterfallFabChevronUp",
-          defaultWidth = 24.dp,
-          defaultHeight = 24.dp,
-          viewportWidth = 24f,
-          viewportHeight = 24f,
-      )
-      .apply {
-        path(fill = SolidColor(Color.Black), pathFillType = PathFillType.NonZero) {
-          moveTo(12f, 8.83f)
-          lineTo(16.59f, 13.41f)
-          lineTo(18f, 12f)
-          lineTo(12f, 6f)
-          lineTo(6f, 12f)
-          lineTo(7.41f, 13.41f)
-          close()
-        }
-      }
-      .build()
-}
-
-private val waterfallFabChevronDownIcon: ImageVector by lazy {
-  ImageVector.Builder(
-          name = "WaterfallFabChevronDown",
-          defaultWidth = 24.dp,
-          defaultHeight = 24.dp,
-          viewportWidth = 24f,
-          viewportHeight = 24f,
-      )
-      .apply {
-        path(fill = SolidColor(Color.Black), pathFillType = PathFillType.NonZero) {
-          moveTo(7.41f, 10.59f)
-          lineTo(12f, 15.17f)
-          lineTo(16.59f, 10.59f)
-          lineTo(18f, 12f)
-          lineTo(12f, 18f)
-          lineTo(6f, 12f)
-          close()
-        }
-      }
-      .build()
-}
-
-private val waterfallFabDoubleChevronUpIcon: ImageVector by lazy {
-  ImageVector.Builder(
-          name = "WaterfallFabDoubleChevronUp",
-          defaultWidth = 24.dp,
-          defaultHeight = 24.dp,
-          viewportWidth = 24f,
-          viewportHeight = 24f,
-      )
-      .apply {
-        path(fill = SolidColor(Color.Black), pathFillType = PathFillType.NonZero) {
-          moveTo(12f, 11.66f)
-          lineTo(16.59f, 16.24f)
-          lineTo(18f, 14.83f)
-          lineTo(12f, 8.83f)
-          lineTo(6f, 14.83f)
-          lineTo(7.41f, 16.24f)
-          close()
-          moveTo(12f, 5.66f)
-          lineTo(16.59f, 10.24f)
-          lineTo(18f, 8.83f)
-          lineTo(12f, 2.83f)
-          lineTo(6f, 8.83f)
-          lineTo(7.41f, 10.24f)
-          close()
-        }
-      }
-      .build()
-}
-
-private val waterfallFabDoubleChevronDownIcon: ImageVector by lazy {
-  ImageVector.Builder(
-          name = "WaterfallFabDoubleChevronDown",
-          defaultWidth = 24.dp,
-          defaultHeight = 24.dp,
-          viewportWidth = 24f,
-          viewportHeight = 24f,
-      )
-      .apply {
-        path(fill = SolidColor(Color.Black), pathFillType = PathFillType.NonZero) {
-          moveTo(7.41f, 7.76f)
-          lineTo(12f, 12.34f)
-          lineTo(16.59f, 7.76f)
-          lineTo(18f, 9.17f)
-          lineTo(12f, 15.17f)
-          lineTo(6f, 9.17f)
-          close()
-          moveTo(7.41f, 13.76f)
-          lineTo(12f, 18.34f)
-          lineTo(16.59f, 13.76f)
-          lineTo(18f, 15.17f)
-          lineTo(12f, 21.17f)
-          lineTo(6f, 15.17f)
-          close()
-        }
-      }
-      .build()
-}
 
 data class SubmissionWaterfallPageControls(
     val paginationKind: SubmissionPaginationKind? = null,
@@ -550,7 +416,7 @@ private fun SubmissionWaterfallPageFab(
     if (effectiveControls.showFirstPage) {
       add(
           SubmissionWaterfallFabAction(
-              icon = waterfallFabDoubleChevronUpIcon,
+              icon = FaMaterialSymbols.Outlined.KeyboardDoubleArrowUp,
               contentDescription = stringResource(Res.string.waterfall_first_page),
               enabled = effectiveControls.canLoadFirstPage && !effectiveControls.loading,
               onClick = { onLoadFirstPage?.invoke() },
@@ -560,7 +426,7 @@ private fun SubmissionWaterfallPageFab(
     if (effectiveControls.showPreviousPage) {
       add(
           SubmissionWaterfallFabAction(
-              icon = waterfallFabChevronUpIcon,
+              icon = FaMaterialSymbols.Outlined.ExpandLess,
               contentDescription = stringResource(Res.string.waterfall_previous_page),
               enabled = effectiveControls.canLoadPreviousPage && !effectiveControls.loading,
               onClick = { onLoadPreviousPage?.invoke() },
@@ -602,7 +468,7 @@ private fun SubmissionWaterfallPageFab(
     if (effectiveControls.showNextPage) {
       add(
           SubmissionWaterfallFabAction(
-              icon = waterfallFabChevronDownIcon,
+              icon = FaMaterialSymbols.Outlined.ExpandMore,
               contentDescription = stringResource(Res.string.waterfall_next_page),
               enabled = effectiveControls.canLoadNextPage && !effectiveControls.loading,
               onClick = { onLoadNextPage?.invoke() },
@@ -612,7 +478,7 @@ private fun SubmissionWaterfallPageFab(
     if (effectiveControls.showLastPage) {
       add(
           SubmissionWaterfallFabAction(
-              icon = waterfallFabDoubleChevronDownIcon,
+              icon = FaMaterialSymbols.Outlined.KeyboardDoubleArrowDown,
               contentDescription = stringResource(Res.string.waterfall_last_page),
               enabled = effectiveControls.canLoadLastPage && !effectiveControls.loading,
               onClick = { onLoadLastPage?.invoke() },
@@ -631,7 +497,7 @@ private fun SubmissionWaterfallPageFab(
           Icon(
               imageVector =
                   if (checkedProgress >= 0.5f) FaMaterialSymbols.Filled.Close
-                  else waterfallFabAddIcon,
+                  else FaMaterialSymbols.Filled.Add,
               contentDescription = stringResource(Res.string.waterfall_page_navigation),
           )
         }

@@ -403,6 +403,7 @@ private fun UserFolderGroupsCard(groups: List<GalleryFolderGroup>, onOpenFolder:
             text = group.title,
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(horizontal = 2.dp),
         )
       }
@@ -419,18 +420,18 @@ private fun UserFolderGroupsCard(groups: List<GalleryFolderGroup>, onOpenFolder:
                   } else {
                     MaterialTheme.colorScheme.surfaceVariant
                   },
+              contentColor =
+                  if (folder.isActive) {
+                    MaterialTheme.colorScheme.onSecondaryContainer
+                  } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                  },
               shape = RoundedCornerShape(999.dp),
           ) {
             Text(
                 text = folder.title,
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                 style = MaterialTheme.typography.labelMedium,
-                color =
-                    if (folder.isActive) {
-                      MaterialTheme.colorScheme.onSecondaryContainer
-                    } else {
-                      MaterialTheme.colorScheme.onSurfaceVariant
-                    },
             )
           }
         }

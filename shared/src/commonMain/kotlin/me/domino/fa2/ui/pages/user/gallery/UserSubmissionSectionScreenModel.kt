@@ -47,6 +47,42 @@ data class UserSubmissionSectionUiState(
     get() = !nextPageUrl.isNullOrBlank()
 }
 
+internal fun UserSubmissionSectionUiState.prepareForFolderSwitch(
+    folderUrl: String
+): UserSubmissionSectionUiState =
+    copy(
+        submissions = emptyList(),
+        nextPageUrl = null,
+        folderGroups = folderGroups.withActiveFolder(folderUrl),
+    )
+
+internal fun List<GalleryFolderGroup>.withActiveFolder(
+    folderUrl: String
+): List<GalleryFolderGroup> {
+  if (isEmpty()) return this
+  var changed = false
+  val updatedGroups = map { group ->
+    var groupChanged = false
+    val updatedFolders =
+        group.folders.map { folder ->
+          val shouldBeActive = folder.url == folderUrl
+          if (folder.isActive == shouldBeActive) {
+            folder
+          } else {
+            changed = true
+            groupChanged = true
+            folder.copy(isActive = shouldBeActive)
+          }
+        }
+    if (groupChanged) {
+      group.copy(folders = updatedFolders)
+    } else {
+      group
+    }
+  }
+  return if (changed) updatedGroups else this
+}
+
 /** User 投稿子页状态模型（Gallery/Favorites/Scraps）。 */
 class UserSubmissionSectionScreenModel(
     /** 用户名。 */
@@ -112,7 +148,6 @@ class UserSubmissionSectionScreenModel(
           snapshot.copy(
               submissions = emptyList(),
               nextPageUrl = null,
-              folderGroups = emptyList(),
           )
         } else {
           snapshot
@@ -183,6 +218,7 @@ class UserSubmissionSectionScreenModel(
           return
         }
     log.i { "打开文件夹 -> 开始(route=$route,url=${summarizeUrl(normalized)})" }
+    mutableState.value = state.value.prepareForFolderSwitch(normalized)
     basePageUrlOverride = normalized
     load(forceRefresh = true, clearExisting = true)
   }

@@ -3,10 +3,20 @@ package me.domino.fa2.data.parser
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Element
 import me.domino.fa2.data.model.PageComment
+import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.model.User
 import me.domino.fa2.data.model.UserContact
 import me.domino.fa2.util.FaUrls
+import me.domino.fa2.util.SubmissionDataSummary
+import me.domino.fa2.util.TagBlockSettings
 import me.domino.fa2.util.ensureUserPageAccessible
+import me.domino.fa2.util.isBlockedByTagSettings
+import me.domino.fa2.util.parseImageTags
+import me.domino.fa2.util.parsePositiveFloat
+import me.domino.fa2.util.parseSubmissionAvatarUrls
+import me.domino.fa2.util.parseSubmissionDataSummaries
+import me.domino.fa2.util.parseSubmissionSid
+import me.domino.fa2.util.parseTagBlockSettings
 import me.domino.fa2.util.toAbsoluteUrl
 
 /** User 主页头信息解析器。 */
@@ -23,6 +33,8 @@ class UserParser {
           pattern = """\((?:Watched by|Watching)\s*([0-9,]+)\)""",
           options = setOf(RegexOption.IGNORE_CASE),
       )
+  private val galleryPreviewSelector = "#gallery-latest-submissions figure"
+  private val favoritesPreviewSelector = "#gallery-latest-favorites figure"
 
   /** 解析用户主页头部信息。 */
   fun parse(html: String, url: String): User {
@@ -62,6 +74,31 @@ class UserParser {
     val profileNode =
         document.selectFirst("section.userpage-layout-profile .section-body.userpage-profile")
     val profileHtml = profileNode?.html()?.trim().orEmpty()
+    val submissionDataSummaries = parseSubmissionDataSummaries(html)
+    val submissionAvatarUrls = parseSubmissionAvatarUrls(html)
+    val tagBlockSettings = parseTagBlockSettings(document)
+    val galleryPreviews =
+        parseSubmissionPreviews(
+            document = document,
+            selector = galleryPreviewSelector,
+            baseUrl = url,
+            defaultAuthor = username,
+            fallbackAuthorAvatarUrl = avatarUrl,
+            submissionDataSummaries = submissionDataSummaries,
+            submissionAvatarUrls = submissionAvatarUrls,
+            tagBlockSettings = tagBlockSettings,
+        )
+    val favoritesPreviews =
+        parseSubmissionPreviews(
+            document = document,
+            selector = favoritesPreviewSelector,
+            baseUrl = url,
+            defaultAuthor = "",
+            fallbackAuthorAvatarUrl = "",
+            submissionDataSummaries = submissionDataSummaries,
+            submissionAvatarUrls = submissionAvatarUrls,
+            tagBlockSettings = tagBlockSettings,
+        )
 
     return User(
         username = username,
@@ -80,6 +117,8 @@ class UserParser {
         shouts = shouts,
         contacts = contacts,
         profileHtml = profileHtml,
+        galleryPreviews = galleryPreviews,
+        favoritesPreviews = favoritesPreviews,
     )
   }
 
@@ -329,6 +368,108 @@ class UserParser {
     )
   }
 
+  private fun parseSubmissionPreviews(
+      document: com.fleeksoft.ksoup.nodes.Document,
+      selector: String,
+      baseUrl: String,
+      defaultAuthor: String,
+      fallbackAuthorAvatarUrl: String,
+      submissionDataSummaries: Map<Int, SubmissionDataSummary>,
+      submissionAvatarUrls: Map<Int, String>,
+      tagBlockSettings: TagBlockSettings,
+  ): List<SubmissionThumbnail> {
+    val normalizedDefaultAuthor = defaultAuthor.trim().lowercase()
+    val previews = LinkedHashMap<Int, SubmissionThumbnail>()
+    document.select(selector).forEach { node ->
+      val parsed =
+          parseSubmissionPreview(
+              node = node,
+              baseUrl = baseUrl,
+              defaultAuthor = defaultAuthor,
+              normalizedDefaultAuthor = normalizedDefaultAuthor,
+              fallbackAuthorAvatarUrl = fallbackAuthorAvatarUrl,
+              submissionDataSummaries = submissionDataSummaries,
+              submissionAvatarUrls = submissionAvatarUrls,
+              tagBlockSettings = tagBlockSettings,
+          )
+      if (parsed != null) {
+        previews[parsed.id] = parsed
+      }
+    }
+    return previews.values.toList()
+  }
+
+  private fun parseSubmissionPreview(
+      node: Element,
+      baseUrl: String,
+      defaultAuthor: String,
+      normalizedDefaultAuthor: String,
+      fallbackAuthorAvatarUrl: String,
+      submissionDataSummaries: Map<Int, SubmissionDataSummary>,
+      submissionAvatarUrls: Map<Int, String>,
+      tagBlockSettings: TagBlockSettings,
+  ): SubmissionThumbnail? {
+    val rawSubmissionUrl = node.selectFirst("a[href*='/view/']")?.attr("href").orEmpty()
+    val submissionUrl =
+        toAbsoluteUrl(
+            baseUrl = "https://www.furaffinity.net/",
+            maybeRelativeUrl = rawSubmissionUrl,
+        )
+    val id =
+        node.attr("id").removePrefix("sid-").toIntOrNull()
+            ?: parseSubmissionSid(submissionUrl)
+            ?: return null
+    val image =
+        node.selectFirst("a[href*='/view/'] > img")
+            ?: node.selectFirst("a[href*='/view/'] img")
+            ?: return null
+    val metadata = submissionDataSummaries[id]
+    val captionLinks = node.select("figcaption p a")
+    val title =
+        captionLinks.getOrNull(0)?.text()?.trim()?.takeIf { it.isNotBlank() }
+            ?: metadata?.title?.takeIf { it.isNotBlank() }
+            ?: image.attr("alt").trim().ifBlank { "Untitled #$id" }
+    val dataUserAuthor = node.attr("data-user").removePrefix("u-").trim().ifBlank { "" }
+    val author =
+        captionLinks.getOrNull(1)?.text()?.trim()?.takeIf { it.isNotBlank() }
+            ?: metadata?.author?.takeIf { it.isNotBlank() }
+            ?: dataUserAuthor.ifBlank { defaultAuthor }.ifBlank { "unknown" }
+    val resolvedAuthorAvatarUrl =
+        submissionAvatarUrls[id]?.takeIf { it.isNotBlank() }
+            ?: fallbackAuthorAvatarUrl.takeIf {
+              it.isNotBlank() && author.trim().lowercase() == normalizedDefaultAuthor
+            }
+    val width =
+        parsePositiveFloat(image.attr("data-width"))
+            ?: parsePositiveFloat(image.attr("width"))
+            ?: 1f
+    val height =
+        parsePositiveFloat(image.attr("data-height"))
+            ?: parsePositiveFloat(image.attr("height"))
+            ?: 1f
+    val thumbnailUrl =
+        toAbsoluteUrl(
+            baseUrl = "https://www.furaffinity.net/",
+            maybeRelativeUrl = resolveThumbnailRawUrl(image),
+        )
+    val imageTags = parseImageTags(image)
+    val categoryTag = imageTags.sorted().firstOrNull { tag -> tag.startsWith("c_") }.orEmpty()
+    val isBlockedByTag =
+        isBlockedByTagSettings(imageTags = imageTags, tagBlockSettings = tagBlockSettings)
+
+    return SubmissionThumbnail(
+        id = id,
+        submissionUrl = submissionUrl.ifBlank { FaUrls.submission(id) },
+        title = title,
+        author = author,
+        authorAvatarUrl = resolvedAuthorAvatarUrl.orEmpty(),
+        thumbnailUrl = thumbnailUrl,
+        thumbnailAspectRatio = width / height,
+        categoryTag = categoryTag,
+        isBlockedByTag = isBlockedByTag,
+    )
+  }
+
   private fun normalizeContactUrl(href: String, displayText: String, baseUrl: String): String {
     val normalizedHref = href.trim()
     if (
@@ -398,6 +539,26 @@ class UserParser {
 
   private fun extractSrcsetFirstUrl(rawSrcset: String): String =
       rawSrcset.substringBefore(',').substringBefore(' ').trim()
+
+  private fun resolveThumbnailRawUrl(image: Element): String {
+    val direct =
+        listOf(
+                "src",
+                "data-src",
+                "data-preview-src",
+                "data-fullview-src",
+                "data-lazy-src",
+                "data-original",
+            )
+            .asSequence()
+            .map { attribute -> image.attr(attribute).trim() }
+            .firstOrNull { value -> value.isNotBlank() }
+    if (!direct.isNullOrBlank()) {
+      return direct
+    }
+
+    return extractSrcsetFirstUrl(image.attr("srcset"))
+  }
 
   private data class WatchState(val isWatching: Boolean, val actionUrl: String)
 

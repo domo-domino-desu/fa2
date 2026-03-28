@@ -27,6 +27,8 @@ fun MoreScreen(
     onOpenUser: () -> Unit,
     /** 打开当前用户已关注列表。 */
     onOpenFollowing: () -> Unit,
+    /** 打开当前用户收藏列表。 */
+    onOpenFavorites: () -> Unit,
     /** 打开设置页。 */
     onOpenSettings: () -> Unit,
     /** 打开投稿浏览记录。 */
@@ -52,6 +54,7 @@ fun MoreScreen(
           state = state,
           onOpenUser = onOpenUser,
           onOpenFollowing = onOpenFollowing,
+          onOpenFavorites = onOpenFavorites,
           onOpenSettings = onOpenSettings,
           onOpenSubmissionHistory = onOpenSubmissionHistory,
           onOpenSearchHistory = onOpenSearchHistory,
@@ -71,6 +74,8 @@ private fun MoreContent(
     onOpenUser: () -> Unit,
     /** 打开当前用户已关注列表。 */
     onOpenFollowing: () -> Unit,
+    /** 打开当前用户收藏列表。 */
+    onOpenFavorites: () -> Unit,
     /** 打开设置页回调。 */
     onOpenSettings: () -> Unit,
     /** 打开投稿浏览记录。 */
@@ -98,11 +103,18 @@ private fun MoreContent(
     item {
       SettingsGroup(titleHorizontalPadding = 0.dp, containerHorizontalPadding = 0.dp) {
         SettingsListItem(
-            icon = FaMaterialSymbols.Filled.Favorite,
+            icon = FaMaterialSymbols.Filled.Notifications,
             title = stringResource(Res.string.following),
             subtitle = stringResource(Res.string.following_more_summary),
             onClick = onOpenFollowing,
             modifier = Modifier.testTag("more-following"),
+        )
+        SettingsListItem(
+            icon = FaMaterialSymbols.Filled.Favorite,
+            title = stringResource(Res.string.favorites),
+            subtitle = stringResource(Res.string.favorite_more_summary),
+            onClick = onOpenFavorites,
+            modifier = Modifier.testTag("more-favorites"),
         )
         SettingsListItem(
             icon = FaMaterialSymbols.Filled.History,

@@ -56,6 +56,7 @@
   <string name="no_records">No records yet</string>
   <string name="settings_summary">Theme, waterfall width, and translation settings</string>
   <string name="following_more_summary">Open the users this account is following</string>
+  <string name="favorite_more_summary">Open this account's favorited submissions</string>
   <string name="about_summary">View the open-source libraries and licenses used by this app</string>
   <string name="logout">Log Out</string>
   <string name="logout_failed">Log out failed</string>

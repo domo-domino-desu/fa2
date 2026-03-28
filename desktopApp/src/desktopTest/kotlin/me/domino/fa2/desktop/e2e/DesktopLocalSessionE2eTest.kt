@@ -73,6 +73,7 @@ class DesktopLocalSessionE2eTest {
         description = "more screen root",
     )
     composeRule.onNodeWithTag("more-following", useUnmergedTree = true).assertExists()
+    composeRule.onNodeWithTag("more-favorites", useUnmergedTree = true).assertExists()
 
     DesktopE2eThrottle.pauseBeforeAction("open-search")
     composeRule.onNodeWithTag("nav-search", useUnmergedTree = true).performClick()

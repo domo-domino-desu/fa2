@@ -225,20 +225,20 @@ class UserChildRouteScreen(
               revisionKey = buildUserSubmissionScrollKey(username, route, routeInitialFolderUrl),
           )
         }
-        key(scrollKey) {
-          val layout =
-              remember(headerContent) {
-                userSubmissionSectionScrollLayout(hasHeader = headerContent != null)
-              }
-          val initialScrollPosition =
-              remember(scrollKey, headerContent) {
-                resolveInitialUserScrollPosition(
-                    sharedTopScrollState = resolveSharedTopScrollState(),
-                    bodyScrollPosition = resolveBodyScrollPosition(scrollKey),
-                    layout = layout,
-                )
-              }
-          val waterfallState =
+        val layout =
+            remember(headerContent) {
+              userSubmissionSectionScrollLayout(hasHeader = headerContent != null)
+            }
+        val initialScrollPosition =
+            remember(scrollKey, headerContent) {
+              resolveInitialUserScrollPosition(
+                  sharedTopScrollState = resolveSharedTopScrollState(),
+                  bodyScrollPosition = resolveBodyScrollPosition(scrollKey),
+                  layout = layout,
+              )
+            }
+        val waterfallState =
+            key(scrollKey) {
               rememberLazyStaggeredGridState(
                   initialFirstVisibleItemIndex =
                       contextState?.waterfallViewport?.firstVisibleItemIndex
@@ -247,101 +247,95 @@ class UserChildRouteScreen(
                       contextState?.waterfallViewport?.firstVisibleItemScrollOffset
                           ?: initialScrollPosition.firstVisibleItemScrollOffset,
               )
-          val scope = rememberCoroutineScope()
-          LaunchedEffect(waterfallState, updateCurrentRouteScrollToTopAction) {
-            updateCurrentRouteScrollToTopAction {
-              scope.launch { waterfallState.animateScrollToItem(0) }
             }
+        val scope = rememberCoroutineScope()
+        LaunchedEffect(waterfallState, updateCurrentRouteScrollToTopAction) {
+          updateCurrentRouteScrollToTopAction {
+            scope.launch { waterfallState.animateScrollToItem(0) }
           }
-          var deferredBodyScrollPosition by
-              remember(scrollKey) {
-                mutableStateOf(initialScrollPosition.deferredBodyScrollPosition)
-              }
-          val pageControls = contextState?.toWaterfallPageControls()
-
-          UserSubmissionSectionScreen(
-              route = route,
-              state =
-                  contextState?.let { snapshot ->
-                    state.copy(
-                        submissions = snapshot.flatItems.ifEmpty { state.submissions },
-                        nextPageUrl = if (snapshot.hasNextPage) "context:next" else null,
-                        isLoadingMore = snapshot.loading.appendLoading,
-                        appendErrorMessage = snapshot.loading.appendErrorMessage,
-                    )
-                  } ?: state,
-              onRetry = { screenModel.load(forceRefresh = true) },
-              onRefresh = {
-                refreshHeader?.invoke()
-                screenModel.load(forceRefresh = true)
-              },
-              onOpenSubmission = { item ->
-                contextScreenModel.selectSubmission(holderTag, item.id)
-                rootNavigator.push(
-                    SubmissionRouteScreen(initialSid = item.id, contextId = holderTag)
-                )
-              },
-              onOpenFolder = { folderUrl ->
-                updateFolderUrl(route, folderUrl)
-                screenModel.openFolder(folderUrl)
-              },
-              onLastVisibleIndexChanged = { lastVisibleIndex ->
-                val items = contextState?.flatItems ?: state.submissions
-                if (items.isNotEmpty() && lastVisibleIndex > items.lastIndex - 10) {
-                  contextScreenModel.loadNextPageIfNeeded(holderTag)
-                }
-              },
-              onRetryLoadMore = {
-                contextScreenModel.loadNextPageIfNeeded(holderTag, force = true)
-              },
-              onSelectRoute = { target ->
-                if (target != route) {
-                  localNavigator.replaceAll(
-                      UserChildRouteScreen(
-                          username = username,
-                          route = target,
-                          initialFolderUrl = resolveFolderUrl(target),
-                      )
-                  )
-                }
-              },
-              headerContent = headerContent,
-              waterfallState = waterfallState,
-              deferredBodyScrollPosition = deferredBodyScrollPosition,
-              onDeferredBodyScrollPositionConsumed = { deferredBodyScrollPosition = null },
-              onSharedTopScrollChanged = updateSharedTopScrollState,
-              onBodyScrollPositionChanged = { position ->
-                updateBodyScrollPosition(scrollKey, position)
-              },
-              pageControls = pageControls,
-              canLoadPreviousPageAtTop = contextState?.hasPreviousPage == true,
-              loadingPreviousPage = contextState?.loading?.prependLoading == true,
-              prependErrorMessage = contextState?.loading?.prependErrorMessage,
-              onLoadPreviousPageAtTop = {
-                contextScreenModel.loadPreviousPageIfNeeded(holderTag, force = true)
-              },
-              onLoadFirstPage = { contextScreenModel.navigateToFirstPage(holderTag) },
-              onLoadPreviousPage = { contextScreenModel.navigateToPreviousPage(holderTag) },
-              onJumpToPage = { pageNumber ->
-                contextScreenModel.navigateToPage(holderTag, pageNumber)
-              },
-              onLoadNextPage = { contextScreenModel.navigateToNextPage(holderTag) },
-              onLoadLastPage = { contextScreenModel.navigateToLastPage(holderTag) },
-              pendingScrollRequest = contextState?.waterfallViewport?.scrollRequest,
-              onConsumeScrollRequest = { version ->
-                contextScreenModel.consumeWaterfallScrollRequest(holderTag, version)
-              },
-              onViewportChanged = { viewport ->
-                contextScreenModel.updateWaterfallViewport(
-                    contextId = holderTag,
-                    firstVisibleItemIndex = viewport.firstVisibleItemIndex,
-                    firstVisibleItemScrollOffset = viewport.firstVisibleItemScrollOffset,
-                    anchorSid = viewport.anchorSid,
-                    currentPageNumber = contextState?.pageNumberForSid(viewport.anchorSid),
-                )
-              },
-          )
         }
+        var deferredBodyScrollPosition by
+            remember(scrollKey) { mutableStateOf(initialScrollPosition.deferredBodyScrollPosition) }
+        val pageControls = contextState?.toWaterfallPageControls()
+
+        UserSubmissionSectionScreen(
+            route = route,
+            state =
+                contextState?.let { snapshot ->
+                  state.copy(
+                      submissions = snapshot.flatItems.ifEmpty { state.submissions },
+                      nextPageUrl = if (snapshot.hasNextPage) "context:next" else null,
+                      isLoadingMore = snapshot.loading.appendLoading,
+                      appendErrorMessage = snapshot.loading.appendErrorMessage,
+                  )
+                } ?: state,
+            onRetry = { screenModel.load(forceRefresh = true) },
+            onRefresh = {
+              refreshHeader?.invoke()
+              screenModel.load(forceRefresh = true)
+            },
+            onOpenSubmission = { item ->
+              contextScreenModel.selectSubmission(holderTag, item.id)
+              rootNavigator.push(SubmissionRouteScreen(initialSid = item.id, contextId = holderTag))
+            },
+            onOpenFolder = { folderUrl ->
+              updateFolderUrl(route, folderUrl)
+              screenModel.openFolder(folderUrl)
+            },
+            onLastVisibleIndexChanged = { lastVisibleIndex ->
+              val items = contextState?.flatItems ?: state.submissions
+              if (items.isNotEmpty() && lastVisibleIndex > items.lastIndex - 10) {
+                contextScreenModel.loadNextPageIfNeeded(holderTag)
+              }
+            },
+            onRetryLoadMore = { contextScreenModel.loadNextPageIfNeeded(holderTag, force = true) },
+            onSelectRoute = { target ->
+              if (target != route) {
+                localNavigator.replaceAll(
+                    UserChildRouteScreen(
+                        username = username,
+                        route = target,
+                        initialFolderUrl = resolveFolderUrl(target),
+                    )
+                )
+              }
+            },
+            headerContent = headerContent,
+            waterfallState = waterfallState,
+            deferredBodyScrollPosition = deferredBodyScrollPosition,
+            onDeferredBodyScrollPositionConsumed = { deferredBodyScrollPosition = null },
+            onSharedTopScrollChanged = updateSharedTopScrollState,
+            onBodyScrollPositionChanged = { position ->
+              updateBodyScrollPosition(scrollKey, position)
+            },
+            pageControls = pageControls,
+            canLoadPreviousPageAtTop = contextState?.hasPreviousPage == true,
+            loadingPreviousPage = contextState?.loading?.prependLoading == true,
+            prependErrorMessage = contextState?.loading?.prependErrorMessage,
+            onLoadPreviousPageAtTop = {
+              contextScreenModel.loadPreviousPageIfNeeded(holderTag, force = true)
+            },
+            onLoadFirstPage = { contextScreenModel.navigateToFirstPage(holderTag) },
+            onLoadPreviousPage = { contextScreenModel.navigateToPreviousPage(holderTag) },
+            onJumpToPage = { pageNumber ->
+              contextScreenModel.navigateToPage(holderTag, pageNumber)
+            },
+            onLoadNextPage = { contextScreenModel.navigateToNextPage(holderTag) },
+            onLoadLastPage = { contextScreenModel.navigateToLastPage(holderTag) },
+            pendingScrollRequest = contextState?.waterfallViewport?.scrollRequest,
+            onConsumeScrollRequest = { version ->
+              contextScreenModel.consumeWaterfallScrollRequest(holderTag, version)
+            },
+            onViewportChanged = { viewport ->
+              contextScreenModel.updateWaterfallViewport(
+                  contextId = holderTag,
+                  firstVisibleItemIndex = viewport.firstVisibleItemIndex,
+                  firstVisibleItemScrollOffset = viewport.firstVisibleItemScrollOffset,
+                  anchorSid = viewport.anchorSid,
+                  currentPageNumber = contextState?.pageNumberForSid(viewport.anchorSid),
+              )
+            },
+        )
       }
     }
   }

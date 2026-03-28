@@ -41,6 +41,6 @@ class UserStore(private val dataSource: UserDataSource, private val pageCacheDao
   private fun normalizeUsername(username: String): String = username.trim().lowercase()
 
   companion object {
-    private const val PAGE_TYPE_USER: String = "user_header_v1"
+    private const val PAGE_TYPE_USER: String = "user_header_v2"
   }
 }

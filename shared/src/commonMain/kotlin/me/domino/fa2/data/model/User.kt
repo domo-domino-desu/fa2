@@ -37,6 +37,10 @@ data class User(
     val contacts: List<UserContact> = emptyList(),
     /** 主页简介 HTML。 */
     val profileHtml: String = "",
+    /** 主页内展示的 Gallery 预览投稿。 */
+    val galleryPreviews: List<SubmissionThumbnail> = emptyList(),
+    /** 主页内展示的 Favorites 预览投稿。 */
+    val favoritesPreviews: List<SubmissionThumbnail> = emptyList(),
 )
 
 @Serializable

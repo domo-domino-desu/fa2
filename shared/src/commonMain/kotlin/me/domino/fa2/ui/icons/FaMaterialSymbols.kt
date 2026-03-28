@@ -2,6 +2,7 @@ package me.domino.fa2.ui.icons
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import me.domino.fa2.generated.symbols.icons.materialsymbols.Icons as GeneratedIcons
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.AddW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ArrowBackW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ArrowCircleRightW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.CategoryW400Outlined
@@ -27,6 +28,8 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ImageW400Outl
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.InfoW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.Inventory2W400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.KeyboardArrowRightW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.KeyboardDoubleArrowDownW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.KeyboardDoubleArrowUpW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.LogoutW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.MenuW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.MenuW400Outlinedfill1
@@ -50,6 +53,7 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.WrapTextW400O
 
 object FaMaterialSymbols {
   object Filled {
+    val Add: ImageVector = GeneratedIcons.AddW400Outlinedfill1
     val Close: ImageVector = GeneratedIcons.CloseW400Outlinedfill1
     val Done: ImageVector = GeneratedIcons.DoneW400Outlinedfill1
     val Download: ImageVector = GeneratedIcons.DownloadW400Outlinedfill1
@@ -82,6 +86,8 @@ object FaMaterialSymbols {
     val Home: ImageVector = GeneratedIcons.HomeW400Outlined
     val Image: ImageVector = GeneratedIcons.ImageW400Outlined
     val Inventory2: ImageVector = GeneratedIcons.Inventory2W400Outlined
+    val KeyboardDoubleArrowDown: ImageVector = GeneratedIcons.KeyboardDoubleArrowDownW400Outlined
+    val KeyboardDoubleArrowUp: ImageVector = GeneratedIcons.KeyboardDoubleArrowUpW400Outlined
     val Menu: ImageVector = GeneratedIcons.MenuW400Outlined
     val Movie: ImageVector = GeneratedIcons.MovieW400Outlined
     val MusicNote: ImageVector = GeneratedIcons.MusicNoteW400Outlined

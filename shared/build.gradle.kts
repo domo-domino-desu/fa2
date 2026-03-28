@@ -113,6 +113,7 @@ symbolCraft {
   naming { pascalCase() }
 
   materialSymbols(
+      "add",
       "close",
       "done",
       "download",
@@ -147,6 +148,8 @@ symbolCraft {
       "image",
       "inventory_2",
       "keyboard_arrow_right",
+      "keyboard_double_arrow_down",
+      "keyboard_double_arrow_up",
       "language",
       "logout",
       "mail",
