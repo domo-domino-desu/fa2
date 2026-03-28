@@ -134,6 +134,13 @@ fun SettingsScreen(
       item { AppearanceSettingsSection(draft = draft, onDraftChange = { next -> draft = next }) }
 
       item {
+        RecommendationSettingsSection(
+            draft = draft,
+            onDraftChange = { next -> draft = next },
+        )
+      }
+
+      item {
         TranslationSettingsSection(
             draft = draft,
             onDraftChange = { next -> draft = next },

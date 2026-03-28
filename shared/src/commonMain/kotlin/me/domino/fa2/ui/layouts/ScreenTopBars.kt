@@ -223,6 +223,20 @@ fun UserWatchlistRouteTopBar(
 }
 
 @Composable
+fun WatchRecommendationRouteTopBar(
+    onBack: () -> Unit,
+    onGoHome: () -> Unit,
+    onTitleClick: (() -> Unit)? = null,
+) {
+  RouteTopBar(
+      title = stringResource(Res.string.following_recommendation),
+      onBack = onBack,
+      onGoHome = onGoHome,
+      onTitleClick = onTitleClick,
+  )
+}
+
+@Composable
 fun SubmissionRouteTopBar(
     onBack: () -> Unit,
     onGoHome: () -> Unit,

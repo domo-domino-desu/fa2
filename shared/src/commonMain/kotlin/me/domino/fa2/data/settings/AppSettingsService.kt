@@ -99,4 +99,8 @@ class AppSettingsService(private val storage: AppSettingsStorage) {
   suspend fun updateReturnToCurrentSubmissionInWaterfall(enabled: Boolean) {
     updateSettings(mutableSettings.value.copy(returnToCurrentSubmissionInWaterfall = enabled))
   }
+
+  suspend fun updateWatchRecommendationPageSize(pageSize: Int) {
+    updateSettings(mutableSettings.value.copy(watchRecommendationPageSize = pageSize))
+  }
 }

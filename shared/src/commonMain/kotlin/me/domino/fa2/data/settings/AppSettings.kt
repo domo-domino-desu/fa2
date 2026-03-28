@@ -16,6 +16,7 @@ data class AppSettings(
         defaultBlockedSubmissionWaterfallMode,
     val blockedSubmissionPagerMode: BlockedSubmissionPagerMode = defaultBlockedSubmissionPagerMode,
     val returnToCurrentSubmissionInWaterfall: Boolean = defaultReturnToCurrentSubmissionInWaterfall,
+    val watchRecommendationPageSize: Int = defaultWatchRecommendationPageSize,
 ) {
   companion object {
     val supportedUiLanguages: List<UiLanguageSetting> =
@@ -55,6 +56,7 @@ data class AppSettings(
     val defaultBlockedSubmissionPagerMode: BlockedSubmissionPagerMode =
         BlockedSubmissionPagerMode.BLUR_THEN_OPEN
     const val defaultReturnToCurrentSubmissionInWaterfall: Boolean = false
+    const val defaultWatchRecommendationPageSize: Int = 20
 
     const val minTranslationChunkWordLimit: Int = 50
     const val maxTranslationChunkWordLimit: Int = 10000
@@ -64,6 +66,8 @@ data class AppSettings(
 
     const val minWaterfallMinCardWidthDp: Int = 120
     const val maxWaterfallMinCardWidthDp: Int = 480
+    const val minWatchRecommendationPageSize: Int = 5
+    const val maxWatchRecommendationPageSize: Int = 50
 
     fun normalize(raw: AppSettings): AppSettings =
         raw.copy(
@@ -93,6 +97,11 @@ data class AppSettings(
                 raw.waterfallMinCardWidthDp.coerceIn(
                     minWaterfallMinCardWidthDp,
                     maxWaterfallMinCardWidthDp,
+                ),
+            watchRecommendationPageSize =
+                raw.watchRecommendationPageSize.coerceIn(
+                    minWatchRecommendationPageSize,
+                    maxWatchRecommendationPageSize,
                 ),
             blockedSubmissionWaterfallMode =
                 raw.blockedSubmissionWaterfallMode.takeIf { mode ->

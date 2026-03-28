@@ -1,7 +1,8 @@
 package me.domino.fa2.application.submissionseries
 
 import com.fleeksoft.ksoup.Ksoup
-import kotlinx.coroutines.delay
+import me.domino.fa2.application.request.SequentialRequestThrottle
+import me.domino.fa2.application.request.defaultSequentialRequestThrottleMs
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
@@ -11,10 +12,13 @@ import me.domino.fa2.domain.translation.SubmissionDescriptionBlockExtractor
 import me.domino.fa2.domain.translation.SubmissionTranslationResultAligner
 import me.domino.fa2.util.normalizeFaSubmissionUrl
 
-internal const val submissionSeriesRequestThrottleMs: Long = 300L
+internal const val submissionSeriesRequestThrottleMs: Long = defaultSequentialRequestThrottleMs
 private const val maxResolvedSeriesSize: Int = 20
 
-class SubmissionSeriesResolver(private val repository: SubmissionDetailRepository) {
+class SubmissionSeriesResolver(
+    private val repository: SubmissionDetailRepository,
+    private val requestThrottleMs: Long = submissionSeriesRequestThrottleMs,
+) {
   private val blockExtractor =
       SubmissionDescriptionBlockExtractor(SubmissionTranslationResultAligner())
 
@@ -33,7 +37,11 @@ class SubmissionSeriesResolver(private val repository: SubmissionDetailRepositor
   }
 
   suspend fun resolveSeries(candidate: SubmissionSeriesCandidate): SubmissionSeriesResolvedSeries? {
-    val loader = SubmissionSeriesRemoteLoader(repository)
+    val loader =
+        SubmissionSeriesRemoteLoader(
+            repository = repository,
+            throttle = SequentialRequestThrottle(requestThrottleMs),
+        )
     val firstPair = resolveFirstPage(candidate, loader) ?: return null
     val (firstDetail, firstCandidate) = firstPair
 
@@ -343,14 +351,10 @@ private enum class SubmissionSeriesNavigationLinkType {
 
 private class SubmissionSeriesRemoteLoader(
     private val repository: SubmissionDetailRepository,
+    private val throttle: SequentialRequestThrottle,
 ) {
-  private var hasLoaded: Boolean = false
-
   suspend fun load(url: String): Submission? {
-    if (hasLoaded) {
-      delay(submissionSeriesRequestThrottleMs)
-    }
-    hasLoaded = true
+    throttle.awaitReady()
     return when (val state = repository.loadSubmissionDetailByUrl(url)) {
       is PageState.Success -> state.data
       PageState.CfChallenge,

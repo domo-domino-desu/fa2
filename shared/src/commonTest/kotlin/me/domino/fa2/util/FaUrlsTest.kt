@@ -30,7 +30,7 @@ class FaUrlsTest {
   fun buildsSearchUrlWithDefaultsOmittedAndGenderInQuery() {
     val url = FaUrls.search(FaUrls.SearchParams(q = "dragon @keywords female trans_female"))
     assertTrue(url.contains("/search/?"))
-    assertTrue(url.contains("q=wolf%20%40keywords%20female%20trans_female"))
+    assertTrue(url.contains("q=dragon%20%40keywords%20female%20trans_female"))
     assertTrue(url.contains("order-by=relevancy"))
     assertTrue(url.contains("order-direction=desc"))
     assertTrue(url.contains("rating-general=1"))

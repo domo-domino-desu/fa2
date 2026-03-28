@@ -212,6 +212,37 @@ internal fun TranslationSettingsSection(
 }
 
 @Composable
+internal fun RecommendationSettingsSection(
+    draft: SettingsDraft,
+    onDraftChange: (SettingsDraft) -> Unit,
+) {
+  SettingsGroup(title = stringResource(Res.string.following_recommendation), framed = false) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+      OutlinedTextField(
+          value = draft.watchRecommendationPageSizeInput,
+          onValueChange = { next ->
+            onDraftChange(draft.copy(watchRecommendationPageSizeInput = next.filter(Char::isDigit)))
+          },
+          label = { Text(stringResource(Res.string.watch_recommendation_page_size)) },
+          supportingText = {
+            Text(
+                stringResource(
+                    Res.string.numeric_range,
+                    AppSettings.minWatchRecommendationPageSize,
+                    AppSettings.maxWatchRecommendationPageSize,
+                )
+            )
+          },
+          modifier = Modifier.fillMaxWidth(),
+      )
+    }
+  }
+}
+
+@Composable
 internal fun BlockedContentSettingsSection(
     draft: SettingsDraft,
     onDraftChange: (SettingsDraft) -> Unit,

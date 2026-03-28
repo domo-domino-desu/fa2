@@ -56,6 +56,12 @@
   <string name="no_records">No records yet</string>
   <string name="settings_summary">Theme, waterfall width, and translation settings</string>
   <string name="following_more_summary">Open the users this account is following</string>
+  <string name="following_recommendation">Follow Recommendations</string>
+  <string name="following_recommendation_summary">Discover new users from the people you already follow</string>
+  <string name="following_recommendation_description">Randomly sample people you follow, then find the users they commonly follow.</string>
+  <string name="following_recommendation_action">Start recommending</string>
+  <string name="following_recommendation_empty">No recommendation candidates were found this time. Pull to refresh and try another sample.</string>
+  <string name="following_recommendation_load_failed">Failed to generate follow recommendations. Please retry.</string>
   <string name="favorite_more_summary">Open this account's favorited submissions</string>
   <string name="about_summary">View the open-source libraries and licenses used by this app</string>
   <string name="logout">Log Out</string>
@@ -147,6 +153,7 @@
   <string name="translation_target_language">Translation Target Language</string>
   <string name="metadata_display">Category/Type/Species/Gender/Rating Display</string>
   <string name="waterfall_min_column_width_dp">Waterfall Min Column Width (dp)</string>
+  <string name="watch_recommendation_page_size">Recommendations Per Run</string>
   <string name="base_url">Base URL</string>
   <string name="api_key">API Key</string>
   <string name="model">Model</string>

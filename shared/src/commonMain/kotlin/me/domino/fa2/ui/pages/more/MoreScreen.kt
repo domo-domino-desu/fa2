@@ -27,6 +27,8 @@ fun MoreScreen(
     onOpenUser: () -> Unit,
     /** 打开当前用户已关注列表。 */
     onOpenFollowing: () -> Unit,
+    /** 打开关注推荐页面。 */
+    onOpenWatchRecommendations: () -> Unit,
     /** 打开当前用户收藏列表。 */
     onOpenFavorites: () -> Unit,
     /** 打开设置页。 */
@@ -54,6 +56,7 @@ fun MoreScreen(
           state = state,
           onOpenUser = onOpenUser,
           onOpenFollowing = onOpenFollowing,
+          onOpenWatchRecommendations = onOpenWatchRecommendations,
           onOpenFavorites = onOpenFavorites,
           onOpenSettings = onOpenSettings,
           onOpenSubmissionHistory = onOpenSubmissionHistory,
@@ -74,6 +77,8 @@ private fun MoreContent(
     onOpenUser: () -> Unit,
     /** 打开当前用户已关注列表。 */
     onOpenFollowing: () -> Unit,
+    /** 打开关注推荐页。 */
+    onOpenWatchRecommendations: () -> Unit,
     /** 打开当前用户收藏列表。 */
     onOpenFavorites: () -> Unit,
     /** 打开设置页回调。 */
@@ -108,6 +113,13 @@ private fun MoreContent(
             subtitle = stringResource(Res.string.following_more_summary),
             onClick = onOpenFollowing,
             modifier = Modifier.testTag("more-following"),
+        )
+        SettingsListItem(
+            icon = FaMaterialSymbols.Outlined.Troubleshoot,
+            title = stringResource(Res.string.following_recommendation),
+            subtitle = stringResource(Res.string.following_recommendation_summary),
+            onClick = onOpenWatchRecommendations,
+            modifier = Modifier.testTag("more-following-recommendation"),
         )
         SettingsListItem(
             icon = FaMaterialSymbols.Filled.Favorite,

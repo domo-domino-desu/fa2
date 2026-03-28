@@ -55,6 +55,12 @@
   <string name="no_records">暂无记录</string>
   <string name="settings_summary">主题、瀑布流列宽与翻译设置</string>
   <string name="following_more_summary">打开当前账号已关注的用户列表</string>
+  <string name="following_recommendation">关注推荐</string>
+  <string name="following_recommendation_summary">根据你已经关注的人，发现值得继续关注的新用户</string>
+  <string name="following_recommendation_description">随机抽取你关注的一些人，再找出他们共同关注的用户。</string>
+  <string name="following_recommendation_action">开始推荐</string>
+  <string name="following_recommendation_empty">这次没有找到合适的推荐结果，下拉刷新后可重新抽样。</string>
+  <string name="following_recommendation_load_failed">生成关注推荐失败，请重试。</string>
   <string name="favorite_more_summary">打开当前账号的收藏内容</string>
   <string name="about_summary">查看本应用使用的开源库与许可证</string>
   <string name="logout">退出登录</string>
@@ -142,6 +148,7 @@
   <string name="translation_target_language">翻译目标语言</string>
   <string name="metadata_display">Category/Type/Species/Gender/Rating 显示</string>
   <string name="waterfall_min_column_width_dp">瀑布流单列最小宽度 (dp)</string>
+  <string name="watch_recommendation_page_size">每次推荐用户数</string>
   <string name="base_url">Base URL</string>
   <string name="api_key">API Key</string>
   <string name="model">Model</string>

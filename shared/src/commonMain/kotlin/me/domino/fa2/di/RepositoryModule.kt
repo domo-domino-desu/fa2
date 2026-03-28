@@ -4,6 +4,7 @@ import eu.anifantakis.lib.ksafe.KSafe
 import me.domino.fa2.application.attachmenttext.AttachmentTextService
 import me.domino.fa2.application.submissionseries.SubmissionSeriesResolver
 import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.application.watchrecommendation.WatchRecommendationService
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.repository.AuthRepository
 import me.domino.fa2.data.repository.BrowseRepository
@@ -13,10 +14,12 @@ import me.domino.fa2.data.repository.GalleryRepository
 import me.domino.fa2.data.repository.JournalDetailRepository
 import me.domino.fa2.data.repository.JournalRepository
 import me.domino.fa2.data.repository.JournalsRepository
+import me.domino.fa2.data.repository.PersistedWatchRecommendationCooldownRepository
 import me.domino.fa2.data.repository.SearchRepository
 import me.domino.fa2.data.repository.SubmissionDetailRepository
 import me.domino.fa2.data.repository.SubmissionRepository
 import me.domino.fa2.data.repository.UserRepository
+import me.domino.fa2.data.repository.WatchRecommendationCooldownRepository
 import me.domino.fa2.data.repository.WatchlistRepository
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.settings.AppSettingsStorage
@@ -47,6 +50,9 @@ fun repositoryModule(): Module = module {
   single { SearchRepository(get()) }
   single { SubmissionRepository(get(), get(), get(), get()) } bind SubmissionDetailRepository::class
   single { SubmissionSeriesResolver(get()) }
+  single { PersistedWatchRecommendationCooldownRepository(get()) } bind
+      WatchRecommendationCooldownRepository::class
+  single { WatchRecommendationService(get<WatchlistRepository>(), get()) }
   single { UserRepository(get(), get()) }
   single { GalleryRepository(get()) }
   single { FavoritesRepository(get()) }

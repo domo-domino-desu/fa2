@@ -49,6 +49,7 @@ import me.domino.fa2.ui.pages.submission.toWaterfallPageControls
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.pages.user.route.UserRouteScreen
 import me.domino.fa2.ui.pages.user.watchlist.UserWatchlistRouteScreen
+import me.domino.fa2.ui.pages.watchrecommendation.WatchRecommendationRouteScreen
 import me.domino.fa2.util.FaUrls
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
@@ -512,6 +513,9 @@ class MainRouteScreen(
                         category = WatchlistCategory.Watching,
                     )
                 )
+              },
+              onOpenWatchRecommendations = {
+                navigator.push(WatchRecommendationRouteScreen(username = username))
               },
               onOpenFavorites = {
                 navigator.push(

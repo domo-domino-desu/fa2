@@ -23,6 +23,7 @@ internal data class SettingsDraft(
     val blockedSubmissionWaterfallMode: BlockedSubmissionWaterfallMode,
     val blockedSubmissionPagerMode: BlockedSubmissionPagerMode,
     val returnToCurrentSubmissionInWaterfall: Boolean,
+    val watchRecommendationPageSizeInput: String,
     val chunkWordLimitInput: String,
     val maxConcurrencyInput: String,
     val waterfallMinCardWidthInput: String,
@@ -35,6 +36,7 @@ internal data class SettingsDraft(
     val chunkWordLimit = chunkWordLimitInput.toIntOrNull() ?: return null
     val maxConcurrency = maxConcurrencyInput.toIntOrNull() ?: return null
     val waterfallWidth = waterfallMinCardWidthInput.toIntOrNull() ?: return null
+    val watchRecommendationPageSize = watchRecommendationPageSizeInput.toIntOrNull() ?: return null
 
     return AppSettings(
         uiLanguage = uiLanguage,
@@ -46,6 +48,7 @@ internal data class SettingsDraft(
         blockedSubmissionWaterfallMode = blockedSubmissionWaterfallMode,
         blockedSubmissionPagerMode = blockedSubmissionPagerMode,
         returnToCurrentSubmissionInWaterfall = returnToCurrentSubmissionInWaterfall,
+        watchRecommendationPageSize = watchRecommendationPageSize,
         translationChunkWordLimit = chunkWordLimit,
         translationMaxConcurrency = maxConcurrency,
         waterfallMinCardWidthDp = waterfallWidth,
@@ -68,6 +71,7 @@ internal data class SettingsDraft(
     val chunkWordLimitLabel = appString(Res.string.chunk_word_limit)
     val maxConcurrencyLabel = appString(Res.string.max_concurrency)
     val waterfallMinColumnWidthLabel = appString(Res.string.waterfall_min_column_width_dp)
+    val watchRecommendationPageSizeLabel = appString(Res.string.watch_recommendation_page_size)
     val themeModeLabel = appString(Res.string.theme_mode)
     val appLanguageLabel = appString(Res.string.app_language)
     val translationTargetLanguageLabel = appString(Res.string.translation_target_language)
@@ -88,6 +92,9 @@ internal data class SettingsDraft(
     val waterfallWidth =
         waterfallMinCardWidthInput.toIntOrNull()
             ?: return appString(Res.string.must_be_number, waterfallMinColumnWidthLabel)
+    val watchRecommendationPageSize =
+        watchRecommendationPageSizeInput.toIntOrNull()
+            ?: return appString(Res.string.must_be_number, watchRecommendationPageSizeLabel)
 
     if (themeMode !in AppSettings.supportedThemeModes) {
       return appString(Res.string.unsupported_setting, themeModeLabel)
@@ -142,6 +149,17 @@ internal data class SettingsDraft(
       )
     }
 
+    if (
+        watchRecommendationPageSize !in
+            AppSettings.minWatchRecommendationPageSize..AppSettings.maxWatchRecommendationPageSize
+    ) {
+      return mustBeInRangeText(
+          watchRecommendationPageSizeLabel,
+          AppSettings.minWatchRecommendationPageSize,
+          AppSettings.maxWatchRecommendationPageSize,
+      )
+    }
+
     if (translationEnabled && translationProvider == TranslationProvider.OPENAI_COMPATIBLE) {
       val baseUrl = openAiBaseUrl.trim()
       if (baseUrl.isBlank()) return appString(Res.string.cannot_be_empty, baseUrlLabel)
@@ -170,6 +188,7 @@ internal data class SettingsDraft(
             blockedSubmissionWaterfallMode = settings.blockedSubmissionWaterfallMode,
             blockedSubmissionPagerMode = settings.blockedSubmissionPagerMode,
             returnToCurrentSubmissionInWaterfall = settings.returnToCurrentSubmissionInWaterfall,
+            watchRecommendationPageSizeInput = settings.watchRecommendationPageSize.toString(),
             chunkWordLimitInput = settings.translationChunkWordLimit.toString(),
             maxConcurrencyInput = settings.translationMaxConcurrency.toString(),
             waterfallMinCardWidthInput = settings.waterfallMinCardWidthDp.toString(),

@@ -15,6 +15,30 @@ import okio.Path.Companion.toPath
 
 class AppSettingsStorageTest {
   @Test
+  fun watchRecommendationPageSizeUsesDefaultAndNormalization() = runTest {
+    val randomSuffix = Random.nextLong().toString().replace('-', '0')
+    val tempPath =
+        "${FileSystem.SYSTEM_TEMPORARY_DIRECTORY}/fa2-settings-$randomSuffix.preferences_pb"
+            .toPath()
+    val dataStore = PreferenceDataStoreFactory.createWithPath(produceFile = { tempPath })
+    val keyValueStorage = KeyValueStorage(dataStore)
+    val secretVault = KSafe(fileName = "fa2_settings_secret_$randomSuffix")
+    val storage = AppSettingsStorage(kv = keyValueStorage, secretVault = secretVault)
+
+    assertEquals(
+        AppSettings.defaultWatchRecommendationPageSize,
+        storage.load().watchRecommendationPageSize,
+    )
+
+    storage.save(AppSettings(watchRecommendationPageSize = 999))
+
+    assertEquals(
+        AppSettings.maxWatchRecommendationPageSize,
+        storage.load().watchRecommendationPageSize,
+    )
+  }
+
+  @Test
   fun savesOpenAiApiKeyOnlyToSecretVault() = runTest {
     val randomSuffix = Random.nextLong().toString().replace('-', '0')
     val tempPath =

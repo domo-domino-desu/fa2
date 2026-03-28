@@ -64,6 +64,9 @@ class AppSettingsStorage(
     val returnToCurrentSubmissionInWaterfall =
         kv.load(KEY_RETURN_TO_CURRENT_SUBMISSION_IN_WATERFALL)?.toBooleanStrictOrNull()
             ?: AppSettings.defaultReturnToCurrentSubmissionInWaterfall
+    val rawWatchRecommendationPageSize =
+        kv.load(KEY_WATCH_RECOMMENDATION_PAGE_SIZE)?.toIntOrNull()
+            ?: AppSettings.defaultWatchRecommendationPageSize
 
     return AppSettings.normalize(
         AppSettings(
@@ -80,6 +83,7 @@ class AppSettingsStorage(
             blockedSubmissionWaterfallMode = blockedSubmissionWaterfallMode,
             blockedSubmissionPagerMode = blockedSubmissionPagerMode,
             returnToCurrentSubmissionInWaterfall = returnToCurrentSubmissionInWaterfall,
+            watchRecommendationPageSize = rawWatchRecommendationPageSize,
         )
     )
   }
@@ -119,6 +123,10 @@ class AppSettingsStorage(
         KEY_RETURN_TO_CURRENT_SUBMISSION_IN_WATERFALL,
         normalized.returnToCurrentSubmissionInWaterfall.toString(),
     )
+    kv.save(
+        KEY_WATCH_RECOMMENDATION_PAGE_SIZE,
+        normalized.watchRecommendationPageSize.toString(),
+    )
   }
 
   companion object {
@@ -144,5 +152,6 @@ class AppSettingsStorage(
     const val KEY_BLOCKED_SUBMISSION_PAGER_MODE: String = "settings.blockedSubmission.pager.mode"
     const val KEY_RETURN_TO_CURRENT_SUBMISSION_IN_WATERFALL: String =
         "settings.submission.returnToCurrentInWaterfall"
+    const val KEY_WATCH_RECOMMENDATION_PAGE_SIZE: String = "settings.watchRecommendation.pageSize"
   }
 }
