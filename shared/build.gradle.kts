@@ -133,6 +133,8 @@ symbolCraft {
   }
 
   materialSymbols(
+      "arrow_downward_alt",
+      "arrow_upward_alt",
       "arrow_back",
       "category",
       "comment",
@@ -166,6 +168,7 @@ symbolCraft {
       "troubleshoot",
       "translate",
       "arrow_circle_right",
+      "vertical_align_bottom",
       "vertical_align_top",
       "visibility",
       "wrap_text",

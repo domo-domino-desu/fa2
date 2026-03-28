@@ -416,7 +416,7 @@ private fun SubmissionWaterfallPageFab(
     if (effectiveControls.showFirstPage) {
       add(
           SubmissionWaterfallFabAction(
-              icon = FaMaterialSymbols.Outlined.KeyboardDoubleArrowUp,
+              icon = FaMaterialSymbols.Outlined.VerticalAlignTop,
               contentDescription = stringResource(Res.string.waterfall_first_page),
               enabled = effectiveControls.canLoadFirstPage && !effectiveControls.loading,
               onClick = { onLoadFirstPage?.invoke() },
@@ -426,7 +426,7 @@ private fun SubmissionWaterfallPageFab(
     if (effectiveControls.showPreviousPage) {
       add(
           SubmissionWaterfallFabAction(
-              icon = FaMaterialSymbols.Outlined.KeyboardArrowUp,
+              icon = FaMaterialSymbols.Outlined.ArrowUpwardAlt,
               contentDescription = stringResource(Res.string.waterfall_previous_page),
               enabled = effectiveControls.canLoadPreviousPage && !effectiveControls.loading,
               onClick = { onLoadPreviousPage?.invoke() },
@@ -468,7 +468,7 @@ private fun SubmissionWaterfallPageFab(
     if (effectiveControls.showNextPage) {
       add(
           SubmissionWaterfallFabAction(
-              icon = FaMaterialSymbols.Outlined.KeyboardArrowDown,
+              icon = FaMaterialSymbols.Outlined.ArrowDownwardAlt,
               contentDescription = stringResource(Res.string.waterfall_next_page),
               enabled = effectiveControls.canLoadNextPage && !effectiveControls.loading,
               onClick = { onLoadNextPage?.invoke() },
@@ -478,7 +478,7 @@ private fun SubmissionWaterfallPageFab(
     if (effectiveControls.showLastPage) {
       add(
           SubmissionWaterfallFabAction(
-              icon = FaMaterialSymbols.Outlined.KeyboardDoubleArrowDown,
+              icon = FaMaterialSymbols.Outlined.VerticalAlignBottom,
               contentDescription = stringResource(Res.string.waterfall_last_page),
               enabled = effectiveControls.canLoadLastPage && !effectiveControls.loading,
               onClick = { onLoadLastPage?.invoke() },
