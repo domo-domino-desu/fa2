@@ -53,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
@@ -508,13 +509,15 @@ private fun SubmissionWaterfallPageFab(
           if (action.enabled) {
             MaterialTheme.colorScheme.primaryContainer
           } else {
-            MaterialTheme.colorScheme.surfaceVariant
+            MaterialTheme.colorScheme.onSurface
+                .copy(alpha = 0.12f)
+                .compositeOver(MaterialTheme.colorScheme.surface)
           }
       val contentColor =
           if (action.enabled) {
             MaterialTheme.colorScheme.onPrimaryContainer
           } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
           }
       if (action.isIconOnly) {
         AnimatedVisibility(

@@ -72,7 +72,7 @@ private fun UserContactIconAction(contact: UserContact) {
 
   Icon(
       imageVector = icon,
-      contentDescription = contact.label,
+      contentDescription = displayUserContactLabel(contact.label),
       tint = MaterialTheme.colorScheme.onSurfaceVariant,
       modifier =
           Modifier.size(14.dp)
@@ -180,12 +180,7 @@ private fun activateUserContact(
 }
 
 private fun buildUserContactText(contact: UserContact): String {
-  val value = contact.value.trim()
-  if (value.isBlank()) return contact.label
-  if (value.equals(contact.label, ignoreCase = true)) return contact.label
-  if (contact.url.isNotBlank()) return value
-
-  return "${contact.label}: $value"
+  return displayUserContactLabel(contact.label)
 }
 
 private fun copyUserContact(
@@ -245,6 +240,43 @@ internal fun resolveUserContactIcon(label: String): ImageVector? =
       "wiiufriendcode" -> FaContactIcons.WiiU
       "battlenet" -> FaContactIcons.BattleNet
       else -> null
+    }
+
+internal fun displayUserContactLabel(label: String): String =
+    when (normalizeUserContactLabel(label)) {
+      "website" -> "Website"
+      "youtube" -> "YouTube"
+      "twitter" -> "Twitter"
+      "bluesky" -> "Bluesky"
+      "twitch" -> "Twitch"
+      "facebook" -> "Facebook"
+      "instagram" -> "Instagram"
+      "mastodon" -> "Mastodon"
+      "tiktok" -> "TikTok"
+      "reddit" -> "Reddit"
+      "etsy" -> "Etsy"
+      "patreon" -> "Patreon"
+      "kofi" -> "Ko-fi"
+      "deviantart" -> "DeviantArt"
+      "tumblr" -> "Tumblr"
+      "telegram" -> "Telegram"
+      "discord" -> "Discord"
+      "email" -> "Email"
+      "weasyl" -> "Weasyl"
+      "furrynetwork" -> "Furry Network"
+      "pixiv" -> "Pixiv"
+      "ao3" -> "AO3"
+      "wattpad" -> "Wattpad"
+      "steam" -> "Steam"
+      "xboxlive" -> "Xbox Live"
+      "xbox" -> "Xbox"
+      "playstationnetwork" -> "PlayStation Network"
+      "playstation" -> "PlayStation"
+      "3dsfriendcode" -> "Nintendo 3DS"
+      "switchfriendcode" -> "Nintendo Switch"
+      "wiiufriendcode" -> "Wii U"
+      "battlenet" -> "Battle.net"
+      else -> label.trim().ifBlank { "Link" }
     }
 
 private fun normalizeUserContactLabel(label: String): String =
