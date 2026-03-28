@@ -426,7 +426,7 @@ private fun SubmissionWaterfallPageFab(
     if (effectiveControls.showPreviousPage) {
       add(
           SubmissionWaterfallFabAction(
-              icon = FaMaterialSymbols.Outlined.ExpandLess,
+              icon = FaMaterialSymbols.Outlined.KeyboardArrowUp,
               contentDescription = stringResource(Res.string.waterfall_previous_page),
               enabled = effectiveControls.canLoadPreviousPage && !effectiveControls.loading,
               onClick = { onLoadPreviousPage?.invoke() },
@@ -468,7 +468,7 @@ private fun SubmissionWaterfallPageFab(
     if (effectiveControls.showNextPage) {
       add(
           SubmissionWaterfallFabAction(
-              icon = FaMaterialSymbols.Outlined.ExpandMore,
+              icon = FaMaterialSymbols.Outlined.KeyboardArrowDown,
               contentDescription = stringResource(Res.string.waterfall_next_page),
               enabled = effectiveControls.canLoadNextPage && !effectiveControls.loading,
               onClick = { onLoadNextPage?.invoke() },

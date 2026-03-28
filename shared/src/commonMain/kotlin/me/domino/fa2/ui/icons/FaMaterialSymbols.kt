@@ -27,7 +27,9 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.HomeW400Outli
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ImageW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.InfoW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.Inventory2W400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.KeyboardArrowDownW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.KeyboardArrowRightW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.KeyboardArrowUpW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.KeyboardDoubleArrowDownW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.KeyboardDoubleArrowUpW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.LogoutW400Outlined
@@ -86,6 +88,8 @@ object FaMaterialSymbols {
     val Home: ImageVector = GeneratedIcons.HomeW400Outlined
     val Image: ImageVector = GeneratedIcons.ImageW400Outlined
     val Inventory2: ImageVector = GeneratedIcons.Inventory2W400Outlined
+    val KeyboardArrowDown: ImageVector = GeneratedIcons.KeyboardArrowDownW400Outlined
+    val KeyboardArrowUp: ImageVector = GeneratedIcons.KeyboardArrowUpW400Outlined
     val KeyboardDoubleArrowDown: ImageVector = GeneratedIcons.KeyboardDoubleArrowDownW400Outlined
     val KeyboardDoubleArrowUp: ImageVector = GeneratedIcons.KeyboardDoubleArrowUpW400Outlined
     val Menu: ImageVector = GeneratedIcons.MenuW400Outlined
