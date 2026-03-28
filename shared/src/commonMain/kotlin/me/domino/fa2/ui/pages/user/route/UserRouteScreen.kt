@@ -55,7 +55,7 @@ class UserRouteScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
       UserRouteTopBar(
-          title = userState.header?.displayName?.ifBlank { username } ?: username,
+          title = "~$username",
           onBack = { parentNavigator.pop() },
           onGoHome = { parentNavigator.goBackHome() },
           shareUrl = FaUrls.user(username),
