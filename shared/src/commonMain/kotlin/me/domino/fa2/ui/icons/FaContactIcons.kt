@@ -32,6 +32,7 @@ import me.domino.fa2.generated.symbols.icons.simpleicons.icons.FurrynetworkSimpl
 import me.domino.fa2.generated.symbols.icons.simpleicons.icons.KofiSimpleicons
 import me.domino.fa2.generated.symbols.icons.simpleicons.icons.Nintendo3dsSimpleicons
 import me.domino.fa2.generated.symbols.icons.simpleicons.icons.NintendoswitchSimpleicons
+import me.domino.fa2.generated.symbols.icons.simpleicons.icons.PicartodottvSimpleicons
 import me.domino.fa2.generated.symbols.icons.simpleicons.icons.WattpadSimpleicons
 import me.domino.fa2.generated.symbols.icons.simpleicons.icons.WeasylSimpleicons
 import me.domino.fa2.generated.symbols.icons.simpleicons.icons.WiiuSimpleicons
@@ -60,6 +61,7 @@ object FaContactIcons {
   val PlayStation: ImageVector = FontAwesomeBrandIcons.PlaystationFontawesomebrands
   val BattleNet: ImageVector = FontAwesomeBrandIcons.BattleNetFontawesomebrands
   val KoFi: ImageVector = SimpleIcons.KofiSimpleicons
+  val Picarto: ImageVector = SimpleIcons.PicartodottvSimpleicons
   val FurryNetwork: ImageVector = SimpleIcons.FurrynetworkSimpleicons
   val Ao3: ImageVector = SimpleIcons.ArchiveofourownSimpleicons
   val Wattpad: ImageVector = SimpleIcons.WattpadSimpleicons

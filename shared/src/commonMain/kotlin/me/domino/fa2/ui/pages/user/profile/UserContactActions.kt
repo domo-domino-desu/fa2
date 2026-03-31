@@ -219,6 +219,7 @@ internal fun resolveUserContactIcon(label: String): ImageVector? =
       "etsy" -> FaContactIcons.Etsy
       "patreon" -> FaContactIcons.Patreon
       "kofi" -> FaContactIcons.KoFi
+      "picarto" -> FaContactIcons.Picarto
       "deviantart" -> FaContactIcons.DeviantArt
       "tumblr" -> FaContactIcons.Tumblr
       "telegram" -> FaContactIcons.Telegram
@@ -257,6 +258,7 @@ internal fun displayUserContactLabel(label: String): String =
       "etsy" -> "Etsy"
       "patreon" -> "Patreon"
       "kofi" -> "Ko-fi"
+      "picarto" -> "Picarto"
       "deviantart" -> "DeviantArt"
       "tumblr" -> "Tumblr"
       "telegram" -> "Telegram"

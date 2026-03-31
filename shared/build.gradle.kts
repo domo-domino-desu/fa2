@@ -222,6 +222,7 @@ symbolCraft {
               "kofi",
               "nintendo3ds",
               "nintendoswitch",
+              "picartodottv",
               "wattpad",
               "weasyl",
               "wiiu",

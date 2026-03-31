@@ -15,7 +15,6 @@ Platforms that still could not be matched after trying multiple likely aliases:
 - SoFurry
 - Inkbunny
 - Transfur
-- Picarto
 - Itaku
 - Toyhou.se
 - FanFiction.net
@@ -32,7 +31,6 @@ Alias attempts used while searching:
 - `SoFurry`: `sofurry`
 - `Inkbunny`: `inkbunny`
 - `Transfur`: `transfur`
-- `Picarto`: `picarto`
 - `Itaku`: `itaku`
 - `Toyhou.se`: `toyhouse`, `toyhou-se`, `toyhou.se`
 - `FanFiction.net`: `fanfictiondotnet`, `fanfiction`
