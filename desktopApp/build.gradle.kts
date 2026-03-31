@@ -26,6 +26,7 @@ kotlin {
         implementation(project(":shared"))
         implementation(libs.koin.core)
         implementation(libs.kermit)
+        implementation(libs.rapidocr4j)
         implementation(libs.room.runtime)
         implementation(libs.sqlite.bundled)
         implementation(libs.slf4j.simple)

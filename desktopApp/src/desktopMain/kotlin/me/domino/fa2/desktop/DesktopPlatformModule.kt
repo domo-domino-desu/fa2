@@ -9,7 +9,9 @@ import eu.anifantakis.lib.ksafe.KSafe
 import java.io.File
 import me.domino.fa2.data.local.AppDatabase
 import me.domino.fa2.data.local.AppDatabaseBuilderFactory
-import me.domino.fa2.data.ocr.RapidImageTextRecognitionPort
+import me.domino.fa2.desktop.ocr.DesktopOcrBlockExtractor
+import me.domino.fa2.desktop.ocr.RapidImageTextRecognitionPort
+import me.domino.fa2.desktop.ocr.RapidOcrBlockExtractor
 import me.domino.fa2.di.KOIN_QUALIFIER_COOKIE_VAULT
 import me.domino.fa2.di.KOIN_QUALIFIER_SETTINGS_SECRET_VAULT
 import me.domino.fa2.domain.ocr.ImageTextRecognitionPort
@@ -21,7 +23,8 @@ import org.koin.dsl.module
 
 /** Desktop 平台依赖模块。 */
 fun desktopPlatformModule(): Module = module {
-  single<ImageTextRecognitionPort> { RapidImageTextRecognitionPort() }
+  single<DesktopOcrBlockExtractor> { RapidOcrBlockExtractor() }
+  single<ImageTextRecognitionPort> { RapidImageTextRecognitionPort(get()) }
   single<SystemLanguageProvider> {
     object : SystemLanguageProvider {
       override fun currentLanguageTag(): String = java.util.Locale.getDefault().toLanguageTag()

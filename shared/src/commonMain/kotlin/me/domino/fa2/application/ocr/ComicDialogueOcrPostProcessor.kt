@@ -17,40 +17,46 @@ private const val maxHorizontalGapWithoutVerticalOverlapFactor = 1.6f
 private const val maxBoundingAreaFactor = 4.5f
 private const val rowCenterThresholdFactor = 0.65f
 
-internal fun ImageOcrResult.mergeComicDialogueBlocks(): ImageOcrResult =
-    copy(blocks = mergeComicDialogueBlocks(blocks))
+object ComicDialogueOcrBlockMerger {
+  fun merge(result: ImageOcrResult): ImageOcrResult = result.copy(blocks = merge(result.blocks))
 
-internal fun mergeComicDialogueBlocks(
-    blocks: List<RecognizedTextBlock>
-): List<RecognizedTextBlock> {
-  if (blocks.size <= 1) return blocks
+  fun merge(blocks: List<RecognizedTextBlock>): List<RecognizedTextBlock> {
+    if (blocks.size <= 1) return blocks
 
-  val measuredBlocks = blocks.mapNotNull { block -> MeasuredOcrBlock.from(block) }
-  if (measuredBlocks.size <= 1) return measuredBlocks.map { it.block }
+    val measuredBlocks = blocks.mapNotNull { block -> MeasuredOcrBlock.from(block) }
+    if (measuredBlocks.size <= 1) return measuredBlocks.map { it.block }
 
-  val medianHeight = measuredBlocks.map { it.rect.height }.median()
-  if (medianHeight <= 0f) return measuredBlocks.map { it.block }
+    val medianHeight = measuredBlocks.map { it.rect.height }.median()
+    if (medianHeight <= 0f) return measuredBlocks.map { it.block }
 
-  val adjacency = Array(measuredBlocks.size) { mutableListOf<Int>() }
-  for (leftIndex in 0 until measuredBlocks.lastIndex) {
-    for (rightIndex in leftIndex + 1 until measuredBlocks.size) {
-      if (shouldConnect(measuredBlocks[leftIndex], measuredBlocks[rightIndex], medianHeight)) {
-        adjacency[leftIndex] += rightIndex
-        adjacency[rightIndex] += leftIndex
+    val adjacency = Array(measuredBlocks.size) { mutableListOf<Int>() }
+    for (leftIndex in 0 until measuredBlocks.lastIndex) {
+      for (rightIndex in leftIndex + 1 until measuredBlocks.size) {
+        if (shouldConnect(measuredBlocks[leftIndex], measuredBlocks[rightIndex], medianHeight)) {
+          adjacency[leftIndex] += rightIndex
+          adjacency[rightIndex] += leftIndex
+        }
       }
     }
-  }
 
-  val visited = BooleanArray(measuredBlocks.size)
-  val mergedBlocks = mutableListOf<RecognizedTextBlock>()
-  for (index in measuredBlocks.indices) {
-    if (visited[index]) continue
-    val component = collectConnectedComponent(index, adjacency, visited).map { measuredBlocks[it] }
-    mergedBlocks += mergeConnectedComponent(component)
-  }
+    val visited = BooleanArray(measuredBlocks.size)
+    val mergedBlocks = mutableListOf<RecognizedTextBlock>()
+    for (index in measuredBlocks.indices) {
+      if (visited[index]) continue
+      val component =
+          collectConnectedComponent(index, adjacency, visited).map { measuredBlocks[it] }
+      mergedBlocks += mergeConnectedComponent(component)
+    }
 
-  return mergedBlocks.sortedWith(compareBy({ it.boundsRect().top }, { it.boundsRect().left }))
+    return mergedBlocks.sortedWith(compareBy({ it.boundsRect().top }, { it.boundsRect().left }))
+  }
 }
+
+fun ImageOcrResult.mergeComicDialogueBlocks(): ImageOcrResult =
+    ComicDialogueOcrBlockMerger.merge(this)
+
+fun mergeComicDialogueBlocks(blocks: List<RecognizedTextBlock>): List<RecognizedTextBlock> =
+    ComicDialogueOcrBlockMerger.merge(blocks)
 
 private fun collectConnectedComponent(
     startIndex: Int,

@@ -73,6 +73,7 @@ dependencies {
   implementation(libs.ksafe)
   implementation(libs.koin.core)
   implementation(libs.kermit)
+  implementation(libs.mlkit.text.recognition)
   implementation(libs.room.runtime)
   androidTestImplementation(libs.compose.ui.test.junit4)
   androidTestImplementation(libs.androidx.test.ext.junit)

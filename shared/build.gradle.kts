@@ -63,6 +63,7 @@ kotlin {
         implementation(kotlin("test"))
         implementation(libs.koin.core)
         implementation(libs.kotlinx.coroutines.test)
+        implementation(libs.ktor.client.mock)
         implementation(libs.room.runtime)
         implementation(libs.sqlite.bundled)
       }
@@ -73,7 +74,6 @@ kotlin {
       dependencies {
         implementation(libs.ktor.client.okhttp)
         implementation(libs.pdfbox)
-        implementation(libs.rapidocr4j)
         implementation(libs.slf4j.simple)
       }
     }
@@ -86,7 +86,6 @@ kotlin {
         implementation(libs.documentfile)
         implementation(libs.ktor.client.okhttp)
         implementation(libs.pdfbox.android)
-        implementation(libs.rapidocr4j.android)
       }
     }
   }

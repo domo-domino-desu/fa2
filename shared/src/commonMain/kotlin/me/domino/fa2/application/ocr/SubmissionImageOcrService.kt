@@ -24,6 +24,6 @@ class KtorSubmissionImageOcrService(
     if (imageBytes.isEmpty()) {
       throw IllegalStateException("Image OCR downloaded empty image payload")
     }
-    return recognitionPort.recognize(imageBytes).mergeComicDialogueBlocks()
+    return recognitionPort.recognize(imageBytes)
   }
 }

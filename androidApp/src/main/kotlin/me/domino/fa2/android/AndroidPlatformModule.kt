@@ -7,9 +7,9 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.room.Room
 import eu.anifantakis.lib.ksafe.KSafe
 import java.io.File
+import me.domino.fa2.android.ocr.MlKitImageTextRecognitionPort
 import me.domino.fa2.data.local.AppDatabase
 import me.domino.fa2.data.local.AppDatabaseBuilderFactory
-import me.domino.fa2.data.ocr.RapidImageTextRecognitionPort
 import me.domino.fa2.di.KOIN_QUALIFIER_COOKIE_VAULT
 import me.domino.fa2.di.KOIN_QUALIFIER_SETTINGS_SECRET_VAULT
 import me.domino.fa2.domain.ocr.ImageTextRecognitionPort
@@ -25,7 +25,7 @@ fun androidPlatformModule(
     context: Context
 ): Module = module {
   single<Context> { context.applicationContext }
-  single<ImageTextRecognitionPort> { RapidImageTextRecognitionPort(get()) }
+  single<ImageTextRecognitionPort> { MlKitImageTextRecognitionPort() }
   single<SystemLanguageProvider> {
     object : SystemLanguageProvider {
       override fun currentLanguageTag(): String = java.util.Locale.getDefault().toLanguageTag()

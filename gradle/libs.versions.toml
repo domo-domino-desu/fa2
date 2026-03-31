@@ -26,6 +26,7 @@ ksp = "2.3.6"
 ktfmt = "0.26.0"
 ktor = "3.0.0"
 lifecycle = "2.9.2"
+mlkitTextRecognition = "16.0.1"
 materialyou = "0.2.9"
 datastore = "1.2.1"
 documentfile = "1.1.0"
@@ -40,7 +41,6 @@ symbolcraft = "0.3.4"
 pdfbox = "2.0.26"
 pdfboxAndroid = "2.0.26.0"
 rapidocr4j = "1.0.3"
-rapidocr4jAndroid = "1.0.0"
 
 [libraries]
 aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibraries" }
@@ -74,8 +74,10 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
 ksafe = { module = "eu.anifantakis:ksafe", version.ref = "kSafe" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 materialyou = { module = "dev.zwander:materialyou", version.ref = "materialyou" }
+mlkit-text-recognition = { module = "com.google.mlkit:text-recognition", version.ref = "mlkitTextRecognition" }
 datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore" }
 documentfile = { module = "androidx.documentfile:documentfile", version.ref = "documentfile" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation" }
@@ -92,7 +94,6 @@ zoomimage-compose-coil3 = { module = "io.github.panpf.zoomimage:zoomimage-compos
 pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }
 pdfbox-android = { module = "com.tom-roush:pdfbox-android", version.ref = "pdfboxAndroid" }
 rapidocr4j = { module = "io.github.hzkitty:rapidocr4j", version.ref = "rapidocr4j" }
-rapidocr4j-android = { module = "io.github.hzkitty:rapidocr4j-android", version.ref = "rapidocr4jAndroid" }
 
 [plugins]
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

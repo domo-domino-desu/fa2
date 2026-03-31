@@ -1,19 +1,18 @@
-package me.domino.fa2.data.ocr
+package me.domino.fa2.desktop.ocr
 
 import io.github.hzkitty.RapidOCR
 import io.github.hzkitty.entity.RecResult
 import java.io.ByteArrayInputStream
 import javax.imageio.ImageIO
-import me.domino.fa2.domain.ocr.ImageOcrResult
-import me.domino.fa2.domain.ocr.ImageTextRecognitionPort
+import me.domino.fa2.application.ocr.ComicDialogueOcrBlockMerger
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.ocr.RecognizedTextBlock
 import org.opencv.core.Point
 
-class RapidImageTextRecognitionPort : ImageTextRecognitionPort {
+internal class RapidOcrBlockExtractor : DesktopOcrBlockExtractor {
   private val engine: RapidOCR by lazy { RapidOCR.create() }
 
-  override suspend fun recognize(imageBytes: ByteArray): ImageOcrResult {
+  override suspend fun extract(imageBytes: ByteArray): List<RecognizedTextBlock> {
     val sourceImage =
         checkNotNull(ImageIO.read(ByteArrayInputStream(imageBytes))) {
           "Unable to decode image for OCR"
@@ -23,13 +22,20 @@ class RapidImageTextRecognitionPort : ImageTextRecognitionPort {
     check(width > 0 && height > 0) { "Invalid image size for OCR: ${width}x$height" }
 
     val result = engine.run(imageBytes)
-    val blocks =
-        result.recRes.orEmpty().mapNotNull { record -> record.toRecognizedTextBlock(width, height) }
-    return ImageOcrResult(blocks)
+    return rapidOcrResultToBlocks(result.recRes.orEmpty(), width, height)
   }
 }
 
-private fun RecResult.toRecognizedTextBlock(
+internal fun rapidOcrResultToBlocks(
+    records: List<RecResult>,
+    width: Int,
+    height: Int,
+): List<RecognizedTextBlock> {
+  val fragments = records.mapNotNull { record -> record.toRecognizedTextFragment(width, height) }
+  return ComicDialogueOcrBlockMerger.merge(fragments)
+}
+
+private fun RecResult.toRecognizedTextFragment(
     width: Int,
     height: Int,
 ): RecognizedTextBlock? {
