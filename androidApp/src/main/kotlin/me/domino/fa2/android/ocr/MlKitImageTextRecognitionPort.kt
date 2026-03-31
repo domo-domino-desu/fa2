@@ -11,6 +11,7 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
+import me.domino.fa2.application.ocr.ComicDialogueOcrBlockMerger
 import me.domino.fa2.domain.ocr.ImageOcrResult
 import me.domino.fa2.domain.ocr.ImageTextRecognitionPort
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
@@ -33,10 +34,8 @@ class MlKitImageTextRecognitionPort : ImageTextRecognitionPort {
     val image = InputImage.fromBitmap(bitmap, 0)
     val result = recognizer.process(image).await()
     val blocks =
-        result.textBlocks
-            .mapNotNull { block -> block.toRecognizedTextBlock(width, height) }
-            .sortedWith(compareBy({ it.boundsRect().top }, { it.boundsRect().left }))
-    return ImageOcrResult(blocks = blocks)
+        result.textBlocks.mapNotNull { block -> block.toRecognizedTextBlock(width, height) }
+    return ImageOcrResult(blocks = ComicDialogueOcrBlockMerger.merge(blocks))
   }
 }
 
@@ -50,7 +49,12 @@ private fun Text.TextBlock.toRecognizedTextBlock(
     width: Int,
     height: Int,
 ): RecognizedTextBlock? {
-  val textValue = text.trim()
+  val textValue =
+      lines
+          .map { line -> line.text.trim() }
+          .filter { it.isNotBlank() }
+          .joinToString(separator = " ")
+          .ifBlank { text.trim() }
   if (textValue.isBlank()) return null
   val points =
       cornerPoints.toNormalizedPoints(width, height)
@@ -84,35 +88,3 @@ private fun Point.toNormalizedPoint(width: Int, height: Int): NormalizedImagePoi
         x = (x.toFloat() / width.toFloat()).coerceIn(0f, 1f),
         y = (y.toFloat() / height.toFloat()).coerceIn(0f, 1f),
     )
-
-private fun RecognizedTextBlock.boundsRect(): NormalizedRect =
-    points.fold(NormalizedRect.Empty) { rect, point -> rect.include(point) }
-
-private data class NormalizedRect(
-    val left: Float,
-    val top: Float,
-    val right: Float,
-    val bottom: Float,
-) {
-  fun include(point: NormalizedImagePoint): NormalizedRect =
-      if (this == Empty) {
-        NormalizedRect(point.x, point.y, point.x, point.y)
-      } else {
-        NormalizedRect(
-            left = minOf(left, point.x),
-            top = minOf(top, point.y),
-            right = maxOf(right, point.x),
-            bottom = maxOf(bottom, point.y),
-        )
-      }
-
-  companion object {
-    val Empty =
-        NormalizedRect(
-            left = Float.POSITIVE_INFINITY,
-            top = Float.POSITIVE_INFINITY,
-            right = Float.NEGATIVE_INFINITY,
-            bottom = Float.NEGATIVE_INFINITY,
-        )
-  }
-}
