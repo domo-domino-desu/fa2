@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -72,8 +71,24 @@ fun SubmissionPager(
     scrollOffsetOfSid: (Int) -> Int,
     /** 请求 pager 容器重新获取焦点。 */
     requestPagerFocus: () -> Unit,
-    /** 原图缩放遮罩显隐回调。 */
-    onZoomOverlayVisibilityChanged: (Boolean) -> Unit,
+    /** 当前打开的原图缩放遮罩图片 URL。 */
+    activeZoomOverlayImageUrl: String?,
+    /** 当前原图 OCR 状态。 */
+    zoomImageOcrState: me.domino.fa2.ui.pages.submission.SubmissionImageOcrUiState,
+    /** 打开图片放大。 */
+    onOpenImageZoom: (String) -> Unit,
+    /** 关闭图片放大。 */
+    onDismissImageZoom: () -> Unit,
+    /** 切换原图 OCR。 */
+    onToggleImageOcr: () -> Unit,
+    /** 打开 OCR 文本编辑弹窗。 */
+    onOpenImageOcrDialog: (String) -> Unit,
+    /** 关闭 OCR 文本编辑弹窗。 */
+    onDismissImageOcrDialog: () -> Unit,
+    /** 更新 OCR 文本编辑草稿。 */
+    onUpdateImageOcrDialogDraft: (String) -> Unit,
+    /** 刷新 OCR 文本翻译。 */
+    onRefreshImageOcrDialogTranslation: () -> Unit,
     /** 当前页滚动偏移变更。 */
     onPageScrollOffsetChanged: (sid: Int, offset: Int) -> Unit,
     /** 各 sid 的回顶命令版本。 */
@@ -107,12 +122,10 @@ fun SubmissionPager(
         .distinctUntilChanged()
         .collect { page -> onPageChanged(page) }
   }
-  var zoomOverlayImageUrl by remember { mutableStateOf<String?>(null) }
-
-  LaunchedEffect(zoomOverlayImageUrl) {
-    onZoomOverlayVisibilityChanged(!zoomOverlayImageUrl.isNullOrBlank())
-  }
-  PlatformBackHandler(enabled = !zoomOverlayImageUrl.isNullOrBlank()) { zoomOverlayImageUrl = null }
+  PlatformBackHandler(
+      enabled = !activeZoomOverlayImageUrl.isNullOrBlank(),
+      onBack = onDismissImageZoom,
+  )
   val blockedMediaRevealState = remember { mutableStateMapOf<Int, Boolean>() }
   val consumedScrollToTopVersions = remember { mutableStateMapOf<Int, Long>() }
 
@@ -147,7 +160,7 @@ fun SubmissionPager(
                 onKeywordLongPress = onKeywordLongPress,
                 onOpenBrowseFilter = onOpenBrowseFilter,
                 onCopySubmissionUrl = onCopySubmissionUrl,
-                onOpenImageZoom = { imageUrl -> zoomOverlayImageUrl = imageUrl },
+                onOpenImageZoom = onOpenImageZoom,
                 isBlockedByTag = item.isBlockedByTag,
                 blockedSubmissionMode = blockedSubmissionMode,
                 isBlockedMediaRevealed = blockedMediaRevealState[item.id] == true,
@@ -172,11 +185,17 @@ fun SubmissionPager(
       }
     }
 
-    val activeImageUrl = zoomOverlayImageUrl
+    val activeImageUrl = activeZoomOverlayImageUrl
     if (!activeImageUrl.isNullOrBlank()) {
       SubmissionZoomImageOverlay(
           imageUrl = activeImageUrl,
-          onDismiss = { zoomOverlayImageUrl = null },
+          ocrState = zoomImageOcrState,
+          onToggleOcr = onToggleImageOcr,
+          onOpenBlockDialog = onOpenImageOcrDialog,
+          onDismissBlockDialog = onDismissImageOcrDialog,
+          onUpdateDialogDraft = onUpdateImageOcrDialogDraft,
+          onRefreshBlockTranslation = onRefreshImageOcrDialogTranslation,
+          onDismiss = onDismissImageZoom,
       )
     }
   }

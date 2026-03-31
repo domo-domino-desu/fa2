@@ -9,18 +9,23 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.domino.fa2.application.attachmenttext.AttachmentTextExtractor
+import me.domino.fa2.application.ocr.SubmissionImageOcrService
 import me.domino.fa2.application.submissionseries.seriesInitialReadyCount
 import me.domino.fa2.application.submissionseries.seriesWarmBufferCount
 import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.application.translation.SubmissionImageOcrTranslationResult
+import me.domino.fa2.application.translation.SubmissionImageOcrTranslationService
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.domain.attachmenttext.deriveAttachmentFileName
+import me.domino.fa2.domain.ocr.RecognizedTextBlock
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.appString
 import me.domino.fa2.util.FaUrls
+import me.domino.fa2.util.isGifUrl
 import me.domino.fa2.util.logging.summarizePageState
 
 internal const val pagerPrefetchDebounceMs: Long = 500L
@@ -40,6 +45,8 @@ internal class SubmissionScreenWorkflow(
     private val contextController: SubmissionPagerContextController,
     private val submissionSource: SubmissionPagerDetailSource,
     private val translationService: SubmissionDescriptionTranslationService,
+    private val imageOcrService: SubmissionImageOcrService,
+    private val imageOcrTranslationService: SubmissionImageOcrTranslationService,
     private val settingsService: AppSettingsService? = null,
     private val systemLanguageProvider: SystemLanguageProvider? = null,
     private val screenModelScope: CoroutineScope,
@@ -52,6 +59,10 @@ internal class SubmissionScreenWorkflow(
   private val scrollOffsetBySid: MutableMap<Int, Int> = mutableMapOf()
   private val scrollToTopVersionBySid: MutableMap<Int, Long> = mutableMapOf()
   private val translationJobs: MutableMap<SubmissionTranslationJobKey, Job> = mutableMapOf()
+  private var zoomOverlayImageUrl: String? = null
+  private var zoomImageOcrState: SubmissionImageOcrUiState = SubmissionImageOcrUiState.Idle
+  private var imageOcrJob: Job? = null
+  private var imageOcrDialogJob: Job? = null
   private var prefetchJob: Job? = null
   private val prefetchedSuccessSids: MutableSet<Int> = mutableSetOf()
   private val prefetchingSids: MutableSet<Int> = mutableSetOf()
@@ -74,6 +85,7 @@ internal class SubmissionScreenWorkflow(
       }
       return
     }
+    clearZoomOverlayState(publish = false)
     contextController.setCurrentIndex(contextController.currentIndex() - 1)
     publishState()
     loadCurrentAndSchedulePrefetch()
@@ -82,6 +94,7 @@ internal class SubmissionScreenWorkflow(
 
   fun next() {
     if (contextController.hasNextCached()) {
+      clearZoomOverlayState(publish = false)
       contextController.setCurrentIndex(contextController.currentIndex() + 1)
       publishState()
       loadCurrentAndSchedulePrefetch()
@@ -92,6 +105,7 @@ internal class SubmissionScreenWorkflow(
   }
 
   fun onPageChanged(index: Int) {
+    clearZoomOverlayState(publish = false)
     contextController.setCurrentIndex(index)
     publishState()
     loadCurrentAndSchedulePrefetch()
@@ -120,6 +134,248 @@ internal class SubmissionScreenWorkflow(
     val current = contextController.current() ?: return
     log.i { "重试详情加载 -> sid=${current.id}" }
     loadDetail(current = current, force = true)
+  }
+
+  fun openImageZoom(imageUrl: String) {
+    val normalizedUrl = normalizeZoomImageUrl(imageUrl) ?: return
+    cancelImageOcrJobs()
+    zoomOverlayImageUrl = normalizedUrl
+    zoomImageOcrState = SubmissionImageOcrUiState.Idle
+    publishState()
+  }
+
+  fun dismissImageZoom() {
+    if (zoomOverlayImageUrl == null && zoomImageOcrState is SubmissionImageOcrUiState.Idle) return
+    clearZoomOverlayState(publish = true)
+  }
+
+  fun toggleImageOcrCurrent() {
+    val imageUrl = zoomOverlayImageUrl ?: return
+    if (isGifUrl(imageUrl)) return
+    when (zoomImageOcrState) {
+      is SubmissionImageOcrUiState.Loading -> return
+      is SubmissionImageOcrUiState.Showing -> {
+        cancelImageOcrDialogJob()
+        zoomImageOcrState = SubmissionImageOcrUiState.Idle
+        publishState()
+        return
+      }
+
+      is SubmissionImageOcrUiState.Error,
+      SubmissionImageOcrUiState.Idle -> Unit
+    }
+
+    cancelImageOcrJobs()
+    zoomImageOcrState = SubmissionImageOcrUiState.Loading
+    publishState()
+
+    val targetImageUrl = imageUrl
+    imageOcrJob =
+        screenModelScope.launch {
+          try {
+            val result = imageOcrService.recognize(targetImageUrl)
+            if (zoomOverlayImageUrl != targetImageUrl) return@launch
+            if (result.blocks.isEmpty()) {
+              val emptyMessage = appString(Res.string.image_ocr_empty)
+              zoomImageOcrState = SubmissionImageOcrUiState.Error(emptyMessage)
+              emitToast(emptyMessage)
+            } else {
+              val translatedBlocks = translateImageOcrBlocks(result.blocks)
+              zoomImageOcrState = SubmissionImageOcrUiState.Showing(blocks = translatedBlocks)
+              if (
+                  translatedBlocks.isNotEmpty() &&
+                      translatedBlocks.none {
+                        it.translationStatus == SubmissionImageOcrTranslationStatus.SUCCESS
+                      }
+              ) {
+                emitToast(appString(Res.string.image_ocr_translation_failed))
+              }
+            }
+            publishState()
+          } catch (cancelled: CancellationException) {
+            throw cancelled
+          } catch (error: Throwable) {
+            if (zoomOverlayImageUrl != targetImageUrl) return@launch
+            val failureMessage =
+                appString(
+                    Res.string.image_ocr_failed,
+                    error.message?.takeIf { it.isNotBlank() } ?: error.toString(),
+                )
+            zoomImageOcrState = SubmissionImageOcrUiState.Error(failureMessage)
+            emitToast(failureMessage)
+            publishState()
+          } finally {
+            val currentJob = currentCoroutineContext()[Job]
+            if (imageOcrJob === currentJob) {
+              imageOcrJob = null
+            }
+          }
+        }
+  }
+
+  fun openImageOcrDialog(blockId: String) {
+    val showingState = zoomImageOcrState as? SubmissionImageOcrUiState.Showing ?: return
+    val block = showingState.blocks.firstOrNull { it.id == blockId } ?: return
+    cancelImageOcrDialogJob()
+    zoomImageOcrState =
+        showingState.copy(
+            dialog =
+                SubmissionImageOcrDialogUiState(
+                    blockId = block.id,
+                    draftOriginalText = block.originalText,
+                    translatedText = block.translatedText,
+                )
+        )
+    publishState()
+  }
+
+  fun dismissImageOcrDialog() {
+    val showingState = zoomImageOcrState as? SubmissionImageOcrUiState.Showing ?: return
+    if (showingState.dialog == null) return
+    cancelImageOcrDialogJob()
+    zoomImageOcrState = showingState.copy(dialog = null)
+    publishState()
+  }
+
+  fun updateImageOcrDialogDraft(text: String) {
+    val showingState = zoomImageOcrState as? SubmissionImageOcrUiState.Showing ?: return
+    val dialog = showingState.dialog ?: return
+    zoomImageOcrState =
+        showingState.copy(dialog = dialog.copy(draftOriginalText = text, errorMessage = null))
+    publishState()
+  }
+
+  fun refreshImageOcrDialogTranslation() {
+    val showingState = zoomImageOcrState as? SubmissionImageOcrUiState.Showing ?: return
+    val dialog = showingState.dialog ?: return
+    if (dialog.refreshing) return
+    val blockIndex = showingState.blocks.indexOfFirst { it.id == dialog.blockId }
+    if (blockIndex < 0) return
+
+    val currentBlock = showingState.blocks[blockIndex]
+    val normalizedDraft = dialog.draftOriginalText.trim()
+    if (normalizedDraft.isBlank()) return
+    if (normalizedDraft == currentBlock.originalText.trim()) return
+
+    cancelImageOcrDialogJob()
+    zoomImageOcrState =
+        showingState.copy(dialog = dialog.copy(refreshing = true, errorMessage = null))
+    publishState()
+
+    val targetImageUrl = zoomOverlayImageUrl
+    val targetBlockId = dialog.blockId
+    imageOcrDialogJob =
+        screenModelScope.launch {
+          try {
+            when (val result = imageOcrTranslationService.translateText(normalizedDraft)) {
+              is SubmissionImageOcrTranslationResult.Success -> {
+                val latestState =
+                    zoomImageOcrState as? SubmissionImageOcrUiState.Showing ?: return@launch
+                val latestDialog = latestState.dialog ?: return@launch
+                if (
+                    zoomOverlayImageUrl != targetImageUrl || latestDialog.blockId != targetBlockId
+                ) {
+                  return@launch
+                }
+                val refreshedBlocks =
+                    latestState.blocks.map { block ->
+                      if (block.id != targetBlockId) {
+                        block
+                      } else {
+                        block.copy(
+                            originalText = normalizedDraft,
+                            translatedText = result.translatedText,
+                            translationStatus = SubmissionImageOcrTranslationStatus.SUCCESS,
+                        )
+                      }
+                    }
+                zoomImageOcrState =
+                    latestState.copy(
+                        blocks = refreshedBlocks,
+                        dialog =
+                            latestDialog.copy(
+                                draftOriginalText = normalizedDraft,
+                                translatedText = result.translatedText,
+                                refreshing = false,
+                                errorMessage = null,
+                            ),
+                    )
+                publishState()
+              }
+
+              SubmissionImageOcrTranslationResult.Empty -> {
+                val latestState =
+                    zoomImageOcrState as? SubmissionImageOcrUiState.Showing ?: return@launch
+                val latestDialog = latestState.dialog ?: return@launch
+                if (
+                    zoomOverlayImageUrl != targetImageUrl || latestDialog.blockId != targetBlockId
+                ) {
+                  return@launch
+                }
+                val errorMessage = appString(Res.string.image_ocr_translation_empty)
+                zoomImageOcrState =
+                    latestState.copy(
+                        dialog =
+                            latestDialog.copy(
+                                refreshing = false,
+                                errorMessage = errorMessage,
+                            )
+                    )
+                publishState()
+              }
+
+              is SubmissionImageOcrTranslationResult.Failure -> {
+                val latestState =
+                    zoomImageOcrState as? SubmissionImageOcrUiState.Showing ?: return@launch
+                val latestDialog = latestState.dialog ?: return@launch
+                if (
+                    zoomOverlayImageUrl != targetImageUrl || latestDialog.blockId != targetBlockId
+                ) {
+                  return@launch
+                }
+                val errorMessage =
+                    appString(Res.string.image_ocr_translation_failed_with_reason, result.message)
+                zoomImageOcrState =
+                    latestState.copy(
+                        dialog =
+                            latestDialog.copy(
+                                refreshing = false,
+                                errorMessage = errorMessage,
+                            )
+                    )
+                publishState()
+              }
+            }
+          } catch (cancelled: CancellationException) {
+            throw cancelled
+          } catch (error: Throwable) {
+            val latestState =
+                zoomImageOcrState as? SubmissionImageOcrUiState.Showing ?: return@launch
+            val latestDialog = latestState.dialog ?: return@launch
+            if (zoomOverlayImageUrl != targetImageUrl || latestDialog.blockId != targetBlockId) {
+              return@launch
+            }
+            val errorMessage =
+                appString(
+                    Res.string.image_ocr_translation_failed_with_reason,
+                    error.message?.takeIf { it.isNotBlank() } ?: error.toString(),
+                )
+            zoomImageOcrState =
+                latestState.copy(
+                    dialog =
+                        latestDialog.copy(
+                            refreshing = false,
+                            errorMessage = errorMessage,
+                        )
+                )
+            publishState()
+          } finally {
+            val currentJob = currentCoroutineContext()[Job]
+            if (imageOcrDialogJob === currentJob) {
+              imageOcrDialogJob = null
+            }
+          }
+        }
   }
 
   fun translateDescriptionCurrent() {
@@ -523,6 +779,7 @@ internal class SubmissionScreenWorkflow(
   }
 
   fun onContextChanged() {
+    clearZoomOverlayState(publish = false)
     publishState()
     loadCurrentAndSchedulePrefetch()
     maintainPagerBuffer(forceBoundary = false)
@@ -623,6 +880,8 @@ internal class SubmissionScreenWorkflow(
         SubmissionPagerUiState.Data(
             submissions = items,
             detailBySid = detailBySid.toMap(),
+            zoomOverlayImageUrl = zoomOverlayImageUrl,
+            zoomImageOcrState = zoomImageOcrState,
             scrollToTopVersionBySid = scrollToTopVersionBySid.toMap(),
             currentIndex = index.coerceIn(0, (items.lastIndex).coerceAtLeast(0)),
             hasPrevious =
@@ -994,11 +1253,84 @@ internal class SubmissionScreenWorkflow(
     toastSink(message)
   }
 
+  private fun clearZoomOverlayState(publish: Boolean) {
+    cancelImageOcrJobs()
+    zoomOverlayImageUrl = null
+    zoomImageOcrState = SubmissionImageOcrUiState.Idle
+    if (publish) {
+      publishState()
+    }
+  }
+
+  private suspend fun translateImageOcrBlocks(
+      blocks: List<RecognizedTextBlock>
+  ): List<SubmissionImageOcrBlockUiState> {
+    val translations =
+        try {
+          imageOcrTranslationService.translateTexts(blocks.map { it.text })
+        } catch (error: Throwable) {
+          List(blocks.size) {
+            SubmissionImageOcrTranslationResult.Failure(
+                error.message?.takeIf { it.isNotBlank() } ?: error.toString()
+            )
+          }
+        }
+
+    return blocks.mapIndexed { index, block ->
+      val translation = translations.getOrNull(index) ?: SubmissionImageOcrTranslationResult.Empty
+      when (translation) {
+        is SubmissionImageOcrTranslationResult.Success ->
+            SubmissionImageOcrBlockUiState(
+                id = "ocr-block-$index",
+                points = block.points,
+                originalText = block.text,
+                translatedText = translation.translatedText,
+                translationStatus = SubmissionImageOcrTranslationStatus.SUCCESS,
+            )
+
+        SubmissionImageOcrTranslationResult.Empty ->
+            SubmissionImageOcrBlockUiState(
+                id = "ocr-block-$index",
+                points = block.points,
+                originalText = block.text,
+                translatedText = null,
+                translationStatus = SubmissionImageOcrTranslationStatus.EMPTY,
+            )
+
+        is SubmissionImageOcrTranslationResult.Failure ->
+            SubmissionImageOcrBlockUiState(
+                id = "ocr-block-$index",
+                points = block.points,
+                originalText = block.text,
+                translatedText = null,
+                translationStatus = SubmissionImageOcrTranslationStatus.FAILURE,
+            )
+      }
+    }
+  }
+
+  private fun cancelImageOcrJobs() {
+    imageOcrJob?.cancel()
+    imageOcrJob = null
+    cancelImageOcrDialogJob()
+  }
+
+  private fun cancelImageOcrDialogJob() {
+    imageOcrDialogJob?.cancel()
+    imageOcrDialogJob = null
+  }
+
   private fun toBlockedKeywordSet(detail: Submission): Set<String> =
       detail.blockedTagNames.map(::normalizeTagKey).filter { it.isNotBlank() }.toSet()
 }
 
 private fun normalizeTagKey(tagName: String): String = tagName.trim().lowercase()
+
+private fun normalizeZoomImageUrl(imageUrl: String): String? =
+    imageUrl
+        .trim()
+        .takeIf { it.isNotBlank() }
+        ?.let { url -> if (url.startsWith("//")) "https:$url" else url }
 
 private fun resolveAttachmentTextState(
     detail: Submission,

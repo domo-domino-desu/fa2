@@ -18,7 +18,7 @@ android {
 
   defaultConfig {
     applicationId = "me.domino.fa2.android"
-    minSdk = 24
+    minSdk = 29
     targetSdk = 36
     versionCode = appVersionCode
     versionName = appVersionName

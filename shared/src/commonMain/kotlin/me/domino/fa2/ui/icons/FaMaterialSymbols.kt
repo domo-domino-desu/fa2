@@ -41,6 +41,7 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.MovieW400Outl
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.MusicNoteW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.NotificationsW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.NotificationsW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.RefreshW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.RestartAltW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SaveW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SearchW400Outlined
@@ -101,6 +102,7 @@ object FaMaterialSymbols {
     val Movie: ImageVector = GeneratedIcons.MovieW400Outlined
     val MusicNote: ImageVector = GeneratedIcons.MusicNoteW400Outlined
     val Notifications: ImageVector = GeneratedIcons.NotificationsW400Outlined
+    val Refresh: ImageVector = GeneratedIcons.RefreshW400Outlined
     val FilePresent: ImageVector = GeneratedIcons.FilePresentW400Outlined
     val Search: ImageVector = GeneratedIcons.SearchW400Outlined
     val Share: ImageVector = GeneratedIcons.ShareW400Outlined

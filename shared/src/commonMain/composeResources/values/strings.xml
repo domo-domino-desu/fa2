@@ -124,6 +124,16 @@
   <string name="missing_attachment_download_url">Attachment download URL is missing</string>
   <string name="no_browsable_submissions">There are no submissions to browse right now.</string>
   <string name="original_image">View original image</string>
+  <string name="image_ocr_action">Recognize text in image</string>
+  <string name="image_ocr_empty">No text found in the image</string>
+  <string name="image_ocr_failed">Image OCR failed: %1$s</string>
+  <string name="image_ocr_translation_failed">Image OCR translation failed</string>
+  <string name="image_ocr_translation_failed_with_reason">Image OCR translation failed: %1$s</string>
+  <string name="image_ocr_translation_empty">Translation is empty</string>
+  <string name="image_ocr_original_text">Original text</string>
+  <string name="image_ocr_translated_text">Translated text</string>
+  <string name="image_ocr_edit_dialog_title">OCR Translation</string>
+  <string name="image_ocr_refresh_translation">Refresh translation</string>
   <string name="close_preview">Close preview</string>
   <string name="loading_more_content">Loading more content...</string>
   <string name="loading_previous_page_content">Loading the previous page...</string>

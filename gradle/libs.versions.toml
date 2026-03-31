@@ -39,6 +39,8 @@ zoomimage = "1.4.0"
 symbolcraft = "0.3.4"
 pdfbox = "2.0.26"
 pdfboxAndroid = "2.0.26.0"
+rapidocr4j = "1.0.3"
+rapidocr4jAndroid = "1.0.0"
 
 [libraries]
 aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibraries" }
@@ -89,6 +91,8 @@ voyager-screenmodel = { module = "cafe.adriel.voyager:voyager-screenmodel", vers
 zoomimage-compose-coil3 = { module = "io.github.panpf.zoomimage:zoomimage-compose-coil3", version.ref = "zoomimage" }
 pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }
 pdfbox-android = { module = "com.tom-roush:pdfbox-android", version.ref = "pdfboxAndroid" }
+rapidocr4j = { module = "io.github.hzkitty:rapidocr4j", version.ref = "rapidocr4j" }
+rapidocr4j-android = { module = "io.github.hzkitty:rapidocr4j-android", version.ref = "rapidocr4jAndroid" }
 
 [plugins]
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

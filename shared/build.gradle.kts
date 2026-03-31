@@ -16,7 +16,7 @@ kotlin {
   android {
     namespace = "me.domino.fa2.shared"
     compileSdk = 36
-    minSdk = 24
+    minSdk = 29
     androidResources { enable = true }
   }
 
@@ -25,34 +25,34 @@ kotlin {
   sourceSets {
     val commonMain by getting {
       dependencies {
-        implementation(libs.kotlinx.coroutines.core)
-        implementation(libs.kotlinx.serialization.json)
-        implementation(libs.compose.runtime)
-        implementation(libs.compose.foundation)
-        implementation(libs.compose.material3)
-        implementation(libs.compose.ui)
-        implementation(libs.compose.components.resources)
-        implementation(libs.compose.native.webview)
-        implementation(libs.ktor.client.core)
-        implementation(libs.ksoup)
-        implementation(libs.ksafe)
-        implementation(libs.koin.core)
-        implementation(libs.koin.compose)
-        implementation(libs.voyager.core)
-        implementation(libs.voyager.navigator)
-        implementation(libs.voyager.screenmodel)
-        implementation(libs.voyager.koin)
+        implementation(libs.aboutlibraries.compose.m3)
+        implementation(libs.aboutlibraries.core)
         implementation(libs.coil.compose)
         implementation(libs.coil.network.ktor3)
-        implementation(libs.zoomimage.compose.coil3)
-        implementation(libs.htmlconverter.compose)
-        implementation(libs.materialyou)
-        implementation(libs.aboutlibraries.core)
-        implementation(libs.aboutlibraries.compose.m3)
+        implementation(libs.compose.components.resources)
+        implementation(libs.compose.foundation)
+        implementation(libs.compose.material3)
+        implementation(libs.compose.native.webview)
+        implementation(libs.compose.runtime)
+        implementation(libs.compose.ui)
         implementation(libs.datastore.preferences.core)
+        implementation(libs.htmlconverter.compose)
+        implementation(libs.kermit)
+        implementation(libs.koin.compose)
+        implementation(libs.koin.core)
+        implementation(libs.kotlinx.coroutines.core)
+        implementation(libs.kotlinx.serialization.json)
+        implementation(libs.ksafe)
+        implementation(libs.ksoup)
+        implementation(libs.ktor.client.core)
+        implementation(libs.materialyou)
         implementation(libs.room.runtime)
         implementation(libs.store5)
-        implementation(libs.kermit)
+        implementation(libs.voyager.core)
+        implementation(libs.voyager.koin)
+        implementation(libs.voyager.navigator)
+        implementation(libs.voyager.screenmodel)
+        implementation(libs.zoomimage.compose.coil3)
       }
     }
 
@@ -61,8 +61,8 @@ kotlin {
     val commonTest by getting {
       dependencies {
         implementation(kotlin("test"))
-        implementation(libs.kotlinx.coroutines.test)
         implementation(libs.koin.core)
+        implementation(libs.kotlinx.coroutines.test)
         implementation(libs.room.runtime)
         implementation(libs.sqlite.bundled)
       }
@@ -72,8 +72,9 @@ kotlin {
       dependsOn(jvmSharedMain)
       dependencies {
         implementation(libs.ktor.client.okhttp)
-        implementation(libs.slf4j.simple)
         implementation(libs.pdfbox)
+        implementation(libs.rapidocr4j)
+        implementation(libs.slf4j.simple)
       }
     }
 
@@ -82,9 +83,10 @@ kotlin {
       dependencies {
         implementation(libs.androidx.activity.compose)
         implementation(libs.coil.gif)
+        implementation(libs.documentfile)
         implementation(libs.ktor.client.okhttp)
         implementation(libs.pdfbox.android)
-        implementation(libs.documentfile)
+        implementation(libs.rapidocr4j.android)
       }
     }
   }
@@ -134,9 +136,10 @@ symbolCraft {
   }
 
   materialSymbols(
+      "arrow_back",
+      "arrow_circle_right",
       "arrow_downward_alt",
       "arrow_upward_alt",
-      "arrow_back",
       "category",
       "comment",
       "content_copy",
@@ -162,13 +165,13 @@ symbolCraft {
       "movie",
       "music_note",
       "notifications",
+      "refresh",
       "search",
       "share",
       "subject",
       "tag",
-      "troubleshoot",
       "translate",
-      "arrow_circle_right",
+      "troubleshoot",
       "vertical_align_bottom",
       "vertical_align_top",
       "visibility",

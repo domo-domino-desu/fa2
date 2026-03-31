@@ -10,7 +10,9 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
+import me.domino.fa2.application.ocr.SubmissionImageOcrService
 import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.application.translation.SubmissionImageOcrTranslationService
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.i18n.SystemLanguageProvider
@@ -28,6 +30,10 @@ class SubmissionScreenModel(
     private val submissionSource: SubmissionPagerDetailSource,
     /** 描述/附件翻译编排服务。 */
     private val translationService: SubmissionDescriptionTranslationService,
+    /** 原图 OCR 服务。 */
+    private val imageOcrService: SubmissionImageOcrService,
+    /** 原图 OCR 翻译服务。 */
+    private val imageOcrTranslationService: SubmissionImageOcrTranslationService,
     private val settingsService: AppSettingsService? = null,
     private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) : StateScreenModel<SubmissionPagerUiState>(SubmissionPagerUiState.Empty) {
@@ -101,6 +107,8 @@ class SubmissionScreenModel(
           contextController = contextController,
           submissionSource = submissionSource,
           translationService = translationService,
+          imageOcrService = imageOcrService,
+          imageOcrTranslationService = imageOcrTranslationService,
           settingsService = settingsService,
           systemLanguageProvider = systemLanguageProvider,
           screenModelScope = screenModelScope,
@@ -136,6 +144,20 @@ class SubmissionScreenModel(
   fun requestCurrentPageScrollToTop() = workflow.requestCurrentPageScrollToTop()
 
   fun retryCurrentDetail() = workflow.retryCurrentDetail()
+
+  fun openImageZoom(imageUrl: String) = workflow.openImageZoom(imageUrl)
+
+  fun dismissImageZoom() = workflow.dismissImageZoom()
+
+  fun toggleImageOcrCurrent() = workflow.toggleImageOcrCurrent()
+
+  fun openImageOcrDialog(blockId: String) = workflow.openImageOcrDialog(blockId)
+
+  fun dismissImageOcrDialog() = workflow.dismissImageOcrDialog()
+
+  fun updateImageOcrDialogDraft(text: String) = workflow.updateImageOcrDialogDraft(text)
+
+  fun refreshImageOcrDialogTranslation() = workflow.refreshImageOcrDialogTranslation()
 
   fun translateDescriptionCurrent() = workflow.translateDescriptionCurrent()
 

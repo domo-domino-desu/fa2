@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -31,8 +30,10 @@ import fa2.shared.generated.resources.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import me.domino.fa2.application.ocr.SubmissionImageOcrService
 import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.application.translation.SubmissionImageOcrTranslationService
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.ActivityHistoryRepository
@@ -77,6 +78,8 @@ class SubmissionRouteScreen(
     val navigator = LocalNavigator.currentOrThrow
     val submissionRepository = koinInject<SubmissionRepository>()
     val translationService = koinInject<SubmissionDescriptionTranslationService>()
+    val imageOcrService = koinInject<SubmissionImageOcrService>()
+    val imageOcrTranslationService = koinInject<SubmissionImageOcrTranslationService>()
     val systemLanguageProvider = koinInject<SystemLanguageProvider>()
     val settingsService = koinInject<AppSettingsService>()
     val contextScreenModel =
@@ -144,6 +147,8 @@ class SubmissionRouteScreen(
               contextScreenModel = contextScreenModel,
               submissionSource = SubmissionPagerDetailSourceImpl(submissionRepository),
               translationService = translationService,
+              imageOcrService = imageOcrService,
+              imageOcrTranslationService = imageOcrTranslationService,
               settingsService = settingsService,
               systemLanguageProvider = systemLanguageProvider,
           )
@@ -168,7 +173,8 @@ class SubmissionRouteScreen(
           }
         }
     val topBarActions = resolveTopBarActions(initialSid = initialSid, state = state)
-    val zoomOverlayVisible = remember { mutableStateOf(false) }
+    val zoomOverlayVisible =
+        (state as? SubmissionPagerUiState.Data)?.zoomOverlayImageUrl.isNullOrBlank().not()
 
     LaunchedEffect(Unit) { requestPagerFocus() }
     LaunchedEffect(screenModel, showToast) {
@@ -218,7 +224,7 @@ class SubmissionRouteScreen(
           state = state,
           pageState = pageState,
           topBarActions = topBarActions,
-          zoomOverlayVisible = zoomOverlayVisible.value,
+          zoomOverlayVisible = zoomOverlayVisible,
           blockedSubmissionMode = settings.blockedSubmissionPagerMode,
           onBack = handleBackNavigation,
           onGoHome = { navigator.goBackHome() },
@@ -300,7 +306,13 @@ class SubmissionRouteScreen(
           onOpenSubmissionSeries = { series -> navigator.openSubmissionSeries(series) },
           scrollOffsetOfSid = screenModel::scrollOffsetForSid,
           requestPagerFocus = requestPagerFocus,
-          onZoomOverlayVisibilityChanged = { visible -> zoomOverlayVisible.value = visible },
+          onOpenImageZoom = screenModel::openImageZoom,
+          onDismissImageZoom = screenModel::dismissImageZoom,
+          onToggleImageOcr = screenModel::toggleImageOcrCurrent,
+          onOpenImageOcrDialog = screenModel::openImageOcrDialog,
+          onDismissImageOcrDialog = screenModel::dismissImageOcrDialog,
+          onUpdateImageOcrDialogDraft = screenModel::updateImageOcrDialogDraft,
+          onRefreshImageOcrDialogTranslation = screenModel::refreshImageOcrDialogTranslation,
           onPageScrollOffsetChanged = screenModel::setCurrentPageScrollOffset,
           onToggleFavorite = screenModel::toggleFavoriteCurrent,
       )

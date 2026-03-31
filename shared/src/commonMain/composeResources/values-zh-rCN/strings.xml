@@ -120,6 +120,16 @@
   <string name="missing_attachment_download_url">缺少附件下载地址</string>
   <string name="no_browsable_submissions">当前没有可浏览的投稿。</string>
   <string name="original_image">查看原图</string>
+  <string name="image_ocr_action">识别图片文字</string>
+  <string name="image_ocr_empty">图片中未识别到文字</string>
+  <string name="image_ocr_failed">图片 OCR 失败：%1$s</string>
+  <string name="image_ocr_translation_failed">图片 OCR 翻译失败</string>
+  <string name="image_ocr_translation_failed_with_reason">图片 OCR 翻译失败：%1$s</string>
+  <string name="image_ocr_translation_empty">翻译结果为空</string>
+  <string name="image_ocr_original_text">原文</string>
+  <string name="image_ocr_translated_text">译文</string>
+  <string name="image_ocr_edit_dialog_title">OCR 翻译</string>
+  <string name="image_ocr_refresh_translation">刷新译文</string>
   <string name="close_preview">关闭预览</string>
   <string name="loading_more_content">正在自动加载更多内容</string>
   <string name="loading_previous_page_content">正在加载上一页</string>

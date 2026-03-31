@@ -27,6 +27,10 @@ sealed interface SubmissionPagerUiState {
       val submissions: List<SubmissionThumbnail>,
       /** 详情状态映射。 */
       val detailBySid: Map<Int, SubmissionDetailUiState>,
+      /** 当前原图缩放遮罩中的图片 URL。 */
+      val zoomOverlayImageUrl: String? = null,
+      /** 当前原图 OCR 状态。 */
+      val zoomImageOcrState: SubmissionImageOcrUiState = SubmissionImageOcrUiState.Idle,
       /** 各 sid 的回顶命令版本。 */
       val scrollToTopVersionBySid: Map<Int, Long>,
       /** 当前索引。 */
