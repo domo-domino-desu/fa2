@@ -88,6 +88,8 @@
   <string name="save_and_login">保存并登录</string>
   <string name="retry_existing_session">重试现有登录态</string>
   <string name="checking_login_state">正在检查登录态…</string>
+  <string name="auth_probe_failed_title">无法验证登录状态</string>
+  <string name="auth_probe_failed_body">暂时无法验证当前 Fur Affinity 会话。请检查网络后重试，已保存的登录信息不会丢失。</string>
   <string name="missing_persisted_cookie">未找到持久化 Cookie，请先登录。</string>
   <string name="empty_cookie_header">Cookie 不能为空。</string>
   <string name="default_web_view_login_status">请在左侧 WebView 中完成登录；如果遇到 Cloudflare，请先完成验证，再点击“完成登录”。</string>

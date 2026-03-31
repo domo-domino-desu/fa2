@@ -89,6 +89,8 @@
   <string name="save_and_login">Save and sign in</string>
   <string name="retry_existing_session">Retry existing session</string>
   <string name="checking_login_state">Checking login status...</string>
+  <string name="auth_probe_failed_title">Couldn't verify sign-in status</string>
+  <string name="auth_probe_failed_body">We couldn't verify the current Fur Affinity session just now. Check your network and retry. Your saved sign-in info is kept.</string>
   <string name="missing_persisted_cookie">No persisted cookie found. Please sign in first.</string>
   <string name="empty_cookie_header">Cookie cannot be empty.</string>
   <string name="default_web_view_login_status">Finish signing in through the WebView on the left. If

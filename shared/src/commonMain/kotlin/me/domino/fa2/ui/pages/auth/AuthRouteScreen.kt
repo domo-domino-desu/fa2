@@ -91,6 +91,10 @@ class AuthRouteScreen : Screen {
         )
       }
 
+      is AuthUiState.ProbeFailed -> {
+        AuthProbeFailedScreen(state = snapshot, onRetry = screenModel::retryProbe)
+      }
+
       is AuthUiState.Authenticated -> {
         // 导航 effect 会在上方处理，这里保持占位防止闪屏。
         AuthLoadingScreen()

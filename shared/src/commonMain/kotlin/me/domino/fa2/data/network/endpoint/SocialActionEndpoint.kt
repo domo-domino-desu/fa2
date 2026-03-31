@@ -1,10 +1,12 @@
 package me.domino.fa2.data.network.endpoint
 
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.CancellationException
 import me.domino.fa2.application.challenge.port.ChallengeResolver
 import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.FaHtmlDataSource
 import me.domino.fa2.data.network.UserAgentStorage
+import me.domino.fa2.util.toUserFacingRequestMessage
 
 /** 社交动作端点（Fav/Watch 等）。 */
 class SocialActionEndpoint
@@ -46,8 +48,13 @@ private constructor(
     if (targetUrl.isBlank()) {
       return SocialActionResult.Failed(message = "Empty social action url")
     }
-    return backend?.execute(targetUrl)
-        ?: SocialActionResult.Failed("No HTTP backend for social action")
+    return try {
+      backend?.execute(targetUrl) ?: SocialActionResult.Failed("No HTTP backend for social action")
+    } catch (cancelled: CancellationException) {
+      throw cancelled
+    } catch (error: Throwable) {
+      SocialActionResult.Failed(error.toUserFacingRequestMessage())
+    }
   }
 
   /** 屏蔽/取消屏蔽标签（POST /route/tag_blocking）。 */
@@ -65,11 +72,17 @@ private constructor(
       return SocialActionResult.Failed(message = "Missing tag block nonce")
     }
 
-    return backend?.updateTagBlocklist(
-        tagName = normalizedTagName,
-        nonce = normalizedNonce,
-        toAdd = toAdd,
-    ) ?: SocialActionResult.Failed("No HTTP backend for tag blocking")
+    return try {
+      backend?.updateTagBlocklist(
+          tagName = normalizedTagName,
+          nonce = normalizedNonce,
+          toAdd = toAdd,
+      ) ?: SocialActionResult.Failed("No HTTP backend for tag blocking")
+    } catch (cancelled: CancellationException) {
+      throw cancelled
+    } catch (error: Throwable) {
+      SocialActionResult.Failed(error.toUserFacingRequestMessage())
+    }
   }
 }
 

@@ -5,9 +5,11 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
+import kotlinx.coroutines.CancellationException
 import me.domino.fa2.util.logging.FaLog
 import me.domino.fa2.util.logging.summarizeHtmlResult
 import me.domino.fa2.util.logging.summarizeUrl
+import me.domino.fa2.util.toUserFacingRequestMessage
 
 /** HTML 数据源抽象。 */
 interface FaHtmlDataSource {
@@ -46,39 +48,46 @@ class FaHttpClient(
       val cookiesText = cookieNames.ifEmpty { listOf("-") }.joinToString(",")
       "请求页面 -> 上下文(cookies=$cookiesText,ua=${if (userAgent.isBlank()) "空" else "已设置"})"
     }
-    val response =
-        client.get(url) {
-          if (cookieHeader.isNotBlank()) {
-            header(HttpHeaders.Cookie, cookieHeader)
+    return try {
+      val response =
+          client.get(url) {
+            if (cookieHeader.isNotBlank()) {
+              header(HttpHeaders.Cookie, cookieHeader)
+            }
+            header(HttpHeaders.UserAgent, userAgent)
+            header(HttpHeaders.Accept, "text/html,application/xhtml+xml")
+            header(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9")
           }
-          header(HttpHeaders.UserAgent, userAgent)
-          header(HttpHeaders.Accept, "text/html,application/xhtml+xml")
-          header(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9")
-        }
 
-    val body = response.bodyAsText()
-    val headers = response.headers.entries().associate { (key, values) -> key to values }
-    val setCookieValues = response.headers.getAll(HttpHeaders.SetCookie).orEmpty()
-    cookiesStorage.mergeSetCookieValues(setCookieValues)
+      val body = response.bodyAsText()
+      val headers = response.headers.entries().associate { (key, values) -> key to values }
+      val setCookieValues = response.headers.getAll(HttpHeaders.SetCookie).orEmpty()
+      cookiesStorage.mergeSetCookieValues(setCookieValues)
 
-    val classified =
-        HtmlResponseResult.classify(
-            statusCode = response.status.value,
-            headers = headers,
-            body = body,
-            url = url,
-        )
-    val cfRay =
-        headers.entries
-            .firstOrNull { (key, _) -> key.equals("cf-ray", ignoreCase = true) }
-            ?.value
-            ?.firstOrNull()
-            .orEmpty()
-    log.d {
-      val ray = if (cfRay.isBlank()) "-" else cfRay
-      "请求页面 -> ${summarizeHtmlResult(classified)}(status=${response.status.value},cf-ray=$ray)"
+      val classified =
+          HtmlResponseResult.classify(
+              statusCode = response.status.value,
+              headers = headers,
+              body = body,
+              url = url,
+          )
+      val cfRay =
+          headers.entries
+              .firstOrNull { (key, _) -> key.equals("cf-ray", ignoreCase = true) }
+              ?.value
+              ?.firstOrNull()
+              .orEmpty()
+      log.d {
+        val ray = if (cfRay.isBlank()) "-" else cfRay
+        "请求页面 -> ${summarizeHtmlResult(classified)}(status=${response.status.value},cf-ray=$ray)"
+      }
+      classified
+    } catch (cancelled: CancellationException) {
+      throw cancelled
+    } catch (error: Throwable) {
+      log.e(error) { "请求页面 -> 失败(url=$safeUrl)" }
+      HtmlResponseResult.Error(statusCode = 0, message = error.toUserFacingRequestMessage())
     }
-    return classified
   }
 
   private fun extractCookieNames(cookieHeader: String): List<String> =

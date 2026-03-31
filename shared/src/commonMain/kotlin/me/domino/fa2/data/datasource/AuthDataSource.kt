@@ -1,11 +1,13 @@
 package me.domino.fa2.data.datasource
 
+import kotlinx.coroutines.CancellationException
 import me.domino.fa2.data.model.AuthProbeResult
 import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.HtmlResponseResult
 import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.data.network.endpoint.HomeEndpoint
 import me.domino.fa2.util.isCloudflareCookieName
+import me.domino.fa2.util.toUserFacingRequestMessage
 
 /** 登录态数据源。 */
 class AuthDataSource(
@@ -84,26 +86,32 @@ class AuthDataSource(
 
   /** 探测当前登录态。 */
   suspend fun probeLogin(): AuthProbeResult {
-    return when (val response = homeEndpoint.fetch()) {
-      is HtmlResponseResult.Success -> {
-        if (isLoggedIn(response.body)) {
-          AuthProbeResult.LoggedIn(username = extractUsername(response.body))
-        } else {
-          AuthProbeResult.AuthInvalid(message = "认证失效，请粘贴浏览器 Cookie。")
+    return try {
+      when (val response = homeEndpoint.fetch()) {
+        is HtmlResponseResult.Success -> {
+          if (isLoggedIn(response.body)) {
+            AuthProbeResult.LoggedIn(username = extractUsername(response.body))
+          } else {
+            AuthProbeResult.AuthInvalid(message = "认证失效，请粘贴浏览器 Cookie。")
+          }
+        }
+
+        is HtmlResponseResult.CfChallenge -> {
+          AuthProbeResult.AuthInvalid(message = "Cloudflare challenge 尚未完成，请先在覆盖层完成验证。")
+        }
+
+        is HtmlResponseResult.MatureBlocked -> {
+          AuthProbeResult.AuthInvalid(message = response.reason)
+        }
+
+        is HtmlResponseResult.Error -> {
+          AuthProbeResult.ProbeFailed(message = response.message)
         }
       }
-
-      is HtmlResponseResult.CfChallenge -> {
-        AuthProbeResult.Error(message = "Cloudflare challenge 尚未完成，请先在覆盖层完成验证。")
-      }
-
-      is HtmlResponseResult.MatureBlocked -> {
-        AuthProbeResult.AuthInvalid(message = response.reason)
-      }
-
-      is HtmlResponseResult.Error -> {
-        AuthProbeResult.Error(message = response.message)
-      }
+    } catch (cancelled: CancellationException) {
+      throw cancelled
+    } catch (error: Throwable) {
+      AuthProbeResult.ProbeFailed(message = error.toUserFacingRequestMessage())
     }
   }
 

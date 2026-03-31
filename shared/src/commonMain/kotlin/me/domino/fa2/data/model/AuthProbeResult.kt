@@ -27,7 +27,7 @@ sealed interface AuthProbeResult {
    *
    * @property message 错误摘要。
    */
-  data class Error(
+  data class ProbeFailed(
       /** 登录探测失败时的错误摘要。 */
       val message: String
   ) : AuthProbeResult

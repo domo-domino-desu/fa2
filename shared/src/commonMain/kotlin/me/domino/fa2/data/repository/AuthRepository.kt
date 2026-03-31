@@ -85,7 +85,7 @@ class AuthRepository(
                 when (result) {
                     is AuthProbeResult.LoggedIn -> "已登录"
                     is AuthProbeResult.AuthInvalid -> "认证失效"
-                    is AuthProbeResult.Error -> "请求失败"
+                    is AuthProbeResult.ProbeFailed -> "探测失败"
                 }
             }"
     }

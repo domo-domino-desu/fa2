@@ -3,6 +3,7 @@ package me.domino.fa2.ui.pages.auth
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import fa2.shared.generated.resources.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -186,6 +187,10 @@ class AuthScreenModel(
         )
       }
 
+      is AuthUiState.ProbeFailed -> {
+        updateWebViewUiState(isConfirming = false, statusMessage = nextState.message)
+      }
+
       AuthUiState.Loading -> {
         updateWebViewUiState(
             isConfirming = false,
@@ -198,18 +203,26 @@ class AuthScreenModel(
   /** 执行一次登录态探测并更新 UI 状态。 */
   private suspend fun probeAndUpdate(): AuthUiState {
     val nextState =
-        when (val result = authRepository.probeLogin()) {
-          is AuthProbeResult.LoggedIn -> {
-            AuthUiState.Authenticated(username = result.username)
-          }
+        try {
+          when (val result = authRepository.probeLogin()) {
+            is AuthProbeResult.LoggedIn -> {
+              AuthUiState.Authenticated(username = result.username)
+            }
 
-          is AuthProbeResult.AuthInvalid -> {
-            AuthUiState.AuthInvalid(message = result.message)
-          }
+            is AuthProbeResult.AuthInvalid -> {
+              AuthUiState.AuthInvalid(message = result.message)
+            }
 
-          is AuthProbeResult.Error -> {
-            AuthUiState.AuthInvalid(message = result.message)
+            is AuthProbeResult.ProbeFailed -> {
+              AuthUiState.ProbeFailed(message = result.message)
+            }
           }
+        } catch (cancelled: CancellationException) {
+          throw cancelled
+        } catch (error: Throwable) {
+          AuthUiState.ProbeFailed(
+              message = error.message?.takeIf { it.isNotBlank() } ?: error.toString()
+          )
         }
     mutableState.value = nextState
     log.i { "登录态探测 -> ${summarizeAuthUiState(nextState)}" }
@@ -297,6 +310,7 @@ class AuthScreenModel(
         AuthUiState.Loading -> "加载中"
         is AuthUiState.Authenticated -> "已认证"
         is AuthUiState.AuthInvalid -> "认证无效"
+        is AuthUiState.ProbeFailed -> "探测失败"
       }
 }
 
@@ -326,6 +340,16 @@ sealed interface AuthUiState {
    */
   data class AuthInvalid(
       /** 展示给用户的输入提示文案。 */
+      val message: String
+  ) : AuthUiState
+
+  /**
+   * 登录态探测失败，但当前会话信息仍然保留。
+   *
+   * @property message 失败摘要。
+   */
+  data class ProbeFailed(
+      /** 展示给用户的错误说明。 */
       val message: String
   ) : AuthUiState
 

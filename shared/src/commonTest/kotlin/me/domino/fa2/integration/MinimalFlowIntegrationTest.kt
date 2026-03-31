@@ -98,9 +98,9 @@ class MinimalFlowIntegrationTest {
     }
   }
 
-  /** `CF challenge -> 登录探测返回错误` 链路。 */
+  /** `CF challenge -> 登录探测返回认证无效` 链路。 */
   @Test
-  fun cfChallengeProbeReturnsError() = runTest {
+  fun cfChallengeProbeReturnsAuthInvalid() = runTest {
     withTestApp { source ->
       val authDataSource = authDataSource()
 
@@ -109,7 +109,7 @@ class MinimalFlowIntegrationTest {
           response = HtmlResponseResult.CfChallenge(cfRay = "ray123"),
       )
       val firstProbe = authDataSource.probeLogin()
-      assertTrue(firstProbe is AuthProbeResult.Error)
+      assertTrue(firstProbe is AuthProbeResult.AuthInvalid)
     }
   }
 

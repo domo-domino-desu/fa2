@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import me.domino.fa2.application.challenge.port.SessionWebViewPort
@@ -109,6 +110,24 @@ class AuthScreenModelTest {
         assertIs<AuthUiState.AuthInvalid>(state)
         assertTrue(fixture.screenModel.webViewState().value.statusMessage.contains("登录未完成"))
       }
+
+  @Test
+  fun submitCookieShowsProbeFailedWhenProbeThrows() =
+      runTest(dispatcher.scheduler) {
+        val fixture = createAuthScreenModelFixture()
+        fixture.htmlDataSource.enqueueFailure(
+            url = FaUrls.home,
+            error = IllegalStateException("boom"),
+        )
+
+        fixture.screenModel.updateCookieDraft("a=1")
+        fixture.screenModel.submitCookie()
+        runCurrent()
+
+        val state = fixture.screenModel.state.value
+        val failed = assertIs<AuthUiState.ProbeFailed>(state)
+        assertTrue(failed.message.contains("boom"))
+      }
 }
 
 private data class AuthScreenModelFixture(
@@ -161,16 +180,31 @@ private class InMemoryCookiePersistence : CookiePersistence {
 }
 
 private class ScriptedAuthHtmlDataSource : FaHtmlDataSource {
-  private val queueByUrl: MutableMap<String, ArrayDeque<HtmlResponseResult>> = mutableMapOf()
+  private val queueByUrl: MutableMap<String, ArrayDeque<ScriptedResult>> = mutableMapOf()
 
   fun enqueue(url: String, response: HtmlResponseResult) {
     val queue = queueByUrl.getOrPut(url) { ArrayDeque() }
-    queue.addLast(response)
+    queue.addLast(ScriptedResult.Success(response))
+  }
+
+  fun enqueueFailure(url: String, error: Throwable) {
+    val queue = queueByUrl.getOrPut(url) { ArrayDeque() }
+    queue.addLast(ScriptedResult.Failure(error))
   }
 
   override suspend fun get(url: String): HtmlResponseResult =
-      queueByUrl[url]?.removeFirstOrNull()
-          ?: HtmlResponseResult.Error(statusCode = 500, message = "No scripted response for $url")
+      when (val next = queueByUrl[url]?.removeFirstOrNull()) {
+        is ScriptedResult.Success -> next.response
+        is ScriptedResult.Failure -> throw next.error
+        null ->
+            HtmlResponseResult.Error(statusCode = 500, message = "No scripted response for $url")
+      }
+}
+
+private sealed interface ScriptedResult {
+  data class Success(val response: HtmlResponseResult) : ScriptedResult
+
+  data class Failure(val error: Throwable) : ScriptedResult
 }
 
 private class FakeSessionWebViewPort(
