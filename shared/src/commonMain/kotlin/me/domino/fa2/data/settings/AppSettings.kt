@@ -16,6 +16,16 @@ data class AppSettings(
         defaultBlockedSubmissionWaterfallMode,
     val blockedSubmissionPagerMode: BlockedSubmissionPagerMode = defaultBlockedSubmissionPagerMode,
     val returnToCurrentSubmissionInWaterfall: Boolean = defaultReturnToCurrentSubmissionInWaterfall,
+    /** 下载保存路径。Android 侧保存树 URI，Desktop 侧保存绝对路径。 */
+    val downloadSavePath: String = defaultDownloadSavePath,
+    /** 是否允许系统相册/媒体库索引。 */
+    val downloadAllowMediaIndexing: Boolean = defaultDownloadAllowMediaIndexing,
+    /** 下载子目录策略。 */
+    val downloadSubfolderMode: DownloadSubfolderMode = defaultDownloadSubfolderMode,
+    /** 下载文件名模式。 */
+    val downloadFileNameMode: DownloadFileNameMode = defaultDownloadFileNameMode,
+    /** 自定义下载文件名模板（仅定义文件名，不含扩展名）。 */
+    val downloadCustomFileNameTemplate: String = defaultDownloadCustomFileNameTemplate,
     val watchRecommendationPageSize: Int = defaultWatchRecommendationPageSize,
 ) {
   companion object {
@@ -40,6 +50,15 @@ data class AppSettings(
         )
     val supportedBlockedSubmissionPagerModes: List<BlockedSubmissionPagerMode> =
         listOf(BlockedSubmissionPagerMode.SHOW, BlockedSubmissionPagerMode.BLUR_THEN_OPEN)
+    val supportedDownloadSubfolderModes: List<DownloadSubfolderMode> =
+        listOf(DownloadSubfolderMode.FLAT, DownloadSubfolderMode.BY_USERNAME)
+    val supportedDownloadFileNameModes: List<DownloadFileNameMode> =
+        listOf(
+            DownloadFileNameMode.ID_TITLE,
+            DownloadFileNameMode.USERNAME_ID,
+            DownloadFileNameMode.USERNAME_ID_TITLE,
+            DownloadFileNameMode.CUSTOM,
+        )
 
     val defaultUiLanguage: UiLanguageSetting = UiLanguageSetting.SYSTEM
     const val defaultTranslationEnabled: Boolean = true
@@ -56,6 +75,11 @@ data class AppSettings(
     val defaultBlockedSubmissionPagerMode: BlockedSubmissionPagerMode =
         BlockedSubmissionPagerMode.BLUR_THEN_OPEN
     const val defaultReturnToCurrentSubmissionInWaterfall: Boolean = false
+    const val defaultDownloadSavePath: String = ""
+    const val defaultDownloadAllowMediaIndexing: Boolean = true
+    val defaultDownloadSubfolderMode: DownloadSubfolderMode = DownloadSubfolderMode.FLAT
+    val defaultDownloadFileNameMode: DownloadFileNameMode = DownloadFileNameMode.ID_TITLE
+    const val defaultDownloadCustomFileNameTemplate: String = "{submission_id}-{title}"
     const val defaultWatchRecommendationPageSize: Int = 20
 
     const val minTranslationChunkWordLimit: Int = 50
@@ -111,6 +135,17 @@ data class AppSettings(
                 raw.blockedSubmissionPagerMode.takeIf { mode ->
                   mode in supportedBlockedSubmissionPagerModes
                 } ?: defaultBlockedSubmissionPagerMode,
+            downloadSavePath = raw.downloadSavePath.trim(),
+            downloadSubfolderMode =
+                raw.downloadSubfolderMode.takeIf { mode -> mode in supportedDownloadSubfolderModes }
+                    ?: defaultDownloadSubfolderMode,
+            downloadFileNameMode =
+                raw.downloadFileNameMode.takeIf { mode -> mode in supportedDownloadFileNameModes }
+                    ?: defaultDownloadFileNameMode,
+            downloadCustomFileNameTemplate =
+                raw.downloadCustomFileNameTemplate.trim().ifBlank {
+                  defaultDownloadCustomFileNameTemplate
+                },
         )
   }
 }
@@ -192,6 +227,30 @@ enum class BlockedSubmissionPagerMode(val persistedValue: String) {
   }
 }
 
+/** 下载子目录策略。 */
+enum class DownloadSubfolderMode(val persistedValue: String) {
+  FLAT("flat"),
+  BY_USERNAME("by_username");
+
+  companion object {
+    fun fromPersistedValue(raw: String?): DownloadSubfolderMode? =
+        entries.firstOrNull { it.persistedValue == raw?.trim() }
+  }
+}
+
+/** 下载文件名模式。 */
+enum class DownloadFileNameMode(val persistedValue: String) {
+  ID_TITLE("id_title"),
+  USERNAME_ID("username_id"),
+  USERNAME_ID_TITLE("username_id_title"),
+  CUSTOM("custom");
+
+  companion object {
+    fun fromPersistedValue(raw: String?): DownloadFileNameMode? =
+        entries.firstOrNull { it.persistedValue == raw?.trim() }
+  }
+}
+
 /** OpenAI 兼容翻译配置。 */
 data class OpenAiTranslationConfig(
     val baseUrl: String = defaultBaseUrl,
@@ -204,11 +263,11 @@ data class OpenAiTranslationConfig(
     const val defaultModel: String = "gpt-4o-mini"
     val defaultPromptTemplate: String =
         """
-        你是专业翻译助手。请把输入文本翻译为 [TARGET_LANG]。
-        请严格保留段落分隔标记 [SEPARATOR] 的数量和顺序。
+        你是专业翻译助手。请把输入文本翻译为 {TARGET_LANG}。
+        请严格保留段落分隔标记 {SEPARATOR} 的数量和顺序。
         只输出译文，不要输出解释或额外内容。
 
-        [INPUT]
+        {INPUT}
         """
             .trimIndent()
 

@@ -14,6 +14,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import me.domino.fa2.data.settings.OpenAiTranslationConfig
 import me.domino.fa2.domain.translation.TranslationRequest
+import me.domino.fa2.util.renderBraceTemplate
 
 internal class OpenAiCompatibleTranslationClient(
     private val transport: TranslationHttpTransport,
@@ -94,11 +95,15 @@ internal class OpenAiCompatibleTranslationClient(
       input: String,
       targetLanguage: String,
   ): String =
-      template
-          .ifBlank { OpenAiTranslationConfig.defaultPromptTemplate }
-          .replace("[TARGET_LANG]", targetLanguage)
-          .replace("[SEPARATOR]", separatorMarker)
-          .replace("[INPUT]", input)
+      renderBraceTemplate(
+          template = template.ifBlank { OpenAiTranslationConfig.defaultPromptTemplate },
+          values =
+              mapOf(
+                  "TARGET_LANG" to targetLanguage,
+                  "SEPARATOR" to separatorMarker,
+                  "INPUT" to input,
+              ),
+      )
 
   private fun flattenMessageContent(contentArray: JsonArray): String =
       contentArray

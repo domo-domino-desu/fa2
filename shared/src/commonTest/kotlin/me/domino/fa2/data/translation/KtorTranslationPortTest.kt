@@ -72,36 +72,34 @@ class KtorTranslationPortTest {
 
   @Test
   fun openAiClientFlattensArrayContentAndStripsThinkTag() = runTest {
-    val client =
-        OpenAiCompatibleTranslationClient(
-            transport =
-                FakeTranslationHttpTransport(
-                    postResponses =
-                        ArrayDeque(
-                            listOf(
-                                TranslationHttpResponse(
-                                    statusCode = 200,
-                                    body =
-                                        """
-                                        {
-                                          "choices": [
-                                            {
-                                              "message": {
-                                                "content": [
-                                                  {"text": "<think>ignore</think>"},
-                                                  {"text": "译文"}
-                                                ]
-                                              }
-                                            }
-                                          ]
-                                        }
-                                        """
-                                            .trimIndent(),
-                                )
-                            )
+    val transport =
+        FakeTranslationHttpTransport(
+            postResponses =
+                ArrayDeque(
+                    listOf(
+                        TranslationHttpResponse(
+                            statusCode = 200,
+                            body =
+                                """
+                                {
+                                  "choices": [
+                                    {
+                                      "message": {
+                                        "content": [
+                                          {"text": "<think>ignore</think>"},
+                                          {"text": "译文"}
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                                """
+                                    .trimIndent(),
                         )
-                )
+                    )
+                ),
         )
+    val client = OpenAiCompatibleTranslationClient(transport = transport)
 
     val translated =
         client.translate(
@@ -113,6 +111,13 @@ class KtorTranslationPortTest {
         )
 
     assertEquals("译文", translated)
+    val requestBody = transport.postRequests.single().second.body.orEmpty()
+    assertEquals(true, requestBody.contains("hello"))
+    assertEquals(true, requestBody.contains("简体中文"))
+    assertEquals(true, requestBody.contains("%%"))
+    assertEquals(false, requestBody.contains("{INPUT}"))
+    assertEquals(false, requestBody.contains("{TARGET_LANG}"))
+    assertEquals(false, requestBody.contains("{SEPARATOR}"))
   }
 
   @Test

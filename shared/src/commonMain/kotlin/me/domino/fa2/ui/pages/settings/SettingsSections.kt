@@ -15,12 +15,13 @@ import fa2.shared.generated.resources.*
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
+import me.domino.fa2.data.settings.DownloadFileNameMode
 import me.domino.fa2.data.settings.TranslationProvider
 import me.domino.fa2.ui.components.ExpressiveTextButton
+import me.domino.fa2.ui.components.platform.rememberPlatformDirectoryPicker
 import me.domino.fa2.ui.components.settings.SettingsDropdownField
 import me.domino.fa2.ui.components.settings.SettingsGroup
 import me.domino.fa2.ui.components.settings.SettingsSwitchRow
-import me.domino.fa2.ui.host.LocalAppI18n
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -28,7 +29,6 @@ internal fun AppearanceSettingsSection(
     draft: SettingsDraft,
     onDraftChange: (SettingsDraft) -> Unit,
 ) {
-  val appI18n = LocalAppI18n.current
   SettingsGroup(title = stringResource(Res.string.appearance), framed = false) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
@@ -86,7 +86,6 @@ internal fun TranslationSettingsSection(
     showApiKey: Boolean,
     onToggleShowApiKey: () -> Unit,
 ) {
-  val appI18n = LocalAppI18n.current
   SettingsGroup(title = stringResource(Res.string.translation), framed = false) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
@@ -206,6 +205,74 @@ internal fun TranslationSettingsSection(
               modifier = Modifier.fillMaxWidth(),
           )
         }
+      }
+    }
+  }
+}
+
+@Composable
+internal fun DownloadSettingsSection(
+    draft: SettingsDraft,
+    onDraftChange: (SettingsDraft) -> Unit,
+) {
+  val triggerDirectoryPicker = rememberPlatformDirectoryPicker { selectedPath ->
+    if (selectedPath != null) {
+      onDraftChange(draft.copy(downloadSavePath = selectedPath))
+    }
+  }
+  SettingsGroup(title = stringResource(Res.string.download_settings), framed = false) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+      OutlinedTextField(
+          value = draft.downloadSavePath,
+          onValueChange = {},
+          readOnly = true,
+          label = { Text(stringResource(Res.string.download_save_path)) },
+          supportingText = { Text(stringResource(Res.string.download_save_path_required_hint)) },
+          modifier = Modifier.fillMaxWidth(),
+      )
+      ExpressiveTextButton(onClick = triggerDirectoryPicker) {
+        Text(stringResource(Res.string.choose_save_path))
+      }
+
+      SettingsSwitchRow(
+          label = stringResource(Res.string.download_allow_media_indexing),
+          checked = draft.downloadAllowMediaIndexing,
+          onCheckedChange = { enabled ->
+            onDraftChange(draft.copy(downloadAllowMediaIndexing = enabled))
+          },
+      )
+
+      SettingsDropdownField(
+          label = stringResource(Res.string.download_subfolder_mode),
+          selected = draft.downloadSubfolderMode,
+          options = AppSettings.supportedDownloadSubfolderModes,
+          optionLabel = { option -> downloadSubfolderModeLabel(option) },
+          onSelect = { selected -> onDraftChange(draft.copy(downloadSubfolderMode = selected)) },
+      )
+
+      SettingsDropdownField(
+          label = stringResource(Res.string.download_file_name_mode),
+          selected = draft.downloadFileNameMode,
+          options = AppSettings.supportedDownloadFileNameModes,
+          optionLabel = { option -> downloadFileNameModeLabel(option) },
+          onSelect = { selected -> onDraftChange(draft.copy(downloadFileNameMode = selected)) },
+      )
+
+      if (draft.downloadFileNameMode == DownloadFileNameMode.CUSTOM) {
+        OutlinedTextField(
+            value = draft.downloadCustomFileNameTemplate,
+            onValueChange = { next ->
+              onDraftChange(draft.copy(downloadCustomFileNameTemplate = next))
+            },
+            label = { Text(stringResource(Res.string.download_file_name_template)) },
+            supportingText = {
+              Text(stringResource(Res.string.download_file_name_template_variables_hint))
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
       }
     }
   }

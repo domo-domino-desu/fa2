@@ -89,4 +89,43 @@ class AppSettingsStorageTest {
     assertEquals("", loaded.openAiTranslationConfig.apiKey)
     assertNull(secretVault.getKeyInfo(AppSettingsStorage.KEY_SECRET_OPENAI_API_KEY))
   }
+
+  @Test
+  fun persistsDownloadSettingsAndAppliesNormalization() = runTest {
+    val randomSuffix = Random.nextLong().toString().replace('-', '0')
+    val tempPath =
+        "${FileSystem.SYSTEM_TEMPORARY_DIRECTORY}/fa2-settings-$randomSuffix.preferences_pb"
+            .toPath()
+    val dataStore = PreferenceDataStoreFactory.createWithPath(produceFile = { tempPath })
+    val keyValueStorage = KeyValueStorage(dataStore)
+    val secretVault = KSafe(fileName = "fa2_settings_secret_$randomSuffix")
+    val storage = AppSettingsStorage(kv = keyValueStorage, secretVault = secretVault)
+
+    storage.save(
+        AppSettings(
+            downloadSavePath = " /tmp/fa2-downloads ",
+            downloadAllowMediaIndexing = false,
+            downloadSubfolderMode = DownloadSubfolderMode.BY_USERNAME,
+            downloadFileNameMode = DownloadFileNameMode.CUSTOM,
+            downloadCustomFileNameTemplate = " {username}-{title} ",
+        )
+    )
+    val loaded = storage.load()
+    assertEquals("/tmp/fa2-downloads", loaded.downloadSavePath)
+    assertEquals(false, loaded.downloadAllowMediaIndexing)
+    assertEquals(DownloadSubfolderMode.BY_USERNAME, loaded.downloadSubfolderMode)
+    assertEquals(DownloadFileNameMode.CUSTOM, loaded.downloadFileNameMode)
+    assertEquals("{username}-{title}", loaded.downloadCustomFileNameTemplate)
+
+    storage.save(
+        AppSettings(
+            downloadFileNameMode = DownloadFileNameMode.CUSTOM,
+            downloadCustomFileNameTemplate = "   ",
+        )
+    )
+    assertEquals(
+        AppSettings.defaultDownloadCustomFileNameTemplate,
+        storage.load().downloadCustomFileNameTemplate,
+    )
+  }
 }

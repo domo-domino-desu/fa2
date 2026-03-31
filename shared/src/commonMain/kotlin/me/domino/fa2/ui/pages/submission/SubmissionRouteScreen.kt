@@ -39,6 +39,8 @@ import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.ui.components.LocalShowToast
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
+import me.domino.fa2.ui.components.platform.PlatformDownloadRequest
+import me.domino.fa2.ui.components.platform.PlatformDownloadResult
 import me.domino.fa2.ui.components.platform.rememberPlatformTextCopier
 import me.domino.fa2.ui.components.platform.rememberPlatformUrlDownloader
 import me.domino.fa2.ui.navigation.goBackHome
@@ -202,10 +204,12 @@ class SubmissionRouteScreen(
           blockedSubmissionMode = settings.blockedSubmissionPagerMode,
           onBack = handleBackNavigation,
           onGoHome = { navigator.goBackHome() },
-          onDownload = { downloadUrl ->
+          onDownload = { downloadRequest ->
             coroutineScope.launch {
-              if (!downloadUrlHandler(downloadUrl)) {
-                uriHandler.openUri(downloadUrl)
+              when (val result = downloadUrlHandler(downloadRequest)) {
+                PlatformDownloadResult.NotHandled -> uriHandler.openUri(downloadRequest.downloadUrl)
+                PlatformDownloadResult.Saved -> Unit
+                is PlatformDownloadResult.HandledFailure -> showToast(result.message)
               }
             }
           },
@@ -286,7 +290,10 @@ class SubmissionRouteScreen(
   }
 }
 
-internal data class SubmissionTopBarActions(val shareUrl: String, val downloadUrl: String?)
+internal data class SubmissionTopBarActions(
+    val shareUrl: String,
+    val downloadRequest: PlatformDownloadRequest?,
+)
 
 private fun resolveTopBarActions(
     initialSid: Int,
@@ -294,7 +301,7 @@ private fun resolveTopBarActions(
 ): SubmissionTopBarActions {
   return when (state) {
     SubmissionPagerUiState.Empty ->
-        SubmissionTopBarActions(shareUrl = FaUrls.submission(initialSid), downloadUrl = null)
+        SubmissionTopBarActions(shareUrl = FaUrls.submission(initialSid), downloadRequest = null)
 
     is SubmissionPagerUiState.Data -> {
       val currentItem = state.submissions.getOrNull(state.currentIndex)
@@ -308,8 +315,25 @@ private fun resolveTopBarActions(
                   ?: currentItem?.submissionUrl?.ifBlank { null }
                   ?: currentItem?.let { item -> FaUrls.submission(item.id) }
                   ?: FaUrls.submission(initialSid),
-          downloadUrl =
-              currentDetail?.detail?.downloadUrl?.trim()?.takeIf { value -> value.isNotBlank() },
+          downloadRequest =
+              currentDetail?.detail?.let { detail ->
+                val normalizedDownloadUrl = detail.downloadUrl?.trim().orEmpty()
+                if (normalizedDownloadUrl.isBlank()) {
+                  null
+                } else {
+                  PlatformDownloadRequest(
+                      downloadUrl = normalizedDownloadUrl,
+                      submissionId = detail.id,
+                      title = detail.title,
+                      username = detail.author,
+                      category = detail.category,
+                      rating = detail.rating,
+                      type = detail.type,
+                      species = detail.species,
+                      downloadFileNameHint = detail.downloadFileName,
+                  )
+                }
+              },
       )
     }
   }

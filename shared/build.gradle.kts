@@ -84,6 +84,7 @@ kotlin {
         implementation(libs.coil.gif)
         implementation(libs.ktor.client.okhttp)
         implementation(libs.pdfbox.android)
+        implementation(libs.documentfile)
       }
     }
   }

@@ -2,6 +2,8 @@ package me.domino.fa2.ui.pages.settings
 
 import androidx.compose.runtime.Composable
 import fa2.shared.generated.resources.*
+import me.domino.fa2.data.settings.DownloadFileNameMode
+import me.domino.fa2.data.settings.DownloadSubfolderMode
 import me.domino.fa2.data.settings.MetadataDisplayMode
 import me.domino.fa2.data.settings.ThemeMode
 import me.domino.fa2.data.settings.TranslationProvider
@@ -47,4 +49,23 @@ internal fun themeModeLabel(themeMode: ThemeMode): String =
       ThemeMode.SYSTEM -> stringResource(Res.string.theme_mode_system)
       ThemeMode.LIGHT -> stringResource(Res.string.theme_mode_light)
       ThemeMode.DARK -> stringResource(Res.string.theme_mode_dark)
+    }
+
+@Composable
+internal fun downloadSubfolderModeLabel(mode: DownloadSubfolderMode): String =
+    when (mode) {
+      DownloadSubfolderMode.FLAT -> stringResource(Res.string.download_subfolder_mode_flat)
+      DownloadSubfolderMode.BY_USERNAME ->
+          stringResource(Res.string.download_subfolder_mode_by_username)
+    }
+
+@Composable
+internal fun downloadFileNameModeLabel(mode: DownloadFileNameMode): String =
+    when (mode) {
+      DownloadFileNameMode.ID_TITLE -> stringResource(Res.string.download_file_name_mode_id_title)
+      DownloadFileNameMode.USERNAME_ID ->
+          stringResource(Res.string.download_file_name_mode_username_id)
+      DownloadFileNameMode.USERNAME_ID_TITLE ->
+          stringResource(Res.string.download_file_name_mode_username_id_title)
+      DownloadFileNameMode.CUSTOM -> stringResource(Res.string.download_file_name_mode_custom)
     }

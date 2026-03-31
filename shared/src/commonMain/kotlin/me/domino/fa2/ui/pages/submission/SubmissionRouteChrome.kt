@@ -22,6 +22,7 @@ import fa2.shared.generated.resources.*
 import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.ui.components.PageStateWrapper
+import me.domino.fa2.ui.components.platform.PlatformDownloadRequest
 import me.domino.fa2.ui.components.submission.SubmissionPager
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.layouts.SubmissionRouteTopBar
@@ -37,7 +38,7 @@ internal fun SubmissionRouteChrome(
     blockedSubmissionMode: BlockedSubmissionPagerMode,
     onBack: () -> Unit,
     onGoHome: () -> Unit,
-    onDownload: (String) -> Unit,
+    onDownload: (PlatformDownloadRequest) -> Unit,
     onRequestScrollToTop: () -> Unit,
     onRetryPage: () -> Unit,
     onRetryCurrentDetail: () -> Unit,
@@ -65,10 +66,8 @@ internal fun SubmissionRouteChrome(
           onBack = onBack,
           onGoHome = onGoHome,
           shareUrl = topBarActions.shareUrl,
-          downloadUrl = topBarActions.downloadUrl,
-          onDownload = {
-            topBarActions.downloadUrl?.let { downloadUrl -> onDownload(downloadUrl) }
-          },
+          downloadUrl = topBarActions.downloadRequest?.downloadUrl,
+          onDownload = { topBarActions.downloadRequest?.let { request -> onDownload(request) } },
           onTitleClick = onRequestScrollToTop,
       )
     }

@@ -100,6 +100,26 @@ class AppSettingsService(private val storage: AppSettingsStorage) {
     updateSettings(mutableSettings.value.copy(returnToCurrentSubmissionInWaterfall = enabled))
   }
 
+  suspend fun updateDownloadSavePath(path: String) {
+    updateSettings(mutableSettings.value.copy(downloadSavePath = path))
+  }
+
+  suspend fun updateDownloadAllowMediaIndexing(allow: Boolean) {
+    updateSettings(mutableSettings.value.copy(downloadAllowMediaIndexing = allow))
+  }
+
+  suspend fun updateDownloadSubfolderMode(mode: DownloadSubfolderMode) {
+    updateSettings(mutableSettings.value.copy(downloadSubfolderMode = mode))
+  }
+
+  suspend fun updateDownloadFileNameMode(mode: DownloadFileNameMode) {
+    updateSettings(mutableSettings.value.copy(downloadFileNameMode = mode))
+  }
+
+  suspend fun updateDownloadCustomFileNameTemplate(template: String) {
+    updateSettings(mutableSettings.value.copy(downloadCustomFileNameTemplate = template))
+  }
+
   suspend fun updateWatchRecommendationPageSize(pageSize: Int) {
     updateSettings(mutableSettings.value.copy(watchRecommendationPageSize = pageSize))
   }

@@ -4,6 +4,8 @@ import fa2.shared.generated.resources.*
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
+import me.domino.fa2.data.settings.DownloadFileNameMode
+import me.domino.fa2.data.settings.DownloadSubfolderMode
 import me.domino.fa2.data.settings.MetadataDisplayMode
 import me.domino.fa2.data.settings.OpenAiTranslationConfig
 import me.domino.fa2.data.settings.ThemeMode
@@ -23,6 +25,11 @@ internal data class SettingsDraft(
     val blockedSubmissionWaterfallMode: BlockedSubmissionWaterfallMode,
     val blockedSubmissionPagerMode: BlockedSubmissionPagerMode,
     val returnToCurrentSubmissionInWaterfall: Boolean,
+    val downloadSavePath: String,
+    val downloadAllowMediaIndexing: Boolean,
+    val downloadSubfolderMode: DownloadSubfolderMode,
+    val downloadFileNameMode: DownloadFileNameMode,
+    val downloadCustomFileNameTemplate: String,
     val watchRecommendationPageSizeInput: String,
     val chunkWordLimitInput: String,
     val maxConcurrencyInput: String,
@@ -48,6 +55,11 @@ internal data class SettingsDraft(
         blockedSubmissionWaterfallMode = blockedSubmissionWaterfallMode,
         blockedSubmissionPagerMode = blockedSubmissionPagerMode,
         returnToCurrentSubmissionInWaterfall = returnToCurrentSubmissionInWaterfall,
+        downloadSavePath = downloadSavePath,
+        downloadAllowMediaIndexing = downloadAllowMediaIndexing,
+        downloadSubfolderMode = downloadSubfolderMode,
+        downloadFileNameMode = downloadFileNameMode,
+        downloadCustomFileNameTemplate = downloadCustomFileNameTemplate,
         watchRecommendationPageSize = watchRecommendationPageSize,
         translationChunkWordLimit = chunkWordLimit,
         translationMaxConcurrency = maxConcurrency,
@@ -78,6 +90,8 @@ internal data class SettingsDraft(
     val metadataDisplayLabel = appString(Res.string.metadata_display)
     val blurInWaterfallsLabel = appString(Res.string.blur_blocked_submissions_in_waterfalls)
     val blurInDetailPagesLabel = appString(Res.string.blur_blocked_submissions_in_detail_pages)
+    val downloadSubfolderModeLabel = appString(Res.string.download_subfolder_mode)
+    val downloadFileNameModeLabel = appString(Res.string.download_file_name_mode)
     val baseUrlLabel = appString(Res.string.base_url)
     val apiKeyLabel = appString(Res.string.api_key)
     val modelLabel = appString(Res.string.model)
@@ -113,6 +127,12 @@ internal data class SettingsDraft(
     }
     if (blockedSubmissionPagerMode !in AppSettings.supportedBlockedSubmissionPagerModes) {
       return appString(Res.string.unsupported_setting, blurInDetailPagesLabel)
+    }
+    if (downloadSubfolderMode !in AppSettings.supportedDownloadSubfolderModes) {
+      return appString(Res.string.unsupported_setting, downloadSubfolderModeLabel)
+    }
+    if (downloadFileNameMode !in AppSettings.supportedDownloadFileNameModes) {
+      return appString(Res.string.unsupported_setting, downloadFileNameModeLabel)
     }
 
     if (
@@ -188,6 +208,11 @@ internal data class SettingsDraft(
             blockedSubmissionWaterfallMode = settings.blockedSubmissionWaterfallMode,
             blockedSubmissionPagerMode = settings.blockedSubmissionPagerMode,
             returnToCurrentSubmissionInWaterfall = settings.returnToCurrentSubmissionInWaterfall,
+            downloadSavePath = settings.downloadSavePath,
+            downloadAllowMediaIndexing = settings.downloadAllowMediaIndexing,
+            downloadSubfolderMode = settings.downloadSubfolderMode,
+            downloadFileNameMode = settings.downloadFileNameMode,
+            downloadCustomFileNameTemplate = settings.downloadCustomFileNameTemplate,
             watchRecommendationPageSizeInput = settings.watchRecommendationPageSize.toString(),
             chunkWordLimitInput = settings.translationChunkWordLimit.toString(),
             maxConcurrencyInput = settings.translationMaxConcurrency.toString(),

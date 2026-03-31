@@ -28,6 +28,7 @@ ktor = "3.0.0"
 lifecycle = "2.9.2"
 materialyou = "0.2.9"
 datastore = "1.2.1"
+documentfile = "1.1.0"
 navigation = "2.9.2"
 room = "2.7.1"
 slf4j = "2.0.17"
@@ -74,6 +75,7 @@ ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 materialyou = { module = "dev.zwander:materialyou", version.ref = "materialyou" }
 datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore" }
+documentfile = { module = "androidx.documentfile:documentfile", version.ref = "documentfile" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }

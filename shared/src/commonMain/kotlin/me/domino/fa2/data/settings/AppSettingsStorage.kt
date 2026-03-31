@@ -64,6 +64,19 @@ class AppSettingsStorage(
     val returnToCurrentSubmissionInWaterfall =
         kv.load(KEY_RETURN_TO_CURRENT_SUBMISSION_IN_WATERFALL)?.toBooleanStrictOrNull()
             ?: AppSettings.defaultReturnToCurrentSubmissionInWaterfall
+    val downloadSavePath = kv.load(KEY_DOWNLOAD_SAVE_PATH) ?: AppSettings.defaultDownloadSavePath
+    val downloadAllowMediaIndexing =
+        kv.load(KEY_DOWNLOAD_ALLOW_MEDIA_INDEXING)?.toBooleanStrictOrNull()
+            ?: AppSettings.defaultDownloadAllowMediaIndexing
+    val downloadSubfolderMode =
+        DownloadSubfolderMode.fromPersistedValue(kv.load(KEY_DOWNLOAD_SUBFOLDER_MODE))
+            ?: AppSettings.defaultDownloadSubfolderMode
+    val downloadFileNameMode =
+        DownloadFileNameMode.fromPersistedValue(kv.load(KEY_DOWNLOAD_FILE_NAME_MODE))
+            ?: AppSettings.defaultDownloadFileNameMode
+    val downloadCustomFileNameTemplate =
+        kv.load(KEY_DOWNLOAD_CUSTOM_FILE_NAME_TEMPLATE)
+            ?: AppSettings.defaultDownloadCustomFileNameTemplate
     val rawWatchRecommendationPageSize =
         kv.load(KEY_WATCH_RECOMMENDATION_PAGE_SIZE)?.toIntOrNull()
             ?: AppSettings.defaultWatchRecommendationPageSize
@@ -83,6 +96,11 @@ class AppSettingsStorage(
             blockedSubmissionWaterfallMode = blockedSubmissionWaterfallMode,
             blockedSubmissionPagerMode = blockedSubmissionPagerMode,
             returnToCurrentSubmissionInWaterfall = returnToCurrentSubmissionInWaterfall,
+            downloadSavePath = downloadSavePath,
+            downloadAllowMediaIndexing = downloadAllowMediaIndexing,
+            downloadSubfolderMode = downloadSubfolderMode,
+            downloadFileNameMode = downloadFileNameMode,
+            downloadCustomFileNameTemplate = downloadCustomFileNameTemplate,
             watchRecommendationPageSize = rawWatchRecommendationPageSize,
         )
     )
@@ -123,6 +141,17 @@ class AppSettingsStorage(
         KEY_RETURN_TO_CURRENT_SUBMISSION_IN_WATERFALL,
         normalized.returnToCurrentSubmissionInWaterfall.toString(),
     )
+    kv.save(KEY_DOWNLOAD_SAVE_PATH, normalized.downloadSavePath)
+    kv.save(
+        KEY_DOWNLOAD_ALLOW_MEDIA_INDEXING,
+        normalized.downloadAllowMediaIndexing.toString(),
+    )
+    kv.save(KEY_DOWNLOAD_SUBFOLDER_MODE, normalized.downloadSubfolderMode.persistedValue)
+    kv.save(KEY_DOWNLOAD_FILE_NAME_MODE, normalized.downloadFileNameMode.persistedValue)
+    kv.save(
+        KEY_DOWNLOAD_CUSTOM_FILE_NAME_TEMPLATE,
+        normalized.downloadCustomFileNameTemplate,
+    )
     kv.save(
         KEY_WATCH_RECOMMENDATION_PAGE_SIZE,
         normalized.watchRecommendationPageSize.toString(),
@@ -152,6 +181,12 @@ class AppSettingsStorage(
     const val KEY_BLOCKED_SUBMISSION_PAGER_MODE: String = "settings.blockedSubmission.pager.mode"
     const val KEY_RETURN_TO_CURRENT_SUBMISSION_IN_WATERFALL: String =
         "settings.submission.returnToCurrentInWaterfall"
+    const val KEY_DOWNLOAD_SAVE_PATH: String = "settings.download.savePath"
+    const val KEY_DOWNLOAD_ALLOW_MEDIA_INDEXING: String = "settings.download.allowMediaIndexing"
+    const val KEY_DOWNLOAD_SUBFOLDER_MODE: String = "settings.download.subfolderMode"
+    const val KEY_DOWNLOAD_FILE_NAME_MODE: String = "settings.download.fileNameMode"
+    const val KEY_DOWNLOAD_CUSTOM_FILE_NAME_TEMPLATE: String =
+        "settings.download.customFileNameTemplate"
     const val KEY_WATCH_RECOMMENDATION_PAGE_SIZE: String = "settings.watchRecommendation.pageSize"
   }
 }
