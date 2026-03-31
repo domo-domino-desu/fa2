@@ -56,10 +56,7 @@ android {
     buildConfig = true
   }
 
-  packaging {
-    jniLibs { useLegacyPackaging = true }
-    resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }
-  }
+  packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
 
 kotlin { jvmToolchain(21) }
