@@ -1,6 +1,5 @@
 import org.gradle.api.Project
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.api.tasks.Copy
 
 plugins {
   alias(libs.plugins.androidApplication)
@@ -23,6 +22,7 @@ android {
     versionCode = appVersionCode
     versionName = appVersionName
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    ndk { abiFilters += "arm64-v8a" }
   }
 
   signingConfigs {
@@ -56,15 +56,10 @@ android {
     buildConfig = true
   }
 
-  sourceSets {
-    getByName("main") {
-      assets.directories.add(
-          layout.buildDirectory.dir("generated/aboutlibrariesAssets").get().asFile.path
-      )
-    }
+  packaging {
+    jniLibs { useLegacyPackaging = true }
+    resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }
   }
-
-  packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
 
 kotlin { jvmToolchain(21) }
@@ -87,21 +82,7 @@ dependencies {
   androidTestImplementation(libs.androidx.test.espresso.core)
 }
 
-val copyAboutLibrariesJsonToAssets by
-    tasks.registering(Copy::class) {
-      from(
-          project(":shared")
-              .layout
-              .projectDirectory
-              .file("src/commonMain/composeResources/files/aboutlibraries.json")
-      )
-      into(layout.buildDirectory.dir("generated/aboutlibrariesAssets"))
-    }
-
-tasks.named("preBuild").configure {
-  dependsOn(copyAboutLibrariesJsonToAssets)
-  dependsOn(rootProject.tasks.named("generateAppIcons"))
-}
+tasks.named("preBuild").configure { dependsOn(rootProject.tasks.named("generateAppIcons")) }
 
 private data class AndroidReleaseSigning(
     val storeFilePath: String,
