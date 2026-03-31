@@ -163,6 +163,7 @@ class SubmissionRouteScreen(
     val showToast = LocalShowToast.current
     val coroutineScope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
+    val downloadSavedText = stringResource(Res.string.download_save_succeeded)
     val tagCopiedText = stringResource(Res.string.tag_copied)
     val linkCopiedText = stringResource(Res.string.link_copied)
     val requestPagerFocus =
@@ -232,7 +233,7 @@ class SubmissionRouteScreen(
             coroutineScope.launch {
               when (val result = downloadUrlHandler(downloadRequest)) {
                 PlatformDownloadResult.NotHandled -> uriHandler.openUri(downloadRequest.downloadUrl)
-                PlatformDownloadResult.Saved -> Unit
+                PlatformDownloadResult.Saved -> showToast(downloadSavedText)
                 is PlatformDownloadResult.HandledFailure -> showToast(result.message)
               }
             }

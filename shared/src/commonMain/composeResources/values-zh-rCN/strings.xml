@@ -183,6 +183,7 @@
   <string name="download_file_name_template">文件名模板</string>
   <string name="download_file_name_template_variables_hint">支持 {username} {title} {submission_id} {category} {rating} {type} {species}</string>
   <string name="download_save_path_not_configured">请先在设置中选择保存路径</string>
+  <string name="download_save_succeeded">保存成功</string>
   <string name="download_save_failed">下载保存失败：%1$s</string>
   <string name="download_save_error_invalid_path">保存路径无效</string>
   <string name="download_save_error_cannot_access_directory">无法访问保存目录</string>

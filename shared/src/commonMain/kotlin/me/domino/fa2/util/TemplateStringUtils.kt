@@ -1,6 +1,6 @@
 package me.domino.fa2.util
 
-private val braceTemplateTokenRegex = Regex("""\{([A-Za-z0-9_]+)}""")
+private val braceTemplateTokenRegex = Regex("""\{([A-Za-z0-9_]+)\}""")
 private val whitespaceRegex = Regex("""\s+""")
 private val connectorSpacingRegex = Regex("""\s*([_-])\s*""")
 private val duplicateConnectorRegex = Regex("""([_-])\1+""")

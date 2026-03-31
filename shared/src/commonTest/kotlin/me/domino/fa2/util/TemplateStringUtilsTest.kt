@@ -37,6 +37,22 @@ class TemplateStringUtilsTest {
   }
 
   @Test
+  fun supportsDownloadFileNameTemplates() {
+    val rendered =
+        renderBraceTemplate(
+            template = "{username}-{submission_id}-{title}",
+            values =
+                mapOf(
+                    "username" to "alice",
+                    "submission_id" to "123",
+                    "title" to "sunset",
+                ),
+        )
+
+    assertEquals("alice-123-sunset", rendered)
+  }
+
+  @Test
   fun cleanupCollapsesConnectorNoise() {
     assertEquals("a-b_c", cleanupTemplateRenderedText(" a -  b__c "))
     assertEquals("alice", cleanupTemplateRenderedText("alice---"))
