@@ -110,7 +110,11 @@ class BrowseRouteScreen(private val initialFilter: BrowseFilterState) : Screen {
           onTitleClick = { coroutineScope.launch { waterfallState.animateScrollToItem(0) } },
       )
 
-      PageStateWrapper(state = pageState, onRetry = screenModel::refresh) {
+      PageStateWrapper(
+          state = pageState,
+          hasContent = displayState.submissions.isNotEmpty(),
+          onRetry = screenModel::refresh,
+      ) {
         BrowseScreen(
             state = displayState,
             onUpdateCategory = screenModel::updateCategory,

@@ -27,13 +27,11 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -67,6 +65,8 @@ import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
 import me.domino.fa2.ui.components.ExpressiveButton
 import me.domino.fa2.ui.components.ExpressiveTextButton
 import me.domino.fa2.ui.components.NetworkImage
+import me.domino.fa2.ui.components.PaginationRetryBar
+import me.domino.fa2.ui.components.PaginationRetryDirection
 import me.domino.fa2.ui.components.ThumbnailImage
 import me.domino.fa2.ui.host.LocalTaxonomyCatalog
 import me.domino.fa2.ui.host.LocalTaxonomyRepository
@@ -746,61 +746,13 @@ private fun LazyStaggeredGridScope.paginationHeader(
     return
   }
   item(key = "waterfall-prepend-header", span = StaggeredGridItemSpan.FullLine) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-    ) {
-      Row(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Text(
-            text =
-                when {
-                  loadingPreviousPage -> stringResource(Res.string.loading_previous_page_content)
-                  !prependErrorMessage.isNullOrBlank() ->
-                      stringResource(Res.string.auto_load_failed_manual_previous_page)
-                  else ->
-                      stringResource(
-                          Res.string.continue_auto_load_previous_page_with_manual_fallback
-                      )
-                },
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        if (loadingPreviousPage) {
-          Row(
-              horizontalArrangement = Arrangement.spacedBy(8.dp),
-              verticalAlignment = Alignment.CenterVertically,
-          ) {
-            LoadingIndicator(
-                modifier = Modifier.padding(top = 2.dp).size(22.dp),
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = stringResource(Res.string.loading),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary,
-            )
-          }
-        } else if (canLoadPreviousPage && onLoadPreviousPage != null) {
-          AssistChip(
-              onClick = onLoadPreviousPage,
-              label = {
-                Text(
-                    text =
-                        if (!prependErrorMessage.isNullOrBlank()) {
-                          stringResource(Res.string.manual_load_previous_page)
-                        } else {
-                          stringResource(Res.string.load_previous_page)
-                        }
-                )
-              },
-          )
-        }
-      }
-    }
+    PaginationRetryBar(
+        direction = PaginationRetryDirection.Prepend,
+        canLoad = canLoadPreviousPage,
+        loading = loadingPreviousPage,
+        errorMessage = prependErrorMessage,
+        onRetry = onLoadPreviousPage ?: {},
+    )
   }
 }
 
@@ -813,60 +765,14 @@ private fun LazyStaggeredGridScope.paginationFooter(
     onRetryLoadMore: () -> Unit,
 ) {
   item(span = StaggeredGridItemSpan.FullLine) {
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-    ) {
-      Row(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Text(
-            text =
-                when {
-                  loadingMore -> stringResource(Res.string.loading_more_content)
-                  !appendErrorMessage.isNullOrBlank() && canLoadMore ->
-                      stringResource(Res.string.auto_load_failed_manual_next_page)
-                  canLoadMore ->
-                      stringResource(Res.string.continue_auto_load_next_page_with_manual_fallback)
-                  else -> stringResource(Res.string.reached_current_results_end)
-                },
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        if (canLoadMore && !loadingMore) {
-          AssistChip(
-              onClick = onRetryLoadMore,
-              label = {
-                Text(
-                    text =
-                        if (!appendErrorMessage.isNullOrBlank()) {
-                          stringResource(Res.string.manual_load_next_page)
-                        } else {
-                          stringResource(Res.string.load_next_page)
-                        }
-                )
-              },
-          )
-        } else if (loadingMore) {
-          Row(
-              horizontalArrangement = Arrangement.spacedBy(8.dp),
-              verticalAlignment = Alignment.CenterVertically,
-          ) {
-            LoadingIndicator(
-                modifier = Modifier.padding(top = 2.dp).size(22.dp),
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = stringResource(Res.string.loading),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary,
-            )
-          }
-        }
-      }
-    }
+    PaginationRetryBar(
+        direction = PaginationRetryDirection.Append,
+        canLoad = canLoadMore,
+        loading = loadingMore,
+        errorMessage = appendErrorMessage,
+        onRetry = onRetryLoadMore,
+        modifier = Modifier.padding(bottom = 12.dp),
+    )
   }
 }
 

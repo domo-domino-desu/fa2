@@ -126,7 +126,11 @@ class SearchRouteScreen(
           onTitleClick = { coroutineScope.launch { waterfallState.animateScrollToItem(0) } },
       )
 
-      PageStateWrapper(state = pageState, onRetry = screenModel::refresh) {
+      PageStateWrapper(
+          state = pageState,
+          hasContent = displayState.submissions.isNotEmpty(),
+          onRetry = screenModel::refresh,
+      ) {
         SearchScreen(
             state = displayState,
             actions =

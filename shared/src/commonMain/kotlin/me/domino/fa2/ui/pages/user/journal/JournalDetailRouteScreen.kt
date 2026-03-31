@@ -38,10 +38,11 @@ import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.ui.components.DetailSectionCardSurface
-import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
 import me.domino.fa2.ui.components.HtmlText
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.SkeletonBlock
+import me.domino.fa2.ui.components.StatusSurface
+import me.domino.fa2.ui.components.StatusSurfaceVariant
 import me.domino.fa2.ui.components.SubmissionSeriesProbeConfig
 import me.domino.fa2.ui.components.TranslatableBlocksCard
 import me.domino.fa2.ui.host.LocalAppI18n
@@ -163,17 +164,14 @@ private fun JournalDetailErrorCard(
     message: String,
     onRetry: () -> Unit,
 ) {
-  DetailSectionCardSurface(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)
-  ) {
-    Text(text = title, style = MaterialTheme.typography.titleMedium)
-    Text(
-        text = message,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-    ExpressiveFilledTonalButton(onClick = onRetry) { Text(retryText) }
-  }
+  StatusSurface(
+      title = title,
+      body = message,
+      modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+      actionLabel = retryText,
+      onAction = onRetry,
+      variant = StatusSurfaceVariant.Section,
+  )
 }
 
 @Composable

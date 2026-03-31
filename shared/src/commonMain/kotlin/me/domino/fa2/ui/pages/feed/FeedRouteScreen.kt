@@ -82,7 +82,11 @@ class FeedRouteScreen : Screen {
         } ?: state
     val pageControls = contextState?.toWaterfallPageControls()
 
-    PageStateWrapper(state = pageState, onRetry = { screenModel.load(forceRefresh = true) }) {
+    PageStateWrapper(
+        state = pageState,
+        hasContent = displayState.submissions.isNotEmpty(),
+        onRetry = { screenModel.load(forceRefresh = true) },
+    ) {
       FeedScreen(
           state = displayState,
           onRetry = { screenModel.load(forceRefresh = true) },

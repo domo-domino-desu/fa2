@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -23,12 +21,12 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.Res
 import fa2.shared.generated.resources.load_failed
 import fa2.shared.generated.resources.no_displayable_shouts
-import fa2.shared.generated.resources.retry
 import fa2.shared.generated.resources.shouts
 import fa2.shared.generated.resources.shouts_count
 import kotlinx.coroutines.launch
-import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
 import me.domino.fa2.ui.components.SkeletonBlock
+import me.domino.fa2.ui.components.StatusSurface
+import me.domino.fa2.ui.components.StatusSurfaceVariant
 import me.domino.fa2.ui.components.submission.SubmissionCommentsCard
 import me.domino.fa2.ui.layouts.UserRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
@@ -108,19 +106,11 @@ private fun UserShoutsSkeleton() {
 
 @Composable
 private fun UserShoutsError(message: String, onRetry: () -> Unit) {
-  Column(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-      verticalArrangement = Arrangement.spacedBy(10.dp),
-  ) {
-    Text(
-        text = stringResource(Res.string.load_failed),
-        style = MaterialTheme.typography.titleMedium,
-    )
-    Text(
-        text = message,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-    ExpressiveFilledTonalButton(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
-  }
+  StatusSurface(
+      title = stringResource(Res.string.load_failed),
+      body = message,
+      modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+      onAction = onRetry,
+      variant = StatusSurfaceVariant.Section,
+  )
 }

@@ -40,6 +40,8 @@ import me.domino.fa2.ui.components.FilterOption
 import me.domino.fa2.ui.components.FilterOptionGroup
 import me.domino.fa2.ui.components.GroupedFilterDropdownField
 import me.domino.fa2.ui.components.GroupedTextPickerDialog
+import me.domino.fa2.ui.components.StatusSurface
+import me.domino.fa2.ui.components.StatusSurfaceVariant
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
 import me.domino.fa2.ui.components.submission.SubmissionWaterfallPageControls
@@ -161,55 +163,57 @@ fun BrowseScreen(
             modifier = Modifier.fillMaxSize(),
         )
       }
-    } else if (!state.errorMessage.isNullOrBlank() && state.submissions.isEmpty()) {
+    } else {
       Column(
           modifier = Modifier.fillMaxSize(),
           verticalArrangement = Arrangement.spacedBy(10.dp),
       ) {
-        filterBar()
-        BrowseStatusCard(
-            title = stringResource(Res.string.load_failed),
-            body = state.errorMessage.orEmpty(),
-            onRetry = onRetry,
-        )
-      }
-    } else {
-      val waterfallContent: @Composable () -> Unit = {
-        SubmissionWaterfall(
-            items = state.submissions,
-            onItemClick = onOpenSubmission,
-            onLastVisibleIndexChanged = onLastVisibleIndexChanged,
-            canLoadMore = state.hasMore,
-            loadingMore = state.isLoadingMore,
-            appendErrorMessage = state.appendErrorMessage,
-            onRetryLoadMore = onRetryLoadMore,
-            state = waterfallState,
-            minCardWidthDp = settings.waterfallMinCardWidthDp,
-            headerContent = filterBar,
-            blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
-            itemIndexOffset = 1,
-            pageControls = pageControls,
-            canLoadPreviousPageAtTop = canLoadPreviousPageAtTop,
-            loadingPreviousPage = loadingPreviousPage,
-            prependErrorMessage = prependErrorMessage,
-            onLoadPreviousPageAtTop = onLoadPreviousPageAtTop,
-            onLoadFirstPage = onLoadFirstPage,
-            onLoadPreviousPage = onLoadPreviousPage,
-            onJumpToPage = onJumpToPage,
-            onLoadNextPage = onLoadNextPage,
-            onLoadLastPage = onLoadLastPage,
-            pendingScrollRequest = pendingScrollRequest,
-            onConsumeScrollRequest = onConsumeScrollRequest,
-            onViewportChanged = onViewportChanged,
-        )
-      }
-      WaterfallRefreshBox(
-          enabled = refreshEnabled,
-          refreshing = state.refreshing,
-          onRefresh = onRefresh,
-          modifier = Modifier.fillMaxSize(),
-      ) {
-        waterfallContent()
+        state.errorMessage
+            ?.takeIf { message -> message.isNotBlank() && state.submissions.isNotEmpty() }
+            ?.let { inlineErrorMessage ->
+              BrowseStatusCard(
+                  title = stringResource(Res.string.load_failed),
+                  body = inlineErrorMessage,
+                  onRetry = onRetry,
+              )
+            }
+        val waterfallContent: @Composable () -> Unit = {
+          SubmissionWaterfall(
+              items = state.submissions,
+              onItemClick = onOpenSubmission,
+              onLastVisibleIndexChanged = onLastVisibleIndexChanged,
+              canLoadMore = state.hasMore,
+              loadingMore = state.isLoadingMore,
+              appendErrorMessage = state.appendErrorMessage,
+              onRetryLoadMore = onRetryLoadMore,
+              state = waterfallState,
+              minCardWidthDp = settings.waterfallMinCardWidthDp,
+              headerContent = filterBar,
+              blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
+              itemIndexOffset = 1,
+              pageControls = pageControls,
+              canLoadPreviousPageAtTop = canLoadPreviousPageAtTop,
+              loadingPreviousPage = loadingPreviousPage,
+              prependErrorMessage = prependErrorMessage,
+              onLoadPreviousPageAtTop = onLoadPreviousPageAtTop,
+              onLoadFirstPage = onLoadFirstPage,
+              onLoadPreviousPage = onLoadPreviousPage,
+              onJumpToPage = onJumpToPage,
+              onLoadNextPage = onLoadNextPage,
+              onLoadLastPage = onLoadLastPage,
+              pendingScrollRequest = pendingScrollRequest,
+              onConsumeScrollRequest = onConsumeScrollRequest,
+              onViewportChanged = onViewportChanged,
+          )
+        }
+        WaterfallRefreshBox(
+            enabled = refreshEnabled,
+            refreshing = state.refreshing,
+            onRefresh = onRefresh,
+            modifier = Modifier.fillMaxSize(),
+        ) {
+          waterfallContent()
+        }
       }
     }
 
@@ -485,31 +489,13 @@ private fun RatingCheckbox(label: String, checked: Boolean, onCheckedChange: (Bo
 
 @Composable
 private fun BrowseStatusCard(title: String, body: String, onRetry: () -> Unit) {
-  Surface(
-      color = MaterialTheme.colorScheme.surface,
-      shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
-      border =
-          androidx.compose.foundation.BorderStroke(
-              width = 1.dp,
-              color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
-          ),
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-  ) {
-    Column(
-        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-      Text(text = title, style = MaterialTheme.typography.titleMedium)
-      Text(
-          text = body,
-          style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-      )
-      me.domino.fa2.ui.components.ExpressiveFilledTonalButton(onClick = onRetry) {
-        Text(stringResource(Res.string.retry))
-      }
-    }
-  }
+  StatusSurface(
+      title = title,
+      body = body,
+      modifier = Modifier.padding(horizontal = 12.dp),
+      onAction = onRetry,
+      variant = StatusSurfaceVariant.Section,
+  )
 }
 
 private fun buildBrowseGenderOptions(

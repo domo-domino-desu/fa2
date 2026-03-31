@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,11 +14,9 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -37,7 +34,11 @@ import fa2.shared.generated.resources.*
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.JournalSummary
+import me.domino.fa2.ui.components.PaginationRetryBar
+import me.domino.fa2.ui.components.PaginationRetryDirection
 import me.domino.fa2.ui.components.SkeletonBlock
+import me.domino.fa2.ui.components.StatusSurface
+import me.domino.fa2.ui.components.StatusSurfaceVariant
 import me.domino.fa2.ui.pages.user.profile.UserBodyScrollPosition
 import me.domino.fa2.ui.pages.user.profile.UserChildRouteTabs
 import me.domino.fa2.ui.pages.user.profile.UserSectionTopDefaults
@@ -323,73 +324,25 @@ private fun UserJournalsFooter(
     appendErrorMessage: String?,
     onRetryLoadMore: () -> Unit,
 ) {
-  Surface(
-      color = MaterialTheme.colorScheme.surface,
-      shape = RoundedCornerShape(12.dp),
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
-  ) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-      Text(
-          text =
-              when {
-                isLoadingMore -> stringResource(Res.string.loading_more_content)
-                !appendErrorMessage.isNullOrBlank() && hasMore ->
-                    stringResource(Res.string.auto_load_failed_manual_next_page)
-                hasMore -> stringResource(Res.string.continue_auto_load_next_page)
-                else -> stringResource(Res.string.reached_end)
-              },
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-      )
-      if (hasMore && !isLoadingMore) {
-        AssistChip(
-            onClick = onRetryLoadMore,
-            label = {
-              Text(
-                  text =
-                      if (appendErrorMessage.isNullOrBlank()) {
-                        stringResource(Res.string.load_next_page)
-                      } else {
-                        stringResource(Res.string.manual_load)
-                      }
-              )
-            },
-        )
-      }
-    }
-  }
+  PaginationRetryBar(
+      direction = PaginationRetryDirection.Append,
+      canLoad = hasMore,
+      loading = isLoadingMore,
+      errorMessage = appendErrorMessage,
+      onRetry = onRetryLoadMore,
+      modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+  )
 }
 
 @Composable
 private fun UserJournalsStatusCard(title: String, body: String, onRetry: () -> Unit) {
-  Surface(
-      color = MaterialTheme.colorScheme.surface,
-      shape = RoundedCornerShape(14.dp),
-      border =
-          BorderStroke(
-              width = 1.dp,
-              color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
-          ),
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-  ) {
-    Column(
-        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-      Text(text = title, style = MaterialTheme.typography.titleMedium)
-      Text(
-          text = body,
-          style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-      )
-      me.domino.fa2.ui.components.ExpressiveFilledTonalButton(onClick = onRetry) {
-        Text(stringResource(Res.string.retry))
-      }
-    }
-  }
+  StatusSurface(
+      title = title,
+      body = body,
+      modifier = Modifier.padding(horizontal = 12.dp),
+      onAction = onRetry,
+      variant = StatusSurfaceVariant.Section,
+  )
 }
 
 private fun isListAtTop(listState: LazyListState): Boolean =

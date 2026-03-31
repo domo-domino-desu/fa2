@@ -32,11 +32,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
-import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
 import me.domino.fa2.ui.components.ExpressiveIconButton
 import me.domino.fa2.ui.components.HtmlText
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.SkeletonBlock
+import me.domino.fa2.ui.components.StatusSurface
+import me.domino.fa2.ui.components.StatusSurfaceVariant
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import org.jetbrains.compose.resources.stringResource
 
@@ -111,14 +112,12 @@ internal fun UserHeaderCard(
           }
 
           if (header == null) {
-            Text(
-                text = state.errorMessage ?: stringResource(Res.string.load_failed),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
+            StatusSurface(
+                title = stringResource(Res.string.load_failed),
+                body = state.errorMessage ?: stringResource(Res.string.load_failed),
+                onAction = onRetry,
+                variant = StatusSurfaceVariant.Inline,
             )
-            ExpressiveFilledTonalButton(onClick = onRetry) {
-              Text(stringResource(Res.string.retry))
-            }
             return@Surface
           }
 
@@ -236,10 +235,10 @@ internal fun UserHeaderCard(
           }
 
           if (!state.errorMessage.isNullOrBlank()) {
-            Text(
-                text = state.errorMessage,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error,
+            StatusSurface(
+                title = stringResource(Res.string.load_failed),
+                body = state.errorMessage,
+                variant = StatusSurfaceVariant.Inline,
             )
           }
         }

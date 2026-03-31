@@ -81,7 +81,15 @@ internal fun SubmissionRouteChrome(
           onTitleClick = onRequestScrollToTop,
       )
     }
-    PageStateWrapper(state = pageState, onRetry = onRetryPage) {
+    PageStateWrapper(
+        state = pageState,
+        hasContent =
+            when (state) {
+              SubmissionPagerUiState.Empty -> false
+              is SubmissionPagerUiState.Data -> state.submissions.isNotEmpty()
+            },
+        onRetry = onRetryPage,
+    ) {
       when (val snapshot = state) {
         SubmissionPagerUiState.Empty -> {
           Text(

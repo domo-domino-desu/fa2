@@ -26,7 +26,6 @@ import me.domino.fa2.ui.components.submission.SubmissionWaterfallPageControls
 import me.domino.fa2.ui.components.submission.SubmissionWaterfallViewportSnapshot
 import me.domino.fa2.ui.components.submission.WaterfallLoadingSkeleton
 import me.domino.fa2.ui.components.submission.WaterfallRefreshBox
-import me.domino.fa2.ui.host.LocalAppI18n
 import me.domino.fa2.ui.host.LocalAppSettings
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.search.component.SearchHint
@@ -55,7 +54,6 @@ fun SearchScreen(
     onConsumeScrollRequest: ((Long) -> Unit)? = null,
     onViewportChanged: ((SubmissionWaterfallViewportSnapshot) -> Unit)? = null,
 ) {
-  val appI18n = LocalAppI18n.current
   val settings = LocalAppSettings.current
   val refreshEnabled = pageControls?.showFirstPage != true || !pageControls.canLoadFirstPage
   val overlayUiData = rememberSearchOverlayUiData()
@@ -77,59 +75,56 @@ fun SearchScreen(
             modifier = Modifier.fillMaxSize(),
         )
       } else {
-        when {
-          state.loading && state.submissions.isEmpty() -> {
-            WaterfallLoadingSkeleton(
-                minCardWidthDp = settings.waterfallMinCardWidthDp,
+        if (state.loading && state.submissions.isEmpty()) {
+          WaterfallLoadingSkeleton(
+              minCardWidthDp = settings.waterfallMinCardWidthDp,
+              state = waterfallState,
+              modifier = Modifier.fillMaxSize(),
+          )
+        } else {
+          state.errorMessage
+              ?.takeIf { message -> message.isNotBlank() && state.submissions.isNotEmpty() }
+              ?.let { inlineErrorMessage ->
+                SearchStatusCard(
+                    title = stringResource(Res.string.load_failed),
+                    body = inlineErrorMessage,
+                    onRetry = actions.onRetry,
+                )
+              }
+          val waterfallContent: @Composable () -> Unit = {
+            SubmissionWaterfall(
+                items = state.submissions,
+                onItemClick = actions.onOpenSubmission,
+                onLastVisibleIndexChanged = actions.onLastVisibleIndexChanged,
+                canLoadMore = state.hasMore,
+                loadingMore = state.isLoadingMore,
+                appendErrorMessage = state.appendErrorMessage,
+                onRetryLoadMore = actions.onRetryLoadMore,
                 state = waterfallState,
-                modifier = Modifier.fillMaxSize(),
+                minCardWidthDp = settings.waterfallMinCardWidthDp,
+                blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
+                pageControls = pageControls,
+                canLoadPreviousPageAtTop = canLoadPreviousPageAtTop,
+                loadingPreviousPage = loadingPreviousPage,
+                prependErrorMessage = prependErrorMessage,
+                onLoadPreviousPageAtTop = onLoadPreviousPageAtTop,
+                onLoadFirstPage = onLoadFirstPage,
+                onLoadPreviousPage = onLoadPreviousPage,
+                onJumpToPage = onJumpToPage,
+                onLoadNextPage = onLoadNextPage,
+                onLoadLastPage = onLoadLastPage,
+                pendingScrollRequest = pendingScrollRequest,
+                onConsumeScrollRequest = onConsumeScrollRequest,
+                onViewportChanged = onViewportChanged,
             )
           }
-
-          !state.errorMessage.isNullOrBlank() && state.submissions.isEmpty() -> {
-            SearchStatusCard(
-                title = stringResource(Res.string.load_failed),
-                body = state.errorMessage.orEmpty(),
-                onRetry = actions.onRetry,
-            )
-          }
-
-          else -> {
-            val waterfallContent: @Composable () -> Unit = {
-              SubmissionWaterfall(
-                  items = state.submissions,
-                  onItemClick = actions.onOpenSubmission,
-                  onLastVisibleIndexChanged = actions.onLastVisibleIndexChanged,
-                  canLoadMore = state.hasMore,
-                  loadingMore = state.isLoadingMore,
-                  appendErrorMessage = state.appendErrorMessage,
-                  onRetryLoadMore = actions.onRetryLoadMore,
-                  state = waterfallState,
-                  minCardWidthDp = settings.waterfallMinCardWidthDp,
-                  blockedSubmissionMode = settings.blockedSubmissionWaterfallMode,
-                  pageControls = pageControls,
-                  canLoadPreviousPageAtTop = canLoadPreviousPageAtTop,
-                  loadingPreviousPage = loadingPreviousPage,
-                  prependErrorMessage = prependErrorMessage,
-                  onLoadPreviousPageAtTop = onLoadPreviousPageAtTop,
-                  onLoadFirstPage = onLoadFirstPage,
-                  onLoadPreviousPage = onLoadPreviousPage,
-                  onJumpToPage = onJumpToPage,
-                  onLoadNextPage = onLoadNextPage,
-                  onLoadLastPage = onLoadLastPage,
-                  pendingScrollRequest = pendingScrollRequest,
-                  onConsumeScrollRequest = onConsumeScrollRequest,
-                  onViewportChanged = onViewportChanged,
-              )
-            }
-            WaterfallRefreshBox(
-                enabled = refreshEnabled,
-                refreshing = state.refreshing,
-                onRefresh = actions.onRefresh,
-                modifier = Modifier.fillMaxSize(),
-            ) {
-              waterfallContent()
-            }
+          WaterfallRefreshBox(
+              enabled = refreshEnabled,
+              refreshing = state.refreshing,
+              onRefresh = actions.onRefresh,
+              modifier = Modifier.fillMaxSize(),
+          ) {
+            waterfallContent()
           }
         }
       }
@@ -151,7 +146,6 @@ fun SearchScreen(
 
 @Composable
 private fun SearchBarShell(query: String, overlayVisible: Boolean, onToggleOverlay: () -> Unit) {
-  val appI18n = LocalAppI18n.current
   Surface(
       color = MaterialTheme.colorScheme.surface,
       shadowElevation = 2.dp,

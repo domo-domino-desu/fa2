@@ -21,13 +21,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import fa2.shared.generated.resources.Res
-import fa2.shared.generated.resources.retry
 import me.domino.fa2.data.model.WatchlistUser
-import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.SkeletonBlock
-import org.jetbrains.compose.resources.stringResource
+import me.domino.fa2.ui.components.StatusSurface
+import me.domino.fa2.ui.components.StatusSurfaceVariant
 
 @Composable
 fun WatchlistSkeleton() {
@@ -87,22 +85,11 @@ fun WatchlistUserCard(item: WatchlistUser, onClick: () -> Unit) {
 
 @Composable
 fun WatchlistStatusCard(title: String, body: String, onRetry: () -> Unit) {
-  Surface(
-      color = MaterialTheme.colorScheme.surface,
-      border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-  ) {
-    Column(
-        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-      Text(text = title, style = MaterialTheme.typography.titleMedium)
-      Text(
-          text = body,
-          style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-      )
-      ExpressiveFilledTonalButton(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
-    }
-  }
+  StatusSurface(
+      title = title,
+      body = body,
+      modifier = Modifier.padding(horizontal = 12.dp),
+      onAction = onRetry,
+      variant = StatusSurfaceVariant.Section,
+  )
 }

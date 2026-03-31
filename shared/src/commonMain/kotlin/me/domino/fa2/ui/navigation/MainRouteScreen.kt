@@ -318,6 +318,7 @@ class MainRouteScreen(
         TopLevelDestination.FEED -> {
           PageStateWrapper(
               state = feedPageState,
+              hasContent = feedDisplayState.submissions.isNotEmpty(),
               onRetry = { feedScreenModel.load(forceRefresh = true) },
           ) {
             FeedScreen(
@@ -372,6 +373,7 @@ class MainRouteScreen(
         TopLevelDestination.BROWSE -> {
           PageStateWrapper(
               state = browsePageState,
+              hasContent = browseDisplayState.submissions.isNotEmpty(),
               onRetry = browseScreenModel::refresh,
           ) {
             BrowseScreen(
@@ -434,6 +436,7 @@ class MainRouteScreen(
         TopLevelDestination.SEARCH -> {
           PageStateWrapper(
               state = searchPageState,
+              hasContent = searchDisplayState.submissions.isNotEmpty(),
               onRetry = searchScreenModel::refresh,
           ) {
             SearchScreen(

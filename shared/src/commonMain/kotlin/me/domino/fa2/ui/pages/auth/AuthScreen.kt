@@ -1,6 +1,5 @@
 package me.domino.fa2.ui.pages.auth
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -17,7 +15,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.components.ExpressiveButton
 import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
+import me.domino.fa2.ui.components.HardFallbackScreen
 import org.jetbrains.compose.resources.stringResource
 
 /** 登录页主界面。 */
@@ -205,40 +203,17 @@ fun AuthProbeFailedScreen(
     state: AuthUiState.ProbeFailed,
     onRetry: () -> Unit,
 ) {
-  Box(
-      modifier = Modifier.fillMaxSize().padding(20.dp).testTag("auth-probe-failed-screen"),
-      contentAlignment = Alignment.Center,
-  ) {
-    Surface(
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(20.dp),
-        border =
-            BorderStroke(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
-            ),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-      Column(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 18.dp),
-          verticalArrangement = Arrangement.spacedBy(12.dp),
-      ) {
-        Text(
-            text = stringResource(Res.string.auth_probe_failed_title),
-            style = MaterialTheme.typography.headlineSmall,
-        )
-        Text(
-            text = stringResource(Res.string.auth_probe_failed_body),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            text = state.message,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        ExpressiveButton(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
-      }
-    }
-  }
+  HardFallbackScreen(
+      title = stringResource(Res.string.auth_probe_failed_title),
+      body =
+          buildString {
+            append(stringResource(Res.string.auth_probe_failed_body))
+            if (state.message.isNotBlank()) {
+              append("\n\n")
+              append(state.message)
+            }
+          },
+      modifier = Modifier.testTag("auth-probe-failed-screen"),
+      onAction = onRetry,
+  )
 }

@@ -1,6 +1,5 @@
 package me.domino.fa2.ui.pages.user.gallery
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,6 +38,8 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.GalleryFolderGroup
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.ui.components.StatusSurface
+import me.domino.fa2.ui.components.StatusSurfaceVariant
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
 import me.domino.fa2.ui.components.submission.SubmissionWaterfallPageControls
 import me.domino.fa2.ui.components.submission.SubmissionWaterfallViewportSnapshot
@@ -363,31 +364,13 @@ private fun UserSubmissionSectionSingleStateGrid(
 
 @Composable
 private fun UserStatusCard(title: String, body: String, onRetry: () -> Unit) {
-  Surface(
-      color = MaterialTheme.colorScheme.surface,
-      shape = RoundedCornerShape(14.dp),
-      border =
-          BorderStroke(
-              width = 1.dp,
-              color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
-          ),
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-  ) {
-    Column(
-        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-      Text(text = title, style = MaterialTheme.typography.titleMedium)
-      Text(
-          text = body,
-          style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-      )
-      me.domino.fa2.ui.components.ExpressiveFilledTonalButton(onClick = onRetry) {
-        Text(stringResource(Res.string.retry))
-      }
-    }
-  }
+  StatusSurface(
+      title = title,
+      body = body,
+      modifier = Modifier.padding(horizontal = 12.dp),
+      onAction = onRetry,
+      variant = StatusSurfaceVariant.Section,
+  )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
