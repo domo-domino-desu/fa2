@@ -11,7 +11,6 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
-import me.domino.fa2.application.ocr.ComicDialogueOcrBlockMerger
 import me.domino.fa2.domain.ocr.ImageOcrResult
 import me.domino.fa2.domain.ocr.ImageTextRecognitionPort
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
@@ -35,7 +34,7 @@ class MlKitImageTextRecognitionPort : ImageTextRecognitionPort {
     val result = recognizer.process(image).await()
     val blocks =
         result.textBlocks.mapNotNull { block -> block.toRecognizedTextBlock(width, height) }
-    return ImageOcrResult(blocks = ComicDialogueOcrBlockMerger.merge(blocks))
+    return ImageOcrResult(blocks = blocks)
   }
 }
 

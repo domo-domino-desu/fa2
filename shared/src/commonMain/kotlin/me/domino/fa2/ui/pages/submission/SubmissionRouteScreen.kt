@@ -309,10 +309,17 @@ class SubmissionRouteScreen(
           onOpenImageZoom = screenModel::openImageZoom,
           onDismissImageZoom = screenModel::dismissImageZoom,
           onToggleImageOcr = screenModel::toggleImageOcrCurrent,
+          onTranslateImageOcr = {
+            if (settings.translationEnabled) {
+              screenModel.translateImageOcrCurrent()
+            }
+          },
+          imageOcrTranslationEnabled = settings.translationEnabled,
           onOpenImageOcrDialog = screenModel::openImageOcrDialog,
           onDismissImageOcrDialog = screenModel::dismissImageOcrDialog,
           onUpdateImageOcrDialogDraft = screenModel::updateImageOcrDialogDraft,
           onRefreshImageOcrDialogTranslation = screenModel::refreshImageOcrDialogTranslation,
+          onMergeImageOcrBlocks = screenModel::mergeImageOcrBlocks,
           onPageScrollOffsetChanged = screenModel::setCurrentPageScrollOffset,
           onToggleFavorite = screenModel::toggleFavoriteCurrent,
       )

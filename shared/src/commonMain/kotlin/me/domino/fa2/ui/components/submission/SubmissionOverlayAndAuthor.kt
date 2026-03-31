@@ -1,7 +1,10 @@
 package me.domino.fa2.ui.components.submission
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +27,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,8 +36,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.input.pointer.PointerId
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -54,9 +62,13 @@ import me.domino.fa2.ui.components.rememberImageLoadProgressState
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.SubmissionImageOcrBlockUiState
 import me.domino.fa2.ui.pages.submission.SubmissionImageOcrDialogUiState
+import me.domino.fa2.ui.pages.submission.SubmissionImageOcrTranslationMode
 import me.domino.fa2.ui.pages.submission.SubmissionImageOcrUiState
 import me.domino.fa2.util.isGifUrl
+import me.domino.fa2.util.logging.FaLog
 import org.jetbrains.compose.resources.stringResource
+
+private val imageOcrOverlayLog = FaLog.withTag("ImageOcrOverlay")
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -64,10 +76,13 @@ internal fun SubmissionZoomImageOverlay(
     imageUrl: String,
     ocrState: SubmissionImageOcrUiState,
     onToggleOcr: () -> Unit,
+    onTranslateOcr: () -> Unit,
+    translationEnabled: Boolean,
     onOpenBlockDialog: (String) -> Unit,
     onDismissBlockDialog: () -> Unit,
     onUpdateDialogDraft: (String) -> Unit,
     onRefreshBlockTranslation: () -> Unit,
+    onMergeBlocks: (String, List<NormalizedImagePoint>) -> Unit,
     onDismiss: () -> Unit,
 ) {
   Box(
@@ -110,7 +125,12 @@ internal fun SubmissionZoomImageOverlay(
           SubmissionImageOcrOverlay(
               blocks = ocrState.blocks,
               contentDisplayRect = zoomState.zoomable.contentDisplayRect,
+              canOpenBlockDialog =
+                  translationEnabled &&
+                      ocrState.translationMode == SubmissionImageOcrTranslationMode.APPLIED,
+              dragEnabled = ocrState.translationMode != SubmissionImageOcrTranslationMode.LOADING,
               onBlockClick = onOpenBlockDialog,
+              onMergeBlocks = onMergeBlocks,
               modifier = Modifier.fillMaxSize(),
           )
         }
@@ -134,7 +154,7 @@ internal fun SubmissionZoomImageOverlay(
             LoadingIndicator(modifier = Modifier.size(18.dp), color = Color(0xD8D8D8D8))
           } else {
             Icon(
-                imageVector = FaMaterialSymbols.Outlined.Translate,
+                imageVector = FaMaterialSymbols.Outlined.DocumentScanner,
                 contentDescription = stringResource(Res.string.image_ocr_action),
                 tint =
                     when (ocrState) {
@@ -144,6 +164,29 @@ internal fun SubmissionZoomImageOverlay(
                       SubmissionImageOcrUiState.Loading -> Color(0xD8D8D8D8)
                     },
             )
+          }
+        }
+        if (translationEnabled && ocrState is SubmissionImageOcrUiState.Showing) {
+          ExpressiveIconButton(
+              onClick = onTranslateOcr,
+              enabled = ocrState.translationMode != SubmissionImageOcrTranslationMode.LOADING,
+          ) {
+            if (ocrState.translationMode == SubmissionImageOcrTranslationMode.LOADING) {
+              LoadingIndicator(modifier = Modifier.size(18.dp), color = Color(0xD8D8D8D8))
+            } else {
+              Icon(
+                  imageVector = FaMaterialSymbols.Outlined.Translate,
+                  contentDescription = stringResource(Res.string.image_ocr_translate_action),
+                  tint =
+                      when (ocrState.translationMode) {
+                        SubmissionImageOcrTranslationMode.APPLIED ->
+                            MaterialTheme.colorScheme.primary
+                        SubmissionImageOcrTranslationMode.ERROR -> MaterialTheme.colorScheme.error
+                        SubmissionImageOcrTranslationMode.IDLE,
+                        SubmissionImageOcrTranslationMode.LOADING -> Color(0xD8D8D8D8)
+                      },
+              )
+            }
           }
         }
       }
@@ -172,7 +215,10 @@ internal fun SubmissionZoomImageOverlay(
 private fun SubmissionImageOcrOverlay(
     blocks: List<SubmissionImageOcrBlockUiState>,
     contentDisplayRect: IntRect,
+    canOpenBlockDialog: Boolean,
+    dragEnabled: Boolean,
     onBlockClick: (String) -> Unit,
+    onMergeBlocks: (String, List<NormalizedImagePoint>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
   if (contentDisplayRect.width <= 0 || contentDisplayRect.height <= 0 || blocks.isEmpty()) return
@@ -181,35 +227,150 @@ private fun SubmissionImageOcrOverlay(
       remember(blocks, contentDisplayRect) {
         blocks.mapNotNull { it.toRenderedBlock(contentDisplayRect) }
       }
+  var dragState by remember(renderedBlocks) { mutableStateOf<ActiveImageOcrDrag?>(null) }
+  val mergePreview =
+      remember(renderedBlocks, dragState) {
+        resolveImageOcrMergePreview(renderedBlocks = renderedBlocks, dragState = dragState)
+      }
+  val blockRenderOrder =
+      remember(renderedBlocks, dragState?.blockId) {
+        renderedBlocks.sortedBy { block -> if (block.id == dragState?.blockId) 1 else 0 }
+      }
 
   Box(modifier = modifier.clipToBounds()) {
-    renderedBlocks.forEach { block ->
-      val offset =
-          IntOffset(
-              x = block.left.roundToInt(),
-              y = block.top.roundToInt(),
-          )
-      Surface(
-          color = Color.White.copy(alpha = 0.96f),
-          contentColor = Color.Black,
-          shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
-          modifier =
-              Modifier.offset { offset }
-                  .clickable { onBlockClick(block.id) }
-                  .size(
-                      width = with(density) { block.width.coerceAtLeast(20f).toDp() },
-                      height = with(density) { block.height.coerceAtLeast(20f).toDp() },
-                  ),
-      ) {
-        Box(modifier = Modifier.fillMaxSize().padding(horizontal = 6.dp, vertical = 4.dp)) {
-          Text(
-              text = block.text,
-              style = MaterialTheme.typography.labelSmall,
-              maxLines = 3,
-              overflow = TextOverflow.Ellipsis,
-          )
+    blockRenderOrder.forEach { block ->
+      key(block.id) {
+        val offset =
+            IntOffset(
+                x = block.left.roundToInt(),
+                y = block.top.roundToInt(),
+            )
+        val canOpenThisBlock = canOpenBlockDialog && block.hasTranslation
+        Surface(
+            color = Color.White.copy(alpha = 0.96f),
+            contentColor = Color.Black,
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
+            modifier =
+                Modifier.offset { offset }
+                    .size(
+                        width = with(density) { block.width.coerceAtLeast(20f).toDp() },
+                        height = with(density) { block.height.coerceAtLeast(20f).toDp() },
+                    )
+                    .pointerInput(
+                        block.id,
+                        dragEnabled,
+                        canOpenThisBlock,
+                        renderedBlocks,
+                        contentDisplayRect,
+                    ) {
+                      imageOcrOverlayLog.d {
+                        "安装拖拽监听 -> blockId=${block.id}, rect=${block.toRect().toLogString()}"
+                      }
+                      awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        val pointerId = down.id
+                        val downAbsolutePosition =
+                            Offset(
+                                x = block.left + down.position.x,
+                                y = block.top + down.position.y,
+                            )
+                        var trackedAbsolutePosition = downAbsolutePosition
+                        var moved = false
+                        imageOcrOverlayLog.i {
+                          "开始拖拽 OCR 框 -> blockId=${block.id}, 起点=${downAbsolutePosition.toLogString()}"
+                        }
+
+                        while (true) {
+                          val change = currentPointerChange(pointerId) ?: break
+                          if (!change.pressed) {
+                            imageOcrOverlayLog.d {
+                              "收到抬起事件 -> blockId=${block.id}, 当前=${trackedAbsolutePosition.toLogString()}"
+                            }
+                            break
+                          }
+
+                          val delta = change.position - change.previousPosition
+                          if (dragEnabled && delta != Offset.Zero) {
+                            moved = true
+                            trackedAbsolutePosition += delta
+                            dragState =
+                                ActiveImageOcrDrag(
+                                    blockId = block.id,
+                                    startPointerPosition = downAbsolutePosition,
+                                    pointerPosition = trackedAbsolutePosition,
+                                )
+                            change.consume()
+                          }
+                        }
+
+                        val currentDrag = dragState
+                        dragState = null
+                        if (dragEnabled && moved) {
+                          val preview =
+                              resolveImageOcrMergePreview(
+                                  renderedBlocks = renderedBlocks,
+                                  dragState = currentDrag,
+                              )
+                          if (
+                              currentDrag != null &&
+                                  preview != null &&
+                                  preview.selectedBlockIds.size >= 2
+                          ) {
+                            imageOcrOverlayLog.i {
+                              "提交 OCR 框合并 -> draggedBlockId=${currentDrag.blockId}, 命中=${preview.selectedBlockIds.joinToString()}, 选区=${preview.selectionRect.toLogString()}"
+                            }
+                            onMergeBlocks(
+                                currentDrag.blockId,
+                                preview.selectionRect.toNormalizedPoints(contentDisplayRect),
+                            )
+                          } else {
+                            imageOcrOverlayLog.i {
+                              "结束拖拽但未合并 -> blockId=${block.id}, 最终位置=${trackedAbsolutePosition.toLogString()}, 预览命中=${preview?.selectedBlockIds?.joinToString().orEmpty()}"
+                            }
+                          }
+                        } else if (canOpenThisBlock) {
+                          imageOcrOverlayLog.i { "点击 OCR 框打开弹窗 -> blockId=${block.id}" }
+                          onBlockClick(block.id)
+                        } else {
+                          imageOcrOverlayLog.d { "结束手势但未触发动作 -> blockId=${block.id}" }
+                        }
+                      }
+                    },
+        ) {
+          Box(modifier = Modifier.fillMaxSize().padding(horizontal = 6.dp, vertical = 4.dp)) {
+            Text(
+                text = block.text,
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+            )
+          }
         }
       }
+    }
+    mergePreview?.let { preview ->
+      val offset =
+          IntOffset(
+              x = preview.selectionRect.left.roundToInt(),
+              y = preview.selectionRect.top.roundToInt(),
+          )
+      Box(
+          modifier =
+              Modifier.offset { offset }
+                  .size(
+                      width =
+                          with(density) { preview.selectionRect.width.coerceAtLeast(20f).toDp() },
+                      height =
+                          with(density) { preview.selectionRect.height.coerceAtLeast(20f).toDp() },
+                  )
+                  .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                  .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.42f))
+                  .border(
+                      width = 2.dp,
+                      color = MaterialTheme.colorScheme.tertiary,
+                      shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
+                  ),
+      )
     }
   }
 }
@@ -217,6 +378,7 @@ private fun SubmissionImageOcrOverlay(
 private data class RenderedImageOcrBlock(
     val id: String,
     val text: String,
+    val hasTranslation: Boolean,
     val left: Float,
     val top: Float,
     val width: Float,
@@ -236,6 +398,7 @@ private fun SubmissionImageOcrBlockUiState.toRenderedBlock(
   return RenderedImageOcrBlock(
       id = id,
       text = displayText,
+      hasTranslation = hasTranslation,
       left = minX,
       top = minY,
       width = maxX - minX,
@@ -248,6 +411,131 @@ private fun NormalizedImagePoint.toContainerPoint(contentDisplayRect: IntRect): 
         contentDisplayRect.left + contentDisplayRect.width * x.coerceIn(0f, 1f),
         contentDisplayRect.top + contentDisplayRect.height * y.coerceIn(0f, 1f),
     )
+
+private data class ActiveImageOcrDrag(
+    val blockId: String,
+    val startPointerPosition: Offset,
+    val pointerPosition: Offset,
+)
+
+private suspend fun androidx.compose.ui.input.pointer.AwaitPointerEventScope.currentPointerChange(
+    pointerId: PointerId
+): androidx.compose.ui.input.pointer.PointerInputChange? {
+  while (true) {
+    val event = awaitPointerEvent()
+    val matchingChange = event.changes.firstOrNull { change -> change.id == pointerId }
+    if (matchingChange != null) return matchingChange
+    if (event.changes.none { change -> change.pressed }) {
+      imageOcrOverlayLog.d { "拖拽事件流结束 -> pointerId=$pointerId" }
+      return null
+    }
+    imageOcrOverlayLog.d { "拖拽事件流中未找到目标指针 -> pointerId=$pointerId, 当前指针数=${event.changes.size}" }
+  }
+}
+
+private data class ImageOcrMergePreview(
+    val selectedBlockIds: Set<String>,
+    val selectionRect: Rect,
+)
+
+private fun resolveImageOcrMergePreview(
+    renderedBlocks: List<RenderedImageOcrBlock>,
+    dragState: ActiveImageOcrDrag?,
+): ImageOcrMergePreview? {
+  val currentDrag = dragState ?: return null
+  val draggedBlock =
+      renderedBlocks.firstOrNull { block -> block.id == currentDrag.blockId } ?: return null
+  val baseRect =
+      draggedBlock.toPreviewRect(
+          dragStartPosition = currentDrag.startPointerPosition,
+          pointerPosition = currentDrag.pointerPosition,
+      )
+  var expandedRect = baseRect
+  var selectedBlockIds = setOf(draggedBlock.id)
+
+  while (true) {
+    val intersectingBlocks =
+        renderedBlocks.filter { block ->
+          block.id != draggedBlock.id && expandedRect.overlapArea(block.toRect()) > 0f
+        }
+    val nextSelectedIds = intersectingBlocks.map { block -> block.id }.toSet() + draggedBlock.id
+    val nextRect =
+        intersectingBlocks.fold(baseRect) { currentRect, block ->
+          currentRect.union(block.toRect())
+        }
+    if (nextSelectedIds == selectedBlockIds && nextRect == expandedRect) {
+      imageOcrOverlayLog.d {
+        "解析拖拽预览 -> draggedBlockId=${draggedBlock.id}, 基础选区=${baseRect.toLogString()}, 最终选区=${nextRect.toLogString()}, 命中=${nextSelectedIds.joinToString()}"
+      }
+      return ImageOcrMergePreview(
+          selectedBlockIds = nextSelectedIds,
+          selectionRect = nextRect,
+      )
+    }
+    selectedBlockIds = nextSelectedIds
+    expandedRect = nextRect
+  }
+}
+
+private fun RenderedImageOcrBlock.toRect(offset: Offset = Offset.Zero): Rect =
+    Rect(
+        left = left + offset.x,
+        top = top + offset.y,
+        right = left + offset.x + width,
+        bottom = top + offset.y + height,
+    )
+
+private fun RenderedImageOcrBlock.toPreviewRect(
+    dragStartPosition: Offset,
+    pointerPosition: Offset,
+): Rect {
+  val originalRect = toRect()
+  val horizontalDraggedRight = pointerPosition.x >= dragStartPosition.x
+  val verticalDraggedDown = pointerPosition.y >= dragStartPosition.y
+  return Rect(
+      left = if (horizontalDraggedRight) originalRect.left else pointerPosition.x,
+      top = if (verticalDraggedDown) originalRect.top else pointerPosition.y,
+      right = if (horizontalDraggedRight) pointerPosition.x else originalRect.right,
+      bottom = if (verticalDraggedDown) pointerPosition.y else originalRect.bottom,
+  )
+}
+
+private fun Rect.overlapArea(other: Rect): Float {
+  val overlapWidth = (minOf(right, other.right) - maxOf(left, other.left)).coerceAtLeast(0f)
+  val overlapHeight = (minOf(bottom, other.bottom) - maxOf(top, other.top)).coerceAtLeast(0f)
+  return overlapWidth * overlapHeight
+}
+
+private fun Rect.union(other: Rect): Rect =
+    Rect(
+        left = minOf(left, other.left),
+        top = minOf(top, other.top),
+        right = maxOf(right, other.right),
+        bottom = maxOf(bottom, other.bottom),
+    )
+
+private fun Rect.toNormalizedPoints(contentDisplayRect: IntRect): List<NormalizedImagePoint> {
+  if (contentDisplayRect.width <= 0 || contentDisplayRect.height <= 0) return emptyList()
+  val containerWidth = contentDisplayRect.width.toFloat()
+  val containerHeight = contentDisplayRect.height.toFloat()
+  fun normalizeX(value: Float): Float =
+      ((value - contentDisplayRect.left.toFloat()) / containerWidth).coerceIn(0f, 1f)
+  fun normalizeY(value: Float): Float =
+      ((value - contentDisplayRect.top.toFloat()) / containerHeight).coerceIn(0f, 1f)
+  return listOf(
+      NormalizedImagePoint(normalizeX(left), normalizeY(top)),
+      NormalizedImagePoint(normalizeX(right), normalizeY(top)),
+      NormalizedImagePoint(normalizeX(right), normalizeY(bottom)),
+      NormalizedImagePoint(normalizeX(left), normalizeY(bottom)),
+  )
+}
+
+private fun Offset.toLogString(): String = "(${x.formatForLog()}, ${y.formatForLog()})"
+
+private fun Rect.toLogString(): String =
+    "[${left.formatForLog()}, ${top.formatForLog()}]-[${right.formatForLog()}, ${bottom.formatForLog()}]"
+
+private fun Float.formatForLog(): String = ((this * 10).toInt() / 10f).toString()
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable

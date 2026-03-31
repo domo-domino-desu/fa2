@@ -143,6 +143,7 @@ symbolCraft {
       "comment",
       "content_copy",
       "date_range",
+      "document_scanner",
       "download",
       "expand_less",
       "expand_more",

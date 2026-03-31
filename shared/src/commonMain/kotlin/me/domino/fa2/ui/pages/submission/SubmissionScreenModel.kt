@@ -15,6 +15,7 @@ import me.domino.fa2.application.translation.SubmissionDescriptionTranslationSer
 import me.domino.fa2.application.translation.SubmissionImageOcrTranslationService
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.util.logging.FaLog
 
@@ -151,6 +152,8 @@ class SubmissionScreenModel(
 
   fun toggleImageOcrCurrent() = workflow.toggleImageOcrCurrent()
 
+  fun translateImageOcrCurrent() = workflow.translateImageOcrCurrent()
+
   fun openImageOcrDialog(blockId: String) = workflow.openImageOcrDialog(blockId)
 
   fun dismissImageOcrDialog() = workflow.dismissImageOcrDialog()
@@ -158,6 +161,11 @@ class SubmissionScreenModel(
   fun updateImageOcrDialogDraft(text: String) = workflow.updateImageOcrDialogDraft(text)
 
   fun refreshImageOcrDialogTranslation() = workflow.refreshImageOcrDialogTranslation()
+
+  fun mergeImageOcrBlocks(
+      draggedBlockId: String,
+      mergeRegionPoints: List<NormalizedImagePoint>,
+  ) = workflow.mergeImageOcrBlocks(draggedBlockId, mergeRegionPoints)
 
   fun translateDescriptionCurrent() = workflow.translateDescriptionCurrent()
 

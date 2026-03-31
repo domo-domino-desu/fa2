@@ -10,6 +10,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.domino.fa2.application.attachmenttext.AttachmentTextExtractor
 import me.domino.fa2.application.ocr.SubmissionImageOcrService
+import me.domino.fa2.application.ocr.collectRecognizedTextBlocksIntersectingRegion
+import me.domino.fa2.application.ocr.mergeRecognizedTextBlocksForOverlay
 import me.domino.fa2.application.submissionseries.seriesInitialReadyCount
 import me.domino.fa2.application.submissionseries.seriesWarmBufferCount
 import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
@@ -21,11 +23,13 @@ import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.domain.attachmenttext.deriveAttachmentFileName
+import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.ocr.RecognizedTextBlock
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.appString
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.isGifUrl
+import me.domino.fa2.util.logging.FaLog
 import me.domino.fa2.util.logging.summarizePageState
 
 internal const val pagerPrefetchDebounceMs: Long = 500L
@@ -55,15 +59,18 @@ internal class SubmissionScreenWorkflow(
     private val pageStateSink: (PageState<SubmissionPagerUiState>) -> Unit,
     private val toastSink: (String) -> Unit,
 ) {
+  private val imageOcrLog = FaLog.withTag("SubmissionImageOcrWorkflow")
   private val detailBySid: MutableMap<Int, SubmissionDetailUiState> = mutableMapOf()
   private val scrollOffsetBySid: MutableMap<Int, Int> = mutableMapOf()
   private val scrollToTopVersionBySid: MutableMap<Int, Long> = mutableMapOf()
   private val translationJobs: MutableMap<SubmissionTranslationJobKey, Job> = mutableMapOf()
   private var zoomOverlayImageUrl: String? = null
   private var zoomImageOcrState: SubmissionImageOcrUiState = SubmissionImageOcrUiState.Idle
-  private var imageOcrJob: Job? = null
+  private var imageOcrRecognitionJob: Job? = null
+  private var imageOcrTranslationJob: Job? = null
   private var imageOcrDialogJob: Job? = null
   private var prefetchJob: Job? = null
+  private var imageOcrMergedBlockCounter: Long = 0L
   private val prefetchedSuccessSids: MutableSet<Int> = mutableSetOf()
   private val prefetchingSids: MutableSet<Int> = mutableSetOf()
 
@@ -138,7 +145,9 @@ internal class SubmissionScreenWorkflow(
 
   fun openImageZoom(imageUrl: String) {
     val normalizedUrl = normalizeZoomImageUrl(imageUrl) ?: return
+    imageOcrLog.i { "打开原图缩放层 -> imageUrl=$normalizedUrl" }
     cancelImageOcrJobs()
+    imageOcrMergedBlockCounter = 0L
     zoomOverlayImageUrl = normalizedUrl
     zoomImageOcrState = SubmissionImageOcrUiState.Idle
     publishState()
@@ -146,6 +155,7 @@ internal class SubmissionScreenWorkflow(
 
   fun dismissImageZoom() {
     if (zoomOverlayImageUrl == null && zoomImageOcrState is SubmissionImageOcrUiState.Idle) return
+    imageOcrLog.i { "关闭原图缩放层 -> 清空 OCR 会话状态" }
     clearZoomOverlayState(publish = true)
   }
 
@@ -155,7 +165,8 @@ internal class SubmissionScreenWorkflow(
     when (zoomImageOcrState) {
       is SubmissionImageOcrUiState.Loading -> return
       is SubmissionImageOcrUiState.Showing -> {
-        cancelImageOcrDialogJob()
+        imageOcrLog.i { "关闭 OCR 覆盖层 -> imageUrl=$imageUrl" }
+        cancelImageOcrJobs()
         zoomImageOcrState = SubmissionImageOcrUiState.Idle
         publishState()
         return
@@ -166,36 +177,36 @@ internal class SubmissionScreenWorkflow(
     }
 
     cancelImageOcrJobs()
+    imageOcrLog.i { "开始识别原图 OCR -> imageUrl=$imageUrl" }
     zoomImageOcrState = SubmissionImageOcrUiState.Loading
     publishState()
 
     val targetImageUrl = imageUrl
-    imageOcrJob =
+    imageOcrRecognitionJob =
         screenModelScope.launch {
           try {
             val result = imageOcrService.recognize(targetImageUrl)
             if (zoomOverlayImageUrl != targetImageUrl) return@launch
             if (result.blocks.isEmpty()) {
+              imageOcrLog.w { "原图 OCR 完成但没有识别到文本 -> imageUrl=$targetImageUrl" }
               val emptyMessage = appString(Res.string.image_ocr_empty)
               zoomImageOcrState = SubmissionImageOcrUiState.Error(emptyMessage)
               emitToast(emptyMessage)
             } else {
-              val translatedBlocks = translateImageOcrBlocks(result.blocks)
-              zoomImageOcrState = SubmissionImageOcrUiState.Showing(blocks = translatedBlocks)
-              if (
-                  translatedBlocks.isNotEmpty() &&
-                      translatedBlocks.none {
-                        it.translationStatus == SubmissionImageOcrTranslationStatus.SUCCESS
-                      }
-              ) {
-                emitToast(appString(Res.string.image_ocr_translation_failed))
+              imageOcrLog.i {
+                "原图 OCR 完成 -> imageUrl=$targetImageUrl, blocks=${result.blocks.size}"
               }
+              zoomImageOcrState =
+                  SubmissionImageOcrUiState.Showing(
+                      blocks = buildRecognizedImageOcrBlocks(result.blocks)
+                  )
             }
             publishState()
           } catch (cancelled: CancellationException) {
             throw cancelled
           } catch (error: Throwable) {
             if (zoomOverlayImageUrl != targetImageUrl) return@launch
+            imageOcrLog.e(error) { "原图 OCR 失败 -> imageUrl=$targetImageUrl" }
             val failureMessage =
                 appString(
                     Res.string.image_ocr_failed,
@@ -206,8 +217,95 @@ internal class SubmissionScreenWorkflow(
             publishState()
           } finally {
             val currentJob = currentCoroutineContext()[Job]
-            if (imageOcrJob === currentJob) {
-              imageOcrJob = null
+            if (imageOcrRecognitionJob === currentJob) {
+              imageOcrRecognitionJob = null
+            }
+          }
+        }
+  }
+
+  fun translateImageOcrCurrent() {
+    val showingState = zoomImageOcrState as? SubmissionImageOcrUiState.Showing ?: return
+    if (showingState.blocks.isEmpty()) return
+    if (showingState.translationMode == SubmissionImageOcrTranslationMode.LOADING) return
+
+    imageOcrLog.i { "开始翻译 OCR 结果 -> blocks=${showingState.blocks.size}" }
+    cancelImageOcrDialogJob()
+    cancelImageOcrTranslationJob()
+    zoomImageOcrState =
+        showingState.copy(
+            translationMode = SubmissionImageOcrTranslationMode.LOADING,
+            dialog = null,
+            translationErrorMessage = null,
+        )
+    publishState()
+
+    val targetImageUrl = zoomOverlayImageUrl
+    val targetBlockIds = showingState.blocks.map { it.id }
+    imageOcrTranslationJob =
+        screenModelScope.launch {
+          try {
+            val translatedBlocks = translateImageOcrBlocks(showingState.blocks)
+            val latestState =
+                zoomImageOcrState as? SubmissionImageOcrUiState.Showing ?: return@launch
+            if (zoomOverlayImageUrl != targetImageUrl) return@launch
+            if (latestState.blocks.map { it.id } != targetBlockIds) return@launch
+
+            val hasSuccessfulTranslations =
+                translatedBlocks.any { block ->
+                  block.translationStatus == SubmissionImageOcrTranslationStatus.SUCCESS
+                }
+            val nextMode =
+                if (hasSuccessfulTranslations) {
+                  SubmissionImageOcrTranslationMode.APPLIED
+                } else {
+                  SubmissionImageOcrTranslationMode.ERROR
+                }
+            val errorMessage =
+                if (nextMode == SubmissionImageOcrTranslationMode.ERROR) {
+                  appString(Res.string.image_ocr_translation_failed)
+                } else {
+                  null
+                }
+
+            zoomImageOcrState =
+                latestState.copy(
+                    blocks = translatedBlocks,
+                    translationMode = nextMode,
+                    dialog = null,
+                    translationErrorMessage = errorMessage,
+                )
+            imageOcrLog.i {
+              "OCR 翻译完成 -> mode=${nextMode.name}, success=${translatedBlocks.count { it.translationStatus == SubmissionImageOcrTranslationStatus.SUCCESS }}, total=${translatedBlocks.size}"
+            }
+            if (errorMessage != null) {
+              emitToast(errorMessage)
+            }
+            publishState()
+          } catch (cancelled: CancellationException) {
+            throw cancelled
+          } catch (error: Throwable) {
+            val latestState =
+                zoomImageOcrState as? SubmissionImageOcrUiState.Showing ?: return@launch
+            if (zoomOverlayImageUrl != targetImageUrl) return@launch
+            imageOcrLog.e(error) { "OCR 翻译失败 -> imageUrl=$targetImageUrl" }
+            val errorMessage =
+                appString(
+                    Res.string.image_ocr_translation_failed_with_reason,
+                    error.message?.takeIf { it.isNotBlank() } ?: error.toString(),
+                )
+            zoomImageOcrState =
+                latestState.copy(
+                    translationMode = SubmissionImageOcrTranslationMode.ERROR,
+                    dialog = null,
+                    translationErrorMessage = errorMessage,
+                )
+            emitToast(errorMessage)
+            publishState()
+          } finally {
+            val currentJob = currentCoroutineContext()[Job]
+            if (imageOcrTranslationJob === currentJob) {
+              imageOcrTranslationJob = null
             }
           }
         }
@@ -215,7 +313,16 @@ internal class SubmissionScreenWorkflow(
 
   fun openImageOcrDialog(blockId: String) {
     val showingState = zoomImageOcrState as? SubmissionImageOcrUiState.Showing ?: return
+    if (showingState.translationMode != SubmissionImageOcrTranslationMode.APPLIED) {
+      imageOcrLog.w { "拒绝打开 OCR 弹窗 -> 当前未处于已翻译态, blockId=$blockId" }
+      return
+    }
     val block = showingState.blocks.firstOrNull { it.id == blockId } ?: return
+    if (!block.hasTranslation) {
+      imageOcrLog.w { "拒绝打开 OCR 弹窗 -> block 没有可用译文, blockId=$blockId" }
+      return
+    }
+    imageOcrLog.i { "打开 OCR 弹窗 -> blockId=$blockId" }
     cancelImageOcrDialogJob()
     zoomImageOcrState =
         showingState.copy(
@@ -376,6 +483,76 @@ internal class SubmissionScreenWorkflow(
             }
           }
         }
+  }
+
+  fun mergeImageOcrBlocks(
+      draggedBlockId: String,
+      mergeRegionPoints: List<NormalizedImagePoint>,
+  ) {
+    val showingState = zoomImageOcrState as? SubmissionImageOcrUiState.Showing ?: return
+    if (showingState.translationMode == SubmissionImageOcrTranslationMode.LOADING) return
+    imageOcrLog.i {
+      "收到 OCR 框合并请求 -> draggedBlockId=$draggedBlockId, region=${mergeRegionPoints.toLogString()}"
+    }
+
+    val regionRecognizedBlocks =
+        collectRecognizedTextBlocksIntersectingRegion(
+            blocks = showingState.blocks.map { block -> block.toRecognizedTextBlock() },
+            regionPoints = mergeRegionPoints,
+        )
+    if (regionRecognizedBlocks.size < 2) {
+      imageOcrLog.w { "忽略 OCR 框合并 -> 命中块不足, draggedBlockId=$draggedBlockId" }
+      return
+    }
+
+    val selectedKeys =
+        regionRecognizedBlocks.map { block -> block.toSelectionKey() }.toMutableList()
+    val selectedBlocks = mutableListOf<SubmissionImageOcrBlockUiState>()
+    showingState.blocks.forEach { block ->
+      val key = block.toSelectionKey()
+      val matchIndex = selectedKeys.indexOf(key)
+      if (matchIndex >= 0) {
+        selectedBlocks += block
+        selectedKeys.removeAt(matchIndex)
+      }
+    }
+    if (selectedBlocks.size < 2) {
+      imageOcrLog.w { "忽略 OCR 框合并 -> 会话块映射后不足两个" }
+      return
+    }
+    if (selectedBlocks.none { it.id == draggedBlockId }) {
+      imageOcrLog.w { "忽略 OCR 框合并 -> 选区不包含拖拽源, draggedBlockId=$draggedBlockId" }
+      return
+    }
+
+    val mergedRecognizedBlock =
+        mergeRecognizedTextBlocksForOverlay(
+            selectedBlocks.map { block -> block.toRecognizedTextBlock() }
+        ) ?: return
+    val mergedBlock =
+        SubmissionImageOcrBlockUiState(
+            id = nextMergedImageOcrBlockId(),
+            points = mergedRecognizedBlock.points,
+            originalText = mergedRecognizedBlock.text,
+            translatedText = null,
+            translationStatus = SubmissionImageOcrTranslationStatus.IDLE,
+        )
+    val selectedIds = selectedBlocks.map { it.id }.toSet()
+    val mergedBlocks =
+        sortImageOcrBlocks(
+            showingState.blocks.filterNot { block -> block.id in selectedIds } + mergedBlock
+        )
+    val dialog =
+        showingState.dialog?.takeUnless { currentDialog -> currentDialog.blockId in selectedIds }
+    imageOcrLog.i {
+      "OCR 框合并完成 -> selected=${selectedIds.joinToString()}, mergedBlockId=${mergedBlock.id}, translationMode=${showingState.translationMode.name}"
+    }
+    zoomImageOcrState = showingState.copy(blocks = mergedBlocks, dialog = dialog)
+    publishState()
+
+    if (showingState.translationMode == SubmissionImageOcrTranslationMode.APPLIED) {
+      translateMergedImageOcrBlock(blockId = mergedBlock.id)
+    }
   }
 
   fun translateDescriptionCurrent() {
@@ -1255,6 +1432,7 @@ internal class SubmissionScreenWorkflow(
 
   private fun clearZoomOverlayState(publish: Boolean) {
     cancelImageOcrJobs()
+    imageOcrMergedBlockCounter = 0L
     zoomOverlayImageUrl = null
     zoomImageOcrState = SubmissionImageOcrUiState.Idle
     if (publish) {
@@ -1263,11 +1441,11 @@ internal class SubmissionScreenWorkflow(
   }
 
   private suspend fun translateImageOcrBlocks(
-      blocks: List<RecognizedTextBlock>
+      blocks: List<SubmissionImageOcrBlockUiState>
   ): List<SubmissionImageOcrBlockUiState> {
     val translations =
         try {
-          imageOcrTranslationService.translateTexts(blocks.map { it.text })
+          imageOcrTranslationService.translateTexts(blocks.map { it.originalText })
         } catch (error: Throwable) {
           List(blocks.size) {
             SubmissionImageOcrTranslationResult.Failure(
@@ -1280,28 +1458,19 @@ internal class SubmissionScreenWorkflow(
       val translation = translations.getOrNull(index) ?: SubmissionImageOcrTranslationResult.Empty
       when (translation) {
         is SubmissionImageOcrTranslationResult.Success ->
-            SubmissionImageOcrBlockUiState(
-                id = "ocr-block-$index",
-                points = block.points,
-                originalText = block.text,
+            block.copy(
                 translatedText = translation.translatedText,
                 translationStatus = SubmissionImageOcrTranslationStatus.SUCCESS,
             )
 
         SubmissionImageOcrTranslationResult.Empty ->
-            SubmissionImageOcrBlockUiState(
-                id = "ocr-block-$index",
-                points = block.points,
-                originalText = block.text,
+            block.copy(
                 translatedText = null,
                 translationStatus = SubmissionImageOcrTranslationStatus.EMPTY,
             )
 
         is SubmissionImageOcrTranslationResult.Failure ->
-            SubmissionImageOcrBlockUiState(
-                id = "ocr-block-$index",
-                points = block.points,
-                originalText = block.text,
+            block.copy(
                 translatedText = null,
                 translationStatus = SubmissionImageOcrTranslationStatus.FAILURE,
             )
@@ -1309,10 +1478,126 @@ internal class SubmissionScreenWorkflow(
     }
   }
 
+  private fun buildRecognizedImageOcrBlocks(
+      blocks: List<RecognizedTextBlock>
+  ): List<SubmissionImageOcrBlockUiState> =
+      blocks.mapIndexed { index, block ->
+        SubmissionImageOcrBlockUiState(
+            id = "ocr-block-$index",
+            points = block.points,
+            originalText = block.text,
+            translatedText = null,
+            translationStatus = SubmissionImageOcrTranslationStatus.IDLE,
+        )
+      }
+
+  private fun translateMergedImageOcrBlock(blockId: String) {
+    val showingState = zoomImageOcrState as? SubmissionImageOcrUiState.Showing ?: return
+    val block = showingState.blocks.firstOrNull { candidate -> candidate.id == blockId } ?: return
+    imageOcrLog.i { "开始翻译合并后的 OCR 框 -> blockId=$blockId" }
+    cancelImageOcrTranslationJob()
+    val targetImageUrl = zoomOverlayImageUrl
+    imageOcrTranslationJob =
+        screenModelScope.launch {
+          try {
+            when (val result = imageOcrTranslationService.translateText(block.originalText)) {
+              is SubmissionImageOcrTranslationResult.Success ->
+                  updateMergedImageOcrBlockTranslation(
+                          blockId = blockId,
+                          targetImageUrl = targetImageUrl,
+                          translatedText = result.translatedText,
+                          status = SubmissionImageOcrTranslationStatus.SUCCESS,
+                      )
+                      .also { imageOcrLog.i { "合并 OCR 框翻译成功 -> blockId=$blockId" } }
+
+              SubmissionImageOcrTranslationResult.Empty -> {
+                updateMergedImageOcrBlockTranslation(
+                    blockId = blockId,
+                    targetImageUrl = targetImageUrl,
+                    translatedText = null,
+                    status = SubmissionImageOcrTranslationStatus.EMPTY,
+                )
+                imageOcrLog.w { "合并 OCR 框翻译为空 -> blockId=$blockId" }
+                emitToast(appString(Res.string.image_ocr_translation_empty))
+              }
+
+              is SubmissionImageOcrTranslationResult.Failure -> {
+                updateMergedImageOcrBlockTranslation(
+                    blockId = blockId,
+                    targetImageUrl = targetImageUrl,
+                    translatedText = null,
+                    status = SubmissionImageOcrTranslationStatus.FAILURE,
+                )
+                imageOcrLog.w { "合并 OCR 框翻译失败 -> blockId=$blockId, message=${result.message}" }
+                emitToast(
+                    appString(
+                        Res.string.image_ocr_translation_failed_with_reason,
+                        result.message,
+                    )
+                )
+              }
+            }
+          } catch (cancelled: CancellationException) {
+            throw cancelled
+          } catch (error: Throwable) {
+            imageOcrLog.e(error) { "合并 OCR 框翻译异常 -> blockId=$blockId" }
+            updateMergedImageOcrBlockTranslation(
+                blockId = blockId,
+                targetImageUrl = targetImageUrl,
+                translatedText = null,
+                status = SubmissionImageOcrTranslationStatus.FAILURE,
+            )
+            emitToast(
+                appString(
+                    Res.string.image_ocr_translation_failed_with_reason,
+                    error.message?.takeIf { it.isNotBlank() } ?: error.toString(),
+                )
+            )
+          } finally {
+            val currentJob = currentCoroutineContext()[Job]
+            if (imageOcrTranslationJob === currentJob) {
+              imageOcrTranslationJob = null
+            }
+          }
+        }
+  }
+
+  private fun updateMergedImageOcrBlockTranslation(
+      blockId: String,
+      targetImageUrl: String?,
+      translatedText: String?,
+      status: SubmissionImageOcrTranslationStatus,
+  ) {
+    val latestState = zoomImageOcrState as? SubmissionImageOcrUiState.Showing ?: return
+    if (zoomOverlayImageUrl != targetImageUrl) return
+    if (latestState.blocks.none { block -> block.id == blockId }) return
+    zoomImageOcrState =
+        latestState.copy(
+            blocks =
+                latestState.blocks.map { block ->
+                  if (block.id != blockId) {
+                    block
+                  } else {
+                    block.copy(
+                        translatedText = translatedText,
+                        translationStatus = status,
+                    )
+                  }
+                }
+        )
+    publishState()
+  }
+
   private fun cancelImageOcrJobs() {
-    imageOcrJob?.cancel()
-    imageOcrJob = null
+    imageOcrRecognitionJob?.cancel()
+    imageOcrRecognitionJob = null
+    cancelImageOcrTranslationJob()
     cancelImageOcrDialogJob()
+  }
+
+  private fun cancelImageOcrTranslationJob() {
+    imageOcrTranslationJob?.cancel()
+    imageOcrTranslationJob = null
   }
 
   private fun cancelImageOcrDialogJob() {
@@ -1322,6 +1607,12 @@ internal class SubmissionScreenWorkflow(
 
   private fun toBlockedKeywordSet(detail: Submission): Set<String> =
       detail.blockedTagNames.map(::normalizeTagKey).filter { it.isNotBlank() }.toSet()
+
+  private fun nextMergedImageOcrBlockId(): String {
+    val nextId = "ocr-merged-${imageOcrMergedBlockCounter}"
+    imageOcrMergedBlockCounter += 1L
+    return nextId
+  }
 }
 
 private fun normalizeTagKey(tagName: String): String = tagName.trim().lowercase()
@@ -1331,6 +1622,37 @@ private fun normalizeZoomImageUrl(imageUrl: String): String? =
         .trim()
         .takeIf { it.isNotBlank() }
         ?.let { url -> if (url.startsWith("//")) "https:$url" else url }
+
+private data class ImageOcrSelectionKey(
+    val originalText: String,
+    val points: List<NormalizedImagePoint>,
+)
+
+private fun SubmissionImageOcrBlockUiState.toRecognizedTextBlock(): RecognizedTextBlock =
+    RecognizedTextBlock(
+        text = originalText,
+        points = points,
+        confidence = null,
+    )
+
+private fun SubmissionImageOcrBlockUiState.toSelectionKey(): ImageOcrSelectionKey =
+    ImageOcrSelectionKey(originalText = originalText, points = points)
+
+private fun RecognizedTextBlock.toSelectionKey(): ImageOcrSelectionKey =
+    ImageOcrSelectionKey(originalText = text, points = points)
+
+private fun sortImageOcrBlocks(
+    blocks: List<SubmissionImageOcrBlockUiState>
+): List<SubmissionImageOcrBlockUiState> =
+    blocks.sortedWith(
+        compareBy(
+            { block -> block.points.minOfOrNull { point -> point.y } ?: 0f },
+            { block -> block.points.minOfOrNull { point -> point.x } ?: 0f },
+        )
+    )
+
+private fun List<NormalizedImagePoint>.toLogString(): String =
+    joinToString(prefix = "[", postfix = "]") { point -> "(${point.x},${point.y})" }
 
 private fun resolveAttachmentTextState(
     detail: Submission,

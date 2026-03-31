@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
+import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.platform.PlatformVerticalScrollbar
 import me.domino.fa2.ui.pages.submission.SubmissionDetailUiState
@@ -81,6 +82,10 @@ fun SubmissionPager(
     onDismissImageZoom: () -> Unit,
     /** 切换原图 OCR。 */
     onToggleImageOcr: () -> Unit,
+    /** 触发原图 OCR 翻译。 */
+    onTranslateImageOcr: () -> Unit,
+    /** 当前是否允许使用原图 OCR 翻译。 */
+    imageOcrTranslationEnabled: Boolean,
     /** 打开 OCR 文本编辑弹窗。 */
     onOpenImageOcrDialog: (String) -> Unit,
     /** 关闭 OCR 文本编辑弹窗。 */
@@ -89,6 +94,8 @@ fun SubmissionPager(
     onUpdateImageOcrDialogDraft: (String) -> Unit,
     /** 刷新 OCR 文本翻译。 */
     onRefreshImageOcrDialogTranslation: () -> Unit,
+    /** 合并 OCR 文本框。 */
+    onMergeImageOcrBlocks: (String, List<NormalizedImagePoint>) -> Unit,
     /** 当前页滚动偏移变更。 */
     onPageScrollOffsetChanged: (sid: Int, offset: Int) -> Unit,
     /** 各 sid 的回顶命令版本。 */
@@ -191,10 +198,13 @@ fun SubmissionPager(
           imageUrl = activeImageUrl,
           ocrState = zoomImageOcrState,
           onToggleOcr = onToggleImageOcr,
+          onTranslateOcr = onTranslateImageOcr,
+          translationEnabled = imageOcrTranslationEnabled,
           onOpenBlockDialog = onOpenImageOcrDialog,
           onDismissBlockDialog = onDismissImageOcrDialog,
           onUpdateDialogDraft = onUpdateImageOcrDialogDraft,
           onRefreshBlockTranslation = onRefreshImageOcrDialogTranslation,
+          onMergeBlocks = onMergeImageOcrBlocks,
           onDismiss = onDismissImageZoom,
       )
     }

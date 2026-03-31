@@ -127,6 +127,7 @@
   <string name="no_browsable_submissions">There are no submissions to browse right now.</string>
   <string name="original_image">View original image</string>
   <string name="image_ocr_action">Recognize text in image</string>
+  <string name="image_ocr_translate_action">Translate recognized text</string>
   <string name="image_ocr_empty">No text found in the image</string>
   <string name="image_ocr_failed">Image OCR failed: %1$s</string>
   <string name="image_ocr_translation_failed">Image OCR translation failed</string>

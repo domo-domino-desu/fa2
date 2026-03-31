@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
+import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.ui.components.PageStateWrapper
 import me.domino.fa2.ui.components.platform.PlatformDownloadRequest
 import me.domino.fa2.ui.components.submission.SubmissionPager
@@ -59,10 +60,13 @@ internal fun SubmissionRouteChrome(
     onOpenImageZoom: (String) -> Unit,
     onDismissImageZoom: () -> Unit,
     onToggleImageOcr: () -> Unit,
+    onTranslateImageOcr: () -> Unit,
+    imageOcrTranslationEnabled: Boolean,
     onOpenImageOcrDialog: (String) -> Unit,
     onDismissImageOcrDialog: () -> Unit,
     onUpdateImageOcrDialogDraft: (String) -> Unit,
     onRefreshImageOcrDialogTranslation: () -> Unit,
+    onMergeImageOcrBlocks: (String, List<NormalizedImagePoint>) -> Unit,
     onPageScrollOffsetChanged: (Int, Int) -> Unit,
     onToggleFavorite: () -> Unit,
 ) {
@@ -114,10 +118,13 @@ internal fun SubmissionRouteChrome(
                 onOpenImageZoom = onOpenImageZoom,
                 onDismissImageZoom = onDismissImageZoom,
                 onToggleImageOcr = onToggleImageOcr,
+                onTranslateImageOcr = onTranslateImageOcr,
+                imageOcrTranslationEnabled = imageOcrTranslationEnabled,
                 onOpenImageOcrDialog = onOpenImageOcrDialog,
                 onDismissImageOcrDialog = onDismissImageOcrDialog,
                 onUpdateImageOcrDialogDraft = onUpdateImageOcrDialogDraft,
                 onRefreshImageOcrDialogTranslation = onRefreshImageOcrDialogTranslation,
+                onMergeImageOcrBlocks = onMergeImageOcrBlocks,
                 onPageScrollOffsetChanged = onPageScrollOffsetChanged,
                 scrollToTopVersionBySid = snapshot.scrollToTopVersionBySid,
                 blockedSubmissionMode = blockedSubmissionMode,

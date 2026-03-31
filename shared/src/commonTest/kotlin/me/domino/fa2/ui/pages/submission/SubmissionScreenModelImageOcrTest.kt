@@ -88,10 +88,11 @@ class SubmissionScreenModelImageOcrTest {
         val shownOcrState =
             assertIs<SubmissionImageOcrUiState.Showing>(showingState.zoomImageOcrState)
         assertEquals(1, shownOcrState.blocks.size)
+        assertEquals(SubmissionImageOcrTranslationMode.IDLE, shownOcrState.translationMode)
         assertEquals("hello", shownOcrState.blocks.single().displayText)
-        assertEquals("hello", shownOcrState.blocks.single().translatedText)
+        assertEquals(null, shownOcrState.blocks.single().translatedText)
         assertEquals(
-            SubmissionImageOcrTranslationStatus.SUCCESS,
+            SubmissionImageOcrTranslationStatus.IDLE,
             shownOcrState.blocks.single().translationStatus,
         )
         assertEquals(listOf("https://example.com/ocr-1.jpg"), requests)
@@ -111,6 +112,71 @@ class SubmissionScreenModelImageOcrTest {
             listOf("https://example.com/ocr-1.jpg", "https://example.com/ocr-1.jpg"),
             requests,
         )
+      }
+
+  @Test
+  fun imageOcrDialogRemainsUnavailableUntilTranslationIsApplied() =
+      runTest(dispatcher.scheduler) {
+        val model =
+            createSubmissionScreenModelForTest(
+                initialSid = 1,
+                items = listOf(imageOcrTestThumbnail(1)),
+                submissionSource = ImageOcrRecordingDetailSource(),
+                translationService = createTestSubmissionTranslationService(),
+                imageOcrService =
+                    createTestSubmissionImageOcrService { _ ->
+                      ImageOcrResult(
+                          blocks =
+                              listOf(
+                                  RecognizedTextBlock(
+                                      text = "hello",
+                                      points =
+                                          listOf(
+                                              NormalizedImagePoint(0.1f, 0.2f),
+                                              NormalizedImagePoint(0.4f, 0.2f),
+                                              NormalizedImagePoint(0.4f, 0.3f),
+                                              NormalizedImagePoint(0.1f, 0.3f),
+                                          ),
+                                  )
+                              )
+                      )
+                    },
+                imageOcrTranslationService =
+                    createTestSubmissionImageOcrTranslationService { request ->
+                      "translated:${request.sourceText}"
+                    },
+            )
+
+        runCurrent()
+        model.openImageZoom("https://example.com/ocr-dialog.jpg")
+        runCurrent()
+        model.toggleImageOcrCurrent()
+        advanceUntilIdle()
+
+        model.openImageOcrDialog("ocr-block-0")
+        runCurrent()
+
+        val rawShowingState =
+            assertIs<SubmissionImageOcrUiState.Showing>(
+                (model.state.value as SubmissionPagerUiState.Data).zoomImageOcrState
+            )
+        assertNull(rawShowingState.dialog)
+
+        model.translateImageOcrCurrent()
+        advanceUntilIdle()
+        model.openImageOcrDialog("ocr-block-0")
+        runCurrent()
+
+        val translatedShowingState =
+            assertIs<SubmissionImageOcrUiState.Showing>(
+                (model.state.value as SubmissionPagerUiState.Data).zoomImageOcrState
+            )
+        assertEquals(
+            SubmissionImageOcrTranslationMode.APPLIED,
+            translatedShowingState.translationMode,
+        )
+        assertEquals("translated:hello", translatedShowingState.blocks.single().translatedText)
+        assertTrue(translatedShowingState.dialog != null)
       }
 
   @Test
@@ -205,6 +271,8 @@ class SubmissionScreenModelImageOcrTest {
         runCurrent()
         model.toggleImageOcrCurrent()
         advanceUntilIdle()
+        model.translateImageOcrCurrent()
+        advanceUntilIdle()
 
         model.openImageOcrDialog("ocr-block-0")
         runCurrent()
@@ -225,9 +293,138 @@ class SubmissionScreenModelImageOcrTest {
             SubmissionImageOcrTranslationStatus.SUCCESS,
             refreshedBlock.translationStatus,
         )
-        assertTrue(showingState.dialog != null)
-        assertEquals("changed text", showingState.dialog?.draftOriginalText)
-        assertEquals("CHANGED TEXT", showingState.dialog?.translatedText)
+        val dialogState = showingState.dialog
+        assertTrue(dialogState != null)
+        assertEquals("changed text", dialogState.draftOriginalText)
+        assertEquals("CHANGED TEXT", dialogState.translatedText)
+      }
+
+  @Test
+  fun mergesAllBlocksInsideSelectedRegionAndRetranslatesMergedBlock() =
+      runTest(dispatcher.scheduler) {
+        val model =
+            createSubmissionScreenModelForTest(
+                initialSid = 1,
+                items = listOf(imageOcrTestThumbnail(1)),
+                submissionSource = ImageOcrRecordingDetailSource(),
+                translationService = createTestSubmissionTranslationService(),
+                imageOcrService =
+                    createTestSubmissionImageOcrService { _ ->
+                      ImageOcrResult(
+                          blocks =
+                              listOf(
+                                  ocrBlock("hello", 0.10f, 0.10f, 0.20f, 0.18f),
+                                  ocrBlock("there", 0.22f, 0.11f, 0.32f, 0.19f),
+                                  ocrBlock("friend", 0.12f, 0.21f, 0.30f, 0.29f),
+                              )
+                      )
+                    },
+                imageOcrTranslationService =
+                    createTestSubmissionImageOcrTranslationService { request ->
+                      request.sourceText.uppercase()
+                    },
+            )
+
+        runCurrent()
+        model.openImageZoom("https://example.com/ocr-merge.jpg")
+        runCurrent()
+        model.toggleImageOcrCurrent()
+        advanceUntilIdle()
+        model.translateImageOcrCurrent()
+        advanceUntilIdle()
+
+        model.mergeImageOcrBlocks(
+            draggedBlockId = "ocr-block-0",
+            mergeRegionPoints =
+                listOf(
+                    NormalizedImagePoint(0.09f, 0.09f),
+                    NormalizedImagePoint(0.33f, 0.09f),
+                    NormalizedImagePoint(0.33f, 0.30f),
+                    NormalizedImagePoint(0.09f, 0.30f),
+                ),
+        )
+        advanceUntilIdle()
+
+        val showingState =
+            assertIs<SubmissionImageOcrUiState.Showing>(
+                (model.state.value as SubmissionPagerUiState.Data).zoomImageOcrState
+            )
+        assertEquals(SubmissionImageOcrTranslationMode.APPLIED, showingState.translationMode)
+        assertEquals(1, showingState.blocks.size)
+        val mergedBlock = showingState.blocks.single()
+        assertTrue(mergedBlock.id.startsWith("ocr-merged-"))
+        assertEquals("hello there friend", mergedBlock.originalText)
+        assertEquals("HELLO THERE FRIEND", mergedBlock.translatedText)
+        assertEquals(SubmissionImageOcrTranslationStatus.SUCCESS, mergedBlock.translationStatus)
+
+        model.openImageOcrDialog(mergedBlock.id)
+        runCurrent()
+
+        val dialogShowingState =
+            assertIs<SubmissionImageOcrUiState.Showing>(
+                (model.state.value as SubmissionPagerUiState.Data).zoomImageOcrState
+            )
+        assertEquals(mergedBlock.id, dialogShowingState.dialog?.blockId)
+      }
+
+  @Test
+  fun dismissingZoomOverlayClearsSessionMergedBlocks() =
+      runTest(dispatcher.scheduler) {
+        val model =
+            createSubmissionScreenModelForTest(
+                initialSid = 1,
+                items = listOf(imageOcrTestThumbnail(1)),
+                submissionSource = ImageOcrRecordingDetailSource(),
+                translationService = createTestSubmissionTranslationService(),
+                imageOcrService =
+                    createTestSubmissionImageOcrService { _ ->
+                      ImageOcrResult(
+                          blocks =
+                              listOf(
+                                  ocrBlock("hello", 0.10f, 0.10f, 0.20f, 0.18f),
+                                  ocrBlock("there", 0.22f, 0.11f, 0.32f, 0.19f),
+                              )
+                      )
+                    },
+                imageOcrTranslationService = createTestSubmissionImageOcrTranslationService(),
+            )
+
+        runCurrent()
+        model.openImageZoom("https://example.com/ocr-reset.jpg")
+        runCurrent()
+        model.toggleImageOcrCurrent()
+        advanceUntilIdle()
+        model.mergeImageOcrBlocks(
+            draggedBlockId = "ocr-block-0",
+            mergeRegionPoints =
+                listOf(
+                    NormalizedImagePoint(0.09f, 0.09f),
+                    NormalizedImagePoint(0.33f, 0.09f),
+                    NormalizedImagePoint(0.33f, 0.20f),
+                    NormalizedImagePoint(0.09f, 0.20f),
+                ),
+        )
+        advanceUntilIdle()
+
+        val mergedState =
+            assertIs<SubmissionImageOcrUiState.Showing>(
+                (model.state.value as SubmissionPagerUiState.Data).zoomImageOcrState
+            )
+        assertEquals(1, mergedState.blocks.size)
+        assertTrue(mergedState.blocks.single().id.startsWith("ocr-merged-"))
+
+        model.dismissImageZoom()
+        runCurrent()
+        model.openImageZoom("https://example.com/ocr-reset.jpg")
+        runCurrent()
+        model.toggleImageOcrCurrent()
+        advanceUntilIdle()
+
+        val reopenedState =
+            assertIs<SubmissionImageOcrUiState.Showing>(
+                (model.state.value as SubmissionPagerUiState.Data).zoomImageOcrState
+            )
+        assertEquals(listOf("ocr-block-0", "ocr-block-1"), reopenedState.blocks.map { it.id })
       }
 }
 
@@ -299,4 +496,22 @@ private fun imageOcrTestSubmission(sid: Int): Submission =
         downloadFileName = null,
         aspectRatio = 1f,
         descriptionHtml = "",
+    )
+
+private fun ocrBlock(
+    text: String,
+    left: Float,
+    top: Float,
+    right: Float,
+    bottom: Float,
+): RecognizedTextBlock =
+    RecognizedTextBlock(
+        text = text,
+        points =
+            listOf(
+                NormalizedImagePoint(left, top),
+                NormalizedImagePoint(right, top),
+                NormalizedImagePoint(right, bottom),
+                NormalizedImagePoint(left, bottom),
+            ),
     )

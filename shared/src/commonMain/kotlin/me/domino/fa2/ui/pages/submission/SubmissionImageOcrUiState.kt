@@ -12,6 +12,11 @@ data class SubmissionImageOcrBlockUiState(
 ) {
   val displayText: String
     get() = translatedText?.takeIf { it.isNotBlank() } ?: originalText
+
+  val hasTranslation: Boolean
+    get() =
+        translationStatus == SubmissionImageOcrTranslationStatus.SUCCESS &&
+            translatedText?.isNotBlank() == true
 }
 
 data class SubmissionImageOcrDialogUiState(
@@ -29,6 +34,13 @@ enum class SubmissionImageOcrTranslationStatus {
   FAILURE,
 }
 
+enum class SubmissionImageOcrTranslationMode {
+  IDLE,
+  LOADING,
+  APPLIED,
+  ERROR,
+}
+
 sealed interface SubmissionImageOcrUiState {
   data object Idle : SubmissionImageOcrUiState
 
@@ -36,7 +48,10 @@ sealed interface SubmissionImageOcrUiState {
 
   data class Showing(
       val blocks: List<SubmissionImageOcrBlockUiState>,
+      val translationMode: SubmissionImageOcrTranslationMode =
+          SubmissionImageOcrTranslationMode.IDLE,
       val dialog: SubmissionImageOcrDialogUiState? = null,
+      val translationErrorMessage: String? = null,
   ) : SubmissionImageOcrUiState
 
   data class Error(

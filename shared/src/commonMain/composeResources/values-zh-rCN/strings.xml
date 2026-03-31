@@ -123,6 +123,7 @@
   <string name="no_browsable_submissions">当前没有可浏览的投稿。</string>
   <string name="original_image">查看原图</string>
   <string name="image_ocr_action">识别图片文字</string>
+  <string name="image_ocr_translate_action">翻译识别结果</string>
   <string name="image_ocr_empty">图片中未识别到文字</string>
   <string name="image_ocr_failed">图片 OCR 失败：%1$s</string>
   <string name="image_ocr_translation_failed">图片 OCR 翻译失败</string>
