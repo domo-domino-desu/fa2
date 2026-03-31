@@ -4,6 +4,7 @@ import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
+import me.domino.fa2.application.auth.AuthSessionController
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.repository.AuthRepository
 import me.domino.fa2.data.settings.AppSettingsService
@@ -13,10 +14,9 @@ import me.domino.fa2.util.logging.FaLog
 
 /** More 页面状态模型。 */
 class MoreScreenModel(
-    /** 当前用户名。 */
-    private val username: String,
     /** 认证仓储。 */
     private val authRepository: AuthRepository,
+    private val authSessionController: AuthSessionController,
     /** 历史记录仓储。 */
     private val historyRepository: ActivityHistoryRepository,
     private val settingsService: AppSettingsService? = null,
@@ -33,7 +33,8 @@ class MoreScreenModel(
     log.i { "加载More -> 开始" }
     screenModelScope.launch {
       runCatching {
-            val hasCookie = authRepository.loadCookieHeader().isNotBlank()
+            val hasCookie = authRepository.hasAuthCookie()
+            val username = authSessionController.loadPersistedUsername()
             val submissionHistoryCount = historyRepository.loadSubmissionHistory().size
             val searchHistoryCount = historyRepository.loadSearchHistory().size
             mutableState.value =
@@ -65,8 +66,10 @@ class MoreScreenModel(
       mutableState.value = snapshot.copy(loggingOut = true, errorMessage = null)
       runCatching { authRepository.clearSession() }
           .onSuccess {
+            authSessionController.clearSessionProfile()
             mutableState.value =
                 snapshot.copy(
+                    username = null,
                     hasCookie = false,
                     submissionHistoryCount = snapshot.submissionHistoryCount,
                     searchHistoryCount = snapshot.searchHistoryCount,
@@ -107,7 +110,7 @@ sealed interface MoreUiState {
    */
   data class Ready(
       /** 当前用户名。 */
-      val username: String,
+      val username: String?,
       /** 当前是否有 cookie。 */
       val hasCookie: Boolean,
       /** 投稿历史数量。 */

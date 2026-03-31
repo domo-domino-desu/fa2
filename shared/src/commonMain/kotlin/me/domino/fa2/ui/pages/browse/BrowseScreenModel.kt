@@ -171,6 +171,12 @@ class BrowseScreenModel(
               log.i { "加载Browse -> 成功(count=${updated.submissions.size})" }
             }
 
+            is PageState.AuthRequired -> {
+              mutablePageState.value =
+                  PageState.AuthRequired(pageState.requestUrl, pageState.message)
+              log.w { "加载Browse -> 需要重新登录" }
+            }
+
             PageState.CfChallenge -> {
               mutablePageState.value = PageState.CfChallenge
               log.w { "加载Browse -> Cloudflare验证" }
@@ -226,6 +232,7 @@ class BrowseScreenModel(
               }
             }
 
+            is PageState.AuthRequired -> log.w { "自动加载Browse -> 需要重新登录" }
             PageState.CfChallenge -> log.w { "自动加载Browse -> Cloudflare验证" }
             is PageState.MatureBlocked -> log.w { "自动加载Browse -> 受限(${pageState.reason})" }
             is PageState.Error -> log.e(pageState.exception) { "自动加载Browse -> 失败" }

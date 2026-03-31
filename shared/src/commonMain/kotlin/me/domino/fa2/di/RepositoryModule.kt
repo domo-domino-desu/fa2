@@ -10,6 +10,7 @@ import me.domino.fa2.application.translation.SubmissionImageOcrTranslationServic
 import me.domino.fa2.application.watchrecommendation.WatchRecommendationService
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.repository.AuthRepository
+import me.domino.fa2.data.repository.AuthSessionProfileStore
 import me.domino.fa2.data.repository.BrowseRepository
 import me.domino.fa2.data.repository.FavoritesRepository
 import me.domino.fa2.data.repository.FeedRepository
@@ -50,6 +51,7 @@ fun repositoryModule(): Module = module {
   single { ActivityHistoryRepository(get()) }
   single { SubmissionDescriptionTranslationService(get(), get()) }
   single { AuthRepository(get()) }
+  single { AuthSessionProfileStore(get()) }
   single { FeedRepository(get()) }
   single { BrowseRepository(get()) }
   single { SearchRepository(get()) }

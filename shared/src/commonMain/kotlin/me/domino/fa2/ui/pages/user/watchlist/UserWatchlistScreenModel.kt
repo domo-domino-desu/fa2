@@ -120,6 +120,7 @@ class UserWatchlistScreenModel(
               log.i { "加载Watchlist页 -> ${summarizePageState(next)}(count=${updated.users.size})" }
             }
 
+            is PageState.AuthRequired -> log.w { "加载Watchlist页 -> 需要重新登录" }
             PageState.CfChallenge -> log.w { "加载Watchlist页 -> Cloudflare验证" }
             is PageState.MatureBlocked -> log.w { "加载Watchlist页 -> 受限(${next.reason})" }
             is PageState.Error -> log.e(next.exception) { "加载Watchlist页 -> 失败" }
@@ -183,6 +184,7 @@ class UserWatchlistScreenModel(
               log.d { "自动加载Watchlist页 -> ${summarizePageState(next)}(count=${updated.users.size})" }
             }
 
+            is PageState.AuthRequired -> log.w { "自动加载Watchlist页 -> 需要重新登录" }
             PageState.CfChallenge -> log.w { "自动加载Watchlist页 -> Cloudflare验证" }
             is PageState.MatureBlocked -> log.w { "自动加载Watchlist页 -> 受限(${next.reason})" }
             is PageState.Error -> log.e(next.exception) { "自动加载Watchlist页 -> 失败" }

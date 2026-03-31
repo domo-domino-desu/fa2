@@ -224,6 +224,11 @@ internal class SearchPaginationCoordinator(
               }
             }
 
+            is PageState.AuthRequired -> {
+              pageStateSink(PageState.AuthRequired(pageState.requestUrl, pageState.message))
+              log.w { "加载Search -> 需要重新登录" }
+            }
+
             PageState.CfChallenge -> {
               pageStateSink(PageState.CfChallenge)
               log.w { "加载Search -> Cloudflare验证" }
@@ -292,6 +297,7 @@ internal class SearchPaginationCoordinator(
               }
             }
 
+            is PageState.AuthRequired -> log.w { "自动加载Search -> 需要重新登录" }
             PageState.CfChallenge -> log.w { "自动加载Search -> Cloudflare验证" }
             is PageState.MatureBlocked -> log.w { "自动加载Search -> 受限(${pageState.reason})" }
             is PageState.Error -> log.e(pageState.exception) { "自动加载Search -> 失败" }

@@ -16,6 +16,19 @@ sealed interface HtmlResponseResult {
   ) : HtmlResponseResult
 
   /**
+   * 请求命中登录页或已退出态，表明当前业务请求需要重新登录。
+   *
+   * @property requestUrl 原始请求地址。
+   * @property finalUrl 最终页面地址。
+   * @property message 提示文案。
+   */
+  data class AuthRequired(
+      val requestUrl: String,
+      val finalUrl: String,
+      val message: String,
+  ) : HtmlResponseResult
+
+  /**
    * 请求错误。
    *
    * @property statusCode HTTP 状态码。
@@ -79,7 +92,8 @@ sealed interface HtmlResponseResult {
         statusCode: Int,
         headers: Map<String, List<String>>,
         body: String,
-        url: String,
+        requestUrl: String,
+        finalUrl: String,
     ): HtmlResponseResult {
       val normalizedBody = body.lowercase()
       val server = firstHeader(headers, "server").orEmpty()
@@ -102,11 +116,25 @@ sealed interface HtmlResponseResult {
         return MatureBlocked(reason = "Mature content is blocked")
       }
 
-      if (statusCode in 200..299) {
-        return Success(body = body, url = url)
+      if (
+          isAuthRequiredResponse(
+              requestUrl = requestUrl,
+              finalUrl = finalUrl,
+              normalizedBody = normalizedBody,
+          )
+      ) {
+        return AuthRequired(
+            requestUrl = requestUrl,
+            finalUrl = finalUrl,
+            message = "Authentication required for $requestUrl",
+        )
       }
 
-      return Error(statusCode = statusCode, message = "HTTP $statusCode for $url")
+      if (statusCode in 200..299) {
+        return Success(body = body, url = finalUrl)
+      }
+
+      return Error(statusCode = statusCode, message = "HTTP $statusCode for $requestUrl")
     }
 
     /**
@@ -121,5 +149,30 @@ sealed interface HtmlResponseResult {
             ?.value
             ?.firstOrNull()
             ?.takeIf { it.isNotBlank() }
+
+    private fun isAuthRequiredResponse(
+        requestUrl: String,
+        finalUrl: String,
+        normalizedBody: String,
+    ): Boolean {
+      if (
+          finalUrl.trim().substringBefore('?').removeSuffix("/") ==
+              "https://www.furaffinity.net/login"
+      ) {
+        return true
+      }
+      val loggedOutHome =
+          "data-user-logged-in=\"0\"" in normalizedBody &&
+              normalizedBody.contains("href=\"/login\"") &&
+              normalizedBody.contains("href=\"/register\"")
+      if (!loggedOutHome) return false
+
+      val normalizedRequestUrl = requestUrl.trim().substringBefore('?').removeSuffix("/")
+      val normalizedFinalUrl = finalUrl.trim().substringBefore('?').removeSuffix("/")
+      val normalizedHomeUrl = "https://www.furaffinity.net"
+      return normalizedRequestUrl != normalizedHomeUrl ||
+          normalizedFinalUrl != normalizedHomeUrl ||
+          requestUrl.contains("/msg/", ignoreCase = true)
+    }
   }
 }

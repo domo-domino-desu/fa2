@@ -26,9 +26,18 @@ class AuthDataSource(
   suspend fun restorePersistedSession(): Boolean {
     userAgentStorage.loadPersistedIfNeeded()
     cookiesStorage.restorePersistedIfNeeded()
-    val hasCookie = cookiesStorage.hasCookie()
-    return hasCookie
+    return hasAuthCookie()
   }
+
+  /** 判断当前是否存在 auth cookie（忽略 Cloudflare cookie）。 */
+  suspend fun hasAuthCookie(): Boolean =
+      loadCookieHeader()
+          .split(';')
+          .mapNotNull { token ->
+            val name = token.substringBefore('=').trim()
+            name.takeIf { it.isNotBlank() }
+          }
+          .any { cookieName -> !isCloudflareCookieName(cookieName) }
 
   /**
    * 提交用户输入的 Cookie。
@@ -94,6 +103,10 @@ class AuthDataSource(
           } else {
             AuthProbeResult.AuthInvalid(message = "认证失效，请粘贴浏览器 Cookie。")
           }
+        }
+
+        is HtmlResponseResult.AuthRequired -> {
+          AuthProbeResult.AuthInvalid(message = "认证失效，请粘贴浏览器 Cookie。")
         }
 
         is HtmlResponseResult.CfChallenge -> {

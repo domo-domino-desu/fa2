@@ -15,6 +15,17 @@ sealed interface PageState<out T> {
       val data: T
   ) : PageState<T>
 
+  /**
+   * 当前请求需要重新登录。
+   *
+   * @property requestUrl 原始请求地址。
+   * @property message 展示文案。
+   */
+  data class AuthRequired(
+      val requestUrl: String,
+      val message: String,
+  ) : PageState<Nothing>
+
   /** 命中 Cloudflare challenge。 */
   data object CfChallenge : PageState<Nothing>
 

@@ -429,6 +429,7 @@ private class SubmissionSeriesRemoteLoader(
     throttle.awaitReady()
     return when (val state = repository.loadSubmissionDetailByUrl(url)) {
       is PageState.Success -> state.data
+      is PageState.AuthRequired,
       PageState.CfChallenge,
       is PageState.MatureBlocked,
       is PageState.Error,

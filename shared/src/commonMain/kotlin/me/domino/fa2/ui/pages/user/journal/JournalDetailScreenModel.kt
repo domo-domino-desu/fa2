@@ -88,6 +88,7 @@ class JournalDetailScreenModel(
           when (result) {
             is PageState.Success ->
                 buildSuccessState(detail = result.data, previous = previousSuccess)
+            is PageState.AuthRequired -> JournalDetailUiState.Error(result.message)
             PageState.CfChallenge ->
                 JournalDetailUiState.Error(appString(Res.string.cloudflare_challenge_title))
             is PageState.MatureBlocked -> JournalDetailUiState.Error(result.reason)
@@ -100,6 +101,10 @@ class JournalDetailScreenModel(
       when (result) {
         is PageState.Success -> {
           log.i { "加载Journal详情 -> ${summarizePageState(result)}" }
+        }
+
+        is PageState.AuthRequired -> {
+          log.w { "加载Journal详情 -> 需要重新登录" }
         }
 
         PageState.CfChallenge -> {

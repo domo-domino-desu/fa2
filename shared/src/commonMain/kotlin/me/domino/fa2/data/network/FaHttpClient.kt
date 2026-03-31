@@ -61,6 +61,7 @@ class FaHttpClient(
 
       val body = response.bodyAsText()
       val headers = response.headers.entries().associate { (key, values) -> key to values }
+      val finalUrl = response.call.request.url.toString()
       val setCookieValues = response.headers.getAll(HttpHeaders.SetCookie).orEmpty()
       cookiesStorage.mergeSetCookieValues(setCookieValues)
 
@@ -69,7 +70,8 @@ class FaHttpClient(
               statusCode = response.status.value,
               headers = headers,
               body = body,
-              url = url,
+              requestUrl = url,
+              finalUrl = finalUrl,
           )
       val cfRay =
           headers.entries

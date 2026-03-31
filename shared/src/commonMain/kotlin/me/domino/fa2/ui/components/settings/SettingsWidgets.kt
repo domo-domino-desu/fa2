@@ -38,11 +38,13 @@ fun SettingsAccountHeader(
     subtitle: String,
     /** 点击回调。 */
     onClick: () -> Unit,
+    /** 是否可点击。 */
+    enabled: Boolean = true,
     /** 修饰符。 */
     modifier: Modifier = Modifier,
 ) {
   Surface(
-      modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
+      modifier = modifier.fillMaxWidth().clickable(enabled = enabled, onClick = onClick),
       shape = RoundedCornerShape(14.dp),
       color = MaterialTheme.colorScheme.surface,
       border =
@@ -141,6 +143,8 @@ fun SettingsListItem(
     subtitle: String,
     /** 点击回调。 */
     onClick: () -> Unit,
+    /** 是否可点击。 */
+    enabled: Boolean = true,
     /** 是否展示底部分割线。 */
     showDivider: Boolean = true,
     /** 修饰符。 */
@@ -151,7 +155,7 @@ fun SettingsListItem(
         modifier =
             modifier
                 .fillMaxWidth()
-                .clickable(onClick = onClick)
+                .clickable(enabled = enabled, onClick = onClick)
                 .padding(horizontal = 14.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -177,6 +181,9 @@ fun SettingsListItem(
             text = title,
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
+            color =
+                if (enabled) MaterialTheme.colorScheme.onSurface
+                else MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
             text = subtitle,

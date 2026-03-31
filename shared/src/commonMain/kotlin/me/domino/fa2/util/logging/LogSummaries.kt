@@ -7,6 +7,7 @@ import me.domino.fa2.data.network.HtmlResponseResult
 fun summarizePageState(state: PageState<*>): String =
     when (state) {
       PageState.Loading -> "加载中"
+      is PageState.AuthRequired -> "需要登录:${state.requestUrl}"
       PageState.CfChallenge -> "Cloudflare 验证"
       is PageState.Success<*> -> "成功"
       is PageState.MatureBlocked -> "受限:${state.reason}"
@@ -17,6 +18,7 @@ fun summarizePageState(state: PageState<*>): String =
 fun summarizeHtmlResult(result: HtmlResponseResult): String =
     when (result) {
       is HtmlResponseResult.Success -> "成功"
+      is HtmlResponseResult.AuthRequired -> "需要登录:${result.requestUrl}"
       is HtmlResponseResult.CfChallenge -> {
         val ray = result.cfRay?.takeIf { it.isNotBlank() } ?: "-"
         "Cloudflare验证(cf-ray=$ray)"

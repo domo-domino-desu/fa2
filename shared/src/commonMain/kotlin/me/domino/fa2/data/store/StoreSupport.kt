@@ -7,6 +7,11 @@ import org.mobilenativefoundation.store.store5.StoreReadResponse
 
 internal data object CfChallengeException : IllegalStateException("Cloudflare challenge detected")
 
+internal data class AuthRequiredException(
+    val requestUrl: String,
+    val detail: String,
+) : IllegalStateException(detail)
+
 internal data class MatureBlockedException(val reason: String) : IllegalStateException(reason)
 
 internal class RemoteRequestException(message: String) : IllegalStateException(message)
@@ -14,6 +19,7 @@ internal class RemoteRequestException(message: String) : IllegalStateException(m
 internal fun <T> PageState<T>.requireStoreValue(): T =
     when (this) {
       is PageState.Success -> data
+      is PageState.AuthRequired -> throw AuthRequiredException(requestUrl, message)
       PageState.CfChallenge -> throw CfChallengeException
       is PageState.MatureBlocked -> throw MatureBlockedException(reason)
       is PageState.Error -> throw exception
@@ -23,6 +29,7 @@ internal fun <T> PageState<T>.requireStoreValue(): T =
 internal fun <T> mapStoreException(error: Throwable): PageState<T> =
     when (error) {
       CfChallengeException -> PageState.CfChallenge
+      is AuthRequiredException -> PageState.AuthRequired(error.requestUrl, error.detail)
       is MatureBlockedException -> PageState.MatureBlocked(error.reason)
       else -> PageState.Error(error)
     }

@@ -21,6 +21,7 @@ class ChallengeProbeVerifier(
       log.d { "验证探测 -> 第${index + 1}次(url=${summarizeUrl(probeUrl)})" }
       when (val response = rawHtmlDataSource.get(probeUrl)) {
         is HtmlResponseResult.Success -> return
+        is HtmlResponseResult.AuthRequired -> return
         is HtmlResponseResult.MatureBlocked -> return
         is HtmlResponseResult.CfChallenge -> {
           log.w { "验证探测 -> 仍命中challenge" }

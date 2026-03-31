@@ -18,7 +18,7 @@ class FaLinkUriHandler(private val navigator: Navigator, private val fallback: U
     UriHandler {
   override fun openUri(uri: String) {
     val normalized = toAbsoluteUrl(FaUrls.home, uri)
-    val target = resolveFaTarget(normalized)
+    val target = parseFaRouteTarget(normalized)
     if (target == null) {
       fallback.openUri(normalized)
       return
@@ -27,7 +27,7 @@ class FaLinkUriHandler(private val navigator: Navigator, private val fallback: U
   }
 }
 
-private fun resolveFaTarget(url: String): Screen? {
+internal fun parseFaRouteTarget(url: String): Screen? {
   if (!isFaUrl(url)) return null
   val path = extractPath(url)
 

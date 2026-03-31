@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import me.domino.fa2.application.auth.AuthSessionController
+import me.domino.fa2.application.auth.PendingFaRouteStore
 import me.domino.fa2.application.challenge.port.SessionWebViewPort
 import me.domino.fa2.data.model.AuthProbeResult
 import me.domino.fa2.data.repository.AuthRepository
@@ -21,6 +23,8 @@ import me.domino.fa2.util.logging.FaLog
 class AuthScreenModel(
     /** 认证仓储。 */
     private val authRepository: AuthRepository,
+    private val authSessionController: AuthSessionController,
+    private val pendingFaRouteStore: PendingFaRouteStore,
     private val settingsService: AppSettingsService? = null,
     private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) : StateScreenModel<AuthUiState>(AuthUiState.Loading) {
@@ -80,15 +84,17 @@ class AuthScreenModel(
     screenModelScope.launch {
       mutableState.value = AuthUiState.Loading
       resetAuthInteractionState()
-      val hasCookie = authRepository.restorePersistedSession()
+      authRepository.restorePersistedSession()
+      val hasCookie = authRepository.hasAuthCookie()
       refreshCookieDraft()
-      if (!hasCookie) {
+      if (!hasCookie || authSessionController.needsRelogin()) {
         log.w { "认证初始化 -> 无可用Cookie" }
         mutableState.value =
             AuthUiState.AuthInvalid(message = appString(Res.string.missing_persisted_cookie))
         return@launch
       }
-      probeAndUpdate()
+      mutableState.value =
+          AuthUiState.Authenticated(username = authSessionController.loadPersistedUsername())
     }
   }
 
@@ -206,6 +212,7 @@ class AuthScreenModel(
         try {
           when (val result = authRepository.probeLogin()) {
             is AuthProbeResult.LoggedIn -> {
+              authSessionController.completeLogin(result.username)
               AuthUiState.Authenticated(username = result.username)
             }
 
@@ -228,6 +235,8 @@ class AuthScreenModel(
     log.i { "登录态探测 -> ${summarizeAuthUiState(nextState)}" }
     return nextState
   }
+
+  fun hasPendingRestoreUri(): Boolean = pendingFaRouteStore.peek() != null
 
   /** 重置认证交互状态。 */
   private fun resetAuthInteractionState() {

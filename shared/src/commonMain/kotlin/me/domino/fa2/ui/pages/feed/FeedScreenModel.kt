@@ -110,6 +110,11 @@ class FeedScreenModel(
               log.i { "加载Feed -> 成功(count=${updated.submissions.size})" }
             }
 
+            is PageState.AuthRequired -> {
+              mutablePageState.value = PageState.AuthRequired(next.requestUrl, next.message)
+              log.w { "加载Feed -> 需要重新登录" }
+            }
+
             PageState.CfChallenge -> {
               mutablePageState.value = PageState.CfChallenge
               log.w { "加载Feed -> Cloudflare验证" }
@@ -206,6 +211,7 @@ class FeedScreenModel(
               log.d { "自动加载Feed -> ${summarizePageState(next)}(count=${updated.submissions.size})" }
             }
 
+            is PageState.AuthRequired -> log.w { "自动加载Feed -> 需要重新登录" }
             PageState.CfChallenge -> log.w { "自动加载Feed -> Cloudflare验证" }
             is PageState.MatureBlocked -> log.w { "自动加载Feed -> 受限(${next.reason})" }
             is PageState.Error -> log.e(next.exception) { "自动加载Feed -> 失败" }

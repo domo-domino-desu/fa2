@@ -2,6 +2,9 @@ package me.domino.fa2.di
 
 import eu.anifantakis.lib.ksafe.KSafe
 import io.ktor.client.HttpClient
+import me.domino.fa2.application.auth.AuthSessionController
+import me.domino.fa2.application.auth.DefaultAuthSessionController
+import me.domino.fa2.application.auth.PendingFaRouteStore
 import me.domino.fa2.application.challenge.CfChallengeController
 import me.domino.fa2.application.challenge.CfChallengeCoordinator
 import me.domino.fa2.application.challenge.ChallengeCookiePolicy
@@ -16,6 +19,7 @@ import me.domino.fa2.data.network.FaHttpClient
 import me.domino.fa2.data.network.ImageProgressTracker
 import me.domino.fa2.data.network.KSafeCookiePersistence
 import me.domino.fa2.data.network.UserAgentStorage
+import me.domino.fa2.data.network.challenge.AuthAwareFaHtmlDataSource
 import me.domino.fa2.data.network.challenge.ChallengeAwareFaHtmlDataSource
 import me.domino.fa2.data.network.endpoint.AttachmentDownloadEndpoint
 import me.domino.fa2.data.network.endpoint.AttachmentDownloadSource
@@ -45,6 +49,10 @@ fun networkModule(): Module = module {
   single { FaCookiesStorage(get()) }
   single { UserAgentStorage(get()) }
   single { ImageProgressTracker() }
+  single { PendingFaRouteStore() }
+  single<AuthSessionController> {
+    DefaultAuthSessionController(profileStore = get(), pendingFaRouteStore = get())
+  }
 
   single<HttpClient> { HttpClient { expectSuccess = false } }
   single<TranslationPort> { KtorTranslationPort(get()) }
@@ -69,10 +77,16 @@ fun networkModule(): Module = module {
   }
   single<CfChallengeController> { get<CfChallengeCoordinator>() }
   single<ChallengeResolver> { get<CfChallengeCoordinator>() }
-  single<FaHtmlDataSource> {
+  single<FaHtmlDataSource>(qualifier = named(KOIN_QUALIFIER_CHALLENGE_AWARE_HTML_DATA_SOURCE)) {
     ChallengeAwareFaHtmlDataSource(
         delegate = get(qualifier = named(KOIN_QUALIFIER_RAW_HTML_DATA_SOURCE)),
         challengeResolver = get<ChallengeResolver>(),
+    )
+  }
+  single<FaHtmlDataSource> {
+    AuthAwareFaHtmlDataSource(
+        delegate = get(qualifier = named(KOIN_QUALIFIER_CHALLENGE_AWARE_HTML_DATA_SOURCE)),
+        authSessionController = get(),
     )
   }
   single<HttpClient>(qualifier = named(KOIN_QUALIFIER_SOCIAL_ACTION_CLIENT)) {
@@ -87,7 +101,7 @@ fun networkModule(): Module = module {
     )
   }
 
-  single { HomeEndpoint(get()) }
+  single { HomeEndpoint(get(qualifier = named(KOIN_QUALIFIER_CHALLENGE_AWARE_HTML_DATA_SOURCE))) }
   single { FeedEndpoint(get()) }
   single { BrowseEndpoint(get()) }
   single { SearchEndpoint(get()) }

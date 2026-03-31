@@ -23,6 +23,13 @@ class AuthRepository(
     return ok
   }
 
+  /** 当前是否存在 auth cookie（忽略 Cloudflare cookie）。 */
+  suspend fun hasAuthCookie(): Boolean {
+    val hasAuthCookie = dataSource.hasAuthCookie()
+    log.d { "读取Auth Cookie -> ${if (hasAuthCookie) "存在" else "不存在"}" }
+    return hasAuthCookie
+  }
+
   /**
    * 提交用户输入的 Cookie。
    *

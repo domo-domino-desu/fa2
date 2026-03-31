@@ -20,11 +20,11 @@ import org.koin.dsl.module
 
 /** ScreenModel 依赖模块。 */
 fun screenModelModule(): Module = module {
-  factory { AuthScreenModel(get(), get(), get()) }
+  factory { AuthScreenModel(get(), get(), get(), get(), get()) }
   factory { FeedScreenModel(get(), get(), get()) }
   factory { BrowseScreenModel(get(), get(), get()) }
   factory { SearchScreenModel(get(), get(), get(), get(), get(), get()) }
-  factory { (username: String) -> MoreScreenModel(username, get(), get(), get(), get()) }
+  factory { MoreScreenModel(get(), get(), get(), get(), get()) }
   factory { (username: String, initialChildRoute: UserChildRoute, initialFolderUrl: String?) ->
     UserScreenModel(
         username = username,

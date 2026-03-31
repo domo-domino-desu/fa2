@@ -15,6 +15,8 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import me.domino.fa2.application.auth.DefaultAuthSessionController
+import me.domino.fa2.application.auth.PendingFaRouteStore
 import me.domino.fa2.application.challenge.port.SessionWebViewPort
 import me.domino.fa2.data.datasource.AuthDataSource
 import me.domino.fa2.data.local.KeyValueStorage
@@ -144,12 +146,10 @@ private fun createAuthScreenModelFixture(): AuthScreenModelFixture {
   val dataStorePath =
       "${FileSystem.SYSTEM_TEMPORARY_DIRECTORY}/fa2-auth-screen-$randomSuffix.preferences_pb"
           .toPath()
-  val userAgentStorage =
-      UserAgentStorage(
-          KeyValueStorage(
-              PreferenceDataStoreFactory.createWithPath(produceFile = { dataStorePath })
-          )
-      )
+  val keyValueStorage =
+      KeyValueStorage(PreferenceDataStoreFactory.createWithPath(produceFile = { dataStorePath }))
+  val userAgentStorage = UserAgentStorage(keyValueStorage)
+  val pendingFaRouteStore = PendingFaRouteStore()
   val repository =
       AuthRepository(
           AuthDataSource(
@@ -159,7 +159,17 @@ private fun createAuthScreenModelFixture(): AuthScreenModelFixture {
           )
       )
   return AuthScreenModelFixture(
-      screenModel = AuthScreenModel(repository),
+      screenModel =
+          AuthScreenModel(
+              authRepository = repository,
+              authSessionController =
+                  DefaultAuthSessionController(
+                      profileStore =
+                          me.domino.fa2.data.repository.AuthSessionProfileStore(keyValueStorage),
+                      pendingFaRouteStore = pendingFaRouteStore,
+                  ),
+              pendingFaRouteStore = pendingFaRouteStore,
+          ),
       htmlDataSource = htmlDataSource,
       userAgentStorage = userAgentStorage,
   )

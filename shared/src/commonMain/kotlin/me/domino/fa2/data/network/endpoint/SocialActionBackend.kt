@@ -23,6 +23,7 @@ internal class DataSourceSocialActionBackend(
     while (true) {
       when (val response = dataSource.get(actionUrl)) {
         is HtmlResponseResult.Success -> return SocialActionResult.Completed(redirected = false)
+        is HtmlResponseResult.AuthRequired -> return SocialActionResult.Failed(response.message)
         is HtmlResponseResult.MatureBlocked -> return SocialActionResult.Blocked(response.reason)
         is HtmlResponseResult.Error -> return SocialActionResult.Failed(response.message)
         is HtmlResponseResult.CfChallenge ->
@@ -67,10 +68,12 @@ internal class RawHttpSocialActionBackend(
                   statusCode = response.statusCode,
                   headers = response.headers,
                   body = response.body,
-                  url = actionUrl,
+                  requestUrl = actionUrl,
+                  finalUrl = actionUrl,
               )
       ) {
         is HtmlResponseResult.Success -> return SocialActionResult.Completed(redirected = false)
+        is HtmlResponseResult.AuthRequired -> return SocialActionResult.Failed(classified.message)
         is HtmlResponseResult.MatureBlocked -> return SocialActionResult.Blocked(classified.reason)
         is HtmlResponseResult.Error -> return SocialActionResult.Failed(classified.message)
         is HtmlResponseResult.CfChallenge ->

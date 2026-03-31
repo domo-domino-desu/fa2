@@ -45,5 +45,11 @@ class KeyValueStorage(
   companion object {
     /** HTTP UA 的 KV 键。 */
     const val KEY_HTTP_USER_AGENT: String = "http_user_agent"
+
+    /** 当前登录用户名的 KV 键。 */
+    const val KEY_AUTH_PERSISTED_USERNAME: String = "auth.persisted_username"
+
+    /** 是否需要重新登录的 KV 键。 */
+    const val KEY_AUTH_NEEDS_RELOGIN: String = "auth.needs_relogin"
   }
 }

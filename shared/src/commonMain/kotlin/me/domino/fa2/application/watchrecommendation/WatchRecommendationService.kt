@@ -168,6 +168,14 @@ class WatchRecommendationService(
           error("Cloudflare verification required")
         }
 
+        is PageState.AuthRequired -> {
+          if (skipOnFailure) {
+            log.w { "关注推荐 -> 跳过用户(需要登录,user=$username)" }
+            return null
+          }
+          error(result.message)
+        }
+
         is PageState.MatureBlocked -> {
           if (skipOnFailure) {
             log.w { "关注推荐 -> 跳过用户(受限,user=$username,reason=${result.reason})" }

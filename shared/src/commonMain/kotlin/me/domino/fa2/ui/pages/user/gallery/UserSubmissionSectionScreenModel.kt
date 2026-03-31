@@ -186,6 +186,7 @@ class UserSubmissionSectionScreenModel(
               log.i { "加载用户投稿分区 -> ${summarizePageState(next)}(count=${updated.submissions.size})" }
             }
 
+            is PageState.AuthRequired -> log.w { "加载用户投稿分区 -> 需要重新登录" }
             PageState.CfChallenge -> log.w { "加载用户投稿分区 -> Cloudflare验证" }
             is PageState.MatureBlocked -> log.w { "加载用户投稿分区 -> 受限(${next.reason})" }
             is PageState.Error -> log.e(next.exception) { "加载用户投稿分区 -> 失败" }
@@ -260,6 +261,7 @@ class UserSubmissionSectionScreenModel(
               }
             }
 
+            is PageState.AuthRequired -> log.w { "自动加载用户投稿分区 -> 需要重新登录" }
             PageState.CfChallenge -> log.w { "自动加载用户投稿分区 -> Cloudflare验证" }
             is PageState.MatureBlocked -> log.w { "自动加载用户投稿分区 -> 受限(${next.reason})" }
             is PageState.Error -> log.e(next.exception) { "自动加载用户投稿分区 -> 失败" }

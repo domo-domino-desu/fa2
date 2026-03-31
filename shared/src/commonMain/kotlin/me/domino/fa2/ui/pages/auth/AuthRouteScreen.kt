@@ -33,7 +33,9 @@ class AuthRouteScreen : Screen {
     LaunchedEffect(state) {
       val snapshot = state
       if (snapshot is AuthUiState.Authenticated) {
-        navigator.replaceAll(MainRouteScreen(snapshot.username ?: "unknown"))
+        navigator.replaceAll(
+            MainRouteScreen(deferInitialFeedLoad = screenModel.hasPendingRestoreUri())
+        )
       }
     }
 

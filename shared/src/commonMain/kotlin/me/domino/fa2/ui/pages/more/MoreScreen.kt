@@ -24,13 +24,13 @@ fun MoreScreen(
     /** More 页面状态。 */
     state: MoreUiState,
     /** 打开当前用户页面。 */
-    onOpenUser: () -> Unit,
+    onOpenUser: (() -> Unit)?,
     /** 打开当前用户已关注列表。 */
-    onOpenFollowing: () -> Unit,
+    onOpenFollowing: (() -> Unit)?,
     /** 打开关注推荐页面。 */
-    onOpenWatchRecommendations: () -> Unit,
+    onOpenWatchRecommendations: (() -> Unit)?,
     /** 打开当前用户收藏列表。 */
-    onOpenFavorites: () -> Unit,
+    onOpenFavorites: (() -> Unit)?,
     /** 打开设置页。 */
     onOpenSettings: () -> Unit,
     /** 打开投稿浏览记录。 */
@@ -74,13 +74,13 @@ private fun MoreContent(
     /** 可展示状态。 */
     state: MoreUiState.Ready,
     /** 打开用户页回调。 */
-    onOpenUser: () -> Unit,
+    onOpenUser: (() -> Unit)?,
     /** 打开当前用户已关注列表。 */
-    onOpenFollowing: () -> Unit,
+    onOpenFollowing: (() -> Unit)?,
     /** 打开关注推荐页。 */
-    onOpenWatchRecommendations: () -> Unit,
+    onOpenWatchRecommendations: (() -> Unit)?,
     /** 打开当前用户收藏列表。 */
-    onOpenFavorites: () -> Unit,
+    onOpenFavorites: (() -> Unit)?,
     /** 打开设置页回调。 */
     onOpenSettings: () -> Unit,
     /** 打开投稿浏览记录。 */
@@ -99,9 +99,10 @@ private fun MoreContent(
   ) {
     item {
       SettingsAccountHeader(
-          title = state.username,
+          title = state.username ?: stringResource(Res.string.account_center),
           subtitle = stringResource(Res.string.account_center),
-          onClick = onOpenUser,
+          onClick = { onOpenUser?.invoke() },
+          enabled = onOpenUser != null,
           modifier = Modifier.padding(top = 4.dp),
       )
     }
@@ -111,21 +112,24 @@ private fun MoreContent(
             icon = FaMaterialSymbols.Filled.Notifications,
             title = stringResource(Res.string.following),
             subtitle = stringResource(Res.string.following_more_summary),
-            onClick = onOpenFollowing,
+            onClick = { onOpenFollowing?.invoke() },
+            enabled = onOpenFollowing != null,
             modifier = Modifier.testTag("more-following"),
         )
         SettingsListItem(
             icon = FaMaterialSymbols.Outlined.Troubleshoot,
             title = stringResource(Res.string.following_recommendation),
             subtitle = stringResource(Res.string.following_recommendation_summary),
-            onClick = onOpenWatchRecommendations,
+            onClick = { onOpenWatchRecommendations?.invoke() },
+            enabled = onOpenWatchRecommendations != null,
             modifier = Modifier.testTag("more-following-recommendation"),
         )
         SettingsListItem(
             icon = FaMaterialSymbols.Filled.Favorite,
             title = stringResource(Res.string.favorites),
             subtitle = stringResource(Res.string.favorite_more_summary),
-            onClick = onOpenFavorites,
+            onClick = { onOpenFavorites?.invoke() },
+            enabled = onOpenFavorites != null,
             modifier = Modifier.testTag("more-favorites"),
         )
         SettingsListItem(

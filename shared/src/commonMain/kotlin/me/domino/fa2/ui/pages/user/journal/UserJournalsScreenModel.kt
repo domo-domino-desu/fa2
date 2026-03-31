@@ -106,6 +106,7 @@ class UserJournalsScreenModel(
               log.i { "加载Journals页 -> ${summarizePageState(next)}(count=${updated.journals.size})" }
             }
 
+            is PageState.AuthRequired -> log.w { "加载Journals页 -> 需要重新登录" }
             PageState.CfChallenge -> log.w { "加载Journals页 -> Cloudflare验证" }
             is PageState.MatureBlocked -> log.w { "加载Journals页 -> 受限(${next.reason})" }
             is PageState.Error -> log.e(next.exception) { "加载Journals页 -> 失败" }
@@ -166,6 +167,7 @@ class UserJournalsScreenModel(
               }
             }
 
+            is PageState.AuthRequired -> log.w { "自动加载Journals页 -> 需要重新登录" }
             PageState.CfChallenge -> log.w { "自动加载Journals页 -> Cloudflare验证" }
             is PageState.MatureBlocked -> log.w { "自动加载Journals页 -> 受限(${next.reason})" }
             is PageState.Error -> log.e(next.exception) { "自动加载Journals页 -> 失败" }

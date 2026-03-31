@@ -14,8 +14,10 @@ import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
+import me.domino.fa2.application.auth.PendingFaRouteStore
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.repository.BrowseRepository
 import me.domino.fa2.data.repository.FeedRepository
@@ -52,12 +54,11 @@ import me.domino.fa2.ui.pages.user.watchlist.UserWatchlistRouteScreen
 import me.domino.fa2.ui.pages.watchrecommendation.WatchRecommendationRouteScreen
 import me.domino.fa2.util.FaUrls
 import org.koin.compose.koinInject
-import org.koin.core.parameter.parametersOf
 
 /** 登录后的主路由页面。 */
 class MainRouteScreen(
-    /** 当前用户名。 */
-    private val username: String
+    /** 是否延后 Feed 首次加载。 */
+    private val deferInitialFeedLoad: Boolean = false,
 ) : Screen {
   /** 页面内容。 */
   @Composable
@@ -78,7 +79,8 @@ class MainRouteScreen(
     val feedScreenModel = koinScreenModel<FeedScreenModel>()
     val browseScreenModel = koinScreenModel<BrowseScreenModel>()
     val searchScreenModel = koinScreenModel<SearchScreenModel>()
-    val moreScreenModel = koinScreenModel<MoreScreenModel> { parametersOf(username) }
+    val moreScreenModel = koinScreenModel<MoreScreenModel>()
+    val pendingFaRouteStore = koinInject<PendingFaRouteStore>()
     val feedState by feedScreenModel.state.collectAsState()
     val browseState by browseScreenModel.state.collectAsState()
     val searchState by searchScreenModel.state.collectAsState()
@@ -89,6 +91,9 @@ class MainRouteScreen(
     val browseContextState by contextScreenModel.state(browseContextId).collectAsState()
     val searchContextState by contextScreenModel.state(searchContextId).collectAsState()
     val moreState by moreScreenModel.state.collectAsState()
+    val pendingRestoreUri by pendingFaRouteStore.pendingUri.collectAsState()
+    var feedAutoLoadUnlocked by
+        remember(deferInitialFeedLoad) { mutableStateOf(!deferInitialFeedLoad) }
     val initialFeedViewport =
         remember(contextScreenModel, feedContextId) {
           contextScreenModel.snapshot(feedContextId)?.waterfallViewport ?: WaterfallViewportState()
@@ -123,13 +128,30 @@ class MainRouteScreen(
     val coroutineScope = rememberCoroutineScope()
     val topLevelDestinationHolder =
         navigator.rememberNavigatorScreenModel<MainTopLevelDestinationHolder>(
-            tag = "main-top-level-destination:${username.lowercase()}"
+            tag = "main-top-level-destination"
         ) {
           MainTopLevelDestinationHolder()
         }
     val currentTopLevelDestination = topLevelDestinationHolder.destination
 
-    LaunchedEffect(Unit) { feedScreenModel.load() }
+    LaunchedEffect(pendingRestoreUri) {
+      if (pendingRestoreUri == null) {
+        feedAutoLoadUnlocked = true
+      }
+    }
+
+    LaunchedEffect(
+        currentTopLevelDestination,
+        pendingRestoreUri,
+        feedState.submissions,
+        feedAutoLoadUnlocked,
+    ) {
+      if (currentTopLevelDestination != TopLevelDestination.FEED) return@LaunchedEffect
+      if (feedState.submissions.isNotEmpty()) return@LaunchedEffect
+      if (pendingRestoreUri != null) return@LaunchedEffect
+      if (!feedAutoLoadUnlocked) return@LaunchedEffect
+      feedScreenModel.load()
+    }
 
     LaunchedEffect(feedState.submissions, feedState.nextPageUrl) {
       if (feedState.submissions.isEmpty()) return@LaunchedEffect
@@ -498,33 +520,10 @@ class MainRouteScreen(
         TopLevelDestination.MORE -> {
           MoreScreen(
               state = moreState,
-              onOpenUser = {
-                navigator.push(
-                    UserRouteScreen(
-                        username = username,
-                        initialChildRoute = UserChildRoute.Gallery,
-                    )
-                )
-              },
-              onOpenFollowing = {
-                navigator.push(
-                    UserWatchlistRouteScreen(
-                        username = username,
-                        category = WatchlistCategory.Watching,
-                    )
-                )
-              },
-              onOpenWatchRecommendations = {
-                navigator.push(WatchRecommendationRouteScreen(username = username))
-              },
-              onOpenFavorites = {
-                navigator.push(
-                    UserRouteScreen(
-                        username = username,
-                        initialChildRoute = UserChildRoute.Favorites,
-                    )
-                )
-              },
+              onOpenUser = moreState.openUserAction(navigator),
+              onOpenFollowing = moreState.openFollowingAction(navigator),
+              onOpenWatchRecommendations = moreState.openWatchRecommendationsAction(navigator),
+              onOpenFavorites = moreState.openFavoritesAction(navigator),
               onOpenSettings = { navigator.push(SettingsRouteScreen()) },
               onOpenSubmissionHistory = { navigator.push(SubmissionHistoryRouteScreen()) },
               onOpenSearchHistory = { navigator.push(SearchHistoryRouteScreen()) },
@@ -536,6 +535,59 @@ class MainRouteScreen(
     }
   }
 }
+
+private fun MoreUiState.openUserAction(navigator: Navigator): (() -> Unit)? =
+    (this as? MoreUiState.Ready)
+        ?.username
+        ?.takeIf { it.isNotBlank() }
+        ?.let { username ->
+          {
+            navigator.push(
+                UserRouteScreen(
+                    username = username,
+                    initialChildRoute = UserChildRoute.Gallery,
+                )
+            )
+          }
+        }
+
+private fun MoreUiState.openFollowingAction(navigator: Navigator): (() -> Unit)? =
+    (this as? MoreUiState.Ready)
+        ?.username
+        ?.takeIf { it.isNotBlank() }
+        ?.let { username ->
+          {
+            navigator.push(
+                UserWatchlistRouteScreen(
+                    username = username,
+                    category = WatchlistCategory.Watching,
+                )
+            )
+          }
+        }
+
+private fun MoreUiState.openWatchRecommendationsAction(navigator: Navigator): (() -> Unit)? =
+    (this as? MoreUiState.Ready)
+        ?.username
+        ?.takeIf { it.isNotBlank() }
+        ?.let { username ->
+          { navigator.push(WatchRecommendationRouteScreen(username = username)) }
+        }
+
+private fun MoreUiState.openFavoritesAction(navigator: Navigator): (() -> Unit)? =
+    (this as? MoreUiState.Ready)
+        ?.username
+        ?.takeIf { it.isNotBlank() }
+        ?.let { username ->
+          {
+            navigator.push(
+                UserRouteScreen(
+                    username = username,
+                    initialChildRoute = UserChildRoute.Favorites,
+                )
+            )
+          }
+        }
 
 private class MainTopLevelDestinationHolder : ScreenModel {
   var destination by mutableStateOf(TopLevelDestination.FEED)

@@ -59,11 +59,14 @@ internal class SocialActionTagBlockingResponseParser(
                 statusCode = response.statusCode,
                 headers = response.headers,
                 body = response.body,
-                url = TAG_BLOCKING_URL,
+                requestUrl = TAG_BLOCKING_URL,
+                finalUrl = TAG_BLOCKING_URL,
             )
     ) {
       is HtmlResponseResult.Success ->
           SocialActionTagBlockingOutcome.Result(SocialActionResult.Completed(redirected = false))
+      is HtmlResponseResult.AuthRequired ->
+          SocialActionTagBlockingOutcome.Result(SocialActionResult.Failed(classified.message))
       is HtmlResponseResult.MatureBlocked ->
           SocialActionTagBlockingOutcome.Result(SocialActionResult.Blocked(classified.reason))
       is HtmlResponseResult.Error ->

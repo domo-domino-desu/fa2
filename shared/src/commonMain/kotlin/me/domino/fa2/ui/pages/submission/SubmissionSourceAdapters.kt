@@ -514,6 +514,8 @@ internal class SeriesSubmissionSourceAdapter(
   private suspend fun loadSeriesPage(requestKey: String): PageState<SubmissionLoadedPage> =
       when (val detailState = repository.loadSubmissionDetailByUrl(requestKey)) {
         is PageState.Success -> PageState.Success(detailState.data.toLoadedPage())
+        is PageState.AuthRequired ->
+            PageState.AuthRequired(detailState.requestUrl, detailState.message)
         PageState.CfChallenge -> PageState.CfChallenge
         is PageState.MatureBlocked -> PageState.MatureBlocked(detailState.reason)
         is PageState.Error -> PageState.Error(detailState.exception)
@@ -680,6 +682,7 @@ private inline fun <T> PageState<T>.mapLoadedPage(
 ): PageState<SubmissionLoadedPage> =
     when (this) {
       is PageState.Success -> PageState.Success(transform(data))
+      is PageState.AuthRequired -> PageState.AuthRequired(requestUrl, message)
       PageState.CfChallenge -> PageState.CfChallenge
       is PageState.MatureBlocked -> PageState.MatureBlocked(reason)
       is PageState.Error -> PageState.Error(exception)

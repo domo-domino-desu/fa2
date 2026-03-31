@@ -75,7 +75,20 @@ class AttachmentDownloadEndpoint(
 
     val htmlishBody = bytes.decodeToString().trim()
     if (looksLikeHtmlResponse(contentType = contentType, body = htmlishBody)) {
-      when (val classified = HtmlResponseResult.classify(statusCode, headers, htmlishBody, url)) {
+      when (
+          val classified =
+              HtmlResponseResult.classify(
+                  statusCode = statusCode,
+                  headers = headers,
+                  body = htmlishBody,
+                  requestUrl = url,
+                  finalUrl = url,
+              )
+      ) {
+        is HtmlResponseResult.AuthRequired -> {
+          return AttachmentDownloadResult.Failed(classified.message)
+        }
+
         is HtmlResponseResult.CfChallenge -> {
           val resolved =
               challengeResolver.awaitResolution(

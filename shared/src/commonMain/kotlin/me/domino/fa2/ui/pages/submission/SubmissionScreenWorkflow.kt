@@ -663,6 +663,16 @@ internal class SubmissionScreenWorkflow(
               )
             }
 
+            is PageState.AuthRequired ->
+                latestState.copy(
+                    attachmentTextState =
+                        SubmissionAttachmentTextUiState.Error(
+                            fileName = fileName,
+                            message = result.message,
+                        ),
+                    attachmentTranslationState = null,
+                )
+
             PageState.CfChallenge ->
                 latestState.copy(
                     attachmentTextState =
@@ -754,6 +764,23 @@ internal class SubmissionScreenWorkflow(
               log.i { "收藏操作 -> 成功(sid=$sid,isFavorited=${refreshed.data.isFavorited})" }
             }
 
+            is PageState.AuthRequired -> {
+              detailBySid[sid] =
+                  currentState.copy(
+                      detail =
+                          optimisticDetail.copy(
+                              favoriteActionUrl = guessNextFavoriteActionUrl(actionUrl)
+                          ),
+                      favoriteUpdating = false,
+                      favoriteErrorMessage =
+                          appString(
+                              Res.string.favorite_submitted_but_refresh_failed,
+                              refreshed.message,
+                          ),
+                  )
+              log.w { "收藏操作 -> 已提交, 但刷新需要重新登录(sid=$sid)" }
+            }
+
             PageState.CfChallenge -> {
               detailBySid[sid] =
                   currentState.copy(
@@ -804,6 +831,16 @@ internal class SubmissionScreenWorkflow(
 
             PageState.Loading -> Unit
           }
+        }
+
+        is PageState.AuthRequired -> {
+          detailBySid[sid] =
+              currentState.copy(
+                  detail = originalDetail,
+                  favoriteUpdating = false,
+                  favoriteErrorMessage = toggleResult.message,
+              )
+          log.w { "收藏操作 -> 需要重新登录(sid=$sid)" }
         }
 
         PageState.CfChallenge -> {
@@ -891,6 +928,17 @@ internal class SubmissionScreenWorkflow(
                 toAdd = toAdd,
                 nonce = refreshedNonce,
             )
+          }
+
+          is PageState.AuthRequired -> {
+            detailBySid[sid] =
+                currentState.copy(
+                    favoriteErrorMessage =
+                        appString(Res.string.refresh_details_failed, refreshed.message)
+                )
+            publishState()
+            emitToast(appString(Res.string.refresh_details_failed, refreshed.message))
+            log.w { "标签屏蔽 -> 刷新详情需要重新登录(sid=$sid)" }
           }
 
           PageState.CfChallenge -> {
@@ -996,6 +1044,13 @@ internal class SubmissionScreenWorkflow(
             else appString(Res.string.tag_unblocked, tagName)
         )
         log.i { "标签屏蔽 -> 成功(sid=$sid,tag=$tagName,toAdd=$toAdd)" }
+      }
+
+      is PageState.AuthRequired -> {
+        val latest = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return
+        detailBySid[sid] = latest.copy(favoriteErrorMessage = blocked.message)
+        emitToast(appString(Res.string.tag_block_failed, blocked.message))
+        log.w { "标签屏蔽 -> 需要重新登录(sid=$sid,tag=$tagName)" }
       }
 
       PageState.CfChallenge -> {
@@ -1106,6 +1161,7 @@ internal class SubmissionScreenWorkflow(
                     publishState()
                   }
 
+                  is PageState.AuthRequired,
                   PageState.CfChallenge,
                   is PageState.MatureBlocked,
                   is PageState.Error,
@@ -1344,6 +1400,11 @@ internal class SubmissionScreenWorkflow(
                   detail = next.data,
                   previous = previous,
               )
+            }
+
+            is PageState.AuthRequired -> {
+              log.w { "加载投稿详情 -> 需要重新登录(sid=$sid)" }
+              SubmissionDetailUiState.Error(next.message)
             }
 
             PageState.CfChallenge -> {

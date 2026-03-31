@@ -32,6 +32,14 @@ fun <T> PageStateWrapper(
       content()
     }
 
+    is PageState.AuthRequired -> {
+      StatusCard(
+          title = stringResource(Res.string.auth_probe_failed_title),
+          body = state.message,
+          onRetry = onRetry,
+      )
+    }
+
     PageState.CfChallenge -> {
       StatusCard(
           title = stringResource(Res.string.cloudflare_challenge_title),

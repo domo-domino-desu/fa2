@@ -40,6 +40,11 @@ internal class UserShoutsScreenModel(
           log.i { "加载用户留言 -> ${summarizePageState(next)}" }
         }
 
+        is PageState.AuthRequired -> {
+          mutableState.value = UserShoutsUiState.Error(next.message)
+          log.w { "加载用户留言 -> 需要重新登录" }
+        }
+
         PageState.CfChallenge -> {
           mutableState.value = UserShoutsUiState.Error("Cloudflare verification required")
           log.w { "加载用户留言 -> Cloudflare验证" }

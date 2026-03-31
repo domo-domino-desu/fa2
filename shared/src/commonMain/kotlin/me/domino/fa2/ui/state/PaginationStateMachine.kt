@@ -63,6 +63,15 @@ class PaginationStateMachine<Item, Key>(
                 appendErrorMessage = null,
             )
 
+        is PageState.AuthRequired ->
+            snapshot.copy(
+                loading = false,
+                refreshing = false,
+                isLoadingMore = false,
+                errorMessage = result.message,
+                appendErrorMessage = null,
+            )
+
         PageState.CfChallenge ->
             snapshot.copy(
                 loading = false,
@@ -105,6 +114,9 @@ class PaginationStateMachine<Item, Key>(
                 isLoadingMore = false,
                 appendErrorMessage = null,
             )
+
+        is PageState.AuthRequired ->
+            snapshot.copy(isLoadingMore = false, appendErrorMessage = result.message)
 
         PageState.CfChallenge ->
             snapshot.copy(isLoadingMore = false, appendErrorMessage = challengeMessage())

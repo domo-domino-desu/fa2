@@ -100,6 +100,15 @@ class UserScreenModel(
               log.i { "加载用户 -> ${summarizePageState(next)}" }
             }
 
+            is PageState.AuthRequired -> {
+              mutableState.value =
+                  state.value.copy(
+                      loading = false,
+                      errorMessage = next.message,
+                  )
+              log.w { "加载用户 -> 需要重新登录" }
+            }
+
             PageState.CfChallenge -> {
               mutableState.value =
                   state.value.copy(
@@ -208,6 +217,20 @@ class UserScreenModel(
               log.i { "关注操作 -> 成功(isWatching=${refreshed.data.isWatching})" }
             }
 
+            is PageState.AuthRequired -> {
+              mutableState.value =
+                  state.value.copy(
+                      loading = false,
+                      watchUpdating = false,
+                      errorMessage =
+                          appString(
+                              Res.string.action_submitted_but_refresh_failed,
+                              refreshed.message,
+                          ),
+                  )
+              log.w { "关注操作 -> 已提交, 但刷新需要重新登录" }
+            }
+
             PageState.CfChallenge -> {
               mutableState.value =
                   state.value.copy(
@@ -249,6 +272,16 @@ class UserScreenModel(
 
             PageState.Loading -> Unit
           }
+        }
+
+        is PageState.AuthRequired -> {
+          mutableState.value =
+              state.value.copy(
+                  header = header,
+                  watchUpdating = false,
+                  errorMessage = next.message,
+              )
+          log.w { "关注操作 -> 需要重新登录" }
         }
 
         PageState.CfChallenge -> {

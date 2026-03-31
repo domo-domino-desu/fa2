@@ -556,6 +556,7 @@ class SubmissionContextScreenModel : ScreenModel {
                     appString(Res.string.cloudflare_challenge_title),
                 )
 
+            is PageState.AuthRequired -> updateLoadingError(contextId, kind, result.message)
             is PageState.MatureBlocked -> updateLoadingError(contextId, kind, result.reason)
             is PageState.Error ->
                 updateLoadingError(
