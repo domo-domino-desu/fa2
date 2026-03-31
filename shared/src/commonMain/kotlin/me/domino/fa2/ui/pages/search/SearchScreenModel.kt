@@ -2,7 +2,6 @@ package me.domino.fa2.ui.pages.search
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import fa2.shared.generated.resources.*
 import io.ktor.http.decodeURLQueryComponent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +14,7 @@ import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.i18n.AppI18nSnapshot
 import me.domino.fa2.i18n.SystemLanguageProvider
-import me.domino.fa2.i18n.appString
+import me.domino.fa2.i18n.uiText
 import me.domino.fa2.ui.components.FilterOption
 import me.domino.fa2.ui.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.search.SearchUiMetadataKey
@@ -318,6 +317,7 @@ internal fun buildSearchFiltersSummary(
 ): String {
   val defaults = SearchFormState()
   val summary = mutableListOf<String>()
+  val listDelimiter = appI18n.uiText(zhHans = "、", en = ", ")
   val orderByOptions = orderByOptions(searchUiLabelsRepository, appI18n.uiLanguage)
   val orderDirectionOptions = orderDirectionOptions(searchUiLabelsRepository, appI18n.uiLanguage)
   val rangeOptions = rangeOptions(searchUiLabelsRepository, appI18n.uiLanguage)
@@ -396,7 +396,7 @@ internal fun buildSearchFiltersSummary(
           } else {
             searchUiLabelsRepository.formatLabelValue(
                 searchUiLabelsRepository.text(SearchUiTextKey.SUMMARY_DATE, appI18n.uiLanguage),
-                "$label${appString(Res.string.parenthetical_format, detail)}",
+                appI18n.uiText(zhHans = "$label（$detail）", en = "$label ($detail)"),
                 appI18n.uiLanguage,
             )
           }
@@ -532,7 +532,7 @@ internal fun buildSearchFiltersSummary(
                       )
                   )
                 }
-                .joinToString(appString(Res.string.list_delimiter)),
+                .joinToString(listDelimiter),
             appI18n.uiLanguage,
         )
   }
@@ -541,7 +541,7 @@ internal fun buildSearchFiltersSummary(
     val genders =
         SearchGender.entries
             .filter { gender -> gender in form.selectedGenders }
-            .joinToString(appString(Res.string.list_delimiter)) { gender ->
+            .joinToString(listDelimiter) { gender ->
               searchUiLabelsRepository.metadataOptionLabel(
                   SearchUiOptionKey.GENDER,
                   gender.token,

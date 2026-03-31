@@ -26,7 +26,7 @@ class AuthDataSource(
   suspend fun restorePersistedSession(): Boolean {
     userAgentStorage.loadPersistedIfNeeded()
     cookiesStorage.restorePersistedIfNeeded()
-    return hasAuthCookie()
+    return cookiesStorage.hasCookie()
   }
 
   /** 判断当前是否存在 auth cookie（忽略 Cloudflare cookie）。 */

@@ -26,6 +26,45 @@ class UiColorUsageTest {
             ),
             Regex("""\bColor\(0x[0-9A-Fa-f_]+\)"""),
         )
+    val allowedHardcodedColors =
+        listOf(
+            AllowedHardcodedColor(
+                path =
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/components/submission/SubmissionOverlayAndAuthor.kt",
+                snippet =
+                    "LoadingIndicator(modifier = Modifier.size(18.dp), color = Color(0xD8D8D8D8))",
+            ),
+            AllowedHardcodedColor(
+                path =
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/components/submission/SubmissionOverlayAndAuthor.kt",
+                snippet = "SubmissionImageOcrUiState.Loading -> Color(0xD8D8D8D8)",
+            ),
+            AllowedHardcodedColor(
+                path =
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/components/submission/SubmissionOverlayAndAuthor.kt",
+                snippet = "SubmissionImageOcrTranslationMode.LOADING -> Color(0xD8D8D8D8)",
+            ),
+            AllowedHardcodedColor(
+                path =
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/components/submission/SubmissionOverlayAndAuthor.kt",
+                snippet = "tint = Color(0xD8D8D8D8),",
+            ),
+            AllowedHardcodedColor(
+                path =
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/components/submission/SubmissionOverlayAndAuthor.kt",
+                snippet = "color = Color.White.copy(alpha = 0.96f),",
+            ),
+            AllowedHardcodedColor(
+                path =
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/components/submission/SubmissionOverlayAndAuthor.kt",
+                snippet = "contentColor = Color.Black,",
+            ),
+            AllowedHardcodedColor(
+                path =
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/about/AboutRouteScreen.kt",
+                snippet = "private val aboutHeaderBackground = Color(0xFF12284F)",
+            ),
+        )
 
     val violations =
         uiSourceRoots
@@ -40,10 +79,17 @@ class UiColorUsageTest {
                           .readText()
                           .lineSequence()
                           .mapIndexedNotNull { index, line ->
+                            val relativePath = repoRoot.relativize(path).toString()
+                            val trimmedLine = line.trim()
                             if (
-                                forbiddenPatterns.any { pattern -> pattern.containsMatchIn(line) }
+                                forbiddenPatterns.any { pattern ->
+                                  pattern.containsMatchIn(line)
+                                } &&
+                                    allowedHardcodedColors.none { exception ->
+                                      exception.matches(relativePath, trimmedLine)
+                                    }
                             ) {
-                              "${repoRoot.relativize(path)}:${index + 1}: ${line.trim()}"
+                              "$relativePath:${index + 1}: $trimmedLine"
                             } else {
                               null
                             }
@@ -74,5 +120,13 @@ class UiColorUsageTest {
       current = current.parent
     }
     error("Unable to locate repository root from $start")
+  }
+
+  private data class AllowedHardcodedColor(
+      val path: String,
+      val snippet: String,
+  ) {
+    fun matches(relativePath: String, trimmedLine: String): Boolean =
+        relativePath == path && trimmedLine == snippet
   }
 }

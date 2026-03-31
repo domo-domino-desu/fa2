@@ -101,7 +101,7 @@ fun networkModule(): Module = module {
     )
   }
 
-  single { HomeEndpoint(get(qualifier = named(KOIN_QUALIFIER_CHALLENGE_AWARE_HTML_DATA_SOURCE))) }
+  single { HomeEndpoint(get(qualifier = named(KOIN_QUALIFIER_RAW_HTML_DATA_SOURCE))) }
   single { FeedEndpoint(get()) }
   single { BrowseEndpoint(get()) }
   single { SearchEndpoint(get()) }

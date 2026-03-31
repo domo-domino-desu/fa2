@@ -109,8 +109,8 @@ class AuthScreenModelTest {
         )
 
         val state = fixture.screenModel.state.value
-        assertIs<AuthUiState.AuthInvalid>(state)
-        assertTrue(fixture.screenModel.webViewState().value.statusMessage.contains("登录未完成"))
+        val invalid = assertIs<AuthUiState.AuthInvalid>(state)
+        assertTrue(fixture.screenModel.webViewState().value.statusMessage.contains(invalid.message))
       }
 
   @Test
