@@ -31,7 +31,9 @@ import fa2.shared.generated.resources.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.repository.SubmissionRepository
@@ -63,13 +65,11 @@ class SubmissionRouteScreen(
     private val contextId: String,
     /** 当 holder 不含 sid 时的占位链接。 */
     private val seedSubmissionUrl: String? = null,
-    /** 独立 submission 系列的初始列表。 */
-    private val seedSubmissions: List<SubmissionThumbnail>? = null,
-    /** 独立 submission 系列 key。 */
-    private val seedSeriesKey: String? = null,
+    /** 独立 submission 系列。 */
+    private val submissionSeries: SubmissionSeriesResolvedSeries? = null,
 ) : Screen {
   override val key: String =
-      "submission:$contextId:$initialSid:${seedSubmissionUrl.orEmpty()}:${seedSeriesKey.orEmpty()}"
+      "submission:$contextId:$initialSid:${seedSubmissionUrl.orEmpty()}:${submissionSeries?.candidateKey.orEmpty()}"
 
   /** 页面内容。 */
   @Composable
@@ -86,15 +86,33 @@ class SubmissionRouteScreen(
           SubmissionContextScreenModel()
         }
     val fallbackSubmissionTitle = stringResource(Res.string.submission_fallback_title, initialSid)
-    LaunchedEffect(contextId, initialSid, seedSubmissionUrl, seedSubmissions, seedSeriesKey) {
+    LaunchedEffect(contextId, initialSid, seedSubmissionUrl, submissionSeries?.candidateKey) {
       when {
-        seedSubmissions != null ->
-            contextScreenModel.ensureSeedContext(
-                contextId = contextId,
-                sourceKind = SubmissionContextSourceKind.SEQUENCE,
-                items = seedSubmissions,
-                selectedSid = initialSid,
-            )
+        submissionSeries != null -> {
+          val adapter =
+              SeriesSubmissionSourceAdapter(
+                  repository = submissionRepository,
+                  series = submissionSeries,
+              )
+          when (val initialPage = adapter.loadInitialPage()) {
+            is PageState.Success ->
+                contextScreenModel.ensureSeedContext(
+                    contextId = contextId,
+                    adapter = adapter,
+                    initialPage = initialPage.data,
+                    selectedSid = initialSid,
+                    revisionKey = submissionSeries.candidateKey,
+                )
+
+            else ->
+                contextScreenModel.ensureSeedContext(
+                    contextId = contextId,
+                    sourceKind = SubmissionContextSourceKind.SEQUENCE,
+                    items = submissionSeries.seedSubmissions,
+                    selectedSid = initialSid,
+                )
+          }
+        }
 
         seedSubmissionUrl != null ->
             contextScreenModel.ensureSeedContext(

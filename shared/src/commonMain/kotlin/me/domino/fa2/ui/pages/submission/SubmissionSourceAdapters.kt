@@ -1,9 +1,15 @@
 package me.domino.fa2.ui.pages.submission
 
 import io.ktor.http.encodeURLParameter
+import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
+import me.domino.fa2.application.submissionseries.SubmissionSeriesResolver
+import me.domino.fa2.application.submissionseries.SubmissionSeriesRule
+import me.domino.fa2.application.submissionseries.normalizeSubmissionSeriesUrl
+import me.domino.fa2.application.submissionseries.toSubmissionThumbnail
 import me.domino.fa2.data.model.FeedPage
 import me.domino.fa2.data.model.GalleryPage
 import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionListingPage
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.BrowseRepository
@@ -11,6 +17,7 @@ import me.domino.fa2.data.repository.FavoritesRepository
 import me.domino.fa2.data.repository.FeedRepository
 import me.domino.fa2.data.repository.GalleryRepository
 import me.domino.fa2.data.repository.SearchRepository
+import me.domino.fa2.data.repository.SubmissionDetailRepository
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 
 internal interface SubmissionSourceAdapter {
@@ -457,6 +464,109 @@ private object UserSubmissionLastPageHintCache {
 
   fun put(key: String, value: Int) {
     values[key] = value
+  }
+}
+
+internal class SeriesSubmissionSourceAdapter(
+    private val repository: SubmissionDetailRepository,
+    private val series: SubmissionSeriesResolvedSeries,
+) : SubmissionSourceAdapter {
+  private val resolver = SubmissionSeriesResolver(repository = repository)
+  private val loadedUrls =
+      series.seedSubmissions
+          .map(SubmissionThumbnail::submissionUrl)
+          .filter(String::isNotBlank)
+          .map(::normalizeSubmissionSeriesUrl)
+          .toMutableSet()
+  private val orderedUrls = series.orderedSubmissionUrls.distinctBy(::normalizeSubmissionSeriesUrl)
+  private val orderedIndexByUrl =
+      orderedUrls.mapIndexed { index, url -> normalizeSubmissionSeriesUrl(url) to index }.toMap()
+
+  override val sourceKind: SubmissionContextSourceKind = SubmissionContextSourceKind.SEQUENCE
+  override val paginationModel: SubmissionPaginationModel =
+      SubmissionPaginationModel(
+          kind = SubmissionPaginationKind.CURSOR,
+          hasFirstPage = true,
+          knowsLastPage = false,
+      )
+
+  override suspend fun loadInitialPage(): PageState<SubmissionLoadedPage> =
+      PageState.Success(
+          SubmissionLoadedPage(
+              pageId = "series:${series.candidateKey}:seed",
+              requestKey = series.firstSubmissionUrl,
+              items = series.seedSubmissions,
+              previousRequestKey = series.previousRequestKey,
+              nextRequestKey = series.nextRequestKey,
+              firstRequestKey = series.firstSubmissionUrl,
+              lastRequestKey = null,
+              lastPageNumber = null,
+              totalCount = null,
+          )
+      )
+
+  override suspend fun loadNextPage(requestKey: String): PageState<SubmissionLoadedPage> =
+      loadSeriesPage(requestKey)
+
+  override suspend fun loadPreviousPage(requestKey: String): PageState<SubmissionLoadedPage> =
+      loadSeriesPage(requestKey)
+
+  private suspend fun loadSeriesPage(requestKey: String): PageState<SubmissionLoadedPage> =
+      when (val detailState = repository.loadSubmissionDetailByUrl(requestKey)) {
+        is PageState.Success -> PageState.Success(detailState.data.toLoadedPage())
+        PageState.CfChallenge -> PageState.CfChallenge
+        is PageState.MatureBlocked -> PageState.MatureBlocked(detailState.reason)
+        is PageState.Error -> PageState.Error(detailState.exception)
+        PageState.Loading -> PageState.Loading
+      }
+
+  private fun Submission.toLoadedPage(): SubmissionLoadedPage {
+    val normalizedUrl = normalizeSubmissionSeriesUrl(submissionUrl)
+    loadedUrls += normalizedUrl
+    val previousRequestKey: String?
+    val nextRequestKey: String?
+
+    when (series.rule) {
+      SubmissionSeriesRule.NUMBERED_BLOCKS -> {
+        val currentIndex = orderedIndexByUrl[normalizedUrl]
+        previousRequestKey =
+            currentIndex
+                ?.minus(1)
+                ?.takeIf { index -> index >= 0 }
+                ?.let(orderedUrls::get)
+                ?.takeUnless { url -> normalizeSubmissionSeriesUrl(url) in loadedUrls }
+        nextRequestKey =
+            currentIndex
+                ?.plus(1)
+                ?.takeIf { index -> index < orderedUrls.size }
+                ?.let(orderedUrls::get)
+                ?.takeUnless { url -> normalizeSubmissionSeriesUrl(url) in loadedUrls }
+      }
+
+      SubmissionSeriesRule.PREV_NEXT_BLOCK -> {
+        val candidate = resolver.detectCandidate(descriptionHtml, submissionUrl)
+        previousRequestKey =
+            candidate?.previousSubmissionUrl?.takeUnless { url ->
+              normalizeSubmissionSeriesUrl(url) in loadedUrls
+            }
+        nextRequestKey =
+            candidate?.nextSubmissionUrl?.takeUnless { url ->
+              normalizeSubmissionSeriesUrl(url) in loadedUrls
+            }
+      }
+    }
+
+    return SubmissionLoadedPage(
+        pageId = "series:${series.candidateKey}:$normalizedUrl",
+        requestKey = submissionUrl,
+        items = listOf(toSubmissionThumbnail()),
+        previousRequestKey = previousRequestKey,
+        nextRequestKey = nextRequestKey,
+        firstRequestKey = series.firstSubmissionUrl,
+        lastRequestKey = null,
+        lastPageNumber = null,
+        totalCount = null,
+    )
   }
 }
 

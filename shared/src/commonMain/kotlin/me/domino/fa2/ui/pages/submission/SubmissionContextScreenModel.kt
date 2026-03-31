@@ -53,6 +53,29 @@ class SubmissionContextScreenModel : ScreenModel {
         )
   }
 
+  internal fun ensureSeedContext(
+      contextId: String,
+      adapter: SubmissionSourceAdapter,
+      initialPage: SubmissionLoadedPage,
+      selectedSid: Int?,
+      revisionKey: String? = null,
+  ) {
+    val record = recordOf(contextId)
+    if (record.state.value != null) return
+    record.adapter = adapter
+    record.state.value =
+        buildSnapshot(
+            contextId = contextId,
+            sourceKind = adapter.sourceKind,
+            paginationModel = adapter.paginationModel,
+            pages = listOf(initialPage.toSnapshot()),
+            selectedSid = selectedSid,
+            loading = ContextLoadingState(),
+            viewport = WaterfallViewportState(anchorSid = selectedSid),
+            revisionKey = revisionKey,
+        )
+  }
+
   internal fun syncRootPage(
       contextId: String,
       sourceKind: SubmissionContextSourceKind,

@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -168,8 +169,11 @@ class SubmissionSeriesResolverTest {
     val resolved = localResolver.resolveSeries(candidate!!)
 
     assertNotNull(resolved)
-    assertEquals(listOf(401, 402, 403), resolved.submissions.map { it.id })
+    assertEquals(listOf(401, 402, 403), resolved.seedSubmissions.map { it.id })
     assertEquals(401, resolved.firstSid)
+    assertEquals(FaUrls.submission(401), resolved.firstSubmissionUrl)
+    assertNull(resolved.previousRequestKey)
+    assertNull(resolved.nextRequestKey)
     assertEquals(
         listOf(FaUrls.submission(401), FaUrls.submission(402), FaUrls.submission(403)),
         repository.requestedUrls,
@@ -235,7 +239,7 @@ class SubmissionSeriesResolverTest {
         backgroundScope.launch {
           val resolved = localResolver.resolveSeries(candidate!!)
           assertNotNull(resolved)
-          assertEquals(listOf(501, 502, 503), resolved.submissions.map { it.id })
+          assertEquals(listOf(501, 502, 503), resolved.seedSubmissions.map { it.id })
         }
 
     runCurrent()
@@ -310,6 +314,170 @@ class SubmissionSeriesResolverTest {
     val resolved = localResolver.resolveSeries(candidate!!)
 
     assertNull(resolved)
+  }
+
+  @Test
+  fun resolvesNumberedSeriesWithInitialSeedOnlyAndKeepsFullOrderedUrls() = runTest {
+    val orderedSids = (1001..1025).toList()
+    val numberedHtml =
+        orderedSids.joinToString(separator = "\n") { sid ->
+          """<p><a href="/view/$sid/">part ${sid - 1000}</a></p>"""
+        }
+    val repository =
+        FakeSubmissionDetailRepository(
+            details =
+                buildList {
+                  add(fakeSubmission(sid = 1001, descriptionHtml = numberedHtml))
+                  addAll(
+                      orderedSids.drop(1).take(seriesInitialReadyCount - 1).map { sid ->
+                        fakeSubmission(sid = sid, descriptionHtml = "<p>part</p>")
+                      }
+                  )
+                }
+        )
+    val localResolver = SubmissionSeriesResolver(repository)
+    val candidate = localResolver.detectCandidate(numberedHtml, baseUrl = FaUrls.submission(1999))
+
+    val resolved = localResolver.resolveSeries(candidate!!)
+
+    assertNotNull(resolved)
+    assertEquals(seriesInitialReadyCount, resolved.seedSubmissions.size)
+    assertEquals(orderedSids.take(seriesInitialReadyCount), resolved.seedSubmissions.map { it.id })
+    assertEquals(orderedSids.map(FaUrls::submission), resolved.orderedSubmissionUrls)
+    assertEquals(FaUrls.submission(1011), resolved.nextRequestKey)
+  }
+
+  @Test
+  fun resolvesPreviousOnlyChainBackToFirstPageWithoutExplicitFirstLink() = runTest {
+    val repository =
+        FakeSubmissionDetailRepository(
+            details =
+                listOf(
+                    fakeSubmission(
+                        sid = 801,
+                        descriptionHtml =
+                            """
+                            <p><a href="/view/802/">NEXT</a></p>
+                            """
+                                .trimIndent(),
+                    ),
+                    fakeSubmission(
+                        sid = 802,
+                        descriptionHtml =
+                            """
+                            <p>
+                              <a href="/view/801/">PREVIOUS</a>
+                              <a href="/view/803/">NEXT</a>
+                            </p>
+                            """
+                                .trimIndent(),
+                    ),
+                    fakeSubmission(
+                        sid = 803,
+                        descriptionHtml =
+                            """
+                            <p>
+                              <a href="/view/802/">PREVIOUS</a>
+                              <a href="/view/804/">NEXT</a>
+                            </p>
+                            """
+                                .trimIndent(),
+                    ),
+                    fakeSubmission(
+                        sid = 804,
+                        descriptionHtml =
+                            """
+                            <p>
+                              <a href="/view/803/">PREVIOUS</a>
+                              <a href="/view/805/">NEXT</a>
+                            </p>
+                            """
+                                .trimIndent(),
+                    ),
+                    fakeSubmission(
+                        sid = 805,
+                        descriptionHtml =
+                            """
+                            <p><a href="/view/804/">PREVIOUS</a></p>
+                            """
+                                .trimIndent(),
+                    ),
+                )
+        )
+    val localResolver = SubmissionSeriesResolver(repository)
+    val candidate =
+        localResolver.detectCandidate(
+            """
+            <p>
+              <a href="/view/803/">PREVIOUS</a>
+              <a href="/view/805/">NEXT</a>
+            </p>
+            """
+                .trimIndent(),
+            baseUrl = FaUrls.submission(804),
+        )
+
+    val resolved = localResolver.resolveSeries(candidate!!)
+
+    assertNotNull(resolved)
+    assertEquals(801, resolved.firstSid)
+    assertEquals(listOf(801, 802, 803, 804, 805), resolved.seedSubmissions.map { it.id })
+    assertNull(resolved.previousRequestKey)
+    assertNull(resolved.nextRequestKey)
+  }
+
+  @Test
+  fun failsSafelyWhenPreviousChainLoops() = runTest {
+    val repository =
+        FakeSubmissionDetailRepository(
+            details =
+                listOf(
+                    fakeSubmission(
+                        sid = 901,
+                        descriptionHtml =
+                            """
+                            <p>
+                              <a href="/view/902/">PREVIOUS</a>
+                              <a href="/view/903/">NEXT</a>
+                            </p>
+                            """
+                                .trimIndent(),
+                    ),
+                    fakeSubmission(
+                        sid = 902,
+                        descriptionHtml =
+                            """
+                            <p>
+                              <a href="/view/901/">PREVIOUS</a>
+                              <a href="/view/903/">NEXT</a>
+                            </p>
+                            """
+                                .trimIndent(),
+                    ),
+                    fakeSubmission(
+                        sid = 903,
+                        descriptionHtml =
+                            """
+                            <p><a href="/view/901/">PREVIOUS</a></p>
+                            """
+                                .trimIndent(),
+                    ),
+                )
+        )
+    val localResolver = SubmissionSeriesResolver(repository)
+    val candidate =
+        localResolver.detectCandidate(
+            """
+            <p><a href="/view/901/">PREVIOUS</a></p>
+            """
+                .trimIndent(),
+            baseUrl = FaUrls.submission(903),
+        )
+
+    val resolved = localResolver.resolveSeries(candidate!!)
+
+    assertNull(resolved)
+    assertTrue(repository.requestedUrls.size <= seriesBacktrackLimit + 1)
   }
 }
 

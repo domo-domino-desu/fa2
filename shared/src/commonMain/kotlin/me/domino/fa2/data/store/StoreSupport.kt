@@ -79,6 +79,7 @@ private fun ttlForPageType(pageType: String): Long =
       "watchlist_page_v1" -> SHORT_TTL_MS
 
       "user_header_v1",
+      "user_header_v2",
       "submission_detail_v1",
       "journal_detail_v1" -> LONG_TTL_MS
 

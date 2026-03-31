@@ -5,6 +5,8 @@ import me.domino.fa2.data.model.SubmissionThumbnail
 internal interface SubmissionPagerContextController {
   fun initializeSelection(initialSid: Int)
 
+  fun sourceKind(): SubmissionContextSourceKind?
+
   fun size(): Int
 
   fun currentIndex(): Int
@@ -17,6 +19,8 @@ internal interface SubmissionPagerContextController {
 
   fun hasPreviousCached(): Boolean
 
+  fun hasPreviousPages(): Boolean
+
   fun hasNextCached(): Boolean
 
   fun hasMorePages(): Boolean
@@ -24,6 +28,8 @@ internal interface SubmissionPagerContextController {
   fun isLoadingMore(): Boolean
 
   fun appendErrorMessage(): String?
+
+  fun requestPrepend(force: Boolean)
 
   fun requestAppend(force: Boolean)
 }

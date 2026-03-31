@@ -68,3 +68,31 @@ internal fun createSubmissionScreenModelForTest(
       systemLanguageProvider = systemLanguageProvider,
   )
 }
+
+internal fun createSubmissionScreenModelForTest(
+    initialSid: Int,
+    adapter: SubmissionSourceAdapter,
+    initialPage: SubmissionLoadedPage,
+    submissionSource: SubmissionPagerDetailSource,
+    translationService: SubmissionDescriptionTranslationService,
+    settingsService: AppSettingsService? = null,
+    systemLanguageProvider: SystemLanguageProvider? = null,
+    contextId: String = "test-context:$initialSid",
+): SubmissionScreenModel {
+  val contextScreenModel = SubmissionContextScreenModel()
+  contextScreenModel.ensureSeedContext(
+      contextId = contextId,
+      adapter = adapter,
+      initialPage = initialPage,
+      selectedSid = initialSid,
+  )
+  return SubmissionScreenModel(
+      initialSid = initialSid,
+      contextId = contextId,
+      contextScreenModel = contextScreenModel,
+      submissionSource = submissionSource,
+      translationService = translationService,
+      settingsService = settingsService,
+      systemLanguageProvider = systemLanguageProvider,
+  )
+}

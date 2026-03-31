@@ -13,7 +13,9 @@ import me.domino.fa2.domain.translation.SubmissionTranslationResultAligner
 import me.domino.fa2.util.normalizeFaSubmissionUrl
 
 internal const val submissionSeriesRequestThrottleMs: Long = defaultSequentialRequestThrottleMs
-private const val maxResolvedSeriesSize: Int = 20
+internal const val seriesInitialReadyCount: Int = 10
+internal const val seriesWarmBufferCount: Int = 30
+internal const val seriesBacktrackLimit: Int = 500
 
 class SubmissionSeriesResolver(
     private val repository: SubmissionDetailRepository,
@@ -45,26 +47,36 @@ class SubmissionSeriesResolver(
     val firstPair = resolveFirstPage(candidate, loader) ?: return null
     val (firstDetail, firstCandidate) = firstPair
 
-    val resolvedDetails =
+    val seedResult =
         if (firstCandidate.orderedSubmissionUrls.size >= 3) {
-          resolveNumberedSeries(
+          resolveNumberedSeriesSeed(
               firstDetail = firstDetail,
               orderedSubmissionUrls = firstCandidate.orderedSubmissionUrls,
               loader = loader,
           )
         } else {
-          resolveLinkedSeries(
+          resolveLinkedSeriesSeed(
               firstDetail = firstDetail,
               firstCandidate = firstCandidate,
               loader = loader,
           )
         }
 
-    if (resolvedDetails.size < 3) return null
+    if (seedResult.submissions.size < 3) return null
     return SubmissionSeriesResolvedSeries(
         candidateKey = candidate.candidateKey,
         firstSid = firstDetail.id,
-        submissions = resolvedDetails,
+        firstSubmissionUrl = firstDetail.submissionUrl,
+        seedSubmissions = seedResult.submissions.map(Submission::toSubmissionThumbnail),
+        previousRequestKey = seedResult.previousRequestKey,
+        nextRequestKey = seedResult.nextRequestKey,
+        rule = firstCandidate.rule,
+        orderedSubmissionUrls =
+            if (firstCandidate.rule == SubmissionSeriesRule.NUMBERED_BLOCKS) {
+              firstCandidate.orderedSubmissionUrls
+            } else {
+              emptyList()
+            },
     )
   }
 
@@ -79,15 +91,31 @@ class SubmissionSeriesResolver(
       return firstDetail to firstCandidate
     }
 
+    if (candidate.previousSubmissionUrl == null) {
+      val currentUrl = candidate.currentSubmissionUrl
+      val currentDetail = loader.load(currentUrl) ?: return null
+      val currentCandidate =
+          detectCandidate(currentDetail.descriptionHtml, currentDetail.submissionUrl) ?: return null
+      if (currentCandidate.previousSubmissionUrl == null) {
+        return currentDetail to currentCandidate
+      }
+    }
+
     var previousUrl = candidate.previousSubmissionUrl ?: return null
-    repeat(maxResolvedSeriesSize) {
+    val visitedUrls = mutableSetOf<String>()
+    repeat(seriesBacktrackLimit) {
+      val normalizedPreviousUrl = normalizeSubmissionSeriesUrl(previousUrl)
+      if (!visitedUrls.add(normalizedPreviousUrl)) return null
       val previousDetail = loader.load(previousUrl) ?: return null
       val previousCandidate =
           detectCandidate(previousDetail.descriptionHtml, previousDetail.submissionUrl)
               ?: return null
       previousCandidate.firstSubmissionUrl?.let { firstUrl ->
         val firstDetail =
-            if (normalizeUrl(firstUrl) == normalizeUrl(previousDetail.submissionUrl)) {
+            if (
+                normalizeSubmissionSeriesUrl(firstUrl) ==
+                    normalizeSubmissionSeriesUrl(previousDetail.submissionUrl)
+            ) {
               previousDetail
             } else {
               loader.load(firstUrl) ?: return null
@@ -96,77 +124,112 @@ class SubmissionSeriesResolver(
             detectCandidate(firstDetail.descriptionHtml, firstDetail.submissionUrl) ?: return null
         return firstDetail to firstCandidate
       }
-      previousUrl = previousCandidate.previousSubmissionUrl ?: return null
+      if (previousCandidate.previousSubmissionUrl == null) {
+        return previousDetail to previousCandidate
+      }
+      previousUrl = previousCandidate.previousSubmissionUrl
     }
 
     return null
   }
 
-  private suspend fun resolveNumberedSeries(
+  private suspend fun resolveNumberedSeriesSeed(
       firstDetail: Submission,
       orderedSubmissionUrls: List<String>,
       loader: SubmissionSeriesRemoteLoader,
-  ): List<Submission> {
+  ): SubmissionSeriesSeedResult {
+    val orderedUrls = orderedSubmissionUrls.distinctBy(::normalizeSubmissionSeriesUrl)
     val resolved = mutableListOf(firstDetail)
-    val visitedUrls = mutableSetOf(normalizeUrl(firstDetail.submissionUrl))
-    orderedSubmissionUrls.drop(1).forEach { nextUrl ->
-      if (resolved.size >= maxResolvedSeriesSize) return@forEach
-      val normalizedUrl = normalizeUrl(nextUrl)
-      if (!visitedUrls.add(normalizedUrl)) return@forEach
-      val nextDetail = loader.load(nextUrl) ?: return@forEach
-      resolved += nextDetail
+    val visitedUrls = mutableSetOf(normalizeSubmissionSeriesUrl(firstDetail.submissionUrl))
+    var nextCursor =
+        orderedUrls.indexOfFirst { url ->
+          normalizeSubmissionSeriesUrl(url) ==
+              normalizeSubmissionSeriesUrl(firstDetail.submissionUrl)
+        }
+    if (nextCursor < 0) nextCursor = 0
+    nextCursor += 1
+
+    while (nextCursor < orderedUrls.size && resolved.size < seriesInitialReadyCount) {
+      val nextUrl = orderedUrls[nextCursor]
+      val normalizedUrl = normalizeSubmissionSeriesUrl(nextUrl)
+      if (normalizedUrl !in visitedUrls) {
+        val nextDetail = loader.load(nextUrl) ?: break
+        visitedUrls += normalizedUrl
+        resolved += nextDetail
+      }
+      nextCursor += 1
     }
-    return resolved
+
+    val nextRequestKey =
+        orderedUrls.drop(nextCursor).firstOrNull { url ->
+          normalizeSubmissionSeriesUrl(url) !in visitedUrls
+        }
+    return SubmissionSeriesSeedResult(
+        submissions = resolved,
+        previousRequestKey = null,
+        nextRequestKey = nextRequestKey,
+    )
   }
 
-  private suspend fun resolveLinkedSeries(
+  private suspend fun resolveLinkedSeriesSeed(
       firstDetail: Submission,
       firstCandidate: SubmissionSeriesCandidate,
       loader: SubmissionSeriesRemoteLoader,
-  ): List<Submission> {
+  ): SubmissionSeriesSeedResult {
     val resolved = mutableListOf(firstDetail)
-    val visitedUrls = mutableSetOf(normalizeUrl(firstDetail.submissionUrl))
+    val visitedUrls = mutableSetOf(normalizeSubmissionSeriesUrl(firstDetail.submissionUrl))
     var currentCandidate = firstCandidate
+    var nextRequestKey =
+        currentCandidate.nextSubmissionUrl?.takeIf { nextUrl ->
+          normalizeSubmissionSeriesUrl(nextUrl) !in visitedUrls
+        }
 
-    while (resolved.size < maxResolvedSeriesSize) {
-      val nextUrl = currentCandidate.nextSubmissionUrl ?: break
-      val normalizedNextUrl = normalizeUrl(nextUrl)
-      if (!visitedUrls.add(normalizedNextUrl)) break
+    while (resolved.size < seriesInitialReadyCount) {
+      val nextUrl = nextRequestKey ?: break
+      val normalizedNextUrl = normalizeSubmissionSeriesUrl(nextUrl)
+      if (normalizedNextUrl in visitedUrls) {
+        nextRequestKey = null
+        break
+      }
 
       val nextDetail = loader.load(nextUrl) ?: break
+      visitedUrls += normalizedNextUrl
       resolved += nextDetail
 
       val nextCandidate =
           detectCandidate(nextDetail.descriptionHtml, nextDetail.submissionUrl) ?: break
       currentCandidate = nextCandidate
+      nextRequestKey =
+          currentCandidate.nextSubmissionUrl?.takeIf { candidateUrl ->
+            normalizeSubmissionSeriesUrl(candidateUrl) !in visitedUrls
+          }
     }
 
-    return resolved
+    return SubmissionSeriesSeedResult(
+        submissions = resolved,
+        previousRequestKey =
+            firstCandidate.previousSubmissionUrl?.takeIf { previousUrl ->
+              normalizeSubmissionSeriesUrl(previousUrl) !in visitedUrls
+            },
+        nextRequestKey = nextRequestKey,
+    )
   }
 }
 
 data class SubmissionSeriesResolvedSeries(
     val candidateKey: String,
     val firstSid: Int,
-    val submissions: List<Submission>,
-) {
-  fun toSeedThumbnails(): List<SubmissionThumbnail> =
-      submissions.map { detail ->
-        SubmissionThumbnail(
-            id = detail.id,
-            submissionUrl = detail.submissionUrl,
-            title = detail.title,
-            author = detail.author,
-            authorAvatarUrl = detail.authorAvatarUrl,
-            thumbnailUrl = detail.previewImageUrl.ifBlank { detail.fullImageUrl },
-            thumbnailAspectRatio = detail.aspectRatio,
-            categoryTag = "",
-        )
-      }
-}
+    val firstSubmissionUrl: String,
+    val seedSubmissions: List<SubmissionThumbnail>,
+    val previousRequestKey: String?,
+    val nextRequestKey: String?,
+    val rule: SubmissionSeriesRule,
+    val orderedSubmissionUrls: List<String> = emptyList(),
+)
 
 data class SubmissionSeriesCandidate(
     val candidateKey: String,
+    val currentSubmissionUrl: String,
     val anchorBlockIndex: Int,
     val rule: SubmissionSeriesRule,
     val firstSubmissionUrl: String? = null,
@@ -189,6 +252,12 @@ private data class NumberedBlockMatch(
     val blockIndex: Int,
     val partNumber: Int,
     val submissionUrl: String,
+)
+
+private data class SubmissionSeriesSeedResult(
+    val submissions: List<Submission>,
+    val previousRequestKey: String?,
+    val nextRequestKey: String?,
 )
 
 private fun detectPrevNextCandidate(
@@ -224,6 +293,7 @@ private fun detectPrevNextCandidate(
                   anchorBlockIndex = index,
                   urls = listOfNotNull(firstUrl, previousUrl, nextUrl),
               ),
+          currentSubmissionUrl = baseUrl,
           anchorBlockIndex = index,
           rule = SubmissionSeriesRule.PREV_NEXT_BLOCK,
           firstSubmissionUrl = firstUrl,
@@ -269,6 +339,7 @@ private fun detectNumberedBlocksCandidate(
                   anchorBlockIndex = partOne.blockIndex,
                   urls = orderedUrls,
               ),
+          currentSubmissionUrl = baseUrl,
           anchorBlockIndex = partOne.blockIndex,
           rule = SubmissionSeriesRule.NUMBERED_BLOCKS,
           firstSubmissionUrl = partOne.submissionUrl,
@@ -318,13 +389,14 @@ private fun buildCandidateKey(
     anchorBlockIndex: Int,
     urls: List<String>,
 ): String =
-    (listOf(rule.name, anchorBlockIndex.toString()) + urls.map(::normalizeUrl).sorted())
+    (listOf(rule.name, anchorBlockIndex.toString()) +
+            urls.map(::normalizeSubmissionSeriesUrl).sorted())
         .joinToString("::")
 
 private fun normalizeLinkLabel(label: String): String =
     label.lowercase().replace(whitespaceRegex, " ").trim()
 
-private fun normalizeUrl(url: String): String = url.trim().trimEnd('/')
+internal fun normalizeSubmissionSeriesUrl(url: String): String = url.trim().trimEnd('/')
 
 private val whitespaceRegex = Regex("""\s+""")
 private val nonLettersRegex = Regex("""[^a-z]+""")
@@ -364,3 +436,15 @@ private class SubmissionSeriesRemoteLoader(
     }
   }
 }
+
+internal fun Submission.toSubmissionThumbnail(): SubmissionThumbnail =
+    SubmissionThumbnail(
+        id = id,
+        submissionUrl = submissionUrl,
+        title = title,
+        author = author,
+        authorAvatarUrl = authorAvatarUrl,
+        thumbnailUrl = previewImageUrl.ifBlank { fullImageUrl },
+        thumbnailAspectRatio = aspectRatio,
+        categoryTag = "",
+    )

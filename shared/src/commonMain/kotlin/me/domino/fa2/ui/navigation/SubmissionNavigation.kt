@@ -17,8 +17,7 @@ internal fun Navigator.openSubmissionSeries(series: SubmissionSeriesResolvedSeri
       SubmissionRouteScreen(
           initialSid = series.firstSid,
           contextId = "submission-series:${series.candidateKey}:${nextSubmissionRouteNonce()}",
-          seedSubmissions = series.toSeedThumbnails(),
-          seedSeriesKey = series.candidateKey,
+          submissionSeries = series,
       )
   )
 }

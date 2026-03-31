@@ -45,6 +45,9 @@ class SubmissionScreenModel(
           contextScreenModel.selectSubmission(contextId, initialSid)
         }
 
+        override fun sourceKind(): SubmissionContextSourceKind? =
+            contextScreenModel.snapshot(contextId)?.sourceKind
+
         override fun size(): Int = contextScreenModel.snapshot(contextId)?.flatItems?.size ?: 0
 
         override fun currentIndex(): Int =
@@ -66,6 +69,9 @@ class SubmissionScreenModel(
 
         override fun hasPreviousCached(): Boolean = currentIndex() > 0
 
+        override fun hasPreviousPages(): Boolean =
+            contextScreenModel.snapshot(contextId)?.hasPreviousPage == true
+
         override fun hasNextCached(): Boolean {
           val snapshot = contextScreenModel.snapshot(contextId) ?: return false
           return currentIndex() < snapshot.flatItems.lastIndex
@@ -79,6 +85,10 @@ class SubmissionScreenModel(
 
         override fun appendErrorMessage(): String? =
             contextScreenModel.snapshot(contextId)?.loading?.appendErrorMessage
+
+        override fun requestPrepend(force: Boolean) {
+          contextScreenModel.loadPreviousPageIfNeeded(contextId = contextId, force = force)
+        }
 
         override fun requestAppend(force: Boolean) {
           contextScreenModel.loadNextPageIfNeeded(contextId = contextId, force = force)

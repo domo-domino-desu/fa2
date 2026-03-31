@@ -9,6 +9,8 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.domino.fa2.application.attachmenttext.AttachmentTextExtractor
+import me.domino.fa2.application.submissionseries.seriesInitialReadyCount
+import me.domino.fa2.application.submissionseries.seriesWarmBufferCount
 import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
@@ -21,7 +23,6 @@ import me.domino.fa2.i18n.appString
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.logging.summarizePageState
 
-private const val pagerAppendThreshold = 2
 internal const val pagerPrefetchDebounceMs: Long = 500L
 
 private enum class SubmissionTranslationTarget {
@@ -60,13 +61,23 @@ internal class SubmissionScreenWorkflow(
     contextController.initializeSelection(initialSid)
     publishState()
     loadCurrentAndSchedulePrefetch()
-    appendIfNearEnd(force = false)
+    maintainPagerBuffer(forceBoundary = false)
   }
 
   fun previous() {
+    if (!contextController.hasPreviousCached()) {
+      if (
+          contextController.sourceKind() == SubmissionContextSourceKind.SEQUENCE &&
+              contextController.hasPreviousPages()
+      ) {
+        contextController.requestPrepend(force = true)
+      }
+      return
+    }
     contextController.setCurrentIndex(contextController.currentIndex() - 1)
     publishState()
     loadCurrentAndSchedulePrefetch()
+    maintainPagerBuffer(forceBoundary = false)
   }
 
   fun next() {
@@ -74,17 +85,17 @@ internal class SubmissionScreenWorkflow(
       contextController.setCurrentIndex(contextController.currentIndex() + 1)
       publishState()
       loadCurrentAndSchedulePrefetch()
-      appendIfNearEnd(force = false)
+      maintainPagerBuffer(forceBoundary = false)
       return
     }
-    appendIfNearEnd(force = true)
+    maintainPagerBuffer(forceBoundary = true)
   }
 
   fun onPageChanged(index: Int) {
     contextController.setCurrentIndex(index)
     publishState()
     loadCurrentAndSchedulePrefetch()
-    appendIfNearEnd(force = false)
+    maintainPagerBuffer(forceBoundary = false)
   }
 
   fun setCurrentPageScrollOffset(sid: Int, offset: Int) {
@@ -508,13 +519,13 @@ internal class SubmissionScreenWorkflow(
 
   fun retryLoadMore() {
     log.d { "自动加载投稿列表 -> 手动重试" }
-    appendIfNearEnd(force = true)
+    maintainPagerBuffer(forceBoundary = true)
   }
 
   fun onContextChanged() {
     publishState()
     loadCurrentAndSchedulePrefetch()
-    appendIfNearEnd(force = false)
+    maintainPagerBuffer(forceBoundary = false)
   }
 
   private suspend fun executeTagBlockRequest(
@@ -614,7 +625,8 @@ internal class SubmissionScreenWorkflow(
             detailBySid = detailBySid.toMap(),
             scrollToTopVersionBySid = scrollToTopVersionBySid.toMap(),
             currentIndex = index.coerceIn(0, (items.lastIndex).coerceAtLeast(0)),
-            hasPrevious = contextController.hasPreviousCached(),
+            hasPrevious =
+                contextController.hasPreviousCached() || contextController.hasPreviousPages(),
             hasNext = contextController.hasNextCached() || contextController.hasMorePages(),
             hasMore = contextController.hasMorePages(),
             isLoadingMore = contextController.isLoadingMore(),
@@ -821,15 +833,51 @@ internal class SubmissionScreenWorkflow(
     translationJobs.remove(key)?.cancel()
   }
 
-  private fun appendIfNearEnd(force: Boolean) {
+  private fun maintainPagerBuffer(forceBoundary: Boolean) {
+    if (warmBufferIfNeeded()) return
+    loadBoundaryPageIfNeeded(force = forceBoundary)
+  }
+
+  private fun warmBufferIfNeeded(): Boolean {
+    if (contextController.sourceKind() != SubmissionContextSourceKind.SEQUENCE) return false
+    val currentSize = contextController.size()
+    if (currentSize <= 0 || currentSize >= seriesWarmBufferCount) return false
+    return when {
+      contextController.hasMorePages() -> {
+        log.d { "自动加载投稿列表 -> 预热后续缓存(size=$currentSize,target=$seriesWarmBufferCount)" }
+        contextController.requestAppend(force = false)
+        true
+      }
+
+      contextController.hasPreviousPages() -> {
+        log.d { "自动加载投稿列表 -> 预热前序缓存(size=$currentSize,target=$seriesWarmBufferCount)" }
+        contextController.requestPrepend(force = false)
+        true
+      }
+
+      else -> false
+    }
+  }
+
+  private fun loadBoundaryPageIfNeeded(force: Boolean) {
     val currentSize = contextController.size()
     if (currentSize <= 0) return
-    val isNearEnd = contextController.currentIndex() >= currentSize - 1 - pagerAppendThreshold
-    if (!force && !isNearEnd) return
-    log.d {
-      "自动加载投稿列表 -> 触发检查(force=$force,current=${contextController.currentIndex()},size=$currentSize)"
+    val currentIndex = contextController.currentIndex()
+    val isNearStart = currentIndex <= seriesInitialReadyCount
+    val isNearEnd = currentIndex >= currentSize - 1 - seriesInitialReadyCount
+    when {
+      contextController.hasMorePages() && (force || isNearEnd) -> {
+        log.d { "自动加载投稿列表 -> 触发后续检查(force=$force,current=$currentIndex,size=$currentSize)" }
+        contextController.requestAppend(force = force)
+      }
+
+      contextController.sourceKind() == SubmissionContextSourceKind.SEQUENCE &&
+          contextController.hasPreviousPages() &&
+          (force || isNearStart) -> {
+        log.d { "自动加载投稿列表 -> 触发前序检查(force=$force,current=$currentIndex,size=$currentSize)" }
+        contextController.requestPrepend(force = force)
+      }
     }
-    contextController.requestAppend(force = force)
   }
 
   private fun loadDetail(current: SubmissionThumbnail, force: Boolean) {
