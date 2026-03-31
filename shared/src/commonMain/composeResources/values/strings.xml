@@ -10,7 +10,7 @@
   <string name="back">Back</string>
   <string name="go_home">Go home</string>
   <string name="scroll_to_top">Scroll to top</string>
-  <string name="about">Open Source Licenses</string>
+  <string name="about">About</string>
   <string name="settings">Settings</string>
   <string name="search_history">Search History</string>
   <string name="submission_history">Browsing History</string>
@@ -57,19 +57,27 @@
   <string name="settings_summary">Theme, download, waterfall width, and translation settings</string>
   <string name="following_more_summary">Open the users this account is following</string>
   <string name="following_recommendation">Follow Recommendations</string>
-  <string name="following_recommendation_summary">Discover new users from the people you already follow</string>
-  <string name="following_recommendation_description">Randomly sample people you follow, then find the users they commonly follow.</string>
+  <string name="following_recommendation_summary">Discover new users from the people you already
+    follow</string>
+  <string name="following_recommendation_description">Randomly sample people you follow, then find
+    the users they commonly follow.</string>
   <string name="following_recommendation_action">Start recommending</string>
-  <string name="following_recommendation_empty">No recommendation candidates were found this time. Pull to refresh and try another sample.</string>
-  <string name="following_recommendation_load_failed">Failed to generate follow recommendations. Please retry.</string>
+  <string name="following_recommendation_empty">No recommendation candidates were found this time.
+    Pull to refresh and try another sample.</string>
+  <string name="following_recommendation_load_failed">Failed to generate follow recommendations.
+    Please retry.</string>
   <string name="following_recommendation_blocklist">Hidden Recommendations</string>
-  <string name="following_recommendation_blocklist_summary">Manage users hidden from follow recommendations</string>
-  <string name="following_recommendation_blocklist_empty">No users are hidden from recommendations right now.</string>
-  <string name="following_recommendation_blocklist_update_failed">Failed to update recommendation blocklist: %1$s</string>
+  <string name="following_recommendation_blocklist_summary">Manage users hidden from follow
+    recommendations</string>
+  <string name="following_recommendation_blocklist_empty">No users are hidden from recommendations
+    right now.</string>
+  <string name="following_recommendation_blocklist_update_failed">Failed to update recommendation
+    blocklist: %1$s</string>
   <string name="following_recommendation_block">Don't recommend</string>
   <string name="following_recommendation_unblock">Unhide</string>
   <string name="favorite_more_summary">Open this account's favorited submissions</string>
-  <string name="about_summary">View the open-source libraries and licenses used by this app</string>
+  <string name="about_summary">View app info, project links, open-source libraries, and
+    acknowledgements</string>
   <string name="logout">Log Out</string>
   <string name="logout_failed">Log out failed</string>
   <string name="clearing_cookie">Clearing cookies...</string>
@@ -96,7 +104,8 @@
   <string name="retry_existing_session">Retry existing session</string>
   <string name="checking_login_state">Checking login status...</string>
   <string name="auth_probe_failed_title">Couldn't verify sign-in status</string>
-  <string name="auth_probe_failed_body">We couldn't verify the current Fur Affinity session just now. Check your network and retry. Your saved sign-in info is kept.</string>
+  <string name="auth_probe_failed_body">We couldn't verify the current Fur Affinity session just
+    now. Check your network and retry. Your saved sign-in info is kept.</string>
   <string name="missing_persisted_cookie">No persisted cookie found. Please sign in first.</string>
   <string name="empty_cookie_header">Cookie cannot be empty.</string>
   <string name="default_web_view_login_status">Finish signing in through the WebView on the left. If
@@ -147,7 +156,8 @@
   <string name="loading_more_content">Loading more content...</string>
   <string name="loading_previous_page_content">Loading the previous page...</string>
   <string name="auto_load_failed_manual_next_page">Auto-load failed. Load the next page manually.</string>
-  <string name="auto_load_failed_manual_previous_page">Auto-load failed. Load the previous page manually.</string>
+  <string name="auto_load_failed_manual_previous_page">Auto-load failed. Load the previous page
+    manually.</string>
   <string name="continue_auto_load_next_page">Keep browsing to auto-load the next page.</string>
   <string name="continue_auto_load_previous_page_with_manual_fallback">Load the previous page here.</string>
   <string name="continue_auto_load_next_page_with_manual_fallback">Keep browsing to auto-load the
@@ -192,7 +202,8 @@
   <string name="download_file_name_mode_username_id_title">username-id-title</string>
   <string name="download_file_name_mode_custom">Custom template</string>
   <string name="download_file_name_template">File name template</string>
-  <string name="download_file_name_template_variables_hint">Supports {username} {title} {submission_id} {category} {rating} {type} {species}</string>
+  <string name="download_file_name_template_variables_hint">Supports {username} {title}
+    {submission_id} {category} {rating} {type} {species}</string>
   <string name="download_save_path_not_configured">Please choose a save path in Settings first</string>
   <string name="download_save_succeeded">Saved successfully</string>
   <string name="download_save_failed">Download save failed: %1$s</string>
@@ -206,7 +217,8 @@
   <string name="blocked_content">Blocked Content</string>
   <string name="blur_blocked_submissions_in_waterfalls">Blur blocked submissions in waterfalls</string>
   <string name="blur_blocked_submissions_in_detail_pages">Blur blocked submissions in detail pages</string>
-  <string name="return_to_current_submission_in_waterfall">When leaving a submission, move the waterfall to the current submission</string>
+  <string name="return_to_current_submission_in_waterfall">When leaving a submission, move the
+    waterfall to the current submission</string>
   <string name="show">Show</string>
   <string name="hide">Hide</string>
   <string name="watch">Watch</string>
@@ -216,6 +228,22 @@
   <string name="empty_comment_html">&lt;p&gt;(No content)&lt;/p&gt;</string>
   <string name="about_libraries_metadata_source">License and dependency metadata provided by
     AboutLibraries</string>
+  <string name="about_description">Third-party FurAffinity client</string>
+  <string name="about_project_address">github</string>
+  <string name="about_project_address_url">https://github.com/domo-domino-desu/fa2</string>
+  <string name="about_libraries">Open-source libraries</string>
+  <string name="about_libraries_summary">View the libraries and licenses used by this app</string>
+  <string name="about_version">Version</string>
+  <string name="about_version_copied">Version copied</string>
+  <string name="about_license">LICENSE</string>
+  <string name="about_license_summary">View the full license text</string>
+  <string name="about_export_logs">Export logs</string>
+  <string name="about_export_logs_summary">Export the current runtime logs to a text file</string>
+  <string name="about_export_logs_success">Logs exported: %1$s</string>
+  <string name="about_export_logs_failed">Log export failed: %1$s</string>
+  <string name="about_thanks">Thanks</string>
+  <string name="about_acknowledgements_furaffinity_app">FurAffinityApp</string>
+  <string name="about_acknowledgements_transfur_bar">百度贴吧Transfur吧</string>
   <string name="interrupted_loading">Loading interrupted</string>
   <string name="missing_tag_block_credentials">Missing tag-block credential</string>
   <string name="favorite">Favorite</string>

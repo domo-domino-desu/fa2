@@ -7,8 +7,10 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ArrowBackW400
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ArrowCircleRightW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ArrowDownwardAltW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ArrowUpwardAltW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.AttributionW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.CategoryW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.CloseW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.CodeW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.CommentW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ContentCopyW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.DateRangeW400Outlined
@@ -42,6 +44,8 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.MovieW400Outl
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.MusicNoteW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.NotificationsW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.NotificationsW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.OutputCircleW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ReceiptLongW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.RefreshW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.RestartAltW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SaveW400Outlinedfill1
@@ -83,7 +87,9 @@ object FaMaterialSymbols {
     val ArrowCircleRight: ImageVector = GeneratedIcons.ArrowCircleRightW400Outlined
     val ArrowDownwardAlt: ImageVector = GeneratedIcons.ArrowDownwardAltW400Outlined
     val ArrowUpwardAlt: ImageVector = GeneratedIcons.ArrowUpwardAltW400Outlined
+    val Attribution: ImageVector = GeneratedIcons.AttributionW400Outlined
     val Category: ImageVector = GeneratedIcons.CategoryW400Outlined
+    val Code: ImageVector = GeneratedIcons.CodeW400Outlined
     val Comment: ImageVector = GeneratedIcons.CommentW400Outlined
     val ContentCopy: ImageVector = GeneratedIcons.ContentCopyW400Outlined
     val DateRange: ImageVector = GeneratedIcons.DateRangeW400Outlined
@@ -105,7 +111,9 @@ object FaMaterialSymbols {
     val Movie: ImageVector = GeneratedIcons.MovieW400Outlined
     val MusicNote: ImageVector = GeneratedIcons.MusicNoteW400Outlined
     val Notifications: ImageVector = GeneratedIcons.NotificationsW400Outlined
+    val OutputCircle: ImageVector = GeneratedIcons.OutputCircleW400Outlined
     val Refresh: ImageVector = GeneratedIcons.RefreshW400Outlined
+    val ReceiptLong: ImageVector = GeneratedIcons.ReceiptLongW400Outlined
     val FilePresent: ImageVector = GeneratedIcons.FilePresentW400Outlined
     val Search: ImageVector = GeneratedIcons.SearchW400Outlined
     val Share: ImageVector = GeneratedIcons.ShareW400Outlined

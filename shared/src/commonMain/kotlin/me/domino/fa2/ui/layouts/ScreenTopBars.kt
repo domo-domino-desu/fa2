@@ -77,6 +77,20 @@ fun AboutRouteTopBar(onBack: () -> Unit, onGoHome: () -> Unit, onTitleClick: (()
   )
 }
 
+@Composable
+fun AboutLibrariesRouteTopBar(
+    onBack: () -> Unit,
+    onGoHome: () -> Unit,
+    onTitleClick: (() -> Unit)? = null,
+) {
+  RouteTopBar(
+      title = stringResource(Res.string.about_libraries),
+      onBack = onBack,
+      onGoHome = onGoHome,
+      onTitleClick = onTitleClick,
+  )
+}
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsRouteTopBar(

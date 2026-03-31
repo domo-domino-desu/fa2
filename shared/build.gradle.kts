@@ -12,6 +12,40 @@ plugins {
   alias(libs.plugins.symbolCraft)
 }
 
+val appVersionName = providers.gradleProperty("APP_VERSION_NAME").get()
+val generatedAboutMetadataDir =
+    layout.buildDirectory.dir("generated/aboutMetadata/commonMain/kotlin")
+val generateAboutMetadata =
+    tasks.register("generateAboutMetadata") {
+      val licenseFile = rootProject.file("LICENSE")
+      inputs.property("appVersionName", appVersionName)
+      inputs.file(licenseFile)
+      outputs.dir(generatedAboutMetadataDir)
+
+      doLast {
+        val outputFile =
+            generatedAboutMetadataDir.get().file("me/domino/fa2/generated/AboutMetadata.kt").asFile
+        val licenseLiteral = buildString {
+          append("\"\"\"")
+          append(licenseFile.readText().replace("\"\"\"", "\"\"\\\"").replace("$", "\${'$'}"))
+          append("\"\"\".trimIndent()")
+        }
+        outputFile.parentFile.mkdirs()
+        outputFile.writeText(
+            """
+            package me.domino.fa2.generated
+
+            internal object AboutMetadata {
+              const val versionName: String = "$appVersionName"
+
+              val licenseText: String = $licenseLiteral
+            }
+            """
+                .trimIndent()
+        )
+      }
+    }
+
 kotlin {
   android {
     namespace = "me.domino.fa2.shared"
@@ -24,6 +58,7 @@ kotlin {
 
   sourceSets {
     val commonMain by getting {
+      kotlin.srcDir(generatedAboutMetadataDir)
       dependencies {
         implementation(libs.aboutlibraries.compose.m3)
         implementation(libs.aboutlibraries.core)
@@ -141,8 +176,10 @@ symbolCraft {
       "arrow_upward_alt",
       "category",
       "comment",
+      "code",
       "content_copy",
       "date_range",
+      "attribution",
       "document_scanner",
       "download",
       "expand_less",
@@ -165,7 +202,9 @@ symbolCraft {
       "movie",
       "music_note",
       "notifications",
+      "output_circle",
       "refresh",
+      "receipt_long",
       "search",
       "share",
       "subject",
@@ -193,6 +232,7 @@ symbolCraft {
               "discord",
               "etsy",
               "facebook",
+              "github",
               "instagram",
               "mastodon",
               "patreon",
@@ -250,5 +290,6 @@ val symbolCraftConsumerTasks =
 tasks.configureEach {
   if (name in symbolCraftConsumerTasks) {
     dependsOn("generateSymbolCraftIcons")
+    dependsOn(generateAboutMetadata)
   }
 }

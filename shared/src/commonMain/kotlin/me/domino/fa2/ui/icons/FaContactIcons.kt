@@ -8,6 +8,7 @@ import me.domino.fa2.generated.symbols.icons.fontawesomebrands.icons.DeviantartF
 import me.domino.fa2.generated.symbols.icons.fontawesomebrands.icons.DiscordFontawesomebrands
 import me.domino.fa2.generated.symbols.icons.fontawesomebrands.icons.EtsyFontawesomebrands
 import me.domino.fa2.generated.symbols.icons.fontawesomebrands.icons.FacebookFontawesomebrands
+import me.domino.fa2.generated.symbols.icons.fontawesomebrands.icons.GithubFontawesomebrands
 import me.domino.fa2.generated.symbols.icons.fontawesomebrands.icons.InstagramFontawesomebrands
 import me.domino.fa2.generated.symbols.icons.fontawesomebrands.icons.MastodonFontawesomebrands
 import me.domino.fa2.generated.symbols.icons.fontawesomebrands.icons.PatreonFontawesomebrands
@@ -45,6 +46,7 @@ object FaContactIcons {
   val Bluesky: ImageVector = FontAwesomeBrandIcons.BlueskyFontawesomebrands
   val Twitch: ImageVector = FontAwesomeBrandIcons.TwitchFontawesomebrands
   val Facebook: ImageVector = FontAwesomeBrandIcons.FacebookFontawesomebrands
+  val GitHub: ImageVector = FontAwesomeBrandIcons.GithubFontawesomebrands
   val Instagram: ImageVector = FontAwesomeBrandIcons.InstagramFontawesomebrands
   val Mastodon: ImageVector = FontAwesomeBrandIcons.MastodonFontawesomebrands
   val Tiktok: ImageVector = FontAwesomeBrandIcons.TiktokFontawesomebrands

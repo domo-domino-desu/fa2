@@ -10,7 +10,7 @@
   <string name="back">返回</string>
   <string name="go_home">回到首页</string>
   <string name="scroll_to_top">回到顶部</string>
-  <string name="about">开源许可</string>
+  <string name="about">关于</string>
   <string name="settings">设置</string>
   <string name="search_history">搜索记录</string>
   <string name="submission_history">浏览记录</string>
@@ -68,7 +68,7 @@
   <string name="following_recommendation_block">不再推荐</string>
   <string name="following_recommendation_unblock">取消屏蔽</string>
   <string name="favorite_more_summary">打开当前账号的收藏内容</string>
-  <string name="about_summary">查看本应用使用的开源库与许可证</string>
+  <string name="about_summary">查看应用信息、项目地址、开源库与致谢</string>
   <string name="logout">退出登录</string>
   <string name="logout_failed">退出登录失败</string>
   <string name="clearing_cookie">正在清除 Cookie...</string>
@@ -187,7 +187,8 @@
   <string name="download_file_name_mode_username_id_title">username-id-title</string>
   <string name="download_file_name_mode_custom">自定义模板</string>
   <string name="download_file_name_template">文件名模板</string>
-  <string name="download_file_name_template_variables_hint">支持 {username} {title} {submission_id} {category} {rating} {type} {species}</string>
+  <string name="download_file_name_template_variables_hint">支持 {username} {title} {submission_id}
+    {category} {rating} {type} {species}</string>
   <string name="download_save_path_not_configured">请先在设置中选择保存路径</string>
   <string name="download_save_succeeded">保存成功</string>
   <string name="download_save_failed">下载保存失败：%1$s</string>
@@ -210,6 +211,22 @@
   <string name="expand_profile">展开简介</string>
   <string name="empty_comment_html">&lt;p&gt;（无内容）&lt;/p&gt;</string>
   <string name="about_libraries_metadata_source">许可证与依赖元数据来源：AboutLibraries</string>
+  <string name="about_description">FurAffinity 第三方客户端</string>
+  <string name="about_project_address">github</string>
+  <string name="about_project_address_url">https://github.com/domo-domino-desu/fa2</string>
+  <string name="about_libraries">开源库使用情况</string>
+  <string name="about_libraries_summary">查看本应用使用的开源库与许可证</string>
+  <string name="about_version">版本号</string>
+  <string name="about_version_copied">版本号已复制</string>
+  <string name="about_license">LICENSE</string>
+  <string name="about_license_summary">查看开源协议全文</string>
+  <string name="about_export_logs">导出日志</string>
+  <string name="about_export_logs_summary">导出当前运行期日志到文本文件</string>
+  <string name="about_export_logs_success">日志已导出：%1$s</string>
+  <string name="about_export_logs_failed">导出日志失败：%1$s</string>
+  <string name="about_thanks">感谢</string>
+  <string name="about_acknowledgements_furaffinity_app">FurAffinityApp</string>
+  <string name="about_acknowledgements_transfur_bar">百度贴吧Transfur吧</string>
   <string name="interrupted_loading">加载中断</string>
   <string name="missing_tag_block_credentials">缺少标签屏蔽凭据</string>
   <string name="favorite">收藏</string>
