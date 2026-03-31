@@ -7,7 +7,7 @@ import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
-import me.domino.fa2.data.repository.WatchRecommendationCooldownRepository
+import me.domino.fa2.data.repository.WatchRecommendationBlocklistRepository
 import me.domino.fa2.data.repository.WatchlistRepository
 import me.domino.fa2.util.logging.FaLog
 
@@ -21,18 +21,18 @@ class WatchRecommendationService(
         suspend (username: String, category: WatchlistCategory, nextPageUrl: String?) -> PageState<
                 WatchlistPage
             >,
-    private val cooldownRepository: WatchRecommendationCooldownRepository,
+    private val blocklistRepository: WatchRecommendationBlocklistRepository,
     private val random: Random = Random.Default,
     private val requestThrottleMs: Long = defaultSequentialRequestThrottleMs,
 ) {
   constructor(
       repository: WatchlistRepository,
-      cooldownRepository: WatchRecommendationCooldownRepository,
+      blocklistRepository: WatchRecommendationBlocklistRepository,
       random: Random = Random.Default,
       requestThrottleMs: Long = defaultSequentialRequestThrottleMs,
   ) : this(
       loadWatchlistPage = repository::loadWatchlistPage,
-      cooldownRepository = cooldownRepository,
+      blocklistRepository = blocklistRepository,
       random = random,
       requestThrottleMs = requestThrottleMs,
   )
@@ -61,11 +61,11 @@ class WatchRecommendationService(
 
     val followingByKey = linkedMapOf<String, WatchlistUser>()
     following.forEach { user -> followingByKey.putIfAbsent(user.username.lowercase(), user) }
-    val cooldownExcludedUsernames = cooldownRepository.loadExcludedUsernames()
+    val blockedUsernames = blocklistRepository.loadBlockedUsernameSet()
     val excludedUsernames =
         followingByKey.keys.toMutableSet().apply {
           add(normalizedUsername.lowercase())
-          addAll(cooldownExcludedUsernames)
+          addAll(blockedUsernames)
         }
     val sampledUsers = followingByKey.values.shuffled(random)
 
@@ -119,18 +119,14 @@ class WatchRecommendationService(
 
       bestCandidates = roundCandidates
       log.i {
-        "关注推荐 -> 第${round + 1}轮(user=$normalizedUsername,sample=${sources.size},threshold=$minimumSharedFollowers,candidates=${roundCandidates.size},cooldown=${cooldownExcludedUsernames.size})"
+        "关注推荐 -> 第${round + 1}轮(user=$normalizedUsername,sample=${sources.size},threshold=$minimumSharedFollowers,candidates=${roundCandidates.size},blocked=${blockedUsernames.size})"
       }
       if (roundCandidates.size >= recommendationCount || minimumSharedFollowers <= 1) {
-        val displayedResults = roundCandidates.take(recommendationCount)
-        recordDisplayedRecommendations(displayedResults)
-        return displayedResults
+        return roundCandidates.take(recommendationCount)
       }
     }
 
-    val displayedResults = bestCandidates.take(recommendationCount)
-    recordDisplayedRecommendations(displayedResults)
-    return displayedResults
+    return bestCandidates.take(recommendationCount)
   }
 
   private suspend fun loadCompleteWatching(
@@ -195,13 +191,6 @@ class WatchRecommendationService(
         PageState.Loading -> Unit
       }
     }
-  }
-
-  private suspend fun recordDisplayedRecommendations(results: List<RecommendedWatchUser>) {
-    if (results.isEmpty()) return
-    cooldownRepository.recordDisplayedRecommendations(
-        results.map { result -> result.user.username }
-    )
   }
 }
 

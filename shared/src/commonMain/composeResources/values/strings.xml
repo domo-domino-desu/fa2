@@ -62,6 +62,12 @@
   <string name="following_recommendation_action">Start recommending</string>
   <string name="following_recommendation_empty">No recommendation candidates were found this time. Pull to refresh and try another sample.</string>
   <string name="following_recommendation_load_failed">Failed to generate follow recommendations. Please retry.</string>
+  <string name="following_recommendation_blocklist">Hidden Recommendations</string>
+  <string name="following_recommendation_blocklist_summary">Manage users hidden from follow recommendations</string>
+  <string name="following_recommendation_blocklist_empty">No users are hidden from recommendations right now.</string>
+  <string name="following_recommendation_blocklist_update_failed">Failed to update recommendation blocklist: %1$s</string>
+  <string name="following_recommendation_block">Don't recommend</string>
+  <string name="following_recommendation_unblock">Unhide</string>
   <string name="favorite_more_summary">Open this account's favorited submissions</string>
   <string name="about_summary">View the open-source libraries and licenses used by this app</string>
   <string name="logout">Log Out</string>

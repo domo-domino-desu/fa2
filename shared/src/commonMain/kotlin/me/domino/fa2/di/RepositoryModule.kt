@@ -18,12 +18,12 @@ import me.domino.fa2.data.repository.GalleryRepository
 import me.domino.fa2.data.repository.JournalDetailRepository
 import me.domino.fa2.data.repository.JournalRepository
 import me.domino.fa2.data.repository.JournalsRepository
-import me.domino.fa2.data.repository.PersistedWatchRecommendationCooldownRepository
+import me.domino.fa2.data.repository.PersistedWatchRecommendationBlocklistRepository
 import me.domino.fa2.data.repository.SearchRepository
 import me.domino.fa2.data.repository.SubmissionDetailRepository
 import me.domino.fa2.data.repository.SubmissionRepository
 import me.domino.fa2.data.repository.UserRepository
-import me.domino.fa2.data.repository.WatchRecommendationCooldownRepository
+import me.domino.fa2.data.repository.WatchRecommendationBlocklistRepository
 import me.domino.fa2.data.repository.WatchlistRepository
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.settings.AppSettingsStorage
@@ -57,8 +57,8 @@ fun repositoryModule(): Module = module {
   single { SearchRepository(get()) }
   single { SubmissionRepository(get(), get(), get(), get()) } bind SubmissionDetailRepository::class
   single { SubmissionSeriesResolver(get()) }
-  single { PersistedWatchRecommendationCooldownRepository(get()) } bind
-      WatchRecommendationCooldownRepository::class
+  single { PersistedWatchRecommendationBlocklistRepository(get()) } bind
+      WatchRecommendationBlocklistRepository::class
   single { WatchRecommendationService(get<WatchlistRepository>(), get()) }
   single { UserRepository(get(), get()) }
   single { GalleryRepository(get()) }

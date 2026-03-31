@@ -6,6 +6,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.ui.navigation.goBackHome
+import me.domino.fa2.ui.pages.watchrecommendation.WatchRecommendationBlocklistRouteScreen
 import org.koin.compose.koinInject
 
 /** 应用设置页面。 */
@@ -18,6 +19,9 @@ class SettingsRouteScreen : Screen {
         settingsService = settingsService,
         onBack = { navigator.pop() },
         onGoHome = { navigator.goBackHome() },
+        onOpenRecommendationBlocklist = {
+          navigator.push(WatchRecommendationBlocklistRouteScreen())
+        },
     )
   }
 }

@@ -9,7 +9,7 @@ import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
-import me.domino.fa2.data.repository.WatchRecommendationCooldownRepository
+import me.domino.fa2.data.repository.WatchRecommendationBlocklistRepository
 
 class WatchRecommendationServiceTest {
   @Test
@@ -28,14 +28,13 @@ class WatchRecommendationServiceTest {
           )
     }
 
-    val cooldownRepository = FakeWatchRecommendationCooldownRepository()
-    val service = buildService(responses, cooldownRepository)
+    val blocklistRepository = FakeWatchRecommendationBlocklistRepository()
+    val service = buildService(responses, blocklistRepository)
 
     val result = service.recommend(username = "me", recommendationCount = 2)
 
     assertEquals(listOf("artist-a", "artist-b"), result.map { it.user.username })
     assertEquals(listOf(10, 10), result.map { it.sharedFollowCount })
-    assertEquals(listOf(listOf("artist-a", "artist-b")), cooldownRepository.recordedBatches)
   }
 
   @Test
@@ -184,7 +183,7 @@ class WatchRecommendationServiceTest {
   }
 
   @Test
-  fun excludesRecentlyDisplayedRecommendationsFromLaterRuns() = runTest {
+  fun excludesManuallyBlockedRecommendations() = runTest {
     val followingUsers = (1..10).map(::sourceUser)
     val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
     responses[LoaderKey("me", null)] = successPage(followingUsers)
@@ -198,23 +197,19 @@ class WatchRecommendationServiceTest {
               }
           )
     }
-    val cooldownRepository =
-        FakeWatchRecommendationCooldownRepository(
-            initialBatches = listOf(listOf("artist-a"), listOf("artist-b"))
+    val blocklistRepository =
+        FakeWatchRecommendationBlocklistRepository(
+            initialUsernames = listOf("artist-a", "artist-b")
         )
-    val service = buildService(responses, cooldownRepository)
+    val service = buildService(responses, blocklistRepository)
 
     val result = service.recommend(username = "me", recommendationCount = 3)
 
     assertEquals(listOf("artist-c"), result.map { it.user.username })
-    assertEquals(
-        listOf(listOf("artist-a"), listOf("artist-b"), listOf("artist-c")),
-        cooldownRepository.recordedBatches,
-    )
   }
 
   @Test
-  fun oldestDisplayedBatchExpiresAfterThreeLaterRuns() = runTest {
+  fun manualBlocklistDoesNotChangeAfterRecommend() = runTest {
     val followingUsers = (1..10).map(::sourceUser)
     val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
     responses[LoaderKey("me", null)] = successPage(followingUsers)
@@ -230,72 +225,22 @@ class WatchRecommendationServiceTest {
               }
           )
     }
-    val cooldownRepository =
-        FakeWatchRecommendationCooldownRepository(initialBatches = listOf(listOf("artist-a")))
-    val service = buildService(responses, cooldownRepository)
+    val blocklistRepository =
+        FakeWatchRecommendationBlocklistRepository(initialUsernames = listOf("artist-a"))
+    val service = buildService(responses, blocklistRepository)
 
     val first = service.recommend(username = "me", recommendationCount = 1)
     val second = service.recommend(username = "me", recommendationCount = 1)
-    val third = service.recommend(username = "me", recommendationCount = 1)
-    val fourth = service.recommend(username = "me", recommendationCount = 1)
 
     assertEquals(listOf("artist-b"), first.map { it.user.username })
-    assertEquals(listOf("artist-c"), second.map { it.user.username })
-    assertEquals(listOf("artist-d"), third.map { it.user.username })
-    assertEquals(listOf("artist-a"), fourth.map { it.user.username })
-  }
-
-  @Test
-  fun cooldownDoesNotRecordEmptyResults() = runTest {
-    val followingUsers = (1..10).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
-    responses[LoaderKey("me", null)] = successPage(followingUsers)
-    followingUsers.forEach { source ->
-      responses[LoaderKey(source.username, null)] = successPage(listOf(candidateUser("artist-a")))
-    }
-    val cooldownRepository =
-        FakeWatchRecommendationCooldownRepository(
-            initialBatches = listOf(listOf("artist-a"), listOf("artist-b"), listOf("artist-c"))
-        )
-    val service = buildService(responses, cooldownRepository)
-
-    val result = service.recommend(username = "me", recommendationCount = 2)
-
-    assertEquals(emptyList(), result)
-    assertEquals(
-        listOf(listOf("artist-a"), listOf("artist-b"), listOf("artist-c")),
-        cooldownRepository.recordedBatches,
-    )
-  }
-
-  @Test
-  fun cooldownOnlyAppliesToPreviouslyDisplayedResults() = runTest {
-    val followingUsers = (1..10).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
-    responses[LoaderKey("me", null)] = successPage(followingUsers)
-    followingUsers.forEachIndexed { index, source ->
-      responses[LoaderKey(source.username, null)] =
-          successPage(
-              buildList {
-                add(candidateUser("artist-a"))
-                add(candidateUser("artist-b"))
-                if (index < 4) add(candidateUser("artist-c"))
-              }
-          )
-    }
-    val cooldownRepository =
-        FakeWatchRecommendationCooldownRepository(initialBatches = listOf(listOf("artist-a")))
-    val service = buildService(responses, cooldownRepository)
-
-    val result = service.recommend(username = "me", recommendationCount = 1)
-
-    assertEquals(listOf("artist-b"), result.map { it.user.username })
+    assertEquals(listOf("artist-b"), second.map { it.user.username })
+    assertEquals(listOf("artist-a"), blocklistRepository.listBlockedUsernames())
   }
 
   private fun buildService(
       responses: Map<LoaderKey, PageState<WatchlistPage>>,
-      cooldownRepository: WatchRecommendationCooldownRepository =
-          FakeWatchRecommendationCooldownRepository(),
+      blocklistRepository: WatchRecommendationBlocklistRepository =
+          FakeWatchRecommendationBlocklistRepository(),
   ): WatchRecommendationService =
       WatchRecommendationService(
           loadWatchlistPage = { username, category, nextPageUrl ->
@@ -305,7 +250,7 @@ class WatchRecommendationServiceTest {
                     IllegalStateException("missing response for $username::$nextPageUrl")
                 )
           },
-          cooldownRepository = cooldownRepository,
+          blocklistRepository = blocklistRepository,
           random = Random(0),
           requestThrottleMs = 0L,
       )
@@ -333,21 +278,29 @@ private data class LoaderKey(
     val nextPageUrl: String?,
 )
 
-private class FakeWatchRecommendationCooldownRepository(
-    initialBatches: List<List<String>> = emptyList(),
-) : WatchRecommendationCooldownRepository {
-  val recordedBatches: MutableList<List<String>> =
-      initialBatches.map { batch -> batch.map(String::lowercase) }.toMutableList()
+private class FakeWatchRecommendationBlocklistRepository(
+    initialUsernames: List<String> = emptyList(),
+) : WatchRecommendationBlocklistRepository {
+  private val blockedUsernames: MutableList<String> =
+      initialUsernames
+          .map(String::trim)
+          .map(String::lowercase)
+          .filter(String::isNotBlank)
+          .distinct()
+          .toMutableList()
 
-  override suspend fun loadExcludedUsernames(): Set<String> = recordedBatches.flatten().toSet()
+  override suspend fun loadBlockedUsernameSet(): Set<String> = blockedUsernames.toSet()
 
-  override suspend fun recordDisplayedRecommendations(usernames: List<String>) {
-    val normalized =
-        usernames.map(String::trim).map(String::lowercase).filter(String::isNotBlank).distinct()
-    if (normalized.isEmpty()) return
-    recordedBatches += normalized
-    while (recordedBatches.size > 3) {
-      recordedBatches.removeAt(0)
-    }
+  override suspend fun listBlockedUsernames(): List<String> = blockedUsernames.toList()
+
+  override suspend fun addBlockedUsername(username: String) {
+    val normalized = username.trim().lowercase()
+    if (normalized.isBlank() || normalized in blockedUsernames) return
+    blockedUsernames += normalized
+  }
+
+  override suspend fun removeBlockedUsername(username: String) {
+    val normalized = username.trim().lowercase()
+    blockedUsernames.removeAll { it == normalized }
   }
 }

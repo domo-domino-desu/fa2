@@ -61,6 +61,12 @@
   <string name="following_recommendation_action">开始推荐</string>
   <string name="following_recommendation_empty">这次没有找到合适的推荐结果，下拉刷新后可重新抽样。</string>
   <string name="following_recommendation_load_failed">生成关注推荐失败，请重试。</string>
+  <string name="following_recommendation_blocklist">推荐屏蔽名单</string>
+  <string name="following_recommendation_blocklist_summary">管理不会再出现在关注推荐中的用户</string>
+  <string name="following_recommendation_blocklist_empty">当前没有被隐藏的推荐用户。</string>
+  <string name="following_recommendation_blocklist_update_failed">更新推荐屏蔽名单失败：%1$s</string>
+  <string name="following_recommendation_block">不再推荐</string>
+  <string name="following_recommendation_unblock">取消屏蔽</string>
   <string name="favorite_more_summary">打开当前账号的收藏内容</string>
   <string name="about_summary">查看本应用使用的开源库与许可证</string>
   <string name="logout">退出登录</string>

@@ -55,6 +55,7 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.TranslateW400
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.TroubleshootW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VerticalAlignBottomW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VerticalAlignTopW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VisibilityOffW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VisibilityW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.WrapTextW400Outlined
 
@@ -115,6 +116,7 @@ object FaMaterialSymbols {
     val VerticalAlignBottom: ImageVector = GeneratedIcons.VerticalAlignBottomW400Outlined
     val VerticalAlignTop: ImageVector = GeneratedIcons.VerticalAlignTopW400Outlined
     val Visibility: ImageVector = GeneratedIcons.VisibilityW400Outlined
+    val VisibilityOff: ImageVector = GeneratedIcons.VisibilityOffW400Outlined
     val WrapText: ImageVector = GeneratedIcons.WrapTextW400Outlined
   }
 

@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,12 +31,14 @@ import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import me.domino.fa2.application.watchrecommendation.RecommendedWatchUser
 import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
+import me.domino.fa2.ui.components.ExpressiveIconButton
+import me.domino.fa2.ui.components.UserHorizontalCard
+import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.layouts.WatchRecommendationRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.pages.user.route.UserRouteScreen
 import me.domino.fa2.ui.pages.user.watchlist.WatchlistStatusCard
-import me.domino.fa2.ui.pages.user.watchlist.WatchlistUserCard
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
 
@@ -93,6 +96,7 @@ class WatchRecommendationRouteScreen(
               listState = listState,
               onRefresh = screenModel::refreshRecommendations,
               onRetry = screenModel::loadRecommendations,
+              onBlockUser = screenModel::blockRecommendation,
               onOpenUser = { user ->
                 navigator.push(
                     UserRouteScreen(
@@ -148,6 +152,7 @@ private fun WatchRecommendationSuccessContent(
     listState: androidx.compose.foundation.lazy.LazyListState,
     onRefresh: () -> Unit,
     onRetry: () -> Unit,
+    onBlockUser: (String) -> Unit,
     onOpenUser: (RecommendedWatchUser) -> Unit,
 ) {
   PullToRefreshBox(
@@ -185,7 +190,23 @@ private fun WatchRecommendationSuccessContent(
             items = state.users,
             key = { item -> item.user.username.lowercase() },
         ) { item ->
-          WatchlistUserCard(item = item.user, onClick = { onOpenUser(item) })
+          UserHorizontalCard(
+              user = item.user,
+              onClick = { onOpenUser(item) },
+              trailingContent = {
+                val normalizedUsername = item.user.username.lowercase()
+                ExpressiveIconButton(
+                    onClick = { onBlockUser(item.user.username) },
+                    enabled = normalizedUsername !in state.blockingUsernames,
+                ) {
+                  Icon(
+                      imageVector = FaMaterialSymbols.Outlined.VisibilityOff,
+                      contentDescription =
+                          stringResource(Res.string.following_recommendation_block),
+                  )
+                }
+              },
+          )
         }
       }
     }

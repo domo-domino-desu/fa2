@@ -35,6 +35,7 @@ fun SettingsScreen(
     settingsService: AppSettingsService,
     onBack: () -> Unit,
     onGoHome: () -> Unit,
+    onOpenRecommendationBlocklist: () -> Unit,
 ) {
   val scope = rememberCoroutineScope()
 
@@ -139,6 +140,7 @@ fun SettingsScreen(
         RecommendationSettingsSection(
             draft = draft,
             onDraftChange = { next -> draft = next },
+            onOpenBlocklistManager = onOpenRecommendationBlocklist,
         )
       }
 

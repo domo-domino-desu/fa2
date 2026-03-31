@@ -14,6 +14,7 @@ import me.domino.fa2.ui.pages.user.profile.UserScreenModel
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.pages.user.shout.UserShoutsScreenModel
 import me.domino.fa2.ui.pages.user.watchlist.UserWatchlistScreenModel
+import me.domino.fa2.ui.pages.watchrecommendation.WatchRecommendationBlocklistScreenModel
 import me.domino.fa2.ui.pages.watchrecommendation.WatchRecommendationScreenModel
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -87,10 +88,12 @@ fun screenModelModule(): Module = module {
         systemLanguageProvider = get(),
     )
   }
+  factory { WatchRecommendationBlocklistScreenModel(get()) }
   factory { (username: String) ->
     WatchRecommendationScreenModel(
         username = username,
         recommendationService = get(),
+        blocklistRepository = get(),
         settingsService = get(),
     )
   }

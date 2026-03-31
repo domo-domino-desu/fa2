@@ -21,7 +21,9 @@ import me.domino.fa2.ui.components.ExpressiveTextButton
 import me.domino.fa2.ui.components.platform.rememberPlatformDirectoryPicker
 import me.domino.fa2.ui.components.settings.SettingsDropdownField
 import me.domino.fa2.ui.components.settings.SettingsGroup
+import me.domino.fa2.ui.components.settings.SettingsListItem
 import me.domino.fa2.ui.components.settings.SettingsSwitchRow
+import me.domino.fa2.ui.icons.FaMaterialSymbols
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -282,6 +284,7 @@ internal fun DownloadSettingsSection(
 internal fun RecommendationSettingsSection(
     draft: SettingsDraft,
     onDraftChange: (SettingsDraft) -> Unit,
+    onOpenBlocklistManager: () -> Unit,
 ) {
   SettingsGroup(title = stringResource(Res.string.following_recommendation), framed = false) {
     Column(
@@ -304,6 +307,14 @@ internal fun RecommendationSettingsSection(
             )
           },
           modifier = Modifier.fillMaxWidth(),
+      )
+
+      SettingsListItem(
+          icon = FaMaterialSymbols.Outlined.Inventory2,
+          title = stringResource(Res.string.following_recommendation_blocklist),
+          subtitle = stringResource(Res.string.following_recommendation_blocklist_summary),
+          onClick = onOpenBlocklistManager,
+          showDivider = false,
       )
     }
   }
