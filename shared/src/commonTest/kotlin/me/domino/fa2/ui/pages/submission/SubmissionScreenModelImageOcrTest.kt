@@ -119,43 +119,6 @@ class SubmissionScreenModelImageOcrTest {
       }
 
   @Test
-  fun premergesRecognizedDialogueFragmentsBeforeShowingOverlay() =
-      runTest(dispatcher.scheduler) {
-        val model =
-            createSubmissionScreenModelForTest(
-                initialSid = 1,
-                items = listOf(imageOcrTestThumbnail(1)),
-                submissionSource = ImageOcrRecordingDetailSource(),
-                translationService = createTestSubmissionTranslationService(),
-                imageOcrService =
-                    createTestSubmissionImageOcrService { _ ->
-                      ImageOcrResult(
-                          blocks =
-                              listOf(
-                                  ocrBlock("hello", 0.10f, 0.10f, 0.20f, 0.15f),
-                                  ocrBlock("there", 0.11f, 0.18f, 0.22f, 0.205f),
-                                  ocrBlock("friend", 0.12f, 0.23f, 0.25f, 0.28f),
-                              )
-                      )
-                    },
-                imageOcrTranslationService = createTestSubmissionImageOcrTranslationService(),
-            )
-
-        runCurrent()
-        model.openImageZoom("https://example.com/ocr-premerge.jpg")
-        runCurrent()
-        model.toggleImageOcrCurrent()
-        advanceUntilIdle()
-
-        val showingState =
-            assertIs<SubmissionImageOcrUiState.Showing>(
-                (model.state.value as SubmissionPagerUiState.Data).zoomImageOcrState
-            )
-        assertEquals(1, showingState.blocks.size)
-        assertEquals("hello there friend", showingState.blocks.single().originalText)
-      }
-
-  @Test
   fun imageOcrDialogRemainsUnavailableUntilTranslationIsApplied() =
       runTest(dispatcher.scheduler) {
         val model =

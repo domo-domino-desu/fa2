@@ -231,9 +231,19 @@ private fun SubmissionImageOcrOverlay(
   if (contentDisplayRect.width <= 0 || contentDisplayRect.height <= 0 || blocks.isEmpty()) return
   val density = LocalDensity.current
   val viewConfiguration = LocalViewConfiguration.current
-  val overlayTextStyle = MaterialTheme.typography.labelSmall
-  val overlayHorizontalPadding = 6.dp
-  val overlayVerticalPadding = 4.dp
+  val baseOverlayTextStyle = MaterialTheme.typography.labelSmall
+  val overlayTextStyle =
+      baseOverlayTextStyle.copy(
+          fontSize = baseOverlayTextStyle.fontSize * 0.75f,
+          lineHeight =
+              if (baseOverlayTextStyle.lineHeight.isUnspecified) {
+                baseOverlayTextStyle.lineHeight
+              } else {
+                baseOverlayTextStyle.lineHeight * 0.75f
+              },
+      )
+  val overlayHorizontalPadding = 2.dp
+  val overlayVerticalPadding = 1.dp
   val minimumBlockHeightPx =
       with(density) {
         val lineHeight =
@@ -271,7 +281,7 @@ private fun SubmissionImageOcrOverlay(
         Surface(
             color = Color.White.copy(alpha = 0.96f),
             contentColor = Color.Black,
-            shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(6.dp),
             modifier =
                 Modifier.offset { offset }
                     .size(
@@ -398,12 +408,12 @@ private fun SubmissionImageOcrOverlay(
                       height =
                           with(density) { preview.previewRect.height.coerceAtLeast(20f).toDp() },
                   )
-                  .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                  .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
                   .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.42f))
                   .border(
                       width = 2.dp,
                       color = MaterialTheme.colorScheme.tertiary,
-                      shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
+                      shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
                   ),
       )
     }

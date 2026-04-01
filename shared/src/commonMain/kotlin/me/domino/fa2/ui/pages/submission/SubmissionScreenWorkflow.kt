@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.application.attachmenttext.AttachmentTextExtractor
 import me.domino.fa2.application.ocr.SubmissionImageOcrService
 import me.domino.fa2.application.ocr.collectRecognizedTextBlocksIntersectingRegion
-import me.domino.fa2.application.ocr.mergeComicDialogueBlocks
 import me.domino.fa2.application.ocr.mergeRecognizedTextBlocksForOverlay
 import me.domino.fa2.application.submissionseries.seriesInitialReadyCount
 import me.domino.fa2.application.submissionseries.seriesWarmBufferCount
@@ -191,7 +190,7 @@ internal class SubmissionScreenWorkflow(
     imageOcrRecognitionJob =
         screenModelScope.launch {
           try {
-            val result = imageOcrService.recognize(targetImageUrl).mergeComicDialogueBlocks()
+            val result = imageOcrService.recognize(targetImageUrl)
             if (zoomOverlayImageUrl != targetImageUrl) return@launch
             if (result.blocks.isEmpty()) {
               imageOcrLog.w { "原图 OCR 完成但没有识别到文本 -> imageUrl=$targetImageUrl" }
