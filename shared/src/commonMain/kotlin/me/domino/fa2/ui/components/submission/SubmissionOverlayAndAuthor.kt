@@ -268,6 +268,10 @@ private fun SubmissionImageOcrOverlay(
       remember(renderedBlocks, dragState?.blockId) {
         renderedBlocks.sortedBy { block -> if (block.id == dragState?.blockId) 1 else 0 }
       }
+  val isMergeDragging = dragState != null
+  val mergeOverlayShape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+  val mergeOverlayBackgroundColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.42f)
+  val mergeOverlayBorderColor = MaterialTheme.colorScheme.tertiary
 
   Box(modifier = modifier.clipToBounds()) {
     blockRenderOrder.forEach { block ->
@@ -279,15 +283,30 @@ private fun SubmissionImageOcrOverlay(
             )
         val canOpenThisBlock = canOpenBlockDialog && block.hasTranslation
         Surface(
-            color = Color.White.copy(alpha = 0.96f),
-            contentColor = Color.Black,
-            shape = androidx.compose.foundation.shape.RoundedCornerShape(6.dp),
+            color =
+                if (isMergeDragging) mergeOverlayBackgroundColor
+                else Color.White.copy(alpha = 0.96f),
+            contentColor = if (isMergeDragging) mergeOverlayBorderColor else Color.Black,
+            shape =
+                if (isMergeDragging) mergeOverlayShape
+                else androidx.compose.foundation.shape.RoundedCornerShape(6.dp),
             modifier =
                 Modifier.offset { offset }
                     .size(
                         width = with(density) { block.visualRect.width.coerceAtLeast(20f).toDp() },
                         height =
                             with(density) { block.visualRect.height.coerceAtLeast(20f).toDp() },
+                    )
+                    .then(
+                        if (isMergeDragging) {
+                          Modifier.border(
+                              width = 2.dp,
+                              color = mergeOverlayBorderColor,
+                              shape = mergeOverlayShape,
+                          )
+                        } else {
+                          Modifier
+                        }
                     )
                     .pointerInput(
                         block.id,
@@ -378,18 +397,20 @@ private fun SubmissionImageOcrOverlay(
                       }
                     },
         ) {
-          Box(
-              modifier =
-                  Modifier.fillMaxSize()
-                      .padding(
-                          horizontal = overlayHorizontalPadding,
-                          vertical = overlayVerticalPadding,
-                      )
-          ) {
-            Text(
-                text = block.text,
-                style = overlayTextStyle,
-            )
+          if (!isMergeDragging) {
+            Box(
+                modifier =
+                    Modifier.fillMaxSize()
+                        .padding(
+                            horizontal = overlayHorizontalPadding,
+                            vertical = overlayVerticalPadding,
+                        )
+            ) {
+              Text(
+                  text = block.text,
+                  style = overlayTextStyle,
+              )
+            }
           }
         }
       }
@@ -408,12 +429,12 @@ private fun SubmissionImageOcrOverlay(
                       height =
                           with(density) { preview.previewRect.height.coerceAtLeast(20f).toDp() },
                   )
-                  .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                  .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.42f))
+                  .clip(mergeOverlayShape)
+                  .background(mergeOverlayBackgroundColor)
                   .border(
                       width = 2.dp,
-                      color = MaterialTheme.colorScheme.tertiary,
-                      shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+                      color = mergeOverlayBorderColor,
+                      shape = mergeOverlayShape,
                   ),
       )
     }
