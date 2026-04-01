@@ -28,6 +28,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
@@ -42,7 +44,10 @@ import me.domino.fa2.ui.components.GroupedFilterDropdownField
 import me.domino.fa2.ui.components.GroupedTextPickerDialog
 import me.domino.fa2.ui.components.StatusSurface
 import me.domino.fa2.ui.components.StatusSurfaceVariant
+import me.domino.fa2.ui.components.accessibilityHeading
+import me.domino.fa2.ui.components.accessibleToggleRow
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
+import me.domino.fa2.ui.components.presentationOnlySemantics
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
 import me.domino.fa2.ui.components.submission.SubmissionWaterfallPageControls
 import me.domino.fa2.ui.components.submission.SubmissionWaterfallViewportSnapshot
@@ -466,10 +471,14 @@ private fun RatingRow(
     onSetAdult: (Boolean) -> Unit,
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-    Text(text = title, style = MaterialTheme.typography.titleSmall)
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier.accessibilityHeading(),
+    )
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
       RatingCheckbox(generalLabel, general, onSetGeneral)
@@ -481,8 +490,22 @@ private fun RatingRow(
 
 @Composable
 private fun RatingCheckbox(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-  Row(verticalAlignment = Alignment.CenterVertically) {
-    Checkbox(checked = checked, onCheckedChange = onCheckedChange)
+  Row(
+      modifier =
+          Modifier.accessibleToggleRow(
+              label = label,
+              checked = checked,
+              role = Role.Checkbox,
+              onCheckedChange = onCheckedChange,
+          ),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+  ) {
+    Checkbox(
+        checked = checked,
+        onCheckedChange = null,
+        modifier = Modifier.presentationOnlySemantics().scale(0.84f),
+    )
     Text(text = label, style = MaterialTheme.typography.bodyMedium)
   }
 }

@@ -113,7 +113,12 @@ kotlin {
       }
     }
 
-    val desktopTest by getting { dependencies { implementation(compose.desktop.currentOs) } }
+    val desktopTest by getting {
+      dependencies {
+        implementation(compose.desktop.currentOs)
+        implementation(compose.desktop.uiTestJUnit4)
+      }
+    }
 
     val androidMain by getting {
       dependsOn(jvmSharedMain)

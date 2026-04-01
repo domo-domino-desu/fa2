@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import me.domino.fa2.ui.components.accessibleClickableSummary
 import me.domino.fa2.ui.host.LocalAppI18n
 import me.domino.fa2.ui.host.LocalSearchUiLabelsRepository
 import me.domino.fa2.ui.search.SearchUiMetadataKey
@@ -103,7 +104,16 @@ private fun SubmissionBrowseMetadataField(label: String, value: String, onClick:
   Surface(
       color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.72f),
       shape = RoundedCornerShape(999.dp),
-      modifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier,
+      modifier =
+          if (onClick != null) {
+            Modifier.clickable(onClick = onClick)
+                .accessibleClickableSummary(
+                    title =
+                        searchUiLabelsRepository.formatLabelValue(label, value, appI18n.uiLanguage)
+                )
+          } else {
+            Modifier
+          },
   ) {
     Text(
         text = searchUiLabelsRepository.formatLabelValue(label, value, appI18n.uiLanguage),

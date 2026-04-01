@@ -29,6 +29,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
@@ -255,11 +258,24 @@ private fun UserProfileExpandToggle(expanded: Boolean, onClick: () -> Unit) {
       } else {
         stringResource(Res.string.expand_profile)
       }
+  val stateDescription =
+      if (expanded) {
+        stringResource(Res.string.accessibility_expanded)
+      } else {
+        stringResource(Res.string.accessibility_collapsed)
+      }
   Box(
       modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 1.dp),
       contentAlignment = Alignment.Center,
   ) {
-    ExpressiveIconButton(onClick = onClick) {
+    ExpressiveIconButton(
+        onClick = onClick,
+        modifier =
+            Modifier.semantics {
+              this.contentDescription = contentDescription
+              this.stateDescription = stateDescription
+            },
+    ) {
       Icon(
           imageVector =
               if (expanded) {
@@ -267,7 +283,7 @@ private fun UserProfileExpandToggle(expanded: Boolean, onClick: () -> Unit) {
               } else {
                 FaMaterialSymbols.Outlined.ExpandMore
               },
-          contentDescription = contentDescription,
+          contentDescription = null,
           tint = MaterialTheme.colorScheme.onSurfaceVariant,
           modifier = Modifier.size(20.dp),
       )
@@ -322,8 +338,18 @@ private fun UserWatchActionButton(
         isWatching -> stringResource(Res.string.unwatch)
         else -> stringResource(Res.string.watch)
       }
+  val stateDescription =
+      when {
+        updating -> stringResource(Res.string.processing)
+        isWatching -> stringResource(Res.string.accessibility_watch_state_watching)
+        else -> stringResource(Res.string.accessibility_watch_state_not_watching)
+      }
   Surface(
-      modifier = Modifier.size(52.dp).clickable(enabled = !updating, onClick = onClick),
+      modifier =
+          Modifier.size(52.dp).clickable(enabled = !updating, onClick = onClick).semantics {
+            this.contentDescription = contentDescription
+            this.stateDescription = stateDescription
+          },
       shape = RoundedCornerShape(16.dp),
       color =
           if (isWatching) {
@@ -346,7 +372,7 @@ private fun UserWatchActionButton(
                 } else {
                   FaMaterialSymbols.Outlined.Notifications
                 },
-            contentDescription = contentDescription,
+            contentDescription = null,
         )
       }
     }

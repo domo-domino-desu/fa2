@@ -22,6 +22,7 @@ import fa2.shared.generated.resources.Res
 import fa2.shared.generated.resources.copied_to_clipboard
 import me.domino.fa2.data.model.UserContact
 import me.domino.fa2.ui.components.LocalShowToast
+import me.domino.fa2.ui.components.accessibleCombinedAction
 import me.domino.fa2.ui.components.platform.rememberPlatformTextCopier
 import me.domino.fa2.ui.icons.FaContactIcons
 import me.domino.fa2.util.logging.FaLog
@@ -69,7 +70,6 @@ private fun UserContactIconAction(contact: UserContact) {
   val showToast = LocalShowToast.current
   val copiedText = stringResource(Res.string.copied_to_clipboard)
   val icon = resolveUserContactIcon(contact.label) ?: return
-
   Icon(
       imageVector = icon,
       contentDescription = displayUserContactLabel(contact.label),
@@ -117,7 +117,8 @@ private fun UserContactTextAction(contact: UserContact) {
       overflow = TextOverflow.Ellipsis,
       modifier =
           Modifier.widthIn(max = 260.dp)
-              .combinedClickable(
+              .accessibleCombinedAction(
+                  label = buildUserContactText(contact),
                   onClick = {
                     activateUserContact(
                         contact = contact,

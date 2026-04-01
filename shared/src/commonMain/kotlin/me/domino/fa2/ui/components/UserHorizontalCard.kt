@@ -40,6 +40,11 @@ fun UserHorizontalCard(
         modifier =
             Modifier.fillMaxWidth()
                 .clickable(onClick = onClick)
+                .accessibleClickableSummary(
+                    title = user.displayName,
+                    subtitle = "~${user.username}",
+                    mergeDescendants = false,
+                )
                 .padding(horizontal = 14.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically,

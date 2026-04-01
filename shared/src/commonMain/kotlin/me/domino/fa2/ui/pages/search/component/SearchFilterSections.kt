@@ -12,7 +12,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import me.domino.fa2.ui.components.accessibilityHeading
+import me.domino.fa2.ui.components.accessibleToggleRow
+import me.domino.fa2.ui.components.presentationOnlySemantics
 import me.domino.fa2.ui.pages.search.SearchGender
 
 private data class GenderOption(val gender: SearchGender, val label: String, val checked: Boolean)
@@ -34,18 +39,33 @@ internal fun GenderKeywordsSection(
         )
       }
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-    Text(text = title, style = MaterialTheme.typography.titleSmall)
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier.accessibilityHeading(),
+    )
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
         maxItemsInEachRow = 3,
     ) {
       options.forEach { option ->
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier =
+                Modifier.accessibleToggleRow(
+                    label = option.label,
+                    checked = option.checked,
+                    role = Role.Checkbox,
+                    onCheckedChange = { checked -> onToggleGender(option.gender, checked) },
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
           Checkbox(
               checked = option.checked,
-              onCheckedChange = { checked -> onToggleGender(option.gender, checked) },
+              onCheckedChange = null,
+              modifier = Modifier.presentationOnlySemantics().scale(0.84f),
           )
           Text(option.label)
         }
@@ -69,10 +89,14 @@ internal fun RatingsSection(
     onSetAdult: (Boolean) -> Unit,
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-    Text(title, style = MaterialTheme.typography.titleSmall)
+    Text(
+        title,
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier.accessibilityHeading(),
+    )
     FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       RatingItem(generalLabel, general, onSetGeneral)
       RatingItem(matureLabel, mature, onSetMature)
@@ -105,10 +129,14 @@ internal fun SubmissionTypeSection(
     onSetTypePoetry: (Boolean) -> Unit,
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-    Text(title, style = MaterialTheme.typography.titleSmall)
+    Text(
+        title,
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier.accessibilityHeading(),
+    )
     FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       RatingItem(artLabel, typeArt, onSetTypeArt)
       RatingItem(musicLabel, typeMusic, onSetTypeMusic)
@@ -122,8 +150,22 @@ internal fun SubmissionTypeSection(
 
 @Composable
 private fun RatingItem(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-  Row(verticalAlignment = Alignment.CenterVertically) {
-    Checkbox(checked = checked, onCheckedChange = onCheckedChange)
+  Row(
+      modifier =
+          Modifier.accessibleToggleRow(
+              label = label,
+              checked = checked,
+              role = Role.Checkbox,
+              onCheckedChange = onCheckedChange,
+          ),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+  ) {
+    Checkbox(
+        checked = checked,
+        onCheckedChange = null,
+        modifier = Modifier.presentationOnlySemantics().scale(0.84f),
+    )
     Text(label)
   }
 }

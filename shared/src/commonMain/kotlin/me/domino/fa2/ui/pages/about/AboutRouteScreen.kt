@@ -62,6 +62,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import me.domino.fa2.generated.AboutMetadata
 import me.domino.fa2.ui.components.LocalShowToast
+import me.domino.fa2.ui.components.accessibilityHeading
+import me.domino.fa2.ui.components.accessibleClickableSummary
 import me.domino.fa2.ui.components.platform.PlatformTextFileDestination
 import me.domino.fa2.ui.components.platform.PlatformTextFileWriteRequest
 import me.domino.fa2.ui.components.platform.PlatformTextFileWriteResult
@@ -273,6 +275,7 @@ private fun AboutActionRow(
       modifier =
           Modifier.fillMaxWidth()
               .clickable(onClick = onClick)
+              .accessibleClickableSummary(title = title, subtitle = subtitle)
               .padding(horizontal = 16.dp, vertical = 14.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -319,6 +322,7 @@ private fun ThanksSection(onOpenFurAffinityApp: () -> Unit) {
         text = stringResource(Res.string.about_thanks),
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Medium,
+        modifier = Modifier.accessibilityHeading(),
     )
     Text(
         text = stringResource(Res.string.about_acknowledgements_transfur_bar),
@@ -330,7 +334,11 @@ private fun ThanksSection(onOpenFurAffinityApp: () -> Unit) {
         style = MaterialTheme.typography.bodyLarge,
         color = MaterialTheme.colorScheme.primary,
         textDecoration = TextDecoration.Underline,
-        modifier = Modifier.clickable(onClick = onOpenFurAffinityApp),
+        modifier =
+            Modifier.clickable(onClick = onOpenFurAffinityApp)
+                .accessibleClickableSummary(
+                    title = stringResource(Res.string.about_acknowledgements_furaffinity_app)
+                ),
     )
   }
 }

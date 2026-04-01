@@ -68,6 +68,7 @@ import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.PaginationRetryBar
 import me.domino.fa2.ui.components.PaginationRetryDirection
 import me.domino.fa2.ui.components.ThumbnailImage
+import me.domino.fa2.ui.components.accessibleClickableSummary
 import me.domino.fa2.ui.host.LocalTaxonomyCatalog
 import me.domino.fa2.ui.host.LocalTaxonomyRepository
 import me.domino.fa2.ui.icons.FaMaterialSymbols
@@ -598,7 +599,10 @@ private fun SubmissionWaterfallItem(
               color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
           ),
       modifier =
-          Modifier.fillMaxWidth().testTag("submission-waterfall-card").clickable(onClick = onClick),
+          Modifier.fillMaxWidth()
+              .testTag("submission-waterfall-card")
+              .clickable(onClick = onClick)
+              .accessibleClickableSummary(title = item.title, subtitle = item.author),
   ) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
       Box(

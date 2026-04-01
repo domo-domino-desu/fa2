@@ -25,12 +25,15 @@ fun ThumbnailImage(
     url: String,
     /** 组件修饰符。 */
     modifier: Modifier = Modifier,
+    /** 图片说明。 */
+    contentDescription: String? = null,
     /** 是否展示加载占位层。 */
     showLoadingPlaceholder: Boolean = true,
 ) {
   NetworkImage(
       url = url,
       modifier = modifier,
+      contentDescription = contentDescription,
       contentScale = ContentScale.Crop,
       showLoadingPlaceholder = showLoadingPlaceholder,
   )
@@ -43,6 +46,8 @@ fun NetworkImage(
     url: String,
     /** 组件修饰符。 */
     modifier: Modifier = Modifier,
+    /** 图片说明。 */
+    contentDescription: String? = null,
     /** 图片缩放模式。 */
     contentScale: ContentScale = ContentScale.Fit,
     /** 加载主图时用于占位的缩略图地址。 */
@@ -65,6 +70,7 @@ fun NetworkImage(
       NetworkImage(
           url = normalizedThumbnailUrl,
           modifier = modifier,
+          contentDescription = contentDescription,
           contentScale = contentScale,
           showLoadingPlaceholder = showLoadingPlaceholder,
           showTopLinearLoadingProgress = false,
@@ -109,7 +115,7 @@ fun NetworkImage(
   Box(modifier = modifier) {
     SubcomposeAsyncImage(
         model = request,
-        contentDescription = null,
+        contentDescription = contentDescription,
         modifier = Modifier.fillMaxSize(),
         contentScale = contentScale,
         filterQuality = FilterQuality.High,
@@ -121,6 +127,7 @@ fun NetworkImage(
             NetworkImage(
                 url = normalizedThumbnailUrl,
                 modifier = Modifier.fillMaxSize(),
+                contentDescription = contentDescription,
                 contentScale = contentScale,
                 showLoadingPlaceholder = showLoadingPlaceholder,
                 showTopLinearLoadingProgress = false,
@@ -141,6 +148,7 @@ fun NetworkImage(
             NetworkImage(
                 url = normalizedThumbnailUrl,
                 modifier = Modifier.fillMaxSize(),
+                contentDescription = contentDescription,
                 contentScale = contentScale,
                 showLoadingPlaceholder = showLoadingPlaceholder,
                 showTopLinearLoadingProgress = false,

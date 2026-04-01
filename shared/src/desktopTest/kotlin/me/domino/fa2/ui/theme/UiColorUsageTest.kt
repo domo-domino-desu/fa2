@@ -37,6 +37,12 @@ class UiColorUsageTest {
             AllowedHardcodedColor(
                 path =
                     "shared/src/commonMain/kotlin/me/domino/fa2/ui/components/submission/SubmissionOverlayAndAuthor.kt",
+                snippet =
+                    "LoadingIndicator(modifier = Modifier.size(18.dp), color = Color(0xD8D8D8D8))",
+            ),
+            AllowedHardcodedColor(
+                path =
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/components/submission/SubmissionOverlayAndAuthor.kt",
                 snippet = "SubmissionImageOcrUiState.Loading -> Color(0xD8D8D8D8)",
             ),
             AllowedHardcodedColor(
@@ -52,12 +58,13 @@ class UiColorUsageTest {
             AllowedHardcodedColor(
                 path =
                     "shared/src/commonMain/kotlin/me/domino/fa2/ui/components/submission/SubmissionOverlayAndAuthor.kt",
-                snippet = "color = Color.White.copy(alpha = 0.96f),",
+                snippet = "else Color.White.copy(alpha = 0.96f),",
             ),
             AllowedHardcodedColor(
                 path =
                     "shared/src/commonMain/kotlin/me/domino/fa2/ui/components/submission/SubmissionOverlayAndAuthor.kt",
-                snippet = "contentColor = Color.Black,",
+                snippet =
+                    "contentColor = if (isMergeDragging) mergeOverlayBorderColor else Color.Black,",
             ),
             AllowedHardcodedColor(
                 path =

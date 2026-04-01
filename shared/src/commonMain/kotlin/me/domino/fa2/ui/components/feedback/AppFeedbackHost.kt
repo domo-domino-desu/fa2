@@ -49,7 +49,10 @@ fun AppFeedbackHost(content: @Composable () -> Unit) {
       content()
       SnackbarHost(
           hostState = snackbarHostState,
-          modifier = Modifier.align(Alignment.BottomCenter).padding(12.dp),
+          modifier =
+              Modifier.align(Alignment.BottomCenter)
+                  .padding(12.dp)
+                  .then(accessibilitySnackbarModifier()),
       )
     }
   }

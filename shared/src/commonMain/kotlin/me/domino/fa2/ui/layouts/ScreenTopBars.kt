@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.components.ExpressiveIconButton
+import me.domino.fa2.ui.components.accessibilityHeading
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import org.jetbrains.compose.resources.stringResource
 
@@ -49,9 +50,9 @@ private fun RouteTopBar(
               style = MaterialTheme.typography.titleLarge,
               modifier =
                   if (onTitleClick != null) {
-                    Modifier.clickable(onClick = onTitleClick)
+                    Modifier.accessibilityHeading().clickable(onClick = onTitleClick)
                   } else {
-                    Modifier
+                    Modifier.accessibilityHeading()
                   },
           )
         }
@@ -300,9 +301,9 @@ fun BrowseFilterOverlayTopBar(
             style = MaterialTheme.typography.titleMedium,
             modifier =
                 if (onTitleClick != null) {
-                  Modifier.clickable(onClick = onTitleClick)
+                  Modifier.accessibilityHeading().clickable(onClick = onTitleClick)
                 } else {
-                  Modifier
+                  Modifier.accessibilityHeading()
                 },
         )
       },
@@ -347,9 +348,9 @@ fun SearchOverlayTopBar(
             style = MaterialTheme.typography.titleMedium,
             modifier =
                 if (onTitleClick != null) {
-                  Modifier.clickable(onClick = onTitleClick)
+                  Modifier.accessibilityHeading().clickable(onClick = onTitleClick)
                 } else {
-                  Modifier
+                  Modifier.accessibilityHeading()
                 },
         )
       },

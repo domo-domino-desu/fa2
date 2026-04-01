@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import me.domino.fa2.ui.components.accessibleClickableSummary
 
 @Composable
 internal fun SubmissionInfoMetricChip(metric: SubmissionInfoMetric) {
@@ -18,7 +19,12 @@ internal fun SubmissionInfoMetricChip(metric: SubmissionInfoMetric) {
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(4.dp),
       modifier =
-          if (metric.onClick != null) Modifier.clickable(onClick = metric.onClick) else Modifier,
+          if (metric.onClick != null) {
+            Modifier.clickable(onClick = metric.onClick)
+                .accessibleClickableSummary(title = metric.text)
+          } else {
+            Modifier
+          },
   ) {
     Icon(
         imageVector = metric.icon,

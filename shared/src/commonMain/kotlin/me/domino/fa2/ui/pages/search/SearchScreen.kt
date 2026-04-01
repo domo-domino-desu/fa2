@@ -1,6 +1,5 @@
 package me.domino.fa2.ui.pages.search
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
+import me.domino.fa2.ui.components.accessibleReadOnlyFieldTrigger
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
+import me.domino.fa2.ui.components.presentationOnlySemantics
 import me.domino.fa2.ui.components.submission.SubmissionWaterfall
 import me.domino.fa2.ui.components.submission.SubmissionWaterfallPageControls
 import me.domino.fa2.ui.components.submission.SubmissionWaterfallViewportSnapshot
@@ -146,6 +147,14 @@ fun SearchScreen(
 
 @Composable
 private fun SearchBarShell(query: String, overlayVisible: Boolean, onToggleOverlay: () -> Unit) {
+  val queryLabel = stringResource(Res.string.query)
+  val emptyValueText = stringResource(Res.string.accessibility_not_set)
+  val actionLabel =
+      if (overlayVisible) {
+        stringResource(Res.string.close_search_overlay)
+      } else {
+        stringResource(Res.string.open_search_overlay)
+      }
   Surface(
       color = MaterialTheme.colorScheme.surface,
       shadowElevation = 2.dp,
@@ -163,7 +172,7 @@ private fun SearchBarShell(query: String, overlayVisible: Boolean, onToggleOverl
             readOnly = true,
             placeholder = { Text(stringResource(Res.string.search_bar_placeholder)) },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp).presentationOnlySemantics(),
             trailingIcon = {
               Icon(
                   imageVector =
@@ -181,7 +190,18 @@ private fun SearchBarShell(query: String, overlayVisible: Boolean, onToggleOverl
               )
             },
         )
-        Box(modifier = Modifier.fillMaxWidth().height(56.dp).clickable(onClick = onToggleOverlay))
+        Box(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .height(56.dp)
+                    .accessibleReadOnlyFieldTrigger(
+                        label = queryLabel,
+                        value = query,
+                        emptyValue = emptyValueText,
+                        actionLabel = actionLabel,
+                        onClick = onToggleOverlay,
+                    )
+        )
       }
     }
   }

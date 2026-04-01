@@ -1,6 +1,5 @@
 package me.domino.fa2.ui.pages.search.component
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -23,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.components.ExpressiveTextButton
+import me.domino.fa2.ui.components.accessibleReadOnlyFieldTrigger
+import me.domino.fa2.ui.components.presentationOnlySemantics
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.search.util.epochMillisToIsoDate
 import me.domino.fa2.ui.pages.search.util.isoDateToEpochMillisOrNull
@@ -133,6 +134,8 @@ private fun ManualDateField(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+  val emptyValueText = stringResource(Res.string.accessibility_not_set)
+  val actionLabel = stringResource(Res.string.accessibility_open_field, label)
   Box(modifier = modifier) {
     OutlinedTextField(
         value = value,
@@ -146,8 +149,19 @@ private fun ManualDateField(
               contentDescription = stringResource(Res.string.select_date),
           )
         },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().presentationOnlySemantics(),
     )
-    Box(modifier = Modifier.fillMaxWidth().height(56.dp).clickable(onClick = onClick))
+    Box(
+        modifier =
+            Modifier.fillMaxWidth()
+                .height(56.dp)
+                .accessibleReadOnlyFieldTrigger(
+                    label = label,
+                    value = value,
+                    emptyValue = emptyValueText,
+                    actionLabel = actionLabel,
+                    onClick = onClick,
+                )
+    )
   }
 }

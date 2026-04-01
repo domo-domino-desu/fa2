@@ -39,6 +39,7 @@ import me.domino.fa2.ui.components.PaginationRetryDirection
 import me.domino.fa2.ui.components.SkeletonBlock
 import me.domino.fa2.ui.components.StatusSurface
 import me.domino.fa2.ui.components.StatusSurfaceVariant
+import me.domino.fa2.ui.components.accessibleClickableSummary
 import me.domino.fa2.ui.pages.user.profile.UserBodyScrollPosition
 import me.domino.fa2.ui.pages.user.profile.UserChildRouteTabs
 import me.domino.fa2.ui.pages.user.profile.UserSectionTopDefaults
@@ -281,8 +282,17 @@ private fun UserJournalsSkeleton() {
 
 @Composable
 private fun JournalSummaryCard(item: JournalSummary, onClick: () -> Unit) {
+  val metadataText =
+      "${item.timestampNatural} · ${stringResource(Res.string.comments_inline_count, item.commentCount)}"
   Card(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).clickable(onClick = onClick),
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(horizontal = 12.dp)
+              .clickable(onClick = onClick)
+              .accessibleClickableSummary(
+                  title = item.title,
+                  subtitle = item.excerpt.ifBlank { metadataText },
+              ),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
       border =
           BorderStroke(
@@ -300,8 +310,7 @@ private fun JournalSummaryCard(item: JournalSummary, onClick: () -> Unit) {
           fontWeight = FontWeight.SemiBold,
       )
       Text(
-          text =
-              "${item.timestampNatural} · ${stringResource(Res.string.comments_inline_count, item.commentCount)}",
+          text = metadataText,
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
       )

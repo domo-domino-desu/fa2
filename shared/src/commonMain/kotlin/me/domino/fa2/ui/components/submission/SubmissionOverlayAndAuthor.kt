@@ -49,6 +49,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
@@ -73,9 +76,32 @@ import me.domino.fa2.ui.pages.submission.SubmissionImageOcrTranslationMode
 import me.domino.fa2.ui.pages.submission.SubmissionImageOcrUiState
 import me.domino.fa2.util.isGifUrl
 import me.domino.fa2.util.logging.FaLog
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 private val imageOcrOverlayLog = FaLog.withTag("ImageOcrOverlay")
+
+internal fun submissionImageOcrStateDescriptionRes(
+    state: SubmissionImageOcrUiState
+): StringResource =
+    when (state) {
+      SubmissionImageOcrUiState.Idle -> Res.string.accessibility_ocr_state_idle
+      SubmissionImageOcrUiState.Loading -> Res.string.accessibility_ocr_state_loading
+      is SubmissionImageOcrUiState.Showing -> Res.string.accessibility_ocr_state_applied
+      is SubmissionImageOcrUiState.Error -> Res.string.accessibility_ocr_state_error
+    }
+
+internal fun submissionImageOcrTranslationStateDescriptionRes(
+    mode: SubmissionImageOcrTranslationMode
+): StringResource =
+    when (mode) {
+      SubmissionImageOcrTranslationMode.IDLE -> Res.string.accessibility_translation_state_idle
+      SubmissionImageOcrTranslationMode.LOADING ->
+          Res.string.accessibility_translation_state_loading
+      SubmissionImageOcrTranslationMode.APPLIED ->
+          Res.string.accessibility_translation_state_applied
+      SubmissionImageOcrTranslationMode.ERROR -> Res.string.accessibility_translation_state_error
+    }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -103,6 +129,7 @@ internal fun SubmissionZoomImageOverlay(
       NetworkImage(
           url = normalizedUrl,
           modifier = Modifier.fillMaxSize().padding(12.dp).clickable { onDismiss() },
+          contentDescription = stringResource(Res.string.original_image),
           contentScale = ContentScale.Fit,
           showLoadingPlaceholder = false,
       )
@@ -153,16 +180,23 @@ internal fun SubmissionZoomImageOverlay(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
       if (!isGif) {
+        val ocrActionLabel = stringResource(Res.string.image_ocr_action)
+        val ocrStateDescription = stringResource(submissionImageOcrStateDescriptionRes(ocrState))
         ExpressiveIconButton(
             onClick = onToggleOcr,
             enabled = ocrState !is SubmissionImageOcrUiState.Loading,
+            modifier =
+                Modifier.semantics {
+                  contentDescription = ocrActionLabel
+                  stateDescription = ocrStateDescription
+                },
         ) {
           if (ocrState is SubmissionImageOcrUiState.Loading) {
             LoadingIndicator(modifier = Modifier.size(18.dp), color = Color(0xD8D8D8D8))
           } else {
             Icon(
                 imageVector = FaMaterialSymbols.Outlined.DocumentScanner,
-                contentDescription = stringResource(Res.string.image_ocr_action),
+                contentDescription = null,
                 tint =
                     when (ocrState) {
                       is SubmissionImageOcrUiState.Showing -> MaterialTheme.colorScheme.primary
@@ -174,16 +208,26 @@ internal fun SubmissionZoomImageOverlay(
           }
         }
         if (translationEnabled && ocrState is SubmissionImageOcrUiState.Showing) {
+          val translationActionLabel = stringResource(Res.string.image_ocr_translate_action)
+          val translationStateDescription =
+              stringResource(
+                  submissionImageOcrTranslationStateDescriptionRes(ocrState.translationMode)
+              )
           ExpressiveIconButton(
               onClick = onTranslateOcr,
               enabled = ocrState.translationMode != SubmissionImageOcrTranslationMode.LOADING,
+              modifier =
+                  Modifier.semantics {
+                    contentDescription = translationActionLabel
+                    stateDescription = translationStateDescription
+                  },
           ) {
             if (ocrState.translationMode == SubmissionImageOcrTranslationMode.LOADING) {
               LoadingIndicator(modifier = Modifier.size(18.dp), color = Color(0xD8D8D8D8))
             } else {
               Icon(
                   imageVector = FaMaterialSymbols.Outlined.Translate,
-                  contentDescription = stringResource(Res.string.image_ocr_translate_action),
+                  contentDescription = null,
                   tint =
                       when (ocrState.translationMode) {
                         SubmissionImageOcrTranslationMode.APPLIED ->

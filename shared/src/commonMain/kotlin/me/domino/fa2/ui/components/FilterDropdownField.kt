@@ -172,6 +172,8 @@ fun FilterDialogTriggerField(
     onOpenPicker: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+  val emptyValueText = stringResource(Res.string.accessibility_not_set)
+  val actionLabel = stringResource(Res.string.accessibility_open_field, label)
   Box(modifier = modifier) {
     OutlinedTextField(
         value = valueLabel,
@@ -180,9 +182,19 @@ fun FilterDialogTriggerField(
         label = { Text(label) },
         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
         colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().presentationOnlySemantics(),
     )
-    Box(modifier = Modifier.matchParentSize().clickable(onClick = onOpenPicker))
+    Box(
+        modifier =
+            Modifier.matchParentSize()
+                .accessibleReadOnlyFieldTrigger(
+                    label = label,
+                    value = valueLabel,
+                    emptyValue = emptyValueText,
+                    actionLabel = actionLabel,
+                    onClick = onOpenPicker,
+                )
+    )
   }
 }
 

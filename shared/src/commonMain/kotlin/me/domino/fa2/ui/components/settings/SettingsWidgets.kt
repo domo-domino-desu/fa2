@@ -27,6 +27,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import me.domino.fa2.ui.components.accessibilityHeading
+import me.domino.fa2.ui.components.accessibleClickableSummary
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 
 /** More 页顶部账号头。 */
@@ -44,7 +46,15 @@ fun SettingsAccountHeader(
     modifier: Modifier = Modifier,
 ) {
   Surface(
-      modifier = modifier.fillMaxWidth().clickable(enabled = enabled, onClick = onClick),
+      modifier =
+          modifier
+              .fillMaxWidth()
+              .clickable(enabled = enabled, onClick = onClick)
+              .accessibleClickableSummary(
+                  title = title,
+                  subtitle = subtitle,
+                  mergeDescendants = false,
+              ),
       shape = RoundedCornerShape(14.dp),
       color = MaterialTheme.colorScheme.surface,
       border =
@@ -106,7 +116,7 @@ fun SettingsGroup(
     if (!title.isNullOrBlank()) {
       Text(
           text = title,
-          modifier = Modifier.padding(horizontal = titleHorizontalPadding),
+          modifier = Modifier.padding(horizontal = titleHorizontalPadding).accessibilityHeading(),
           style = MaterialTheme.typography.labelLarge,
           color = MaterialTheme.colorScheme.primary,
       )
@@ -156,6 +166,7 @@ fun SettingsListItem(
             modifier
                 .fillMaxWidth()
                 .clickable(enabled = enabled, onClick = onClick)
+                .accessibleClickableSummary(title = title, subtitle = subtitle)
                 .padding(horizontal = 14.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,

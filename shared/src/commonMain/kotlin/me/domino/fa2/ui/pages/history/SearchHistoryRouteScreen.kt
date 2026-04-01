@@ -33,6 +33,7 @@ import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.SearchHistoryRecord
 import me.domino.fa2.data.repository.ActivityHistoryRepository
+import me.domino.fa2.ui.components.accessibleClickableSummary
 import me.domino.fa2.ui.layouts.SearchHistoryRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.pages.search.SearchRouteScreen
@@ -103,14 +104,19 @@ class SearchHistoryRouteScreen : Screen {
                           color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.46f),
                       ),
                   modifier =
-                      Modifier.fillMaxWidth().clickable {
-                        navigator.push(
-                            SearchRouteScreen(
-                                initialQuery = entry.query,
-                                initialSearchUrl = entry.searchUrl,
+                      Modifier.fillMaxWidth()
+                          .clickable {
+                            navigator.push(
+                                SearchRouteScreen(
+                                    initialQuery = entry.query,
+                                    initialSearchUrl = entry.searchUrl,
+                                )
                             )
-                        )
-                      },
+                          }
+                          .accessibleClickableSummary(
+                              title = entry.query,
+                              subtitle = entry.filtersSummary,
+                          ),
               ) {
                 Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
                   Text(
