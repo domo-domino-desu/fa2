@@ -4,7 +4,7 @@ import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.ocr.RecognizedTextBlock
 import me.domino.fa2.util.logging.FaLog
 
-private const val overlayRowCenterThresholdFactor = 0.65f
+private const val overlayRowCenterThresholdFactor = 0.85f
 private val imageOcrOverlayMergeLog = FaLog.withTag("ImageOcrOverlayMerge")
 
 internal data class NormalizedImageRect(

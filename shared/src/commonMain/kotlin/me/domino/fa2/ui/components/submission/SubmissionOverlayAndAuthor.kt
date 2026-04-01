@@ -12,13 +12,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -44,14 +48,17 @@ import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isUnspecified
+import androidx.compose.ui.window.Dialog
 import com.github.panpf.zoomimage.CoilZoomAsyncImage
 import com.github.panpf.zoomimage.rememberCoilZoomState
 import fa2.shared.generated.resources.*
+import kotlin.math.max
 import kotlin.math.roundToInt
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.ui.components.CenterCircularWavyImageLoadingProgress
@@ -223,9 +230,24 @@ private fun SubmissionImageOcrOverlay(
 ) {
   if (contentDisplayRect.width <= 0 || contentDisplayRect.height <= 0 || blocks.isEmpty()) return
   val density = LocalDensity.current
+  val viewConfiguration = LocalViewConfiguration.current
+  val overlayTextStyle = MaterialTheme.typography.labelSmall
+  val overlayHorizontalPadding = 6.dp
+  val overlayVerticalPadding = 4.dp
+  val minimumBlockHeightPx =
+      with(density) {
+        val lineHeight =
+            if (overlayTextStyle.lineHeight.isUnspecified) {
+              (overlayTextStyle.fontSize * 1.2f).toPx()
+            } else {
+              overlayTextStyle.lineHeight.toPx()
+            }
+        lineHeight + overlayVerticalPadding.toPx() * 2f
+      }
+  val dragSlopPx = viewConfiguration.touchSlop * 1.35f
   val renderedBlocks =
-      remember(blocks, contentDisplayRect) {
-        blocks.mapNotNull { it.toRenderedBlock(contentDisplayRect) }
+      remember(blocks, contentDisplayRect, minimumBlockHeightPx) {
+        blocks.mapNotNull { it.toRenderedBlock(contentDisplayRect, minimumBlockHeightPx) }
       }
   var dragState by remember(renderedBlocks) { mutableStateOf<ActiveImageOcrDrag?>(null) }
   val mergePreview =
@@ -242,8 +264,8 @@ private fun SubmissionImageOcrOverlay(
       key(block.id) {
         val offset =
             IntOffset(
-                x = block.left.roundToInt(),
-                y = block.top.roundToInt(),
+                x = block.visualRect.left.roundToInt(),
+                y = block.visualRect.top.roundToInt(),
             )
         val canOpenThisBlock = canOpenBlockDialog && block.hasTranslation
         Surface(
@@ -253,8 +275,9 @@ private fun SubmissionImageOcrOverlay(
             modifier =
                 Modifier.offset { offset }
                     .size(
-                        width = with(density) { block.width.coerceAtLeast(20f).toDp() },
-                        height = with(density) { block.height.coerceAtLeast(20f).toDp() },
+                        width = with(density) { block.visualRect.width.coerceAtLeast(20f).toDp() },
+                        height =
+                            with(density) { block.visualRect.height.coerceAtLeast(20f).toDp() },
                     )
                     .pointerInput(
                         block.id,
@@ -262,17 +285,18 @@ private fun SubmissionImageOcrOverlay(
                         canOpenThisBlock,
                         renderedBlocks,
                         contentDisplayRect,
+                        dragSlopPx,
                     ) {
                       imageOcrOverlayLog.d {
-                        "安装拖拽监听 -> blockId=${block.id}, rect=${block.toRect().toLogString()}"
+                        "安装拖拽监听 -> blockId=${block.id}, rect=${block.visualRect.toLogString()}"
                       }
                       awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
                         val pointerId = down.id
                         val downAbsolutePosition =
                             Offset(
-                                x = block.left + down.position.x,
-                                y = block.top + down.position.y,
+                                x = block.visualRect.left + down.position.x,
+                                y = block.visualRect.top + down.position.y,
                             )
                         var trackedAbsolutePosition = downAbsolutePosition
                         var moved = false
@@ -290,16 +314,23 @@ private fun SubmissionImageOcrOverlay(
                           }
 
                           val delta = change.position - change.previousPosition
-                          if (dragEnabled && delta != Offset.Zero) {
-                            moved = true
+                          if (delta != Offset.Zero) {
                             trackedAbsolutePosition += delta
-                            dragState =
-                                ActiveImageOcrDrag(
-                                    blockId = block.id,
-                                    startPointerPosition = downAbsolutePosition,
-                                    pointerPosition = trackedAbsolutePosition,
-                                )
-                            change.consume()
+                            if (
+                                dragEnabled &&
+                                    (moved ||
+                                        (trackedAbsolutePosition - downAbsolutePosition)
+                                            .getDistance() > dragSlopPx)
+                            ) {
+                              moved = true
+                              dragState =
+                                  ActiveImageOcrDrag(
+                                      blockId = block.id,
+                                      startPointerPosition = downAbsolutePosition,
+                                      pointerPosition = trackedAbsolutePosition,
+                                  )
+                              change.consume()
+                            }
                           }
                         }
 
@@ -337,12 +368,17 @@ private fun SubmissionImageOcrOverlay(
                       }
                     },
         ) {
-          Box(modifier = Modifier.fillMaxSize().padding(horizontal = 6.dp, vertical = 4.dp)) {
+          Box(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(
+                          horizontal = overlayHorizontalPadding,
+                          vertical = overlayVerticalPadding,
+                      )
+          ) {
             Text(
                 text = block.text,
-                style = MaterialTheme.typography.labelSmall,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
+                style = overlayTextStyle,
             )
           }
         }
@@ -351,17 +387,16 @@ private fun SubmissionImageOcrOverlay(
     mergePreview?.let { preview ->
       val offset =
           IntOffset(
-              x = preview.selectionRect.left.roundToInt(),
-              y = preview.selectionRect.top.roundToInt(),
+              x = preview.previewRect.left.roundToInt(),
+              y = preview.previewRect.top.roundToInt(),
           )
       Box(
           modifier =
               Modifier.offset { offset }
                   .size(
-                      width =
-                          with(density) { preview.selectionRect.width.coerceAtLeast(20f).toDp() },
+                      width = with(density) { preview.previewRect.width.coerceAtLeast(20f).toDp() },
                       height =
-                          with(density) { preview.selectionRect.height.coerceAtLeast(20f).toDp() },
+                          with(density) { preview.previewRect.height.coerceAtLeast(20f).toDp() },
                   )
                   .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
                   .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.42f))
@@ -379,14 +414,13 @@ private data class RenderedImageOcrBlock(
     val id: String,
     val text: String,
     val hasTranslation: Boolean,
-    val left: Float,
-    val top: Float,
-    val width: Float,
-    val height: Float,
+    val rawRect: Rect,
+    val visualRect: Rect,
 )
 
 private fun SubmissionImageOcrBlockUiState.toRenderedBlock(
-    contentDisplayRect: IntRect
+    contentDisplayRect: IntRect,
+    minimumBlockHeightPx: Float,
 ): RenderedImageOcrBlock? {
   val mappedPoints = points.map { it.toContainerPoint(contentDisplayRect) }
   if (mappedPoints.isEmpty()) return null
@@ -395,14 +429,15 @@ private fun SubmissionImageOcrBlockUiState.toRenderedBlock(
   val minY = mappedPoints.minOf { it.second }
   val maxY = mappedPoints.maxOf { it.second }
   if (maxX <= minX || maxY <= minY) return null
+  val rawRect = Rect(left = minX, top = minY, right = maxX, bottom = maxY)
+  val visualRect =
+      expandOverlayRectForMinimumHeight(rawRect, minimumBlockHeightPx, contentDisplayRect)
   return RenderedImageOcrBlock(
       id = id,
       text = displayText,
       hasTranslation = hasTranslation,
-      left = minX,
-      top = minY,
-      width = maxX - minX,
-      height = maxY - minY,
+      rawRect = rawRect,
+      visualRect = visualRect,
   )
 }
 
@@ -435,6 +470,7 @@ private suspend fun androidx.compose.ui.input.pointer.AwaitPointerEventScope.cur
 
 private data class ImageOcrMergePreview(
     val selectedBlockIds: Set<String>,
+    val previewRect: Rect,
     val selectionRect: Rect,
 )
 
@@ -445,51 +481,61 @@ private fun resolveImageOcrMergePreview(
   val currentDrag = dragState ?: return null
   val draggedBlock =
       renderedBlocks.firstOrNull { block -> block.id == currentDrag.blockId } ?: return null
-  val baseRect =
+  val basePreviewRect =
       draggedBlock.toPreviewRect(
           dragStartPosition = currentDrag.startPointerPosition,
           pointerPosition = currentDrag.pointerPosition,
       )
-  var expandedRect = baseRect
+  var expandedPreviewRect = basePreviewRect
   var selectedBlockIds = setOf(draggedBlock.id)
+  var selectionRect = draggedBlock.rawRect
 
   while (true) {
     val intersectingBlocks =
         renderedBlocks.filter { block ->
-          block.id != draggedBlock.id && expandedRect.overlapArea(block.toRect()) > 0f
+          block.id != draggedBlock.id && expandedPreviewRect.overlapArea(block.toVisualRect()) > 0f
         }
     val nextSelectedIds = intersectingBlocks.map { block -> block.id }.toSet() + draggedBlock.id
-    val nextRect =
-        intersectingBlocks.fold(baseRect) { currentRect, block ->
-          currentRect.union(block.toRect())
+    val nextPreviewRect =
+        intersectingBlocks.fold(basePreviewRect) { currentRect, block ->
+          currentRect.union(block.toVisualRect())
         }
-    if (nextSelectedIds == selectedBlockIds && nextRect == expandedRect) {
+    val nextSelectionRect =
+        renderedBlocks
+            .filter { block -> block.id in nextSelectedIds }
+            .map { block -> block.toRawRect() }
+            .reduce(Rect::union)
+    if (
+        nextSelectedIds == selectedBlockIds &&
+            nextPreviewRect == expandedPreviewRect &&
+            nextSelectionRect == selectionRect
+    ) {
       imageOcrOverlayLog.d {
-        "解析拖拽预览 -> draggedBlockId=${draggedBlock.id}, 基础选区=${baseRect.toLogString()}, 最终选区=${nextRect.toLogString()}, 命中=${nextSelectedIds.joinToString()}"
+        "解析拖拽预览 -> draggedBlockId=${draggedBlock.id}, 基础选区=${basePreviewRect.toLogString()}, 最终预览=${nextPreviewRect.toLogString()}, 最终提交=${nextSelectionRect.toLogString()}, 命中=${nextSelectedIds.joinToString()}"
       }
       return ImageOcrMergePreview(
           selectedBlockIds = nextSelectedIds,
-          selectionRect = nextRect,
+          previewRect = nextPreviewRect,
+          selectionRect = nextSelectionRect,
       )
     }
     selectedBlockIds = nextSelectedIds
-    expandedRect = nextRect
+    expandedPreviewRect = nextPreviewRect
+    selectionRect = nextSelectionRect
   }
 }
 
-private fun RenderedImageOcrBlock.toRect(offset: Offset = Offset.Zero): Rect =
-    Rect(
-        left = left + offset.x,
-        top = top + offset.y,
-        right = left + offset.x + width,
-        bottom = top + offset.y + height,
-    )
+private fun RenderedImageOcrBlock.toRawRect(offset: Offset = Offset.Zero): Rect =
+    rawRect.translate(offset)
+
+private fun RenderedImageOcrBlock.toVisualRect(offset: Offset = Offset.Zero): Rect =
+    visualRect.translate(offset)
 
 private fun RenderedImageOcrBlock.toPreviewRect(
     dragStartPosition: Offset,
     pointerPosition: Offset,
 ): Rect {
-  val originalRect = toRect()
+  val originalRect = toVisualRect()
   val horizontalDraggedRight = pointerPosition.x >= dragStartPosition.x
   val verticalDraggedDown = pointerPosition.y >= dragStartPosition.y
   return Rect(
@@ -499,6 +545,30 @@ private fun RenderedImageOcrBlock.toPreviewRect(
       bottom = if (verticalDraggedDown) pointerPosition.y else originalRect.bottom,
   )
 }
+
+internal fun expandOverlayRectForMinimumHeight(
+    rawRect: Rect,
+    minimumHeightPx: Float,
+    contentDisplayRect: IntRect,
+): Rect {
+  val targetHeight =
+      max(rawRect.height, minimumHeightPx).coerceAtMost(contentDisplayRect.height.toFloat())
+  val maxTop =
+      (contentDisplayRect.bottom.toFloat() - targetHeight).coerceAtLeast(
+          contentDisplayRect.top.toFloat()
+      )
+  val centeredTop = rawRect.center.y - targetHeight / 2f
+  val top = centeredTop.coerceIn(contentDisplayRect.top.toFloat(), maxTop)
+  return Rect(left = rawRect.left, top = top, right = rawRect.right, bottom = top + targetHeight)
+}
+
+private fun Rect.translate(offset: Offset): Rect =
+    Rect(
+        left = left + offset.x,
+        top = top + offset.y,
+        right = right + offset.x,
+        bottom = bottom + offset.y,
+    )
 
 private fun Rect.overlapArea(other: Rect): Float {
   val overlapWidth = (minOf(right, other.right) - maxOf(left, other.left)).coerceAtLeast(0f)
@@ -550,12 +620,23 @@ private fun SubmissionImageOcrEditDialog(
   val normalizedDraft = dialogState.draftOriginalText.trim()
   val hasRefreshAction =
       normalizedDraft.isNotBlank() && normalizedDraft != targetBlock.originalText.trim()
+  val bodyScrollState = rememberScrollState()
 
-  AlertDialog(
-      onDismissRequest = onDismiss,
-      title = {
+  Dialog(onDismissRequest = onDismiss) {
+    Surface(
+        shape = MaterialTheme.shapes.large,
+        tonalElevation = 6.dp,
+        modifier =
+            Modifier.fillMaxWidth()
+                .widthIn(max = 720.dp)
+                .heightIn(max = 640.dp)
+                .navigationBarsPadding(),
+    ) {
+      Column(modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -590,9 +671,11 @@ private fun SubmissionImageOcrEditDialog(
             }
           }
         }
-      },
-      text = {
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+        Column(
+            modifier = Modifier.fillMaxWidth().verticalScroll(bodyScrollState).padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
           OutlinedTextField(
               value = dialogState.draftOriginalText,
               onValueChange = onDraftChange,
@@ -627,10 +710,9 @@ private fun SubmissionImageOcrEditDialog(
             }
           }
         }
-      },
-      confirmButton = {},
-      dismissButton = {},
-  )
+      }
+    }
+  }
 }
 
 @Composable

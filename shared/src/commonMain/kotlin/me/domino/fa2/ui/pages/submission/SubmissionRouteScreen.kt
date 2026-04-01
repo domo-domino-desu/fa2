@@ -38,14 +38,21 @@ import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.repository.SubmissionRepository
+import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.i18n.SystemLanguageProvider
+import me.domino.fa2.ui.components.LocalShowFeedback
 import me.domino.fa2.ui.components.LocalShowToast
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.platform.PlatformDownloadRequest
 import me.domino.fa2.ui.components.platform.PlatformDownloadResult
+import me.domino.fa2.ui.components.platform.PlatformTextFileDestination
+import me.domino.fa2.ui.components.platform.PlatformTextFileWriteRequest
+import me.domino.fa2.ui.components.platform.PlatformTextFileWriteResult
 import me.domino.fa2.ui.components.platform.rememberPlatformTextCopier
+import me.domino.fa2.ui.components.platform.rememberPlatformTextFileWriter
 import me.domino.fa2.ui.components.platform.rememberPlatformUrlDownloader
+import me.domino.fa2.ui.components.platform.resolveDownloadRelativeDirectories
 import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.navigation.openSubmissionSeries
 import me.domino.fa2.ui.pages.browse.BrowseFilterState
@@ -159,11 +166,15 @@ class SubmissionRouteScreen(
     val pageState by screenModel.pageState.collectAsState()
     val uriHandler = LocalUriHandler.current
     val downloadUrlHandler = rememberPlatformUrlDownloader()
+    val writeTextFile = rememberPlatformTextFileWriter()
     val copyTextToClipboard = rememberPlatformTextCopier()
+    val showFeedback = LocalShowFeedback.current
     val showToast = LocalShowToast.current
     val coroutineScope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
     val downloadSavedText = stringResource(Res.string.download_save_succeeded)
+    val downloadSavedWithSidecarWarningText =
+        stringResource(Res.string.download_save_succeeded_with_translation_sidecar_warning)
     val tagCopiedText = stringResource(Res.string.tag_copied)
     val linkCopiedText = stringResource(Res.string.link_copied)
     val requestPagerFocus =
@@ -178,8 +189,8 @@ class SubmissionRouteScreen(
         (state as? SubmissionPagerUiState.Data)?.zoomOverlayImageUrl.isNullOrBlank().not()
 
     LaunchedEffect(Unit) { requestPagerFocus() }
-    LaunchedEffect(screenModel, showToast) {
-      screenModel.toastMessages.collect { message -> showToast(message) }
+    LaunchedEffect(screenModel, showFeedback) {
+      screenModel.feedbackEvents.collect { request -> showFeedback(request) }
     }
     val currentHistoryItem =
         when (val snapshot = state) {
@@ -233,7 +244,25 @@ class SubmissionRouteScreen(
             coroutineScope.launch {
               when (val result = downloadUrlHandler(downloadRequest)) {
                 PlatformDownloadResult.NotHandled -> uriHandler.openUri(downloadRequest.downloadUrl)
-                PlatformDownloadResult.Saved -> showToast(downloadSavedText)
+                PlatformDownloadResult.Saved -> {
+                  val sidecarFailures =
+                      writeTranslationSidecarFiles(
+                          request = downloadRequest,
+                          settings = settings,
+                          detailState =
+                              state.successDetailForSubmission(downloadRequest.submissionId),
+                          writeTextFile = writeTextFile,
+                      )
+                  if (sidecarFailures.isEmpty()) {
+                    showToast(downloadSavedText)
+                  } else {
+                    showToast(
+                        downloadSavedWithSidecarWarningText.format(
+                            sidecarFailures.first(),
+                        )
+                    )
+                  }
+                }
                 is PlatformDownloadResult.HandledFailure -> showToast(result.message)
               }
             }
@@ -429,3 +458,53 @@ private fun String.normalizePrefetchUrl(): String {
   if (normalized.startsWith("//")) return "https:$normalized"
   return normalized
 }
+
+private suspend fun writeTranslationSidecarFiles(
+    request: PlatformDownloadRequest,
+    settings: AppSettings,
+    detailState: SubmissionDetailUiState.Success?,
+    writeTextFile: suspend (PlatformTextFileWriteRequest) -> PlatformTextFileWriteResult,
+): List<String> {
+  val currentDetailState = detailState ?: return emptyList()
+  val savePath = settings.downloadSavePath.trim()
+  if (savePath.isBlank()) return emptyList()
+  val sidecarFiles =
+      buildSubmissionTranslationSidecarFiles(
+          submissionId = request.submissionId,
+          descriptionTranslationState = currentDetailState.descriptionTranslationState,
+          attachmentTranslationState = currentDetailState.attachmentTranslationState,
+          imageOcrSnapshot = currentDetailState.imageOcrTranslationExportSnapshot,
+      )
+  if (sidecarFiles.isEmpty()) return emptyList()
+  val destination =
+      PlatformTextFileDestination.Directory(
+          path = savePath,
+          relativeDirectories = resolveDownloadRelativeDirectories(settings, request),
+      )
+  return buildList {
+    sidecarFiles.forEach { file ->
+      when (
+          val result =
+              writeTextFile(
+                  PlatformTextFileWriteRequest(
+                      destination = destination,
+                      fileName = file.fileName,
+                      content = file.content,
+                  )
+              )
+      ) {
+        is PlatformTextFileWriteResult.Saved -> Unit
+        is PlatformTextFileWriteResult.Failure -> add(result.message)
+      }
+    }
+  }
+}
+
+private fun SubmissionPagerUiState.successDetailForSubmission(
+    submissionId: Int,
+): SubmissionDetailUiState.Success? =
+    when (this) {
+      SubmissionPagerUiState.Empty -> null
+      is SubmissionPagerUiState.Data ->
+          detailBySid[submissionId] as? SubmissionDetailUiState.Success
+    }

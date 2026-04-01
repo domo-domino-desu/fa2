@@ -119,6 +119,10 @@
   <string name="login_succeeded_entering_home">Sign-in succeeded. Entering home...</string>
   <string name="translation_empty">Translation is empty</string>
   <string name="translation_failed">Translation failed</string>
+  <string name="description_translation_failed">Description translation failed</string>
+  <string name="attachment_translation_failed">Attachment translation failed</string>
+  <string name="translation_switch_provider_and_retry">Switch to %1$s and retry</string>
+  <string name="translation_provider_switched">Switched translation provider to %1$s</string>
   <string name="confirm">Confirm</string>
   <string name="cancel">Cancel</string>
   <string name="date_from_label">From (YYYY-MM-DD)</string>
@@ -206,6 +210,7 @@
     {submission_id} {category} {rating} {type} {species}</string>
   <string name="download_save_path_not_configured">Please choose a save path in Settings first</string>
   <string name="download_save_succeeded">Saved successfully</string>
+  <string name="download_save_succeeded_with_translation_sidecar_warning">Saved main file, but failed to save some translation sidecars: %1$s</string>
   <string name="download_save_failed">Download save failed: %1$s</string>
   <string name="download_save_error_invalid_path">Invalid save path</string>
   <string name="download_save_error_cannot_access_directory">Cannot access save directory</string>

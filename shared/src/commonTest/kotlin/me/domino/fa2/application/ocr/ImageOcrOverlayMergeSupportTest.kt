@@ -2,6 +2,7 @@ package me.domino.fa2.application.ocr
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.ocr.RecognizedTextBlock
 
@@ -52,6 +53,21 @@ class ImageOcrOverlayMergeSupportTest {
         ),
         merged?.points,
     )
+  }
+
+  @Test
+  fun keepsVeryShortBlocksInReadingOrderWhenMergingOverlaySelection() {
+    val merged =
+        mergeRecognizedTextBlocksForOverlay(
+            listOf(
+                ocrBlock("hello", 0.10f, 0.10f, 0.22f, 0.17f),
+                ocrBlock("there", 0.11f, 0.19f, 0.23f, 0.215f),
+                ocrBlock("friend", 0.12f, 0.24f, 0.26f, 0.31f),
+            )
+        )
+
+    assertNotNull(merged)
+    assertEquals("hello there friend", merged.text)
   }
 }
 

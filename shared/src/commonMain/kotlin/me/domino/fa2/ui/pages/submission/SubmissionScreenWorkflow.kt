@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.application.attachmenttext.AttachmentTextExtractor
 import me.domino.fa2.application.ocr.SubmissionImageOcrService
 import me.domino.fa2.application.ocr.collectRecognizedTextBlocksIntersectingRegion
+import me.domino.fa2.application.ocr.mergeComicDialogueBlocks
 import me.domino.fa2.application.ocr.mergeRecognizedTextBlocksForOverlay
 import me.domino.fa2.application.submissionseries.seriesInitialReadyCount
 import me.domino.fa2.application.submissionseries.seriesWarmBufferCount
@@ -20,17 +21,22 @@ import me.domino.fa2.application.translation.SubmissionImageOcrTranslationServic
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.data.settings.TranslationProvider
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.domain.attachmenttext.deriveAttachmentFileName
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.ocr.RecognizedTextBlock
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.appString
+import me.domino.fa2.ui.components.AppFeedbackRequest
+import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.isGifUrl
 import me.domino.fa2.util.logging.FaLog
 import me.domino.fa2.util.logging.summarizePageState
+import org.jetbrains.compose.resources.StringResource
 
 internal const val pagerPrefetchDebounceMs: Long = 500L
 
@@ -57,7 +63,7 @@ internal class SubmissionScreenWorkflow(
     private val log: Logger,
     private val stateSink: (SubmissionPagerUiState) -> Unit,
     private val pageStateSink: (PageState<SubmissionPagerUiState>) -> Unit,
-    private val toastSink: (String) -> Unit,
+    private val feedbackSink: (AppFeedbackRequest) -> Unit,
 ) {
   private val imageOcrLog = FaLog.withTag("SubmissionImageOcrWorkflow")
   private val detailBySid: MutableMap<Int, SubmissionDetailUiState> = mutableMapOf()
@@ -185,11 +191,11 @@ internal class SubmissionScreenWorkflow(
     imageOcrRecognitionJob =
         screenModelScope.launch {
           try {
-            val result = imageOcrService.recognize(targetImageUrl)
+            val result = imageOcrService.recognize(targetImageUrl).mergeComicDialogueBlocks()
             if (zoomOverlayImageUrl != targetImageUrl) return@launch
             if (result.blocks.isEmpty()) {
               imageOcrLog.w { "原图 OCR 完成但没有识别到文本 -> imageUrl=$targetImageUrl" }
-              val emptyMessage = appString(Res.string.image_ocr_empty)
+              val emptyMessage = imageOcrEmptyMessage()
               zoomImageOcrState = SubmissionImageOcrUiState.Error(emptyMessage)
               emitToast(emptyMessage)
             } else {
@@ -208,10 +214,7 @@ internal class SubmissionScreenWorkflow(
             if (zoomOverlayImageUrl != targetImageUrl) return@launch
             imageOcrLog.e(error) { "原图 OCR 失败 -> imageUrl=$targetImageUrl" }
             val failureMessage =
-                appString(
-                    Res.string.image_ocr_failed,
-                    error.message?.takeIf { it.isNotBlank() } ?: error.toString(),
-                )
+                imageOcrFailedMessage(error.message?.takeIf { it.isNotBlank() } ?: error.toString())
             zoomImageOcrState = SubmissionImageOcrUiState.Error(failureMessage)
             emitToast(failureMessage)
             publishState()
@@ -232,6 +235,7 @@ internal class SubmissionScreenWorkflow(
     imageOcrLog.i { "开始翻译 OCR 结果 -> blocks=${showingState.blocks.size}" }
     cancelImageOcrDialogJob()
     cancelImageOcrTranslationJob()
+    clearCurrentImageOcrTranslationExportSnapshot(publish = false)
     zoomImageOcrState =
         showingState.copy(
             translationMode = SubmissionImageOcrTranslationMode.LOADING,
@@ -263,7 +267,7 @@ internal class SubmissionScreenWorkflow(
                 }
             val errorMessage =
                 if (nextMode == SubmissionImageOcrTranslationMode.ERROR) {
-                  appString(Res.string.image_ocr_translation_failed)
+                  imageOcrTranslationFailedMessage()
                 } else {
                   null
                 }
@@ -279,7 +283,16 @@ internal class SubmissionScreenWorkflow(
               "OCR 翻译完成 -> mode=${nextMode.name}, success=${translatedBlocks.count { it.translationStatus == SubmissionImageOcrTranslationStatus.SUCCESS }}, total=${translatedBlocks.size}"
             }
             if (errorMessage != null) {
-              emitToast(errorMessage)
+              emitImageOcrRetryFeedback(
+                  message = errorMessage,
+                  targetImageUrl = targetImageUrl,
+              )
+            } else {
+              updateCurrentImageOcrTranslationExportSnapshot(
+                  imageUrl = targetImageUrl,
+                  blocks = translatedBlocks,
+                  publish = false,
+              )
             }
             publishState()
           } catch (cancelled: CancellationException) {
@@ -290,9 +303,8 @@ internal class SubmissionScreenWorkflow(
             if (zoomOverlayImageUrl != targetImageUrl) return@launch
             imageOcrLog.e(error) { "OCR 翻译失败 -> imageUrl=$targetImageUrl" }
             val errorMessage =
-                appString(
-                    Res.string.image_ocr_translation_failed_with_reason,
-                    error.message?.takeIf { it.isNotBlank() } ?: error.toString(),
+                imageOcrTranslationFailedWithReasonMessage(
+                    error.message?.takeIf { it.isNotBlank() } ?: error.toString()
                 )
             zoomImageOcrState =
                 latestState.copy(
@@ -300,7 +312,7 @@ internal class SubmissionScreenWorkflow(
                     dialog = null,
                     translationErrorMessage = errorMessage,
                 )
-            emitToast(errorMessage)
+            emitImageOcrRetryFeedback(message = errorMessage, targetImageUrl = targetImageUrl)
             publishState()
           } finally {
             val currentJob = currentCoroutineContext()[Job]
@@ -365,6 +377,7 @@ internal class SubmissionScreenWorkflow(
     if (normalizedDraft == currentBlock.originalText.trim()) return
 
     cancelImageOcrDialogJob()
+    clearCurrentImageOcrTranslationExportSnapshot(publish = false)
     zoomImageOcrState =
         showingState.copy(dialog = dialog.copy(refreshing = true, errorMessage = null))
     publishState()
@@ -407,6 +420,11 @@ internal class SubmissionScreenWorkflow(
                                 errorMessage = null,
                             ),
                     )
+                updateCurrentImageOcrTranslationExportSnapshot(
+                    imageUrl = targetImageUrl,
+                    blocks = refreshedBlocks,
+                    publish = false,
+                )
                 publishState()
               }
 
@@ -419,7 +437,7 @@ internal class SubmissionScreenWorkflow(
                 ) {
                   return@launch
                 }
-                val errorMessage = appString(Res.string.image_ocr_translation_empty)
+                val errorMessage = imageOcrTranslationEmptyMessage()
                 zoomImageOcrState =
                     latestState.copy(
                         dialog =
@@ -440,8 +458,7 @@ internal class SubmissionScreenWorkflow(
                 ) {
                   return@launch
                 }
-                val errorMessage =
-                    appString(Res.string.image_ocr_translation_failed_with_reason, result.message)
+                val errorMessage = imageOcrTranslationFailedWithReasonMessage(result.message)
                 zoomImageOcrState =
                     latestState.copy(
                         dialog =
@@ -463,9 +480,8 @@ internal class SubmissionScreenWorkflow(
               return@launch
             }
             val errorMessage =
-                appString(
-                    Res.string.image_ocr_translation_failed_with_reason,
-                    error.message?.takeIf { it.isNotBlank() } ?: error.toString(),
+                imageOcrTranslationFailedWithReasonMessage(
+                    error.message?.takeIf { it.isNotBlank() } ?: error.toString()
                 )
             zoomImageOcrState =
                 latestState.copy(
@@ -547,6 +563,7 @@ internal class SubmissionScreenWorkflow(
     imageOcrLog.i {
       "OCR 框合并完成 -> selected=${selectedIds.joinToString()}, mergedBlockId=${mergedBlock.id}, translationMode=${showingState.translationMode.name}"
     }
+    clearCurrentImageOcrTranslationExportSnapshot(publish = false)
     zoomImageOcrState = showingState.copy(blocks = mergedBlocks, dialog = dialog)
     publishState()
 
@@ -615,8 +632,8 @@ internal class SubmissionScreenWorkflow(
                     progress =
                         initialAttachmentTextProgress(
                             fileName = fileName,
-                            settingsService = settingsService,
-                            systemLanguageProvider = systemLanguageProvider,
+                            _settingsService = settingsService,
+                            _systemLanguageProvider = systemLanguageProvider,
                         ),
                 ),
             attachmentTranslationState = null,
@@ -1294,6 +1311,21 @@ internal class SubmissionScreenWorkflow(
                           ),
                   )
               publishState()
+              val finalTranslationState =
+                  (detailBySid[sid] as? SubmissionDetailUiState.Success)?.translationStateOf(target)
+                      ?: return@launch
+              val hasFailure =
+                  finalTranslationState.variantOf(sourceMode).blocks.any { block ->
+                    block.status == SubmissionDescriptionTranslationStatus.FAILURE
+                  }
+              if (hasFailure) {
+                emitTranslationRetryFeedback(
+                    message = translationFailureMessage(target),
+                    sid = sid,
+                    target = target,
+                    sourceKey = pendingState.sourceKey,
+                )
+              }
             }
           }
         }
@@ -1474,8 +1506,15 @@ internal class SubmissionScreenWorkflow(
         favoriteErrorMessage = favoriteErrorMessage,
         attachmentTextState = attachmentTextState,
         attachmentTranslationState = attachmentTranslationState,
+        imageOcrTranslationExportSnapshot =
+            previous?.imageOcrTranslationExportSnapshot?.takeIf { snapshot ->
+              snapshot.imageUrl == exportableImageUrl(detail)
+            },
     )
   }
+
+  private fun exportableImageUrl(detail: Submission): String =
+      detail.fullImageUrl.ifBlank { detail.previewImageUrl }.trim()
 
   private fun guessNextFavoriteActionUrl(currentActionUrl: String): String {
     val url = currentActionUrl.trim()
@@ -1487,8 +1526,219 @@ internal class SubmissionScreenWorkflow(
     }
   }
 
+  private fun emitFeedback(request: AppFeedbackRequest) {
+    feedbackSink(request)
+  }
+
   private fun emitToast(message: String) {
-    toastSink(message)
+    emitFeedback(AppFeedbackRequest(message = message))
+  }
+
+  private fun emitTranslationRetryFeedback(
+      message: String,
+      sid: Int,
+      target: SubmissionTranslationTarget,
+      sourceKey: String,
+  ) {
+    if (settingsService == null) {
+      emitToast(message)
+      return
+    }
+    val nextProvider = currentTranslationProvider().nextRetryProvider()
+    emitFeedback(
+        AppFeedbackRequest(
+            message = message,
+            actionLabel = switchProviderAndRetryLabel(nextProvider),
+            onAction = {
+              val retried =
+                  switchTranslationProvider(nextProvider) {
+                    retryTranslationIfPossible(
+                        sid = sid,
+                        target = target,
+                        sourceKey = sourceKey,
+                    )
+                  }
+              if (!retried) {
+                emitToast(translationProviderSwitchedMessage(nextProvider))
+              }
+            },
+        )
+    )
+  }
+
+  private fun emitImageOcrRetryFeedback(
+      message: String,
+      targetImageUrl: String?,
+  ) {
+    if (settingsService == null) {
+      emitToast(message)
+      return
+    }
+    val nextProvider = currentTranslationProvider().nextRetryProvider()
+    emitFeedback(
+        AppFeedbackRequest(
+            message = message,
+            actionLabel = switchProviderAndRetryLabel(nextProvider),
+            onAction = {
+              val retried =
+                  switchTranslationProvider(nextProvider) {
+                    retryImageOcrIfPossible(targetImageUrl)
+                  }
+              if (!retried) {
+                emitToast(translationProviderSwitchedMessage(nextProvider))
+              }
+            },
+        )
+    )
+  }
+
+  private suspend fun switchTranslationProvider(
+      provider: TranslationProvider,
+      retry: suspend () -> Boolean,
+  ): Boolean {
+    val currentSettingsService = settingsService ?: return false
+    currentSettingsService.ensureLoaded()
+    currentSettingsService.updateTranslationProvider(provider)
+    return retry()
+  }
+
+  private fun currentTranslationProvider(): TranslationProvider =
+      settingsService?.settings?.value?.translationProvider
+          ?: AppSettings.defaultTranslationProvider
+
+  private fun providerLabel(provider: TranslationProvider): String =
+      when (provider) {
+        TranslationProvider.GOOGLE ->
+            safeAppString(Res.string.translation_provider_google) { "Google Translate" }
+        TranslationProvider.MICROSOFT ->
+            safeAppString(Res.string.translation_provider_microsoft) { "Microsoft Translator" }
+        TranslationProvider.OPENAI_COMPATIBLE ->
+            safeAppString(Res.string.translation_provider_openai_compatible) { "OpenAI Compatible" }
+      }
+
+  private fun translationFailureMessage(target: SubmissionTranslationTarget): String =
+      when (target) {
+        SubmissionTranslationTarget.DESCRIPTION ->
+            safeAppString(Res.string.description_translation_failed) {
+              "Description translation failed"
+            }
+        SubmissionTranslationTarget.ATTACHMENT ->
+            safeAppString(Res.string.attachment_translation_failed) {
+              "Attachment translation failed"
+            }
+      }
+
+  private fun imageOcrEmptyMessage(): String =
+      safeAppString(Res.string.image_ocr_empty) { "No text detected in image" }
+
+  private fun imageOcrFailedMessage(reason: String): String =
+      safeAppString(Res.string.image_ocr_failed, reason) { "Image OCR failed: $reason" }
+
+  private fun imageOcrTranslationFailedMessage(): String =
+      safeAppString(Res.string.image_ocr_translation_failed) { "Image OCR translation failed" }
+
+  private fun imageOcrTranslationFailedWithReasonMessage(reason: String): String =
+      safeAppString(Res.string.image_ocr_translation_failed_with_reason, reason) {
+        "Image OCR translation failed: $reason"
+      }
+
+  private fun imageOcrTranslationEmptyMessage(): String =
+      safeAppString(Res.string.image_ocr_translation_empty) { "Translation result is empty" }
+
+  private fun switchProviderAndRetryLabel(provider: TranslationProvider): String =
+      safeAppString(
+          Res.string.translation_switch_provider_and_retry,
+          providerLabel(provider),
+      ) {
+        "Switch to ${providerLabel(provider)} and retry"
+      }
+
+  private fun translationProviderSwitchedMessage(provider: TranslationProvider): String =
+      safeAppString(
+          Res.string.translation_provider_switched,
+          providerLabel(provider),
+      ) {
+        "Switched translation provider to ${providerLabel(provider)}"
+      }
+
+  private fun safeAppString(
+      resource: StringResource,
+      vararg formatArgs: Any,
+      fallback: () -> String,
+  ): String = safeAppStringOrFallback(resource, *formatArgs, fallback = fallback)
+
+  private suspend fun retryTranslationIfPossible(
+      sid: Int,
+      target: SubmissionTranslationTarget,
+      sourceKey: String,
+  ): Boolean {
+    if (contextController.current()?.id != sid) return false
+    val currentState = detailBySid[sid] as? SubmissionDetailUiState.Success ?: return false
+    val translationState = currentState.translationStateOf(target) ?: return false
+    if (translationState.sourceKey != sourceKey) return false
+    if (translationState.translating || translationState.sourceBlocks.isEmpty()) return false
+    if (translationState.showTranslation) {
+      detailBySid[sid] =
+          currentState.withTranslationState(
+              target = target,
+              state = translationState.copy(showTranslation = false),
+          )
+    }
+    translateCurrent(target)
+    return true
+  }
+
+  private fun retryImageOcrIfPossible(targetImageUrl: String?): Boolean {
+    val showingState = zoomImageOcrState as? SubmissionImageOcrUiState.Showing ?: return false
+    if (zoomOverlayImageUrl != targetImageUrl) return false
+    if (showingState.translationMode == SubmissionImageOcrTranslationMode.LOADING) return false
+    if (showingState.blocks.isEmpty()) return false
+    translateImageOcrCurrent()
+    return true
+  }
+
+  private fun clearCurrentImageOcrTranslationExportSnapshot(publish: Boolean) {
+    val current = contextController.current() ?: return
+    val currentState = detailBySid[current.id] as? SubmissionDetailUiState.Success ?: return
+    if (currentState.imageOcrTranslationExportSnapshot == null) return
+    detailBySid[current.id] = currentState.copy(imageOcrTranslationExportSnapshot = null)
+    if (publish) {
+      publishState()
+    }
+  }
+
+  private fun updateCurrentImageOcrTranslationExportSnapshot(
+      imageUrl: String?,
+      blocks: List<SubmissionImageOcrBlockUiState>,
+      publish: Boolean,
+  ) {
+    val normalizedImageUrl = imageUrl?.trim().orEmpty()
+    val current = contextController.current() ?: return
+    val currentState = detailBySid[current.id] as? SubmissionDetailUiState.Success ?: return
+    val nextSnapshot =
+        normalizedImageUrl
+            .takeIf { it.isNotBlank() }
+            ?.let { validImageUrl ->
+              blocks
+                  .takeIf { candidates ->
+                    candidates.any { block ->
+                      block.translationStatus == SubmissionImageOcrTranslationStatus.SUCCESS &&
+                          block.translatedText?.isNotBlank() == true
+                    }
+                  }
+                  ?.let { translatedBlocks ->
+                    SubmissionImageOcrTranslationExportSnapshot(
+                        imageUrl = validImageUrl,
+                        provider = currentTranslationProvider(),
+                        blocks = translatedBlocks,
+                    )
+                  }
+            }
+    if (currentState.imageOcrTranslationExportSnapshot == nextSnapshot) return
+    detailBySid[current.id] = currentState.copy(imageOcrTranslationExportSnapshot = nextSnapshot)
+    if (publish) {
+      publishState()
+    }
   }
 
   private fun clearZoomOverlayState(publish: Boolean) {
@@ -1590,11 +1840,13 @@ internal class SubmissionScreenWorkflow(
                     status = SubmissionImageOcrTranslationStatus.FAILURE,
                 )
                 imageOcrLog.w { "合并 OCR 框翻译失败 -> blockId=$blockId, message=${result.message}" }
-                emitToast(
-                    appString(
-                        Res.string.image_ocr_translation_failed_with_reason,
-                        result.message,
-                    )
+                emitImageOcrRetryFeedback(
+                    message =
+                        appString(
+                            Res.string.image_ocr_translation_failed_with_reason,
+                            result.message,
+                        ),
+                    targetImageUrl = targetImageUrl,
                 )
               }
             }
@@ -1608,11 +1860,13 @@ internal class SubmissionScreenWorkflow(
                 translatedText = null,
                 status = SubmissionImageOcrTranslationStatus.FAILURE,
             )
-            emitToast(
-                appString(
-                    Res.string.image_ocr_translation_failed_with_reason,
-                    error.message?.takeIf { it.isNotBlank() } ?: error.toString(),
-                )
+            emitImageOcrRetryFeedback(
+                message =
+                    appString(
+                        Res.string.image_ocr_translation_failed_with_reason,
+                        error.message?.takeIf { it.isNotBlank() } ?: error.toString(),
+                    ),
+                targetImageUrl = targetImageUrl,
             )
           } finally {
             val currentJob = currentCoroutineContext()[Job]
@@ -1646,6 +1900,11 @@ internal class SubmissionScreenWorkflow(
                   }
                 }
         )
+    updateCurrentImageOcrTranslationExportSnapshot(
+        imageUrl = targetImageUrl,
+        blocks = (zoomImageOcrState as? SubmissionImageOcrUiState.Showing)?.blocks.orEmpty(),
+        publish = false,
+    )
     publishState()
   }
 
@@ -1701,6 +1960,13 @@ private fun SubmissionImageOcrBlockUiState.toSelectionKey(): ImageOcrSelectionKe
 
 private fun RecognizedTextBlock.toSelectionKey(): ImageOcrSelectionKey =
     ImageOcrSelectionKey(originalText = text, points = points)
+
+private fun TranslationProvider.nextRetryProvider(): TranslationProvider =
+    when (this) {
+      TranslationProvider.GOOGLE -> TranslationProvider.MICROSOFT
+      TranslationProvider.MICROSOFT,
+      TranslationProvider.OPENAI_COMPATIBLE -> TranslationProvider.GOOGLE
+    }
 
 private fun sortImageOcrBlocks(
     blocks: List<SubmissionImageOcrBlockUiState>
@@ -1768,17 +2034,27 @@ private fun SubmissionDetailUiState.Success.withTranslationState(
 
 private fun initialAttachmentTextProgress(
     fileName: String,
-    settingsService: AppSettingsService?,
-    systemLanguageProvider: SystemLanguageProvider?,
+    _settingsService: AppSettingsService?,
+    _systemLanguageProvider: SystemLanguageProvider?,
 ): AttachmentTextProgress {
   return AttachmentTextProgress(
       overallFraction = 0f,
       stageIndex = 1,
       stageCount = 1,
       stageId = "download_attachment",
-      stageLabel = appString(Res.string.download_attachment),
+      stageLabel =
+          safeAppStringOrFallback(Res.string.download_attachment) { "Download attachment" },
       stageFraction = 0f,
-      message = appString(Res.string.preparing_attachment_download),
+      message =
+          safeAppStringOrFallback(Res.string.preparing_attachment_download) {
+            "Preparing attachment download"
+          },
       currentItemLabel = fileName,
   )
 }
+
+private fun safeAppStringOrFallback(
+    resource: StringResource,
+    vararg formatArgs: Any,
+    fallback: () -> String,
+): String = runCatching { appString(resource, *formatArgs) }.getOrElse { fallback() }

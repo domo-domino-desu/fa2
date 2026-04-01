@@ -4,7 +4,6 @@ import io.github.hzkitty.RapidOCR
 import io.github.hzkitty.entity.RecResult
 import java.io.ByteArrayInputStream
 import javax.imageio.ImageIO
-import me.domino.fa2.application.ocr.ComicDialogueOcrBlockMerger
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.ocr.RecognizedTextBlock
 import org.opencv.core.Point
@@ -31,8 +30,7 @@ internal fun rapidOcrResultToBlocks(
     width: Int,
     height: Int,
 ): List<RecognizedTextBlock> {
-  val fragments = records.mapNotNull { record -> record.toRecognizedTextFragment(width, height) }
-  return ComicDialogueOcrBlockMerger.merge(fragments)
+  return records.mapNotNull { record -> record.toRecognizedTextFragment(width, height) }
 }
 
 private fun RecResult.toRecognizedTextFragment(

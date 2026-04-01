@@ -23,7 +23,7 @@ private suspend fun writeTextFile(
     withContext(Dispatchers.IO) {
       when (val destination = request.destination) {
         is PlatformTextFileDestination.Directory ->
-            writeTextFileIntoDirectory(request, destination.path, context)
+            writeTextFileIntoDirectory(request, destination, context)
 
         is PlatformTextFileDestination.File ->
             writeTextFileToDocumentUri(request, destination.path, context)
@@ -32,10 +32,10 @@ private suspend fun writeTextFile(
 
 private fun writeTextFileIntoDirectory(
     request: PlatformTextFileWriteRequest,
-    directoryPath: String,
+    destination: PlatformTextFileDestination.Directory,
     context: Context,
 ): PlatformTextFileWriteResult {
-  val treeUri = runCatching { Uri.parse(directoryPath) }.getOrNull()
+  val treeUri = runCatching { Uri.parse(destination.path) }.getOrNull()
   if (treeUri == null || treeUri.scheme?.lowercase() != "content") {
     return PlatformTextFileWriteResult.Failure("Invalid directory path")
   }
@@ -43,9 +43,15 @@ private fun writeTextFileIntoDirectory(
   if (rootDirectory == null || !rootDirectory.isDirectory) {
     return PlatformTextFileWriteResult.Failure("Cannot access directory")
   }
+  val targetDirectory =
+      destination.relativeDirectories.fold(rootDirectory) { current, segment ->
+        current.findFile(segment)?.takeIf { file -> file.isDirectory }
+            ?: current.createDirectory(segment)
+            ?: return PlatformTextFileWriteResult.Failure("Cannot create parent directory")
+      }
 
-  rootDirectory.findFile(request.fileName)?.delete()
-  val document = rootDirectory.createFile("text/plain", request.fileName)
+  targetDirectory.findFile(request.fileName)?.delete()
+  val document = targetDirectory.createFile("text/plain", request.fileName)
   if (document == null) {
     return PlatformTextFileWriteResult.Failure("Cannot create target file")
   }

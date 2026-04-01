@@ -14,6 +14,7 @@ sealed interface SubmissionDetailUiState {
       val favoriteErrorMessage: String? = null,
       val attachmentTextState: SubmissionAttachmentTextUiState? = null,
       val attachmentTranslationState: SubmissionTranslationUiState? = null,
+      val imageOcrTranslationExportSnapshot: SubmissionImageOcrTranslationExportSnapshot? = null,
   ) : SubmissionDetailUiState
 
   data class Error(val message: String) : SubmissionDetailUiState

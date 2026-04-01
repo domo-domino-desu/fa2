@@ -17,6 +17,7 @@ import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.i18n.SystemLanguageProvider
+import me.domino.fa2.ui.components.AppFeedbackRequest
 import me.domino.fa2.util.logging.FaLog
 
 /** 投稿详情浏览页面状态模型。 */
@@ -43,8 +44,8 @@ class SubmissionScreenModel(
       MutableStateFlow<PageState<SubmissionPagerUiState>>(PageState.Loading)
   val pageState: StateFlow<PageState<SubmissionPagerUiState>> = mutablePageState.asStateFlow()
 
-  private val toastMessagesMutable = MutableSharedFlow<String>(extraBufferCapacity = 8)
-  val toastMessages: SharedFlow<String> = toastMessagesMutable.asSharedFlow()
+  private val feedbackEventsMutable = MutableSharedFlow<AppFeedbackRequest>(extraBufferCapacity = 8)
+  val feedbackEvents: SharedFlow<AppFeedbackRequest> = feedbackEventsMutable.asSharedFlow()
 
   private val contextController =
       object : SubmissionPagerContextController {
@@ -116,8 +117,8 @@ class SubmissionScreenModel(
           log = log,
           stateSink = { mutableState.value = it },
           pageStateSink = { mutablePageState.value = it },
-          toastSink = { message ->
-            toastMessagesMutable.tryEmit(message)
+          feedbackSink = { request ->
+            feedbackEventsMutable.tryEmit(request)
             Unit
           },
       )

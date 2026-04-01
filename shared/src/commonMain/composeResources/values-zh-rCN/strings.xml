@@ -130,6 +130,10 @@
   <string name="original_image">查看原图</string>
   <string name="image_ocr_action">识别图片文字</string>
   <string name="image_ocr_translate_action">翻译识别结果</string>
+  <string name="description_translation_failed">描述翻译失败</string>
+  <string name="attachment_translation_failed">附件翻译失败</string>
+  <string name="translation_switch_provider_and_retry">切换到 %1$s 并重试</string>
+  <string name="translation_provider_switched">已切换翻译服务到 %1$s</string>
   <string name="image_ocr_empty">图片中未识别到文字</string>
   <string name="image_ocr_failed">图片 OCR 失败：%1$s</string>
   <string name="image_ocr_translation_failed">图片 OCR 翻译失败</string>
@@ -191,6 +195,7 @@
     {category} {rating} {type} {species}</string>
   <string name="download_save_path_not_configured">请先在设置中选择保存路径</string>
   <string name="download_save_succeeded">保存成功</string>
+  <string name="download_save_succeeded_with_translation_sidecar_warning">主文件已保存，但部分翻译结果附件保存失败：%1$s</string>
   <string name="download_save_failed">下载保存失败：%1$s</string>
   <string name="download_save_error_invalid_path">保存路径无效</string>
   <string name="download_save_error_cannot_access_directory">无法访问保存目录</string>

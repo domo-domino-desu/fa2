@@ -79,6 +79,21 @@ class ComicDialogueOcrPostProcessorTest {
   }
 
   @Test
+  fun mergesVeryShortMiddleFragmentIntoDialogueCluster() {
+    val merged =
+        mergeComicDialogueBlocks(
+            listOf(
+                ocrBlock("hello", left = 0.10f, top = 0.10f, right = 0.22f, bottom = 0.17f),
+                ocrBlock("tiny", left = 0.11f, top = 0.19f, right = 0.23f, bottom = 0.215f),
+                ocrBlock("friend", left = 0.09f, top = 0.24f, right = 0.25f, bottom = 0.31f),
+            )
+        )
+
+    assertEquals(1, merged.size)
+    assertEquals("hello tiny friend", merged.single().text)
+  }
+
+  @Test
   fun singleBlockRemainsUnchanged() {
     val source =
         ocrBlock(

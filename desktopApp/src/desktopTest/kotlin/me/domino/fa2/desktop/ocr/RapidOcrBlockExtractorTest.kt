@@ -7,7 +7,7 @@ import org.opencv.core.Point
 
 class RapidOcrBlockExtractorTest {
   @Test
-  fun mergesRapidOcrFragmentsIntoFinalBlocks() {
+  fun keepsRapidOcrFragmentsAsSeparateBlocks() {
     val blocks =
         rapidOcrResultToBlocks(
             records =
@@ -20,9 +20,9 @@ class RapidOcrBlockExtractorTest {
             height = 100,
         )
 
-    assertEquals(1, blocks.size)
-    assertEquals("Hello there friend", blocks.single().text)
-    assertEquals(0.9f, blocks.single().confidence)
+    assertEquals(3, blocks.size)
+    assertEquals(listOf("Hello", "there", "friend"), blocks.map { it.text })
+    assertEquals(listOf(0.9f, 0.9f, 0.9f), blocks.map { it.confidence })
   }
 
   @Test

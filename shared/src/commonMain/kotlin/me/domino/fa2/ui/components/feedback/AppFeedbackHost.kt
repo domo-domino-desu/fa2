@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -19,19 +20,31 @@ import kotlinx.coroutines.launch
 fun AppFeedbackHost(content: @Composable () -> Unit) {
   val snackbarHostState = remember { SnackbarHostState() }
   val coroutineScope = rememberCoroutineScope()
-  val showToast =
+  val showFeedback =
       remember(snackbarHostState, coroutineScope) {
-        { message: String ->
-          val normalized = message.trim()
+        { request: AppFeedbackRequest ->
+          val normalized = request.message.trim()
           if (normalized.isNotBlank()) {
             coroutineScope.launch {
               snackbarHostState.currentSnackbarData?.dismiss()
-              snackbarHostState.showSnackbar(normalized)
+              val result =
+                  snackbarHostState.showSnackbar(
+                      message = normalized,
+                      actionLabel = request.actionLabel?.trim()?.ifBlank { null },
+                  )
+              if (result == SnackbarResult.ActionPerformed) {
+                request.onAction?.invoke()
+              }
             }
           }
         }
       }
-  CompositionLocalProvider(LocalShowToast provides showToast) {
+  val showToast =
+      remember(showFeedback) { { message: String -> showFeedback(AppFeedbackRequest(message)) } }
+  CompositionLocalProvider(
+      LocalShowFeedback provides showFeedback,
+      LocalShowToast provides showToast,
+  ) {
     Box(modifier = Modifier.fillMaxSize()) {
       content()
       SnackbarHost(

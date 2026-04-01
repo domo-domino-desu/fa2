@@ -5,11 +5,14 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -19,6 +22,7 @@ import kotlinx.coroutines.test.setMain
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.data.settings.TranslationProvider
 import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.domain.ocr.ImageOcrResult
@@ -112,6 +116,43 @@ class SubmissionScreenModelImageOcrTest {
             listOf("https://example.com/ocr-1.jpg", "https://example.com/ocr-1.jpg"),
             requests,
         )
+      }
+
+  @Test
+  fun premergesRecognizedDialogueFragmentsBeforeShowingOverlay() =
+      runTest(dispatcher.scheduler) {
+        val model =
+            createSubmissionScreenModelForTest(
+                initialSid = 1,
+                items = listOf(imageOcrTestThumbnail(1)),
+                submissionSource = ImageOcrRecordingDetailSource(),
+                translationService = createTestSubmissionTranslationService(),
+                imageOcrService =
+                    createTestSubmissionImageOcrService { _ ->
+                      ImageOcrResult(
+                          blocks =
+                              listOf(
+                                  ocrBlock("hello", 0.10f, 0.10f, 0.20f, 0.15f),
+                                  ocrBlock("there", 0.11f, 0.18f, 0.22f, 0.205f),
+                                  ocrBlock("friend", 0.12f, 0.23f, 0.25f, 0.28f),
+                              )
+                      )
+                    },
+                imageOcrTranslationService = createTestSubmissionImageOcrTranslationService(),
+            )
+
+        runCurrent()
+        model.openImageZoom("https://example.com/ocr-premerge.jpg")
+        runCurrent()
+        model.toggleImageOcrCurrent()
+        advanceUntilIdle()
+
+        val showingState =
+            assertIs<SubmissionImageOcrUiState.Showing>(
+                (model.state.value as SubmissionPagerUiState.Data).zoomImageOcrState
+            )
+        assertEquals(1, showingState.blocks.size)
+        assertEquals("hello there friend", showingState.blocks.single().originalText)
       }
 
   @Test
@@ -300,6 +341,73 @@ class SubmissionScreenModelImageOcrTest {
       }
 
   @Test
+  fun retriesImageOcrTranslationWithNextProviderFromFeedbackAction() =
+      runTest(dispatcher.scheduler) {
+        val settingsService = createTestAppSettingsService()
+        val requestedProviders = mutableListOf<TranslationProvider>()
+        val feedbackEvents = mutableListOf<me.domino.fa2.ui.components.AppFeedbackRequest>()
+        val model =
+            createSubmissionScreenModelForTest(
+                initialSid = 1,
+                items = listOf(imageOcrTestThumbnail(1)),
+                submissionSource = ImageOcrRecordingDetailSource(),
+                translationService =
+                    createTestSubmissionTranslationService(settingsService = settingsService),
+                imageOcrService =
+                    createTestSubmissionImageOcrService { _ ->
+                      ImageOcrResult(blocks = listOf(ocrBlock("hello", 0.10f, 0.10f, 0.20f, 0.18f)))
+                    },
+                imageOcrTranslationService =
+                    createTestSubmissionImageOcrTranslationService(
+                        settingsService = settingsService
+                    ) { request ->
+                      requestedProviders += request.provider
+                      when (request.provider) {
+                        TranslationProvider.GOOGLE -> error("boom")
+                        TranslationProvider.MICROSOFT -> request.sourceText.uppercase()
+                        TranslationProvider.OPENAI_COMPATIBLE -> error("unexpected provider")
+                      }
+                    },
+                settingsService = settingsService,
+            )
+
+        val feedbackJob = launch {
+          model.feedbackEvents.collect { request -> feedbackEvents += request }
+        }
+
+        runCurrent()
+        model.openImageZoom("https://example.com/ocr-retry.jpg")
+        runCurrent()
+        model.toggleImageOcrCurrent()
+        advanceUntilIdle()
+        model.translateImageOcrCurrent()
+        advanceUntilIdle()
+
+        val feedback = assertNotNull(feedbackEvents.firstOrNull())
+        assertEquals(TranslationProvider.GOOGLE, requestedProviders.single())
+
+        feedback.onAction?.invoke()
+        advanceUntilIdle()
+
+        val showingState =
+            assertIs<SubmissionImageOcrUiState.Showing>(
+                (model.state.value as SubmissionPagerUiState.Data).zoomImageOcrState
+            )
+        assertEquals(
+            listOf(TranslationProvider.GOOGLE, TranslationProvider.MICROSOFT),
+            requestedProviders,
+        )
+        assertEquals(
+            TranslationProvider.MICROSOFT,
+            settingsService.settings.value.translationProvider,
+        )
+        assertEquals(SubmissionImageOcrTranslationMode.APPLIED, showingState.translationMode)
+        assertEquals("HELLO", showingState.blocks.single().translatedText)
+
+        feedbackJob.cancel()
+      }
+
+  @Test
   fun mergesAllBlocksInsideSelectedRegionAndRetranslatesMergedBlock() =
       runTest(dispatcher.scheduler) {
         val model =
@@ -314,8 +422,8 @@ class SubmissionScreenModelImageOcrTest {
                           blocks =
                               listOf(
                                   ocrBlock("hello", 0.10f, 0.10f, 0.20f, 0.18f),
-                                  ocrBlock("there", 0.22f, 0.11f, 0.32f, 0.19f),
-                                  ocrBlock("friend", 0.12f, 0.21f, 0.30f, 0.29f),
+                                  ocrBlock("there", 0.40f, 0.10f, 0.50f, 0.18f),
+                                  ocrBlock("friend", 0.11f, 0.42f, 0.29f, 0.50f),
                               )
                       )
                     },
@@ -338,9 +446,9 @@ class SubmissionScreenModelImageOcrTest {
             mergeRegionPoints =
                 listOf(
                     NormalizedImagePoint(0.09f, 0.09f),
-                    NormalizedImagePoint(0.33f, 0.09f),
-                    NormalizedImagePoint(0.33f, 0.30f),
-                    NormalizedImagePoint(0.09f, 0.30f),
+                    NormalizedImagePoint(0.51f, 0.09f),
+                    NormalizedImagePoint(0.51f, 0.51f),
+                    NormalizedImagePoint(0.09f, 0.51f),
                 ),
         )
         advanceUntilIdle()
@@ -382,7 +490,7 @@ class SubmissionScreenModelImageOcrTest {
                           blocks =
                               listOf(
                                   ocrBlock("hello", 0.10f, 0.10f, 0.20f, 0.18f),
-                                  ocrBlock("there", 0.22f, 0.11f, 0.32f, 0.19f),
+                                  ocrBlock("there", 0.40f, 0.10f, 0.50f, 0.18f),
                               )
                       )
                     },
@@ -399,8 +507,8 @@ class SubmissionScreenModelImageOcrTest {
             mergeRegionPoints =
                 listOf(
                     NormalizedImagePoint(0.09f, 0.09f),
-                    NormalizedImagePoint(0.33f, 0.09f),
-                    NormalizedImagePoint(0.33f, 0.20f),
+                    NormalizedImagePoint(0.51f, 0.09f),
+                    NormalizedImagePoint(0.51f, 0.20f),
                     NormalizedImagePoint(0.09f, 0.20f),
                 ),
         )
@@ -425,6 +533,50 @@ class SubmissionScreenModelImageOcrTest {
                 (model.state.value as SubmissionPagerUiState.Data).zoomImageOcrState
             )
         assertEquals(listOf("ocr-block-0", "ocr-block-1"), reopenedState.blocks.map { it.id })
+      }
+
+  @Test
+  fun preservesSuccessfulImageOcrTranslationSnapshotAfterOverlayDismissed() =
+      runTest(dispatcher.scheduler) {
+        val settingsService = createTestAppSettingsService()
+        val model =
+            createSubmissionScreenModelForTest(
+                initialSid = 1,
+                items = listOf(imageOcrTestThumbnail(1)),
+                submissionSource = ImageOcrRecordingDetailSource(),
+                translationService =
+                    createTestSubmissionTranslationService(settingsService = settingsService),
+                imageOcrService =
+                    createTestSubmissionImageOcrService { _ ->
+                      ImageOcrResult(blocks = listOf(ocrBlock("hello", 0.10f, 0.10f, 0.20f, 0.18f)))
+                    },
+                imageOcrTranslationService =
+                    createTestSubmissionImageOcrTranslationService(
+                        settingsService = settingsService
+                    ) { request ->
+                      request.sourceText.uppercase()
+                    },
+                settingsService = settingsService,
+            )
+
+        runCurrent()
+        model.openImageZoom("https://example.com/ocr-snapshot.jpg")
+        runCurrent()
+        model.toggleImageOcrCurrent()
+        advanceUntilIdle()
+        model.translateImageOcrCurrent()
+        advanceUntilIdle()
+
+        model.dismissImageZoom()
+        runCurrent()
+
+        val detailState =
+            ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
+                as SubmissionDetailUiState.Success)
+        val snapshot = assertNotNull(detailState.imageOcrTranslationExportSnapshot)
+        assertEquals("https://example.com/ocr-snapshot.jpg", snapshot.imageUrl)
+        assertEquals(TranslationProvider.GOOGLE, snapshot.provider)
+        assertEquals("HELLO", snapshot.blocks.single().translatedText)
       }
 }
 

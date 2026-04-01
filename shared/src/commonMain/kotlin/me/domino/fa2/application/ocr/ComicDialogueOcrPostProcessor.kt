@@ -6,16 +6,16 @@ import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.ocr.RecognizedTextBlock
 
 private const val horizontalExpansionFactor = 0.9f
-private const val verticalExpansionFactor = 1.4f
-private const val maxCenterDistanceFactor = 3.2f
-private const val minHeightRatio = 0.45f
-private const val maxHeightRatio = 2.2f
+private const val verticalExpansionFactor = 1.75f
+private const val maxCenterDistanceFactor = 3.6f
+private const val minHeightRatio = 0.3f
+private const val maxHeightRatio = 3.4f
 private const val minWidthRatio = 0.2f
 private const val maxWidthRatio = 5.0f
-private const val maxVerticalGapWithoutHorizontalOverlapFactor = 1.8f
+private const val maxVerticalGapWithoutHorizontalOverlapFactor = 2.15f
 private const val maxHorizontalGapWithoutVerticalOverlapFactor = 1.6f
 private const val maxBoundingAreaFactor = 4.5f
-private const val rowCenterThresholdFactor = 0.65f
+private const val rowCenterThresholdFactor = 0.8f
 
 object ComicDialogueOcrBlockMerger {
   fun merge(result: ImageOcrResult): ImageOcrResult = result.copy(blocks = merge(result.blocks))
@@ -260,10 +260,13 @@ private data class NormalizedRect(
     val bottom: Float,
 ) {
   val width: Float
-    get() = (right - left).coerceAtLeast(0f)
+    get() = right - left
 
   val height: Float
-    get() = (bottom - top).coerceAtLeast(0f)
+    get() = bottom - top
+
+  val area: Float
+    get() = width * height
 
   val centerX: Float
     get() = (left + right) / 2f
@@ -271,22 +274,16 @@ private data class NormalizedRect(
   val centerY: Float
     get() = (top + bottom) / 2f
 
-  val area: Float
-    get() = width * height
-
-  fun expand(horizontalInset: Float, verticalInset: Float): NormalizedRect =
+  fun expand(horizontalPadding: Float, verticalPadding: Float): NormalizedRect =
       NormalizedRect(
-          left = left - horizontalInset,
-          top = top - verticalInset,
-          right = right + horizontalInset,
-          bottom = bottom + verticalInset,
+          left = left - horizontalPadding,
+          top = top - verticalPadding,
+          right = right + horizontalPadding,
+          bottom = bottom + verticalPadding,
       )
 
   fun intersects(other: NormalizedRect): Boolean =
       left <= other.right && right >= other.left && top <= other.bottom && bottom >= other.top
-
-  fun centerDistanceTo(other: NormalizedRect): Float =
-      hypot(centerX - other.centerX, centerY - other.centerY)
 
   fun horizontalOverlap(other: NormalizedRect): Float =
       (minOf(right, other.right) - maxOf(left, other.left)).coerceAtLeast(0f)
@@ -295,10 +292,21 @@ private data class NormalizedRect(
       (minOf(bottom, other.bottom) - maxOf(top, other.top)).coerceAtLeast(0f)
 
   fun horizontalGap(other: NormalizedRect): Float =
-      (maxOf(left, other.left) - minOf(right, other.right)).coerceAtLeast(0f)
+      when {
+        right < other.left -> other.left - right
+        other.right < left -> left - other.right
+        else -> 0f
+      }
 
   fun verticalGap(other: NormalizedRect): Float =
-      (maxOf(top, other.top) - minOf(bottom, other.bottom)).coerceAtLeast(0f)
+      when {
+        bottom < other.top -> other.top - bottom
+        other.bottom < top -> top - other.bottom
+        else -> 0f
+      }
+
+  fun centerDistanceTo(other: NormalizedRect): Float =
+      hypot(centerX - other.centerX, centerY - other.centerY)
 
   fun toRectPoints(): List<NormalizedImagePoint> =
       listOf(

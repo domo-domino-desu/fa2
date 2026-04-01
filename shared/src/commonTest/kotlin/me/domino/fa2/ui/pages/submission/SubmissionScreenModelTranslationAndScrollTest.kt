@@ -9,6 +9,8 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -18,6 +20,7 @@ import kotlinx.coroutines.test.setMain
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.data.settings.TranslationProvider
 import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.domain.attachmenttext.AttachmentTextFormat
 import me.domino.fa2.domain.attachmenttext.AttachmentTextParagraph
@@ -344,6 +347,153 @@ class SubmissionScreenModelTranslationAndScrollTest {
         )
         assertEquals("HELLO", retriedState.blocks.single().translated)
         assertTrue(retriedState.hasTriggered)
+      }
+
+  @Test
+  fun retriesDescriptionTranslationWithNextProviderFromFeedbackAction() =
+      runTest(dispatcher.scheduler) {
+        val settingsService = createTestAppSettingsService()
+        val detailSource =
+            MutableSubmissionDetailSource(
+                submissions =
+                    mutableMapOf(
+                        1 to translationTestSubmission(1, descriptionHtml = "<p>hello</p>")
+                    )
+            )
+        val requestedProviders = mutableListOf<TranslationProvider>()
+        val feedbackEvents = mutableListOf<me.domino.fa2.ui.components.AppFeedbackRequest>()
+        val model =
+            createSubmissionScreenModelForTest(
+                initialSid = 1,
+                items = listOf(translationTestThumbnail(1)),
+                submissionSource = detailSource,
+                translationService =
+                    createTestSubmissionTranslationService(settingsService = settingsService) {
+                        request ->
+                      requestedProviders += request.provider
+                      when (request.provider) {
+                        TranslationProvider.GOOGLE -> error("boom")
+                        TranslationProvider.MICROSOFT -> request.sourceText.uppercase()
+                        TranslationProvider.OPENAI_COMPATIBLE -> error("unexpected provider")
+                      }
+                    },
+                imageOcrTranslationService =
+                    createTestSubmissionImageOcrTranslationService(
+                        settingsService = settingsService
+                    ),
+                settingsService = settingsService,
+            )
+        val feedbackJob = launch {
+          model.feedbackEvents.collect { request -> feedbackEvents += request }
+        }
+
+        runCurrent()
+        model.translateDescriptionCurrent()
+        advanceUntilIdle()
+
+        val feedback = assertNotNull(feedbackEvents.firstOrNull())
+        feedback.onAction?.invoke()
+        advanceUntilIdle()
+
+        val retriedState =
+            ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
+                    as SubmissionDetailUiState.Success)
+                .descriptionTranslationState
+        assertEquals(
+            listOf(TranslationProvider.GOOGLE, TranslationProvider.MICROSOFT),
+            requestedProviders,
+        )
+        assertEquals(
+            TranslationProvider.MICROSOFT,
+            settingsService.settings.value.translationProvider,
+        )
+        assertEquals(
+            SubmissionDescriptionTranslationStatus.SUCCESS,
+            retriedState.blocks.single().status,
+        )
+        assertEquals("HELLO", retriedState.blocks.single().translated)
+
+        feedbackJob.cancel()
+      }
+
+  @Test
+  fun retriesAttachmentTranslationWithNextProviderFromFeedbackAction() =
+      runTest(dispatcher.scheduler) {
+        val settingsService = createTestAppSettingsService()
+        val detailSource =
+            MutableSubmissionDetailSource(
+                submissions =
+                    mutableMapOf(
+                        1 to
+                            translationTestSubmission(
+                                1,
+                                descriptionHtml = "<p>desc</p>",
+                                downloadUrl = "https://example.com/sample.txt",
+                                downloadFileName = "sample.txt",
+                            )
+                    ),
+                attachmentResults =
+                    ArrayDeque(
+                        listOf(PageState.Success(translationTestAttachmentDocument("hello")))
+                    ),
+            )
+        val requestedProviders = mutableListOf<TranslationProvider>()
+        val feedbackEvents = mutableListOf<me.domino.fa2.ui.components.AppFeedbackRequest>()
+        val model =
+            createSubmissionScreenModelForTest(
+                initialSid = 1,
+                items = listOf(translationTestThumbnail(1)),
+                submissionSource = detailSource,
+                translationService =
+                    createTestSubmissionTranslationService(settingsService = settingsService) {
+                        request ->
+                      requestedProviders += request.provider
+                      when (request.provider) {
+                        TranslationProvider.GOOGLE -> error("boom")
+                        TranslationProvider.MICROSOFT -> request.sourceText.uppercase()
+                        TranslationProvider.OPENAI_COMPATIBLE -> error("unexpected provider")
+                      }
+                    },
+                imageOcrTranslationService =
+                    createTestSubmissionImageOcrTranslationService(
+                        settingsService = settingsService
+                    ),
+                settingsService = settingsService,
+            )
+        val feedbackJob = launch {
+          model.feedbackEvents.collect { request -> feedbackEvents += request }
+        }
+
+        runCurrent()
+        model.loadAttachmentTextCurrent()
+        advanceUntilIdle()
+        model.translateAttachmentCurrent()
+        advanceUntilIdle()
+
+        val feedback = assertNotNull(feedbackEvents.firstOrNull())
+        feedback.onAction?.invoke()
+        advanceUntilIdle()
+
+        val retriedState =
+            ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
+                    as SubmissionDetailUiState.Success)
+                .attachmentTranslationState
+        assertNotNull(retriedState)
+        assertEquals(
+            listOf(TranslationProvider.GOOGLE, TranslationProvider.MICROSOFT),
+            requestedProviders,
+        )
+        assertEquals(
+            TranslationProvider.MICROSOFT,
+            settingsService.settings.value.translationProvider,
+        )
+        assertEquals(
+            SubmissionDescriptionTranslationStatus.SUCCESS,
+            retriedState.blocks.single().status,
+        )
+        assertEquals("HELLO", retriedState.blocks.single().translated)
+
+        feedbackJob.cancel()
       }
 
   @Test

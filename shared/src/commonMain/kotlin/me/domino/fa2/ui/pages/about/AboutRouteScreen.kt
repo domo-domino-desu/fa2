@@ -57,7 +57,7 @@ import fa2.shared.generated.resources.about_thanks
 import fa2.shared.generated.resources.about_version
 import fa2.shared.generated.resources.about_version_copied
 import fa2.shared.generated.resources.close
-import fa2.shared.generated.resources.fa2_logo
+import fa2.shared.generated.resources.fa2_logo_raster
 import kotlin.coroutines.resume
 import kotlin.time.Clock
 import kotlinx.coroutines.launch
@@ -222,10 +222,10 @@ private fun AboutHeaderCard() {
     ) {
       Box(contentAlignment = Alignment.Center) {
         androidx.compose.foundation.Image(
-            painter = painterResource(Res.drawable.fa2_logo),
+            painter = painterResource(Res.drawable.fa2_logo_raster),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.size(192.dp),
+            modifier = Modifier.size(256.dp),
         )
       }
     }

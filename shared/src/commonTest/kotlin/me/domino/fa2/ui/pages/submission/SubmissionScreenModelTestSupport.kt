@@ -19,28 +19,30 @@ import okio.FileSystem
 import okio.Path.Companion.toPath
 
 internal suspend fun createTestSubmissionTranslationService(
-    translate: suspend (TranslationRequest) -> String = { request -> request.sourceText }
+    settingsService: AppSettingsService? = null,
+    translate: suspend (TranslationRequest) -> String = { request -> request.sourceText },
 ): SubmissionDescriptionTranslationService {
-  val (translationPort, settingsService) = createTestTranslationDependencies(translate)
+  val resolvedSettingsService = settingsService ?: createTestAppSettingsService()
+  val translationPort = createTestTranslationPort(translate)
   return SubmissionDescriptionTranslationService(
       translationPort = translationPort,
-      settingsService = settingsService,
+      settingsService = resolvedSettingsService,
   )
 }
 
 internal suspend fun createTestSubmissionImageOcrTranslationService(
-    translate: suspend (TranslationRequest) -> String = { request -> request.sourceText }
+    settingsService: AppSettingsService? = null,
+    translate: suspend (TranslationRequest) -> String = { request -> request.sourceText },
 ): SubmissionImageOcrTranslationService {
-  val (translationPort, settingsService) = createTestTranslationDependencies(translate)
+  val resolvedSettingsService = settingsService ?: createTestAppSettingsService()
+  val translationPort = createTestTranslationPort(translate)
   return SubmissionImageOcrTranslationService(
       translationPort = translationPort,
-      settingsService = settingsService,
+      settingsService = resolvedSettingsService,
   )
 }
 
-private suspend fun createTestTranslationDependencies(
-    translate: suspend (TranslationRequest) -> String,
-): Pair<TranslationPort, AppSettingsService> {
+internal suspend fun createTestAppSettingsService(): AppSettingsService {
   val randomSuffix = Random.nextLong().toString().replace('-', '0')
   val tempPath =
       "${FileSystem.SYSTEM_TEMPORARY_DIRECTORY}/fa2-submission-screen-$randomSuffix.preferences_pb"
@@ -54,13 +56,16 @@ private suspend fun createTestTranslationDependencies(
               secretVault = KSafe(fileName = "fa2_submission_settings_$randomSuffix"),
           )
       )
-  val translationPort =
-      object : TranslationPort {
-        override suspend fun translate(request: TranslationRequest): String = translate(request)
-      }
   settingsService.ensureLoaded()
-  return translationPort to settingsService
+  return settingsService
 }
+
+internal fun createTestTranslationPort(
+    translate: suspend (TranslationRequest) -> String,
+): TranslationPort =
+    object : TranslationPort {
+      override suspend fun translate(request: TranslationRequest): String = translate(request)
+    }
 
 internal fun createTestSubmissionImageOcrService(
     recognize: suspend (String) -> ImageOcrResult = { ImageOcrResult(emptyList()) }

@@ -18,7 +18,10 @@ private suspend fun writeTextFile(
     withContext(Dispatchers.IO) {
       val targetFile =
           when (val destination = request.destination) {
-            is PlatformTextFileDestination.Directory -> File(destination.path, request.fileName)
+            is PlatformTextFileDestination.Directory ->
+                destination.relativeDirectories
+                    .fold(File(destination.path)) { current, segment -> File(current, segment) }
+                    .resolve(request.fileName)
             is PlatformTextFileDestination.File -> File(destination.path)
           }
 
