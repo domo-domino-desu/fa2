@@ -28,7 +28,6 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -61,11 +60,13 @@ internal fun rememberHtmlInlineContent(
           when (placeholder.kind) {
             HtmlInlinePlaceholderKind.User -> {
               val labelText = placeholder.displayText.ifBlank { placeholder.username }
+              val labelStyle =
+                  style.copy(color = textColor, fontWeight = style.fontWeight ?: FontWeight.Medium)
               val labelWidthPx =
                   textMeasurer
                       .measure(
                           text = AnnotatedString(labelText),
-                          style = style.copy(color = textColor),
+                          style = labelStyle,
                           maxLines = 1,
                       )
                       .size
@@ -73,11 +74,8 @@ internal fun rememberHtmlInlineContent(
                       .toFloat()
               val gapPx = with(density) { 6.dp.toPx() }
               val avatarSizePx = (lineHeightPx - with(density) { 2.dp.toPx() }).coerceAtLeast(1f)
-              val maxWidthPx = lineHeightPx * 10f
               val widthPx =
-                  (avatarSizePx + gapPx + labelWidthPx)
-                      .coerceAtMost(maxWidthPx)
-                      .coerceAtLeast(avatarSizePx + gapPx)
+                  (avatarSizePx + gapPx + labelWidthPx).coerceAtLeast(avatarSizePx + gapPx)
               InlineTextContent(
                   placeholder =
                       Placeholder(
@@ -90,7 +88,7 @@ internal fun rememberHtmlInlineContent(
                     placeholder = placeholder,
                     text = labelText,
                     textColor = textColor,
-                    style = style,
+                    textStyle = labelStyle,
                 )
               }
             }
@@ -117,7 +115,7 @@ private fun HtmlInlineUserChip(
     placeholder: HtmlInlinePlaceholder,
     text: String,
     textColor: Color,
-    style: TextStyle,
+    textStyle: TextStyle,
 ) {
   Row(
       modifier = Modifier.fillMaxSize(),
@@ -144,7 +142,7 @@ private fun HtmlInlineUserChip(
         ) {
           Text(
               text = placeholder.username.firstOrNull()?.uppercase() ?: "?",
-              style = style,
+              style = textStyle,
               color = textColor,
               maxLines = 1,
           )
@@ -155,12 +153,10 @@ private fun HtmlInlineUserChip(
     Text(
         text = text,
         modifier = Modifier.weight(1f),
-        style = style,
+        style = textStyle,
         color = textColor,
         maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
         softWrap = false,
-        fontWeight = style.fontWeight ?: FontWeight.Medium,
     )
   }
 }
