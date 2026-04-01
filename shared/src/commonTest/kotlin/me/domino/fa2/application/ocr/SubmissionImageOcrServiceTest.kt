@@ -45,7 +45,7 @@ class SubmissionImageOcrServiceTest {
                 )
         )
     val service =
-        KtorSubmissionImageOcrService(
+        RemoteSubmissionImageOcrService(
             client = mockImageClient(byteArrayOf(1, 2, 3)),
             recognitionPort =
                 object : ImageTextRecognitionPort {
@@ -64,7 +64,7 @@ class SubmissionImageOcrServiceTest {
   @Test
   fun rejectsEmptyDownloadedPayload() = runTest {
     val service =
-        KtorSubmissionImageOcrService(
+        RemoteSubmissionImageOcrService(
             client = mockImageClient(byteArrayOf()),
             recognitionPort =
                 object : ImageTextRecognitionPort {

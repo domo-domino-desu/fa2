@@ -24,6 +24,7 @@ fun summarizeHtmlResult(result: HtmlResponseResult): String =
         "Cloudflare验证(cf-ray=$ray)"
       }
 
+      HtmlResponseResult.ChallengeAborted -> "验证已取消"
       is HtmlResponseResult.MatureBlocked -> "受限:${result.reason}"
       is HtmlResponseResult.Error -> "HTTP${result.statusCode}:${result.message}"
     }

@@ -12,7 +12,7 @@ data class PaginationSnapshot<Item>(
     val appendErrorMessage: String?,
 )
 
-class PaginationStateMachine<Item, Key>(
+class PaginationReducer<Item, Key>(
     private val keyOf: (Item) -> Key,
     private val challengeMessage: () -> String,
     private val appendFallbackErrorMessage: () -> String,

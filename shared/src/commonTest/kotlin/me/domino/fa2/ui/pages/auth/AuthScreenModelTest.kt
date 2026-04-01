@@ -17,7 +17,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import me.domino.fa2.application.auth.DefaultAuthSessionController
 import me.domino.fa2.application.auth.PendingFaRouteStore
-import me.domino.fa2.application.challenge.port.SessionWebViewPort
 import me.domino.fa2.data.datasource.AuthDataSource
 import me.domino.fa2.data.local.KeyValueStorage
 import me.domino.fa2.data.network.CookiePersistence
@@ -27,6 +26,7 @@ import me.domino.fa2.data.network.HtmlResponseResult
 import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.data.network.endpoint.HomeEndpoint
 import me.domino.fa2.data.repository.AuthRepository
+import me.domino.fa2.domain.challenge.SessionWebViewPort
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.util.FaUrls
 import okio.FileSystem

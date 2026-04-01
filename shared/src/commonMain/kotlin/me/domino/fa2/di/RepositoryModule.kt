@@ -2,7 +2,7 @@ package me.domino.fa2.di
 
 import eu.anifantakis.lib.ksafe.KSafe
 import me.domino.fa2.application.attachmenttext.AttachmentTextService
-import me.domino.fa2.application.ocr.KtorSubmissionImageOcrService
+import me.domino.fa2.application.ocr.RemoteSubmissionImageOcrService
 import me.domino.fa2.application.ocr.SubmissionImageOcrService
 import me.domino.fa2.application.submissionseries.SubmissionSeriesResolver
 import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
@@ -46,7 +46,7 @@ fun repositoryModule(): Module = module {
   single { FaTaxonomyRepository() }
   single { SearchUiLabelsRepository() }
   single { AttachmentTextService(get()) }
-  single<SubmissionImageOcrService> { KtorSubmissionImageOcrService(get(), get()) }
+  single<SubmissionImageOcrService> { RemoteSubmissionImageOcrService(get(), get()) }
   single { SubmissionImageOcrTranslationService(get(), get()) }
   single { ActivityHistoryRepository(get()) }
   single { SubmissionDescriptionTranslationService(get(), get()) }

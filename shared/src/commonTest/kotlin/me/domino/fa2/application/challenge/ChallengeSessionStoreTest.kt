@@ -6,7 +6,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.application.challenge.port.CfChallengeSignal
+import me.domino.fa2.domain.challenge.CfChallengeSignal
 
 class ChallengeSessionStoreTest {
   @Test

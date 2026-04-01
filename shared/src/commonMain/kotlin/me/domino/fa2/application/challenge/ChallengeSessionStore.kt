@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import me.domino.fa2.application.challenge.port.CfChallengeSignal
+import me.domino.fa2.domain.challenge.CfChallengeSignal
 
 class ChallengeSessionStore {
   private val mutex = Mutex()

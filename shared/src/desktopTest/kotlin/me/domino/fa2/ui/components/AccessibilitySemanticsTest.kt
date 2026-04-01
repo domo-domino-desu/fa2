@@ -13,15 +13,30 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
+import java.util.Locale
 import kotlin.test.assertTrue
 import me.domino.fa2.ui.components.settings.SettingsGroup
 import me.domino.fa2.ui.components.settings.SettingsSwitchRow
 import me.domino.fa2.ui.theme.Fa2Theme
+import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
 class AccessibilitySemanticsTest {
   @get:Rule val composeRule = createComposeRule()
+
+  private val savedLocale: Locale = Locale.getDefault()
+
+  @Before
+  fun forceEnglishLocale() {
+    Locale.setDefault(Locale.ENGLISH)
+  }
+
+  @After
+  fun restoreLocale() {
+    Locale.setDefault(savedLocale)
+  }
 
   @Test
   fun filterDialogTriggerField_exposes_named_button_state() {

@@ -18,6 +18,7 @@ internal inline fun <T> HtmlResponseResult.toPageState(
       is HtmlResponseResult.AuthRequired ->
           PageState.AuthRequired(requestUrl = requestUrl, message = message)
       is HtmlResponseResult.CfChallenge -> PageState.CfChallenge
+      HtmlResponseResult.ChallengeAborted -> PageState.CfChallenge
       is HtmlResponseResult.MatureBlocked -> PageState.MatureBlocked(reason)
       is HtmlResponseResult.Error -> PageState.Error(IllegalStateException(message))
     }

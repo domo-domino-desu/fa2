@@ -75,6 +75,10 @@ internal class SocialActionTagBlockingResponseParser(
           SocialActionTagBlockingOutcome.Result(
               SocialActionResult.Challenge(cfRay = classified.cfRay)
           )
+      HtmlResponseResult.ChallengeAborted ->
+          SocialActionTagBlockingOutcome.Result(
+              SocialActionResult.Failed("Cloudflare challenge aborted")
+          )
     }
   }
 

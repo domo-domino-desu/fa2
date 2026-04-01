@@ -1,9 +1,9 @@
 package me.domino.fa2.data.network.challenge
 
-import me.domino.fa2.application.challenge.port.CfChallengeSignal
-import me.domino.fa2.application.challenge.port.ChallengeResolver
 import me.domino.fa2.data.network.FaHtmlDataSource
 import me.domino.fa2.data.network.HtmlResponseResult
+import me.domino.fa2.domain.challenge.CfChallengeSignal
+import me.domino.fa2.domain.challenge.ChallengeResolver
 import me.domino.fa2.util.logging.FaLog
 import me.domino.fa2.util.logging.summarizeHtmlResult
 import me.domino.fa2.util.logging.summarizeUrl
@@ -29,10 +29,7 @@ class ChallengeAwareFaHtmlDataSource(
         challengeResolver.awaitResolution(CfChallengeSignal(requestUrl = url, cfRay = first.cfRay))
     if (!resolved) {
       log.w { "Challenge代理请求 -> 验证未完成(url=$safeUrl)" }
-      return HtmlResponseResult.Error(
-          statusCode = 403,
-          message = "Cloudflare challenge unresolved for $url",
-      )
+      return HtmlResponseResult.ChallengeAborted
     }
 
     val retried = delegate.get(url)

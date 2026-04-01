@@ -11,7 +11,7 @@ fun interface SubmissionImageOcrService {
   suspend fun recognize(imageUrl: String): ImageOcrResult
 }
 
-class KtorSubmissionImageOcrService(
+class RemoteSubmissionImageOcrService(
     private val client: HttpClient,
     private val recognitionPort: ImageTextRecognitionPort,
 ) : SubmissionImageOcrService {

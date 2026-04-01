@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import me.domino.fa2.application.auth.AuthSessionController
 import me.domino.fa2.application.auth.PendingFaRouteStore
-import me.domino.fa2.application.challenge.port.SessionWebViewPort
 import me.domino.fa2.data.model.AuthProbeResult
 import me.domino.fa2.data.repository.AuthRepository
 import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.domain.challenge.SessionWebViewPort
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.appString
 import me.domino.fa2.util.FaUrls

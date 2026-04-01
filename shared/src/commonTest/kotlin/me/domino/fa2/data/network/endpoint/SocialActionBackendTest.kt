@@ -104,12 +104,12 @@ private class ScriptedHtmlDataSource(vararg responses: HtmlResponseResult) : FaH
 }
 
 private class BackendChallengeResolver(vararg decisions: Boolean) :
-    me.domino.fa2.application.challenge.port.ChallengeResolver {
+    me.domino.fa2.domain.challenge.ChallengeResolver {
   private val queue = ArrayDeque(decisions.toList())
-  val requests = mutableListOf<me.domino.fa2.application.challenge.port.CfChallengeSignal>()
+  val requests = mutableListOf<me.domino.fa2.domain.challenge.CfChallengeSignal>()
 
   override suspend fun awaitResolution(
-      challenge: me.domino.fa2.application.challenge.port.CfChallengeSignal
+      challenge: me.domino.fa2.domain.challenge.CfChallengeSignal
   ): Boolean {
     requests += challenge
     return queue.removeFirstOrNull() ?: false

@@ -4,8 +4,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.application.challenge.port.CfChallengeSignal
-import me.domino.fa2.application.challenge.port.ChallengeResolver
+import me.domino.fa2.domain.challenge.CfChallengeSignal
+import me.domino.fa2.domain.challenge.ChallengeResolver
 
 class SocialActionChallengePolicyTest {
   @Test

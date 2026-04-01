@@ -35,6 +35,11 @@ class ChallengeProbeVerifier(
           log.w { "验证探测 -> 请求失败(${response.message})" }
           lastError = IllegalStateException(response.message)
         }
+
+        HtmlResponseResult.ChallengeAborted -> {
+          log.w { "验证探测 -> 验证被取消" }
+          lastError = IllegalStateException("Challenge aborted during probe")
+        }
       }
     }
     throw lastError ?: IllegalStateException("Challenge probe failed")

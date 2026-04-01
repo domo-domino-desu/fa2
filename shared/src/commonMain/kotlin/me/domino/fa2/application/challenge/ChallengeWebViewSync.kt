@@ -1,7 +1,7 @@
 package me.domino.fa2.application.challenge
 
 import kotlinx.coroutines.delay
-import me.domino.fa2.application.challenge.port.SessionWebViewPort
+import me.domino.fa2.domain.challenge.SessionWebViewPort
 
 internal suspend fun captureCookieHeaderWithRetry(
     port: SessionWebViewPort,

@@ -1,4 +1,4 @@
-package me.domino.fa2.application.challenge.port
+package me.domino.fa2.domain.challenge
 
 /** Cloudflare challenge 触发信息。 */
 data class CfChallengeSignal(

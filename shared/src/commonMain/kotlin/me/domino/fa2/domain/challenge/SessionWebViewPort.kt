@@ -1,4 +1,4 @@
-package me.domino.fa2.application.challenge.port
+package me.domino.fa2.domain.challenge
 
 /** 通用会话 WebView 交互端口。 */
 interface SessionWebViewPort {

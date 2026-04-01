@@ -15,7 +15,7 @@ import me.domino.fa2.i18n.AppI18nSnapshot
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.appString
 import me.domino.fa2.ui.search.SearchUiLabelsRepository
-import me.domino.fa2.ui.state.PaginationStateMachine
+import me.domino.fa2.ui.state.PaginationReducer
 import me.domino.fa2.util.logging.summarizePageState
 
 internal data class SearchAppliedRequest(
@@ -166,7 +166,7 @@ internal class SearchHistoryCoordinator(
 internal class SearchPaginationCoordinator(
     private val repository: SearchRepository,
     private val log: Logger,
-    private val paginationStateMachine: PaginationStateMachine<SubmissionThumbnail, Int>,
+    private val paginationStateMachine: PaginationReducer<SubmissionThumbnail, Int>,
     private val screenModelScope: CoroutineScope,
     private val stateProvider: () -> SearchUiState,
     private val stateSink: (SearchUiState) -> Unit,
@@ -338,7 +338,7 @@ internal class SearchScreenWorkflow(
           repository = repository,
           log = log,
           paginationStateMachine =
-              PaginationStateMachine<SubmissionThumbnail, Int>(
+              PaginationReducer<SubmissionThumbnail, Int>(
                   keyOf = { item -> item.id },
                   challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
                   appendFallbackErrorMessage = { appString(Res.string.load_failed_please_retry) },

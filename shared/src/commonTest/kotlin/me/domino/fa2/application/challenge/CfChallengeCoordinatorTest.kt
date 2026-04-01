@@ -9,14 +9,14 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.application.challenge.port.CfChallengeSignal
-import me.domino.fa2.application.challenge.port.SessionWebViewPort
 import me.domino.fa2.data.local.KeyValueStorage
 import me.domino.fa2.data.network.CookiePersistence
 import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.FaHtmlDataSource
 import me.domino.fa2.data.network.HtmlResponseResult
 import me.domino.fa2.data.network.UserAgentStorage
+import me.domino.fa2.domain.challenge.CfChallengeSignal
+import me.domino.fa2.domain.challenge.SessionWebViewPort
 import me.domino.fa2.util.FaUrls
 import okio.FileSystem
 import okio.Path.Companion.toPath

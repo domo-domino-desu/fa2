@@ -113,6 +113,10 @@ class AuthDataSource(
           AuthProbeResult.AuthInvalid(message = "Cloudflare challenge 尚未完成，请先在覆盖层完成验证。")
         }
 
+        HtmlResponseResult.ChallengeAborted -> {
+          AuthProbeResult.AuthInvalid(message = "Cloudflare challenge 已取消。")
+        }
+
         is HtmlResponseResult.MatureBlocked -> {
           AuthProbeResult.AuthInvalid(message = response.reason)
         }

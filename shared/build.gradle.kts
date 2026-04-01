@@ -9,6 +9,7 @@ plugins {
   alias(libs.plugins.kotlinx.serialization)
   alias(libs.plugins.aboutLibraries)
   alias(libs.plugins.ksp)
+  alias(libs.plugins.room)
   alias(libs.plugins.symbolCraft)
 }
 
@@ -91,8 +92,6 @@ kotlin {
       }
     }
 
-    val jvmSharedMain by creating { dependsOn(commonMain) }
-
     val commonTest by getting {
       dependencies {
         implementation(kotlin("test"))
@@ -105,7 +104,6 @@ kotlin {
     }
 
     val desktopMain by getting {
-      dependsOn(jvmSharedMain)
       dependencies {
         implementation(libs.ktor.client.okhttp)
         implementation(libs.pdfbox)
@@ -121,7 +119,6 @@ kotlin {
     }
 
     val androidMain by getting {
-      dependsOn(jvmSharedMain)
       dependencies {
         implementation(libs.androidx.activity.compose)
         implementation(libs.coil.gif)
@@ -147,6 +144,8 @@ tasks.register("test") {
 aboutLibraries {
   export { outputFile = file("src/commonMain/composeResources/files/aboutlibraries.json") }
 }
+
+room { schemaDirectory("$projectDir/schemas") }
 
 symbolCraft {
   packageName.set("me.domino.fa2.generated.symbols")

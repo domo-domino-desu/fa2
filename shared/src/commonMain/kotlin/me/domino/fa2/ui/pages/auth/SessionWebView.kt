@@ -12,7 +12,7 @@ import io.github.kdroidfilter.webview.web.rememberWebViewState
 import kotlin.coroutines.resume
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
-import me.domino.fa2.application.challenge.port.SessionWebViewPort
+import me.domino.fa2.domain.challenge.SessionWebViewPort
 
 /** 读取 UA 的超时时间（毫秒）。 */
 private const val userAgentEvalTimeoutMs = 1_500L

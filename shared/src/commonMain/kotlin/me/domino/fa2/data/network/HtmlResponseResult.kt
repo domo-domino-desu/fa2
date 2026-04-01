@@ -61,6 +61,9 @@ sealed interface HtmlResponseResult {
       val cfRay: String?
   ) : HtmlResponseResult
 
+  /** 用户主动取消或拒绝完成 Cloudflare challenge。 */
+  data object ChallengeAborted : HtmlResponseResult
+
   companion object {
     /** Cloudflare 常见 challenge 状态码。 */
     private val cfStatusCodes = setOf(403, 429, 503)

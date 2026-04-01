@@ -11,7 +11,6 @@ import me.domino.fa2.application.challenge.ChallengeCookiePolicy
 import me.domino.fa2.application.challenge.ChallengeProbeVerifier
 import me.domino.fa2.application.challenge.ChallengeSessionStore
 import me.domino.fa2.application.challenge.CloudflareChallengeCookiePolicy
-import me.domino.fa2.application.challenge.port.ChallengeResolver
 import me.domino.fa2.data.network.CookiePersistence
 import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.FaHtmlDataSource
@@ -36,6 +35,7 @@ import me.domino.fa2.data.network.endpoint.SubmissionEndpoint
 import me.domino.fa2.data.network.endpoint.UserEndpoint
 import me.domino.fa2.data.network.endpoint.WatchlistEndpoint
 import me.domino.fa2.data.translation.KtorTranslationPort
+import me.domino.fa2.domain.challenge.ChallengeResolver
 import me.domino.fa2.domain.translation.TranslationPort
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
@@ -101,7 +101,7 @@ fun networkModule(): Module = module {
     )
   }
 
-  single { HomeEndpoint(get(qualifier = named(KOIN_QUALIFIER_RAW_HTML_DATA_SOURCE))) }
+  single { HomeEndpoint(get()) }
   single { FeedEndpoint(get()) }
   single { BrowseEndpoint(get()) }
   single { SearchEndpoint(get()) }

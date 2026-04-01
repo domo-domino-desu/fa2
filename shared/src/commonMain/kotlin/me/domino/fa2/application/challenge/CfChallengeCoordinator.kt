@@ -2,11 +2,11 @@ package me.domino.fa2.application.challenge
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.StateFlow
-import me.domino.fa2.application.challenge.port.CfChallengeSignal
-import me.domino.fa2.application.challenge.port.ChallengeResolver
-import me.domino.fa2.application.challenge.port.SessionWebViewPort
 import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.UserAgentStorage
+import me.domino.fa2.domain.challenge.CfChallengeSignal
+import me.domino.fa2.domain.challenge.ChallengeResolver
+import me.domino.fa2.domain.challenge.SessionWebViewPort
 import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.logging.FaLog
 import me.domino.fa2.util.logging.summarizeUrl

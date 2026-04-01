@@ -11,8 +11,8 @@ import me.domino.fa2.data.repository.JournalsRepository
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.appString
+import me.domino.fa2.ui.state.PaginationReducer
 import me.domino.fa2.ui.state.PaginationSnapshot
-import me.domino.fa2.ui.state.PaginationStateMachine
 import me.domino.fa2.util.logging.FaLog
 import me.domino.fa2.util.logging.summarizePageState
 
@@ -51,7 +51,7 @@ class UserJournalsScreenModel(
 ) : StateScreenModel<UserJournalsUiState>(UserJournalsUiState()) {
   private val log = FaLog.withTag("UserJournalsScreenModel")
   private val paginationStateMachine =
-      PaginationStateMachine<JournalSummary, Int>(
+      PaginationReducer<JournalSummary, Int>(
           keyOf = { item -> item.id },
           challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
           appendFallbackErrorMessage = { appString(Res.string.load_failed_please_retry) },

@@ -38,6 +38,8 @@ internal class DataSourceSocialActionBackend(
               SocialActionChallengeDecision.Retry -> challengeRetryCount += 1
               is SocialActionChallengeDecision.Terminal -> return decision.result
             }
+        HtmlResponseResult.ChallengeAborted ->
+            return SocialActionResult.Failed("Cloudflare challenge aborted")
       }
     }
   }
@@ -88,6 +90,8 @@ internal class RawHttpSocialActionBackend(
               SocialActionChallengeDecision.Retry -> challengeRetryCount += 1
               is SocialActionChallengeDecision.Terminal -> return decision.result
             }
+        HtmlResponseResult.ChallengeAborted ->
+            return SocialActionResult.Failed("Cloudflare challenge aborted")
       }
     }
   }

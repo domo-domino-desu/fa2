@@ -2,10 +2,10 @@ package me.domino.fa2.data.network.endpoint
 
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CancellationException
-import me.domino.fa2.application.challenge.port.ChallengeResolver
 import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.FaHtmlDataSource
 import me.domino.fa2.data.network.UserAgentStorage
+import me.domino.fa2.domain.challenge.ChallengeResolver
 import me.domino.fa2.util.toUserFacingRequestMessage
 
 /** 社交动作端点（Fav/Watch 等）。 */
