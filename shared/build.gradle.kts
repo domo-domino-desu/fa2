@@ -275,6 +275,8 @@ symbolCraft {
   ) {
     urlTemplate = "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/{name}.svg"
   }
+
+  localIcons(libraryName = "brand") { directory = "../branding" }
 }
 
 val symbolCraftConsumerTasks =

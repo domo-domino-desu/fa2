@@ -34,6 +34,11 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Install oxipng
+        uses: taiki-e/install-action@v2
+        with:
+          tool: oxipng
+
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
@@ -51,7 +56,8 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             librsvg2-bin \
             imagemagick \
-            icnsutils
+            icnsutils \
+            pngquant
 
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
@@ -80,6 +86,22 @@ jobs:
       - name: Build Android release artifacts
         run: ./gradlew --stacktrace :androidApp:assembleRelease :androidApp:bundleRelease
 
+      - name: Publish PNG optimization summary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          report="build/reports/branding-icons/png-optimization.md"
+          if [[ ! -f "${report}" ]]; then
+            echo "## PNG Optimization" >> "${GITHUB_STEP_SUMMARY}"
+            echo >> "${GITHUB_STEP_SUMMARY}"
+            echo "Report not found at \`${report}\`." >> "${GITHUB_STEP_SUMMARY}"
+            exit 0
+          fi
+
+          cat "${report}" >> "${GITHUB_STEP_SUMMARY}"
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -87,6 +109,7 @@ jobs:
           path: |
             androidApp/build/outputs/apk/release/*.apk
             androidApp/build/outputs/bundle/release/*.aab
+            build/reports/branding-icons/png-optimization.md
           if-no-files-found: error
 
       - name: Build tag release commit summary

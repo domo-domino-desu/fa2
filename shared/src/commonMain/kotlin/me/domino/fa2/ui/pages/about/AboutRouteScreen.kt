@@ -34,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -57,7 +56,6 @@ import fa2.shared.generated.resources.about_thanks
 import fa2.shared.generated.resources.about_version
 import fa2.shared.generated.resources.about_version_copied
 import fa2.shared.generated.resources.close
-import fa2.shared.generated.resources.fa2_logo_raster
 import kotlin.coroutines.resume
 import kotlin.time.Clock
 import kotlinx.coroutines.launch
@@ -71,12 +69,12 @@ import me.domino.fa2.ui.components.platform.rememberPlatformFileSavePicker
 import me.domino.fa2.ui.components.platform.rememberPlatformTextCopier
 import me.domino.fa2.ui.components.platform.rememberPlatformTextFileWriter
 import me.domino.fa2.ui.host.LocalAppSettings
+import me.domino.fa2.ui.icons.FaBrandIcons
 import me.domino.fa2.ui.icons.FaContactIcons
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.layouts.AboutRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.util.logging.FaLog
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val aboutProjectUrl = "https://github.com/domo-domino-desu/fa2"
@@ -221,10 +219,10 @@ private fun AboutHeaderCard() {
         color = aboutHeaderBackground,
     ) {
       Box(contentAlignment = Alignment.Center) {
-        androidx.compose.foundation.Image(
-            painter = painterResource(Res.drawable.fa2_logo_raster),
+        Icon(
+            imageVector = FaBrandIcons.Logo,
             contentDescription = null,
-            contentScale = ContentScale.Crop,
+            tint = Color.Unspecified,
             modifier = Modifier.size(256.dp),
         )
       }

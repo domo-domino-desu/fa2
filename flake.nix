@@ -76,6 +76,8 @@
               lint-staged
               nodejs
               nodePackages.prettier
+              oxipng
+              pngquant
               treefmt
             ]
             ++ desktopLibs;

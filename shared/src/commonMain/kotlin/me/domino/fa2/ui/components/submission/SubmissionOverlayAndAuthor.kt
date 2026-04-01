@@ -593,14 +593,6 @@ internal fun expandOverlayRectForMinimumHeight(
   return Rect(left = rawRect.left, top = top, right = rawRect.right, bottom = top + targetHeight)
 }
 
-private fun Rect.translate(offset: Offset): Rect =
-    Rect(
-        left = left + offset.x,
-        top = top + offset.y,
-        right = right + offset.x,
-        bottom = bottom + offset.y,
-    )
-
 private fun Rect.overlapArea(other: Rect): Float {
   val overlapWidth = (minOf(right, other.right) - maxOf(left, other.left)).coerceAtLeast(0f)
   val overlapHeight = (minOf(bottom, other.bottom) - maxOf(top, other.top)).coerceAtLeast(0f)
