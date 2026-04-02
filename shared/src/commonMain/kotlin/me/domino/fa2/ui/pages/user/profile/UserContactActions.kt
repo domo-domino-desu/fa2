@@ -14,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -22,7 +24,6 @@ import fa2.shared.generated.resources.Res
 import fa2.shared.generated.resources.copied_to_clipboard
 import me.domino.fa2.data.model.UserContact
 import me.domino.fa2.ui.components.LocalShowToast
-import me.domino.fa2.ui.components.accessibleCombinedAction
 import me.domino.fa2.ui.components.platform.rememberPlatformTextCopier
 import me.domino.fa2.ui.icons.FaContactIcons
 import me.domino.fa2.util.logging.FaLog
@@ -117,8 +118,7 @@ private fun UserContactTextAction(contact: UserContact) {
       overflow = TextOverflow.Ellipsis,
       modifier =
           Modifier.widthIn(max = 260.dp)
-              .accessibleCombinedAction(
-                  label = buildUserContactText(contact),
+              .combinedClickable(
                   onClick = {
                     activateUserContact(
                         contact = contact,
@@ -137,7 +137,8 @@ private fun UserContactTextAction(contact: UserContact) {
                         reason = "长按",
                     )
                   },
-              ),
+              )
+              .semantics { contentDescription = buildUserContactText(contact) },
   )
 }
 
