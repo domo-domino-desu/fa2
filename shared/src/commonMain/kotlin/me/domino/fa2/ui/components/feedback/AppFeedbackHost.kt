@@ -3,6 +3,7 @@ package me.domino.fa2.ui.components
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -27,10 +28,17 @@ fun AppFeedbackHost(content: @Composable () -> Unit) {
           if (normalized.isNotBlank()) {
             coroutineScope.launch {
               snackbarHostState.currentSnackbarData?.dismiss()
+              val actionLabel = request.actionLabel?.trim()?.ifBlank { null }
               val result =
                   snackbarHostState.showSnackbar(
                       message = normalized,
-                      actionLabel = request.actionLabel?.trim()?.ifBlank { null },
+                      actionLabel = actionLabel,
+                      duration =
+                          if (actionLabel == null) {
+                            SnackbarDuration.Short
+                          } else {
+                            SnackbarDuration.Long
+                          },
                   )
               if (result == SnackbarResult.ActionPerformed) {
                 request.onAction?.invoke()
