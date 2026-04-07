@@ -53,9 +53,15 @@ class UserWatchlistRouteScreen(
     val screenModel =
         koinScreenModel<UserWatchlistScreenModel> { parametersOf(username, category, initialUrl) }
     val state by screenModel.state.collectAsState()
-    val listState: LazyListState = rememberLazyListState()
+    val listState: LazyListState =
+        rememberLazyListState(
+            initialFirstVisibleItemIndex = state.firstVisibleItemIndex,
+            initialFirstVisibleItemScrollOffset = state.firstVisibleItemScrollOffset,
+        )
     val coroutineScope = rememberCoroutineScope()
     val latestOnLastVisible = rememberUpdatedState(screenModel::onLastVisibleIndexChanged)
+    val latestOnScrollPositionChanged = rememberUpdatedState(screenModel::onScrollPositionChanged)
+    val latestOnScrollToTopConsumed = rememberUpdatedState(screenModel::onScrollToTopConsumed)
     val shareUrl =
         when (category) {
           WatchlistCategory.WatchedBy -> FaUrls.watchlistTo(username)
@@ -67,9 +73,16 @@ class UserWatchlistRouteScreen(
           .distinctUntilChanged()
           .collect { lastIndex -> latestOnLastVisible.value(lastIndex) }
     }
-    LaunchedEffect(state.shuffleVersion) {
-      if (state.shuffleVersion > 0) {
+    LaunchedEffect(listState) {
+      snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
+          .distinctUntilChanged()
+          .collect { (index, offset) -> latestOnScrollPositionChanged.value(index, offset) }
+    }
+    LaunchedEffect(state.pendingScrollToTopVersion) {
+      val version = state.pendingScrollToTopVersion
+      if (version > 0) {
         listState.scrollToItem(0)
+        latestOnScrollToTopConsumed.value(version)
       }
     }
     val topBarTitle =

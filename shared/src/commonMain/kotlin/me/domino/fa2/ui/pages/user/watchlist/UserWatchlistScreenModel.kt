@@ -44,8 +44,12 @@ data class UserWatchlistUiState(
     val hasShuffledAllUsers: Boolean = false,
     /** 已缓存的全量结果。 */
     val shuffledAllUsers: List<WatchlistUser> = emptyList(),
-    /** 随机打乱版本号，用于触发列表无动画回顶。 */
-    val shuffleVersion: Int = 0,
+    /** 当前列表首个可见项索引。 */
+    val firstVisibleItemIndex: Int = 0,
+    /** 当前列表首个可见项偏移。 */
+    val firstVisibleItemScrollOffset: Int = 0,
+    /** 待消费的回顶请求版本号。 */
+    val pendingScrollToTopVersion: Int = 0,
 ) {
   /** 是否有下一页。 */
   val hasMore: Boolean
@@ -190,6 +194,31 @@ class UserWatchlistScreenModel(
     loadMore(force = true)
   }
 
+  /** 更新当前滚动位置。 */
+  fun onScrollPositionChanged(firstVisibleItemIndex: Int, firstVisibleItemScrollOffset: Int) {
+    val normalizedIndex = firstVisibleItemIndex.coerceAtLeast(0)
+    val normalizedOffset = firstVisibleItemScrollOffset.coerceAtLeast(0)
+    val snapshot = state.value
+    if (
+        snapshot.firstVisibleItemIndex == normalizedIndex &&
+            snapshot.firstVisibleItemScrollOffset == normalizedOffset
+    ) {
+      return
+    }
+    mutableState.value =
+        snapshot.copy(
+            firstVisibleItemIndex = normalizedIndex,
+            firstVisibleItemScrollOffset = normalizedOffset,
+        )
+  }
+
+  /** 消费一次性的回顶请求。 */
+  fun onScrollToTopConsumed(version: Int) {
+    val snapshot = state.value
+    if (snapshot.pendingScrollToTopVersion != version) return
+    mutableState.value = snapshot.copy(pendingScrollToTopVersion = 0)
+  }
+
   private fun loadMore(force: Boolean) {
     val snapshot = state.value
     if (snapshot.isShuffling) {
@@ -265,7 +294,9 @@ class UserWatchlistScreenModel(
               users = reshuffled,
               errorMessage = null,
               appendErrorMessage = null,
-              shuffleVersion = snapshot.shuffleVersion + 1,
+              firstVisibleItemIndex = 0,
+              firstVisibleItemScrollOffset = 0,
+              pendingScrollToTopVersion = snapshot.pendingScrollToTopVersion + 1,
           )
       log.i { "随机打乱已关注 -> 本地重排(count=${reshuffled.size})" }
       return
@@ -302,7 +333,9 @@ class UserWatchlistScreenModel(
                       isShuffling = false,
                       hasShuffledAllUsers = true,
                       shuffledAllUsers = next.data,
-                      shuffleVersion = state.value.shuffleVersion + 1,
+                      firstVisibleItemIndex = 0,
+                      firstVisibleItemScrollOffset = 0,
+                      pendingScrollToTopVersion = state.value.pendingScrollToTopVersion + 1,
                   )
               log.i { "随机打乱已关注 -> 成功(count=${shuffled.size})" }
             }
