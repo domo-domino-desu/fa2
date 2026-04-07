@@ -2,16 +2,28 @@ package me.domino.fa2.ui.pages.more
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
+import me.domino.fa2.ui.components.ExpressiveButton
+import me.domino.fa2.ui.components.ExpressiveIconButton
+import me.domino.fa2.ui.components.ExpressiveTextButton
 import me.domino.fa2.ui.components.settings.SettingsAccountHeader
 import me.domino.fa2.ui.components.settings.SettingsGroup
 import me.domino.fa2.ui.components.settings.SettingsListItem
@@ -92,6 +104,7 @@ private fun MoreContent(
     /** 退出登录回调。 */
     onLogout: () -> Unit,
 ) {
+  var logoutDialogVisible by remember { mutableStateOf(false) }
   LazyColumn(
       modifier = Modifier.fillMaxSize().testTag("more-screen"),
       contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
@@ -177,7 +190,7 @@ private fun MoreContent(
                 },
             onClick = {
               if (!state.loggingOut) {
-                onLogout()
+                logoutDialogVisible = true
               }
             },
             showDivider = false,
@@ -196,5 +209,49 @@ private fun MoreContent(
             )
           }
         }
+  }
+
+  if (logoutDialogVisible) {
+    AlertDialog(
+        onDismissRequest = { logoutDialogVisible = false },
+        title = {
+          Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Text(stringResource(Res.string.logout_confirm_title))
+            ExpressiveIconButton(
+                onClick = { logoutDialogVisible = false },
+                enabled = !state.loggingOut,
+            ) {
+              Icon(
+                  imageVector = FaMaterialSymbols.Filled.Close,
+                  contentDescription = stringResource(Res.string.close),
+              )
+            }
+          }
+        },
+        text = { Text(stringResource(Res.string.logout_confirm_body)) },
+        confirmButton = {
+          ExpressiveButton(
+              onClick = {
+                logoutDialogVisible = false
+                onLogout()
+              },
+              enabled = !state.loggingOut,
+          ) {
+            Text(stringResource(Res.string.logout_confirm_action))
+          }
+        },
+        dismissButton = {
+          ExpressiveTextButton(
+              onClick = { logoutDialogVisible = false },
+              enabled = !state.loggingOut,
+          ) {
+            Text(stringResource(Res.string.cancel))
+          }
+        },
+    )
   }
 }

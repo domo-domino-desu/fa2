@@ -7,8 +7,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import me.domino.fa2.domain.challenge.CfChallengeSignal
+import me.domino.fa2.util.logging.FaLog
+import me.domino.fa2.util.logging.summarizeUrl
 
 class ChallengeSessionStore {
+  private val log = FaLog.withTag("ChallengeSessionStore")
   private val mutex = Mutex()
   private var active: ActiveChallengeSession? = null
   private val mutableState = MutableStateFlow<CfChallengeUiState>(CfChallengeUiState.Idle)
@@ -18,6 +21,9 @@ class ChallengeSessionStore {
       mutex.withLock {
         val current = active
         if (current != null) {
+          log.d {
+            "Challenge会话存储 -> 复用(triggerUrl=${summarizeUrl(current.triggerUrl)},cf-ray=${current.cfRay ?: "-"})"
+          }
           return@withLock ChallengeSessionAcquisition(session = current, created = false)
         }
 
@@ -34,6 +40,9 @@ class ChallengeSessionStore {
                 cfRay = created.cfRay,
                 status = CfChallengeStatus.AwaitingUserAction,
             )
+        log.i {
+          "Challenge会话存储 -> 创建(triggerUrl=${summarizeUrl(created.triggerUrl)},cf-ray=${created.cfRay ?: "-"})"
+        }
         ChallengeSessionAcquisition(session = created, created = true)
       }
 
@@ -48,6 +57,7 @@ class ChallengeSessionStore {
               cfRay = session.cfRay,
               status = CfChallengeStatus.Verifying,
           )
+      log.d { "Challenge会话存储 -> 标记验证中(triggerUrl=${summarizeUrl(session.triggerUrl)})" }
     }
   }
 
@@ -60,6 +70,9 @@ class ChallengeSessionStore {
               cfRay = session.cfRay,
               status = CfChallengeStatus.VerificationFailed(detail = detail),
           )
+      log.w {
+        "Challenge会话存储 -> 标记验证失败(triggerUrl=${summarizeUrl(session.triggerUrl)},detail=${detail ?: "-"})"
+      }
     }
   }
 
@@ -69,6 +82,11 @@ class ChallengeSessionStore {
         active = null
         mutableState.value = CfChallengeUiState.Idle
         session?.deferred?.complete(result)
+        if (session != null) {
+          log.i {
+            "Challenge会话存储 -> 完成(triggerUrl=${summarizeUrl(session.triggerUrl)},result=${if (result) "成功" else "失败"})"
+          }
+        }
         session
       }
 }

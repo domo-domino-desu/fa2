@@ -19,6 +19,11 @@
   <string name="restored_saved_settings">Restored saved settings</string>
   <string name="save_settings">Save settings</string>
   <string name="settings_saved">Settings saved</string>
+  <string name="settings_unsaved_changes_title">Unsaved settings</string>
+  <string name="settings_unsaved_changes_body">You have unsaved changes. Leaving now will discard
+    them.</string>
+  <string name="settings_discard_changes">Discard changes</string>
+  <string name="settings_save_and_exit">Save and exit</string>
   <string name="loading_settings">Loading settings...</string>
   <string name="save_failed_enter_valid_numbers">Save failed: enter valid numbers</string>
   <string name="download">Download</string>
@@ -80,6 +85,9 @@
     acknowledgements</string>
   <string name="logout">Log Out</string>
   <string name="logout_failed">Log out failed</string>
+  <string name="logout_confirm_title">Confirm log out</string>
+  <string name="logout_confirm_body">This will clear the current session and sign you out.</string>
+  <string name="logout_confirm_action">Log out</string>
   <string name="clearing_cookie">Clearing cookies...</string>
   <string name="clear_cookie">Clear cookies</string>
   <string name="loading_search_history">Loading search history...</string>
@@ -91,6 +99,9 @@
   <string name="copied_to_clipboard">Copied to clipboard</string>
   <string name="copy_link">Copy link</string>
   <string name="share_link">Share link</string>
+  <string name="shuffle_following">Shuffle following</string>
+  <string name="shuffling_following">Shuffling following</string>
+  <string name="shuffle_following_failed">Failed to shuffle following: %1$s</string>
   <string name="sign_in_to_fur_affinity">Sign in to FurAffinity</string>
   <string name="web_view">WebView</string>
   <string name="cookie">Cookie</string>
@@ -129,6 +140,12 @@
   <string name="date_to_label">To (YYYY-MM-DD)</string>
   <string name="date_placeholder">YYYY-MM-DD</string>
   <string name="select_date">Pick date</string>
+  <string name="search_date_previous_year">Previous year</string>
+  <string name="search_date_previous_month">Previous month</string>
+  <string name="search_date_previous_day">Previous day</string>
+  <string name="search_date_next_day">Next day</string>
+  <string name="search_date_next_month">Next month</string>
+  <string name="search_date_next_year">Next year</string>
   <string name="accessibility_not_set">Not set</string>
   <string name="accessibility_open_field">Open %1$s</string>
   <string name="accessibility_ocr_state_idle">OCR not shown</string>
@@ -224,7 +241,8 @@
     {submission_id} {category} {rating} {type} {species}</string>
   <string name="download_save_path_not_configured">Please choose a save path in Settings first</string>
   <string name="download_save_succeeded">Saved successfully</string>
-  <string name="download_save_succeeded_with_translation_sidecar_warning">Saved main file, but failed to save some translation sidecars: %1$s</string>
+  <string name="download_save_succeeded_with_translation_sidecar_warning">Saved main file, but
+    failed to save some translation sidecars: %1$s</string>
   <string name="download_save_failed">Download save failed: %1$s</string>
   <string name="download_save_error_invalid_path">Invalid save path</string>
   <string name="download_save_error_cannot_access_directory">Cannot access save directory</string>
@@ -263,6 +281,8 @@
   <string name="about_thanks">Thanks</string>
   <string name="about_acknowledgements_furaffinity_app">FurAffinityApp</string>
   <string name="about_acknowledgements_transfur_bar">百度贴吧Transfur吧</string>
+  <string name="about_acknowledgements_anthropic_claude">Anthropic Claude</string>
+  <string name="about_acknowledgements_openai_codex">OpenAI Codex</string>
   <string name="interrupted_loading">Loading interrupted</string>
   <string name="missing_tag_block_credentials">Missing tag-block credential</string>
   <string name="favorite">Favorite</string>

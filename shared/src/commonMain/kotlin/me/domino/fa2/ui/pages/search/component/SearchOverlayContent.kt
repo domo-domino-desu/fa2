@@ -44,6 +44,9 @@ import me.domino.fa2.ui.pages.search.SearchScreenActions
 import me.domino.fa2.ui.pages.search.orderByOptions
 import me.domino.fa2.ui.pages.search.orderDirectionOptions
 import me.domino.fa2.ui.pages.search.rangeOptions
+import me.domino.fa2.ui.pages.search.util.SearchDateRangeShiftAction
+import me.domino.fa2.ui.pages.search.util.canShiftSearchDateFields
+import me.domino.fa2.ui.pages.search.util.resolveSearchDateFields
 import me.domino.fa2.ui.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.search.SearchUiMetadataKey
 import me.domino.fa2.ui.search.SearchUiOptionKey
@@ -60,6 +63,7 @@ internal fun SearchOverlayContent(
     modifier: Modifier = Modifier,
 ) {
   val appI18n = LocalAppI18n.current
+  val resolvedDateFields = resolveSearchDateFields(form.range, form.rangeFrom, form.rangeTo)
   Surface(
       modifier = modifier.background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.24f)),
       color = MaterialTheme.colorScheme.surface,
@@ -112,6 +116,43 @@ internal fun SearchOverlayContent(
               rangeTo = form.rangeTo,
               onUpdateRangeFrom = actions.onUpdateRangeFrom,
               onUpdateRangeTo = actions.onUpdateRangeTo,
+          )
+        }
+
+        if (form.range != "all") {
+          SearchDateShiftButtons(
+              fields = resolvedDateFields,
+              canShiftPreviousYear =
+                  canShiftSearchDateFields(
+                      resolvedDateFields,
+                      SearchDateRangeShiftAction.PreviousYear,
+                  ),
+              canShiftPreviousMonth =
+                  canShiftSearchDateFields(
+                      resolvedDateFields,
+                      SearchDateRangeShiftAction.PreviousMonth,
+                  ),
+              canShiftPreviousDay =
+                  canShiftSearchDateFields(
+                      resolvedDateFields,
+                      SearchDateRangeShiftAction.PreviousDay,
+                  ),
+              canShiftNextDay =
+                  canShiftSearchDateFields(
+                      resolvedDateFields,
+                      SearchDateRangeShiftAction.NextDay,
+                  ),
+              canShiftNextMonth =
+                  canShiftSearchDateFields(
+                      resolvedDateFields,
+                      SearchDateRangeShiftAction.NextMonth,
+                  ),
+              canShiftNextYear =
+                  canShiftSearchDateFields(
+                      resolvedDateFields,
+                      SearchDateRangeShiftAction.NextYear,
+                  ),
+              onShift = actions.onShiftDateRange,
           )
         }
 

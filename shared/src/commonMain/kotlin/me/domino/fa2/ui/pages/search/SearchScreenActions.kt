@@ -2,6 +2,7 @@ package me.domino.fa2.ui.pages.search
 
 import androidx.compose.runtime.Stable
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.ui.pages.search.util.SearchDateRangeShiftAction
 
 @Stable
 data class SearchScreenActions(
@@ -17,6 +18,7 @@ data class SearchScreenActions(
     val onUpdateRange: (String) -> Unit,
     val onUpdateRangeFrom: (String) -> Unit,
     val onUpdateRangeTo: (String) -> Unit,
+    val onShiftDateRange: (SearchDateRangeShiftAction) -> Unit,
     val onSetRatingGeneral: (Boolean) -> Unit,
     val onSetRatingMature: (Boolean) -> Unit,
     val onSetRatingAdult: (Boolean) -> Unit,

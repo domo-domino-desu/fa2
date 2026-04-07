@@ -58,7 +58,7 @@ fun SearchScreen(
   val settings = LocalAppSettings.current
   val refreshEnabled = pageControls?.showFirstPage != true || !pageControls.canLoadFirstPage
   val overlayUiData = rememberSearchOverlayUiData()
-  val canSearch = state.draft.query.trim().isNotBlank()
+  val canSearch = state.canApplySearch
 
   Box(modifier = Modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {

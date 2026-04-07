@@ -455,6 +455,7 @@ class MainRouteScreen(
                         onUpdateRange = searchScreenModel::updateRange,
                         onUpdateRangeFrom = searchScreenModel::updateRangeFrom,
                         onUpdateRangeTo = searchScreenModel::updateRangeTo,
+                        onShiftDateRange = searchScreenModel::shiftDateRange,
                         onSetRatingGeneral = searchScreenModel::setRatingGeneral,
                         onSetRatingMature = searchScreenModel::setRatingMature,
                         onSetRatingAdult = searchScreenModel::setRatingAdult,

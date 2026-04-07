@@ -9,6 +9,12 @@ fun appString(resource: StringResource, vararg formatArgs: Any): String = runBlo
   getString(resource, *formatArgs)
 }
 
+fun appStringOrFallback(
+    resource: StringResource,
+    fallback: () -> String,
+    vararg formatArgs: Any,
+): String = runCatching { appString(resource, *formatArgs) }.getOrElse { fallback() }
+
 fun challengeAwaitingUserActionText(cfRay: String?): String {
   val rayText = cfRay?.trim()?.takeIf { it.isNotBlank() }?.let { "\nCF-Ray: $it" }.orEmpty()
   return appString(Res.string.challenge_awaiting_user_action, rayText)

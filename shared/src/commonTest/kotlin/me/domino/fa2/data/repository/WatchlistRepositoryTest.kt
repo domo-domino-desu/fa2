@@ -2,11 +2,13 @@ package me.domino.fa2.data.repository
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.datasource.WatchlistDataSource
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.WatchlistCategory
+import me.domino.fa2.data.model.WatchlistUser
 import me.domino.fa2.data.network.FaHtmlDataSource
 import me.domino.fa2.data.network.HtmlResponseResult
 import me.domino.fa2.data.network.endpoint.WatchlistEndpoint
@@ -121,6 +123,88 @@ class WatchlistRepositoryTest {
     assertEquals(1, source.requestCount(watchingUrl))
   }
 
+  @Test
+  fun loadAllWatchlistUsersAggregatesPagesAndDeduplicates() = runTest {
+    val source = WatchlistScriptedHtmlDataSource()
+    val repository = buildRepository(source)
+    val firstUrl = FaUrls.watchlistBy("me")
+    val nextUrl = "${FaUrls.watchlistBy("me")}?page=2"
+
+    source.enqueue(
+        url = firstUrl,
+        response =
+            HtmlResponseResult.Success(
+                body =
+                    buildWatchlistHtml(
+                        users =
+                            listOf(
+                                watchUser("alpha", "Alpha"),
+                                watchUser("beta", "Beta"),
+                            ),
+                        nextPage = "2",
+                    ),
+                url = firstUrl,
+            ),
+    )
+    source.enqueue(
+        url = nextUrl,
+        response =
+            HtmlResponseResult.Success(
+                body =
+                    buildWatchlistHtml(
+                        users =
+                            listOf(
+                                watchUser("beta", "Beta"),
+                                watchUser("gamma", "Gamma"),
+                            ),
+                    ),
+                url = nextUrl,
+            ),
+    )
+
+    val result =
+        repository.loadAllWatchlistUsers(
+            username = "me",
+            category = WatchlistCategory.Watching,
+        )
+
+    val success = assertIs<PageState.Success<List<WatchlistUser>>>(result)
+    assertEquals(listOf("alpha", "beta", "gamma"), success.data.map { it.username })
+    assertEquals(1, source.requestCount(firstUrl))
+    assertEquals(1, source.requestCount(nextUrl))
+  }
+
+  @Test
+  fun loadAllWatchlistUsersStopsOnError() = runTest {
+    val source = WatchlistScriptedHtmlDataSource()
+    val repository = buildRepository(source)
+    val firstUrl = FaUrls.watchlistBy("me")
+    val nextUrl = "${FaUrls.watchlistBy("me")}?page=2"
+
+    source.enqueue(
+        url = firstUrl,
+        response =
+            HtmlResponseResult.Success(
+                body =
+                    buildWatchlistHtml(users = listOf(watchUser("alpha", "Alpha")), nextPage = "2"),
+                url = firstUrl,
+            ),
+    )
+    source.enqueue(
+        url = nextUrl,
+        response = HtmlResponseResult.Error(statusCode = 500, message = "boom"),
+    )
+
+    val result =
+        repository.loadAllWatchlistUsers(
+            username = "me",
+            category = WatchlistCategory.Watching,
+        )
+
+    val error = assertIs<PageState.Error>(result)
+    assertTrue(error.exception.message.orEmpty().contains("boom"))
+  }
+
   private fun buildRepository(source: FaHtmlDataSource): WatchlistRepository {
     val store =
         WatchlistStore(
@@ -133,6 +217,36 @@ class WatchlistRepositoryTest {
         )
     return WatchlistRepository(store)
   }
+}
+
+private fun watchUser(username: String, displayName: String): WatchlistUser =
+    WatchlistUser(
+        username = username,
+        displayName = displayName,
+        profileUrl = "https://www.furaffinity.net/user/$username/",
+    )
+
+private fun buildWatchlistHtml(
+    users: List<WatchlistUser>,
+    nextPage: String? = null,
+): String = buildString {
+  append("<html><head><title>Watchlist</title></head><body>")
+  append("<div class='watch-list-items'>")
+  users.forEach { user ->
+    append("<a href='/user/${user.username}/'>")
+    append("<span class='c-usernameBlockSimple__displayName'>${user.displayName}</span>")
+    append("</a>")
+  }
+  append("</div>")
+  if (nextPage != null) {
+    append("<div class='watchlist-navigation'>")
+    append("<form action='/watchlist/by/me/'>")
+    append("<input name='page' value='$nextPage' />")
+    append("<button>Next</button>")
+    append("</form>")
+    append("</div>")
+  }
+  append("</body></html>")
 }
 
 /** 脚本化 HTML 数据源，用于控制请求返回。 */

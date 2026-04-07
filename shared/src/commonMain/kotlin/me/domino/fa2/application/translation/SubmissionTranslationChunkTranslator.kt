@@ -7,17 +7,24 @@ import me.domino.fa2.domain.translation.SubmissionTranslationChunk
 import me.domino.fa2.domain.translation.SubmissionTranslationResultAligner
 import me.domino.fa2.domain.translation.TranslationPort
 import me.domino.fa2.domain.translation.TranslationRequest
+import me.domino.fa2.util.logging.FaLog
 
 internal class SubmissionTranslationChunkTranslator(
     private val translationPort: TranslationPort,
     private val resultAligner: SubmissionTranslationResultAligner,
 ) {
+  private val log = FaLog.withTag("TranslationChunkTranslator")
+
   suspend fun translate(
       chunk: SubmissionTranslationChunk,
       settings: AppSettings,
   ): List<SubmissionDescriptionBlockResult> {
     if (chunk.sourceTexts.all { it.isBlank() }) {
+      log.d { "翻译Chunk转换 -> 跳过空Chunk(start=${chunk.startIndex},size=${chunk.sourceTexts.size})" }
       return List(chunk.sourceTexts.size) { SubmissionDescriptionBlockResult.EmptyResult }
+    }
+    log.d {
+      "翻译Chunk转换 -> 开始(start=${chunk.startIndex},size=${chunk.sourceTexts.size},provider=${settings.translationProvider})"
     }
 
     val payload = chunk.sourceTexts.joinToString(SubmissionTranslationResultAligner.batchSeparator)
@@ -50,19 +57,26 @@ internal class SubmissionTranslationChunkTranslator(
                   }
                 },
                 onFailure = { error ->
+                  log.e(error) {
+                    "翻译Chunk转换 -> 失败(start=${chunk.startIndex},size=${chunk.sourceTexts.size})"
+                  }
                   return List(chunk.sourceTexts.size) {
                     SubmissionDescriptionBlockResult.Failure(error)
                   }
                 },
             )
 
-    return translatedLines.map { translatedLine ->
-      val cleanedTranslation = resultAligner.sanitizeTranslatedBlockText(translatedLine)
-      if (cleanedTranslation.isBlank()) {
-        SubmissionDescriptionBlockResult.EmptyResult
-      } else {
-        SubmissionDescriptionBlockResult.Success(cleanedTranslation)
-      }
-    }
+    return translatedLines
+        .map { translatedLine ->
+          val cleanedTranslation = resultAligner.sanitizeTranslatedBlockText(translatedLine)
+          if (cleanedTranslation.isBlank()) {
+            SubmissionDescriptionBlockResult.EmptyResult
+          } else {
+            SubmissionDescriptionBlockResult.Success(cleanedTranslation)
+          }
+        }
+        .also {
+          log.d { "翻译Chunk转换 -> 成功(start=${chunk.startIndex},size=${chunk.sourceTexts.size})" }
+        }
   }
 }

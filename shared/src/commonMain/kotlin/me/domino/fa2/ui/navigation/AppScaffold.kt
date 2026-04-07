@@ -141,8 +141,8 @@ private fun topLevelDestinations(): List<TopLevelDestinationItem> =
             destination = TopLevelDestination.FEED,
             label = stringResource(Res.string.feed),
             testTag = "nav-feed",
-            selectedIcon = FaMaterialSymbols.Filled.Home,
-            unselectedIcon = FaMaterialSymbols.Outlined.Home,
+            selectedIcon = FaMaterialSymbols.Filled.Inbox,
+            unselectedIcon = FaMaterialSymbols.Outlined.Inbox,
         ),
         TopLevelDestinationItem(
             destination = TopLevelDestination.BROWSE,

@@ -67,6 +67,11 @@ class UserWatchlistRouteScreen(
           .distinctUntilChanged()
           .collect { lastIndex -> latestOnLastVisible.value(lastIndex) }
     }
+    LaunchedEffect(state.shuffleVersion) {
+      if (state.shuffleVersion > 0) {
+        listState.scrollToItem(0)
+      }
+    }
     val topBarTitle =
         when (category) {
           WatchlistCategory.WatchedBy -> stringResource(Res.string.followers)
@@ -79,6 +84,10 @@ class UserWatchlistRouteScreen(
           onBack = { navigator.pop() },
           onGoHome = { navigator.goBackHome() },
           shareUrl = shareUrl,
+          showShuffleAction = category == WatchlistCategory.Watching,
+          isShuffling = state.isShuffling,
+          shuffleEnabled = !state.loading && !state.refreshing && !state.isLoadingMore,
+          onShuffle = screenModel::shuffleAllWatchingUsers,
           onTitleClick = { coroutineScope.launch { listState.animateScrollToItem(0) } },
       )
 

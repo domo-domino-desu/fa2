@@ -21,10 +21,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
+import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
 import me.domino.fa2.ui.components.ExpressiveTextButton
 import me.domino.fa2.ui.components.accessibleReadOnlyFieldTrigger
 import me.domino.fa2.ui.components.presentationOnlySemantics
 import me.domino.fa2.ui.icons.FaMaterialSymbols
+import me.domino.fa2.ui.pages.search.util.SearchDateFields
+import me.domino.fa2.ui.pages.search.util.SearchDateRangeShiftAction
+import me.domino.fa2.ui.pages.search.util.currentSearchDateBounds
 import me.domino.fa2.ui.pages.search.util.epochMillisToIsoDate
 import me.domino.fa2.ui.pages.search.util.isoDateToEpochMillisOrNull
 import org.jetbrains.compose.resources.stringResource
@@ -50,9 +54,12 @@ internal fun ManualDateRangeSection(
           ManualDateFieldTarget.From -> rangeFrom
           ManualDateFieldTarget.To -> rangeTo
         }
+    val bounds = currentSearchDateBounds()
     val datePickerState =
         androidx.compose.material3.rememberDatePickerState(
-            initialSelectedDateMillis = isoDateToEpochMillisOrNull(initialValue)
+            initialSelectedDateMillis =
+                isoDateToEpochMillisOrNull(initialValue)
+                    ?: isoDateToEpochMillisOrNull(bounds.maxIsoDate)
         )
     DatePickerDialog(
         onDismissRequest = { pickerTarget = null },
@@ -126,6 +133,83 @@ internal fun ManualDateRangeSection(
     }
   }
 }
+
+@Composable
+internal fun SearchDateShiftButtons(
+    fields: SearchDateFields?,
+    canShiftPreviousYear: Boolean,
+    canShiftPreviousMonth: Boolean,
+    canShiftPreviousDay: Boolean,
+    canShiftNextDay: Boolean,
+    canShiftNextMonth: Boolean,
+    canShiftNextYear: Boolean,
+    onShift: (SearchDateRangeShiftAction) -> Unit,
+) {
+  val buttons =
+      listOf(
+          SearchDateShiftButtonModel(
+              label = stringResource(Res.string.search_date_previous_year),
+              action = SearchDateRangeShiftAction.PreviousYear,
+              enabled = canShiftPreviousYear,
+          ),
+          SearchDateShiftButtonModel(
+              label = stringResource(Res.string.search_date_previous_month),
+              action = SearchDateRangeShiftAction.PreviousMonth,
+              enabled = canShiftPreviousMonth,
+          ),
+          SearchDateShiftButtonModel(
+              label = stringResource(Res.string.search_date_previous_day),
+              action = SearchDateRangeShiftAction.PreviousDay,
+              enabled = canShiftPreviousDay,
+          ),
+          SearchDateShiftButtonModel(
+              label = stringResource(Res.string.search_date_next_year),
+              action = SearchDateRangeShiftAction.NextYear,
+              enabled = canShiftNextYear,
+          ),
+          SearchDateShiftButtonModel(
+              label = stringResource(Res.string.search_date_next_month),
+              action = SearchDateRangeShiftAction.NextMonth,
+              enabled = canShiftNextMonth,
+          ),
+          SearchDateShiftButtonModel(
+              label = stringResource(Res.string.search_date_next_day),
+              action = SearchDateRangeShiftAction.NextDay,
+              enabled = canShiftNextDay,
+          ),
+      )
+  BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+    val singleColumn = maxWidth < 560.dp
+    val rows = buttons.chunked(if (singleColumn) 2 else 3)
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      rows.forEach { rowButtons ->
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          rowButtons.forEach { button ->
+            ExpressiveFilledTonalButton(
+                onClick = { onShift(button.action) },
+                enabled = fields != null && button.enabled,
+                modifier = Modifier.weight(1f),
+            ) {
+              Text(button.label)
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+private data class SearchDateShiftButtonModel(
+    val label: String,
+    val action: SearchDateRangeShiftAction,
+    val enabled: Boolean,
+)
 
 @Composable
 private fun ManualDateField(

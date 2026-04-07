@@ -156,6 +156,7 @@ symbolCraft {
   naming { pascalCase() }
 
   materialSymbols(
+      "app_badging",
       "add",
       "close",
       "done",
@@ -164,6 +165,7 @@ symbolCraft {
       "favorite",
       "history",
       "home",
+      "inbox",
       "info",
       "menu",
       "notifications",
@@ -176,6 +178,7 @@ symbolCraft {
   }
 
   materialSymbols(
+      "app_badging",
       "arrow_back",
       "arrow_circle_right",
       "arrow_downward_alt",
@@ -195,6 +198,7 @@ symbolCraft {
       "filter_alt",
       "home",
       "image",
+      "inbox",
       "inventory_2",
       "keyboard_arrow_down",
       "keyboard_arrow_right",
@@ -213,6 +217,7 @@ symbolCraft {
       "receipt_long",
       "search",
       "share",
+      "shuffle",
       "subject",
       "tag",
       "translate",

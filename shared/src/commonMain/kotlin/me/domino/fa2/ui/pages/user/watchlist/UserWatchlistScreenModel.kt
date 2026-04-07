@@ -3,15 +3,18 @@ package me.domino.fa2.ui.pages.user.watchlist
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import fa2.shared.generated.resources.*
+import kotlin.random.Random
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.WatchlistCategory
+import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
 import me.domino.fa2.data.repository.WatchlistRepository
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.appString
+import me.domino.fa2.i18n.appStringOrFallback
 import me.domino.fa2.ui.state.PaginationReducer
 import me.domino.fa2.ui.state.PaginationSnapshot
 import me.domino.fa2.util.logging.FaLog
@@ -35,6 +38,14 @@ data class UserWatchlistUiState(
     val errorMessage: String? = null,
     /** 追加错误。 */
     val appendErrorMessage: String? = null,
+    /** 是否正在随机打乱。 */
+    val isShuffling: Boolean = false,
+    /** 是否已缓存全量结果。 */
+    val hasShuffledAllUsers: Boolean = false,
+    /** 已缓存的全量结果。 */
+    val shuffledAllUsers: List<WatchlistUser> = emptyList(),
+    /** 随机打乱版本号，用于触发列表无动画回顶。 */
+    val shuffleVersion: Int = 0,
 ) {
   /** 是否有下一页。 */
   val hasMore: Boolean
@@ -49,6 +60,22 @@ class UserWatchlistScreenModel(
     private val initialPageUrl: String? = null,
     private val settingsService: AppSettingsService? = null,
     private val systemLanguageProvider: SystemLanguageProvider? = null,
+    private val random: Random = Random.Default,
+    private val loadWatchlistPage:
+        suspend (username: String, category: WatchlistCategory, nextPageUrl: String?) -> PageState<
+                WatchlistPage
+            > =
+        repository::loadWatchlistPage,
+    private val refreshWatchlistFirstPage:
+        suspend (username: String, category: WatchlistCategory) -> PageState<WatchlistPage> =
+        repository::refreshWatchlistFirstPage,
+    private val loadAllWatchlistUsers:
+        suspend (
+            username: String,
+            category: WatchlistCategory,
+            useFreshFirstPage: Boolean,
+        ) -> PageState<List<WatchlistUser>> =
+        repository::loadAllWatchlistUsers,
 ) : StateScreenModel<UserWatchlistUiState>(UserWatchlistUiState()) {
   private val log = FaLog.withTag("UserWatchlistScreenModel")
   private val paginationStateMachine =
@@ -59,6 +86,7 @@ class UserWatchlistScreenModel(
       )
   private var loadJob: Job? = null
   private var appendJob: Job? = null
+  private var shuffleJob: Job? = null
 
   init {
     load()
@@ -67,6 +95,10 @@ class UserWatchlistScreenModel(
   /** 加载首页。 */
   fun load(forceRefresh: Boolean = false) {
     log.i { "加载Watchlist页 -> 开始(user=$username,category=$category,forceRefresh=$forceRefresh)" }
+    if (shuffleJob?.isActive == true) {
+      log.d { "加载Watchlist页 -> 跳过(随机打乱中)" }
+      return
+    }
     if (loadJob?.isActive == true) {
       log.d { "加载Watchlist页 -> 跳过(已有任务)" }
       return
@@ -95,15 +127,15 @@ class UserWatchlistScreenModel(
         screenModelScope.launch {
           val next =
               if (forceRefresh) {
-                repository.refreshWatchlistFirstPage(
-                    username = username,
-                    category = category,
+                refreshWatchlistFirstPage(
+                    username,
+                    category,
                 )
               } else {
-                repository.loadWatchlistPage(
-                    username = username,
-                    category = category,
-                    nextPageUrl = firstPageUrl,
+                loadWatchlistPage(
+                    username,
+                    category,
+                    firstPageUrl,
                 )
               }
           val reduced =
@@ -114,10 +146,21 @@ class UserWatchlistScreenModel(
                   nextPageUrlOf = { page -> page.nextPageUrl },
               )
           val updated = state.value.applyPagination(reduced)
-          mutableState.value = updated
+          mutableState.value =
+              if (forceRefresh && next is PageState.Success) {
+                updated.copy(
+                    isShuffling = false,
+                    hasShuffledAllUsers = false,
+                    shuffledAllUsers = emptyList(),
+                )
+              } else {
+                updated.copy(isShuffling = false)
+              }
           when (next) {
             is PageState.Success -> {
-              log.i { "加载Watchlist页 -> ${summarizePageState(next)}(count=${updated.users.size})" }
+              log.i {
+                "加载Watchlist页 -> ${summarizePageState(next)}(count=${mutableState.value.users.size})"
+              }
             }
 
             is PageState.AuthRequired -> log.w { "加载Watchlist页 -> 需要重新登录" }
@@ -133,7 +176,10 @@ class UserWatchlistScreenModel(
   fun onLastVisibleIndexChanged(lastVisibleIndex: Int) {
     val snapshot = state.value
     if (snapshot.users.isEmpty()) return
-    log.d { "自动加载Watchlist页 -> 触发检查(last=$lastVisibleIndex,total=${snapshot.users.size})" }
+    if (snapshot.isShuffling) {
+      log.d { "自动加载Watchlist页 -> 跳过(随机打乱中)" }
+      return
+    }
     if (lastVisibleIndex > snapshot.users.lastIndex - watchlistAutoLoadThreshold) {
       loadMore(force = false)
     }
@@ -146,6 +192,10 @@ class UserWatchlistScreenModel(
 
   private fun loadMore(force: Boolean) {
     val snapshot = state.value
+    if (snapshot.isShuffling) {
+      log.d { "自动加载Watchlist页 -> 跳过(随机打乱中)" }
+      return
+    }
     val nextUrl = snapshot.nextPageUrl ?: return
     if (appendJob?.isActive == true) {
       log.d { "自动加载Watchlist页 -> 跳过(已有追加任务)" }
@@ -165,10 +215,10 @@ class UserWatchlistScreenModel(
     appendJob =
         screenModelScope.launch {
           val next =
-              repository.loadWatchlistPage(
-                  username = username,
-                  category = category,
-                  nextPageUrl = nextUrl,
+              loadWatchlistPage(
+                  username,
+                  category,
+                  nextUrl,
               )
           val reduced =
               paginationStateMachine.reduceAppend(
@@ -189,6 +239,120 @@ class UserWatchlistScreenModel(
             is PageState.MatureBlocked -> log.w { "自动加载Watchlist页 -> 受限(${next.reason})" }
             is PageState.Error -> log.e(next.exception) { "自动加载Watchlist页 -> 失败" }
             PageState.Loading -> log.d { "自动加载Watchlist页 -> 加载中" }
+          }
+        }
+  }
+
+  /** 拉取全部已关注并随机打乱。 */
+  fun shuffleAllWatchingUsers() {
+    if (category != WatchlistCategory.Watching) {
+      log.d { "随机打乱已关注 -> 跳过(非Watching页)" }
+      return
+    }
+    if (shuffleJob?.isActive == true) {
+      log.d { "随机打乱已关注 -> 跳过(已有任务)" }
+      return
+    }
+    if (loadJob?.isActive == true || appendJob?.isActive == true) {
+      log.d { "随机打乱已关注 -> 跳过(分页任务进行中)" }
+      return
+    }
+    val snapshot = state.value
+    if (snapshot.hasShuffledAllUsers) {
+      val reshuffled = snapshot.shuffledAllUsers.shuffled(random)
+      mutableState.value =
+          snapshot.copy(
+              users = reshuffled,
+              errorMessage = null,
+              appendErrorMessage = null,
+              shuffleVersion = snapshot.shuffleVersion + 1,
+          )
+      log.i { "随机打乱已关注 -> 本地重排(count=${reshuffled.size})" }
+      return
+    }
+
+    mutableState.value =
+        snapshot.copy(
+            isShuffling = true,
+            errorMessage = null,
+            appendErrorMessage = null,
+        )
+    log.i { "随机打乱已关注 -> 开始(user=$username)" }
+    shuffleJob =
+        screenModelScope.launch {
+          when (
+              val next =
+                  loadAllWatchlistUsers(
+                      username,
+                      category,
+                      false,
+                  )
+          ) {
+            is PageState.Success -> {
+              val shuffled = next.data.shuffled(random)
+              mutableState.value =
+                  state.value.copy(
+                      users = shuffled,
+                      nextPageUrl = null,
+                      loading = false,
+                      refreshing = false,
+                      isLoadingMore = false,
+                      errorMessage = null,
+                      appendErrorMessage = null,
+                      isShuffling = false,
+                      hasShuffledAllUsers = true,
+                      shuffledAllUsers = next.data,
+                      shuffleVersion = state.value.shuffleVersion + 1,
+                  )
+              log.i { "随机打乱已关注 -> 成功(count=${shuffled.size})" }
+            }
+
+            is PageState.AuthRequired -> {
+              mutableState.value =
+                  state.value.copy(
+                      isShuffling = false,
+                      errorMessage = next.message,
+                  )
+              log.w { "随机打乱已关注 -> 需要重新登录" }
+            }
+
+            PageState.CfChallenge -> {
+              mutableState.value =
+                  state.value.copy(
+                      isShuffling = false,
+                      errorMessage = appString(Res.string.cloudflare_challenge_title),
+                  )
+              log.w { "随机打乱已关注 -> Cloudflare验证" }
+            }
+
+            is PageState.MatureBlocked -> {
+              mutableState.value =
+                  state.value.copy(
+                      isShuffling = false,
+                      errorMessage = next.reason,
+                  )
+              log.w { "随机打乱已关注 -> 受限(${next.reason})" }
+            }
+
+            is PageState.Error -> {
+              val detail =
+                  next.exception.message?.takeIf { it.isNotBlank() } ?: next.exception.toString()
+              mutableState.value =
+                  state.value.copy(
+                      isShuffling = false,
+                      errorMessage =
+                          appStringOrFallback(
+                              Res.string.shuffle_following_failed,
+                              fallback = { "Failed to shuffle following: $detail" },
+                              detail,
+                          ),
+                  )
+              log.e(next.exception) { "随机打乱已关注 -> 失败" }
+            }
+
+            PageState.Loading -> {
+              mutableState.value = state.value.copy(isShuffling = false)
+            }
           }
         }
   }

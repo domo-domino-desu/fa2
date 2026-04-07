@@ -35,7 +35,6 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
-import me.domino.fa2.ui.components.ExpressiveIconButton
 import me.domino.fa2.ui.components.HtmlText
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.SkeletonBlock
@@ -265,29 +264,27 @@ private fun UserProfileExpandToggle(expanded: Boolean, onClick: () -> Unit) {
         stringResource(Res.string.accessibility_collapsed)
       }
   Box(
-      modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 1.dp),
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(top = 4.dp, bottom = 1.dp)
+              .clickable(onClick = onClick)
+              .semantics {
+                this.contentDescription = contentDescription
+                this.stateDescription = stateDescription
+              },
       contentAlignment = Alignment.Center,
   ) {
-    ExpressiveIconButton(
-        onClick = onClick,
-        modifier =
-            Modifier.semantics {
-              this.contentDescription = contentDescription
-              this.stateDescription = stateDescription
+    Icon(
+        imageVector =
+            if (expanded) {
+              FaMaterialSymbols.Outlined.ExpandLess
+            } else {
+              FaMaterialSymbols.Outlined.ExpandMore
             },
-    ) {
-      Icon(
-          imageVector =
-              if (expanded) {
-                FaMaterialSymbols.Outlined.ExpandLess
-              } else {
-                FaMaterialSymbols.Outlined.ExpandMore
-              },
-          contentDescription = null,
-          tint = MaterialTheme.colorScheme.onSurfaceVariant,
-          modifier = Modifier.size(20.dp),
-      )
-    }
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.size(20.dp),
+    )
   }
 }
 

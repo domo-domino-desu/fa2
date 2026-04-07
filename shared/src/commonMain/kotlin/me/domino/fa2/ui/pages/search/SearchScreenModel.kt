@@ -16,6 +16,8 @@ import me.domino.fa2.i18n.AppI18nSnapshot
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.uiText
 import me.domino.fa2.ui.components.FilterOption
+import me.domino.fa2.ui.pages.search.util.SearchDateRangeShiftAction
+import me.domino.fa2.ui.pages.search.util.normalizeManualDateFields
 import me.domino.fa2.ui.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.search.SearchUiMetadataKey
 import me.domino.fa2.ui.search.SearchUiOptionKey
@@ -73,6 +75,9 @@ data class SearchUiState(
 ) {
   val hasMore: Boolean
     get() = !nextPageUrl.isNullOrBlank()
+
+  val canApplySearch: Boolean
+    get() = isSearchFormSubmittable(draft)
 }
 
 /** Search 页面状态模型。 */
@@ -149,6 +154,10 @@ class SearchScreenModel(
 
   fun updateRangeTo(value: String) {
     workflow.updateRangeTo(value)
+  }
+
+  fun shiftDateRange(action: SearchDateRangeShiftAction) {
+    workflow.shiftDateRange(action)
   }
 
   fun setRatingGeneral(enabled: Boolean) {
@@ -232,6 +241,13 @@ internal fun buildSearchUrl(form: SearchFormState, page: Int): String =
             typePoetry = form.typePoetry,
         )
     )
+
+internal fun isSearchFormSubmittable(form: SearchFormState): Boolean {
+  if (form.query.trim().isBlank()) return false
+  if (form.range != "manual") return true
+  val normalized = normalizeManualDateFields(form.rangeFrom, form.rangeTo)
+  return normalized.from.isNotBlank() && normalized.to.isNotBlank()
+}
 
 internal fun SearchUiState.toPaginationSnapshot(): PaginationSnapshot<SubmissionThumbnail> =
     PaginationSnapshot(
@@ -601,25 +617,33 @@ internal fun parseSearchFormFromUrl(url: String, fallbackQuery: String): SearchF
       )
   val hasAnyTypeFlag = typeKeys.any(::has)
 
-  return SearchFormState(
-      query = query.trim(),
-      category = firstInt("category", defaults.category),
-      type = firstInt("arttype", defaults.type),
-      species = firstInt("species", defaults.species),
-      orderBy = first("order-by").ifBlank { defaults.orderBy },
-      orderDirection = first("order-direction").ifBlank { defaults.orderDirection },
-      range = first("range").ifBlank { defaults.range },
-      rangeFrom = first("range_from"),
-      rangeTo = first("range_to"),
-      ratingGeneral = if (hasAnyRatingFlag) boolFlag("rating-general") else defaults.ratingGeneral,
-      ratingMature = if (hasAnyRatingFlag) boolFlag("rating-mature") else defaults.ratingMature,
-      ratingAdult = if (hasAnyRatingFlag) boolFlag("rating-adult") else defaults.ratingAdult,
-      typeArt = if (hasAnyTypeFlag) boolFlag("type-art") else defaults.typeArt,
-      typeMusic = if (hasAnyTypeFlag) boolFlag("type-music") else defaults.typeMusic,
-      typeFlash = if (hasAnyTypeFlag) boolFlag("type-flash") else defaults.typeFlash,
-      typeStory = if (hasAnyTypeFlag) boolFlag("type-story") else defaults.typeStory,
-      typePhoto = if (hasAnyTypeFlag) boolFlag("type-photo") else defaults.typePhoto,
-      typePoetry = if (hasAnyTypeFlag) boolFlag("type-poetry") else defaults.typePoetry,
-      selectedGenders = selectedGenders,
-  )
+  val parsed =
+      SearchFormState(
+          query = query.trim(),
+          category = firstInt("category", defaults.category),
+          type = firstInt("arttype", defaults.type),
+          species = firstInt("species", defaults.species),
+          orderBy = first("order-by").ifBlank { defaults.orderBy },
+          orderDirection = first("order-direction").ifBlank { defaults.orderDirection },
+          range = first("range").ifBlank { defaults.range },
+          rangeFrom = first("range_from"),
+          rangeTo = first("range_to"),
+          ratingGeneral =
+              if (hasAnyRatingFlag) boolFlag("rating-general") else defaults.ratingGeneral,
+          ratingMature = if (hasAnyRatingFlag) boolFlag("rating-mature") else defaults.ratingMature,
+          ratingAdult = if (hasAnyRatingFlag) boolFlag("rating-adult") else defaults.ratingAdult,
+          typeArt = if (hasAnyTypeFlag) boolFlag("type-art") else defaults.typeArt,
+          typeMusic = if (hasAnyTypeFlag) boolFlag("type-music") else defaults.typeMusic,
+          typeFlash = if (hasAnyTypeFlag) boolFlag("type-flash") else defaults.typeFlash,
+          typeStory = if (hasAnyTypeFlag) boolFlag("type-story") else defaults.typeStory,
+          typePhoto = if (hasAnyTypeFlag) boolFlag("type-photo") else defaults.typePhoto,
+          typePoetry = if (hasAnyTypeFlag) boolFlag("type-poetry") else defaults.typePoetry,
+          selectedGenders = selectedGenders,
+      )
+  return if (parsed.range == "manual") {
+    val normalized = normalizeManualDateFields(parsed.rangeFrom, parsed.rangeTo)
+    parsed.copy(rangeFrom = normalized.from, rangeTo = normalized.to)
+  } else {
+    parsed
+  }
 }

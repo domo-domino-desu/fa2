@@ -6,6 +6,8 @@ import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.FaHtmlDataSource
 import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.domain.challenge.ChallengeResolver
+import me.domino.fa2.util.logging.FaLog
+import me.domino.fa2.util.logging.summarizeUrl
 import me.domino.fa2.util.toUserFacingRequestMessage
 
 /** 社交动作端点（Fav/Watch 等）。 */
@@ -13,6 +15,8 @@ class SocialActionEndpoint
 private constructor(
     private val backend: SocialActionBackend?,
 ) {
+  private val log = FaLog.withTag("SocialActionEndpoint")
+
   constructor(
       dataSource: FaHtmlDataSource
   ) : this(
@@ -46,14 +50,20 @@ private constructor(
   suspend fun execute(actionUrl: String): SocialActionResult {
     val targetUrl = actionUrl.trim()
     if (targetUrl.isBlank()) {
+      log.w { "社交动作端点 -> 执行失败(空URL)" }
       return SocialActionResult.Failed(message = "Empty social action url")
     }
+    log.i { "社交动作端点 -> 执行(url=${summarizeUrl(targetUrl)})" }
     return try {
-      backend?.execute(targetUrl) ?: SocialActionResult.Failed("No HTTP backend for social action")
+      (backend?.execute(targetUrl)
+              ?: SocialActionResult.Failed("No HTTP backend for social action"))
+          .also { result -> log.i { "社交动作端点 -> ${summarizeSocialActionResult(result)}" } }
     } catch (cancelled: CancellationException) {
       throw cancelled
     } catch (error: Throwable) {
-      SocialActionResult.Failed(error.toUserFacingRequestMessage())
+      SocialActionResult.Failed(error.toUserFacingRequestMessage()).also { result ->
+        log.e(error) { "社交动作端点 -> 执行异常(${summarizeSocialActionResult(result)})" }
+      }
     }
   }
 
@@ -66,22 +76,32 @@ private constructor(
     val normalizedTagName = tagName.trim()
     val normalizedNonce = nonce.trim()
     if (normalizedTagName.isBlank()) {
+      log.w { "社交动作端点 -> 标签屏蔽失败(空tagName)" }
       return SocialActionResult.Failed(message = "Empty tag name for tag blocking")
     }
     if (normalizedNonce.isBlank()) {
+      log.w { "社交动作端点 -> 标签屏蔽失败(缺少nonce,tag=$normalizedTagName)" }
       return SocialActionResult.Failed(message = "Missing tag block nonce")
     }
+    log.i { "社交动作端点 -> 标签屏蔽(tag=$normalizedTagName,toAdd=$toAdd)" }
 
     return try {
-      backend?.updateTagBlocklist(
-          tagName = normalizedTagName,
-          nonce = normalizedNonce,
-          toAdd = toAdd,
-      ) ?: SocialActionResult.Failed("No HTTP backend for tag blocking")
+      backend
+          ?.updateTagBlocklist(
+              tagName = normalizedTagName,
+              nonce = normalizedNonce,
+              toAdd = toAdd,
+          )
+          ?.also { result -> log.i { "社交动作端点 -> 标签屏蔽${summarizeSocialActionResult(result)}" } }
+          ?: SocialActionResult.Failed("No HTTP backend for tag blocking").also { result ->
+            log.w { "社交动作端点 -> 标签屏蔽${summarizeSocialActionResult(result)}" }
+          }
     } catch (cancelled: CancellationException) {
       throw cancelled
     } catch (error: Throwable) {
-      SocialActionResult.Failed(error.toUserFacingRequestMessage())
+      SocialActionResult.Failed(error.toUserFacingRequestMessage()).also { result ->
+        log.e(error) { "社交动作端点 -> 标签屏蔽异常(${summarizeSocialActionResult(result)})" }
+      }
     }
   }
 }
@@ -96,3 +116,11 @@ sealed interface SocialActionResult {
 
   data class Failed(val message: String) : SocialActionResult
 }
+
+internal fun summarizeSocialActionResult(result: SocialActionResult): String =
+    when (result) {
+      is SocialActionResult.Completed -> "成功(redirected=${result.redirected})"
+      is SocialActionResult.Challenge -> "Challenge(cf-ray=${result.cfRay ?: "-"})"
+      is SocialActionResult.Blocked -> "受限(${result.reason})"
+      is SocialActionResult.Failed -> "失败(${result.message})"
+    }

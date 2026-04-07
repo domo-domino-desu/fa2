@@ -3,6 +3,8 @@ package me.domino.fa2.ui.icons
 import androidx.compose.ui.graphics.vector.ImageVector
 import me.domino.fa2.generated.symbols.icons.materialsymbols.Icons as GeneratedIcons
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.AddW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.AppBadgingW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.AppBadgingW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ArrowBackW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ArrowCircleRightW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ArrowDownwardAltW400Outlined
@@ -30,6 +32,8 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.HistoryW400Ou
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.HomeW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.HomeW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ImageW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.InboxW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.InboxW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.InfoW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.Inventory2W400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.KeyboardArrowDownW400Outlined
@@ -53,6 +57,7 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SearchW400Out
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SearchW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SettingsW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ShareW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ShuffleW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SubjectW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.TagW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.TranslateW400Outlined
@@ -66,6 +71,7 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.WrapTextW400O
 object FaMaterialSymbols {
   object Filled {
     val Add: ImageVector = GeneratedIcons.AddW400Outlinedfill1
+    val AppBadging: ImageVector = GeneratedIcons.AppBadgingW400Outlinedfill1
     val Close: ImageVector = GeneratedIcons.CloseW400Outlinedfill1
     val Done: ImageVector = GeneratedIcons.DoneW400Outlinedfill1
     val Download: ImageVector = GeneratedIcons.DownloadW400Outlinedfill1
@@ -74,6 +80,7 @@ object FaMaterialSymbols {
     val FavoriteBorder: ImageVector = GeneratedIcons.FavoriteW400Outlined
     val History: ImageVector = GeneratedIcons.HistoryW400Outlinedfill1
     val Home: ImageVector = GeneratedIcons.HomeW400Outlinedfill1
+    val Inbox: ImageVector = GeneratedIcons.InboxW400Outlinedfill1
     val Info: ImageVector = GeneratedIcons.InfoW400Outlinedfill1
     val Menu: ImageVector = GeneratedIcons.MenuW400Outlinedfill1
     val Notifications: ImageVector = GeneratedIcons.NotificationsW400Outlinedfill1
@@ -84,6 +91,7 @@ object FaMaterialSymbols {
   }
 
   object Outlined {
+    val AppBadging: ImageVector = GeneratedIcons.AppBadgingW400Outlined
     val ArrowCircleRight: ImageVector = GeneratedIcons.ArrowCircleRightW400Outlined
     val ArrowDownwardAlt: ImageVector = GeneratedIcons.ArrowDownwardAltW400Outlined
     val ArrowUpwardAlt: ImageVector = GeneratedIcons.ArrowUpwardAltW400Outlined
@@ -101,6 +109,7 @@ object FaMaterialSymbols {
     val Favorite: ImageVector = GeneratedIcons.FavoriteW400Outlined
     val FilterAlt: ImageVector = GeneratedIcons.FilterAltW400Outlined
     val Home: ImageVector = GeneratedIcons.HomeW400Outlined
+    val Inbox: ImageVector = GeneratedIcons.InboxW400Outlined
     val Image: ImageVector = GeneratedIcons.ImageW400Outlined
     val Inventory2: ImageVector = GeneratedIcons.Inventory2W400Outlined
     val KeyboardArrowDown: ImageVector = GeneratedIcons.KeyboardArrowDownW400Outlined
@@ -117,6 +126,7 @@ object FaMaterialSymbols {
     val FilePresent: ImageVector = GeneratedIcons.FilePresentW400Outlined
     val Search: ImageVector = GeneratedIcons.SearchW400Outlined
     val Share: ImageVector = GeneratedIcons.ShareW400Outlined
+    val Shuffle: ImageVector = GeneratedIcons.ShuffleW400Outlined
     val Subject: ImageVector = GeneratedIcons.SubjectW400Outlined
     val Tag: ImageVector = GeneratedIcons.TagW400Outlined
     val Troubleshoot: ImageVector = GeneratedIcons.TroubleshootW400Outlined

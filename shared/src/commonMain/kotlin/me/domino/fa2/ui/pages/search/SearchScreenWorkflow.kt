@@ -14,6 +14,10 @@ import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.i18n.AppI18nSnapshot
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.appString
+import me.domino.fa2.ui.pages.search.util.SearchDateRangeShiftAction
+import me.domino.fa2.ui.pages.search.util.normalizeManualDateFields
+import me.domino.fa2.ui.pages.search.util.resolveSearchDateFields
+import me.domino.fa2.ui.pages.search.util.shiftSearchDateFields
 import me.domino.fa2.ui.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.state.PaginationReducer
 import me.domino.fa2.util.logging.summarizePageState
@@ -68,9 +72,23 @@ internal class SearchQueryStateCoordinator(
 
   fun updateRange(range: String) = updateDraft { draft -> draft.copy(range = range) }
 
-  fun updateRangeFrom(value: String) = updateDraft { draft -> draft.copy(rangeFrom = value) }
+  fun updateRangeFrom(value: String) = updateDraft { draft ->
+    val normalized = normalizeManualDateFields(value, draft.rangeTo)
+    draft.copy(range = "manual", rangeFrom = normalized.from, rangeTo = normalized.to)
+  }
 
-  fun updateRangeTo(value: String) = updateDraft { draft -> draft.copy(rangeTo = value) }
+  fun updateRangeTo(value: String) = updateDraft { draft ->
+    val normalized = normalizeManualDateFields(draft.rangeFrom, value)
+    draft.copy(range = "manual", rangeFrom = normalized.from, rangeTo = normalized.to)
+  }
+
+  fun shiftDateRange(action: SearchDateRangeShiftAction) = updateDraft { draft ->
+    val resolved =
+        resolveSearchDateFields(draft.range, draft.rangeFrom, draft.rangeTo)
+            ?: return@updateDraft draft
+    val shifted = shiftSearchDateFields(resolved, action)
+    draft.copy(range = "manual", rangeFrom = shifted.from, rangeTo = shifted.to)
+  }
 
   fun setRatingGeneral(enabled: Boolean) = updateDraft { draft ->
     draft.copy(ratingGeneral = enabled)
@@ -96,8 +114,15 @@ internal class SearchQueryStateCoordinator(
 
   fun buildAppliedSearchRequest(): SearchAppliedRequest? {
     val snapshot = stateProvider()
-    val applied = snapshot.draft.copy(query = snapshot.draft.query.trim())
-    if (applied.query.isBlank()) return null
+    val normalizedDates =
+        normalizeManualDateFields(snapshot.draft.rangeFrom, snapshot.draft.rangeTo)
+    val applied =
+        snapshot.draft.copy(
+            query = snapshot.draft.query.trim(),
+            rangeFrom = normalizedDates.from,
+            rangeTo = normalizedDates.to,
+        )
+    if (!isSearchFormSubmittable(applied)) return null
     return SearchAppliedRequest(
         applied = applied,
         firstUrl = buildSearchUrl(form = applied, page = 1),
@@ -377,6 +402,9 @@ internal class SearchScreenWorkflow(
 
   fun updateRangeTo(value: String) = queryStateCoordinator.updateRangeTo(value)
 
+  fun shiftDateRange(action: SearchDateRangeShiftAction) =
+      queryStateCoordinator.shiftDateRange(action)
+
   fun setRatingGeneral(enabled: Boolean) = queryStateCoordinator.setRatingGeneral(enabled)
 
   fun setRatingMature(enabled: Boolean) = queryStateCoordinator.setRatingMature(enabled)
@@ -399,7 +427,7 @@ internal class SearchScreenWorkflow(
     log.i { "应用Search -> 开始" }
     val request = queryStateCoordinator.buildAppliedSearchRequest()
     if (request == null) {
-      log.w { "应用Search -> 跳过(空关键词)" }
+      log.w { "应用Search -> 跳过(表单不可提交)" }
       return
     }
     firstPageUrl = request.firstUrl

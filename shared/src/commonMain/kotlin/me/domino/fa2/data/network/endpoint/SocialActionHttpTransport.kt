@@ -12,6 +12,8 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.Parameters
 import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.UserAgentStorage
+import me.domino.fa2.util.logging.FaLog
+import me.domino.fa2.util.logging.summarizeUrl
 
 internal const val TAG_BLOCKING_URL: String = "https://www.furaffinity.net/route/tag_blocking"
 
@@ -36,14 +38,19 @@ internal class DefaultSocialActionHttpTransport(
     private val cookiesStorage: FaCookiesStorage,
     private val userAgentStorage: UserAgentStorage,
 ) : SocialActionHttpTransport {
+  private val log = FaLog.withTag("SocialActionHttpTransport")
+
   override suspend fun get(url: String): SocialActionHttpResponse {
+    log.d { "社交动作传输 -> GET(url=${summarizeUrl(url)})" }
     val context = loadRequestContext()
     val response =
         client.get(url) {
           applyCommonHeaders(context = context)
           header(HttpHeaders.Accept, "text/html,application/xhtml+xml")
         }
-    return response.toSocialActionHttpResponse(cookiesStorage)
+    return response.toSocialActionHttpResponse(cookiesStorage).also { result ->
+      log.d { "社交动作传输 -> GET完成(status=${result.statusCode})" }
+    }
   }
 
   override suspend fun postTagBlocklist(
@@ -51,6 +58,7 @@ internal class DefaultSocialActionHttpTransport(
       nonce: String,
       toAdd: Boolean,
   ): SocialActionHttpResponse {
+    log.d { "社交动作传输 -> POST标签屏蔽(tag=$tagName,toAdd=$toAdd)" }
     val context = loadRequestContext()
     val action = if (toAdd) "add-tag" else "remove-tag"
     val response =
@@ -67,15 +75,22 @@ internal class DefaultSocialActionHttpTransport(
               )
           )
         }
-    return response.toSocialActionHttpResponse(cookiesStorage)
+    return response.toSocialActionHttpResponse(cookiesStorage).also { result ->
+      log.d { "社交动作传输 -> POST标签屏蔽完成(status=${result.statusCode})" }
+    }
   }
 
   private suspend fun loadRequestContext(): SocialActionRequestContext {
     userAgentStorage.loadPersistedIfNeeded()
     return SocialActionRequestContext(
-        cookieHeader = cookiesStorage.loadRawCookieHeader(),
-        userAgent = userAgentStorage.currentUserAgent(),
-    )
+            cookieHeader = cookiesStorage.loadRawCookieHeader(),
+            userAgent = userAgentStorage.currentUserAgent(),
+        )
+        .also { context ->
+          log.d {
+            "社交动作传输 -> 读取上下文(cookie=${if (context.cookieHeader.isBlank()) "空" else "已设置"},ua=${if (context.userAgent.isBlank()) "空" else "已设置"})"
+          }
+        }
   }
 
   private fun io.ktor.client.request.HttpRequestBuilder.applyCommonHeaders(

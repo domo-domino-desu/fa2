@@ -10,6 +10,8 @@ import me.domino.fa2.data.repository.SubmissionDetailRepository
 import me.domino.fa2.domain.translation.SubmissionDescriptionBlock
 import me.domino.fa2.domain.translation.SubmissionDescriptionBlockExtractor
 import me.domino.fa2.domain.translation.SubmissionTranslationResultAligner
+import me.domino.fa2.util.logging.FaLog
+import me.domino.fa2.util.logging.summarizeUrl
 import me.domino.fa2.util.normalizeFaSubmissionUrl
 
 internal const val submissionSeriesRequestThrottleMs: Long = defaultSequentialRequestThrottleMs
@@ -21,30 +23,47 @@ class SubmissionSeriesResolver(
     private val repository: SubmissionDetailRepository,
     private val requestThrottleMs: Long = submissionSeriesRequestThrottleMs,
 ) {
+  private val log = FaLog.withTag("SubmissionSeriesResolver")
   private val blockExtractor =
       SubmissionDescriptionBlockExtractor(SubmissionTranslationResultAligner())
 
   fun detectCandidate(
       sourceHtml: String,
       baseUrl: String,
-  ): SubmissionSeriesCandidate? = detectCandidate(blockExtractor.extract(sourceHtml), baseUrl)
+  ): SubmissionSeriesCandidate? =
+      detectCandidate(blockExtractor.extract(sourceHtml), baseUrl).also { candidate ->
+        log.d { "投稿串联 -> 解析候选(baseUrl=${summarizeUrl(baseUrl)},found=${candidate != null})" }
+      }
 
   fun detectCandidate(
       sourceBlocks: List<SubmissionDescriptionBlock>,
       baseUrl: String,
   ): SubmissionSeriesCandidate? {
-    if (sourceBlocks.isEmpty()) return null
-    return detectPrevNextCandidate(sourceBlocks, baseUrl)
-        ?: detectNumberedBlocksCandidate(sourceBlocks, baseUrl)
+    if (sourceBlocks.isEmpty()) {
+      log.d { "投稿串联 -> 跳过候选解析(空区块,baseUrl=${summarizeUrl(baseUrl)})" }
+      return null
+    }
+    return (detectPrevNextCandidate(sourceBlocks, baseUrl)
+            ?: detectNumberedBlocksCandidate(sourceBlocks, baseUrl))
+        ?.also { candidate ->
+          log.d { "投稿串联 -> 命中候选(rule=${candidate.rule},baseUrl=${summarizeUrl(baseUrl)})" }
+        }
   }
 
   suspend fun resolveSeries(candidate: SubmissionSeriesCandidate): SubmissionSeriesResolvedSeries? {
+    log.i {
+      "投稿串联 -> 开始解析(rule=${candidate.rule},currentUrl=${summarizeUrl(candidate.currentSubmissionUrl)})"
+    }
     val loader =
         SubmissionSeriesRemoteLoader(
             repository = repository,
             throttle = SequentialRequestThrottle(requestThrottleMs),
         )
-    val firstPair = resolveFirstPage(candidate, loader) ?: return null
+    val firstPair =
+        resolveFirstPage(candidate, loader)
+            ?: return null.also {
+              log.w { "投稿串联 -> 首条解析失败(currentUrl=${summarizeUrl(candidate.currentSubmissionUrl)})" }
+            }
     val (firstDetail, firstCandidate) = firstPair
 
     val seedResult =
@@ -62,22 +81,30 @@ class SubmissionSeriesResolver(
           )
         }
 
-    if (seedResult.submissions.size < 3) return null
+    if (seedResult.submissions.size < 3) {
+      log.w { "投稿串联 -> 结果不足(rule=${firstCandidate.rule},count=${seedResult.submissions.size})" }
+      return null
+    }
     return SubmissionSeriesResolvedSeries(
-        candidateKey = candidate.candidateKey,
-        firstSid = firstDetail.id,
-        firstSubmissionUrl = firstDetail.submissionUrl,
-        seedSubmissions = seedResult.submissions.map(Submission::toSubmissionThumbnail),
-        previousRequestKey = seedResult.previousRequestKey,
-        nextRequestKey = seedResult.nextRequestKey,
-        rule = firstCandidate.rule,
-        orderedSubmissionUrls =
-            if (firstCandidate.rule == SubmissionSeriesRule.NUMBERED_BLOCKS) {
-              firstCandidate.orderedSubmissionUrls
-            } else {
-              emptyList()
-            },
-    )
+            candidateKey = candidate.candidateKey,
+            firstSid = firstDetail.id,
+            firstSubmissionUrl = firstDetail.submissionUrl,
+            seedSubmissions = seedResult.submissions.map(Submission::toSubmissionThumbnail),
+            previousRequestKey = seedResult.previousRequestKey,
+            nextRequestKey = seedResult.nextRequestKey,
+            rule = firstCandidate.rule,
+            orderedSubmissionUrls =
+                if (firstCandidate.rule == SubmissionSeriesRule.NUMBERED_BLOCKS) {
+                  firstCandidate.orderedSubmissionUrls
+                } else {
+                  emptyList()
+                },
+        )
+        .also { series ->
+          log.i {
+            "投稿串联 -> 解析成功(rule=${series.rule},seedCount=${series.seedSubmissions.size},firstSid=${series.firstSid})"
+          }
+        }
   }
 
   private suspend fun resolveFirstPage(
@@ -425,15 +452,21 @@ private class SubmissionSeriesRemoteLoader(
     private val repository: SubmissionDetailRepository,
     private val throttle: SequentialRequestThrottle,
 ) {
+  private val log = FaLog.withTag("SubmissionSeriesRemoteLoader")
+
   suspend fun load(url: String): Submission? {
     throttle.awaitReady()
     return when (val state = repository.loadSubmissionDetailByUrl(url)) {
-      is PageState.Success -> state.data
+      is PageState.Success ->
+          state.data.also { log.d { "投稿串联远程加载 -> 成功(url=${summarizeUrl(url)},sid=${it.id})" } }
       is PageState.AuthRequired,
       PageState.CfChallenge,
       is PageState.MatureBlocked,
       is PageState.Error,
-      PageState.Loading -> null
+      PageState.Loading ->
+          null.also {
+            log.w { "投稿串联远程加载 -> 失败(url=${summarizeUrl(url)},state=${state::class.simpleName})" }
+          }
     }
   }
 }

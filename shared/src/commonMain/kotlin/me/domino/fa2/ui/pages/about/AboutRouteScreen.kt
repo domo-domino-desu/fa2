@@ -42,7 +42,9 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.Res
+import fa2.shared.generated.resources.about_acknowledgements_anthropic_claude
 import fa2.shared.generated.resources.about_acknowledgements_furaffinity_app
+import fa2.shared.generated.resources.about_acknowledgements_openai_codex
 import fa2.shared.generated.resources.about_acknowledgements_transfur_bar
 import fa2.shared.generated.resources.about_description
 import fa2.shared.generated.resources.about_export_logs
@@ -339,6 +341,16 @@ private fun ThanksSection(onOpenFurAffinityApp: () -> Unit) {
                 .accessibleClickableSummary(
                     title = stringResource(Res.string.about_acknowledgements_furaffinity_app)
                 ),
+    )
+    Text(
+        text = stringResource(Res.string.about_acknowledgements_anthropic_claude),
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Text(
+        text = stringResource(Res.string.about_acknowledgements_openai_codex),
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
   }
 }

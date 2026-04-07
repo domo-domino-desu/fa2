@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -15,6 +16,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.components.ExpressiveIconButton
@@ -230,9 +233,34 @@ fun UserWatchlistRouteTopBar(
     onBack: () -> Unit,
     onGoHome: () -> Unit,
     shareUrl: String,
+    showShuffleAction: Boolean = false,
+    isShuffling: Boolean = false,
+    shuffleEnabled: Boolean = true,
+    onShuffle: (() -> Unit)? = null,
     onTitleClick: (() -> Unit)? = null,
 ) {
   RouteTopBar(title = title, onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick) {
+    if (showShuffleAction && onShuffle != null) {
+      val shuffleFollowingText = stringResource(Res.string.shuffle_following)
+      val shufflingFollowingText = stringResource(Res.string.shuffling_following)
+      ExpressiveIconButton(
+          onClick = onShuffle,
+          enabled = shuffleEnabled && !isShuffling,
+      ) {
+        if (isShuffling) {
+          CircularProgressIndicator(
+              modifier =
+                  Modifier.size(20.dp).semantics { contentDescription = shufflingFollowingText },
+              strokeWidth = 2.dp,
+          )
+        } else {
+          Icon(
+              imageVector = FaMaterialSymbols.Outlined.Shuffle,
+              contentDescription = shuffleFollowingText,
+          )
+        }
+      }
+    }
     TopBarShareAction(url = shareUrl)
   }
 }
