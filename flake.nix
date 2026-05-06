@@ -75,7 +75,7 @@
               librsvg
               lint-staged
               nodejs
-              nodePackages.prettier
+              prettier
               oxipng
               pngquant
               treefmt

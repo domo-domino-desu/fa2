@@ -3,6 +3,8 @@ package me.domino.fa2.ui.components.submission
 import fa2.shared.generated.resources.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import me.domino.fa2.ui.pages.submission.SubmissionImageOcrTranslationMode
 import me.domino.fa2.ui.pages.submission.SubmissionImageOcrUiState
 
@@ -47,5 +49,15 @@ class SubmissionOverlayAccessibilityStateTest {
         Res.string.accessibility_translation_state_error,
         submissionImageOcrTranslationStateDescriptionRes(SubmissionImageOcrTranslationMode.ERROR),
     )
+  }
+
+  @Test
+  fun image_tap_to_dismiss_is_disabled_while_ocr_is_active() {
+    assertTrue(submissionImageTapToDismissEnabled(SubmissionImageOcrUiState.Idle))
+    assertFalse(submissionImageTapToDismissEnabled(SubmissionImageOcrUiState.Loading))
+    assertFalse(
+        submissionImageTapToDismissEnabled(SubmissionImageOcrUiState.Showing(blocks = emptyList()))
+    )
+    assertFalse(submissionImageTapToDismissEnabled(SubmissionImageOcrUiState.Error("boom")))
   }
 }

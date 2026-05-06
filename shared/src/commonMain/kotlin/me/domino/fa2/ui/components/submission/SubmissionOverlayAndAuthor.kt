@@ -103,6 +103,9 @@ internal fun submissionImageOcrTranslationStateDescriptionRes(
       SubmissionImageOcrTranslationMode.ERROR -> Res.string.accessibility_translation_state_error
     }
 
+internal fun submissionImageTapToDismissEnabled(state: SubmissionImageOcrUiState): Boolean =
+    state == SubmissionImageOcrUiState.Idle
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun SubmissionZoomImageOverlay(
@@ -125,6 +128,7 @@ internal fun SubmissionZoomImageOverlay(
     val normalizedUrl =
         imageUrl.trim().let { url -> if (url.startsWith("//")) "https:$url" else url }
     val isGif = isGifUrl(normalizedUrl)
+    val tapToDismissEnabled = submissionImageTapToDismissEnabled(ocrState)
     if (isGif) {
       NetworkImage(
           url = normalizedUrl,
@@ -153,7 +157,11 @@ internal fun SubmissionZoomImageOverlay(
             onLoading = { _ -> loadLifecycleState = ImageLoadLifecycleState.Loading },
             onSuccess = { _ -> loadLifecycleState = ImageLoadLifecycleState.Success },
             onError = { _ -> loadLifecycleState = ImageLoadLifecycleState.Error },
-            onTap = { onDismiss() },
+            onTap = {
+              if (tapToDismissEnabled) {
+                onDismiss()
+              }
+            },
         )
         if (ocrState is SubmissionImageOcrUiState.Showing) {
           SubmissionImageOcrOverlay(

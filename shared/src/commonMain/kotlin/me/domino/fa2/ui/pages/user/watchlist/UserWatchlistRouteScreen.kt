@@ -14,8 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -62,6 +65,7 @@ class UserWatchlistRouteScreen(
     val latestOnLastVisible = rememberUpdatedState(screenModel::onLastVisibleIndexChanged)
     val latestOnScrollPositionChanged = rememberUpdatedState(screenModel::onScrollPositionChanged)
     val latestOnScrollToTopConsumed = rememberUpdatedState(screenModel::onScrollToTopConsumed)
+    var hasRestoredSavedScrollPosition by remember { mutableStateOf(false) }
     val shareUrl =
         when (category) {
           WatchlistCategory.WatchedBy -> FaUrls.watchlistTo(username)
@@ -78,9 +82,26 @@ class UserWatchlistRouteScreen(
           .distinctUntilChanged()
           .collect { (index, offset) -> latestOnScrollPositionChanged.value(index, offset) }
     }
+    LaunchedEffect(
+        listState,
+        state.users.size,
+        state.firstVisibleItemIndex,
+        state.firstVisibleItemScrollOffset,
+        state.pendingScrollToTopVersion,
+    ) {
+      if (hasRestoredSavedScrollPosition || state.users.isEmpty()) return@LaunchedEffect
+      if (state.pendingScrollToTopVersion > 0) return@LaunchedEffect
+      hasRestoredSavedScrollPosition = true
+      val savedIndex = state.firstVisibleItemIndex.coerceIn(0, state.users.lastIndex)
+      val savedOffset = state.firstVisibleItemScrollOffset.coerceAtLeast(0)
+      if (savedIndex > 0 || savedOffset > 0) {
+        listState.scrollToItem(savedIndex, savedOffset)
+      }
+    }
     LaunchedEffect(state.pendingScrollToTopVersion) {
       val version = state.pendingScrollToTopVersion
       if (version > 0) {
+        hasRestoredSavedScrollPosition = true
         listState.scrollToItem(0)
         latestOnScrollToTopConsumed.value(version)
       }
@@ -151,6 +172,10 @@ class UserWatchlistRouteScreen(
                 WatchlistUserCard(
                     item = item,
                     onClick = {
+                      screenModel.onScrollPositionChanged(
+                          listState.firstVisibleItemIndex,
+                          listState.firstVisibleItemScrollOffset,
+                      )
                       navigator.push(
                           UserRouteScreen(
                               username = item.username,

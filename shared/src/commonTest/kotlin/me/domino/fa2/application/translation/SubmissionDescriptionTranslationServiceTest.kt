@@ -189,6 +189,59 @@ class SubmissionDescriptionTranslationServiceTest {
     assertEquals("乙", (results[1] as SubmissionDescriptionBlockResult.Success).translatedText)
   }
 
+  @Test
+  fun stripsLeadingAndTrailingNewlinesFromTranslatedBlock() = runTest {
+    val service = createService(translationOutput = "\n译文内容\n")
+    val results = mutableListOf<SubmissionDescriptionBlockResult>()
+
+    service.translateBlocks(
+        blocks = listOf(SubmissionDescriptionBlock("<p>Original</p>", "Original")),
+        onBlockResult = { _, result -> results += result },
+    )
+
+    assertEquals(1, results.size)
+    assertEquals(
+        "译文内容",
+        (results.single() as SubmissionDescriptionBlockResult.Success).translatedText,
+    )
+  }
+
+  @Test
+  fun stripsLeadingAndTrailingCrLfFromTranslatedBlock() = runTest {
+    val service = createService(translationOutput = "\r\n译文内容\r\n")
+    val results = mutableListOf<SubmissionDescriptionBlockResult>()
+
+    service.translateBlocks(
+        blocks = listOf(SubmissionDescriptionBlock("<p>Original</p>", "Original")),
+        onBlockResult = { _, result -> results += result },
+    )
+
+    assertEquals(1, results.size)
+    assertEquals(
+        "译文内容",
+        (results.single() as SubmissionDescriptionBlockResult.Success).translatedText,
+    )
+  }
+
+  @Test
+  fun stripsNewlinesAroundSeparatorMarkedTranslatedBlocks() = runTest {
+    val service = createService(translationOutput = "\n%%\n甲\n\n%%\n\n%%\r\n乙\r\n%%\n")
+    val results = mutableListOf<SubmissionDescriptionBlockResult>()
+
+    service.translateBlocks(
+        blocks =
+            listOf(
+                SubmissionDescriptionBlock("<p>One</p>", "One"),
+                SubmissionDescriptionBlock("<p>Two</p>", "Two"),
+            ),
+        onBlockResult = { _, result -> results += result },
+    )
+
+    assertEquals(2, results.size)
+    assertEquals("甲", (results[0] as SubmissionDescriptionBlockResult.Success).translatedText)
+    assertEquals("乙", (results[1] as SubmissionDescriptionBlockResult.Success).translatedText)
+  }
+
   private fun createService(
       translationOutput: String? = null
   ): SubmissionDescriptionTranslationService {
