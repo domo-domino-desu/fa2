@@ -85,6 +85,32 @@ class SubmissionParserTest {
   }
 
   @Test
+  fun parsesModernSubmissionPageLayout() {
+    val html = TestFixtures.read("www.furaffinity.net:view:64953345-modern.html")
+    val parser = SubmissionParser()
+
+    val detail = parser.parse(html = html, url = FaUrls.submission(64953345))
+
+    assertEquals(64953345, detail.id)
+    assertEquals("Alina the Serphirivoir", detail.title)
+    assertEquals("cutecentaur", detail.author)
+    assertEquals("CuteCentaur", detail.authorDisplayName)
+    assertEquals(22, detail.viewCount)
+    assertEquals(0, detail.commentCount)
+    assertEquals(1, detail.favoriteCount)
+    assertEquals("General", detail.rating)
+    assertEquals("All", detail.category)
+    assertEquals("Anime", detail.type)
+    assertEquals("Pokemon", detail.species)
+    assertEquals("2478 x 1487", detail.size)
+    assertEquals("1.96 MB", detail.fileSize)
+    assertTrue(detail.keywords.contains("female"))
+    assertTrue(detail.keywords.contains("pokemon"))
+    assertTrue(detail.downloadUrl?.startsWith("https://d.furaffinity.net/") == true)
+    assertTrue(detail.descriptionHtml.contains("Don't listen to her song"))
+  }
+
+  @Test
   fun fallsBackToPreviewWhenFullImageUrlMissing() {
     val html = TestFixtures.read("www.furaffinity.net:view:49338772-nocomment.html")
     val parser = SubmissionParser()

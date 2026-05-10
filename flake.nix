@@ -78,6 +78,7 @@
               prettier
               oxipng
               pngquant
+              steam-run
               treefmt
             ]
             ++ desktopLibs;
