@@ -28,7 +28,7 @@ class HtmlResponseResultTest {
   @Test
   fun doesNotMisclassifyMaturePageAsChallenge() {
     val matureHtml =
-        TestFixtures.read("www.furaffinity.net:view:60245416-mature-content-message.html")
+        TestFixtures.read("www.furaffinity.net:view:10000008-mature-content-message.html")
     val result =
         HtmlResponseResult.classify(
             statusCode = 200,
@@ -38,8 +38,8 @@ class HtmlResponseResultTest {
                     "CF-Ray" to listOf("9ddd33023806e170-NRT"),
                 ),
             body = matureHtml,
-            requestUrl = "https://www.furaffinity.net/view/60245416/",
-            finalUrl = "https://www.furaffinity.net/view/60245416/",
+            requestUrl = "https://www.furaffinity.net/view/10000008/",
+            finalUrl = "https://www.furaffinity.net/view/10000008/",
         )
 
     assertFalse(result is HtmlResponseResult.CfChallenge)

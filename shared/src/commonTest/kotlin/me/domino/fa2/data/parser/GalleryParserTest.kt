@@ -12,19 +12,19 @@ import me.domino.fa2.util.FaUrls
 class GalleryParserTest {
   @Test
   fun parsesGalleryAndNextPage() {
-    val html = TestFixtures.read("www.furaffinity.net:gallery:tiaamaito:.html")
+    val html = TestFixtures.read("www.furaffinity.net:gallery:artist-alpha:.html")
     val parser = GalleryParser()
 
     val page =
         parser.parse(
             html = html,
-            baseUrl = FaUrls.gallery("tiaamaito"),
-            defaultAuthor = "tiaamaito",
+            baseUrl = FaUrls.gallery("artist-alpha"),
+            defaultAuthor = "artist-alpha",
         )
 
     assertTrue(page.submissions.isNotEmpty())
     assertNotNull(page.nextPageUrl)
-    assertTrue(page.nextPageUrl.contains("/gallery/tiaamaito/2/"))
+    assertTrue(page.nextPageUrl.contains("/gallery/artist-alpha/2/"))
     assertTrue(page.submissions.first().id > 0)
     assertTrue(page.submissions.first().author.isNotBlank())
     assertTrue(page.folderGroups.isNotEmpty())
@@ -40,19 +40,19 @@ class GalleryParserTest {
 
   @Test
   fun parsesFavoritesAndNextPage() {
-    val html = TestFixtures.read("www.furaffinity.net:favorites:tiaamaito:.html")
+    val html = TestFixtures.read("www.furaffinity.net:favorites:artist-alpha:.html")
     val parser = GalleryParser()
 
     val page =
         parser.parse(
             html = html,
-            baseUrl = FaUrls.favorites("tiaamaito"),
-            defaultAuthor = "tiaamaito",
+            baseUrl = FaUrls.favorites("artist-alpha"),
+            defaultAuthor = "artist-alpha",
         )
 
     assertTrue(page.submissions.isNotEmpty())
     assertNotNull(page.nextPageUrl)
-    assertTrue(page.nextPageUrl.contains("/favorites/tiaamaito/"))
+    assertTrue(page.nextPageUrl.contains("/favorites/artist-alpha/"))
   }
 
   @Test

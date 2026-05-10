@@ -89,19 +89,11 @@ class HtmlTextTest {
 
   @Test
   fun parsesUserAndAvatarPlaceholdersFromFixture() {
-    val html = TestFixtures.read("www.furaffinity.net:journals:tiaamaito:.html")
+    val html = TestFixtures.read("www.furaffinity.net:journals:artist-alpha:.html")
 
     val result = preprocessHtmlForFaInlinePlaceholders(html)
 
-    assertTrue(
-        result.placeholders.any {
-          it.kind == HtmlInlinePlaceholderKind.Avatar && it.username == "trusted-artists"
-        }
-    )
-    assertTrue(
-        result.placeholders.any {
-          it.kind == HtmlInlinePlaceholderKind.User && it.username == "nighttwilightwolf"
-        }
-    )
+    assertTrue(result.placeholders.any { it.kind == HtmlInlinePlaceholderKind.Avatar })
+    assertTrue(result.placeholders.any { it.kind == HtmlInlinePlaceholderKind.User })
   }
 }

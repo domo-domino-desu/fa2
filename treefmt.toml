@@ -1,3 +1,6 @@
+[global]
+excludes = ["shared/src/commonTest/resources/fixture/*.html"]
+
 [formatter.kotlin]
 command = "ktfmt"
 includes = ["*.kt", "*.kts"]

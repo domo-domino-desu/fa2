@@ -25,8 +25,8 @@ class SubmissionDescriptionTranslationServiceTest {
   fun extractsParagraphsFromPlainDescription() {
     val service = createService()
     val parser = SubmissionParser()
-    val html = TestFixtures.read("www.furaffinity.net:view:49338772-nocomment.html")
-    val detail = parser.parse(html = html, url = FaUrls.submission(49338772))
+    val html = TestFixtures.read("www.furaffinity.net:view:10000001-nocomment.html")
+    val detail = parser.parse(html = html, url = FaUrls.submission(10000001))
 
     val blocks = service.extractBlocks(detail.descriptionHtml)
 
@@ -47,8 +47,8 @@ class SubmissionDescriptionTranslationServiceTest {
   fun extractsParagraphsInsideCodeWrapperAndKeepsWrapperTag() {
     val service = createService()
     val parser = SubmissionParser()
-    val html = TestFixtures.read("www.furaffinity.net:view:49917619-comment-hidden.html")
-    val detail = parser.parse(html = html, url = FaUrls.submission(49917619))
+    val html = TestFixtures.read("www.furaffinity.net:view:10000005-comment-hidden.html")
+    val detail = parser.parse(html = html, url = FaUrls.submission(10000005))
 
     val blocks = service.extractBlocks(detail.descriptionHtml)
 

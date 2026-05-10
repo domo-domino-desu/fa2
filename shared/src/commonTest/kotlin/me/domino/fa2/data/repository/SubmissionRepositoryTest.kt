@@ -33,12 +33,12 @@ class SubmissionRepositoryTest {
   fun loadSubmissionDetailBySidParsesMetadataAndMedia() = runTest {
     val source = SubmissionScriptedHtmlDataSource()
     val repository = buildRepository(source)
-    val targetSid = 49338772
+    val targetSid = 10000001
     source.enqueue(
         url = FaUrls.submission(targetSid),
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:view:49338772-nocomment.html"),
+                body = TestFixtures.read("www.furaffinity.net:view:10000001-nocomment.html"),
                 url = FaUrls.submission(targetSid),
             ),
     )
@@ -46,26 +46,26 @@ class SubmissionRepositoryTest {
     val state = repository.loadSubmissionDetailBySid(targetSid)
     assertTrue(state is PageState.Success)
     val detail = state.data
-    assertEquals("The hookah", detail.title)
+    assertEquals("Sanitized Submission One", detail.title)
     assertEquals(769, detail.viewCount)
     assertEquals(65, detail.favoriteCount)
     assertEquals("1217 x 1280", detail.size)
     assertEquals("1.22 MB", detail.fileSize)
     assertTrue(detail.fullImageUrl.isNotBlank())
     assertTrue(detail.previewImageUrl.isNotBlank())
-    assertEquals("1665402309.annetpeas_the_hookah_fa.png", detail.downloadFileName)
+    assertEquals("1665402309.artist-delta_sanitized_submission_one.png", detail.downloadFileName)
   }
 
   @Test
   fun loadSubmissionDetailByUrlUsesSidCacheKey() = runTest {
     val source = SubmissionScriptedHtmlDataSource()
     val repository = buildRepository(source)
-    val targetSid = 48519387
+    val targetSid = 10000002
     source.enqueue(
         url = FaUrls.submission(targetSid),
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:view:48519387-comments.html"),
+                body = TestFixtures.read("www.furaffinity.net:view:10000002-comments.html"),
                 url = FaUrls.submission(targetSid),
             ),
     )
@@ -73,7 +73,10 @@ class SubmissionRepositoryTest {
     val state = repository.loadSubmissionDetailByUrl(FaUrls.submission(targetSid))
     assertTrue(state is PageState.Success)
     assertEquals(targetSid, state.data.id)
-    assertEquals("1660265303.terriniss_ауцпекн6г.jpg", state.data.downloadFileName)
+    assertEquals(
+        "1660265303.artist-alpha_sanitized_submission_two.jpg",
+        state.data.downloadFileName,
+    )
   }
 
   @Test

@@ -11,14 +11,14 @@ import me.domino.fa2.util.FaUrls
 class SubmissionParserTest {
   @Test
   fun parsesSubmissionPageWithoutComments() {
-    val html = TestFixtures.read("www.furaffinity.net:view:49338772-nocomment.html")
+    val html = TestFixtures.read("www.furaffinity.net:view:10000001-nocomment.html")
     val parser = SubmissionParser()
 
-    val detail = parser.parse(html = html, url = FaUrls.submission(49338772))
+    val detail = parser.parse(html = html, url = FaUrls.submission(10000001))
 
-    assertEquals(49338772, detail.id)
-    assertEquals("The hookah", detail.title)
-    assertEquals("annetpeas", detail.author)
+    assertEquals(10000001, detail.id)
+    assertEquals("Sanitized Submission One", detail.title)
+    assertEquals("artist-delta", detail.author)
     assertTrue(detail.authorAvatarUrl.startsWith("https://a.furaffinity.net/"))
     assertEquals(769, detail.viewCount)
     assertEquals(65, detail.favoriteCount)
@@ -37,13 +37,13 @@ class SubmissionParserTest {
 
   @Test
   fun parsesSubmissionPageWithComments() {
-    val html = TestFixtures.read("www.furaffinity.net:view:48519387-comments.html")
+    val html = TestFixtures.read("www.furaffinity.net:view:10000002-comments.html")
     val parser = SubmissionParser()
 
-    val detail = parser.parse(html = html, url = FaUrls.submission(48519387))
+    val detail = parser.parse(html = html, url = FaUrls.submission(10000002))
 
-    assertEquals(48519387, detail.id)
-    assertEquals("[CLOSED] Adopts Auction - Moon and Dawn", detail.title)
+    assertEquals(10000002, detail.id)
+    assertEquals("Sanitized Submission Two", detail.title)
     assertEquals(428, detail.viewCount)
     assertEquals(27, detail.favoriteCount)
     assertEquals("All", detail.category)
@@ -55,18 +55,18 @@ class SubmissionParserTest {
     assertTrue(detail.keywords.contains("auction_adoptable"))
     assertTrue(detail.tagBlockNonce.isNotBlank())
     assertTrue(detail.downloadUrl?.startsWith("https://") == true)
-    assertTrue(detail.submissionUrl.endsWith("/view/48519387/"))
+    assertTrue(detail.submissionUrl.endsWith("/view/10000002/"))
     assertTrue(detail.comments.isNotEmpty())
     assertTrue(detail.comments.any { comment -> comment.depth > 0 })
   }
 
   @Test
   fun detectsFavoritedStateFromUnfavAction() {
-    val html = TestFixtures.read("www.furaffinity.net:view:49338772-nocomment.html")
+    val html = TestFixtures.read("www.furaffinity.net:view:10000001-nocomment.html")
     val parser = SubmissionParser()
-    val mutated = html.replace("/fav/49338772/", "/unfav/49338772/").replace(">+Fav<", ">-Fav<")
+    val mutated = html.replace("/fav/10000001/", "/unfav/10000001/").replace(">+Fav<", ">-Fav<")
 
-    val detail = parser.parse(html = mutated, url = FaUrls.submission(49338772))
+    val detail = parser.parse(html = mutated, url = FaUrls.submission(10000001))
 
     assertEquals(true, detail.isFavorited)
     assertTrue(detail.favoriteActionUrl.contains("/unfav/"))
@@ -74,10 +74,10 @@ class SubmissionParserTest {
 
   @Test
   fun parsesBlockedTagStateFromSubmissionPage() {
-    val html = TestFixtures.read("www.furaffinity.net:view:64419428-blocked-male.html")
+    val html = TestFixtures.read("www.furaffinity.net:view:10000003-blocked-male.html")
     val parser = SubmissionParser()
 
-    val detail = parser.parse(html = html, url = FaUrls.submission(64419428))
+    val detail = parser.parse(html = html, url = FaUrls.submission(10000003))
 
     assertTrue(detail.tagBlockNonce.isNotBlank())
     assertTrue(detail.blockedTagNames.contains("male"))
@@ -86,15 +86,15 @@ class SubmissionParserTest {
 
   @Test
   fun parsesModernSubmissionPageLayout() {
-    val html = TestFixtures.read("www.furaffinity.net:view:64953345-modern.html")
+    val html = TestFixtures.read("www.furaffinity.net:view:10000004-modern.html")
     val parser = SubmissionParser()
 
-    val detail = parser.parse(html = html, url = FaUrls.submission(64953345))
+    val detail = parser.parse(html = html, url = FaUrls.submission(10000004))
 
-    assertEquals(64953345, detail.id)
-    assertEquals("Alina the Serphirivoir", detail.title)
-    assertEquals("cutecentaur", detail.author)
-    assertEquals("CuteCentaur", detail.authorDisplayName)
+    assertEquals(10000004, detail.id)
+    assertEquals("Sanitized Modern Submission", detail.title)
+    assertEquals("artist-gamma", detail.author)
+    assertEquals("Artist Gamma", detail.authorDisplayName)
     assertEquals(22, detail.viewCount)
     assertEquals(0, detail.commentCount)
     assertEquals(1, detail.favoriteCount)
@@ -107,12 +107,12 @@ class SubmissionParserTest {
     assertTrue(detail.keywords.contains("female"))
     assertTrue(detail.keywords.contains("pokemon"))
     assertTrue(detail.downloadUrl?.startsWith("https://d.furaffinity.net/") == true)
-    assertTrue(detail.descriptionHtml.contains("Don't listen to her song"))
+    assertTrue(detail.descriptionHtml.contains("Sanitized modern description"))
   }
 
   @Test
   fun fallsBackToPreviewWhenFullImageUrlMissing() {
-    val html = TestFixtures.read("www.furaffinity.net:view:49338772-nocomment.html")
+    val html = TestFixtures.read("www.furaffinity.net:view:10000001-nocomment.html")
     val parser = SubmissionParser()
     val mutated =
         html.replace(Regex("""(?s)(<img[^>]*id="submissionImg"[^>]*)(>)""")) { match ->
@@ -120,19 +120,19 @@ class SubmissionParserTest {
               .replace(Regex("""\sdata-fullview-src="[^"]*"""), "")
               .replace(
                   Regex("""\ssrc="[^"]*"""),
-                  """ src="//t.furaffinity.net/49338772@600-1665402309.jpg"""",
+                  """ src="//t.furaffinity.net/10000001@600-1665402309.jpg"""",
               ) + match.groupValues[2]
         }
 
-    val detail = parser.parse(html = mutated, url = FaUrls.submission(49338772))
+    val detail = parser.parse(html = mutated, url = FaUrls.submission(10000001))
 
     assertTrue(detail.previewImageUrl.startsWith("https://"))
-    assertEquals("https://t.furaffinity.net/49338772@600-1665402309.jpg", detail.fullImageUrl)
+    assertEquals("https://t.furaffinity.net/10000001@600-1665402309.jpg", detail.fullImageUrl)
   }
 
   @Test
   fun fallsBackToOgImageWhenSubmissionImgHasNoUsableUrls() {
-    val html = TestFixtures.read("www.furaffinity.net:view:49338772-nocomment.html")
+    val html = TestFixtures.read("www.furaffinity.net:view:10000001-nocomment.html")
     val parser = SubmissionParser()
     val mutated =
         html.replace(Regex("""(?s)(<img[^>]*id="submissionImg"[^>]*)(>)""")) { match ->
@@ -142,10 +142,10 @@ class SubmissionParserTest {
               .replace(Regex("""\ssrc="[^"]*"""), "") + match.groupValues[2]
         }
 
-    val detail = parser.parse(html = mutated, url = FaUrls.submission(49338772))
+    val detail = parser.parse(html = mutated, url = FaUrls.submission(10000001))
 
     assertTrue(detail.previewImageUrl.isBlank())
-    assertEquals("https://t.furaffinity.net/49338772@600-1665402309.jpg", detail.fullImageUrl)
+    assertEquals("https://t.furaffinity.net/10000001@600-1665402309.jpg", detail.fullImageUrl)
   }
 
   @Test

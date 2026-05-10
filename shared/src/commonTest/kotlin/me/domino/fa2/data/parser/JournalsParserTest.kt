@@ -10,13 +10,13 @@ import me.domino.fa2.util.FaUrls
 class JournalsParserTest {
   @Test
   fun parsesNonEmptyJournalsAndOlderPage() {
-    val html = TestFixtures.read("www.furaffinity.net:journals:tiaamaito:.html")
+    val html = TestFixtures.read("www.furaffinity.net:journals:artist-alpha:.html")
     val parser = JournalsParser()
 
-    val page = parser.parse(html = html, baseUrl = FaUrls.journals("tiaamaito"))
+    val page = parser.parse(html = html, baseUrl = FaUrls.journals("artist-alpha"))
 
     assertTrue(page.journals.isNotEmpty())
-    assertTrue(page.nextPageUrl.orEmpty().contains("/journals/tiaamaito/2/"))
+    assertTrue(page.nextPageUrl.orEmpty().contains("/journals/artist-alpha/2/"))
     val first = page.journals.first()
     assertTrue(first.id > 0)
     assertTrue(first.title.isNotBlank())
@@ -26,10 +26,10 @@ class JournalsParserTest {
 
   @Test
   fun parsesEmptyJournalsPage() {
-    val html = TestFixtures.read("www.furaffinity.net:journals:maziurek-empty.html")
+    val html = TestFixtures.read("www.furaffinity.net:journals:empty-user-empty.html")
     val parser = JournalsParser()
 
-    val page = parser.parse(html = html, baseUrl = FaUrls.journals("maziurek"))
+    val page = parser.parse(html = html, baseUrl = FaUrls.journals("empty-user"))
 
     assertTrue(page.journals.isEmpty())
     assertNull(page.nextPageUrl)

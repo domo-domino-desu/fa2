@@ -33,26 +33,26 @@ class UserSectionRepositoriesTest {
     val stores = buildStores(source)
 
     source.enqueue(
-        url = FaUrls.gallery("tiaamaito"),
+        url = FaUrls.gallery("artist-alpha"),
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:gallery:tiaamaito:.html"),
-                url = FaUrls.gallery("tiaamaito"),
+                body = TestFixtures.read("www.furaffinity.net:gallery:artist-alpha:.html"),
+                url = FaUrls.gallery("artist-alpha"),
             ),
     )
-    val galleryState = stores.galleryRepository.loadGalleryPage("tiaamaito")
+    val galleryState = stores.galleryRepository.loadGalleryPage("artist-alpha")
     assertTrue(galleryState is PageState.Success)
     assertTrue(galleryState.data.submissions.isNotEmpty())
 
     source.enqueue(
-        url = FaUrls.favorites("tiaamaito"),
+        url = FaUrls.favorites("artist-alpha"),
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:favorites:tiaamaito:.html"),
-                url = FaUrls.favorites("tiaamaito"),
+                body = TestFixtures.read("www.furaffinity.net:favorites:artist-alpha:.html"),
+                url = FaUrls.favorites("artist-alpha"),
             ),
     )
-    val favoritesState = stores.favoritesRepository.loadFavoritesPage("tiaamaito")
+    val favoritesState = stores.favoritesRepository.loadFavoritesPage("artist-alpha")
     assertTrue(favoritesState is PageState.Success)
     assertTrue(favoritesState.data.submissions.isNotEmpty())
   }
@@ -63,28 +63,28 @@ class UserSectionRepositoriesTest {
     val stores = buildStores(source)
 
     source.enqueue(
-        url = FaUrls.journals("tiaamaito"),
+        url = FaUrls.journals("artist-alpha"),
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:journals:tiaamaito:.html"),
-                url = FaUrls.journals("tiaamaito"),
+                body = TestFixtures.read("www.furaffinity.net:journals:artist-alpha:.html"),
+                url = FaUrls.journals("artist-alpha"),
             ),
     )
-    val journalsState = stores.journalsRepository.loadJournalsPage("tiaamaito")
+    val journalsState = stores.journalsRepository.loadJournalsPage("artist-alpha")
     assertTrue(journalsState is PageState.Success)
     assertTrue(journalsState.data.journals.isNotEmpty())
 
     source.enqueue(
-        url = FaUrls.journal(10516170),
+        url = FaUrls.journal(20000001),
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:journal:10516170-withcomments.html"),
-                url = FaUrls.journal(10516170),
+                body = TestFixtures.read("www.furaffinity.net:journal:20000001-withcomments.html"),
+                url = FaUrls.journal(20000001),
             ),
     )
-    val detailState = stores.journalRepository.loadJournalDetail(10516170)
+    val detailState = stores.journalRepository.loadJournalDetail(20000001)
     assertTrue(detailState is PageState.Success)
-    assertEquals(10516170, detailState.data.id)
+    assertEquals(20000001, detailState.data.id)
   }
 
   private fun buildStores(source: FaHtmlDataSource): StoreBundle {

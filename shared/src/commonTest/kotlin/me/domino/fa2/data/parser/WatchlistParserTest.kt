@@ -11,44 +11,44 @@ import me.domino.fa2.util.FaUrls
 class WatchlistParserTest {
   @Test
   fun parsesWatchedByPageAndNextPageUrl() {
-    val html = TestFixtures.read("www.furaffinity.net:watchlist:to:terriniss.html")
+    val html = TestFixtures.read("www.furaffinity.net:watchlist:to:user-alpha.html")
     val parser = WatchlistParser()
 
-    val page = parser.parse(html = html, baseUrl = FaUrls.watchlistTo("terriniss"))
+    val page = parser.parse(html = html, baseUrl = FaUrls.watchlistTo("user-alpha"))
 
     assertTrue(page.users.isNotEmpty())
-    assertEquals("-cy-", page.users.first().username)
-    assertEquals("-Cy-", page.users.first().displayName)
+    assertEquals("user-0002", page.users.first().username)
+    assertEquals("User 0002", page.users.first().displayName)
     assertTrue(page.users.first().profileUrl.startsWith("https://www.furaffinity.net/user/"))
-    assertTrue(page.nextPageUrl.orEmpty().contains("/watchlist/to/terriniss"))
+    assertTrue(page.nextPageUrl.orEmpty().contains("/watchlist/to/artist-alpha"))
     assertTrue(page.nextPageUrl.orEmpty().contains("page=2"))
   }
 
   @Test
   fun parsesWatchingPageWithoutNextPage() {
-    val html = TestFixtures.read("www.furaffinity.net:watchlist:by:terriniss.html")
+    val html = TestFixtures.read("www.furaffinity.net:watchlist:by:user-alpha.html")
     val parser = WatchlistParser()
 
-    val page = parser.parse(html = html, baseUrl = FaUrls.watchlistBy("terriniss"))
+    val page = parser.parse(html = html, baseUrl = FaUrls.watchlistBy("user-alpha"))
 
     assertTrue(page.users.isNotEmpty())
-    assertEquals("-haunter-", page.users.first().username)
-    assertEquals("-Haunter-", page.users.first().displayName)
+    assertEquals("user-0003", page.users.first().username)
+    assertEquals("User 0003", page.users.first().displayName)
     assertNull(page.nextPageUrl)
   }
 
   @Test
   fun parsesAbsoluteUserLinksFromLocalFixture() {
-    val html = TestFixtures.read("www.furaffinity.net:watchlist:to:razithedragon.html")
+    val html = TestFixtures.read("www.furaffinity.net:watchlist:to:user-beta.html")
     val parser = WatchlistParser()
 
-    val page = parser.parse(html = html, baseUrl = FaUrls.watchlistTo("razithedragon"))
+    val page = parser.parse(html = html, baseUrl = FaUrls.watchlistTo("user-beta"))
 
     assertTrue(page.users.isNotEmpty())
-    assertEquals("2glasseyes", page.users.first().username)
-    assertEquals("2Glasseyes", page.users.first().displayName)
+    assertEquals("user-0001", page.users.first().username)
+    assertEquals("User 0001", page.users.first().displayName)
     assertTrue(
-        page.users.first().profileUrl.startsWith("https://www.furaffinity.net/user/2glasseyes")
+        page.users.first().profileUrl.startsWith("https://www.furaffinity.net/user/user-0001")
     )
     assertTrue(page.nextPageUrl.orEmpty().contains("page=2"))
   }

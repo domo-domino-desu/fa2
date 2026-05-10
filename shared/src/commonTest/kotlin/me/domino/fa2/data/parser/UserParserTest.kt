@@ -11,12 +11,12 @@ import me.domino.fa2.util.FaUrls
 class UserParserTest {
   @Test
   fun parsesUserHeaderFromHomePage() {
-    val html = TestFixtures.read("www.furaffinity.net:user:terriniss.html")
+    val html = TestFixtures.read("www.furaffinity.net:user:artist-alpha.html")
     val parser = UserParser()
 
-    val header = parser.parse(html = html, url = FaUrls.user("terriniss"))
+    val header = parser.parse(html = html, url = FaUrls.user("artist-alpha"))
 
-    assertEquals("terriniss", header.username.lowercase())
+    assertEquals("artist-alpha", header.username.lowercase())
     assertTrue(header.displayName.isNotBlank())
     assertTrue(header.registeredAt.isNotBlank())
     assertTrue(header.profileHtml.contains("bbcode"))
@@ -28,31 +28,32 @@ class UserParserTest {
     assertEquals(120, header.watchingCount)
     assertEquals(12, header.shoutCount)
     assertEquals(12, header.shouts.size)
-    assertTrue(header.watchedByListUrl.contains("/watchlist/to/terriniss"))
-    assertTrue(header.watchingListUrl.contains("/watchlist/by/terriniss"))
-    assertEquals("mengshi", header.shouts.first().author.lowercase())
-    assertTrue(header.shouts.first().bodyHtml.contains("Love your gallery", ignoreCase = true))
+    assertTrue(header.watchedByListUrl.contains("/watchlist/to/artist-alpha"))
+    assertTrue(header.watchingListUrl.contains("/watchlist/by/artist-alpha"))
+    assertEquals("user-commenter-001", header.shouts.first().author.lowercase())
+    assertTrue(header.shouts.first().bodyHtml.contains("Sanitized", ignoreCase = true))
     assertTrue(header.contacts.any { it.label.equals("Twitter", ignoreCase = true) })
     assertTrue(
         header.contacts.any { contact ->
           contact.label.equals("Twitter", ignoreCase = true) &&
-              contact.url.contains("twitter.com", ignoreCase = true)
+              contact.url.contains("social.example.invalid", ignoreCase = true)
         }
     )
     assertEquals(20, header.galleryPreviews.size)
     assertEquals(20, header.favoritesPreviews.size)
     assertEquals(60087990, header.galleryPreviews.first().id)
-    assertEquals("[OPEN] Adopts FixPrice - FluffyBeans", header.galleryPreviews.first().title)
-    assertEquals("Terriniss", header.galleryPreviews.first().author)
-    assertTrue(header.galleryPreviews.first().thumbnailUrl.contains("60087990@300-1741039738"))
-    assertTrue(header.galleryPreviews.first().authorAvatarUrl.isNotBlank())
+    assertEquals("Sanitized Gallery Preview", header.galleryPreviews.first().title)
+    assertEquals("Artist Alpha", header.galleryPreviews.first().author)
+    assertTrue(header.galleryPreviews.first().thumbnailUrl.startsWith("https://t.furaffinity.net/"))
     assertEquals(57803262, header.favoritesPreviews.first().id)
     assertEquals(
-        "Auction. CLOSED. Adopt Alkior from Closed Species Alivante",
+        "Sanitized Favorite Preview",
         header.favoritesPreviews.first().title,
     )
-    assertEquals("inn_art", header.favoritesPreviews.first().author)
-    assertTrue(header.favoritesPreviews.first().thumbnailUrl.contains("57803262@300-1724011901"))
+    assertEquals("artist-favorite-001", header.favoritesPreviews.first().author)
+    assertTrue(
+        header.favoritesPreviews.first().thumbnailUrl.startsWith("https://t.furaffinity.net/")
+    )
   }
 
   @Test
@@ -93,7 +94,7 @@ class UserParserTest {
 
   @Test
   fun parsesProfileBannerFromBannerImageNode() {
-    val html = TestFixtures.read("www.furaffinity.net:journal:10882268-disabled-comments.html")
+    val html = TestFixtures.read("www.furaffinity.net:journal:20000002-disabled-comments.html")
     val parser = UserParser()
 
     val header = parser.parse(html = html, url = FaUrls.user("fender"))
@@ -125,7 +126,7 @@ class UserParserTest {
                 <div class="user-contact-item">
                   <div class="user-contact-user-info">
                     <span class="font-small"><strong class="highlight">Email</strong></span><br>
-                    <a href="mailto:test@example.com">test@example.com</a>
+                    <a href="https://example.invalid/email">tester@example.invalid</a>
                   </div>
                 </div>
                 <div class="user-contact-item">
@@ -151,8 +152,8 @@ class UserParserTest {
     assertEquals("Website", header.contacts[0].label)
     assertEquals("https://example.com/profile", header.contacts[0].url)
     assertEquals("Email", header.contacts[1].label)
-    assertEquals("mailto:test@example.com", header.contacts[1].url)
-    assertEquals("test@example.com", header.contacts[1].value)
+    assertEquals("https://example.invalid/email", header.contacts[1].url)
+    assertEquals("tester@example.invalid", header.contacts[1].value)
     assertEquals("Steam", header.contacts[2].label)
     assertEquals("", header.contacts[2].url)
     assertEquals("test-steam-id", header.contacts[2].value)
@@ -175,7 +176,7 @@ class UserParserTest {
                 <div class="user-contact-item">
                   <div class="user-contact-user-info">
                     <span class="font-small"><strong class="highlight">Discord</strong></span><br>
-                    <a href="javascript:void(0)">discord.gg/testInvite</a>
+                    <a href="javascript:void(0)">social.example.invalid/invite</a>
                   </div>
                 </div>
               </div>
@@ -193,7 +194,7 @@ class UserParserTest {
 
     assertEquals(1, header.contacts.size)
     assertEquals("Discord", header.contacts[0].label)
-    assertEquals("discord.gg/testInvite", header.contacts[0].value)
-    assertEquals("https://discord.gg/testInvite", header.contacts[0].url)
+    assertEquals("social.example.invalid/invite", header.contacts[0].value)
+    assertEquals("https://social.example.invalid/invite", header.contacts[0].url)
   }
 }

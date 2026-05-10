@@ -9,7 +9,7 @@ import me.domino.fa2.fake.TestFixtures
 class ParserUtilsTest {
   @Test
   fun skipsAvatarUrlsWhenAvatarMtimeIsMissing() {
-    val html = TestFixtures.read("www.furaffinity.net:gallery:tiaamaito:.html")
+    val html = TestFixtures.read("www.furaffinity.net:gallery:artist-alpha:.html")
 
     val avatars = parseSubmissionAvatarUrls(html)
 
@@ -20,12 +20,12 @@ class ParserUtilsTest {
   fun derivesThumbnailUrlFromFullImageUrl() {
     val result =
         deriveSubmissionThumbnailUrlFromFullImage(
-            sid = 49338772,
+            sid = 10000001,
             fullImageUrl =
-                "https://d.furaffinity.net/art/annetpeas/1665402309/1665402309.annetpeas_the_hookah_fa.png",
+                "https://d.furaffinity.net/art/artist-delta/1665402309/1665402309.artist-delta_sanitized_submission_one.png",
         )
 
-    assertEquals("https://t.furaffinity.net/49338772@600-1665402309.jpg", result)
+    assertEquals("https://t.furaffinity.net/10000001@600-1665402309.jpg", result)
   }
 
   @Test
@@ -44,19 +44,19 @@ class ParserUtilsTest {
   fun derivesThumbnailUrlWhenFullUrlContainsQuery() {
     val result =
         deriveSubmissionThumbnailUrlFromFullImage(
-            sid = 52209828,
+            sid = 10000006,
             fullImageUrl =
                 "https://d.furaffinity.net/art/minmohere/1684537865/1684537865.minmohere_5-18-23blupee.png?token=abc",
         )
 
-    assertEquals("https://t.furaffinity.net/52209828@600-1684537865.jpg", result)
+    assertEquals("https://t.furaffinity.net/10000006@600-1684537865.jpg", result)
   }
 
   @Test
   fun returnsNullWhenFullImageUrlDoesNotMatchPattern() {
     val result =
         deriveSubmissionThumbnailUrlFromFullImage(
-            sid = 49338772,
+            sid = 10000001,
             fullImageUrl = "https://example.com/image.png",
         )
 

@@ -23,15 +23,15 @@ class UserRepositoryTest {
     val repository = buildRepository(source)
 
     source.enqueue(
-        url = FaUrls.user("terriniss"),
+        url = FaUrls.user("artist-alpha"),
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:user:terriniss.html"),
-                url = FaUrls.user("terriniss"),
+                body = TestFixtures.read("www.furaffinity.net:user:artist-alpha.html"),
+                url = FaUrls.user("artist-alpha"),
             ),
     )
 
-    val state = repository.loadUser("terriniss")
+    val state = repository.loadUser("artist-alpha")
     assertTrue(state is PageState.Success)
     assertTrue(state.data.username.isNotBlank())
   }

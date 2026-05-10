@@ -9,8 +9,9 @@ import me.domino.fa2.ui.pages.user.route.UserRouteScreen
 class UserChildRouteScreenKeyTest {
   @Test
   fun keyDiffersByRoute() {
-    val gallery = UserChildRouteScreen(username = "tiaamaito", route = UserChildRoute.Gallery)
-    val favorites = UserChildRouteScreen(username = "tiaamaito", route = UserChildRoute.Favorites)
+    val gallery = UserChildRouteScreen(username = "artist-alpha", route = UserChildRoute.Gallery)
+    val favorites =
+        UserChildRouteScreen(username = "artist-alpha", route = UserChildRoute.Favorites)
 
     assertNotEquals(gallery.key, favorites.key)
   }

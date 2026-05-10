@@ -42,7 +42,7 @@ class PageCacheTtlPolicyTest {
     val now = Clock.System.now().toEpochMilliseconds()
     val fresh =
         PageCacheEntity(
-            cacheKey = "user:username=terriniss",
+            cacheKey = "user:username=artist-alpha",
             pageType = "user_header_v1",
             dataJson = "{}",
             cachedAtMs = now - 20 * 60 * 1000L,
@@ -71,7 +71,7 @@ class PageCacheTtlPolicyTest {
     val now = Clock.System.now().toEpochMilliseconds()
     val expired =
         PageCacheEntity(
-            cacheKey = "watchlist:category=watching:username=terriniss:cursor=first",
+            cacheKey = "watchlist:category=watching:username=user-alpha:cursor=first",
             pageType = "watchlist_page_v1",
             dataJson = "{}",
             cachedAtMs = now - 5 * 60 * 1000L,

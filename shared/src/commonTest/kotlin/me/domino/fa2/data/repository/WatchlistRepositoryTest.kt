@@ -24,20 +24,20 @@ class WatchlistRepositoryTest {
   fun loadUsesCacheAndRefreshForcesRefetch() = runTest {
     val source = WatchlistScriptedHtmlDataSource()
     val repository = buildRepository(source)
-    val watchedByUrl = FaUrls.watchlistTo("terriniss")
+    val watchedByUrl = FaUrls.watchlistTo("user-alpha")
 
     source.enqueue(
         url = watchedByUrl,
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:watchlist:to:terriniss.html"),
+                body = TestFixtures.read("www.furaffinity.net:watchlist:to:user-alpha.html"),
                 url = watchedByUrl,
             ),
     )
 
     val first =
         repository.loadWatchlistPage(
-            username = "terriniss",
+            username = "user-alpha",
             category = WatchlistCategory.WatchedBy,
             nextPageUrl = null,
         )
@@ -46,7 +46,7 @@ class WatchlistRepositoryTest {
 
     val second =
         repository.loadWatchlistPage(
-            username = "terriniss",
+            username = "user-alpha",
             category = WatchlistCategory.WatchedBy,
             nextPageUrl = null,
         )
@@ -57,14 +57,14 @@ class WatchlistRepositoryTest {
         url = watchedByUrl,
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:watchlist:to:razithedragon.html"),
+                body = TestFixtures.read("www.furaffinity.net:watchlist:to:user-beta.html"),
                 url = watchedByUrl,
             ),
     )
 
     val refreshed =
         repository.refreshWatchlistFirstPage(
-            username = "terriniss",
+            username = "user-alpha",
             category = WatchlistCategory.WatchedBy,
         )
     assertTrue(refreshed is PageState.Success)
@@ -75,14 +75,14 @@ class WatchlistRepositoryTest {
   fun categoriesUseIndependentCaches() = runTest {
     val source = WatchlistScriptedHtmlDataSource()
     val repository = buildRepository(source)
-    val watchedByUrl = FaUrls.watchlistTo("terriniss")
-    val watchingUrl = FaUrls.watchlistBy("terriniss")
+    val watchedByUrl = FaUrls.watchlistTo("user-alpha")
+    val watchingUrl = FaUrls.watchlistBy("user-alpha")
 
     source.enqueue(
         url = watchedByUrl,
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:watchlist:to:terriniss.html"),
+                body = TestFixtures.read("www.furaffinity.net:watchlist:to:user-alpha.html"),
                 url = watchedByUrl,
             ),
     )
@@ -90,20 +90,20 @@ class WatchlistRepositoryTest {
         url = watchingUrl,
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:watchlist:by:terriniss.html"),
+                body = TestFixtures.read("www.furaffinity.net:watchlist:by:user-alpha.html"),
                 url = watchingUrl,
             ),
     )
 
     val watchedBy =
         repository.loadWatchlistPage(
-            username = "terriniss",
+            username = "user-alpha",
             category = WatchlistCategory.WatchedBy,
             nextPageUrl = null,
         )
     val watching =
         repository.loadWatchlistPage(
-            username = "terriniss",
+            username = "user-alpha",
             category = WatchlistCategory.Watching,
             nextPageUrl = null,
         )
@@ -114,7 +114,7 @@ class WatchlistRepositoryTest {
 
     val watchedByCached =
         repository.loadWatchlistPage(
-            username = "terriniss",
+            username = "user-alpha",
             category = WatchlistCategory.WatchedBy,
             nextPageUrl = null,
         )
