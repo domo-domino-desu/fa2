@@ -8,7 +8,7 @@ import me.domino.fa2.util.parsePositiveFloat
 import me.domino.fa2.util.parseSubmissionSid
 import me.domino.fa2.util.toAbsoluteUrl
 
-internal class ModernSubmissionParser {
+internal class SubmissionPageParser {
   private val sizeRegex = Regex("""(\d+)\s*x\s*(\d+)""")
   private val mediaParser = SubmissionMediaParser()
   private val commentsParser = SubmissionCommentsParser()
@@ -17,13 +17,13 @@ internal class ModernSubmissionParser {
   fun parse(document: Document, pageUrl: String): Submission {
     val root =
         document.selectFirst("#submission_page")
-            ?: throw IllegalStateException("Modern submission page root missing")
+            ?: throw IllegalStateException("Submission page root missing")
     val content =
         root.selectFirst("div.submission-content")
-            ?: throw IllegalStateException("Modern submission content missing")
+            ?: throw IllegalStateException("Submission content missing")
     val descriptionNode =
         root.selectFirst("section.submission-description div.submission-description-text")
-            ?: throw IllegalStateException("Modern submission description missing")
+            ?: throw IllegalStateException("Submission description missing")
 
     val media = mediaParser.parse(document = document, content = content, pageUrl = pageUrl)
     val metadata = parseMetadata(document = document, root = root, pageUrl = pageUrl)
@@ -88,7 +88,7 @@ internal class ModernSubmissionParser {
 
     val authorNode =
         description?.selectFirst("a[href*=\"/user/\"]")
-            ?: throw IllegalStateException("Modern submission author link missing")
+            ?: throw IllegalStateException("Submission author link missing")
     val authorHref = authorNode.attr("href")
     val author =
         authorHref.substringAfter("/user/").substringBefore('/').trim().ifBlank {
@@ -115,10 +115,10 @@ internal class ModernSubmissionParser {
 
     val statsNode =
         root.selectFirst("div.submission-page-stats")
-            ?: throw IllegalStateException("Modern submission stats missing")
+            ?: throw IllegalStateException("Submission stats missing")
     val contentStats =
         root.selectFirst("div.submission-content-stats")
-            ?: throw IllegalStateException("Modern submission content stats missing")
+            ?: throw IllegalStateException("Submission content stats missing")
     val downloadNode = findDownloadNode(root)
     val downloadUrl =
         downloadNode
@@ -149,7 +149,7 @@ internal class ModernSubmissionParser {
         favoriteActionUrl = favoriteAction.actionUrl,
         rating = parseStatText(statsNode, "Rating").ifBlank { "Unknown" },
         category = parseInfoValue(contentStats, "Category"),
-        type = parseInfoValue(contentStats, "Sub-Category"),
+        type = parseInfoValue(contentStats, "Sub-Category", "Theme"),
         species = parseInfoValue(contentStats, "Species"),
         size = parseInfoValue(contentStats, "Resolution"),
         fileSize = parseInfoValue(contentStats, "File Size"),
@@ -163,14 +163,19 @@ internal class ModernSubmissionParser {
     )
   }
 
-  private fun parseInfoValue(contentStats: Element, label: String): String {
+  private fun parseInfoValue(contentStats: Element, vararg targetLabels: String): String {
     val columns = contentStats.children()
-    val labels = columns.getOrNull(0)?.children().orEmpty()
+    val labelNodes = columns.getOrNull(0)?.children().orEmpty()
     val values = columns.getOrNull(1)?.children().orEmpty()
-    val index = labels.indexOfFirst { node -> node.text().trim().equals(label, ignoreCase = true) }
+    val index =
+        labelNodes.indexOfFirst { node ->
+          targetLabels.any { label -> node.text().trim().equals(label, ignoreCase = true) }
+        }
     val value = values.getOrNull(index)?.text()?.trim().orEmpty()
     if (value.isBlank()) {
-      throw IllegalStateException("Modern submission info value missing: $label")
+      throw IllegalStateException(
+          "Submission info value missing: ${targetLabels.joinToString("/")}"
+      )
     }
     return value.removeSuffix("px")
   }
@@ -238,3 +243,34 @@ internal class ModernSubmissionParser {
     return width / height
   }
 }
+
+private data class SubmissionParsedMetadata(
+    val submissionUrl: String,
+    val title: String,
+    val author: String,
+    val authorDisplayName: String,
+    val authorAvatarUrl: String,
+    val timestampRaw: String?,
+    val timestampNatural: String,
+    val viewCount: Int,
+    val commentCount: Int,
+    val favoriteCount: Int,
+    val isFavorited: Boolean,
+    val favoriteActionUrl: String,
+    val rating: String,
+    val category: String,
+    val type: String,
+    val species: String,
+    val size: String,
+    val fileSize: String,
+    val keywords: List<String>,
+    val blockedTagNames: List<String>,
+    val tagBlockNonce: String,
+    val downloadUrl: String?,
+    val downloadFileName: String?,
+)
+
+private data class SubmissionFavoriteAction(
+    val actionUrl: String,
+    val isFavorited: Boolean,
+)

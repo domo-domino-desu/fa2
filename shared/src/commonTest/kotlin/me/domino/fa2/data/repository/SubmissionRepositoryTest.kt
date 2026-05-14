@@ -29,52 +29,53 @@ import me.domino.fa2.util.FaUrls
 
 /** SubmissionRepository 详情链路测试。 */
 class SubmissionRepositoryTest {
+  private val latestFixture = "www.furaffinity.net:view:20000009.html"
+  private val latestSid = 20000009
+
   @Test
   fun loadSubmissionDetailBySidParsesMetadataAndMedia() = runTest {
     val source = SubmissionScriptedHtmlDataSource()
     val repository = buildRepository(source)
-    val targetSid = 10000001
     source.enqueue(
-        url = FaUrls.submission(targetSid),
+        url = FaUrls.submission(latestSid),
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:view:10000001-nocomment.html"),
-                url = FaUrls.submission(targetSid),
+                body = TestFixtures.read(latestFixture),
+                url = FaUrls.submission(latestSid),
             ),
     )
 
-    val state = repository.loadSubmissionDetailBySid(targetSid)
+    val state = repository.loadSubmissionDetailBySid(latestSid)
     assertTrue(state is PageState.Success)
     val detail = state.data
-    assertEquals("Sanitized Submission One", detail.title)
-    assertEquals(769, detail.viewCount)
-    assertEquals(65, detail.favoriteCount)
-    assertEquals("1217 x 1280", detail.size)
-    assertEquals("1.22 MB", detail.fileSize)
+    assertEquals("Sanitized Latest Submission", detail.title)
+    assertEquals(657, detail.viewCount)
+    assertEquals(126, detail.favoriteCount)
+    assertEquals("2351 x 1567", detail.size)
+    assertEquals("3.19 MB", detail.fileSize)
     assertTrue(detail.fullImageUrl.isNotBlank())
     assertTrue(detail.previewImageUrl.isNotBlank())
-    assertEquals("1665402309.artist-delta_sanitized_submission_one.png", detail.downloadFileName)
+    assertEquals("1700000009.artist-alpha_sanitized_latest_submission.png", detail.downloadFileName)
   }
 
   @Test
   fun loadSubmissionDetailByUrlUsesSidCacheKey() = runTest {
     val source = SubmissionScriptedHtmlDataSource()
     val repository = buildRepository(source)
-    val targetSid = 10000002
     source.enqueue(
-        url = FaUrls.submission(targetSid),
+        url = FaUrls.submission(latestSid),
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:view:10000002-comments.html"),
-                url = FaUrls.submission(targetSid),
+                body = TestFixtures.read(latestFixture),
+                url = FaUrls.submission(latestSid),
             ),
     )
 
-    val state = repository.loadSubmissionDetailByUrl(FaUrls.submission(targetSid))
+    val state = repository.loadSubmissionDetailByUrl(FaUrls.submission(latestSid))
     assertTrue(state is PageState.Success)
-    assertEquals(targetSid, state.data.id)
+    assertEquals(latestSid, state.data.id)
     assertEquals(
-        "1660265303.artist-alpha_sanitized_submission_two.jpg",
+        "1700000009.artist-alpha_sanitized_latest_submission.png",
         state.data.downloadFileName,
     )
   }

@@ -25,16 +25,21 @@ class SubmissionDescriptionTranslationServiceTest {
   fun extractsParagraphsFromPlainDescription() {
     val service = createService()
     val parser = SubmissionParser()
-    val html = TestFixtures.read("www.furaffinity.net:view:10000001-nocomment.html")
-    val detail = parser.parse(html = html, url = FaUrls.submission(10000001))
+    val html = TestFixtures.read("www.furaffinity.net:view:20000009.html")
+    val detail = parser.parse(html = html, url = FaUrls.submission(20000009))
 
     val blocks = service.extractBlocks(detail.descriptionHtml)
 
-    assertTrue(blocks.size >= 3, "Expected split paragraphs, actual=${blocks.size}")
-    assertTrue(blocks.any { block -> block.sourceText.contains("YCH", ignoreCase = true) })
-    assertTrue(blocks.any { block -> block.sourceText.contains("Cody", ignoreCase = true) })
+    assertTrue(blocks.size >= 2, "Expected split paragraphs, actual=${blocks.size}")
     assertTrue(
-        blocks.any { block -> block.sourceText.contains("Feed me with coffee", ignoreCase = true) }
+        blocks.any { block ->
+          block.sourceText.contains("First sanitized description", ignoreCase = true)
+        }
+    )
+    assertTrue(
+        blocks.any { block ->
+          block.sourceText.contains("Second sanitized description", ignoreCase = true)
+        }
     )
     assertTrue(
         blocks.none { block ->
@@ -46,11 +51,17 @@ class SubmissionDescriptionTranslationServiceTest {
   @Test
   fun extractsParagraphsInsideCodeWrapperAndKeepsWrapperTag() {
     val service = createService()
-    val parser = SubmissionParser()
-    val html = TestFixtures.read("www.furaffinity.net:view:10000005-comment-hidden.html")
-    val detail = parser.parse(html = html, url = FaUrls.submission(10000005))
+    val descriptionHtml =
+        """
+        <code class="bbcode bbcode_center">
+          Since I thought this might be useful<br><br>
+          Payment is made through PayPal<br><br>
+          Third wrapped paragraph<br><br>
+          Fourth wrapped paragraph
+        </code>
+        """
 
-    val blocks = service.extractBlocks(detail.descriptionHtml)
+    val blocks = service.extractBlocks(descriptionHtml)
 
     assertTrue(
         blocks.size >= 4,

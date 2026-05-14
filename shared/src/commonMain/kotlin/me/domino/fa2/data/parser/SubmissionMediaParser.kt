@@ -15,9 +15,14 @@ internal class SubmissionMediaParser {
     val imageSrcRaw = imageNode?.attr("src")?.trim().orEmpty()
     val previewRaw = imageNode?.attr("data-preview-src")?.trim().orEmpty().ifBlank { imageSrcRaw }
     val fullRaw =
-        imageNode?.attr("data-fullview-src")?.trim().orEmpty().ifBlank {
-          document.selectFirst("meta[property='og:image']")?.attr("content")?.trim().orEmpty()
-        }
+        imageNode
+            ?.attr("data-fullview-src")
+            ?.trim()
+            .orEmpty()
+            .ifBlank { imageSrcRaw }
+            .ifBlank {
+              document.selectFirst("meta[property='og:image']")?.attr("content")?.trim().orEmpty()
+            }
 
     return SubmissionParsedMedia(
         previewImageUrl = toAbsoluteUrl(pageUrl, previewRaw),
