@@ -282,7 +282,7 @@ symbolCraft {
           .toTypedArray(),
       libraryName = "simpleicons",
   ) {
-    urlTemplate = "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/{name}.svg"
+    urlTemplate = "https://cdn.jsdelivr.net/npm/simple-icons@13.21.0/icons/{name}.svg"
   }
 
   localIcons(libraryName = "brand") { directory = "../branding" }
