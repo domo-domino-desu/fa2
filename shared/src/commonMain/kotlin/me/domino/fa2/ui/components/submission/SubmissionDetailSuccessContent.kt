@@ -123,7 +123,9 @@ internal fun SubmissionDetailSuccessContent(
                   onClick = { onCopySubmissionUrl(detail.submissionUrl) },
               )
           )
-          add(SubmissionInfoMetric(icon = FaMaterialSymbols.Outlined.Image, text = detail.size))
+          detail.size?.let { resolution ->
+            add(SubmissionInfoMetric(icon = FaMaterialSymbols.Outlined.Image, text = resolution))
+          }
           fileExtensionLabel?.let { extension ->
             add(
                 SubmissionInfoMetric(

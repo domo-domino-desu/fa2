@@ -151,7 +151,7 @@ internal class SubmissionPageParser {
         category = parseInfoValue(contentStats, "Category"),
         type = parseInfoValue(contentStats, "Sub-Category", "Theme"),
         species = parseInfoValue(contentStats, "Species"),
-        size = parseInfoValue(contentStats, "Resolution"),
+        size = parseOptionalInfoValue(contentStats, "Resolution"),
         fileSize = parseInfoValue(contentStats, "File Size"),
         keywords = parseKeywords(root),
         blockedTagNames = parseBlockedTagNames(document, root),
@@ -178,6 +178,18 @@ internal class SubmissionPageParser {
       )
     }
     return value.removeSuffix("px")
+  }
+
+  private fun parseOptionalInfoValue(contentStats: Element, vararg targetLabels: String): String? {
+    val columns = contentStats.children()
+    val labelNodes = columns.getOrNull(0)?.children().orEmpty()
+    val values = columns.getOrNull(1)?.children().orEmpty()
+    val index =
+        labelNodes.indexOfFirst { node ->
+          targetLabels.any { label -> node.text().trim().equals(label, ignoreCase = true) }
+        }
+    if (index < 0) return null
+    return values.getOrNull(index)?.text()?.trim()?.removeSuffix("px")?.takeIf { it.isNotBlank() }
   }
 
   private fun parseKeywords(root: Element): List<String> =
@@ -235,8 +247,8 @@ internal class SubmissionPageParser {
     return stat.children().firstOrNull()?.text()?.trim().orEmpty()
   }
 
-  private fun parseAspectRatio(size: String): Float {
-    val match = sizeRegex.find(size) ?: return 1f
+  private fun parseAspectRatio(size: String?): Float {
+    val match = size?.let(sizeRegex::find) ?: return 1f
     val width = parsePositiveFloat(match.groupValues[1]) ?: return 1f
     val height = parsePositiveFloat(match.groupValues[2]) ?: return 1f
     if (height <= 0f) return 1f
@@ -261,7 +273,7 @@ private data class SubmissionParsedMetadata(
     val category: String,
     val type: String,
     val species: String,
-    val size: String,
+    val size: String?,
     val fileSize: String,
     val keywords: List<String>,
     val blockedTagNames: List<String>,

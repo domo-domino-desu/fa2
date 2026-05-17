@@ -116,6 +116,18 @@ class SubmissionParserTest {
   }
 
   @Test
+  fun allowsMissingResolutionRow() {
+    val html = TestFixtures.read(latestFixture)
+    val parser = SubmissionParser()
+    val mutated = html.replace(">Resolution<", ">Resolution-Missing<")
+
+    val detail = parser.parse(html = mutated, url = FaUrls.submission(latestSid))
+
+    assertEquals(null, detail.size)
+    assertEquals(1f, detail.aspectRatio)
+  }
+
+  @Test
   fun failsOnMalformedHtml() {
     val parser = SubmissionParser()
     assertFailsWith<IllegalStateException> {

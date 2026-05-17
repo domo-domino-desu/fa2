@@ -45,8 +45,8 @@ data class Submission(
     val type: String = "",
     /** 物种。 */
     val species: String,
-    /** 尺寸文本。 */
-    val size: String,
+    /** 尺寸文本（可为空）。 */
+    val size: String?,
     /** 文件大小文本。 */
     val fileSize: String,
     /** 关键词。 */
