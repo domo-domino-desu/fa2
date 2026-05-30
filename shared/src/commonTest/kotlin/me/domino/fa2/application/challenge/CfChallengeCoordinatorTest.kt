@@ -96,7 +96,7 @@ private data class ChallengeCoordinatorFixture(
     val coordinator: CfChallengeCoordinator,
     val cookiesStorage: FaCookiesStorage,
     val userAgentStorage: UserAgentStorage,
-    val sessionStore: ChallengeSessionStore,
+    val sessionStore: ChallengeSessionStorage,
 )
 
 private fun createCoordinatorFixture(response: HtmlResponseResult): ChallengeCoordinatorFixture {
@@ -111,7 +111,7 @@ private fun createCoordinatorFixture(response: HtmlResponseResult): ChallengeCoo
           )
       )
   val htmlDataSource = ScriptedChallengeHtmlDataSource(response)
-  val sessionStore = ChallengeSessionStore()
+  val sessionStore = ChallengeSessionStorage()
   return ChallengeCoordinatorFixture(
       coordinator =
           CfChallengeCoordinator(

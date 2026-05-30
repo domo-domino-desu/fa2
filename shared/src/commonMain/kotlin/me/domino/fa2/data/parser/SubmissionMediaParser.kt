@@ -4,7 +4,9 @@ import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.nodes.Element
 import me.domino.fa2.util.toAbsoluteUrl
 
+/** 解析投稿页面的媒体信息。 */
 internal class SubmissionMediaParser {
+  /** 从页面文档中提取预览图和完整图片地址。 */
   fun parse(document: Document, content: Element, pageUrl: String): SubmissionParsedMedia {
     val imageNode =
         content.selectFirst("div.submission-area img#submissionImg")
@@ -31,7 +33,10 @@ internal class SubmissionMediaParser {
   }
 }
 
+/** 解析后的媒体地址数据。 */
 internal data class SubmissionParsedMedia(
+    /** 预览图地址。 */
     val previewImageUrl: String,
+    /** 完整图片地址。 */
     val fullImageUrl: String,
 )

@@ -55,7 +55,7 @@ fun repositoryModule(): Module = module {
   single { FeedRepository(get()) }
   single { BrowseRepository(get()) }
   single { SearchRepository(get()) }
-  single { SubmissionRepository(get(), get(), get(), get()) } bind SubmissionDetailRepository::class
+  single { SubmissionRepository(get(), get(), get()) } bind SubmissionDetailRepository::class
   single { SubmissionSeriesResolver(get()) }
   single { PersistedWatchRecommendationBlocklistRepository(get()) } bind
       WatchRecommendationBlocklistRepository::class

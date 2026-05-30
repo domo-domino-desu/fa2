@@ -5,14 +5,18 @@ import com.fleeksoft.ksoup.nodes.Element
 import me.domino.fa2.data.model.PageComment
 import me.domino.fa2.util.toAbsoluteUrl
 
+/** 解析投稿页面的评论列表。 */
 internal class SubmissionCommentsParser {
+  /** 用于从内联样式中提取评论缩进宽度百分比的正则。 */
   private val commentWidthRegex = Regex("""width\s*:\s*([0-9.]+)%""", RegexOption.IGNORE_CASE)
 
+  /** 从页面文档中提取所有评论。 */
   fun parse(document: Document, pageUrl: String): List<PageComment> =
       document.select("#comments-submission div.comment_container").mapNotNull { node ->
         parseCommentNode(commentNode = node, pageUrl = pageUrl)
       }
 
+  /** 解析单条评论节点，失败时返回 null。 */
   private fun parseCommentNode(commentNode: Element, pageUrl: String): PageComment? {
     val commentId =
         commentNode

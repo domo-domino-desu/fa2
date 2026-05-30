@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.text.font.FontWeight
@@ -71,6 +72,7 @@ internal fun SubmissionDetailSuccessContent(
     requestPagerFocus: () -> Unit,
 ) {
   val coroutineScope = rememberCoroutineScope()
+  val currentOnCopySubmissionUrl = rememberUpdatedState(onCopySubmissionUrl)
   val appI18n = LocalAppI18n.current
   val searchUiLabelsRepository = LocalSearchUiLabelsRepository.current
   val taxonomyRepository = LocalTaxonomyRepository.current
@@ -85,15 +87,7 @@ internal fun SubmissionDetailSuccessContent(
             ?: extractDownloadFileExtension(detail.downloadUrl)
       }
   val metrics =
-      remember(
-          detail,
-          fileExtensionLabel,
-          canScrollToAttachmentText,
-          onCopySubmissionUrl,
-          commentsBringIntoViewRequester,
-          attachmentBringIntoViewRequester,
-          coroutineScope,
-      ) {
+      remember(detail, fileExtensionLabel, canScrollToAttachmentText) {
         buildList {
           add(
               SubmissionInfoMetric(
@@ -120,7 +114,7 @@ internal fun SubmissionDetailSuccessContent(
               SubmissionInfoMetric(
                   icon = FaMaterialSymbols.Outlined.Tag,
                   text = appString(Res.string.submission_id, detail.id),
-                  onClick = { onCopySubmissionUrl(detail.submissionUrl) },
+                  onClick = { currentOnCopySubmissionUrl.value(detail.submissionUrl) },
               )
           )
           detail.size?.let { resolution ->

@@ -10,9 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
@@ -51,7 +50,7 @@ class UserRouteScreen(
           parametersOf(username, initialChildRoute, initialFolderUrl)
         }
     val userState by userScreenModel.state.collectAsState()
-    var onCurrentRouteScrollToTop by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val scrollToTopVersion = remember { mutableLongStateOf(0L) }
 
     Column(modifier = Modifier.fillMaxSize()) {
       UserRouteTopBar(
@@ -59,7 +58,7 @@ class UserRouteScreen(
           onBack = { parentNavigator.pop() },
           onGoHome = { parentNavigator.goBackHome() },
           shareUrl = FaUrls.user(username),
-          onTitleClick = { onCurrentRouteScrollToTop?.invoke() },
+          onTitleClick = { scrollToTopVersion.longValue++ },
       )
 
       Navigator(
@@ -142,10 +141,7 @@ class UserRouteScreen(
                 { cacheKey, snapshot ->
                   userScreenModel.setSubmissionSectionSnapshot(cacheKey, snapshot)
                 },
-            LocalUserCurrentRouteScrollToTopActionUpdater provides
-                { action ->
-                  onCurrentRouteScrollToTop = action
-                },
+            LocalUserScrollToTopVersion provides scrollToTopVersion,
         ) {
           Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
             CurrentScreen()

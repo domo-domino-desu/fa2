@@ -12,18 +12,18 @@ import me.domino.fa2.util.logging.FaLog
 import me.domino.fa2.util.logging.summarizeUrl
 
 class CfChallengeCoordinator(
-    private val sessionStore: ChallengeSessionStore,
+    private val sessionStorage: ChallengeSessionStorage,
     private val cookiesStorage: FaCookiesStorage,
     private val userAgentStorage: UserAgentStorage,
     private val cookiePolicy: ChallengeCookiePolicy,
     private val probeVerifier: ChallengeProbeVerifier,
 ) : ChallengeResolver, CfChallengeController {
   private val log = FaLog.withTag("CfChallengeCoordinator")
-  override val state: StateFlow<CfChallengeUiState> = sessionStore.state
+  override val state: StateFlow<CfChallengeUiState> = sessionStorage.state
 
   override suspend fun awaitResolution(challenge: CfChallengeSignal): Boolean {
     val safeUrl = summarizeUrl(challenge.requestUrl)
-    val acquisition = sessionStore.acquire(challenge)
+    val acquisition = sessionStorage.acquire(challenge)
     if (acquisition.created) {
       val ray = acquisition.session.cfRay?.takeIf { it.isNotBlank() } ?: "-"
       log.i { "验证会话 -> 创建(url=${summarizeUrl(acquisition.session.triggerUrl)},cf-ray=$ray)" }
@@ -82,12 +82,12 @@ class CfChallengeCoordinator(
       capturedCookieHeader: String,
       triggerUrl: String,
   ): Boolean {
-    val session = sessionStore.currentSession() ?: return false
-    sessionStore.markVerifying(session)
+    val session = sessionStorage.currentSession() ?: return false
+    sessionStorage.markVerifying(session)
 
     if (!cookiePolicy.containsRequiredCookie(capturedCookieHeader)) {
       log.w { "验证会话 -> 未捕获cf cookie(url=${summarizeUrl(triggerUrl)})" }
-      sessionStore.markVerificationFailed(session, cookiePolicy.missingCookieDetail)
+      sessionStorage.markVerificationFailed(session, cookiePolicy.missingCookieDetail)
       return false
     }
 
@@ -107,13 +107,13 @@ class CfChallengeCoordinator(
       if (error is CancellationException) throw error
       cookiesStorage.saveRawCookieHeader(cookieSnapshot)
       log.e(error) { "验证会话 -> 确认失败(url=${summarizeUrl(triggerUrl)})" }
-      sessionStore.markVerificationFailed(session, error.message ?: error::class.simpleName)
+      sessionStorage.markVerificationFailed(session, error.message ?: error::class.simpleName)
       false
     }
   }
 
   private suspend fun completeActive(result: Boolean) {
-    val toComplete = sessionStore.complete(result)
+    val toComplete = sessionStorage.complete(result)
     if (toComplete != null) {
       log.d { "验证会话 -> 清理(result=${if (result) "成功" else "失败"})" }
     }

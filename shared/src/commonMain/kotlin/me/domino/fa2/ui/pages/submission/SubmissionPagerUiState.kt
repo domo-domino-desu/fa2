@@ -45,6 +45,8 @@ sealed interface SubmissionPagerUiState {
       val isLoadingMore: Boolean,
       /** 下一页加载错误。 */
       val appendErrorMessage: String?,
+      /** 用户已手动解锁屏蔽预览的 sid 集合。 */
+      val revealedBlockedMediaSids: Set<Int> = emptySet(),
   ) : SubmissionPagerUiState
 }
 

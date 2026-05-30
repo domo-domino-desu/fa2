@@ -15,17 +15,25 @@ import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.util.logging.FaLog
 import me.domino.fa2.util.logging.summarizeUrl
 
+/** FA 标签屏蔽操作的接口端点 URL。 */
 internal const val TAG_BLOCKING_URL: String = "https://www.furaffinity.net/route/tag_blocking"
 
+/** 社交动作 HTTP 响应的数据封装。 */
 internal data class SocialActionHttpResponse(
+    /** HTTP 状态码。 */
     val statusCode: Int,
+    /** 响应头映射。 */
     val headers: Map<String, List<String>>,
+    /** 响应体文本。 */
     val body: String,
 )
 
+/** 执行社交动作（GET/POST）的 HTTP 传输接口。 */
 internal interface SocialActionHttpTransport {
+  /** 向指定 URL 发起 GET 请求。 */
   suspend fun get(url: String): SocialActionHttpResponse
 
+  /** 向 FA 发起添加或移除标签屏蔽的 POST 请求。 */
   suspend fun postTagBlocklist(
       tagName: String,
       nonce: String,
@@ -33,11 +41,13 @@ internal interface SocialActionHttpTransport {
   ): SocialActionHttpResponse
 }
 
+/** SocialActionHttpTransport 的默认实现，携带 Cookie 与 UserAgent。 */
 internal class DefaultSocialActionHttpTransport(
     private val client: HttpClient,
     private val cookiesStorage: FaCookiesStorage,
     private val userAgentStorage: UserAgentStorage,
 ) : SocialActionHttpTransport {
+  /** 日志标签。 */
   private val log = FaLog.withTag("SocialActionHttpTransport")
 
   override suspend fun get(url: String): SocialActionHttpResponse {
@@ -80,6 +90,7 @@ internal class DefaultSocialActionHttpTransport(
     }
   }
 
+  /** 加载当前请求所需的 Cookie 与 UserAgent 上下文。 */
   private suspend fun loadRequestContext(): SocialActionRequestContext {
     userAgentStorage.loadPersistedIfNeeded()
     return SocialActionRequestContext(
@@ -93,6 +104,7 @@ internal class DefaultSocialActionHttpTransport(
         }
   }
 
+  /** 向请求附加通用请求头（Cookie、UserAgent、Accept-Language）。 */
   private fun io.ktor.client.request.HttpRequestBuilder.applyCommonHeaders(
       context: SocialActionRequestContext
   ) {
@@ -103,6 +115,7 @@ internal class DefaultSocialActionHttpTransport(
     header(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9")
   }
 
+  /** 将 Ktor HttpResponse 转换为 SocialActionHttpResponse 并同步 Cookie。 */
   private suspend fun HttpResponse.toSocialActionHttpResponse(
       cookiesStorage: FaCookiesStorage
   ): SocialActionHttpResponse {
@@ -118,7 +131,10 @@ internal class DefaultSocialActionHttpTransport(
   }
 }
 
+/** 发起社交动作请求所需的上下文（Cookie 与 UserAgent）。 */
 private data class SocialActionRequestContext(
+    /** Cookie 请求头内容。 */
     val cookieHeader: String,
+    /** UserAgent 字符串。 */
     val userAgent: String,
 )

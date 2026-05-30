@@ -12,11 +12,15 @@ import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 
+/** 使用本地真实会话数据的桌面端 E2E 测试套件。 */
 class DesktopLocalSessionE2eTest {
+  /** Compose UI 测试规则。 */
   @get:Rule val composeRule = createComposeRule()
 
+  /** 当前测试使用的 E2E 运行时实例。 */
   private lateinit var runtime: DesktopE2eRuntime
 
+  /** 测试前置：执行预检并启动应用运行时。 */
   @Before
   fun setUp() {
     when (val result = preflightResult) {
@@ -31,12 +35,14 @@ class DesktopLocalSessionE2eTest {
     }
   }
 
+  /** 测试后置：执行节流等待并关闭运行时。 */
   @After
   fun tearDown() {
     runCatching { DesktopE2eThrottle.pauseAfterTest() }
     runCatching { runtime.close() }
   }
 
+  /** 验证应用启动后能恢复本地会话并正确进入主导航界面。 */
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun startup_restores_local_session_and_enters_main_shell() {
@@ -54,6 +60,7 @@ class DesktopLocalSessionE2eTest {
     DesktopE2eChallengePolicy.ensureNoAuthScreen(composeRule)
   }
 
+  /** 验证顶层导航各页及首个作品详情页均可正常访问。 */
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun top_level_navigation_and_first_submission_detail_are_reachable() {
@@ -103,8 +110,10 @@ class DesktopLocalSessionE2eTest {
   }
 
   companion object {
+    /** 类级别的预检结果，在所有测试运行前通过 BeforeClass 填充。 */
     private var preflightResult: DesktopE2ePreflightResult? = null
 
+    /** 在测试类初始化时执行 E2E 预检，判断是否具备运行条件。 */
     @JvmStatic
     @BeforeClass
     fun preflight() {

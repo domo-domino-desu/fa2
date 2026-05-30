@@ -109,29 +109,28 @@ fun BrowseScreen(
   val searchUiLabelsCatalog = LocalSearchUiLabelsCatalog.current
   val taxonomyCatalog = LocalTaxonomyCatalog.current
   var filterPageVisible by remember { mutableStateOf(false) }
-  val browseCategoryOptions =
+  val browseTaxonomyOptions =
       remember(taxonomyCatalog, appI18n) {
-        taxonomyRepository.categoryOptions(appI18n.metadata).map { it.toFilterOption() }
-      }
-  val browseCategoryOptionGroups =
-      remember(taxonomyCatalog, appI18n) {
-        taxonomyRepository.categoryOptionGroups(appI18n.metadata).map { it.toFilterOptionGroup() }
-      }
-  val browseTypeOptions =
-      remember(taxonomyCatalog, appI18n) {
-        taxonomyRepository.typeOptions(appI18n.metadata).map { it.toFilterOption() }
-      }
-  val browseSpeciesOptions =
-      remember(taxonomyCatalog, appI18n) {
-        taxonomyRepository.speciesOptions(appI18n.metadata).map { it.toFilterOption() }
-      }
-  val browseTypeOptionGroups =
-      remember(taxonomyCatalog, appI18n) {
-        taxonomyRepository.typeOptionGroups(appI18n.metadata).map { it.toFilterOptionGroup() }
-      }
-  val browseSpeciesOptionGroups =
-      remember(taxonomyCatalog, appI18n) {
-        taxonomyRepository.speciesOptionGroups(appI18n.metadata).map { it.toFilterOptionGroup() }
+        BrowseTaxonomyOptions(
+            categoryOptions =
+                taxonomyRepository.categoryOptions(appI18n.metadata).map { it.toFilterOption() },
+            categoryOptionGroups =
+                taxonomyRepository.categoryOptionGroups(appI18n.metadata).map {
+                  it.toFilterOptionGroup()
+                },
+            typeOptions =
+                taxonomyRepository.typeOptions(appI18n.metadata).map { it.toFilterOption() },
+            typeOptionGroups =
+                taxonomyRepository.typeOptionGroups(appI18n.metadata).map {
+                  it.toFilterOptionGroup()
+                },
+            speciesOptions =
+                taxonomyRepository.speciesOptions(appI18n.metadata).map { it.toFilterOption() },
+            speciesOptionGroups =
+                taxonomyRepository.speciesOptionGroups(appI18n.metadata).map {
+                  it.toFilterOptionGroup()
+                },
+        )
       }
   val browseGenderOptions =
       remember(searchUiLabelsCatalog, appI18n) {
@@ -143,9 +142,9 @@ fun BrowseScreen(
         chips =
             buildBrowseFilterChips(
                 filter = state.appliedFilter,
-                categoryOptions = browseCategoryOptions,
-                typeOptions = browseTypeOptions,
-                speciesOptions = browseSpeciesOptions,
+                categoryOptions = browseTaxonomyOptions.categoryOptions,
+                typeOptions = browseTaxonomyOptions.typeOptions,
+                speciesOptions = browseTaxonomyOptions.speciesOptions,
                 genderOptions = browseGenderOptions,
                 searchUiLabelsRepository = searchUiLabelsRepository,
                 metadata = appI18n.metadata,
@@ -237,12 +236,12 @@ fun BrowseScreen(
           onSetRatingGeneral = onSetRatingGeneral,
           onSetRatingMature = onSetRatingMature,
           onSetRatingAdult = onSetRatingAdult,
-          categoryOptions = browseCategoryOptions,
-          categoryOptionGroups = browseCategoryOptionGroups,
-          typeOptions = browseTypeOptions,
-          speciesOptions = browseSpeciesOptions,
-          typeOptionGroups = browseTypeOptionGroups,
-          speciesOptionGroups = browseSpeciesOptionGroups,
+          categoryOptions = browseTaxonomyOptions.categoryOptions,
+          categoryOptionGroups = browseTaxonomyOptions.categoryOptionGroups,
+          typeOptions = browseTaxonomyOptions.typeOptions,
+          speciesOptions = browseTaxonomyOptions.speciesOptions,
+          typeOptionGroups = browseTaxonomyOptions.typeOptionGroups,
+          speciesOptionGroups = browseTaxonomyOptions.speciesOptionGroups,
           genderOptions = browseGenderOptions,
           searchUiLabelsRepository = searchUiLabelsRepository,
           modifier = Modifier.fillMaxSize(),
@@ -252,6 +251,15 @@ fun BrowseScreen(
 
   PlatformBackHandler(enabled = filterPageVisible, onBack = { filterPageVisible = false })
 }
+
+private data class BrowseTaxonomyOptions(
+    val categoryOptions: List<FilterOption<Int>>,
+    val categoryOptionGroups: List<FilterOptionGroup<Int>>,
+    val typeOptions: List<FilterOption<Int>>,
+    val typeOptionGroups: List<FilterOptionGroup<Int>>,
+    val speciesOptions: List<FilterOption<Int>>,
+    val speciesOptionGroups: List<FilterOptionGroup<Int>>,
+)
 
 @Composable
 @OptIn(ExperimentalLayoutApi::class)

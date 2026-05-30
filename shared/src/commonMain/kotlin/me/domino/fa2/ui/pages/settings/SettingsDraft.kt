@@ -15,30 +15,54 @@ import me.domino.fa2.data.settings.UiLanguageSetting
 import me.domino.fa2.i18n.appString
 import me.domino.fa2.i18n.mustBeInRangeText
 
+/** 设置页面的草稿状态，持有用户编辑中的各项配置输入值。 */
 internal data class SettingsDraft(
+    /** UI 语言设置。 */
     val uiLanguage: UiLanguageSetting,
+    /** 是否启用翻译功能。 */
     val translationEnabled: Boolean,
+    /** 翻译目标语言。 */
     val translationTargetLanguage: TranslationTargetLanguage,
+    /** 元数据展示模式。 */
     val metadataDisplayMode: MetadataDisplayMode,
+    /** 翻译服务提供商。 */
     val translationProvider: TranslationProvider,
+    /** 主题模式。 */
     val themeMode: ThemeMode,
+    /** 瀑布流中屏蔽作品的展示模式。 */
     val blockedSubmissionWaterfallMode: BlockedSubmissionWaterfallMode,
+    /** 翻页器中屏蔽作品的展示模式。 */
     val blockedSubmissionPagerMode: BlockedSubmissionPagerMode,
+    /** 是否在瀑布流中返回当前作品位置。 */
     val returnToCurrentSubmissionInWaterfall: Boolean,
+    /** 下载保存路径。 */
     val downloadSavePath: String,
+    /** 是否允许下载文件被媒体索引。 */
     val downloadAllowMediaIndexing: Boolean,
+    /** 下载子目录模式。 */
     val downloadSubfolderMode: DownloadSubfolderMode,
+    /** 下载文件名模式。 */
     val downloadFileNameMode: DownloadFileNameMode,
+    /** 自定义下载文件名模板字符串。 */
     val downloadCustomFileNameTemplate: String,
+    /** 关注推荐每页数量的输入字符串。 */
     val watchRecommendationPageSizeInput: String,
+    /** 翻译分块词数上限的输入字符串。 */
     val chunkWordLimitInput: String,
+    /** 翻译最大并发数的输入字符串。 */
     val maxConcurrencyInput: String,
+    /** 瀑布流最小卡片宽度（dp）的输入字符串。 */
     val waterfallMinCardWidthInput: String,
+    /** OpenAI 兼容接口的 Base URL。 */
     val openAiBaseUrl: String,
+    /** OpenAI 兼容接口的 API Key。 */
     val openAiApiKey: String,
+    /** OpenAI 兼容接口使用的模型名称。 */
     val openAiModel: String,
+    /** OpenAI 兼容接口的翻译提示词模板。 */
     val openAiPromptTemplate: String,
 ) {
+  /** 将草稿转换为 AppSettings，输入值不合法时返回 null。 */
   fun toAppSettingsOrNull(): AppSettings? {
     val chunkWordLimit = chunkWordLimitInput.toIntOrNull() ?: return null
     val maxConcurrency = maxConcurrencyInput.toIntOrNull() ?: return null

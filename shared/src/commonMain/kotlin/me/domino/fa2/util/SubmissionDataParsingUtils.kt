@@ -5,18 +5,29 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
+/** 匹配页面中 `#js-submissionData` script 标签内容的正则。 */
 private val submissionDataScriptRegex =
     Regex(
         pattern = """<script[^>]*id=["']js-submissionData["'][^>]*>(.*?)</script>""",
         options = setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL),
     )
+
+/** 用于解析 submissionData JSON 的宽松配置实例。 */
 private val submissionDataJson = Json { ignoreUnknownKeys = true }
+
+/** 从原图路径中提取时间戳数字的正则。 */
 private val fullImageTimestampRegex = Regex("""(?:^|/)art/[^/]+/(\d{9,})/""")
+
+/** 允许作为原图来源的 CDN 域名集合。 */
 private val fullImageAllowedHosts = setOf("d.furaffinity.net", "d.facdn.net")
 
+/** 投稿的标题与作者摘要信息。 */
 data class SubmissionDataSummary(
+    /** 投稿标题。 */
     val title: String = "",
+    /** 作者用户名（原始大小写）。 */
     val author: String = "",
+    /** 作者用户名（全小写）。 */
     val authorLowercase: String = "",
 )
 
@@ -85,6 +96,7 @@ fun parseSubmissionAvatarUrls(html: String): Map<Int, String> {
   }
 }
 
+/** 从页面 HTML 中解析 `#js-submissionData` 脚本块的 JSON 根对象。 */
 private fun parseSubmissionDataRoot(html: String) =
     runCatching {
           val jsonText =
@@ -97,6 +109,7 @@ private fun parseSubmissionDataRoot(html: String) =
         }
         .getOrNull()
 
+/** 从 URL 字符串中解析域名（host）部分。 */
 private fun parseUrlHost(url: String): String? {
   val normalized = if (url.startsWith("//")) "https:$url" else url
   val schemeIndex = normalized.indexOf("://")
@@ -110,6 +123,7 @@ private fun parseUrlHost(url: String): String? {
   return host.trim().ifBlank { null }
 }
 
+/** 从 URL 字符串中提取路径部分（不含查询字符串和片段）。 */
 private fun extractUrlPath(url: String): String {
   val normalized = if (url.startsWith("//")) "https:$url" else url
   val schemeIndex = normalized.indexOf("://")

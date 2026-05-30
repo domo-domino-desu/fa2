@@ -68,6 +68,7 @@ internal class SubmissionScreenWorkflow(
   private val detailBySid: MutableMap<Int, SubmissionDetailUiState> = mutableMapOf()
   private val scrollOffsetBySid: MutableMap<Int, Int> = mutableMapOf()
   private val scrollToTopVersionBySid: MutableMap<Int, Long> = mutableMapOf()
+  private val revealedBlockedMediaSids: MutableSet<Int> = mutableSetOf()
   private val translationJobs: MutableMap<SubmissionTranslationJobKey, Job> = mutableMapOf()
   private var zoomOverlayImageUrl: String? = null
   private var zoomImageOcrState: SubmissionImageOcrUiState = SubmissionImageOcrUiState.Idle
@@ -1014,6 +1015,11 @@ internal class SubmissionScreenWorkflow(
     }
   }
 
+  fun revealBlockedMedia(sid: Int) {
+    revealedBlockedMediaSids += sid
+    publishState()
+  }
+
   fun retryLoadMore() {
     log.d { "自动加载投稿列表 -> 手动重试" }
     maintainPagerBuffer(forceBoundary = true)
@@ -1138,6 +1144,7 @@ internal class SubmissionScreenWorkflow(
             hasMore = contextController.hasMorePages(),
             isLoadingMore = contextController.isLoadingMore(),
             appendErrorMessage = contextController.appendErrorMessage(),
+            revealedBlockedMediaSids = revealedBlockedMediaSids.toSet(),
         )
     stateSink(uiState)
     pageStateSink(PageState.Success(uiState))

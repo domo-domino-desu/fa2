@@ -1,6 +1,8 @@
 package me.domino.fa2.ui.pages.user.route
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableLongState
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import me.domino.fa2.ui.pages.user.gallery.UserSubmissionSectionUiState
 import me.domino.fa2.ui.pages.user.profile.UserBodyScrollPosition
@@ -26,5 +28,5 @@ internal val LocalUserSubmissionSnapshotResolver =
     staticCompositionLocalOf<(String) -> UserSubmissionSectionUiState?> { { null } }
 internal val LocalUserSubmissionSnapshotUpdater =
     staticCompositionLocalOf<(String, UserSubmissionSectionUiState) -> Unit> { { _, _ -> } }
-internal val LocalUserCurrentRouteScrollToTopActionUpdater =
-    staticCompositionLocalOf<((() -> Unit)?) -> Unit> { { _ -> } }
+internal val LocalUserScrollToTopVersion =
+    staticCompositionLocalOf<MutableLongState> { mutableLongStateOf(0L) }

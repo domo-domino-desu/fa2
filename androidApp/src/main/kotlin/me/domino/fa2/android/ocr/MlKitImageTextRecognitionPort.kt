@@ -16,11 +16,14 @@ import me.domino.fa2.domain.ocr.ImageTextRecognitionPort
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.ocr.RecognizedTextBlock
 
+/** 基于 ML Kit 的图像文字识别端口实现。 */
 class MlKitImageTextRecognitionPort : ImageTextRecognitionPort {
+  /** 延迟初始化的 ML Kit 文字识别器。 */
   private val recognizer by lazy {
     TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
   }
 
+  /** 对给定图像字节数组执行 OCR 识别并返回结果。 */
   override suspend fun recognize(imageBytes: ByteArray): ImageOcrResult {
     val bitmap =
         checkNotNull(BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)) {
@@ -38,12 +41,14 @@ class MlKitImageTextRecognitionPort : ImageTextRecognitionPort {
   }
 }
 
+/** 将 ML Kit Task 转换为挂起函数，支持取消。 */
 private suspend fun <T> Task<T>.await(): T = suspendCancellableCoroutine { continuation ->
   addOnSuccessListener { result -> continuation.resume(result) }
   addOnFailureListener { error -> continuation.resumeWithException(error) }
   addOnCanceledListener { continuation.cancel() }
 }
 
+/** 将 ML Kit 文字块转换为归一化的识别文字块，若内容为空则返回 null。 */
 private fun Text.TextBlock.toRecognizedTextBlock(
     width: Int,
     height: Int,
@@ -62,6 +67,7 @@ private fun Text.TextBlock.toRecognizedTextBlock(
   return RecognizedTextBlock(text = textValue, points = points, confidence = null)
 }
 
+/** 将角点数组转换为归一化坐标列表，数组为 null 或点数不足时返回 null。 */
 private fun Array<Point>?.toNormalizedPoints(
     width: Int,
     height: Int,
@@ -71,6 +77,7 @@ private fun Array<Point>?.toNormalizedPoints(
   return rawPoints.map { point -> point.toNormalizedPoint(width, height) }
 }
 
+/** 将边界矩形转换为四角归一化坐标列表，矩形为 null 时返回空列表。 */
 private fun Rect?.toNormalizedPoints(width: Int, height: Int): List<NormalizedImagePoint> {
   val box = this ?: return emptyList()
   return listOf(
@@ -82,6 +89,7 @@ private fun Rect?.toNormalizedPoints(width: Int, height: Int): List<NormalizedIm
       .map { point -> point.toNormalizedPoint(width, height) }
 }
 
+/** 将像素坐标点转换为 [0, 1] 范围内的归一化图像坐标。 */
 private fun Point.toNormalizedPoint(width: Int, height: Int): NormalizedImagePoint =
     NormalizedImagePoint(
         x = (x.toFloat() / width.toFloat()).coerceIn(0f, 1f),

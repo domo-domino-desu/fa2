@@ -1,5 +1,6 @@
 package me.domino.fa2.ui.pages.submission
 
+import me.domino.fa2.application.attachmenttext.AttachmentTextService
 import me.domino.fa2.data.model.FeedPage
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
@@ -34,8 +35,10 @@ class SubmissionPagerFeedSourceImpl(private val repository: FeedRepository) :
       repository.loadPageByNextUrl(nextPageUrl)
 }
 
-class SubmissionPagerDetailSourceImpl(private val repository: SubmissionRepository) :
-    SubmissionPagerDetailSource {
+class SubmissionPagerDetailSourceImpl(
+    private val repository: SubmissionRepository,
+    private val attachmentTextService: AttachmentTextService,
+) : SubmissionPagerDetailSource {
   override suspend fun loadBySid(sid: Int): PageState<Submission> =
       repository.loadSubmissionDetailBySid(sid)
 
@@ -47,11 +50,14 @@ class SubmissionPagerDetailSourceImpl(private val repository: SubmissionReposito
       downloadFileName: String,
       onProgress: (AttachmentTextProgress) -> Unit,
   ): PageState<AttachmentTextDocument> =
-      repository.loadAttachmentText(
-          downloadUrl = downloadUrl,
-          downloadFileName = downloadFileName,
-          onProgress = onProgress,
-      )
+      runCatching {
+            attachmentTextService.load(
+                downloadUrl = downloadUrl,
+                downloadFileName = downloadFileName,
+                onProgress = onProgress,
+            )
+          }
+          .getOrElse { PageState.Error(it) }
 
   override suspend fun toggleFavorite(sid: Int, actionUrl: String): PageState<Unit> =
       repository.toggleFavorite(sid = sid, actionUrl = actionUrl)

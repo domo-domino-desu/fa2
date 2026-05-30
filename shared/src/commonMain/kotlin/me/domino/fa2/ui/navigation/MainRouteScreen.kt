@@ -1,5 +1,6 @@
 package me.domino.fa2.ui.navigation
 
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,8 +17,10 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import me.domino.fa2.application.auth.PendingFaRouteStore
+import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.repository.BrowseRepository
 import me.domino.fa2.data.repository.FeedRepository
@@ -27,8 +30,10 @@ import me.domino.fa2.ui.pages.about.AboutRouteScreen
 import me.domino.fa2.ui.pages.auth.AuthRouteScreen
 import me.domino.fa2.ui.pages.browse.BrowseScreen
 import me.domino.fa2.ui.pages.browse.BrowseScreenModel
+import me.domino.fa2.ui.pages.browse.BrowseUiState
 import me.domino.fa2.ui.pages.feed.FeedScreen
 import me.domino.fa2.ui.pages.feed.FeedScreenModel
+import me.domino.fa2.ui.pages.feed.FeedUiState
 import me.domino.fa2.ui.pages.history.SearchHistoryRouteScreen
 import me.domino.fa2.ui.pages.history.SubmissionHistoryRouteScreen
 import me.domino.fa2.ui.pages.more.MoreScreen
@@ -37,12 +42,14 @@ import me.domino.fa2.ui.pages.more.MoreUiState
 import me.domino.fa2.ui.pages.search.SearchScreen
 import me.domino.fa2.ui.pages.search.SearchScreenActions
 import me.domino.fa2.ui.pages.search.SearchScreenModel
+import me.domino.fa2.ui.pages.search.SearchUiState
 import me.domino.fa2.ui.pages.search.buildSearchUrl
 import me.domino.fa2.ui.pages.settings.SettingsRouteScreen
 import me.domino.fa2.ui.pages.submission.BrowseSubmissionSourceAdapter
 import me.domino.fa2.ui.pages.submission.FeedSubmissionSourceAdapter
 import me.domino.fa2.ui.pages.submission.SearchSubmissionSourceAdapter
 import me.domino.fa2.ui.pages.submission.SubmissionContextScreenModel
+import me.domino.fa2.ui.pages.submission.SubmissionContextSnapshot
 import me.domino.fa2.ui.pages.submission.SubmissionContextSourceKind
 import me.domino.fa2.ui.pages.submission.SubmissionLoadedPage
 import me.domino.fa2.ui.pages.submission.WaterfallViewportState
@@ -272,9 +279,6 @@ class MainRouteScreen(
               appendErrorMessage = snapshot.loading.appendErrorMessage,
           )
         } ?: searchState
-    val feedPageControls = feedContextState?.toWaterfallPageControls()
-    val browsePageControls = browseContextState?.toWaterfallPageControls()
-    val searchPageControls = searchContextState?.toWaterfallPageControls()
 
     AppScaffold(
         currentTopLevelDestination = currentTopLevelDestination,
@@ -288,258 +292,316 @@ class MainRouteScreen(
               val atTop =
                   feedWaterfallState.firstVisibleItemIndex == 0 &&
                       feedWaterfallState.firstVisibleItemScrollOffset == 0
-              if (atTop) {
-                feedScreenModel.refresh()
-              } else {
-                coroutineScope.launch { feedWaterfallState.animateScrollToItem(0) }
-              }
+              if (atTop) feedScreenModel.refresh()
+              else coroutineScope.launch { feedWaterfallState.animateScrollToItem(0) }
             }
-
             TopLevelDestination.BROWSE -> {
               val atTop =
                   browseWaterfallState.firstVisibleItemIndex == 0 &&
                       browseWaterfallState.firstVisibleItemScrollOffset == 0
-              if (atTop) {
-                browseScreenModel.refresh()
-              } else {
-                coroutineScope.launch { browseWaterfallState.animateScrollToItem(0) }
-              }
+              if (atTop) browseScreenModel.refresh()
+              else coroutineScope.launch { browseWaterfallState.animateScrollToItem(0) }
             }
-
-            TopLevelDestination.SEARCH -> {
-              coroutineScope.launch { searchWaterfallState.animateScrollToItem(0) }
-            }
-
+            TopLevelDestination.SEARCH ->
+                coroutineScope.launch { searchWaterfallState.animateScrollToItem(0) }
             TopLevelDestination.MORE -> Unit
           }
         },
     ) {
       when (currentTopLevelDestination) {
-        TopLevelDestination.FEED -> {
-          PageStateWrapper(
-              state = feedPageState,
-              hasContent = feedDisplayState.submissions.isNotEmpty(),
-              onRetry = { feedScreenModel.load(forceRefresh = true) },
-          ) {
-            FeedScreen(
-                state = feedDisplayState,
-                onRetry = { feedScreenModel.load(forceRefresh = true) },
-                onRefresh = feedScreenModel::refresh,
-                onOpenSubmission = { item ->
-                  contextScreenModel.selectSubmission(feedContextId, item.id)
-                  navigator.openSubmissionFromList(sid = item.id, contextId = feedContextId)
-                },
-                onLastVisibleIndexChanged = { lastVisibleIndex ->
-                  val items = feedContextState?.flatItems ?: feedDisplayState.submissions
-                  if (items.isNotEmpty() && lastVisibleIndex > items.lastIndex - 10) {
-                    contextScreenModel.loadNextPageIfNeeded(feedContextId)
-                  }
-                },
-                onRetryLoadMore = {
-                  contextScreenModel.loadNextPageIfNeeded(feedContextId, force = true)
-                },
-                waterfallState = feedWaterfallState,
-                pageControls = feedPageControls,
-                canLoadPreviousPageAtTop = feedContextState?.hasPreviousPage == true,
-                loadingPreviousPage = feedContextState?.loading?.prependLoading == true,
-                prependErrorMessage = feedContextState?.loading?.prependErrorMessage,
-                onLoadPreviousPageAtTop = {
-                  contextScreenModel.loadPreviousPageIfNeeded(feedContextId, force = true)
-                },
-                onLoadFirstPage = { contextScreenModel.navigateToFirstPage(feedContextId) },
-                onLoadPreviousPage = { contextScreenModel.navigateToPreviousPage(feedContextId) },
-                onJumpToPage = { pageNumber ->
-                  contextScreenModel.navigateToPage(feedContextId, pageNumber)
-                },
-                onLoadNextPage = { contextScreenModel.navigateToNextPage(feedContextId) },
-                onLoadLastPage = { contextScreenModel.navigateToLastPage(feedContextId) },
-                pendingScrollRequest = feedContextState?.waterfallViewport?.scrollRequest,
-                onConsumeScrollRequest = { version ->
-                  contextScreenModel.consumeWaterfallScrollRequest(feedContextId, version)
-                },
-                onViewportChanged = { viewport ->
-                  contextScreenModel.updateWaterfallViewport(
-                      contextId = feedContextId,
-                      firstVisibleItemIndex = viewport.firstVisibleItemIndex,
-                      firstVisibleItemScrollOffset = viewport.firstVisibleItemScrollOffset,
-                      anchorSid = viewport.anchorSid,
-                      currentPageNumber = feedContextState?.pageNumberForSid(viewport.anchorSid),
-                  )
-                },
+        TopLevelDestination.FEED ->
+            FeedDestinationContent(
+                feedPageState = feedPageState,
+                feedDisplayState = feedDisplayState,
+                feedContextState = feedContextState,
+                feedWaterfallState = feedWaterfallState,
+                feedScreenModel = feedScreenModel,
+                contextScreenModel = contextScreenModel,
+                navigator = navigator,
+                contextId = feedContextId,
             )
-          }
-        }
-
-        TopLevelDestination.BROWSE -> {
-          PageStateWrapper(
-              state = browsePageState,
-              hasContent = browseDisplayState.submissions.isNotEmpty(),
-              onRetry = browseScreenModel::refresh,
-          ) {
-            BrowseScreen(
-                state = browseDisplayState,
-                onUpdateCategory = browseScreenModel::updateCategory,
-                onUpdateType = browseScreenModel::updateType,
-                onUpdateSpecies = browseScreenModel::updateSpecies,
-                onUpdateGender = browseScreenModel::updateGender,
-                onSetRatingGeneral = browseScreenModel::setRatingGeneral,
-                onSetRatingMature = browseScreenModel::setRatingMature,
-                onSetRatingAdult = browseScreenModel::setRatingAdult,
-                onApplyFilter = browseScreenModel::applyFilter,
-                onRefresh = browseScreenModel::refresh,
-                onRetry = browseScreenModel::refresh,
-                onOpenSubmission = { item ->
-                  contextScreenModel.selectSubmission(browseContextId, item.id)
-                  navigator.openSubmissionFromList(sid = item.id, contextId = browseContextId)
-                },
-                onLastVisibleIndexChanged = { lastVisibleIndex ->
-                  val items = browseContextState?.flatItems ?: browseDisplayState.submissions
-                  if (items.isNotEmpty() && lastVisibleIndex > items.lastIndex - 10) {
-                    contextScreenModel.loadNextPageIfNeeded(browseContextId)
-                  }
-                },
-                onRetryLoadMore = {
-                  contextScreenModel.loadNextPageIfNeeded(browseContextId, force = true)
-                },
-                waterfallState = browseWaterfallState,
-                pageControls = browsePageControls,
-                canLoadPreviousPageAtTop = browseContextState?.hasPreviousPage == true,
-                loadingPreviousPage = browseContextState?.loading?.prependLoading == true,
-                prependErrorMessage = browseContextState?.loading?.prependErrorMessage,
-                onLoadPreviousPageAtTop = {
-                  contextScreenModel.loadPreviousPageIfNeeded(browseContextId, force = true)
-                },
-                onLoadFirstPage = { contextScreenModel.navigateToFirstPage(browseContextId) },
-                onLoadPreviousPage = { contextScreenModel.navigateToPreviousPage(browseContextId) },
-                onJumpToPage = { pageNumber ->
-                  contextScreenModel.navigateToPage(browseContextId, pageNumber)
-                },
-                onLoadNextPage = { contextScreenModel.navigateToNextPage(browseContextId) },
-                onLoadLastPage = { contextScreenModel.navigateToLastPage(browseContextId) },
-                pendingScrollRequest = browseContextState?.waterfallViewport?.scrollRequest,
-                onConsumeScrollRequest = { version ->
-                  contextScreenModel.consumeWaterfallScrollRequest(browseContextId, version)
-                },
-                onViewportChanged = { viewport ->
-                  contextScreenModel.updateWaterfallViewport(
-                      contextId = browseContextId,
-                      firstVisibleItemIndex = viewport.firstVisibleItemIndex,
-                      firstVisibleItemScrollOffset = viewport.firstVisibleItemScrollOffset,
-                      anchorSid = viewport.anchorSid,
-                      currentPageNumber = browseContextState?.pageNumberForSid(viewport.anchorSid),
-                  )
-                },
+        TopLevelDestination.BROWSE ->
+            BrowseDestinationContent(
+                browsePageState = browsePageState,
+                browseDisplayState = browseDisplayState,
+                browseContextState = browseContextState,
+                browseWaterfallState = browseWaterfallState,
+                browseScreenModel = browseScreenModel,
+                contextScreenModel = contextScreenModel,
+                navigator = navigator,
+                contextId = browseContextId,
             )
-          }
-        }
-
-        TopLevelDestination.SEARCH -> {
-          PageStateWrapper(
-              state = searchPageState,
-              hasContent = searchDisplayState.submissions.isNotEmpty(),
-              onRetry = searchScreenModel::refresh,
-          ) {
-            SearchScreen(
-                state = searchDisplayState,
-                actions =
-                    SearchScreenActions(
-                        onOpenOverlay = searchScreenModel::openOverlay,
-                        onCloseOverlay = searchScreenModel::closeOverlay,
-                        onUpdateQuery = searchScreenModel::updateQuery,
-                        onToggleGender = searchScreenModel::toggleGender,
-                        onUpdateCategory = searchScreenModel::updateCategory,
-                        onUpdateType = searchScreenModel::updateType,
-                        onUpdateSpecies = searchScreenModel::updateSpecies,
-                        onUpdateOrderBy = searchScreenModel::updateOrderBy,
-                        onUpdateOrderDirection = searchScreenModel::updateOrderDirection,
-                        onUpdateRange = searchScreenModel::updateRange,
-                        onUpdateRangeFrom = searchScreenModel::updateRangeFrom,
-                        onUpdateRangeTo = searchScreenModel::updateRangeTo,
-                        onShiftDateRange = searchScreenModel::shiftDateRange,
-                        onSetRatingGeneral = searchScreenModel::setRatingGeneral,
-                        onSetRatingMature = searchScreenModel::setRatingMature,
-                        onSetRatingAdult = searchScreenModel::setRatingAdult,
-                        onSetTypeArt = searchScreenModel::setTypeArt,
-                        onSetTypeMusic = searchScreenModel::setTypeMusic,
-                        onSetTypeFlash = searchScreenModel::setTypeFlash,
-                        onSetTypeStory = searchScreenModel::setTypeStory,
-                        onSetTypePhoto = searchScreenModel::setTypePhoto,
-                        onSetTypePoetry = searchScreenModel::setTypePoetry,
-                        onApplySearch = {
-                          coroutineScope.launch { searchWaterfallState.scrollToItem(0) }
-                          searchScreenModel.applySearch()
-                        },
-                        onRefresh = searchScreenModel::refresh,
-                        onRetry = searchScreenModel::refresh,
-                        onOpenSubmission = { item ->
-                          contextScreenModel.selectSubmission(searchContextId, item.id)
-                          navigator.openSubmissionFromList(
-                              sid = item.id,
-                              contextId = searchContextId,
-                          )
-                        },
-                        onLastVisibleIndexChanged = { lastVisibleIndex ->
-                          val items =
-                              searchContextState?.flatItems ?: searchDisplayState.submissions
-                          if (items.isNotEmpty() && lastVisibleIndex > items.lastIndex - 10) {
-                            contextScreenModel.loadNextPageIfNeeded(searchContextId)
-                          }
-                        },
-                        onRetryLoadMore = {
-                          contextScreenModel.loadNextPageIfNeeded(searchContextId, force = true)
-                        },
-                    ),
-                waterfallState = searchWaterfallState,
-                pageControls = searchPageControls,
-                canLoadPreviousPageAtTop = searchContextState?.hasPreviousPage == true,
-                loadingPreviousPage = searchContextState?.loading?.prependLoading == true,
-                prependErrorMessage = searchContextState?.loading?.prependErrorMessage,
-                onLoadPreviousPageAtTop = {
-                  contextScreenModel.loadPreviousPageIfNeeded(searchContextId, force = true)
-                },
-                onLoadFirstPage = { contextScreenModel.navigateToFirstPage(searchContextId) },
-                onLoadPreviousPage = { contextScreenModel.navigateToPreviousPage(searchContextId) },
-                onJumpToPage = { pageNumber ->
-                  contextScreenModel.navigateToPage(searchContextId, pageNumber)
-                },
-                onLoadNextPage = { contextScreenModel.navigateToNextPage(searchContextId) },
-                onLoadLastPage = { contextScreenModel.navigateToLastPage(searchContextId) },
-                pendingScrollRequest = searchContextState?.waterfallViewport?.scrollRequest,
-                onConsumeScrollRequest = { version ->
-                  contextScreenModel.consumeWaterfallScrollRequest(searchContextId, version)
-                },
-                onViewportChanged = { viewport ->
-                  contextScreenModel.updateWaterfallViewport(
-                      contextId = searchContextId,
-                      firstVisibleItemIndex = viewport.firstVisibleItemIndex,
-                      firstVisibleItemScrollOffset = viewport.firstVisibleItemScrollOffset,
-                      anchorSid = viewport.anchorSid,
-                      currentPageNumber = searchContextState?.pageNumberForSid(viewport.anchorSid),
-                  )
-                },
+        TopLevelDestination.SEARCH ->
+            SearchDestinationContent(
+                searchPageState = searchPageState,
+                searchDisplayState = searchDisplayState,
+                searchContextState = searchContextState,
+                searchWaterfallState = searchWaterfallState,
+                searchScreenModel = searchScreenModel,
+                contextScreenModel = contextScreenModel,
+                navigator = navigator,
+                coroutineScope = coroutineScope,
+                contextId = searchContextId,
             )
-          }
-        }
-
-        TopLevelDestination.MORE -> {
-          MoreScreen(
-              state = moreState,
-              onOpenUser = moreState.openUserAction(navigator),
-              onOpenFollowing = moreState.openFollowingAction(navigator),
-              onOpenWatchRecommendations = moreState.openWatchRecommendationsAction(navigator),
-              onOpenFavorites = moreState.openFavoritesAction(navigator),
-              onOpenSettings = { navigator.push(SettingsRouteScreen()) },
-              onOpenSubmissionHistory = { navigator.push(SubmissionHistoryRouteScreen()) },
-              onOpenSearchHistory = { navigator.push(SearchHistoryRouteScreen()) },
-              onOpenAbout = { navigator.push(AboutRouteScreen()) },
-              onLogout = moreScreenModel::logout,
-          )
-        }
+        TopLevelDestination.MORE ->
+            MoreDestinationContent(
+                moreState = moreState,
+                moreScreenModel = moreScreenModel,
+                navigator = navigator,
+            )
       }
     }
   }
 }
 
+/** Feed 导航目标内容。 */
+@Composable
+private fun FeedDestinationContent(
+    feedPageState: PageState<FeedUiState>,
+    feedDisplayState: FeedUiState,
+    feedContextState: SubmissionContextSnapshot?,
+    feedWaterfallState: LazyStaggeredGridState,
+    feedScreenModel: FeedScreenModel,
+    contextScreenModel: SubmissionContextScreenModel,
+    navigator: Navigator,
+    contextId: String,
+) {
+  PageStateWrapper(
+      state = feedPageState,
+      hasContent = feedDisplayState.submissions.isNotEmpty(),
+      onRetry = { feedScreenModel.load(forceRefresh = true) },
+  ) {
+    FeedScreen(
+        state = feedDisplayState,
+        onRetry = { feedScreenModel.load(forceRefresh = true) },
+        onRefresh = feedScreenModel::refresh,
+        onOpenSubmission = { item ->
+          contextScreenModel.selectSubmission(contextId, item.id)
+          navigator.openSubmissionFromList(sid = item.id, contextId = contextId)
+        },
+        onLastVisibleIndexChanged = { lastVisibleIndex ->
+          val items = feedContextState?.flatItems ?: feedDisplayState.submissions
+          if (items.isNotEmpty() && lastVisibleIndex > items.lastIndex - 10) {
+            contextScreenModel.loadNextPageIfNeeded(contextId)
+          }
+        },
+        onRetryLoadMore = { contextScreenModel.loadNextPageIfNeeded(contextId, force = true) },
+        waterfallState = feedWaterfallState,
+        pageControls = feedContextState?.toWaterfallPageControls(),
+        canLoadPreviousPageAtTop = feedContextState?.hasPreviousPage == true,
+        loadingPreviousPage = feedContextState?.loading?.prependLoading == true,
+        prependErrorMessage = feedContextState?.loading?.prependErrorMessage,
+        onLoadPreviousPageAtTop = {
+          contextScreenModel.loadPreviousPageIfNeeded(contextId, force = true)
+        },
+        onLoadFirstPage = { contextScreenModel.navigateToFirstPage(contextId) },
+        onLoadPreviousPage = { contextScreenModel.navigateToPreviousPage(contextId) },
+        onJumpToPage = { pageNumber -> contextScreenModel.navigateToPage(contextId, pageNumber) },
+        onLoadNextPage = { contextScreenModel.navigateToNextPage(contextId) },
+        onLoadLastPage = { contextScreenModel.navigateToLastPage(contextId) },
+        pendingScrollRequest = feedContextState?.waterfallViewport?.scrollRequest,
+        onConsumeScrollRequest = { version ->
+          contextScreenModel.consumeWaterfallScrollRequest(contextId, version)
+        },
+        onViewportChanged = { viewport ->
+          contextScreenModel.updateWaterfallViewport(
+              contextId = contextId,
+              firstVisibleItemIndex = viewport.firstVisibleItemIndex,
+              firstVisibleItemScrollOffset = viewport.firstVisibleItemScrollOffset,
+              anchorSid = viewport.anchorSid,
+              currentPageNumber = feedContextState?.pageNumberForSid(viewport.anchorSid),
+          )
+        },
+    )
+  }
+}
+
+/** Browse 导航目标内容。 */
+@Composable
+private fun BrowseDestinationContent(
+    browsePageState: PageState<BrowseUiState>,
+    browseDisplayState: BrowseUiState,
+    browseContextState: SubmissionContextSnapshot?,
+    browseWaterfallState: LazyStaggeredGridState,
+    browseScreenModel: BrowseScreenModel,
+    contextScreenModel: SubmissionContextScreenModel,
+    navigator: Navigator,
+    contextId: String,
+) {
+  PageStateWrapper(
+      state = browsePageState,
+      hasContent = browseDisplayState.submissions.isNotEmpty(),
+      onRetry = browseScreenModel::refresh,
+  ) {
+    BrowseScreen(
+        state = browseDisplayState,
+        onUpdateCategory = browseScreenModel::updateCategory,
+        onUpdateType = browseScreenModel::updateType,
+        onUpdateSpecies = browseScreenModel::updateSpecies,
+        onUpdateGender = browseScreenModel::updateGender,
+        onSetRatingGeneral = browseScreenModel::setRatingGeneral,
+        onSetRatingMature = browseScreenModel::setRatingMature,
+        onSetRatingAdult = browseScreenModel::setRatingAdult,
+        onApplyFilter = browseScreenModel::applyFilter,
+        onRefresh = browseScreenModel::refresh,
+        onRetry = browseScreenModel::refresh,
+        onOpenSubmission = { item ->
+          contextScreenModel.selectSubmission(contextId, item.id)
+          navigator.openSubmissionFromList(sid = item.id, contextId = contextId)
+        },
+        onLastVisibleIndexChanged = { lastVisibleIndex ->
+          val items = browseContextState?.flatItems ?: browseDisplayState.submissions
+          if (items.isNotEmpty() && lastVisibleIndex > items.lastIndex - 10) {
+            contextScreenModel.loadNextPageIfNeeded(contextId)
+          }
+        },
+        onRetryLoadMore = { contextScreenModel.loadNextPageIfNeeded(contextId, force = true) },
+        waterfallState = browseWaterfallState,
+        pageControls = browseContextState?.toWaterfallPageControls(),
+        canLoadPreviousPageAtTop = browseContextState?.hasPreviousPage == true,
+        loadingPreviousPage = browseContextState?.loading?.prependLoading == true,
+        prependErrorMessage = browseContextState?.loading?.prependErrorMessage,
+        onLoadPreviousPageAtTop = {
+          contextScreenModel.loadPreviousPageIfNeeded(contextId, force = true)
+        },
+        onLoadFirstPage = { contextScreenModel.navigateToFirstPage(contextId) },
+        onLoadPreviousPage = { contextScreenModel.navigateToPreviousPage(contextId) },
+        onJumpToPage = { pageNumber -> contextScreenModel.navigateToPage(contextId, pageNumber) },
+        onLoadNextPage = { contextScreenModel.navigateToNextPage(contextId) },
+        onLoadLastPage = { contextScreenModel.navigateToLastPage(contextId) },
+        pendingScrollRequest = browseContextState?.waterfallViewport?.scrollRequest,
+        onConsumeScrollRequest = { version ->
+          contextScreenModel.consumeWaterfallScrollRequest(contextId, version)
+        },
+        onViewportChanged = { viewport ->
+          contextScreenModel.updateWaterfallViewport(
+              contextId = contextId,
+              firstVisibleItemIndex = viewport.firstVisibleItemIndex,
+              firstVisibleItemScrollOffset = viewport.firstVisibleItemScrollOffset,
+              anchorSid = viewport.anchorSid,
+              currentPageNumber = browseContextState?.pageNumberForSid(viewport.anchorSid),
+          )
+        },
+    )
+  }
+}
+
+/** Search 导航目标内容。 */
+@Composable
+private fun SearchDestinationContent(
+    searchPageState: PageState<SearchUiState>,
+    searchDisplayState: SearchUiState,
+    searchContextState: SubmissionContextSnapshot?,
+    searchWaterfallState: LazyStaggeredGridState,
+    searchScreenModel: SearchScreenModel,
+    contextScreenModel: SubmissionContextScreenModel,
+    navigator: Navigator,
+    coroutineScope: CoroutineScope,
+    contextId: String,
+) {
+  PageStateWrapper(
+      state = searchPageState,
+      hasContent = searchDisplayState.submissions.isNotEmpty(),
+      onRetry = searchScreenModel::refresh,
+  ) {
+    SearchScreen(
+        state = searchDisplayState,
+        actions =
+            SearchScreenActions(
+                onOpenOverlay = searchScreenModel::openOverlay,
+                onCloseOverlay = searchScreenModel::closeOverlay,
+                onUpdateQuery = searchScreenModel::updateQuery,
+                onToggleGender = searchScreenModel::toggleGender,
+                onUpdateCategory = searchScreenModel::updateCategory,
+                onUpdateType = searchScreenModel::updateType,
+                onUpdateSpecies = searchScreenModel::updateSpecies,
+                onUpdateOrderBy = searchScreenModel::updateOrderBy,
+                onUpdateOrderDirection = searchScreenModel::updateOrderDirection,
+                onUpdateRange = searchScreenModel::updateRange,
+                onUpdateRangeFrom = searchScreenModel::updateRangeFrom,
+                onUpdateRangeTo = searchScreenModel::updateRangeTo,
+                onShiftDateRange = searchScreenModel::shiftDateRange,
+                onSetRatingGeneral = searchScreenModel::setRatingGeneral,
+                onSetRatingMature = searchScreenModel::setRatingMature,
+                onSetRatingAdult = searchScreenModel::setRatingAdult,
+                onSetTypeArt = searchScreenModel::setTypeArt,
+                onSetTypeMusic = searchScreenModel::setTypeMusic,
+                onSetTypeFlash = searchScreenModel::setTypeFlash,
+                onSetTypeStory = searchScreenModel::setTypeStory,
+                onSetTypePhoto = searchScreenModel::setTypePhoto,
+                onSetTypePoetry = searchScreenModel::setTypePoetry,
+                onApplySearch = {
+                  coroutineScope.launch { searchWaterfallState.scrollToItem(0) }
+                  searchScreenModel.applySearch()
+                },
+                onRefresh = searchScreenModel::refresh,
+                onRetry = searchScreenModel::refresh,
+                onOpenSubmission = { item ->
+                  contextScreenModel.selectSubmission(contextId, item.id)
+                  navigator.openSubmissionFromList(sid = item.id, contextId = contextId)
+                },
+                onLastVisibleIndexChanged = { lastVisibleIndex ->
+                  val items = searchContextState?.flatItems ?: searchDisplayState.submissions
+                  if (items.isNotEmpty() && lastVisibleIndex > items.lastIndex - 10) {
+                    contextScreenModel.loadNextPageIfNeeded(contextId)
+                  }
+                },
+                onRetryLoadMore = {
+                  contextScreenModel.loadNextPageIfNeeded(contextId, force = true)
+                },
+            ),
+        waterfallState = searchWaterfallState,
+        pageControls = searchContextState?.toWaterfallPageControls(),
+        canLoadPreviousPageAtTop = searchContextState?.hasPreviousPage == true,
+        loadingPreviousPage = searchContextState?.loading?.prependLoading == true,
+        prependErrorMessage = searchContextState?.loading?.prependErrorMessage,
+        onLoadPreviousPageAtTop = {
+          contextScreenModel.loadPreviousPageIfNeeded(contextId, force = true)
+        },
+        onLoadFirstPage = { contextScreenModel.navigateToFirstPage(contextId) },
+        onLoadPreviousPage = { contextScreenModel.navigateToPreviousPage(contextId) },
+        onJumpToPage = { pageNumber -> contextScreenModel.navigateToPage(contextId, pageNumber) },
+        onLoadNextPage = { contextScreenModel.navigateToNextPage(contextId) },
+        onLoadLastPage = { contextScreenModel.navigateToLastPage(contextId) },
+        pendingScrollRequest = searchContextState?.waterfallViewport?.scrollRequest,
+        onConsumeScrollRequest = { version ->
+          contextScreenModel.consumeWaterfallScrollRequest(contextId, version)
+        },
+        onViewportChanged = { viewport ->
+          contextScreenModel.updateWaterfallViewport(
+              contextId = contextId,
+              firstVisibleItemIndex = viewport.firstVisibleItemIndex,
+              firstVisibleItemScrollOffset = viewport.firstVisibleItemScrollOffset,
+              anchorSid = viewport.anchorSid,
+              currentPageNumber = searchContextState?.pageNumberForSid(viewport.anchorSid),
+          )
+        },
+    )
+  }
+}
+
+/** More 导航目标内容。 */
+@Composable
+private fun MoreDestinationContent(
+    moreState: MoreUiState,
+    moreScreenModel: MoreScreenModel,
+    navigator: Navigator,
+) {
+  MoreScreen(
+      state = moreState,
+      onOpenUser = moreState.openUserAction(navigator),
+      onOpenFollowing = moreState.openFollowingAction(navigator),
+      onOpenWatchRecommendations = moreState.openWatchRecommendationsAction(navigator),
+      onOpenFavorites = moreState.openFavoritesAction(navigator),
+      onOpenSettings = { navigator.push(SettingsRouteScreen()) },
+      onOpenSubmissionHistory = { navigator.push(SubmissionHistoryRouteScreen()) },
+      onOpenSearchHistory = { navigator.push(SearchHistoryRouteScreen()) },
+      onOpenAbout = { navigator.push(AboutRouteScreen()) },
+      onLogout = moreScreenModel::logout,
+  )
+}
+
+/** 构建打开当前用户主页的点击操作，用户名为空时返回 null。 */
 private fun MoreUiState.openUserAction(navigator: Navigator): (() -> Unit)? =
     (this as? MoreUiState.Ready)
         ?.username
@@ -555,6 +617,7 @@ private fun MoreUiState.openUserAction(navigator: Navigator): (() -> Unit)? =
           }
         }
 
+/** 构建打开关注列表页的点击操作，用户名为空时返回 null。 */
 private fun MoreUiState.openFollowingAction(navigator: Navigator): (() -> Unit)? =
     (this as? MoreUiState.Ready)
         ?.username
@@ -570,6 +633,7 @@ private fun MoreUiState.openFollowingAction(navigator: Navigator): (() -> Unit)?
           }
         }
 
+/** 构建打开关注推荐页的点击操作，用户名为空时返回 null。 */
 private fun MoreUiState.openWatchRecommendationsAction(navigator: Navigator): (() -> Unit)? =
     (this as? MoreUiState.Ready)
         ?.username
@@ -578,6 +642,7 @@ private fun MoreUiState.openWatchRecommendationsAction(navigator: Navigator): ((
           { navigator.push(WatchRecommendationRouteScreen(username = username)) }
         }
 
+/** 构建打开收藏页的点击操作，用户名为空时返回 null。 */
 private fun MoreUiState.openFavoritesAction(navigator: Navigator): (() -> Unit)? =
     (this as? MoreUiState.Ready)
         ?.username
@@ -593,6 +658,8 @@ private fun MoreUiState.openFavoritesAction(navigator: Navigator): (() -> Unit)?
           }
         }
 
+/** 顶层导航目标状态持有器。 */
 private class MainTopLevelDestinationHolder : ScreenModel {
+  /** 当前选中的顶层导航目标。 */
   var destination by mutableStateOf(TopLevelDestination.FEED)
 }

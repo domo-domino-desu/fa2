@@ -52,10 +52,15 @@ private fun createImageProgressHttpClient(
 }
 
 /** 按图片 URL 合并同一时刻的并发请求。 */
+/** 按图片 URL 合并同一时刻的并发请求。 */
 private class InFlightImageRequestDeduplicator {
+  /** 保护 callsByKey 并发访问的互斥锁。 */
   private val mutex = Mutex()
+
+  /** 当前正在进行中的请求，按 progressKey 索引。 */
   private val callsByKey = mutableMapOf<String, CompletableDeferred<HttpClientCall>>()
 
+  /** 若已有相同 key 的请求在途则等待其结果，否则发起新请求并广播结果。 */
   suspend fun awaitOrExecute(
       progressKey: String,
       executeRequest: suspend () -> HttpClientCall,

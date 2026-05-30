@@ -5,7 +5,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.opencv.core.Point
 
+/** RapidOcrBlockExtractor 的单元测试。 */
 class RapidOcrBlockExtractorTest {
+  /** 验证多个 RapidOCR 片段被保留为独立的文字块。 */
   @Test
   fun keepsRapidOcrFragmentsAsSeparateBlocks() {
     val blocks =
@@ -25,6 +27,7 @@ class RapidOcrBlockExtractorTest {
     assertEquals(listOf(0.9f, 0.9f, 0.9f), blocks.map { it.confidence })
   }
 
+  /** 验证空白内容和点数不足的 RapidOCR 片段被正确过滤。 */
   @Test
   fun filtersBlankAndInvalidRapidOcrFragments() {
     val blocks =
@@ -50,6 +53,7 @@ class RapidOcrBlockExtractorTest {
   }
 }
 
+/** 构造用于测试的矩形边界 RapidOCR 识别结果。 */
 private fun recResult(
     text: String,
     left: Double,

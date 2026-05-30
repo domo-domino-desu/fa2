@@ -10,13 +10,24 @@ import me.domino.fa2.domain.challenge.CfChallengeSignal
 import me.domino.fa2.util.logging.FaLog
 import me.domino.fa2.util.logging.summarizeUrl
 
-class ChallengeSessionStore {
-  private val log = FaLog.withTag("ChallengeSessionStore")
+/** 管理 Cloudflare 挑战会话生命周期及 UI 状态的存储器。 */
+class ChallengeSessionStorage {
+  /** 日志标签。 */
+  private val log = FaLog.withTag("ChallengeSessionStorage")
+
+  /** 保护会话状态并发访问的互斥锁。 */
   private val mutex = Mutex()
+
+  /** 当前活跃的挑战会话，无挑战时为 null。 */
   private var active: ActiveChallengeSession? = null
+
+  /** 可变的挑战 UI 状态流。 */
   private val mutableState = MutableStateFlow<CfChallengeUiState>(CfChallengeUiState.Idle)
+
+  /** 对外暴露的只读挑战 UI 状态流。 */
   val state: StateFlow<CfChallengeUiState> = mutableState.asStateFlow()
 
+  /** 获取当前挑战会话，若不存在则创建新会话。 */
   suspend fun acquire(challenge: CfChallengeSignal): ChallengeSessionAcquisition =
       mutex.withLock {
         val current = active
@@ -46,8 +57,10 @@ class ChallengeSessionStore {
         ChallengeSessionAcquisition(session = created, created = true)
       }
 
+  /** 返回当前活跃会话，若无则返回 null。 */
   suspend fun currentSession(): ActiveChallengeSession? = mutex.withLock { active }
 
+  /** 将指定会话状态更新为"验证中"。 */
   suspend fun markVerifying(session: ActiveChallengeSession) {
     mutex.withLock {
       if (active !== session) return
@@ -61,6 +74,7 @@ class ChallengeSessionStore {
     }
   }
 
+  /** 将指定会话状态更新为"验证失败"。 */
   suspend fun markVerificationFailed(session: ActiveChallengeSession, detail: String?) {
     mutex.withLock {
       if (active !== session) return
@@ -76,6 +90,7 @@ class ChallengeSessionStore {
     }
   }
 
+  /** 完成挑战会话并清除活跃状态，返回已完成的会话对象。 */
   suspend fun complete(result: Boolean): ActiveChallengeSession? =
       mutex.withLock {
         val session = active
@@ -91,13 +106,20 @@ class ChallengeSessionStore {
       }
 }
 
+/** 获取挑战会话的结果，含会话对象与是否为新建标志。 */
 data class ChallengeSessionAcquisition(
+    /** 获取到的会话对象。 */
     val session: ActiveChallengeSession,
+    /** 是否为新建的会话（false 表示复用已有会话）。 */
     val created: Boolean,
 )
 
+/** 当前活跃的 Cloudflare 挑战会话。 */
 data class ActiveChallengeSession(
+    /** 触发挑战的原始请求 URL。 */
     val triggerUrl: String,
+    /** CF-Ray 请求追踪 ID，可能为空。 */
     val cfRay: String?,
+    /** 挑战完成时用于通知等待方的 Deferred。 */
     val deferred: CompletableDeferred<Boolean>,
 )

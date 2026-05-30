@@ -25,42 +25,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Java 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Install oxipng
-        uses: taiki-e/install-action@v2
-        with:
-          tool: oxipng
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK components
-        run: |
-          yes | sdkmanager --licenses
-          sdkmanager \
-            "platform-tools" \
-            "platforms;android-36" \
-            "build-tools;36.0.0"
-
-      - name: Install native icon toolchain
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            librsvg2-bin \
-            imagemagick \
-            icnsutils \
-            pngquant
-
-      - name: Make Gradle wrapper executable
-        run: chmod +x ./gradlew
+      - name: Setup Android build environment
+        uses: ./.github/actions/setup-android-build
 
       - name: Generate SymbolCraft icons
         run: ./gradlew --stacktrace :shared:generateSymbolCraftIcons

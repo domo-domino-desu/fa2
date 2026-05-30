@@ -53,22 +53,24 @@ class FeedRouteScreen : Screen {
         )
 
     LaunchedEffect(Unit) { screenModel.load() }
-    LaunchedEffect(state.submissions, state.nextPageUrl) {
-      if (state.submissions.isEmpty()) return@LaunchedEffect
-      contextScreenModel.syncRootPage(
-          contextId = contextId,
-          sourceKind = SubmissionContextSourceKind.FEED,
-          adapter = FeedSubmissionSourceAdapter(feedRepository),
-          page =
-              SubmissionLoadedPage(
-                  pageId = FaUrls.submissions(),
-                  requestKey = FaUrls.submissions(),
-                  items = state.submissions,
-                  nextRequestKey = state.nextPageUrl,
-                  firstRequestKey = FaUrls.submissions(),
-              ),
-          revisionKey = FaUrls.submissions(),
-      )
+    LaunchedEffect(screenModel, contextId, feedRepository) {
+      screenModel.state.collect { s ->
+        if (s.submissions.isEmpty()) return@collect
+        contextScreenModel.syncRootPage(
+            contextId = contextId,
+            sourceKind = SubmissionContextSourceKind.FEED,
+            adapter = FeedSubmissionSourceAdapter(feedRepository),
+            page =
+                SubmissionLoadedPage(
+                    pageId = FaUrls.submissions(),
+                    requestKey = FaUrls.submissions(),
+                    items = s.submissions,
+                    nextRequestKey = s.nextPageUrl,
+                    firstRequestKey = FaUrls.submissions(),
+                ),
+            revisionKey = FaUrls.submissions(),
+        )
+      }
     }
 
     val displayState =

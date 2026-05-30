@@ -9,7 +9,7 @@ import me.domino.fa2.application.challenge.CfChallengeController
 import me.domino.fa2.application.challenge.CfChallengeCoordinator
 import me.domino.fa2.application.challenge.ChallengeCookiePolicy
 import me.domino.fa2.application.challenge.ChallengeProbeVerifier
-import me.domino.fa2.application.challenge.ChallengeSessionStore
+import me.domino.fa2.application.challenge.ChallengeSessionStorage
 import me.domino.fa2.application.challenge.CloudflareChallengeCookiePolicy
 import me.domino.fa2.data.network.CookiePersistence
 import me.domino.fa2.data.network.FaCookiesStorage
@@ -60,7 +60,7 @@ fun networkModule(): Module = module {
     FaHttpClient(client = get(), cookiesStorage = get(), userAgentStorage = get())
   }
   single<ChallengeCookiePolicy> { CloudflareChallengeCookiePolicy() }
-  single { ChallengeSessionStore() }
+  single { ChallengeSessionStorage() }
   single {
     ChallengeProbeVerifier(
         rawHtmlDataSource = get(qualifier = named(KOIN_QUALIFIER_RAW_HTML_DATA_SOURCE))
@@ -68,7 +68,7 @@ fun networkModule(): Module = module {
   }
   single {
     CfChallengeCoordinator(
-        sessionStore = get(),
+        sessionStorage = get(),
         cookiesStorage = get(),
         userAgentStorage = get(),
         cookiePolicy = get(),

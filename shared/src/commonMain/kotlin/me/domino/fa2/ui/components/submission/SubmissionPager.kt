@@ -15,9 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -102,6 +100,10 @@ fun SubmissionPager(
     scrollToTopVersionBySid: Map<Int, Long>,
     /** 左右滑中的被屏蔽投稿策略。 */
     blockedSubmissionMode: BlockedSubmissionPagerMode,
+    /** 用户已手动解锁屏蔽预览的 sid 集合。 */
+    revealedBlockedMediaSids: Set<Int>,
+    /** 解锁当前投稿屏蔽媒体预览回调。 */
+    onRevealBlockedMedia: (Int) -> Unit,
 ) {
   if (submissions.isEmpty()) {
     Text(
@@ -133,8 +135,6 @@ fun SubmissionPager(
       enabled = !activeZoomOverlayImageUrl.isNullOrBlank(),
       onBack = onDismissImageZoom,
   )
-  val blockedMediaRevealState = remember { mutableStateMapOf<Int, Boolean>() }
-  val consumedScrollToTopVersions = remember { mutableStateMapOf<Int, Long>() }
 
   Box(modifier = Modifier.fillMaxSize()) {
     Column(
@@ -150,9 +150,9 @@ fun SubmissionPager(
               .collect { offset -> onPageScrollOffsetChanged(item.id, offset) }
         }
         val scrollToTopVersion = scrollToTopVersionBySid[item.id] ?: 0L
+        val initialScrollToTopVersion = remember(item.id) { scrollToTopVersion }
         LaunchedEffect(item.id, scrollToTopVersion) {
-          val previousConsumed = consumedScrollToTopVersions.put(item.id, scrollToTopVersion)
-          if (previousConsumed != null && scrollToTopVersion > previousConsumed) {
+          if (scrollToTopVersion > initialScrollToTopVersion) {
             scrollState.animateScrollTo(0)
           }
         }
@@ -170,8 +170,8 @@ fun SubmissionPager(
                 onOpenImageZoom = onOpenImageZoom,
                 isBlockedByTag = item.isBlockedByTag,
                 blockedSubmissionMode = blockedSubmissionMode,
-                isBlockedMediaRevealed = blockedMediaRevealState[item.id] == true,
-                onRevealBlockedMedia = { blockedMediaRevealState[item.id] = true },
+                isBlockedMediaRevealed = item.id in revealedBlockedMediaSids,
+                onRevealBlockedMedia = { onRevealBlockedMedia(item.id) },
                 onLoadAttachmentText = onLoadAttachmentText,
                 onTranslateDescription = onTranslateDescription,
                 onWrapDescriptionText = onWrapDescriptionText,

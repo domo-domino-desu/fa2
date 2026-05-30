@@ -30,6 +30,7 @@ import fa2.shared.generated.resources.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import me.domino.fa2.application.attachmenttext.AttachmentTextService
 import me.domino.fa2.application.ocr.SubmissionImageOcrService
 import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
@@ -84,6 +85,7 @@ class SubmissionRouteScreen(
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
     val submissionRepository = koinInject<SubmissionRepository>()
+    val attachmentTextService = koinInject<AttachmentTextService>()
     val translationService = koinInject<SubmissionDescriptionTranslationService>()
     val imageOcrService = koinInject<SubmissionImageOcrService>()
     val imageOcrTranslationService = koinInject<SubmissionImageOcrTranslationService>()
@@ -152,7 +154,8 @@ class SubmissionRouteScreen(
               initialSid = initialSid,
               contextId = contextId,
               contextScreenModel = contextScreenModel,
-              submissionSource = SubmissionPagerDetailSourceImpl(submissionRepository),
+              submissionSource =
+                  SubmissionPagerDetailSourceImpl(submissionRepository, attachmentTextService),
               translationService = translationService,
               imageOcrService = imageOcrService,
               imageOcrTranslationService = imageOcrTranslationService,
@@ -352,6 +355,9 @@ class SubmissionRouteScreen(
           onMergeImageOcrBlocks = screenModel::mergeImageOcrBlocks,
           onPageScrollOffsetChanged = screenModel::setCurrentPageScrollOffset,
           onToggleFavorite = screenModel::toggleFavoriteCurrent,
+          revealedBlockedMediaSids =
+              (state as? SubmissionPagerUiState.Data)?.revealedBlockedMediaSids ?: emptySet(),
+          onRevealBlockedMedia = screenModel::revealBlockedMedia,
       )
     }
   }

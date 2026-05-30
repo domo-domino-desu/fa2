@@ -5,9 +5,12 @@ import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 
+/** 从投稿描述 HTML 中提取可翻译的文本块。 */
 internal class SubmissionDescriptionBlockExtractor(
+    /** 用于规范化翻译文本的对齐器。 */
     private val resultAligner: SubmissionTranslationResultAligner,
 ) {
+  /** 将描述 HTML 拆分为独立的文本块列表。 */
   fun extract(descriptionHtml: String): List<SubmissionDescriptionBlock> {
     if (descriptionHtml.isBlank()) return emptyList()
 
@@ -30,6 +33,7 @@ internal class SubmissionDescriptionBlockExtractor(
     }
   }
 
+  /** 递归遍历节点列表，将内容按块边界收集到输出列表。 */
   private fun collectBlocksFromNodes(
       nodes: List<Node>,
       wrappers: List<Element>,
@@ -93,6 +97,7 @@ internal class SubmissionDescriptionBlockExtractor(
     flushCurrent()
   }
 
+  /** 将节点的 HTML 追加到 StringBuilder（空白节点忽略）。 */
   private fun appendNodeHtml(builder: StringBuilder, node: Node) {
     val html = node.outerHtml()
     if (html.isNotBlank()) {
@@ -100,6 +105,7 @@ internal class SubmissionDescriptionBlockExtractor(
     }
   }
 
+  /** 用外层容器标签包裹内部 HTML。 */
   private fun wrapWithWrappers(innerHtml: String, wrappers: List<Element>): String {
     var wrapped = innerHtml
     wrappers.asReversed().forEach { wrapper ->
@@ -110,6 +116,7 @@ internal class SubmissionDescriptionBlockExtractor(
     return wrapped
   }
 
+  /** 从元素外部 HTML 中提取开始标签字符串。 */
   private fun extractOpenTag(wrapper: Element): String {
     val outer = wrapper.outerHtml()
     val openEnd = outer.indexOf('>')
@@ -118,8 +125,10 @@ internal class SubmissionDescriptionBlockExtractor(
   }
 
   private companion object {
+    /** 独立块边界标签集合，遇到时立即切块。 */
     private val standaloneBoundaryTags =
         setOf("p", "blockquote", "li", "h1", "h2", "h3", "h4", "h5", "h6", "tr", "hr")
+    /** 作为包裹容器递归处理的标签集合。 */
     private val wrapperContainerTags =
         setOf(
             "div",

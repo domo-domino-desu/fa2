@@ -1,8 +1,15 @@
 package me.domino.fa2.util
 
+/** 从投稿 URL 中提取 sid 的正则。 */
 private val submissionRegex = Regex("""/view/(\d+)/?""")
+
+/** 从分页 URL 中提取 fromSid 游标的正则。 */
 private val submissionsFromSidRegex = Regex("""new~(\d+)@""")
+
+/** 从日志 URL 中提取日志 ID 的正则。 */
 private val journalRegex = Regex("""/journal/(\d+)/?""")
+
+/** FA 官方域名集合，用于校验链接来源。 */
 private val faHosts = setOf("www.furaffinity.net", "furaffinity.net")
 
 /**

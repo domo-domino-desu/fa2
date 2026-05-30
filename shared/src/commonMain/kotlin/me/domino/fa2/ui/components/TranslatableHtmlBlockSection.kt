@@ -38,12 +38,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import kotlin.math.roundToInt
-import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
 import me.domino.fa2.ui.state.SubmissionDescriptionDisplayBlock
 import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
-import me.domino.fa2.ui.state.rememberSubmissionDescriptionTranslationState
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -431,10 +429,14 @@ private fun OriginalBlockWithTrailingAction(
                   if (result == null || result.lineCount <= 0) {
                     IntOffset.Zero
                   } else {
-                    val lastLine = result.lineCount - 1
-                    val x = (result.getLineRight(lastLine) + iconGap.toPx()).roundToInt()
+                    val targetLine =
+                        trailingActionLineIndex(
+                            layoutResult = result,
+                            anchorTextLineEndOffset = trailingAction.anchorTextLineEndOffset,
+                        )
+                    val x = (result.getLineRight(targetLine) + iconGap.toPx()).roundToInt()
                     val y =
-                        (result.getLineBottom(lastLine) - iconSize.toPx())
+                        (result.getLineBottom(targetLine) - iconSize.toPx())
                             .roundToInt()
                             .coerceAtLeast(0)
                     IntOffset(x = x, y = y)
@@ -471,6 +473,20 @@ private fun OriginalBlockWithTrailingAction(
       }
     }
   }
+}
+
+private fun trailingActionLineIndex(
+    layoutResult: TextLayoutResult,
+    anchorTextLineEndOffset: Int?,
+): Int {
+  val lastLine = layoutResult.lineCount - 1
+  if (anchorTextLineEndOffset == null) return lastLine
+
+  val textLength = layoutResult.layoutInput.text.length
+  if (textLength <= 0) return lastLine
+
+  val offset = (anchorTextLineEndOffset - 1).coerceIn(0, textLength - 1)
+  return layoutResult.getLineForOffset(offset).coerceIn(0, lastLine)
 }
 
 @Composable
@@ -511,52 +527,6 @@ private fun OriginalBlockText(
     SelectionContainer { content() }
   } else {
     content()
-  }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-internal fun TranslatableHtmlBlockSection(
-    title: String,
-    sourceHtml: String,
-    emptyText: String,
-    translationService: SubmissionDescriptionTranslationService,
-    originalTextStyle: TextStyle,
-    originalTextColor: Color,
-    translatedTextStyle: TextStyle,
-    translatedTextColor: Color,
-    translationEnabled: Boolean = true,
-    modifier: Modifier = Modifier,
-    onTranslateRequested: () -> Unit = {},
-) {
-  val translationController =
-      rememberSubmissionDescriptionTranslationState(
-          descriptionHtml = sourceHtml,
-          service = translationService,
-      )
-
-  Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    TranslatableSectionTitleRow(
-        title = title,
-        translating = translationController.translating,
-        onTranslate = {
-          if (translationEnabled) {
-            translationController.translate()
-            onTranslateRequested()
-          }
-        },
-        modifier = Modifier.fillMaxWidth(),
-        translationEnabled = translationEnabled,
-    )
-
-    TranslatableHtmlBlockContent(
-        blocks = translationController.blocks,
-        emptyText = emptyText,
-        originalTextStyle = originalTextStyle,
-        originalTextColor = originalTextColor,
-        translatedTextStyle = translatedTextStyle,
-        translatedTextColor = translatedTextColor,
-    )
   }
 }
 

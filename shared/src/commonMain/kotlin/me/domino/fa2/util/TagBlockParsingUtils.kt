@@ -3,6 +3,7 @@ package me.domino.fa2.util
 import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.nodes.Element
 
+/** 用于分割 tag 字符串的分隔符正则（空白或逗号）。 */
 private val tagTokenSplitRegex = Regex("""[\s,]+""")
 
 /** 页面级 tag 屏蔽设置。 */
@@ -33,6 +34,7 @@ fun isBlockedByTagSettings(
     imageTags.any { tag -> tag in tagBlockSettings.blockedTags } ||
         (tagBlockSettings.hideTagless && imageTags.isEmpty())
 
+/** 将原始 tag 字符串切分为规范化的小写 token 集合。 */
 private fun parseTagTokens(raw: String): Set<String> =
     raw.split(tagTokenSplitRegex)
         .asSequence()

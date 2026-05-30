@@ -11,11 +11,19 @@ import me.domino.fa2.data.repository.WatchRecommendationBlocklistRepository
 import me.domino.fa2.data.repository.WatchlistRepository
 import me.domino.fa2.util.logging.FaLog
 
+/** 第一轮推荐的初始采样用户数。 */
 private const val initialSampleSize: Int = 10
+
+/** 每轮增加的采样用户数步长。 */
 private const val sampleSizeStep: Int = 5
+
+/** 第一轮所需最少共同关注数阈值。 */
 private const val initialMinimumSharedFollowers: Int = 4
+
+/** 最大推荐计算轮次。 */
 private const val maxRounds: Int = 4
 
+/** 基于共同关注分析，为当前用户推荐可关注的新用户。 */
 class WatchRecommendationService(
     private val loadWatchlistPage:
         suspend (username: String, category: WatchlistCategory, nextPageUrl: String?) -> PageState<
@@ -37,8 +45,10 @@ class WatchRecommendationService(
       requestThrottleMs = requestThrottleMs,
   )
 
+  /** 日志标签。 */
   private val log = FaLog.withTag("WatchRecommendationService")
 
+  /** 为指定用户计算并返回推荐关注列表。 */
   suspend fun recommend(
       username: String,
       recommendationCount: Int,
@@ -129,6 +139,7 @@ class WatchRecommendationService(
     return bestCandidates.take(recommendationCount)
   }
 
+  /** 遍历分页加载指定用户的完整关注列表。 */
   private suspend fun loadCompleteWatching(
       username: String,
       throttle: SequentialRequestThrottle,
@@ -194,12 +205,18 @@ class WatchRecommendationService(
   }
 }
 
+/** 推荐关注的用户及其共同关注数。 */
 data class RecommendedWatchUser(
+    /** 被推荐的用户信息。 */
     val user: WatchlistUser,
+    /** 与当前用户共同关注的数量。 */
     val sharedFollowCount: Int,
 )
 
+/** 推荐计算过程中用于累计共同关注数的可变中间对象。 */
 private data class MutableRecommendedWatchUser(
+    /** 候选用户信息。 */
     val user: WatchlistUser,
+    /** 累计共同关注数（可变）。 */
     var sharedFollowCount: Int,
 )

@@ -55,6 +55,7 @@ object MarkdownAttachmentTextParser : AttachmentTextParser {
   }
 }
 
+/** 构建单个 Markdown 段落。 */
 private fun buildMarkdownParagraph(text: String): AttachmentTextParagraph? {
   val normalized = normalizeParagraphText(text)
   if (normalized.isBlank()) return null
@@ -63,6 +64,7 @@ private fun buildMarkdownParagraph(text: String): AttachmentTextParagraph? {
   return AttachmentTextParagraph(html = "<p>$html</p>")
 }
 
+/** 解析行内 Markdown 语法并返回 HTML 片段。 */
 private fun parseMarkdownInline(text: String): String {
   val output = StringBuilder()
   var index = 0
@@ -138,6 +140,7 @@ private fun parseMarkdownInline(text: String): String {
   return output.toString().trim()
 }
 
+/** 解析 Markdown 链接，返回 HTML 和结束位置。 */
 private fun parseMarkdownLink(text: String, startIndex: Int): Pair<String, Int>? {
   val labelEnd = text.indexOf(']', startIndex + 1)
   if (labelEnd <= startIndex + 1) return null
@@ -154,6 +157,7 @@ private fun parseMarkdownLink(text: String, startIndex: Int): Pair<String, Int>?
   return """<a href="$safeHref">$renderedLabel</a>""" to (hrefEnd + 1)
 }
 
+/** 解析 Markdown 样式区间（粗体/斜体/删除线等），返回 HTML 和结束位置。 */
 private fun parseMarkdownStyledSpan(
     text: String,
     startIndex: Int,
@@ -168,6 +172,7 @@ private fun parseMarkdownStyledSpan(
   return "<$tagName>$renderedContent</$tagName>" to (endIndex + delimiter.length)
 }
 
+/** 消费 Markdown 图片语法，返回结束位置（跳过图片不输出）。 */
 private fun consumeMarkdownImage(text: String, startIndex: Int): Int {
   val labelEnd = text.indexOf(']', startIndex + 2)
   if (labelEnd < 0) return startIndex

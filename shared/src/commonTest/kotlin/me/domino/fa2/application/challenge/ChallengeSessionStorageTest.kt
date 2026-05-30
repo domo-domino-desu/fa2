@@ -8,10 +8,10 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import me.domino.fa2.domain.challenge.CfChallengeSignal
 
-class ChallengeSessionStoreTest {
+class ChallengeSessionStorageTest {
   @Test
   fun acquireReusesActiveSessionAndTracksStateTransitions() = runTest {
-    val store = ChallengeSessionStore()
+    val store = ChallengeSessionStorage()
     val first = store.acquire(CfChallengeSignal(requestUrl = "https://example.com", cfRay = "ray1"))
     val second =
         store.acquire(CfChallengeSignal(requestUrl = "https://example.com/other", cfRay = "ray2"))

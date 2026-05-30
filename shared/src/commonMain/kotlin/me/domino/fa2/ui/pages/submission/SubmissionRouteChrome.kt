@@ -1,6 +1,7 @@
 package me.domino.fa2.ui.pages.submission
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -69,6 +70,8 @@ internal fun SubmissionRouteChrome(
     onMergeImageOcrBlocks: (String, List<NormalizedImagePoint>) -> Unit,
     onPageScrollOffsetChanged: (Int, Int) -> Unit,
     onToggleFavorite: () -> Unit,
+    revealedBlockedMediaSids: Set<Int>,
+    onRevealBlockedMedia: (Int) -> Unit,
 ) {
   Column(modifier = Modifier.fillMaxSize().testTag("submission-route")) {
     if (!zoomOverlayVisible) {
@@ -136,6 +139,8 @@ internal fun SubmissionRouteChrome(
                 onPageScrollOffsetChanged = onPageScrollOffsetChanged,
                 scrollToTopVersionBySid = snapshot.scrollToTopVersionBySid,
                 blockedSubmissionMode = blockedSubmissionMode,
+                revealedBlockedMediaSids = snapshot.revealedBlockedMediaSids,
+                onRevealBlockedMedia = onRevealBlockedMedia,
             )
 
             val currentItem = snapshot.submissions.getOrNull(snapshot.currentIndex)
@@ -143,53 +148,52 @@ internal fun SubmissionRouteChrome(
                 currentItem?.let { item ->
                   snapshot.detailBySid[item.id] as? SubmissionDetailUiState.Success
                 }
-            if (
-                !zoomOverlayVisible &&
-                    detailState != null &&
-                    detailState.detail.favoriteActionUrl.isNotBlank()
-            ) {
-              MediumFloatingActionButton(
-                  onClick = {
-                    onToggleFavorite()
-                    requestPagerFocus()
-                  },
-                  modifier =
-                      Modifier.align(Alignment.BottomEnd).padding(20.dp).focusProperties {
-                        canFocus = false
-                      },
-                  containerColor =
-                      if (detailState.detail.isFavorited) {
-                        MaterialTheme.colorScheme.primaryContainer
-                      } else {
-                        MaterialTheme.colorScheme.surface
-                      },
-              ) {
-                if (detailState.favoriteUpdating) {
-                  LoadingIndicator(
-                      modifier = Modifier.size(22.dp),
-                      color = MaterialTheme.colorScheme.primary,
-                  )
-                } else {
-                  Icon(
-                      imageVector =
-                          if (detailState.detail.isFavorited) {
-                            FaMaterialSymbols.Filled.Favorite
-                          } else {
-                            FaMaterialSymbols.Filled.FavoriteBorder
-                          },
-                      contentDescription =
-                          if (detailState.detail.isFavorited) {
-                            stringResource(Res.string.unfavorite)
-                          } else {
-                            stringResource(Res.string.favorite)
-                          },
-                  )
-                }
-              }
-            }
+            CurrentFavoriteFab(
+                detailState = detailState,
+                zoomOverlayVisible = zoomOverlayVisible,
+                onToggleFavorite = onToggleFavorite,
+                requestPagerFocus = requestPagerFocus,
+            )
           }
         }
       }
+    }
+  }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun BoxScope.CurrentFavoriteFab(
+    detailState: SubmissionDetailUiState.Success?,
+    zoomOverlayVisible: Boolean,
+    onToggleFavorite: () -> Unit,
+    requestPagerFocus: () -> Unit,
+) {
+  if (zoomOverlayVisible || detailState == null || detailState.detail.favoriteActionUrl.isBlank()) {
+    return
+  }
+  MediumFloatingActionButton(
+      onClick = {
+        onToggleFavorite()
+        requestPagerFocus()
+      },
+      modifier =
+          Modifier.align(Alignment.BottomEnd).padding(20.dp).focusProperties { canFocus = false },
+      containerColor =
+          if (detailState.detail.isFavorited) MaterialTheme.colorScheme.primaryContainer
+          else MaterialTheme.colorScheme.surface,
+  ) {
+    if (detailState.favoriteUpdating) {
+      LoadingIndicator(modifier = Modifier.size(22.dp), color = MaterialTheme.colorScheme.primary)
+    } else {
+      Icon(
+          imageVector =
+              if (detailState.detail.isFavorited) FaMaterialSymbols.Filled.Favorite
+              else FaMaterialSymbols.Filled.FavoriteBorder,
+          contentDescription =
+              if (detailState.detail.isFavorited) stringResource(Res.string.unfavorite)
+              else stringResource(Res.string.favorite),
+      )
     }
   }
 }

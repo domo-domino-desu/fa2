@@ -1,14 +1,11 @@
 package me.domino.fa2.data.repository
 
-import me.domino.fa2.application.attachmenttext.AttachmentTextService
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.network.endpoint.SocialActionEndpoint
 import me.domino.fa2.data.network.endpoint.SocialActionResult
 import me.domino.fa2.data.store.GalleryStore
 import me.domino.fa2.data.store.SubmissionStore
-import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
-import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.util.logging.FaLog
 import me.domino.fa2.util.logging.summarizePageState
 import me.domino.fa2.util.logging.summarizeUrl
@@ -25,7 +22,6 @@ class SubmissionRepository(
     private val submissionStore: SubmissionStore,
     private val socialActionEndpoint: SocialActionEndpoint,
     private val galleryStore: GalleryStore,
-    private val attachmentTextService: AttachmentTextService,
 ) : SubmissionDetailRepository {
   private val log = FaLog.withTag("SubmissionRepository")
 
@@ -50,21 +46,6 @@ class SubmissionRepository(
     log.d { "预取投稿详情 -> sid=$sid" }
     submissionStore.prefetchBySid(sid)
   }
-
-  /** 下载并解析附件文本。 */
-  suspend fun loadAttachmentText(
-      downloadUrl: String,
-      downloadFileName: String,
-      onProgress: (AttachmentTextProgress) -> Unit = {},
-  ): PageState<AttachmentTextDocument> =
-      runCatching {
-            attachmentTextService.load(
-                downloadUrl = downloadUrl,
-                downloadFileName = downloadFileName,
-                onProgress = onProgress,
-            )
-          }
-          .getOrElse { error -> PageState.Error(error) }
 
   /** 收藏/取消收藏投稿。 */
   suspend fun toggleFavorite(sid: Int, actionUrl: String): PageState<Unit> {

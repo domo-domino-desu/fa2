@@ -55,6 +55,7 @@ internal fun mergeLinesIntoParagraphs(lines: List<PdfLine>): List<String> {
 /** 句末标点。 */
 private val endingPunctuation = setOf('.', '!', '?', '。', '！', '？')
 
+/** 规范化段落文本（统一换行、去除多余空白）。 */
 private fun normalizeParagraphText(text: String): String =
     text
         .replace('\u00A0', ' ')

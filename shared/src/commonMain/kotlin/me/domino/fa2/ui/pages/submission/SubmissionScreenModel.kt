@@ -182,5 +182,7 @@ class SubmissionScreenModel(
 
   fun blockKeywordCurrent(tagName: String) = workflow.blockKeywordCurrent(tagName)
 
+  fun revealBlockedMedia(sid: Int) = workflow.revealBlockedMedia(sid)
+
   fun retryLoadMore() = workflow.retryLoadMore()
 }

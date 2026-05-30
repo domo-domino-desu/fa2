@@ -33,6 +33,7 @@ internal data class SubmissionSeriesProbeConfig(
 internal data class SubmissionSeriesTrailingAction(
     val state: SubmissionSeriesTrailingActionState,
     val contentDescription: String,
+    val anchorTextLineEndOffset: Int?,
     val onClick: () -> Unit,
 )
 
@@ -91,6 +92,7 @@ internal fun rememberSubmissionSeriesTrailingActions(
                 SubmissionSeriesProbeUiState.Loading -> loadingContentDescription
                 is SubmissionSeriesProbeUiState.Resolved -> openFirstContentDescription
               },
+          anchorTextLineEndOffset = candidate.anchorTextLineEndOffset,
           onClick = {
             when (val snapshot = uiState) {
               SubmissionSeriesProbeUiState.Loading -> Unit

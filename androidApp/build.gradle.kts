@@ -64,8 +64,6 @@ kotlin { jvmToolchain(21) }
 dependencies {
   implementation(project(":shared"))
   implementation(libs.androidx.activity.compose)
-  implementation(libs.compose.material3)
-  implementation(libs.compose.foundation)
   implementation(libs.google.material)
   implementation(libs.coil.compose)
   implementation(libs.coil.gif)

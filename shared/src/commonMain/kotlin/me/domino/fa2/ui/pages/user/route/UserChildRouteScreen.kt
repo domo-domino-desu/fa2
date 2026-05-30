@@ -9,14 +9,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import kotlinx.coroutines.launch
 import me.domino.fa2.data.repository.FavoritesRepository
 import me.domino.fa2.data.repository.GalleryRepository
 import me.domino.fa2.ui.navigation.rootNavigator
@@ -63,7 +61,7 @@ class UserChildRouteScreen(
     val updateBodyScrollPosition = LocalUserBodyScrollPositionUpdater.current
     val resolveSubmissionSnapshot = LocalUserSubmissionSnapshotResolver.current
     val updateSubmissionSnapshot = LocalUserSubmissionSnapshotUpdater.current
-    val updateCurrentRouteScrollToTopAction = LocalUserCurrentRouteScrollToTopActionUpdater.current
+    val scrollToTopVersion = LocalUserScrollToTopVersion.current
     val routeInitialFolderUrl = resolveFolderUrl(route) ?: initialFolderUrl
     when (route) {
       UserChildRoute.Journals -> {
@@ -91,10 +89,10 @@ class UserChildRouteScreen(
                   initialFirstVisibleItemScrollOffset =
                       initialScrollPosition.firstVisibleItemScrollOffset,
               )
-          val scope = rememberCoroutineScope()
-          LaunchedEffect(listState, updateCurrentRouteScrollToTopAction) {
-            updateCurrentRouteScrollToTopAction {
-              scope.launch { listState.animateScrollToItem(0) }
+          val currentScrollToTopVersion = scrollToTopVersion.longValue
+          LaunchedEffect(currentScrollToTopVersion) {
+            if (currentScrollToTopVersion > 0L) {
+              listState.animateScrollToItem(0)
             }
           }
           var deferredBodyScrollPosition by
@@ -184,46 +182,43 @@ class UserChildRouteScreen(
                     UserChildRoute.Journals -> holderTag
                   }
             }
-        LaunchedEffect(
-            scrollKey,
-            state.submissions,
-            state.nextPageUrl,
-            state.folderGroups,
-        ) {
-          updateSubmissionSnapshot(scrollKey, state)
-          if (state.submissions.isEmpty()) return@LaunchedEffect
-          contextScreenModel.syncRootPage(
-              contextId = holderTag,
-              sourceKind =
-                  when (route) {
-                    UserChildRoute.Gallery -> SubmissionContextSourceKind.GALLERY
-                    UserChildRoute.Favorites -> SubmissionContextSourceKind.FAVORITES
-                    UserChildRoute.Journals -> SubmissionContextSourceKind.GALLERY
-                  },
-              adapter =
-                  UserSubmissionSourceAdapter(
-                      route = route,
-                      username = username,
-                      initialPageUrl = routeInitialFolderUrl,
-                      galleryRepository = galleryRepository,
-                      favoritesRepository = favoritesRepository,
-                  ),
-              page =
-                  SubmissionLoadedPage(
-                      pageId = rootPageUrl,
-                      requestKey = rootPageUrl,
-                      items = state.submissions,
-                      pageNumber = 1,
-                      nextRequestKey = state.nextPageUrl,
-                      firstRequestKey =
-                          when (route) {
-                            UserChildRoute.Gallery -> rootPageUrl
-                            UserChildRoute.Favorites -> rootPageUrl
-                            UserChildRoute.Journals -> routeInitialFolderUrl
-                          },
-                  ),
-              revisionKey = buildUserSubmissionScrollKey(username, route, routeInitialFolderUrl),
-          )
+        LaunchedEffect(screenModel, scrollKey, galleryRepository, favoritesRepository) {
+          screenModel.state.collect { s ->
+            updateSubmissionSnapshot(scrollKey, s)
+            if (s.submissions.isEmpty()) return@collect
+            contextScreenModel.syncRootPage(
+                contextId = holderTag,
+                sourceKind =
+                    when (route) {
+                      UserChildRoute.Gallery -> SubmissionContextSourceKind.GALLERY
+                      UserChildRoute.Favorites -> SubmissionContextSourceKind.FAVORITES
+                      UserChildRoute.Journals -> SubmissionContextSourceKind.GALLERY
+                    },
+                adapter =
+                    UserSubmissionSourceAdapter(
+                        route = route,
+                        username = username,
+                        initialPageUrl = routeInitialFolderUrl,
+                        galleryRepository = galleryRepository,
+                        favoritesRepository = favoritesRepository,
+                    ),
+                page =
+                    SubmissionLoadedPage(
+                        pageId = rootPageUrl,
+                        requestKey = rootPageUrl,
+                        items = s.submissions,
+                        pageNumber = 1,
+                        nextRequestKey = s.nextPageUrl,
+                        firstRequestKey =
+                            when (route) {
+                              UserChildRoute.Gallery -> rootPageUrl
+                              UserChildRoute.Favorites -> rootPageUrl
+                              UserChildRoute.Journals -> routeInitialFolderUrl
+                            },
+                    ),
+                revisionKey = buildUserSubmissionScrollKey(username, route, routeInitialFolderUrl),
+            )
+          }
         }
         val layout =
             remember(headerContent) {
@@ -248,10 +243,10 @@ class UserChildRouteScreen(
                           ?: initialScrollPosition.firstVisibleItemScrollOffset,
               )
             }
-        val scope = rememberCoroutineScope()
-        LaunchedEffect(waterfallState, updateCurrentRouteScrollToTopAction) {
-          updateCurrentRouteScrollToTopAction {
-            scope.launch { waterfallState.animateScrollToItem(0) }
+        val currentScrollToTopVersion = scrollToTopVersion.longValue
+        LaunchedEffect(currentScrollToTopVersion) {
+          if (currentScrollToTopVersion > 0L) {
+            waterfallState.animateScrollToItem(0)
           }
         }
         var deferredBodyScrollPosition by
