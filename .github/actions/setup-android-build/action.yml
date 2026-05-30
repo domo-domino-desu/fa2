@@ -24,7 +24,15 @@ runs:
     - name: Install Android SDK components
       shell: bash
       run: |
+        set +e
         yes | sdkmanager --licenses
+        license_status="${PIPESTATUS[1]}"
+        set -e
+
+        if [[ "${license_status}" -ne 0 ]]; then
+          exit "${license_status}"
+        fi
+
         sdkmanager \
           "platform-tools" \
           "platforms;android-36" \
