@@ -86,10 +86,12 @@ jobs:
       if: matrix.build-mode == 'manual'
       shell: bash
       run: |
-        ./gradlew --stacktrace :shared:generateSymbolCraftIcons
-        ./gradlew --stacktrace \
-          :androidApp:assembleRelease \
-          :androidApp:bundleRelease \
+        ./gradlew --no-daemon --no-build-cache --stacktrace \
+          clean \
+          :shared:generateSymbolCraftIcons \
+          :shared:compileKotlinMetadata \
+          :shared:compileKotlinDesktop \
+          :androidApp:compileDebugKotlin \
           :desktopApp:compileKotlinDesktop
 
     - name: Perform CodeQL Analysis
