@@ -123,4 +123,8 @@ class AppSettingsService(private val storage: AppSettingsStorage) {
   suspend fun updateWatchRecommendationPageSize(pageSize: Int) {
     updateSettings(mutableSettings.value.copy(watchRecommendationPageSize = pageSize))
   }
+
+  suspend fun updateLogLevel(logLevel: LogLevelSetting) {
+    updateSettings(mutableSettings.value.copy(logLevel = logLevel))
+  }
 }

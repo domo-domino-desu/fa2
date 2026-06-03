@@ -35,6 +35,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
+import me.domino.fa2.ui.components.AvatarImage
 import me.domino.fa2.ui.components.HtmlText
 import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.SkeletonBlock
@@ -132,32 +133,13 @@ internal fun UserHeaderCard(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-              Surface(
-                  shape = CircleShape,
-                  color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-                  modifier = Modifier.size(54.dp),
-              ) {
-                if (header.avatarUrl.isNotBlank()) {
-                  NetworkImage(
-                      url = header.avatarUrl,
-                      modifier = Modifier.fillMaxSize(),
-                      contentScale = ContentScale.Crop,
-                  )
-                } else {
-                  Box(modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        text = header.displayName.firstOrNull()?.uppercase() ?: "?",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier =
-                            Modifier.padding(
-                                horizontal = 18.dp,
-                                vertical = 14.dp,
-                            ),
-                    )
-                  }
-                }
-              }
+              AvatarImage(
+                  url = header.avatarUrl,
+                  displayName = header.displayName,
+                  size = 54.dp,
+                  placeholderTextStyle = MaterialTheme.typography.titleMedium,
+                  showLoadingPlaceholder = true,
+              )
               Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(
                     text = header.displayName,

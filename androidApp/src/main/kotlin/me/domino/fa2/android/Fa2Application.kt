@@ -2,7 +2,9 @@ package me.domino.fa2.android
 
 import android.app.Application
 import co.touchlab.kermit.Severity
+import kotlinx.coroutines.runBlocking
 import me.domino.fa2.data.attachmenttext.initializeAttachmentTextPlatform
+import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.di.startAppKoin
 import me.domino.fa2.ui.pages.about.AboutLibrariesAndroidContextHolder
 import me.domino.fa2.util.logging.FaLog
@@ -21,7 +23,15 @@ class Fa2Application : Application() {
           Severity.Info
         }
     )
-    startAppKoin(androidPlatformModule(applicationContext))
+    val koin = startAppKoin(androidPlatformModule(applicationContext))
+    runCatching {
+          runBlocking {
+            val settingsService = koin.get<AppSettingsService>()
+            settingsService.ensureLoaded()
+            FaLog.setMinSeverity(settingsService.settings.value.logLevel.severity)
+          }
+        }
+        .onFailure { error -> FaLog.withTag("Fa2Application").e(error) { "应用保存日志级别失败" } }
     FaLog.withTag("Fa2Application").i { "应用启动 -> Koin 与附件文本平台已初始化" }
   }
 }

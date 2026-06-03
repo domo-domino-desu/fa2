@@ -1,5 +1,7 @@
 package me.domino.fa2.data.settings
 
+import co.touchlab.kermit.Severity
+
 /** 全局应用设置。 */
 data class AppSettings(
     val uiLanguage: UiLanguageSetting = defaultUiLanguage,
@@ -27,6 +29,7 @@ data class AppSettings(
     /** 自定义下载文件名模板（仅定义文件名，不含扩展名）。 */
     val downloadCustomFileNameTemplate: String = defaultDownloadCustomFileNameTemplate,
     val watchRecommendationPageSize: Int = defaultWatchRecommendationPageSize,
+    val logLevel: LogLevelSetting = defaultLogLevel,
 ) {
   companion object {
     val supportedUiLanguages: List<UiLanguageSetting> =
@@ -59,6 +62,7 @@ data class AppSettings(
             DownloadFileNameMode.USERNAME_ID_TITLE,
             DownloadFileNameMode.CUSTOM,
         )
+    val supportedLogLevels: List<LogLevelSetting> = LogLevelSetting.entries
 
     val defaultUiLanguage: UiLanguageSetting = UiLanguageSetting.SYSTEM
     const val defaultTranslationEnabled: Boolean = true
@@ -81,6 +85,7 @@ data class AppSettings(
     val defaultDownloadFileNameMode: DownloadFileNameMode = DownloadFileNameMode.ID_TITLE
     const val defaultDownloadCustomFileNameTemplate: String = "{submission_id}-{title}"
     const val defaultWatchRecommendationPageSize: Int = 20
+    val defaultLogLevel: LogLevelSetting = LogLevelSetting.Info
 
     const val minTranslationChunkWordLimit: Int = 50
     const val maxTranslationChunkWordLimit: Int = 10000
@@ -146,7 +151,27 @@ data class AppSettings(
                 raw.downloadCustomFileNameTemplate.trim().ifBlank {
                   defaultDownloadCustomFileNameTemplate
                 },
+            logLevel =
+                raw.logLevel.takeIf { level -> level in supportedLogLevels } ?: defaultLogLevel,
         )
+  }
+}
+
+/** 应用日志级别设置。 */
+enum class LogLevelSetting(val persistedValue: String, val severity: Severity) {
+  Verbose("verbose", Severity.Verbose),
+  Debug("debug", Severity.Debug),
+  Info("info", Severity.Info),
+  Warn("warn", Severity.Warn),
+  Error("error", Severity.Error),
+  Assert("assert", Severity.Assert);
+
+  companion object {
+    fun fromPersistedValue(raw: String?): LogLevelSetting? =
+        entries.firstOrNull { it.persistedValue == raw?.trim()?.lowercase() }
+
+    fun fromSeverity(severity: Severity): LogLevelSetting =
+        entries.firstOrNull { it.severity == severity } ?: Info
   }
 }
 

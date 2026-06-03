@@ -259,6 +259,14 @@
   <string name="about_export_logs_summary">导出当前运行期日志到文本文件</string>
   <string name="about_export_logs_success">日志已导出：%1$s</string>
   <string name="about_export_logs_failed">导出日志失败：%1$s</string>
+  <string name="about_log_level">日志级别</string>
+  <string name="about_log_level_restart_required">日志级别已保存，重启应用后生效。</string>
+  <string name="log_level_verbose">Verbose</string>
+  <string name="log_level_debug">Debug</string>
+  <string name="log_level_info">Info</string>
+  <string name="log_level_warn">Warn</string>
+  <string name="log_level_error">Error</string>
+  <string name="log_level_assert">Assert</string>
   <string name="about_thanks">感谢</string>
   <string name="about_acknowledgements_furaffinity_app">FurAffinityApp</string>
   <string name="about_acknowledgements_transfur_bar">百度贴吧Transfur吧</string>

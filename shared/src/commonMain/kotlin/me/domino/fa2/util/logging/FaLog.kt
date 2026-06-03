@@ -36,11 +36,16 @@ object FaLog {
 
   /** 初始化 Kermit。 */
   fun init(minSeverity: Severity) {
-    minSeveritySnapshot = minSeverity
     Logger.setLogWriters(platformLogWriter(), runtimeLogWriter)
-    Logger.setMinSeverity(minSeverity)
+    setMinSeverity(minSeverity)
     initialized = true
     Logger.withTag("FaLog").i { "初始化日志 -> 最小级别=${minSeverity.name}" }
+  }
+
+  /** 更新 Kermit 最小日志级别。 */
+  fun setMinSeverity(minSeverity: Severity) {
+    minSeveritySnapshot = minSeverity
+    Logger.setMinSeverity(minSeverity)
   }
 
   /** 获取带标签的 Logger。 */

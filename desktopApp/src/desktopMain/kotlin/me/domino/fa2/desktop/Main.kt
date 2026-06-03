@@ -5,8 +5,12 @@ import androidx.compose.ui.window.application
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
+import kotlinx.coroutines.runBlocking
+import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.ImageProgressTracker
+import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.data.network.installCoilImageProgressSupport
+import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.di.startAppKoin
 import me.domino.fa2.di.stopAppKoin
 import me.domino.fa2.ui.host.Fa2App
@@ -23,7 +27,15 @@ fun main() = application {
   val severity = FaLog.parseDesktopSeverity(System.getProperty(desktopLogLevelProp))
   FaLog.init(severity)
   FaLog.withTag("DesktopMain").i { "桌面启动 -> 日志级别=${severity.name}" }
-  startAppKoin(desktopPlatformModule())
+  val koin = startAppKoin(desktopPlatformModule())
+  runCatching {
+        runBlocking {
+          val settingsService = koin.get<AppSettingsService>()
+          settingsService.ensureLoaded()
+          FaLog.setMinSeverity(settingsService.settings.value.logLevel.severity)
+        }
+      }
+      .onFailure { error -> FaLog.withTag("DesktopMain").e(error) { "应用保存日志级别失败" } }
   Window(
       onCloseRequest = {
         FaLog.withTag("DesktopMain").i { "窗口关闭 -> 释放资源" }
@@ -34,8 +46,14 @@ fun main() = application {
   ) {
     setSingletonImageLoaderFactory { platformContext ->
       val progressTracker = GlobalContext.get().get<ImageProgressTracker>()
+      val cookiesStorage = GlobalContext.get().get<FaCookiesStorage>()
+      val userAgentStorage = GlobalContext.get().get<UserAgentStorage>()
       ImageLoader.Builder(platformContext)
-          .installCoilImageProgressSupport(progressTracker)
+          .installCoilImageProgressSupport(
+              progressTracker = progressTracker,
+              cookiesStorage = cookiesStorage,
+              userAgentStorage = userAgentStorage,
+          )
           .diskCache {
             DiskCache.Builder()
                 .directory(desktopCoilDiskCachePath())

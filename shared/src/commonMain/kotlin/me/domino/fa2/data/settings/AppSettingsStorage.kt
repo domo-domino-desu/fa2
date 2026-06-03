@@ -80,6 +80,8 @@ class AppSettingsStorage(
     val rawWatchRecommendationPageSize =
         kv.load(KEY_WATCH_RECOMMENDATION_PAGE_SIZE)?.toIntOrNull()
             ?: AppSettings.defaultWatchRecommendationPageSize
+    val logLevel =
+        LogLevelSetting.fromPersistedValue(kv.load(KEY_LOG_LEVEL)) ?: AppSettings.defaultLogLevel
 
     return AppSettings.normalize(
         AppSettings(
@@ -102,6 +104,7 @@ class AppSettingsStorage(
             downloadFileNameMode = downloadFileNameMode,
             downloadCustomFileNameTemplate = downloadCustomFileNameTemplate,
             watchRecommendationPageSize = rawWatchRecommendationPageSize,
+            logLevel = logLevel,
         )
     )
   }
@@ -156,6 +159,7 @@ class AppSettingsStorage(
         KEY_WATCH_RECOMMENDATION_PAGE_SIZE,
         normalized.watchRecommendationPageSize.toString(),
     )
+    kv.save(KEY_LOG_LEVEL, normalized.logLevel.persistedValue)
   }
 
   companion object {
@@ -188,5 +192,6 @@ class AppSettingsStorage(
     const val KEY_DOWNLOAD_CUSTOM_FILE_NAME_TEMPLATE: String =
         "settings.download.customFileNameTemplate"
     const val KEY_WATCH_RECOMMENDATION_PAGE_SIZE: String = "settings.watchRecommendation.pageSize"
+    const val KEY_LOG_LEVEL: String = "settings.logging.level"
   }
 }

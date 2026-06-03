@@ -115,7 +115,7 @@ private fun createCoordinatorFixture(response: HtmlResponseResult): ChallengeCoo
   return ChallengeCoordinatorFixture(
       coordinator =
           CfChallengeCoordinator(
-              sessionStore = sessionStore,
+              sessionStorage = sessionStore,
               cookiesStorage = cookiesStorage,
               userAgentStorage = userAgentStorage,
               cookiePolicy = CloudflareChallengeCookiePolicy(),

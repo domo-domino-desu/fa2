@@ -39,6 +39,33 @@ class AppSettingsStorageTest {
   }
 
   @Test
+  fun logLevelUsesInfoByDefault() = runTest {
+    val storage = createTestStorage().storage
+
+    assertEquals(LogLevelSetting.Info, storage.load().logLevel)
+  }
+
+  @Test
+  fun logLevelRoundTripsSupportedValues() = runTest {
+    val storage = createTestStorage().storage
+
+    LogLevelSetting.entries.forEach { logLevel ->
+      storage.save(AppSettings(logLevel = logLevel))
+
+      assertEquals(logLevel, storage.load().logLevel)
+    }
+  }
+
+  @Test
+  fun logLevelUnknownPersistedValueNormalizesToInfo() = runTest {
+    val testStorage = createTestStorage()
+
+    testStorage.keyValueStorage.save(AppSettingsStorage.KEY_LOG_LEVEL, "not-a-level")
+
+    assertEquals(LogLevelSetting.Info, testStorage.storage.load().logLevel)
+  }
+
+  @Test
   fun savesOpenAiApiKeyOnlyToSecretVault() = runTest {
     val randomSuffix = Random.nextLong().toString().replace('-', '0')
     val tempPath =
@@ -128,4 +155,22 @@ class AppSettingsStorageTest {
         storage.load().downloadCustomFileNameTemplate,
     )
   }
+}
+
+private data class TestAppSettingsStorage(
+    val storage: AppSettingsStorage,
+    val keyValueStorage: KeyValueStorage,
+)
+
+private fun createTestStorage(): TestAppSettingsStorage {
+  val randomSuffix = Random.nextLong().toString().replace('-', '0')
+  val tempPath =
+      "${FileSystem.SYSTEM_TEMPORARY_DIRECTORY}/fa2-settings-$randomSuffix.preferences_pb".toPath()
+  val dataStore = PreferenceDataStoreFactory.createWithPath(produceFile = { tempPath })
+  val keyValueStorage = KeyValueStorage(dataStore)
+  val secretVault = KSafe(fileName = "fa2_settings_secret_$randomSuffix")
+  return TestAppSettingsStorage(
+      storage = AppSettingsStorage(kv = keyValueStorage, secretVault = secretVault),
+      keyValueStorage = keyValueStorage,
+  )
 }

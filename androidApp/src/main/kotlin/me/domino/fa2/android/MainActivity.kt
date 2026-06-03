@@ -12,7 +12,9 @@ import coil3.disk.DiskCache
 import coil3.gif.GifDecoder
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.ImageProgressTracker
+import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.data.network.installCoilImageProgressSupport
 import me.domino.fa2.ui.host.Fa2App
 import okio.Path.Companion.toPath
@@ -39,9 +41,15 @@ class MainActivity : ComponentActivity() {
     setContent {
       setSingletonImageLoaderFactory { platformContext ->
         val progressTracker = GlobalContext.get().get<ImageProgressTracker>()
+        val cookiesStorage = GlobalContext.get().get<FaCookiesStorage>()
+        val userAgentStorage = GlobalContext.get().get<UserAgentStorage>()
         ImageLoader.Builder(platformContext)
             .components { add(GifDecoder.Factory()) }
-            .installCoilImageProgressSupport(progressTracker)
+            .installCoilImageProgressSupport(
+                progressTracker = progressTracker,
+                cookiesStorage = cookiesStorage,
+                userAgentStorage = userAgentStorage,
+            )
             .diskCache {
               DiskCache.Builder()
                   .directory("${platformContext.cacheDir.absolutePath}/coil-image-cache".toPath())

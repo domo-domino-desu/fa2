@@ -5,7 +5,9 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
 import java.io.File
+import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.ImageProgressTracker
+import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.data.network.installCoilImageProgressSupport
 import me.domino.fa2.di.startAppKoin
 import me.domino.fa2.di.stopAppKoin
@@ -42,11 +44,17 @@ internal class DesktopE2eRuntime(
   fun start(composeRule: ComposeContentTestRule) {
     val koin = startAppKoin(desktopE2eTestPlatformModule(profile = profile, stores = stores))
     val progressTracker = koin.get<ImageProgressTracker>()
+    val cookiesStorage = koin.get<FaCookiesStorage>()
+    val userAgentStorage = koin.get<UserAgentStorage>()
     composeRule.setContent {
       setSingletonImageLoaderFactory { platformContext ->
         ensureParentDir(profile.coilCacheDir)
         ImageLoader.Builder(platformContext)
-            .installCoilImageProgressSupport(progressTracker)
+            .installCoilImageProgressSupport(
+                progressTracker = progressTracker,
+                cookiesStorage = cookiesStorage,
+                userAgentStorage = userAgentStorage,
+            )
             .diskCache {
               DiskCache.Builder()
                   .directory(profile.coilCacheDir.absolutePath.toPath())

@@ -62,9 +62,9 @@ import fa2.shared.generated.resources.*
 import kotlinx.coroutines.flow.distinctUntilChanged
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
+import me.domino.fa2.ui.components.AvatarImage
 import me.domino.fa2.ui.components.ExpressiveButton
 import me.domino.fa2.ui.components.ExpressiveTextButton
-import me.domino.fa2.ui.components.NetworkImage
 import me.domino.fa2.ui.components.PaginationRetryBar
 import me.domino.fa2.ui.components.PaginationRetryDirection
 import me.domino.fa2.ui.components.ThumbnailImage
@@ -662,30 +662,12 @@ private fun SubmissionWaterfallItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-          if (item.authorAvatarUrl.isNotBlank()) {
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
-                modifier = Modifier.size(24.dp),
-            ) {
-              NetworkImage(
-                  url = item.authorAvatarUrl,
-                  modifier = Modifier.fillMaxSize().clip(CircleShape),
-              )
-            }
-          } else {
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.75f),
-            ) {
-              Text(
-                  text = item.author.firstOrNull()?.uppercase() ?: "?",
-                  style = MaterialTheme.typography.labelSmall,
-                  color = MaterialTheme.colorScheme.onSecondaryContainer,
-                  modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
-              )
-            }
-          }
+          AvatarImage(
+              url = item.authorAvatarUrl,
+              displayName = item.author,
+              size = 24.dp,
+              placeholderTextStyle = MaterialTheme.typography.labelSmall,
+          )
           Text(
               text = item.author,
               style = MaterialTheme.typography.bodySmall,

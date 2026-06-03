@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -64,6 +63,7 @@ import fa2.shared.generated.resources.*
 import kotlin.math.max
 import kotlin.math.roundToInt
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
+import me.domino.fa2.ui.components.AvatarImage
 import me.domino.fa2.ui.components.CenterCircularWavyImageLoadingProgress
 import me.domino.fa2.ui.components.ExpressiveIconButton
 import me.domino.fa2.ui.components.ImageLoadLifecycleState
@@ -80,6 +80,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 private val imageOcrOverlayLog = FaLog.withTag("ImageOcrOverlay")
+private val submissionZoomImageLog = FaLog.withTag("SubmissionZoomImage")
 
 internal fun submissionImageOcrStateDescriptionRes(
     state: SubmissionImageOcrUiState
@@ -154,9 +155,18 @@ internal fun SubmissionZoomImageOverlay(
             contentScale = ContentScale.Fit,
             filterQuality = FilterQuality.High,
             zoomState = zoomState,
-            onLoading = { _ -> loadLifecycleState = ImageLoadLifecycleState.Loading },
-            onSuccess = { _ -> loadLifecycleState = ImageLoadLifecycleState.Success },
-            onError = { _ -> loadLifecycleState = ImageLoadLifecycleState.Error },
+            onLoading = {
+              loadLifecycleState = ImageLoadLifecycleState.Loading
+              submissionZoomImageLog.d { "详情放大图开始加载 -> url=$normalizedUrl" }
+            },
+            onSuccess = {
+              loadLifecycleState = ImageLoadLifecycleState.Success
+              submissionZoomImageLog.d { "详情放大图加载成功 -> url=$normalizedUrl" }
+            },
+            onError = { state ->
+              loadLifecycleState = ImageLoadLifecycleState.Error
+              submissionZoomImageLog.e(state.result.throwable) { "详情放大图加载失败 -> url=$normalizedUrl" }
+            },
             onTap = {
               if (tapToDismissEnabled) {
                 onDismiss()
@@ -813,26 +823,12 @@ internal fun SubmissionAuthorRow(
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(10.dp),
   ) {
-    Surface(
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.78f),
-    ) {
-      if (authorAvatarUrl.isNotBlank()) {
-        NetworkImage(
-            url = authorAvatarUrl,
-            modifier = Modifier.size(40.dp).clip(CircleShape),
-            contentScale = ContentScale.Crop,
-            showLoadingPlaceholder = false,
-        )
-      } else {
-        Text(
-            text = authorDisplayName.firstOrNull()?.uppercase() ?: "?",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-        )
-      }
-    }
+    AvatarImage(
+        url = authorAvatarUrl,
+        displayName = authorDisplayName,
+        size = 40.dp,
+        placeholderTextStyle = MaterialTheme.typography.titleMedium,
+    )
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
       Text(
           text = authorDisplayName,

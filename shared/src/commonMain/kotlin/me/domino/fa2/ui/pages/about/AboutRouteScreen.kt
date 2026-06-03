@@ -22,6 +22,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -52,16 +53,28 @@ import fa2.shared.generated.resources.about_export_logs_failed
 import fa2.shared.generated.resources.about_export_logs_success
 import fa2.shared.generated.resources.about_libraries
 import fa2.shared.generated.resources.about_license
+import fa2.shared.generated.resources.about_log_level
+import fa2.shared.generated.resources.about_log_level_restart_required
 import fa2.shared.generated.resources.about_project_address
 import fa2.shared.generated.resources.about_project_address_url
 import fa2.shared.generated.resources.about_thanks
 import fa2.shared.generated.resources.about_version
 import fa2.shared.generated.resources.about_version_copied
 import fa2.shared.generated.resources.close
+import fa2.shared.generated.resources.log_level_assert
+import fa2.shared.generated.resources.log_level_debug
+import fa2.shared.generated.resources.log_level_error
+import fa2.shared.generated.resources.log_level_info
+import fa2.shared.generated.resources.log_level_verbose
+import fa2.shared.generated.resources.log_level_warn
+import fa2.shared.generated.resources.save_failed
 import kotlin.coroutines.resume
 import kotlin.time.Clock
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import me.domino.fa2.data.settings.AppSettings
+import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.data.settings.LogLevelSetting
 import me.domino.fa2.generated.AboutMetadata
 import me.domino.fa2.ui.components.LocalShowToast
 import me.domino.fa2.ui.components.accessibilityHeading
@@ -80,6 +93,7 @@ import me.domino.fa2.ui.layouts.AboutRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.util.logging.FaLog
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 
 private const val aboutProjectUrl = "https://github.com/domo-domino-desu/fa2"
 private const val furAffinityAppUrl = "https://github.com/Ceylo/FurAffinityApp"
@@ -94,6 +108,7 @@ class AboutRouteScreen : Screen {
     val navigator = LocalNavigator.currentOrThrow
     val uriHandler = LocalUriHandler.current
     val settings = LocalAppSettings.current
+    val settingsService = koinInject<AppSettingsService>()
     val showToast = LocalShowToast.current
     val copyTextToClipboard = rememberPlatformTextCopier()
     val writeTextFile = rememberPlatformTextFileWriter()
@@ -102,7 +117,10 @@ class AboutRouteScreen : Screen {
     val versionCopiedText = stringResource(Res.string.about_version_copied)
     val exportLogsFailedText = stringResource(Res.string.about_export_logs_failed)
     val exportLogsSuccessText = stringResource(Res.string.about_export_logs_success)
+    val logLevelRestartRequiredText = stringResource(Res.string.about_log_level_restart_required)
+    val saveFailedText = stringResource(Res.string.save_failed)
     var licenseDialogVisible by remember { mutableStateOf(false) }
+    var logLevelDialogVisible by remember { mutableStateOf(false) }
     var exportingLogs by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -143,6 +161,12 @@ class AboutRouteScreen : Screen {
                           icon = FaMaterialSymbols.Outlined.Attribution,
                           title = stringResource(Res.string.about_license),
                           onClick = { licenseDialogVisible = true },
+                      ),
+                      AboutActionItem(
+                          icon = FaMaterialSymbols.Outlined.Troubleshoot,
+                          title = stringResource(Res.string.about_log_level),
+                          subtitle = logLevelLabel(settings.logLevel),
+                          onClick = { logLevelDialogVisible = true },
                       ),
                       AboutActionItem(
                           icon = FaMaterialSymbols.Outlined.OutputCircle,
@@ -199,6 +223,29 @@ class AboutRouteScreen : Screen {
 
     if (licenseDialogVisible) {
       LicenseDialog(onDismiss = { licenseDialogVisible = false })
+    }
+    if (logLevelDialogVisible) {
+      LogLevelDialog(
+          selected = settings.logLevel,
+          onDismiss = { logLevelDialogVisible = false },
+          onSelect = { logLevel ->
+            if (logLevel == settings.logLevel) {
+              logLevelDialogVisible = false
+              return@LogLevelDialog
+            }
+            coroutineScope.launch {
+              runCatching { settingsService.updateLogLevel(logLevel) }
+                  .onSuccess {
+                    showToast(logLevelRestartRequiredText)
+                    logLevelDialogVisible = false
+                  }
+                  .onFailure { error ->
+                    val detail = error.message ?: error::class.simpleName.orEmpty()
+                    showToast(saveFailedText.format(detail))
+                  }
+            }
+          },
+      )
     }
   }
 }
@@ -312,6 +359,53 @@ private fun AboutActionRow(
     )
   }
 }
+
+@Composable
+private fun LogLevelDialog(
+    selected: LogLevelSetting,
+    onDismiss: () -> Unit,
+    onSelect: (LogLevelSetting) -> Unit,
+) {
+  AlertDialog(
+      onDismissRequest = onDismiss,
+      title = { Text(text = stringResource(Res.string.about_log_level)) },
+      text = {
+        Column {
+          AppSettings.supportedLogLevels.forEach { logLevel ->
+            Row(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .clickable { onSelect(logLevel) }
+                        .padding(vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+              RadioButton(selected = logLevel == selected, onClick = { onSelect(logLevel) })
+              Text(
+                  text = logLevelLabel(logLevel),
+                  style = MaterialTheme.typography.bodyLarge,
+              )
+            }
+          }
+        }
+      },
+      confirmButton = {
+        TextButton(onClick = onDismiss) { Text(text = stringResource(Res.string.close)) }
+      },
+      dismissButton = {},
+  )
+}
+
+@Composable
+private fun logLevelLabel(logLevel: LogLevelSetting): String =
+    when (logLevel) {
+      LogLevelSetting.Verbose -> stringResource(Res.string.log_level_verbose)
+      LogLevelSetting.Debug -> stringResource(Res.string.log_level_debug)
+      LogLevelSetting.Info -> stringResource(Res.string.log_level_info)
+      LogLevelSetting.Warn -> stringResource(Res.string.log_level_warn)
+      LogLevelSetting.Error -> stringResource(Res.string.log_level_error)
+      LogLevelSetting.Assert -> stringResource(Res.string.log_level_assert)
+    }
 
 @Composable
 private fun ThanksSection(onOpenFurAffinityApp: () -> Unit) {

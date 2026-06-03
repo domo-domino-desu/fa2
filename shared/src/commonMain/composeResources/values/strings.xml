@@ -278,6 +278,14 @@
   <string name="about_export_logs_summary">Export the current runtime logs to a text file</string>
   <string name="about_export_logs_success">Logs exported: %1$s</string>
   <string name="about_export_logs_failed">Log export failed: %1$s</string>
+  <string name="about_log_level">Log level</string>
+  <string name="about_log_level_restart_required">Log level saved. Restart the app to apply it.</string>
+  <string name="log_level_verbose">Verbose</string>
+  <string name="log_level_debug">Debug</string>
+  <string name="log_level_info">Info</string>
+  <string name="log_level_warn">Warn</string>
+  <string name="log_level_error">Error</string>
+  <string name="log_level_assert">Assert</string>
   <string name="about_thanks">Thanks</string>
   <string name="about_acknowledgements_furaffinity_app">FurAffinityApp</string>
   <string name="about_acknowledgements_transfur_bar">百度贴吧Transfur吧</string>
