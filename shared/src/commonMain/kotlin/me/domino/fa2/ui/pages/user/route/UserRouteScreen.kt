@@ -26,6 +26,7 @@ import me.domino.fa2.ui.pages.user.profile.UserHeaderCard
 import me.domino.fa2.ui.pages.user.profile.UserScreenModel
 import me.domino.fa2.ui.pages.user.shout.UserShoutsRouteScreen
 import me.domino.fa2.ui.pages.user.watchlist.UserWatchlistRouteScreen
+import me.domino.fa2.ui.pages.watchrecommendation.SimilarUsersRouteScreen
 import me.domino.fa2.util.FaUrls
 import org.koin.core.parameter.parametersOf
 
@@ -58,6 +59,7 @@ class UserRouteScreen(
           onBack = { parentNavigator.pop() },
           onGoHome = { parentNavigator.goBackHome() },
           shareUrl = FaUrls.user(username),
+          onExploreSimilarUsers = { parentNavigator.push(SimilarUsersRouteScreen(username)) },
           onTitleClick = { scrollToTopVersion.longValue++ },
       )
 

@@ -14,6 +14,7 @@ import me.domino.fa2.ui.pages.user.profile.UserScreenModel
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.pages.user.shout.UserShoutsScreenModel
 import me.domino.fa2.ui.pages.user.watchlist.UserWatchlistScreenModel
+import me.domino.fa2.ui.pages.watchrecommendation.SimilarUsersScreenModel
 import me.domino.fa2.ui.pages.watchrecommendation.WatchRecommendationBlocklistScreenModel
 import me.domino.fa2.ui.pages.watchrecommendation.WatchRecommendationScreenModel
 import org.koin.core.module.Module
@@ -91,6 +92,14 @@ fun screenModelModule(): Module = module {
   factory { WatchRecommendationBlocklistScreenModel(get()) }
   factory { (username: String) ->
     WatchRecommendationScreenModel(
+        username = username,
+        recommendationService = get(),
+        blocklistRepository = get(),
+        settingsService = get(),
+    )
+  }
+  factory { (username: String) ->
+    SimilarUsersScreenModel(
         username = username,
         recommendationService = get(),
         blocklistRepository = get(),

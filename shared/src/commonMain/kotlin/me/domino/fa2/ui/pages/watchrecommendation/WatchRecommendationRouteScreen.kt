@@ -39,6 +39,7 @@ import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.pages.user.route.UserRouteScreen
 import me.domino.fa2.ui.pages.user.watchlist.WatchlistStatusCard
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
 
@@ -65,11 +66,15 @@ class WatchRecommendationRouteScreen(
 
       when (val snapshot = state) {
         WatchRecommendationUiState.Idle -> {
-          WatchRecommendationIdleContent(onStart = screenModel::loadRecommendations)
+          RecommendationIdleContent(
+              description = Res.string.following_recommendation_description,
+              action = Res.string.following_recommendation_action,
+              onStart = screenModel::loadRecommendations,
+          )
         }
 
         WatchRecommendationUiState.Loading -> {
-          WatchRecommendationLoadingContent()
+          RecommendationLoadingContent()
         }
 
         is WatchRecommendationUiState.Error -> {
@@ -94,6 +99,7 @@ class WatchRecommendationRouteScreen(
           WatchRecommendationSuccessContent(
               state = snapshot,
               listState = listState,
+              emptyMessage = Res.string.following_recommendation_empty,
               onRefresh = screenModel::refreshRecommendations,
               onRetry = screenModel::loadRecommendations,
               onBlockUser = screenModel::blockRecommendation,
@@ -113,7 +119,11 @@ class WatchRecommendationRouteScreen(
 }
 
 @Composable
-private fun WatchRecommendationIdleContent(onStart: () -> Unit) {
+internal fun RecommendationIdleContent(
+    description: StringResource,
+    action: StringResource,
+    onStart: () -> Unit,
+) {
   Box(
       modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp),
       contentAlignment = Alignment.Center,
@@ -124,19 +134,17 @@ private fun WatchRecommendationIdleContent(onStart: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
       Text(
-          text = stringResource(Res.string.following_recommendation_description),
+          text = stringResource(description),
           style = MaterialTheme.typography.bodyLarge,
       )
-      ExpressiveFilledTonalButton(onClick = onStart) {
-        Text(text = stringResource(Res.string.following_recommendation_action))
-      }
+      ExpressiveFilledTonalButton(onClick = onStart) { Text(text = stringResource(action)) }
     }
   }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun WatchRecommendationLoadingContent() {
+internal fun RecommendationLoadingContent() {
   Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
     LoadingIndicator(
         modifier = Modifier.fillMaxWidth(0.4f),
@@ -147,9 +155,10 @@ private fun WatchRecommendationLoadingContent() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun WatchRecommendationSuccessContent(
+internal fun WatchRecommendationSuccessContent(
     state: WatchRecommendationUiState.Success,
     listState: androidx.compose.foundation.lazy.LazyListState,
+    emptyMessage: StringResource,
     onRefresh: () -> Unit,
     onRetry: () -> Unit,
     onBlockUser: (String) -> Unit,
@@ -181,7 +190,7 @@ private fun WatchRecommendationSuccessContent(
         item("watch-recommendation-empty") {
           WatchlistStatusCard(
               title = stringResource(Res.string.no_content),
-              body = stringResource(Res.string.following_recommendation_empty),
+              body = stringResource(emptyMessage),
               onRetry = onRetry,
           )
         }

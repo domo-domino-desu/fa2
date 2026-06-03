@@ -71,6 +71,13 @@
     Pull to refresh and try another sample.</string>
   <string name="following_recommendation_load_failed">Failed to generate follow recommendations.
     Please retry.</string>
+  <string name="similar_users">Similar Users</string>
+  <string name="similar_users_description">Randomly sample this user's followers, then find users
+    they commonly follow.</string>
+  <string name="similar_users_action">Find similar users</string>
+  <string name="similar_users_empty">No similar users were found this time. Pull to refresh and try
+    another sample.</string>
+  <string name="similar_users_load_failed">Failed to find similar users. Please retry.</string>
   <string name="following_recommendation_blocklist">Hidden Recommendations</string>
   <string name="following_recommendation_blocklist_summary">Manage users hidden from follow
     recommendations</string>

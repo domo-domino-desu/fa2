@@ -52,32 +52,62 @@ class WatchRecommendationService(
   suspend fun recommend(
       username: String,
       recommendationCount: Int,
+  ): List<RecommendedWatchUser> =
+      recommendFromSources(
+          username = username,
+          recommendationCount = recommendationCount,
+          sourceCategory = WatchlistCategory.Watching,
+          excludeSourceUsers = true,
+          logLabel = "关注推荐",
+      )
+
+  /** 基于指定用户的关注者，为该用户发现相似用户。 */
+  suspend fun recommendFromFollowers(
+      username: String,
+      recommendationCount: Int,
+  ): List<RecommendedWatchUser> =
+      recommendFromSources(
+          username = username,
+          recommendationCount = recommendationCount,
+          sourceCategory = WatchlistCategory.WatchedBy,
+          excludeSourceUsers = false,
+          logLabel = "相似用户",
+      )
+
+  private suspend fun recommendFromSources(
+      username: String,
+      recommendationCount: Int,
+      sourceCategory: WatchlistCategory,
+      excludeSourceUsers: Boolean,
+      logLabel: String,
   ): List<RecommendedWatchUser> {
     if (recommendationCount <= 0) return emptyList()
 
     val normalizedUsername = username.trim()
     val throttle = SequentialRequestThrottle(requestThrottleMs)
-    val following =
-        loadCompleteWatching(
+    val sourceUsers =
+        loadCompleteWatchlist(
             username = normalizedUsername,
+            category = sourceCategory,
             throttle = throttle,
             skipOnFailure = false,
         ) ?: return emptyList()
 
-    if (following.isEmpty()) {
-      log.i { "关注推荐 -> 当前账号未关注任何人(user=$normalizedUsername)" }
+    if (sourceUsers.isEmpty()) {
+      log.i { "$logLabel -> 没有可抽样用户(user=$normalizedUsername,category=$sourceCategory)" }
       return emptyList()
     }
 
-    val followingByKey = linkedMapOf<String, WatchlistUser>()
-    following.forEach { user -> followingByKey.putIfAbsent(user.username.lowercase(), user) }
+    val sourcesByKey = linkedMapOf<String, WatchlistUser>()
+    sourceUsers.forEach { user -> sourcesByKey.putIfAbsent(user.username.lowercase(), user) }
     val blockedUsernames = blocklistRepository.loadBlockedUsernameSet()
     val excludedUsernames =
-        followingByKey.keys.toMutableSet().apply {
+        mutableSetOf<String>().apply {
           add(normalizedUsername.lowercase())
+          if (excludeSourceUsers) addAll(sourcesByKey.keys)
           addAll(blockedUsernames)
         }
-    val sampledUsers = followingByKey.values.shuffled(random)
+    val sampledUsers = sourcesByKey.values.shuffled(random)
 
     var bestCandidates: List<RecommendedWatchUser> = emptyList()
     repeat(maxRounds) { round ->
@@ -89,8 +119,9 @@ class WatchRecommendationService(
       val counts = linkedMapOf<String, MutableRecommendedWatchUser>()
       sources.forEach { source ->
         val watchedUsers =
-            loadCompleteWatching(
+            loadCompleteWatchlist(
                 username = source.username,
+                category = WatchlistCategory.Watching,
                 throttle = throttle,
                 skipOnFailure = true,
             ) ?: return@forEach
@@ -129,7 +160,7 @@ class WatchRecommendationService(
 
       bestCandidates = roundCandidates
       log.i {
-        "关注推荐 -> 第${round + 1}轮(user=$normalizedUsername,sample=${sources.size},threshold=$minimumSharedFollowers,candidates=${roundCandidates.size},blocked=${blockedUsernames.size})"
+        "$logLabel -> 第${round + 1}轮(user=$normalizedUsername,sample=${sources.size},threshold=$minimumSharedFollowers,candidates=${roundCandidates.size},blocked=${blockedUsernames.size})"
       }
       if (roundCandidates.size >= recommendationCount || minimumSharedFollowers <= 1) {
         return roundCandidates.take(recommendationCount)
@@ -139,9 +170,10 @@ class WatchRecommendationService(
     return bestCandidates.take(recommendationCount)
   }
 
-  /** 遍历分页加载指定用户的完整关注列表。 */
-  private suspend fun loadCompleteWatching(
+  /** 遍历分页加载指定用户的完整 watchlist。 */
+  private suspend fun loadCompleteWatchlist(
       username: String,
+      category: WatchlistCategory,
       throttle: SequentialRequestThrottle,
       skipOnFailure: Boolean,
   ): List<WatchlistUser>? {
@@ -153,7 +185,7 @@ class WatchRecommendationService(
           val result =
               loadWatchlistPage(
                   username,
-                  WatchlistCategory.Watching,
+                  category,
                   nextPageUrl,
               )
       ) {
@@ -169,7 +201,7 @@ class WatchRecommendationService(
 
         PageState.CfChallenge -> {
           if (skipOnFailure) {
-            log.w { "关注推荐 -> 跳过用户(Cloudflare,user=$username)" }
+            log.w { "推荐计算 -> 跳过用户(Cloudflare,user=$username,category=$category)" }
             return null
           }
           error("Cloudflare verification required")
@@ -177,7 +209,7 @@ class WatchRecommendationService(
 
         is PageState.AuthRequired -> {
           if (skipOnFailure) {
-            log.w { "关注推荐 -> 跳过用户(需要登录,user=$username)" }
+            log.w { "推荐计算 -> 跳过用户(需要登录,user=$username,category=$category)" }
             return null
           }
           error(result.message)
@@ -185,7 +217,7 @@ class WatchRecommendationService(
 
         is PageState.MatureBlocked -> {
           if (skipOnFailure) {
-            log.w { "关注推荐 -> 跳过用户(受限,user=$username,reason=${result.reason})" }
+            log.w { "推荐计算 -> 跳过用户(受限,user=$username,category=$category,reason=${result.reason})" }
             return null
           }
           error(result.reason)
@@ -193,7 +225,7 @@ class WatchRecommendationService(
 
         is PageState.Error -> {
           if (skipOnFailure) {
-            log.w(result.exception) { "关注推荐 -> 跳过用户(失败,user=$username)" }
+            log.w(result.exception) { "推荐计算 -> 跳过用户(失败,user=$username,category=$category)" }
             return null
           }
           throw result.exception

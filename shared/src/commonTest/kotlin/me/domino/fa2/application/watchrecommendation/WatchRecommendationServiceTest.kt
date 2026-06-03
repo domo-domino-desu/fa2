@@ -237,6 +237,99 @@ class WatchRecommendationServiceTest {
     assertEquals(listOf("artist-a"), blocklistRepository.listBlockedUsernames())
   }
 
+  @Test
+  fun similarUsersStartFromFollowersAndRankCommonFollowing() = runTest {
+    val followers = (1..10).map(::sourceUser)
+    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    responses[LoaderKey("artist", null, WatchlistCategory.WatchedBy)] = successPage(followers)
+    followers.forEachIndexed { index, follower ->
+      responses[LoaderKey(follower.username, null)] =
+          successPage(
+              buildList {
+                add(candidateUser("common-a"))
+                if (index < 8) add(candidateUser("common-b"))
+                if (index < 6) add(candidateUser("common-c"))
+              }
+          )
+    }
+
+    val service = buildService(responses)
+
+    val result = service.recommendFromFollowers(username = "artist", recommendationCount = 3)
+
+    assertEquals(listOf("common-a", "common-b", "common-c"), result.map { it.user.username })
+    assertEquals(listOf(10, 8, 6), result.map { it.sharedFollowCount })
+  }
+
+  @Test
+  fun similarUsersExcludeSelfAndBlockedButNotFollowers() = runTest {
+    val followers = (1..10).map(::sourceUser)
+    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    responses[LoaderKey("artist", null, WatchlistCategory.WatchedBy)] = successPage(followers)
+    followers.forEach { follower ->
+      responses[LoaderKey(follower.username, null)] =
+          successPage(
+              listOf(
+                  watchUser("artist"),
+                  watchUser("source1"),
+                  candidateUser("blocked-user"),
+                  candidateUser("visible-user"),
+              )
+          )
+    }
+    val blocklistRepository =
+        FakeWatchRecommendationBlocklistRepository(initialUsernames = listOf("blocked-user"))
+    val service = buildService(responses, blocklistRepository)
+
+    val result = service.recommendFromFollowers(username = "artist", recommendationCount = 5)
+
+    assertEquals(listOf("source1", "visible-user"), result.map { it.user.username })
+  }
+
+  @Test
+  fun similarUsersFailWhenFollowersCannotBeLoaded() = runTest {
+    val responses =
+        mutableMapOf(
+            LoaderKey("artist", null, WatchlistCategory.WatchedBy) to
+                PageState.Error(IllegalStateException("missing followers"))
+        )
+    val service = buildService(responses)
+
+    val error =
+        assertFailsWith<IllegalStateException> {
+          service.recommendFromFollowers(username = "artist", recommendationCount = 10)
+        }
+
+    assertEquals("missing followers", error.message)
+  }
+
+  @Test
+  fun similarUsersSkipFollowersThatFailToLoadFollowing() = runTest {
+    val followers = (1..10).map(::sourceUser)
+    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    responses[LoaderKey("artist", null, WatchlistCategory.WatchedBy)] = successPage(followers)
+    followers.forEachIndexed { index, follower ->
+      responses[LoaderKey(follower.username, null)] =
+          if (index < 2) {
+            PageState.Error(IllegalStateException("boom-${follower.username}"))
+          } else {
+            successPage(
+                buildList {
+                  add(candidateUser("common-a"))
+                  if (index < 6) add(candidateUser("common-b"))
+                }
+            )
+          }
+    }
+
+    val service = buildService(responses)
+
+    val result = service.recommendFromFollowers(username = "artist", recommendationCount = 2)
+
+    assertEquals(listOf("common-a", "common-b"), result.map { it.user.username })
+    assertEquals(listOf(8, 4), result.map { it.sharedFollowCount })
+  }
+
   private fun buildService(
       responses: Map<LoaderKey, PageState<WatchlistPage>>,
       blocklistRepository: WatchRecommendationBlocklistRepository =
@@ -244,10 +337,9 @@ class WatchRecommendationServiceTest {
   ): WatchRecommendationService =
       WatchRecommendationService(
           loadWatchlistPage = { username, category, nextPageUrl ->
-            require(category == WatchlistCategory.Watching)
-            responses[LoaderKey(username.lowercase(), nextPageUrl)]
+            responses[LoaderKey(username.lowercase(), nextPageUrl, category)]
                 ?: PageState.Error(
-                    IllegalStateException("missing response for $username::$nextPageUrl")
+                    IllegalStateException("missing response for $username::$category::$nextPageUrl")
                 )
           },
           blocklistRepository = blocklistRepository,
@@ -276,6 +368,7 @@ class WatchRecommendationServiceTest {
 private data class LoaderKey(
     val username: String,
     val nextPageUrl: String?,
+    val category: WatchlistCategory = WatchlistCategory.Watching,
 )
 
 private class FakeWatchRecommendationBlocklistRepository(

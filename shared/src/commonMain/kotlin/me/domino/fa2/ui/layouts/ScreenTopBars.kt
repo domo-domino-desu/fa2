@@ -220,9 +220,18 @@ fun UserRouteTopBar(
     onBack: () -> Unit,
     onGoHome: () -> Unit,
     shareUrl: String,
+    onExploreSimilarUsers: (() -> Unit)? = null,
     onTitleClick: (() -> Unit)? = null,
 ) {
   RouteTopBar(title = title, onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick) {
+    if (onExploreSimilarUsers != null) {
+      ExpressiveIconButton(onClick = onExploreSimilarUsers) {
+        Icon(
+            imageVector = FaMaterialSymbols.Outlined.Explore,
+            contentDescription = stringResource(Res.string.similar_users),
+        )
+      }
+    }
     TopBarShareAction(url = shareUrl)
   }
 }
@@ -287,6 +296,20 @@ fun WatchRecommendationBlocklistRouteTopBar(
 ) {
   RouteTopBar(
       title = stringResource(Res.string.following_recommendation_blocklist),
+      onBack = onBack,
+      onGoHome = onGoHome,
+      onTitleClick = onTitleClick,
+  )
+}
+
+@Composable
+fun SimilarUsersRouteTopBar(
+    onBack: () -> Unit,
+    onGoHome: () -> Unit,
+    onTitleClick: (() -> Unit)? = null,
+) {
+  RouteTopBar(
+      title = stringResource(Res.string.similar_users),
       onBack = onBack,
       onGoHome = onGoHome,
       onTitleClick = onTitleClick,
