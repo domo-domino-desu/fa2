@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,14 +15,15 @@ import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
 import me.domino.fa2.data.settings.DownloadFileNameMode
+import me.domino.fa2.data.settings.MetadataDisplayMode
 import me.domino.fa2.data.settings.TranslationProvider
 import me.domino.fa2.ui.components.ExpressiveTextButton
 import me.domino.fa2.ui.components.platform.rememberPlatformDirectoryPicker
 import me.domino.fa2.ui.components.settings.SettingsDropdownField
 import me.domino.fa2.ui.components.settings.SettingsGroup
-import me.domino.fa2.ui.components.settings.SettingsListItem
+import me.domino.fa2.ui.components.settings.SettingsInputRow
+import me.domino.fa2.ui.components.settings.SettingsNavigationRow
 import me.domino.fa2.ui.components.settings.SettingsSwitchRow
-import me.domino.fa2.ui.icons.FaMaterialSymbols
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -34,7 +34,7 @@ internal fun AppearanceSettingsSection(
   SettingsGroup(title = stringResource(Res.string.appearance), framed = false) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
       SettingsDropdownField(
           label = stringResource(Res.string.theme_mode),
@@ -52,22 +52,12 @@ internal fun AppearanceSettingsSection(
           onSelect = { selected -> onDraftChange(draft.copy(uiLanguage = selected)) },
       )
 
-      OutlinedTextField(
+      SettingsInputRow(
           value = draft.waterfallMinCardWidthInput,
           onValueChange = { next ->
             onDraftChange(draft.copy(waterfallMinCardWidthInput = next.filter(Char::isDigit)))
           },
-          label = { Text(stringResource(Res.string.waterfall_min_column_width_dp)) },
-          supportingText = {
-            Text(
-                stringResource(
-                    Res.string.waterfall_min_column_width_range,
-                    AppSettings.minWaterfallMinCardWidthDp,
-                    AppSettings.maxWaterfallMinCardWidthDp,
-                )
-            )
-          },
-          modifier = Modifier.fillMaxWidth(),
+          label = stringResource(Res.string.waterfall_min_column_width_dp),
       )
 
       SettingsSwitchRow(
@@ -91,7 +81,7 @@ internal fun TranslationSettingsSection(
   SettingsGroup(title = stringResource(Res.string.translation), framed = false) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
       SettingsSwitchRow(
           label = stringResource(Res.string.enable_translation),
@@ -118,62 +108,62 @@ internal fun TranslationSettingsSection(
             },
         )
 
-        SettingsDropdownField(
-            label = stringResource(Res.string.metadata_display),
-            selected = draft.metadataDisplayMode,
-            options = AppSettings.supportedMetadataDisplayModes,
-            optionLabel = { option -> metadataDisplayModeLabel(option) },
-            onSelect = { selected -> onDraftChange(draft.copy(metadataDisplayMode = selected)) },
+        SettingsSwitchRow(
+            label = stringResource(Res.string.field_translation),
+            checked = draft.metadataDisplayMode == MetadataDisplayMode.TRANSLATED,
+            onCheckedChange = { enabled ->
+              onDraftChange(
+                  draft.copy(
+                      metadataDisplayMode =
+                          if (enabled) {
+                            MetadataDisplayMode.TRANSLATED
+                          } else {
+                            MetadataDisplayMode.ORIGINAL
+                          }
+                  )
+              )
+            },
         )
 
-        OutlinedTextField(
+        SettingsInputRow(
             value = draft.chunkWordLimitInput,
             onValueChange = { next ->
               onDraftChange(draft.copy(chunkWordLimitInput = next.filter(Char::isDigit)))
             },
-            label = { Text(stringResource(Res.string.chunk_word_limit)) },
-            supportingText = {
-              Text(
-                  stringResource(
-                      Res.string.numeric_range,
-                      AppSettings.minTranslationChunkWordLimit,
-                      AppSettings.maxTranslationChunkWordLimit,
-                  )
-              )
-            },
-            modifier = Modifier.fillMaxWidth(),
+            label = stringResource(Res.string.chunk_word_limit),
+            supportingText =
+                stringResource(
+                    Res.string.numeric_range,
+                    AppSettings.minTranslationChunkWordLimit,
+                    AppSettings.maxTranslationChunkWordLimit,
+                ),
         )
 
-        OutlinedTextField(
+        SettingsInputRow(
             value = draft.maxConcurrencyInput,
             onValueChange = { next ->
               onDraftChange(draft.copy(maxConcurrencyInput = next.filter(Char::isDigit)))
             },
-            label = { Text(stringResource(Res.string.max_concurrency)) },
-            supportingText = {
-              Text(
-                  stringResource(
-                      Res.string.numeric_range,
-                      AppSettings.minTranslationMaxConcurrency,
-                      AppSettings.maxTranslationMaxConcurrency,
-                  )
-              )
-            },
-            modifier = Modifier.fillMaxWidth(),
+            label = stringResource(Res.string.max_concurrency),
+            supportingText =
+                stringResource(
+                    Res.string.numeric_range,
+                    AppSettings.minTranslationMaxConcurrency,
+                    AppSettings.maxTranslationMaxConcurrency,
+                ),
         )
 
         if (draft.translationProvider == TranslationProvider.OPENAI_COMPATIBLE) {
-          OutlinedTextField(
+          SettingsInputRow(
               value = draft.openAiBaseUrl,
               onValueChange = { next -> onDraftChange(draft.copy(openAiBaseUrl = next)) },
-              label = { Text(stringResource(Res.string.base_url)) },
-              modifier = Modifier.fillMaxWidth(),
+              label = stringResource(Res.string.base_url),
           )
 
-          OutlinedTextField(
+          SettingsInputRow(
               value = draft.openAiApiKey,
               onValueChange = { next -> onDraftChange(draft.copy(openAiApiKey = next)) },
-              label = { Text(stringResource(Res.string.api_key)) },
+              label = stringResource(Res.string.api_key),
               visualTransformation =
                   if (showApiKey) {
                     VisualTransformation.None
@@ -188,23 +178,21 @@ internal fun TranslationSettingsSection(
                   )
                 }
               },
-              modifier = Modifier.fillMaxWidth(),
           )
 
-          OutlinedTextField(
+          SettingsInputRow(
               value = draft.openAiModel,
               onValueChange = { next -> onDraftChange(draft.copy(openAiModel = next)) },
-              label = { Text(stringResource(Res.string.model)) },
-              modifier = Modifier.fillMaxWidth(),
+              label = stringResource(Res.string.model),
           )
 
-          OutlinedTextField(
+          SettingsInputRow(
               value = draft.openAiPromptTemplate,
               onValueChange = { next -> onDraftChange(draft.copy(openAiPromptTemplate = next)) },
-              label = { Text(stringResource(Res.string.prompt_template)) },
-              supportingText = { Text(stringResource(Res.string.prompt_template_variables_hint)) },
+              label = stringResource(Res.string.prompt_template),
+              supportingText = stringResource(Res.string.prompt_template_variables_hint),
+              singleLine = false,
               minLines = 5,
-              modifier = Modifier.fillMaxWidth(),
           )
         }
       }
@@ -225,19 +213,15 @@ internal fun DownloadSettingsSection(
   SettingsGroup(title = stringResource(Res.string.download_settings), framed = false) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
-      OutlinedTextField(
-          value = draft.downloadSavePath,
-          onValueChange = {},
-          readOnly = true,
-          label = { Text(stringResource(Res.string.download_save_path)) },
-          supportingText = { Text(stringResource(Res.string.download_save_path_required_hint)) },
-          modifier = Modifier.fillMaxWidth(),
+      SettingsNavigationRow(
+          title = stringResource(Res.string.download_save_path),
+          subtitle =
+              draft.downloadSavePath.takeIf { it.isNotBlank() }
+                  ?: stringResource(Res.string.accessibility_not_set),
+          onClick = triggerDirectoryPicker,
       )
-      ExpressiveTextButton(onClick = triggerDirectoryPicker) {
-        Text(stringResource(Res.string.choose_save_path))
-      }
 
       SettingsSwitchRow(
           label = stringResource(Res.string.download_allow_media_indexing),
@@ -264,16 +248,13 @@ internal fun DownloadSettingsSection(
       )
 
       if (draft.downloadFileNameMode == DownloadFileNameMode.CUSTOM) {
-        OutlinedTextField(
+        SettingsInputRow(
             value = draft.downloadCustomFileNameTemplate,
             onValueChange = { next ->
               onDraftChange(draft.copy(downloadCustomFileNameTemplate = next))
             },
-            label = { Text(stringResource(Res.string.download_file_name_template)) },
-            supportingText = {
-              Text(stringResource(Res.string.download_file_name_template_variables_hint))
-            },
-            modifier = Modifier.fillMaxWidth(),
+            label = stringResource(Res.string.download_file_name_template),
+            supportingText = stringResource(Res.string.download_file_name_template_variables_hint),
         )
       }
     }
@@ -289,32 +270,26 @@ internal fun RecommendationSettingsSection(
   SettingsGroup(title = stringResource(Res.string.following_recommendation), framed = false) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
-      OutlinedTextField(
+      SettingsInputRow(
           value = draft.watchRecommendationPageSizeInput,
           onValueChange = { next ->
             onDraftChange(draft.copy(watchRecommendationPageSizeInput = next.filter(Char::isDigit)))
           },
-          label = { Text(stringResource(Res.string.watch_recommendation_page_size)) },
-          supportingText = {
-            Text(
-                stringResource(
-                    Res.string.numeric_range,
-                    AppSettings.minWatchRecommendationPageSize,
-                    AppSettings.maxWatchRecommendationPageSize,
-                )
-            )
-          },
-          modifier = Modifier.fillMaxWidth(),
+          label = stringResource(Res.string.watch_recommendation_page_size),
+          supportingText =
+              stringResource(
+                  Res.string.numeric_range,
+                  AppSettings.minWatchRecommendationPageSize,
+                  AppSettings.maxWatchRecommendationPageSize,
+              ),
       )
 
-      SettingsListItem(
-          icon = FaMaterialSymbols.Outlined.Inventory2,
+      SettingsNavigationRow(
           title = stringResource(Res.string.following_recommendation_blocklist),
           subtitle = stringResource(Res.string.following_recommendation_blocklist_summary),
           onClick = onOpenBlocklistManager,
-          showDivider = false,
       )
     }
   }
@@ -328,7 +303,7 @@ internal fun BlockedContentSettingsSection(
   SettingsGroup(title = stringResource(Res.string.blocked_content), framed = false) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
       SettingsSwitchRow(
           label = stringResource(Res.string.blur_blocked_submissions_in_waterfalls),

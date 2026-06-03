@@ -111,7 +111,7 @@ internal data class SettingsDraft(
     val themeModeLabel = appString(Res.string.theme_mode)
     val appLanguageLabel = appString(Res.string.app_language)
     val translationTargetLanguageLabel = appString(Res.string.translation_target_language)
-    val metadataDisplayLabel = appString(Res.string.metadata_display)
+    val metadataDisplayLabel = appString(Res.string.field_translation)
     val blurInWaterfallsLabel = appString(Res.string.blur_blocked_submissions_in_waterfalls)
     val blurInDetailPagesLabel = appString(Res.string.blur_blocked_submissions_in_detail_pages)
     val downloadSubfolderModeLabel = appString(Res.string.download_subfolder_mode)

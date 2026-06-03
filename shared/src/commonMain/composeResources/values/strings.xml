@@ -27,7 +27,7 @@
   <string name="loading_settings">Loading settings...</string>
   <string name="save_failed_enter_valid_numbers">Save failed: enter valid numbers</string>
   <string name="download">Download</string>
-  <string name="appearance">Appearance</string>
+  <string name="appearance">Appearance Settings</string>
   <string name="theme_mode">Theme Mode</string>
   <string name="app_language">App Language</string>
   <string name="browse_filters">Browse Filters</string>
@@ -61,7 +61,7 @@
   <string name="no_records">No records yet</string>
   <string name="settings_summary">Theme, download, waterfall width, and translation settings</string>
   <string name="following_more_summary">Open the users this account is following</string>
-  <string name="following_recommendation">Follow Recommendations</string>
+  <string name="following_recommendation">Follow Recommendation Features</string>
   <string name="following_recommendation_summary">Discover new users from the people you already
     follow</string>
   <string name="following_recommendation_description">Randomly sample people you follow, then find
@@ -211,12 +211,12 @@
   <string name="processing">Processing...</string>
   <string name="chunk_word_limit">Chunk Word Limit</string>
   <string name="max_concurrency">Max Concurrency</string>
-  <string name="translation">Translation</string>
+  <string name="translation">Translation Features</string>
   <string name="provider">Provider</string>
   <string name="enable_translation">Enable translation</string>
   <string name="translation_target_language">Translation Target Language</string>
-  <string name="metadata_display">Category/Type/Species/Gender/Rating Display</string>
-  <string name="waterfall_min_column_width_dp">Waterfall Min Column Width (dp)</string>
+  <string name="field_translation">Field Translation</string>
+  <string name="waterfall_min_column_width_dp">Card Width</string>
   <string name="watch_recommendation_page_size">Recommendations Per Run</string>
   <string name="base_url">Base URL</string>
   <string name="api_key">API Key</string>
@@ -225,7 +225,6 @@
   <string name="prompt_template_variables_hint">Supports {INPUT} {TARGET_LANG} {SEPARATOR}</string>
   <string name="download_settings">Download</string>
   <string name="download_save_path">Save Path</string>
-  <string name="download_save_path_required_hint">Required for downloading</string>
   <string name="choose_save_path">Choose save path</string>
   <string name="download_allow_media_indexing">Allow system media indexing</string>
   <string name="download_subfolder_mode">Subfolder Mode</string>
@@ -251,7 +250,7 @@
   <string name="download_save_error_sync_nomedia_failed">Failed to sync .nomedia</string>
   <string name="download_save_error_cannot_create_target_file">Cannot create target file</string>
   <string name="download_save_error_cannot_write_target_file">Cannot write target file</string>
-  <string name="blocked_content">Blocked Content</string>
+  <string name="blocked_content">Blocking Features</string>
   <string name="blur_blocked_submissions_in_waterfalls">Blur blocked submissions in waterfalls</string>
   <string name="blur_blocked_submissions_in_detail_pages">Blur blocked submissions in detail pages</string>
   <string name="return_to_current_submission_in_waterfall">When leaving a submission, move the
@@ -308,8 +307,6 @@
   <string name="followers_count">Followers %1$s</string>
   <string name="following_count">Following %1$s</string>
   <string name="shouts_count">%1$s Shouts</string>
-  <string name="waterfall_min_column_width_range">Range %1$d-%2$d; column count is derived
-    automatically</string>
   <string name="numeric_range">Range %1$d-%2$d</string>
   <string name="refresh_details_failed">Failed to refresh details: %1$s</string>
   <string name="action_submitted_but_refresh_needs_cloudflare">Action submitted, but refreshing now
@@ -337,8 +334,6 @@
   <string name="ui_language_en">English</string>
   <string name="translation_target_language_zh_cn">Simplified Chinese</string>
   <string name="translation_target_language_en">English</string>
-  <string name="metadata_display_mode_original">Original</string>
-  <string name="metadata_display_mode_translated">Translated</string>
   <string name="translation_provider_google">Google Translate</string>
   <string name="translation_provider_microsoft">Microsoft Translator</string>
   <string name="translation_provider_openai_compatible">OpenAI-compatible API</string>

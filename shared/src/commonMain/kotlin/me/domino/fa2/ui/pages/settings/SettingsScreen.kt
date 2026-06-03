@@ -182,16 +182,6 @@ fun SettingsScreen(
     ) {
       item { AppearanceSettingsSection(draft = draft, onDraftChange = { next -> draft = next }) }
 
-      item { DownloadSettingsSection(draft = draft, onDraftChange = { next -> draft = next }) }
-
-      item {
-        RecommendationSettingsSection(
-            draft = draft,
-            onDraftChange = { next -> draft = next },
-            onOpenBlocklistManager = onOpenRecommendationBlocklist,
-        )
-      }
-
       item {
         TranslationSettingsSection(
             draft = draft,
@@ -202,11 +192,21 @@ fun SettingsScreen(
       }
 
       item {
+        RecommendationSettingsSection(
+            draft = draft,
+            onDraftChange = { next -> draft = next },
+            onOpenBlocklistManager = onOpenRecommendationBlocklist,
+        )
+      }
+
+      item {
         BlockedContentSettingsSection(
             draft = draft,
             onDraftChange = { next -> draft = next },
         )
       }
+
+      item { DownloadSettingsSection(draft = draft, onDraftChange = { next -> draft = next }) }
 
       validationMessage?.let { message ->
         item {

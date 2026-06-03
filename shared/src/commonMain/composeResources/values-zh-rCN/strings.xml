@@ -26,7 +26,7 @@
   <string name="loading_settings">正在加载设置...</string>
   <string name="save_failed_enter_valid_numbers">保存失败：请输入合法数字</string>
   <string name="download">下载</string>
-  <string name="appearance">外观</string>
+  <string name="appearance">外观设置</string>
   <string name="theme_mode">主题模式</string>
   <string name="app_language">界面语言</string>
   <string name="browse_filters">浏览筛选</string>
@@ -59,7 +59,7 @@
   <string name="no_records">暂无记录</string>
   <string name="settings_summary">主题、下载、瀑布流列宽与翻译设置</string>
   <string name="following_more_summary">打开当前账号已关注的用户列表</string>
-  <string name="following_recommendation">关注推荐</string>
+  <string name="following_recommendation">关注推荐功能</string>
   <string name="following_recommendation_summary">根据你已经关注的人，发现值得继续关注的新用户</string>
   <string name="following_recommendation_description">随机抽取你关注的一些人，再找出他们共同关注的用户。</string>
   <string name="following_recommendation_action">开始推荐</string>
@@ -195,12 +195,12 @@
   <string name="processing">处理中...</string>
   <string name="chunk_word_limit">分块词数上限</string>
   <string name="max_concurrency">最大并发数</string>
-  <string name="translation">翻译</string>
+  <string name="translation">翻译功能</string>
   <string name="provider">翻译服务</string>
   <string name="enable_translation">启用翻译功能</string>
   <string name="translation_target_language">翻译目标语言</string>
-  <string name="metadata_display">Category/Type/Species/Gender/Rating 显示</string>
-  <string name="waterfall_min_column_width_dp">瀑布流单列最小宽度 (dp)</string>
+  <string name="field_translation">字段翻译</string>
+  <string name="waterfall_min_column_width_dp">卡片宽度</string>
   <string name="watch_recommendation_page_size">每次推荐用户数</string>
   <string name="base_url">Base URL</string>
   <string name="api_key">API Key</string>
@@ -209,7 +209,6 @@
   <string name="prompt_template_variables_hint">支持 {INPUT} {TARGET_LANG} {SEPARATOR}</string>
   <string name="download_settings">下载</string>
   <string name="download_save_path">保存路径</string>
-  <string name="download_save_path_required_hint">下载前必须先配置保存路径</string>
   <string name="choose_save_path">选择保存路径</string>
   <string name="download_allow_media_indexing">允许系统相册/媒体库索引</string>
   <string name="download_subfolder_mode">子文件夹模式</string>
@@ -234,7 +233,7 @@
   <string name="download_save_error_sync_nomedia_failed">同步 .nomedia 失败</string>
   <string name="download_save_error_cannot_create_target_file">无法创建目标文件</string>
   <string name="download_save_error_cannot_write_target_file">无法写入目标文件</string>
-  <string name="blocked_content">屏蔽内容</string>
+  <string name="blocked_content">屏蔽功能</string>
   <string name="blur_blocked_submissions_in_waterfalls">瀑布流中模糊显示被屏蔽的投稿</string>
   <string name="blur_blocked_submissions_in_detail_pages">详情页中模糊显示被屏蔽的投稿</string>
   <string name="return_to_current_submission_in_waterfall">退出投稿详情时，将瀑布流定位到当前投稿</string>
@@ -288,7 +287,6 @@
   <string name="followers_count">关注者 %1$s</string>
   <string name="following_count">已关注 %1$s</string>
   <string name="shouts_count">%1$s 留言</string>
-  <string name="waterfall_min_column_width_range">范围 %1$d-%2$d，在此基础上自动布局列数</string>
   <string name="numeric_range">范围 %1$d-%2$d</string>
   <string name="refresh_details_failed">刷新详情失败：%1$s</string>
   <string name="action_submitted_but_refresh_needs_cloudflare">操作已提交，但刷新需要 Cloudflare 验证</string>
@@ -313,8 +311,6 @@
   <string name="ui_language_en">English</string>
   <string name="translation_target_language_zh_cn">简体中文</string>
   <string name="translation_target_language_en">English</string>
-  <string name="metadata_display_mode_original">原版</string>
-  <string name="metadata_display_mode_translated">翻译</string>
   <string name="translation_provider_google">谷歌翻译</string>
   <string name="translation_provider_microsoft">微软翻译</string>
   <string name="translation_provider_openai_compatible">OpenAI 兼容 API</string>

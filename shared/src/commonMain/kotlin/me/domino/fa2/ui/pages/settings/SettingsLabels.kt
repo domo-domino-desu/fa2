@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import fa2.shared.generated.resources.*
 import me.domino.fa2.data.settings.DownloadFileNameMode
 import me.domino.fa2.data.settings.DownloadSubfolderMode
-import me.domino.fa2.data.settings.MetadataDisplayMode
 import me.domino.fa2.data.settings.ThemeMode
 import me.domino.fa2.data.settings.TranslationProvider
 import me.domino.fa2.data.settings.TranslationTargetLanguage
@@ -25,13 +24,6 @@ internal fun translationTargetLanguageLabel(language: TranslationTargetLanguage)
       TranslationTargetLanguage.ZH_CN ->
           stringResource(Res.string.translation_target_language_zh_cn)
       TranslationTargetLanguage.EN -> stringResource(Res.string.translation_target_language_en)
-    }
-
-@Composable
-internal fun metadataDisplayModeLabel(mode: MetadataDisplayMode): String =
-    when (mode) {
-      MetadataDisplayMode.ORIGINAL -> stringResource(Res.string.metadata_display_mode_original)
-      MetadataDisplayMode.TRANSLATED -> stringResource(Res.string.metadata_display_mode_translated)
     }
 
 @Composable
