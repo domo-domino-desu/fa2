@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.User
 import me.domino.fa2.data.repository.UserRepository
+import me.domino.fa2.data.repository.WatchRecommendationBlocklistRepository
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.appString
@@ -30,6 +31,10 @@ data class UserUiState(
     val profileExpanded: Boolean = false,
     /** 是否正在执行 watch/unwatch。 */
     val watchUpdating: Boolean = false,
+    /** 当前用户是否已从关注推荐中隐藏。 */
+    val recommendationHidden: Boolean = false,
+    /** 是否正在更新关注推荐隐藏状态。 */
+    val recommendationHideUpdating: Boolean = false,
     /** 各子路由最后一次打开的 folder URL。 */
     val submissionRouteFolderUrls: Map<UserChildRoute, String> = emptyMap(),
 )
@@ -44,6 +49,7 @@ class UserScreenModel(
     initialChildRoute: UserChildRoute = UserChildRoute.Gallery,
     /** 初始 folder URL（可选）。 */
     initialFolderUrl: String? = null,
+    private val blocklistRepository: WatchRecommendationBlocklistRepository,
     private val settingsService: AppSettingsService? = null,
     private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) :
@@ -78,10 +84,17 @@ class UserScreenModel(
     }
     loadJob?.cancel()
     val snapshot = state.value
-    mutableState.value = snapshot.copy(loading = true, errorMessage = null, watchUpdating = false)
+    mutableState.value =
+        snapshot.copy(
+            loading = true,
+            errorMessage = null,
+            watchUpdating = false,
+            recommendationHideUpdating = false,
+        )
 
     loadJob =
         screenModelScope.launch {
+          val hidden = loadRecommendationHidden()
           when (
               val next =
                   if (forceRefresh) {
@@ -96,6 +109,7 @@ class UserScreenModel(
                       header = next.data,
                       loading = false,
                       errorMessage = null,
+                      recommendationHidden = hidden,
                   )
               log.i { "加载用户 -> ${summarizePageState(next)}" }
             }
@@ -105,6 +119,7 @@ class UserScreenModel(
                   state.value.copy(
                       loading = false,
                       errorMessage = next.message,
+                      recommendationHidden = hidden,
                   )
               log.w { "加载用户 -> 需要重新登录" }
             }
@@ -114,12 +129,18 @@ class UserScreenModel(
                   state.value.copy(
                       loading = false,
                       errorMessage = appString(Res.string.cloudflare_challenge_title),
+                      recommendationHidden = hidden,
                   )
               log.w { "加载用户 -> Cloudflare验证" }
             }
 
             is PageState.MatureBlocked -> {
-              mutableState.value = state.value.copy(loading = false, errorMessage = next.reason)
+              mutableState.value =
+                  state.value.copy(
+                      loading = false,
+                      errorMessage = next.reason,
+                      recommendationHidden = hidden,
+                  )
               log.w { "加载用户 -> 受限(${next.reason})" }
             }
 
@@ -128,6 +149,7 @@ class UserScreenModel(
                   state.value.copy(
                       loading = false,
                       errorMessage = next.exception.message ?: next.exception.toString(),
+                      recommendationHidden = hidden,
                   )
               log.e(next.exception) { "加载用户 -> 失败" }
             }
@@ -317,6 +339,99 @@ class UserScreenModel(
         PageState.Loading -> Unit
       }
     }
+  }
+
+  /** 将当前用户从关注推荐中隐藏。 */
+  fun hideFromRecommendations() {
+    val snapshot = state.value
+    val header = snapshot.header ?: return
+    if (snapshot.recommendationHideUpdating || snapshot.watchUpdating) return
+    if (header.isWatching || snapshot.recommendationHidden) return
+    val normalizedUsername = normalizedUsername()
+    if (normalizedUsername.isBlank()) return
+
+    mutableState.value =
+        snapshot.copy(
+            recommendationHidden = true,
+            recommendationHideUpdating = true,
+            errorMessage = null,
+        )
+
+    screenModelScope.launch {
+      runCatching { blocklistRepository.addBlockedUsername(normalizedUsername) }
+          .onSuccess {
+            mutableState.value =
+                state.value.copy(
+                    recommendationHidden = true,
+                    recommendationHideUpdating = false,
+                    errorMessage = null,
+                )
+            log.i { "用户页推荐隐藏 -> 已隐藏(user=$normalizedUsername)" }
+          }
+          .onFailure { error ->
+            mutableState.value =
+                state.value.copy(
+                    recommendationHidden = false,
+                    recommendationHideUpdating = false,
+                    errorMessage = recommendationBlocklistErrorMessage(error),
+                )
+            log.e(error) { "用户页推荐隐藏 -> 隐藏失败(user=$normalizedUsername)" }
+          }
+    }
+  }
+
+  /** 取消当前用户的关注推荐隐藏状态。 */
+  fun unhideFromRecommendations() {
+    val snapshot = state.value
+    if (snapshot.recommendationHideUpdating || snapshot.watchUpdating) return
+    if (!snapshot.recommendationHidden) return
+    val normalizedUsername = normalizedUsername()
+    if (normalizedUsername.isBlank()) return
+
+    mutableState.value =
+        snapshot.copy(
+            recommendationHidden = false,
+            recommendationHideUpdating = true,
+            errorMessage = null,
+        )
+
+    screenModelScope.launch {
+      runCatching { blocklistRepository.removeBlockedUsername(normalizedUsername) }
+          .onSuccess {
+            mutableState.value =
+                state.value.copy(
+                    recommendationHidden = false,
+                    recommendationHideUpdating = false,
+                    errorMessage = null,
+                )
+            log.i { "用户页推荐隐藏 -> 已取消隐藏(user=$normalizedUsername)" }
+          }
+          .onFailure { error ->
+            mutableState.value =
+                state.value.copy(
+                    recommendationHidden = true,
+                    recommendationHideUpdating = false,
+                    errorMessage = recommendationBlocklistErrorMessage(error),
+                )
+            log.e(error) { "用户页推荐隐藏 -> 取消隐藏失败(user=$normalizedUsername)" }
+          }
+    }
+  }
+
+  private suspend fun loadRecommendationHidden(): Boolean {
+    val normalizedUsername = normalizedUsername()
+    if (normalizedUsername.isBlank()) return false
+    return runCatching { normalizedUsername in blocklistRepository.loadBlockedUsernameSet() }
+        .onFailure { error -> log.e(error) { "用户页推荐隐藏 -> 读取失败(user=$normalizedUsername)" } }
+        .getOrDefault(false)
+  }
+
+  private fun normalizedUsername(): String =
+      (state.value.header?.username ?: username).trim().lowercase()
+
+  private fun recommendationBlocklistErrorMessage(error: Throwable): String {
+    val detail = error.message ?: error::class.simpleName.orEmpty()
+    return appString(Res.string.following_recommendation_blocklist_update_failed, detail)
   }
 
   private companion object {

@@ -65,6 +65,7 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.TroubleshootW
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VerticalAlignBottomW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VerticalAlignTopW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VisibilityOffW400Outlined
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VisibilityOffW400Outlinedfill1
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VisibilityW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.WrapTextW400Outlined
 
@@ -88,6 +89,7 @@ object FaMaterialSymbols {
     val Save: ImageVector = GeneratedIcons.SaveW400Outlinedfill1
     val Search: ImageVector = GeneratedIcons.SearchW400Outlinedfill1
     val Settings: ImageVector = GeneratedIcons.SettingsW400Outlinedfill1
+    val VisibilityOff: ImageVector = GeneratedIcons.VisibilityOffW400Outlinedfill1
   }
 
   object Outlined {

@@ -1,7 +1,9 @@
 package me.domino.fa2.ui.pages.user.profile
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +54,8 @@ internal fun UserHeaderCard(
     onRetry: () -> Unit,
     onToggleProfileExpanded: () -> Unit,
     onToggleWatch: () -> Unit,
+    onHideFromRecommendations: () -> Unit,
+    onUnhideFromRecommendations: () -> Unit,
     onOpenWatchedBy: () -> Unit,
     onOpenShouts: () -> Unit,
     onOpenWatching: () -> Unit,
@@ -177,11 +181,15 @@ internal fun UserHeaderCard(
             }
 
             val hasWatchAction = header.watchActionUrl.isNotBlank()
-            if (hasWatchAction) {
+            if (hasWatchAction || state.recommendationHidden) {
               UserWatchActionButton(
                   isWatching = header.isWatching,
-                  updating = state.watchUpdating,
-                  onClick = onToggleWatch,
+                  recommendationHidden = state.recommendationHidden,
+                  updating = state.watchUpdating || state.recommendationHideUpdating,
+                  watchActionAvailable = hasWatchAction,
+                  onToggleWatch = onToggleWatch,
+                  onHideFromRecommendations = onHideFromRecommendations,
+                  onUnhideFromRecommendations = onUnhideFromRecommendations,
               )
             }
           }
@@ -306,18 +314,26 @@ private fun UserHeaderStatPill(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 private fun UserWatchActionButton(
     isWatching: Boolean,
+    recommendationHidden: Boolean,
     updating: Boolean,
-    onClick: () -> Unit,
+    watchActionAvailable: Boolean,
+    onToggleWatch: () -> Unit,
+    onHideFromRecommendations: () -> Unit,
+    onUnhideFromRecommendations: () -> Unit,
 ) {
-  val contentDescription =
-      when {
-        updating -> stringResource(Res.string.processing)
-        isWatching -> stringResource(Res.string.unwatch)
-        else -> stringResource(Res.string.watch)
+  val action =
+      remember(isWatching, recommendationHidden, updating, watchActionAvailable) {
+        resolveUserWatchButtonAction(
+            isWatching = isWatching,
+            recommendationHidden = recommendationHidden,
+            updating = updating,
+            watchActionAvailable = watchActionAvailable,
+        )
       }
+  val contentDescription = stringResource(action.contentDescription)
   val stateDescription =
       when {
         updating -> stringResource(Res.string.processing)
@@ -326,13 +342,31 @@ private fun UserWatchActionButton(
       }
   Surface(
       modifier =
-          Modifier.size(52.dp).clickable(enabled = !updating, onClick = onClick).semantics {
-            this.contentDescription = contentDescription
-            this.stateDescription = stateDescription
-          },
+          Modifier.size(52.dp)
+              .combinedClickable(
+                  enabled = action.enabled,
+                  onClick = {
+                    when (action.clickAction) {
+                      UserWatchButtonClickAction.ToggleWatch -> onToggleWatch()
+                      UserWatchButtonClickAction.UnhideRecommendation ->
+                          onUnhideFromRecommendations()
+                      UserWatchButtonClickAction.None -> Unit
+                    }
+                  },
+                  onLongClick =
+                      if (action.longClickHidesRecommendation) {
+                        onHideFromRecommendations
+                      } else {
+                        null
+                      },
+              )
+              .semantics {
+                this.contentDescription = contentDescription
+                this.stateDescription = stateDescription
+              },
       shape = RoundedCornerShape(16.dp),
       color =
-          if (isWatching) {
+          if (isWatching || recommendationHidden) {
             MaterialTheme.colorScheme.primaryContainer
           } else {
             MaterialTheme.colorScheme.surfaceVariant
@@ -346,15 +380,84 @@ private fun UserWatchActionButton(
         )
       } else {
         Icon(
-            imageVector =
-                if (isWatching) {
-                  FaMaterialSymbols.Filled.Notifications
-                } else {
-                  FaMaterialSymbols.Outlined.Notifications
-                },
+            imageVector = action.icon,
             contentDescription = null,
         )
       }
     }
+  }
+}
+
+internal enum class UserWatchButtonClickAction {
+  ToggleWatch,
+  UnhideRecommendation,
+  None,
+}
+
+internal data class UserWatchButtonAction(
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val contentDescription: org.jetbrains.compose.resources.StringResource,
+    val clickAction: UserWatchButtonClickAction,
+    val longClickHidesRecommendation: Boolean,
+    val enabled: Boolean,
+)
+
+internal fun resolveUserWatchButtonAction(
+    isWatching: Boolean,
+    recommendationHidden: Boolean,
+    updating: Boolean,
+    watchActionAvailable: Boolean,
+): UserWatchButtonAction {
+  if (updating) {
+    return UserWatchButtonAction(
+        icon =
+            if (isWatching || recommendationHidden) {
+              FaMaterialSymbols.Filled.Notifications
+            } else {
+              FaMaterialSymbols.Outlined.Notifications
+            },
+        contentDescription = Res.string.processing,
+        clickAction = UserWatchButtonClickAction.None,
+        longClickHidesRecommendation = false,
+        enabled = false,
+    )
+  }
+  return when {
+    isWatching ->
+        UserWatchButtonAction(
+            icon = FaMaterialSymbols.Filled.Notifications,
+            contentDescription = Res.string.unwatch,
+            clickAction =
+                if (watchActionAvailable) {
+                  UserWatchButtonClickAction.ToggleWatch
+                } else {
+                  UserWatchButtonClickAction.None
+                },
+            longClickHidesRecommendation = false,
+            enabled = watchActionAvailable,
+        )
+
+    recommendationHidden ->
+        UserWatchButtonAction(
+            icon = FaMaterialSymbols.Filled.VisibilityOff,
+            contentDescription = Res.string.following_recommendation_unblock,
+            clickAction = UserWatchButtonClickAction.UnhideRecommendation,
+            longClickHidesRecommendation = false,
+            enabled = true,
+        )
+
+    else ->
+        UserWatchButtonAction(
+            icon = FaMaterialSymbols.Outlined.Notifications,
+            contentDescription = Res.string.watch,
+            clickAction =
+                if (watchActionAvailable) {
+                  UserWatchButtonClickAction.ToggleWatch
+                } else {
+                  UserWatchButtonClickAction.None
+                },
+            longClickHidesRecommendation = watchActionAvailable,
+            enabled = watchActionAvailable,
+        )
   }
 }

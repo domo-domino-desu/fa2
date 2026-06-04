@@ -173,6 +173,7 @@ symbolCraft {
       "save",
       "search",
       "settings",
+      "visibility_off",
   ) {
     style(weight = 400, variant = SymbolVariant.OUTLINED, fill = SymbolFill.FILLED)
   }

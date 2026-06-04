@@ -33,6 +33,7 @@ fun screenModelModule(): Module = module {
         repository = get(),
         initialChildRoute = initialChildRoute,
         initialFolderUrl = initialFolderUrl,
+        blocklistRepository = get(),
         settingsService = get(),
         systemLanguageProvider = get(),
     )

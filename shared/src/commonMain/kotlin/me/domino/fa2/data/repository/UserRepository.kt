@@ -10,14 +10,14 @@ import me.domino.fa2.util.logging.summarizePageState
 import me.domino.fa2.util.logging.summarizeUrl
 
 /** User 主页仓储。 */
-class UserRepository(
+open class UserRepository(
     private val userStore: UserStore,
     private val socialActionEndpoint: SocialActionEndpoint,
 ) {
   private val log = FaLog.withTag("UserRepository")
 
   /** 加载用户头部信息。 */
-  suspend fun loadUser(username: String): PageState<User> {
+  open suspend fun loadUser(username: String): PageState<User> {
     log.d { "加载用户资料 -> user=$username" }
     val state = userStore.loadOnce(username)
     log.d { "加载用户资料 -> ${summarizePageState(state)}" }
@@ -25,7 +25,7 @@ class UserRepository(
   }
 
   /** 强制刷新用户头部信息。 */
-  suspend fun refreshUser(username: String): PageState<User> {
+  open suspend fun refreshUser(username: String): PageState<User> {
     log.i { "刷新用户资料 -> user=$username" }
     userStore.invalidate(username)
     val state = loadUser(username)
@@ -34,7 +34,7 @@ class UserRepository(
   }
 
   /** Watch / Unwatch 用户。 */
-  suspend fun toggleWatch(username: String, actionUrl: String): PageState<Unit> {
+  open suspend fun toggleWatch(username: String, actionUrl: String): PageState<Unit> {
     val normalizedUrl = actionUrl.trim()
     if (normalizedUrl.isBlank()) {
       log.w { "关注操作 -> 缺少actionUrl" }

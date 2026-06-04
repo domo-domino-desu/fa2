@@ -21,6 +21,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.repository.UserRepository
+import me.domino.fa2.data.repository.WatchRecommendationBlocklistRepository
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.ui.layouts.UserRouteTopBar
@@ -82,6 +83,7 @@ internal fun UserRouteBody(
 ) {
   val parentNavigator = LocalNavigator.currentOrThrow
   val repository = koinInject<UserRepository>()
+  val blocklistRepository = koinInject<WatchRecommendationBlocklistRepository>()
   val settingsService = koinInject<AppSettingsService>()
   val systemLanguageProvider = koinInject<SystemLanguageProvider>()
   val userScreenModel =
@@ -94,6 +96,7 @@ internal fun UserRouteBody(
             repository = repository,
             initialChildRoute = initialChildRoute,
             initialFolderUrl = initialFolderUrl,
+            blocklistRepository = blocklistRepository,
             settingsService = settingsService,
             systemLanguageProvider = systemLanguageProvider,
         )
@@ -116,6 +119,8 @@ internal fun UserRouteBody(
                   onRetry = { userScreenModel.load() },
                   onToggleProfileExpanded = userScreenModel::toggleProfileExpanded,
                   onToggleWatch = userScreenModel::toggleWatch,
+                  onHideFromRecommendations = userScreenModel::hideFromRecommendations,
+                  onUnhideFromRecommendations = userScreenModel::unhideFromRecommendations,
                   onOpenWatchedBy = {
                     val initialUrl =
                         userState.header?.watchedByListUrl?.trim()?.takeIf { value ->
