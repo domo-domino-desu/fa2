@@ -36,8 +36,8 @@ class WatchRecommendationServiceTest {
 
     val result = service.recommend(username = "me", recommendationCount = 2)
 
-    assertEquals(listOf("artist-a", "artist-b"), result.map { it.user.username })
-    assertEquals(listOf(10, 10), result.map { it.sharedFollowCount })
+    assertEquals(listOf("artist-a", "artist-b", "artist-c"), result.map { it.user.username })
+    assertEquals(listOf(10, 10, 10), result.map { it.sharedFollowCount })
   }
 
   @Test
@@ -78,8 +78,8 @@ class WatchRecommendationServiceTest {
 
     val result = service.recommend(username = "me", recommendationCount = 2)
 
-    assertEquals(listOf("artist-1", "artist-10"), result.map { it.user.username })
-    assertEquals(listOf(1, 1), result.map { it.sharedFollowCount })
+    assertEquals((1..25).map { index -> "artist-$index" }.sorted(), result.map { it.user.username })
+    assertEquals(List(25) { 1 }, result.map { it.sharedFollowCount })
   }
 
   @Test
@@ -268,8 +268,14 @@ class WatchRecommendationServiceTest {
     val first = service.recommend(username = "me", recommendationCount = 1)
     val second = service.recommend(username = "me", recommendationCount = 1)
 
-    assertEquals(listOf("artist-b"), first.map { it.user.username })
-    assertEquals(listOf("artist-b"), second.map { it.user.username })
+    assertEquals(
+        listOf("artist-b", "artist-c", "artist-d", "artist-e"),
+        first.map { it.user.username },
+    )
+    assertEquals(
+        listOf("artist-b", "artist-c", "artist-d", "artist-e"),
+        second.map { it.user.username },
+    )
     assertEquals(listOf("artist-a"), blocklistRepository.listBlockedUsernames())
   }
 

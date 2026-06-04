@@ -182,7 +182,7 @@ class WatchRecommendationService(
       val sampleSize = initialSampleSize + (round * sampleSizeStep)
       val minimumSharedFollowers = (initialMinimumSharedFollowers - round).coerceAtLeast(1)
       val sources = sampledUsers.take(sampleSize)
-      if (sources.isEmpty()) return bestCandidates.take(recommendationCount)
+      if (sources.isEmpty()) return bestCandidates
       onProgress(
           WatchRecommendationProgress.RoundStarted(
               round = round + 1,
@@ -246,15 +246,13 @@ class WatchRecommendationService(
         "$logLabel -> 第${round + 1}轮(user=$normalizedUsername,sample=${sources.size},threshold=$minimumSharedFollowers,candidates=${roundCandidates.size},blocked=${blockedUsernames.size})"
       }
       if (roundCandidates.size >= recommendationCount || minimumSharedFollowers <= 1) {
-        val result = roundCandidates.take(recommendationCount)
-        onProgress(WatchRecommendationProgress.Completed(resultCount = result.size))
-        return result
+        onProgress(WatchRecommendationProgress.Completed(resultCount = roundCandidates.size))
+        return roundCandidates
       }
     }
 
-    val result = bestCandidates.take(recommendationCount)
-    onProgress(WatchRecommendationProgress.Completed(resultCount = result.size))
-    return result
+    onProgress(WatchRecommendationProgress.Completed(resultCount = bestCandidates.size))
+    return bestCandidates
   }
 
   /** 完整顺序加载当前用户已关注列表，仅用于排除“已关注”候选。 */
