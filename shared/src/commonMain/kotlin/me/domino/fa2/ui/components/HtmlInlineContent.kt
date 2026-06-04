@@ -1,8 +1,6 @@
 package me.domino.fa2.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -11,16 +9,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.isSpecified
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
@@ -122,33 +117,15 @@ private fun HtmlInlineUserChip(
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(6.dp),
   ) {
-    Box(
-        modifier = Modifier.fillMaxHeight().aspectRatio(1f).clip(CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-      if (placeholder.imageUrl.isNotBlank()) {
-        NetworkImage(
-            url = placeholder.imageUrl,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-            showLoadingPlaceholder = false,
-        )
-      } else {
-        Box(
-            modifier =
-                Modifier.fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.92f)),
-            contentAlignment = Alignment.Center,
-        ) {
-          Text(
-              text = placeholder.username.firstOrNull()?.uppercase() ?: "?",
-              style = textStyle,
-              color = textColor,
-              maxLines = 1,
-          )
-        }
-      }
-    }
+    AvatarImage(
+        url = placeholder.imageUrl,
+        displayName = text,
+        username = placeholder.username,
+        modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+        shape = CircleShape,
+        placeholderTextStyle = textStyle,
+        showLoadingPlaceholder = false,
+    )
 
     Text(
         text = text,
@@ -163,21 +140,14 @@ private fun HtmlInlineUserChip(
 
 @Composable
 private fun HtmlInlineAvatarImage(placeholder: HtmlInlinePlaceholder) {
-  if (placeholder.imageUrl.isNotBlank()) {
-    NetworkImage(
-        url = placeholder.imageUrl,
-        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(4.dp)),
-        contentScale = ContentScale.Crop,
-        showLoadingPlaceholder = false,
-    )
-  } else {
-    Box(
-        modifier =
-            Modifier.fillMaxSize()
-                .clip(RoundedCornerShape(4.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.75f))
-    )
-  }
+  AvatarImage(
+      url = placeholder.imageUrl,
+      displayName = placeholder.displayText,
+      username = placeholder.username,
+      modifier = Modifier.fillMaxSize(),
+      shape = RoundedCornerShape(4.dp),
+      showLoadingPlaceholder = false,
+  )
 }
 
 private fun resolveFontSize(style: TextStyle, fallback: TextStyle): TextUnit {

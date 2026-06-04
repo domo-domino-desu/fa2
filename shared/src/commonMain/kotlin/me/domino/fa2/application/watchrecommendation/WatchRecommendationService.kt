@@ -38,7 +38,6 @@ class WatchRecommendationService(
         suspend (username: String, category: WatchlistCategory, nextPageUrl: String?) -> PageState<
                 WatchlistPage
             >,
-    private val loadUser: suspend (username: String) -> PageState<User>,
     private val blocklistRepository: WatchRecommendationBlocklistRepository,
     private val random: Random = Random.Default,
     private val requestThrottleMs: Long = defaultSequentialRequestThrottleMs,
@@ -65,7 +64,6 @@ class WatchRecommendationService(
       blocklistRepository = blocklistRepository,
       random = random,
       loadWatchlistPage = loadWatchlistPage,
-      loadUser = loadUser,
       requestThrottleMs = requestThrottleMs,
   )
 
@@ -248,21 +246,13 @@ class WatchRecommendationService(
         "$logLabel -> 第${round + 1}轮(user=$normalizedUsername,sample=${sources.size},threshold=$minimumSharedFollowers,candidates=${roundCandidates.size},blocked=${blockedUsernames.size})"
       }
       if (roundCandidates.size >= recommendationCount || minimumSharedFollowers <= 1) {
-        val result =
-            enrichResultUsers(
-                users = roundCandidates.take(recommendationCount),
-                onProgress = onProgress,
-            )
+        val result = roundCandidates.take(recommendationCount)
         onProgress(WatchRecommendationProgress.Completed(resultCount = result.size))
         return result
       }
     }
 
-    val result =
-        enrichResultUsers(
-            users = bestCandidates.take(recommendationCount),
-            onProgress = onProgress,
-        )
+    val result = bestCandidates.take(recommendationCount)
     onProgress(WatchRecommendationProgress.Completed(resultCount = result.size))
     return result
   }
@@ -312,35 +302,6 @@ class WatchRecommendationService(
       }
     }
   }
-
-  private suspend fun enrichResultUsers(
-      users: List<RecommendedWatchUser>,
-      onProgress: (WatchRecommendationProgress) -> Unit,
-  ): List<RecommendedWatchUser> =
-      users.map { recommendation ->
-        val username = recommendation.user.username
-        onProgress(WatchRecommendationProgress.LoadingResultUserProfile(username))
-        when (val state = loadUser(username)) {
-          is PageState.Success ->
-              recommendation.copy(
-                  user =
-                      recommendation.user.copy(
-                          displayName =
-                              state.data.displayName.ifBlank { recommendation.user.displayName },
-                          avatarUrl =
-                              state.data.avatarUrl.ifBlank { recommendation.user.avatarUrl },
-                          profileUrl =
-                              recommendation.user.profileUrl.ifBlank {
-                                state.data.username.takeIf(String::isNotBlank)?.let {
-                                  "https://www.furaffinity.net/user/$it/"
-                                } ?: recommendation.user.profileUrl
-                              },
-                      )
-              )
-
-          else -> recommendation
-        }
-      }
 }
 
 /** 推荐计算进度事件。 */
@@ -353,10 +314,6 @@ sealed interface WatchRecommendationProgress {
   ) : WatchRecommendationProgress
 
   data class LoadingUserProfile(
-      val username: String,
-  ) : WatchRecommendationProgress
-
-  data class LoadingResultUserProfile(
       val username: String,
   ) : WatchRecommendationProgress
 

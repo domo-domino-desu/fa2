@@ -13,9 +13,11 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -32,8 +34,9 @@ import me.domino.fa2.ui.components.UserHorizontalCard
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.layouts.WatchRecommendationBlocklistRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
-import me.domino.fa2.ui.pages.user.route.UserChildRoute
-import me.domino.fa2.ui.pages.user.route.UserRouteScreen
+import me.domino.fa2.ui.pages.user.route.UserPagerContextScreenModel
+import me.domino.fa2.ui.pages.user.route.UserPagerRouteScreen
+import me.domino.fa2.ui.pages.user.route.UserPagerSource
 import me.domino.fa2.ui.pages.user.watchlist.WatchlistSkeleton
 import me.domino.fa2.ui.pages.user.watchlist.WatchlistStatusCard
 import me.domino.fa2.util.FaUrls
@@ -44,6 +47,13 @@ class WatchRecommendationBlocklistRouteScreen : Screen {
   @Composable
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
+    val pagerContextId = remember { "watch-recommendation-blocklist" }
+    val pagerContextScreenModel =
+        navigator.rememberNavigatorScreenModel<UserPagerContextScreenModel>(
+            tag = "user-pager-context:$pagerContextId"
+        ) {
+          UserPagerContextScreenModel()
+        }
     val screenModel = koinScreenModel<WatchRecommendationBlocklistScreenModel>()
     val state by screenModel.state.collectAsState()
     val listState = rememberLazyListState()
@@ -116,12 +126,19 @@ class WatchRecommendationBlocklistRouteScreen : Screen {
                   UserHorizontalCard(
                       user = user,
                       onClick = {
-                        navigator.push(
-                            UserRouteScreen(
-                                username = username,
-                                initialChildRoute = UserChildRoute.Gallery,
-                            )
+                        pagerContextScreenModel.seed(
+                            source = UserPagerSource.RecommendationBlocklist,
+                            users =
+                                state.usernames.map { candidate ->
+                                  WatchlistUser(
+                                      username = candidate,
+                                      displayName = candidate,
+                                      profileUrl = FaUrls.user(candidate),
+                                  )
+                                },
+                            selectedUsername = username,
                         )
+                        navigator.push(UserPagerRouteScreen(username, pagerContextId))
                       },
                       trailingContent = {
                         ExpressiveIconButton(

@@ -826,6 +826,7 @@ internal fun SubmissionAuthorRow(
     AvatarImage(
         url = authorAvatarUrl,
         displayName = authorDisplayName,
+        username = author,
         size = 40.dp,
         placeholderTextStyle = MaterialTheme.typography.titleMedium,
     )

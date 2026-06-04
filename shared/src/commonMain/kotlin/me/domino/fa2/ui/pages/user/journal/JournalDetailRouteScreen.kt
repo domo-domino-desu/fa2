@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -32,6 +33,10 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
+import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.data.repository.JournalDetailRepository
+import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.ui.components.AvatarImage
 import me.domino.fa2.ui.components.DetailSectionCardSurface
 import me.domino.fa2.ui.components.HtmlText
@@ -49,6 +54,7 @@ import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.pages.user.route.UserRouteScreen
 import me.domino.fa2.util.FaUrls
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 /** Journal 详情路由页面。 */
@@ -131,6 +137,79 @@ class JournalDetailRouteScreen(
           )
         }
       }
+    }
+  }
+}
+
+@Composable
+internal fun JournalDetailBody(
+    journalId: Int,
+    journalUrl: String?,
+    listState: LazyListState = rememberLazyListState(),
+) {
+  val navigator = LocalNavigator.currentOrThrow
+  val repository = koinInject<JournalDetailRepository>()
+  val translationService = koinInject<SubmissionDescriptionTranslationService>()
+  val settingsService = koinInject<AppSettingsService>()
+  val systemLanguageProvider = koinInject<SystemLanguageProvider>()
+  val screenModel =
+      navigator.rememberNavigatorScreenModel<JournalDetailScreenModel>(
+          tag = "journal-detail:$journalId:${journalUrl.orEmpty()}"
+      ) {
+        JournalDetailScreenModel(
+            journalId = journalId,
+            journalUrl = journalUrl,
+            repository = repository,
+            translationService = translationService,
+            settingsService = settingsService,
+            systemLanguageProvider = systemLanguageProvider,
+        )
+      }
+  val settings = LocalAppSettings.current
+  val state by screenModel.state.collectAsState()
+
+  when (val snapshot = state) {
+    JournalDetailUiState.Loading -> {
+      JournalDetailSkeleton()
+    }
+
+    is JournalDetailUiState.Error -> {
+      JournalDetailErrorCard(
+          title = stringResource(Res.string.load_failed),
+          retryText = stringResource(Res.string.retry),
+          message = snapshot.message,
+          onRetry = screenModel::load,
+      )
+    }
+
+    is JournalDetailUiState.Success -> {
+      JournalDetailContent(
+          state = snapshot,
+          listState = listState,
+          onTranslate = {
+            if (settings.translationEnabled) {
+              screenModel.translateCurrent()
+            }
+          },
+          onToggleWrapText = {
+            if (settings.translationEnabled) {
+              screenModel.toggleWrapTextCurrent()
+            }
+          },
+          translationEnabled = settings.translationEnabled,
+          onOpenSubmissionSeries = { series -> navigator.openSubmissionSeries(series) },
+          onOpenAuthor = { author ->
+            val normalized = author.trim()
+            if (normalized.isNotBlank()) {
+              navigator.push(
+                  UserRouteScreen(
+                      username = normalized,
+                      initialChildRoute = UserChildRoute.Gallery,
+                  )
+              )
+            }
+          },
+      )
     }
   }
 }
@@ -286,6 +365,7 @@ private fun JournalCommentItem(
       AvatarImage(
           url = comment.authorAvatarUrl,
           displayName = comment.authorDisplayName,
+          username = comment.author,
           size = 30.dp,
           placeholderTextStyle = MaterialTheme.typography.labelSmall,
       )

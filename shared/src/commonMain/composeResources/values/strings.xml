@@ -87,8 +87,6 @@
     (%2$d/%3$s)...</string>
   <string name="recommendation_progress_loading_user_profile">Loading %1$s's profile for watchlist
     counts...</string>
-  <string name="recommendation_progress_loading_result_profile">Loading %1$s's profile for
-    avatar...</string>
   <string name="recommendation_progress_regular_needs_count">First page for %1$s suggests a large
     alphabetical list; loading profile counts.</string>
   <string name="recommendation_progress_regular_sequential">First page for %1$s suggests a small

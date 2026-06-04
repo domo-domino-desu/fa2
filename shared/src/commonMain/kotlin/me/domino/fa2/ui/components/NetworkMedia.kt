@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
@@ -27,23 +28,28 @@ import coil3.compose.LocalPlatformContext
 import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.SubcomposeAsyncImageContent
 import coil3.request.ImageRequest
+import me.domino.fa2.util.FaUrls
 import me.domino.fa2.util.logging.FaLog
 
 private val networkImageLog = FaLog.withTag("NetworkImage")
 
-/** 圆形头像组件。头像 URL 为空或加载失败时回退显示名称首字母。 */
+/** 头像组件。头像 URL 为空时按用户名推导 FA 头像地址，加载失败时回退显示名称首字母。 */
 @Composable
 fun AvatarImage(
     /** 头像地址。 */
-    url: String,
+    url: String = "",
     /** 用于占位首字母的显示名。 */
     displayName: String,
+    /** 用于推导 FA 头像地址的用户名。 */
+    username: String = "",
     /** 组件修饰符。 */
     modifier: Modifier = Modifier,
     /** 图片说明。 */
     contentDescription: String? = null,
     /** 头像尺寸。 */
     size: Dp = 40.dp,
+    /** 头像形状。 */
+    shape: Shape = CircleShape,
     /** 占位首字母文本样式。 */
     placeholderTextStyle: TextStyle = MaterialTheme.typography.labelSmall,
     /** 是否展示加载占位层。 */
@@ -51,9 +57,19 @@ fun AvatarImage(
 ) {
   var failedUrl by remember { mutableStateOf<String?>(null) }
   val normalizedUrl = remember(url) { normalizeNetworkUrl(url).trim() }
-  val shouldShowImage = normalizedUrl.isNotBlank() && failedUrl != normalizedUrl
+  val fallbackUrl =
+      remember(normalizedUrl, username) {
+        if (normalizedUrl.isNotBlank()) {
+          ""
+        } else {
+          username.trim().takeIf { it.isNotBlank() }?.let(FaUrls::avatar).orEmpty()
+        }
+      }
+  val resolvedUrl = normalizedUrl.ifBlank { fallbackUrl }
+  val placeholderLabel = remember(displayName, username) { displayName.ifBlank { username } }
+  val shouldShowImage = resolvedUrl.isNotBlank() && failedUrl != resolvedUrl
   Surface(
-      shape = CircleShape,
+      shape = shape,
       color =
           if (shouldShowImage) {
             MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
@@ -64,17 +80,17 @@ fun AvatarImage(
   ) {
     if (shouldShowImage) {
       NetworkImage(
-          url = normalizedUrl,
-          modifier = Modifier.fillMaxSize().clip(CircleShape),
+          url = resolvedUrl,
+          modifier = Modifier.fillMaxSize().clip(shape),
           contentDescription = contentDescription,
           contentScale = ContentScale.Crop,
           showLoadingPlaceholder = showLoadingPlaceholder,
-          onLoadError = { failedUrl = normalizedUrl },
+          onLoadError = { failedUrl = resolvedUrl },
       )
     } else {
       Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
-            text = displayName.firstOrNull()?.uppercase() ?: "?",
+            text = placeholderLabel.firstOrNull()?.uppercase() ?: "?",
             style = placeholderTextStyle,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),

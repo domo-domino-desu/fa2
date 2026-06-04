@@ -4,6 +4,7 @@ import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.User
@@ -349,9 +350,10 @@ class WatchRecommendationServiceTest {
   }
 
   @Test
-  fun enrichesRecommendationAvatarsFromResultUserProfiles() = runTest {
+  fun recommendationResultsDoNotLoadResultUserProfiles() = runTest {
     val followingUsers = (1..10).map(::sourceUser)
     val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    val loadedUsers = mutableListOf<String>()
     responses[LoaderKey("me", null)] = successPage(followingUsers)
     followingUsers.forEach { source ->
       responses[LoaderKey(source.username, null)] = successPage(listOf(candidateUser("artist-a")))
@@ -359,21 +361,13 @@ class WatchRecommendationServiceTest {
     val service =
         buildService(
             responses = responses,
-            userResponses =
-                mapOf(
-                    "artist-a" to
-                        PageState.Success(
-                            testUser(
-                                username = "artist-a",
-                                avatarUrl = "https://a.example/avatar.gif",
-                            )
-                        )
-                ),
+            onLoadUser = { username -> loadedUsers += username.lowercase() },
         )
 
     val result = service.recommend(username = "me", recommendationCount = 1)
 
-    assertEquals("https://a.example/avatar.gif", result.single().user.avatarUrl)
+    assertEquals(listOf("artist-a"), result.map { it.user.username })
+    assertFalse("artist-a" in loadedUsers)
   }
 
   @Test
@@ -425,6 +419,7 @@ class WatchRecommendationServiceTest {
       blocklistRepository: WatchRecommendationBlocklistRepository =
           FakeWatchRecommendationBlocklistRepository(),
       userResponses: Map<String, PageState<User>> = emptyMap(),
+      onLoadUser: (String) -> Unit = {},
   ): WatchRecommendationService =
       WatchRecommendationService(
           loadWatchlistPage = { username, category, nextPageUrl ->
@@ -434,6 +429,7 @@ class WatchRecommendationServiceTest {
                 )
           },
           loadUser = { username ->
+            onLoadUser(username)
             userResponses[username.lowercase()] ?: PageState.Success(testUser(username))
           },
           blocklistRepository = blocklistRepository,

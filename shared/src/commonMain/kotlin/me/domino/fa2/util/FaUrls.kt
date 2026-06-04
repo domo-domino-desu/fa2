@@ -1,6 +1,7 @@
 package me.domino.fa2.util
 
 import io.ktor.http.encodeURLParameter
+import kotlin.time.Clock
 
 /** FA URL 构建工具。 */
 object FaUrls {
@@ -21,6 +22,15 @@ object FaUrls {
 
   /** submissions 固定页大小。 */
   private const val pageSize: Int = 72
+
+  /** 一天秒数。 */
+  private const val secondsPerDay: Long = 86_400L
+
+  /** 一周天数。 */
+  private const val daysPerWeek: Long = 7L
+
+  /** Unix epoch 后第一个周一（1970-01-05）对应的天数。 */
+  private const val epochMondayOffsetDays: Long = 4L
 
   /** 用户主页根路径。 */
   private const val userRoot: String = "https://www.furaffinity.net/user/"
@@ -77,6 +87,17 @@ object FaUrls {
     if (normalizedUser.isBlank() || normalizedMtime.isBlank()) return ""
     return "$avatarRoot$normalizedMtime/$normalizedUser.gif"
   }
+
+  /**
+   * 使用本周一 00:00 UTC 的 Unix 秒时间戳构建用户头像地址。
+   *
+   * @param usernameLower 用户名（建议小写）。
+   */
+  fun avatar(usernameLower: String, clock: Clock = Clock.System): String =
+      avatar(
+          usernameLower = usernameLower,
+          avatarMtime = currentWeekMondayEpochSeconds(clock).toString(),
+      )
 
   /** 构建用户主页地址。 */
   fun user(username: String): String = "$userRoot${normalizeUsername(username)}/"
@@ -204,5 +225,24 @@ object FaUrls {
   }
 
   /** 规范化用户名段。 */
-  private fun normalizeUsername(username: String): String = username.trim().trim('/')
+  private fun normalizeUsername(username: String): String = username.trim().trim('/').trim()
+
+  private fun currentWeekMondayEpochSeconds(clock: Clock): Long {
+    val epochDay = floorDiv(clock.now().epochSeconds, secondsPerDay)
+    val mondayEpochDay = epochDay - floorMod(epochDay - epochMondayOffsetDays, daysPerWeek)
+    return mondayEpochDay * secondsPerDay
+  }
+
+  private fun floorDiv(value: Long, divisor: Long): Long {
+    var result = value / divisor
+    if ((value xor divisor) < 0 && result * divisor != value) {
+      result -= 1
+    }
+    return result
+  }
+
+  private fun floorMod(value: Long, divisor: Long): Long {
+    val result = value % divisor
+    return if (result >= 0) result else result + divisor
+  }
 }

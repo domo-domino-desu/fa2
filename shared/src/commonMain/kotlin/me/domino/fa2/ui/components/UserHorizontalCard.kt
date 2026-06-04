@@ -48,6 +48,7 @@ fun UserHorizontalCard(
       AvatarImage(
           url = user.avatarUrl,
           displayName = user.displayName,
+          username = user.username,
           size = 42.dp,
           placeholderTextStyle = MaterialTheme.typography.titleMedium,
       )

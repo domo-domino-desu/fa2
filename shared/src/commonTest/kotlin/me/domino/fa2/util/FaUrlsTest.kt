@@ -3,9 +3,30 @@ package me.domino.fa2.util
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /** FaUrls URL 构建测试。 */
 class FaUrlsTest {
+  @Test
+  fun buildsAvatarUrlWithExplicitTimestamp() {
+    val url = FaUrls.avatar(usernameLower = " Artist-Alpha /", avatarMtime = "/1742570939/")
+
+    assertEquals("https://a.furaffinity.net/1742570939/artist-alpha.gif", url)
+  }
+
+  @Test
+  fun buildsAvatarUrlWithCurrentWeekMondayEpochSeconds() {
+    val clock =
+        object : Clock {
+          override fun now(): Instant = Instant.fromEpochSeconds(1_762_345_678)
+        }
+
+    val url = FaUrls.avatar(usernameLower = "Artist-Alpha", clock = clock)
+
+    assertEquals("https://a.furaffinity.net/1762128000/artist-alpha.gif", url)
+  }
+
   @Test
   fun buildsBrowseUrlWithExplicitParams() {
     val url =

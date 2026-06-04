@@ -136,6 +136,7 @@ internal fun UserHeaderCard(
               AvatarImage(
                   url = header.avatarUrl,
                   displayName = header.displayName,
+                  username = header.username.ifBlank { state.username },
                   size = 54.dp,
                   placeholderTextStyle = MaterialTheme.typography.titleMedium,
                   showLoadingPlaceholder = true,

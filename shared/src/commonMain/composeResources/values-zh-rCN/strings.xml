@@ -76,7 +76,6 @@
   <string name="recommendation_progress_loading_followers_page">正在加载 %1$s 的关注者 (%2$d/%3$s)...</string>
   <string name="recommendation_progress_loading_following_page">正在加载 %1$s 的关注列表 (%2$d/%3$s)...</string>
   <string name="recommendation_progress_loading_user_profile">正在加载 %1$s 的用户页来估算关注页数...</string>
-  <string name="recommendation_progress_loading_result_profile">正在加载 %1$s 的用户页来补全头像...</string>
   <string name="recommendation_progress_regular_needs_count">%1$s 第一页显示列表可能很大，加载用户页估算页数。</string>
   <string name="recommendation_progress_regular_sequential">%1$s 第一页显示列表较小，继续顺序加载。</string>
   <string name="recommendation_progress_random_pages">随机抽取页面：%1$s</string>

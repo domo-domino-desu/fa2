@@ -98,6 +98,7 @@ private fun SubmissionCommentItem(comment: PageComment, onOpenAuthor: (String) -
       AvatarImage(
           url = comment.authorAvatarUrl,
           displayName = comment.authorDisplayName,
+          username = comment.author,
           size = 30.dp,
           placeholderTextStyle = MaterialTheme.typography.labelSmall,
       )

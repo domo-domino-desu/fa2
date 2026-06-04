@@ -27,7 +27,8 @@ import me.domino.fa2.ui.pages.submission.pageNumberForSid
 import me.domino.fa2.ui.pages.submission.toWaterfallPageControls
 import me.domino.fa2.ui.pages.user.gallery.UserSubmissionSectionScreen
 import me.domino.fa2.ui.pages.user.gallery.UserSubmissionSectionScreenModel
-import me.domino.fa2.ui.pages.user.journal.JournalDetailRouteScreen
+import me.domino.fa2.ui.pages.user.journal.JournalPagerContextScreenModel
+import me.domino.fa2.ui.pages.user.journal.JournalPagerRouteScreen
 import me.domino.fa2.ui.pages.user.journal.UserJournalsScreen
 import me.domino.fa2.ui.pages.user.journal.UserJournalsScreenModel
 import me.domino.fa2.ui.pages.user.profile.resolveInitialUserScrollPosition
@@ -67,6 +68,13 @@ class UserChildRouteScreen(
       UserChildRoute.Journals -> {
         val localNavigator = LocalNavigator.currentOrThrow
         val rootNavigator = localNavigator.rootNavigator()
+        val pagerContextId = remember(username) { "journals:${username.lowercase()}" }
+        val pagerContextScreenModel =
+            rootNavigator.rememberNavigatorScreenModel<JournalPagerContextScreenModel>(
+                tag = "journal-pager-context:$pagerContextId"
+            ) {
+              JournalPagerContextScreenModel()
+            }
         val screenModel = koinScreenModel<UserJournalsScreenModel> { parametersOf(username) }
         val state by screenModel.state.collectAsState()
         val scrollKey = remember(username) { buildUserJournalsScrollKey(username) }
@@ -103,12 +111,13 @@ class UserChildRouteScreen(
           UserJournalsScreen(
               state = state,
               onOpenJournal = { item ->
-                rootNavigator.push(
-                    JournalDetailRouteScreen(
-                        journalId = item.id,
-                        journalUrl = item.journalUrl,
-                    )
+                pagerContextScreenModel.seed(
+                    ownerUsername = username,
+                    journals = state.journals,
+                    selectedJournalId = item.id,
+                    nextPageUrl = state.nextPageUrl,
                 )
+                rootNavigator.push(JournalPagerRouteScreen(item.id, pagerContextId))
               },
               onRetry = { screenModel.load(forceRefresh = true) },
               onRefresh = {

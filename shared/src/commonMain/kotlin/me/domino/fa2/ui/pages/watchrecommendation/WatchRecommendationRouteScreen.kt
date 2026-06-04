@@ -23,10 +23,12 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -40,8 +42,9 @@ import me.domino.fa2.ui.components.UserHorizontalCard
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.layouts.WatchRecommendationRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
-import me.domino.fa2.ui.pages.user.route.UserChildRoute
-import me.domino.fa2.ui.pages.user.route.UserRouteScreen
+import me.domino.fa2.ui.pages.user.route.UserPagerContextScreenModel
+import me.domino.fa2.ui.pages.user.route.UserPagerRouteScreen
+import me.domino.fa2.ui.pages.user.route.UserPagerSource
 import me.domino.fa2.ui.pages.user.watchlist.WatchlistStatusCard
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -56,6 +59,13 @@ class WatchRecommendationRouteScreen(
   @Composable
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
+    val pagerContextId = remember(username) { "watch-recommendation:${username.lowercase()}" }
+    val pagerContextScreenModel =
+        navigator.rememberNavigatorScreenModel<UserPagerContextScreenModel>(
+            tag = "user-pager-context:$pagerContextId"
+        ) {
+          UserPagerContextScreenModel()
+        }
     val screenModel = koinScreenModel<WatchRecommendationScreenModel> { parametersOf(username) }
     val state by screenModel.state.collectAsState()
     val rankedListState = rememberLazyListState()
@@ -120,12 +130,12 @@ class WatchRecommendationRouteScreen(
               onRetry = screenModel::loadRecommendations,
               onBlockUser = screenModel::blockRecommendation,
               onOpenUser = { user ->
-                navigator.push(
-                    UserRouteScreen(
-                        username = user.user.username,
-                        initialChildRoute = UserChildRoute.Gallery,
-                    )
+                pagerContextScreenModel.seed(
+                    source = UserPagerSource.Recommendation,
+                    users = snapshot.visibleUsers.map { it.user },
+                    selectedUsername = user.user.username,
                 )
+                navigator.push(UserPagerRouteScreen(user.user.username, pagerContextId))
               },
           )
         }

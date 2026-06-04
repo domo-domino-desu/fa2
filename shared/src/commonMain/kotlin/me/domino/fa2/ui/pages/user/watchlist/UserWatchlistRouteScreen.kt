@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -34,8 +35,9 @@ import me.domino.fa2.ui.components.PaginationRetryBar
 import me.domino.fa2.ui.components.PaginationRetryDirection
 import me.domino.fa2.ui.layouts.UserWatchlistRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
-import me.domino.fa2.ui.pages.user.route.UserChildRoute
-import me.domino.fa2.ui.pages.user.route.UserRouteScreen
+import me.domino.fa2.ui.pages.user.route.UserPagerContextScreenModel
+import me.domino.fa2.ui.pages.user.route.UserPagerRouteScreen
+import me.domino.fa2.ui.pages.user.route.UserPagerSource
 import me.domino.fa2.util.FaUrls
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
@@ -53,6 +55,16 @@ class UserWatchlistRouteScreen(
   @Composable
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
+    val pagerContextId =
+        remember(username, category) {
+          "watchlist:${username.lowercase()}:${category.name.lowercase()}"
+        }
+    val pagerContextScreenModel =
+        navigator.rememberNavigatorScreenModel<UserPagerContextScreenModel>(
+            tag = "user-pager-context:$pagerContextId"
+        ) {
+          UserPagerContextScreenModel()
+        }
     val screenModel =
         koinScreenModel<UserWatchlistScreenModel> { parametersOf(username, category, initialUrl) }
     val state by screenModel.state.collectAsState()
@@ -176,12 +188,17 @@ class UserWatchlistRouteScreen(
                           listState.firstVisibleItemIndex,
                           listState.firstVisibleItemScrollOffset,
                       )
-                      navigator.push(
-                          UserRouteScreen(
-                              username = item.username,
-                              initialChildRoute = UserChildRoute.Gallery,
-                          )
+                      pagerContextScreenModel.seed(
+                          source =
+                              UserPagerSource.Watchlist(
+                                  ownerUsername = username,
+                                  category = category,
+                              ),
+                          users = state.users,
+                          selectedUsername = item.username,
+                          nextPageUrl = state.nextPageUrl,
                       )
+                      navigator.push(UserPagerRouteScreen(item.username, pagerContextId))
                     },
                 )
               }

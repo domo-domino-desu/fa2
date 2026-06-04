@@ -665,6 +665,7 @@ private fun SubmissionWaterfallItem(
           AvatarImage(
               url = item.authorAvatarUrl,
               displayName = item.author,
+              username = item.author,
               size = 24.dp,
               placeholderTextStyle = MaterialTheme.typography.labelSmall,
           )

@@ -8,7 +8,6 @@ import fa2.shared.generated.resources.load_failed_please_retry
 import fa2.shared.generated.resources.recommendation_progress_completed
 import fa2.shared.generated.resources.recommendation_progress_loading_followers_page
 import fa2.shared.generated.resources.recommendation_progress_loading_following_page
-import fa2.shared.generated.resources.recommendation_progress_loading_result_profile
 import fa2.shared.generated.resources.recommendation_progress_loading_user_profile
 import fa2.shared.generated.resources.recommendation_progress_random_pages
 import fa2.shared.generated.resources.recommendation_progress_random_users_collected
@@ -201,9 +200,6 @@ internal fun recommendationProgressMessage(progress: WatchRecommendationProgress
 
       is WatchRecommendationProgress.LoadingUserProfile ->
           appString(Res.string.recommendation_progress_loading_user_profile, progress.username)
-
-      is WatchRecommendationProgress.LoadingResultUserProfile ->
-          appString(Res.string.recommendation_progress_loading_result_profile, progress.username)
 
       is WatchRecommendationProgress.RegularUserNeedsCount ->
           appString(Res.string.recommendation_progress_regular_needs_count, progress.username)
