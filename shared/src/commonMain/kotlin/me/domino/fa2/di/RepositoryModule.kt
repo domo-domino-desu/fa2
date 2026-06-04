@@ -59,8 +59,8 @@ fun repositoryModule(): Module = module {
   single { SubmissionSeriesResolver(get()) }
   single { PersistedWatchRecommendationBlocklistRepository(get()) } bind
       WatchRecommendationBlocklistRepository::class
-  single { WatchRecommendationService(get<WatchlistRepository>(), get()) }
   single { UserRepository(get(), get()) }
+  single { WatchRecommendationService(get<WatchlistRepository>(), get<UserRepository>(), get()) }
   single { GalleryRepository(get()) }
   single { FavoritesRepository(get()) }
   single { JournalsRepository(get()) }

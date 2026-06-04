@@ -44,10 +44,19 @@ class WatchlistParser {
             ?.trim()
             .orEmpty()
             .ifBlank { anchor.text().trim().removePrefix("~").ifBlank { username } }
+    val avatarUrl =
+        anchor
+            .selectFirst("img")
+            ?.attr("src")
+            ?.trim()
+            ?.takeIf(String::isNotBlank)
+            ?.let { src -> toAbsoluteUrl(baseUrl, src) }
+            .orEmpty()
     return WatchlistUser(
         username = username,
         displayName = displayName,
         profileUrl = profileUrl,
+        avatarUrl = avatarUrl,
     )
   }
 

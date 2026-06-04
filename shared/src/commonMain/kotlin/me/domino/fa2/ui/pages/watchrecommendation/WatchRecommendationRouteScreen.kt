@@ -1,19 +1,23 @@
 package me.domino.fa2.ui.pages.watchrecommendation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -54,14 +58,26 @@ class WatchRecommendationRouteScreen(
     val navigator = LocalNavigator.currentOrThrow
     val screenModel = koinScreenModel<WatchRecommendationScreenModel> { parametersOf(username) }
     val state by screenModel.state.collectAsState()
-    val listState = rememberLazyListState()
+    val rankedListState = rememberLazyListState()
+    val randomListState = rememberLazyListState()
+    val activeListState =
+        if ((state as? WatchRecommendationUiState.Success)?.useRandomOrder == true) {
+          randomListState
+        } else {
+          rankedListState
+        }
     val coroutineScope = rememberCoroutineScope()
 
     Column(modifier = Modifier.fillMaxSize()) {
       WatchRecommendationRouteTopBar(
           onBack = { navigator.pop() },
           onGoHome = { navigator.goBackHome() },
-          onTitleClick = { coroutineScope.launch { listState.animateScrollToItem(0) } },
+          showRandomOrder =
+              (state as? WatchRecommendationUiState.Success)?.users?.isNotEmpty() == true,
+          randomOrderEnabled =
+              (state as? WatchRecommendationUiState.Success)?.useRandomOrder == true,
+          onToggleRandomOrder = screenModel::toggleRandomOrder,
+          onTitleClick = { coroutineScope.launch { activeListState.animateScrollToItem(0) } },
       )
 
       when (val snapshot = state) {
@@ -73,13 +89,13 @@ class WatchRecommendationRouteScreen(
           )
         }
 
-        WatchRecommendationUiState.Loading -> {
-          RecommendationLoadingContent()
+        is WatchRecommendationUiState.Loading -> {
+          RecommendationLoadingContent(logLines = snapshot.logLines)
         }
 
         is WatchRecommendationUiState.Error -> {
           LazyColumn(
-              state = listState,
+              state = rankedListState,
               modifier = Modifier.fillMaxSize().padding(top = 6.dp),
           ) {
             item("watch-recommendation-error") {
@@ -98,7 +114,7 @@ class WatchRecommendationRouteScreen(
         is WatchRecommendationUiState.Success -> {
           WatchRecommendationSuccessContent(
               state = snapshot,
-              listState = listState,
+              listState = activeListState,
               emptyMessage = Res.string.following_recommendation_empty,
               onRefresh = screenModel::refreshRecommendations,
               onRetry = screenModel::loadRecommendations,
@@ -144,11 +160,43 @@ internal fun RecommendationIdleContent(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun RecommendationLoadingContent() {
+internal fun RecommendationLoadingContent(
+    logLines: List<String>,
+) {
   Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-    LoadingIndicator(
-        modifier = Modifier.fillMaxWidth(0.4f),
-        color = MaterialTheme.colorScheme.primary,
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+      LoadingIndicator(
+          modifier = Modifier.fillMaxWidth(0.4f),
+          color = MaterialTheme.colorScheme.primary,
+      )
+      if (logLines.isNotEmpty()) {
+        RecommendationProgressLog(logLines = logLines)
+      }
+    }
+  }
+}
+
+@Composable
+private fun RecommendationProgressLog(logLines: List<String>) {
+  Surface(
+      modifier = Modifier.widthIn(max = 560.dp).fillMaxWidth(),
+      shape = RoundedCornerShape(12.dp),
+      color = MaterialTheme.colorScheme.surface,
+      border =
+          BorderStroke(
+              width = 1.dp,
+              color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+          ),
+  ) {
+    Text(
+        text = logLines.joinToString(separator = "\n"),
+        modifier = Modifier.padding(12.dp),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
   }
 }
@@ -186,7 +234,7 @@ internal fun WatchRecommendationSuccessContent(
             }
           }
 
-      if (state.users.isEmpty()) {
+      if (state.visibleUsers.isEmpty()) {
         item("watch-recommendation-empty") {
           WatchlistStatusCard(
               title = stringResource(Res.string.no_content),
@@ -196,7 +244,7 @@ internal fun WatchRecommendationSuccessContent(
         }
       } else {
         items(
-            items = state.users,
+            items = state.visibleUsers,
             key = { item -> item.user.username.lowercase() },
         ) { item ->
           UserHorizontalCard(

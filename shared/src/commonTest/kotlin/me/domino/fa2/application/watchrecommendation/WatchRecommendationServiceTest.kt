@@ -6,10 +6,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.User
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
 import me.domino.fa2.data.repository.WatchRecommendationBlocklistRepository
+import me.domino.fa2.util.FaUrls
 
 class WatchRecommendationServiceTest {
   @Test
@@ -167,6 +169,39 @@ class WatchRecommendationServiceTest {
   }
 
   @Test
+  fun middleUserFollowingCandidatesAreLoadedFromFiveRandomPages() = runTest {
+    val followingUsers = (1..10).map(::sourceUser)
+    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    val userResponses = mutableMapOf<String, PageState<User>>()
+    responses[LoaderKey("me", null)] = successPage(followingUsers)
+    followingUsers.forEach { source ->
+      userResponses[source.username] =
+          PageState.Success(testUser(source.username, watchingCount = 1000))
+      (1..5).forEach { page ->
+        responses[
+            LoaderKey(
+                username = source.username,
+                nextPageUrl = if (page == 1) null else watchlistByUrl(source.username, page),
+            )] =
+            successPage(
+                users =
+                    if (page == 5) {
+                      listOf(candidateUser("deep-candidate"))
+                    } else {
+                      listOf(candidateUser("${source.username}-page$page"))
+                    }
+            )
+      }
+    }
+    val service = buildService(responses = responses, userResponses = userResponses)
+
+    val result = service.recommend(username = "me", recommendationCount = 1)
+
+    assertEquals(listOf("deep-candidate"), result.map { it.user.username })
+    assertEquals(listOf(10), result.map { it.sharedFollowCount })
+  }
+
+  @Test
   fun failsWhenCurrentUserFollowingCannotBeLoaded() = runTest {
     val responses =
         mutableMapOf(
@@ -287,6 +322,61 @@ class WatchRecommendationServiceTest {
   }
 
   @Test
+  fun similarUsersExcludeCurrentLoggedInFollowing() = runTest {
+    val followers = (1..10).map(::sourceUser)
+    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    responses[LoaderKey("artist", null, WatchlistCategory.WatchedBy)] = successPage(followers)
+    responses[LoaderKey("me", null)] = successPage(listOf(candidateUser("already-followed")))
+    followers.forEach { follower ->
+      responses[LoaderKey(follower.username, null)] =
+          successPage(
+              listOf(
+                  candidateUser("already-followed"),
+                  candidateUser("visible-user"),
+              )
+          )
+    }
+    val service = buildService(responses)
+
+    val result =
+        service.recommendFromFollowers(
+            username = "artist",
+            recommendationCount = 5,
+            excludeFollowingUsername = "me",
+        )
+
+    assertEquals(listOf("visible-user"), result.map { it.user.username })
+  }
+
+  @Test
+  fun enrichesRecommendationAvatarsFromResultUserProfiles() = runTest {
+    val followingUsers = (1..10).map(::sourceUser)
+    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    responses[LoaderKey("me", null)] = successPage(followingUsers)
+    followingUsers.forEach { source ->
+      responses[LoaderKey(source.username, null)] = successPage(listOf(candidateUser("artist-a")))
+    }
+    val service =
+        buildService(
+            responses = responses,
+            userResponses =
+                mapOf(
+                    "artist-a" to
+                        PageState.Success(
+                            testUser(
+                                username = "artist-a",
+                                avatarUrl = "https://a.example/avatar.gif",
+                            )
+                        )
+                ),
+        )
+
+    val result = service.recommend(username = "me", recommendationCount = 1)
+
+    assertEquals("https://a.example/avatar.gif", result.single().user.avatarUrl)
+  }
+
+  @Test
   fun similarUsersFailWhenFollowersCannotBeLoaded() = runTest {
     val responses =
         mutableMapOf(
@@ -334,6 +424,7 @@ class WatchRecommendationServiceTest {
       responses: Map<LoaderKey, PageState<WatchlistPage>>,
       blocklistRepository: WatchRecommendationBlocklistRepository =
           FakeWatchRecommendationBlocklistRepository(),
+      userResponses: Map<String, PageState<User>> = emptyMap(),
   ): WatchRecommendationService =
       WatchRecommendationService(
           loadWatchlistPage = { username, category, nextPageUrl ->
@@ -341,6 +432,9 @@ class WatchRecommendationServiceTest {
                 ?: PageState.Error(
                     IllegalStateException("missing response for $username::$category::$nextPageUrl")
                 )
+          },
+          loadUser = { username ->
+            userResponses[username.lowercase()] ?: PageState.Success(testUser(username))
           },
           blocklistRepository = blocklistRepository,
           random = Random(0),
@@ -356,6 +450,25 @@ class WatchRecommendationServiceTest {
   private fun sourceUser(index: Int): WatchlistUser = watchUser("source$index")
 
   private fun candidateUser(username: String): WatchlistUser = watchUser(username)
+
+  private fun watchlistByUrl(username: String, page: Int): String =
+      FaUrls.watchlistBy(username, page)
+
+  private fun testUser(
+      username: String,
+      avatarUrl: String = "",
+      watchedByCount: Int? = null,
+      watchingCount: Int? = null,
+  ): User =
+      User(
+          username = username,
+          displayName = username.replaceFirstChar(Char::uppercaseChar),
+          avatarUrl = avatarUrl,
+          userTitle = "",
+          registeredAt = "",
+          watchedByCount = watchedByCount,
+          watchingCount = watchingCount,
+      )
 
   private fun watchUser(username: String): WatchlistUser =
       WatchlistUser(

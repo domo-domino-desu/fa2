@@ -9,6 +9,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -278,6 +279,9 @@ fun UserWatchlistRouteTopBar(
 fun WatchRecommendationRouteTopBar(
     onBack: () -> Unit,
     onGoHome: () -> Unit,
+    showRandomOrder: Boolean = false,
+    randomOrderEnabled: Boolean = false,
+    onToggleRandomOrder: (() -> Unit)? = null,
     onTitleClick: (() -> Unit)? = null,
 ) {
   RouteTopBar(
@@ -285,7 +289,13 @@ fun WatchRecommendationRouteTopBar(
       onBack = onBack,
       onGoHome = onGoHome,
       onTitleClick = onTitleClick,
-  )
+  ) {
+    RecommendationRandomOrderAction(
+        visible = showRandomOrder,
+        selected = randomOrderEnabled,
+        onClick = onToggleRandomOrder,
+    )
+  }
 }
 
 @Composable
@@ -306,6 +316,9 @@ fun WatchRecommendationBlocklistRouteTopBar(
 fun SimilarUsersRouteTopBar(
     onBack: () -> Unit,
     onGoHome: () -> Unit,
+    showRandomOrder: Boolean = false,
+    randomOrderEnabled: Boolean = false,
+    onToggleRandomOrder: (() -> Unit)? = null,
     onTitleClick: (() -> Unit)? = null,
 ) {
   RouteTopBar(
@@ -313,7 +326,36 @@ fun SimilarUsersRouteTopBar(
       onBack = onBack,
       onGoHome = onGoHome,
       onTitleClick = onTitleClick,
-  )
+  ) {
+    RecommendationRandomOrderAction(
+        visible = showRandomOrder,
+        selected = randomOrderEnabled,
+        onClick = onToggleRandomOrder,
+    )
+  }
+}
+
+@Composable
+private fun RecommendationRandomOrderAction(
+    visible: Boolean,
+    selected: Boolean,
+    onClick: (() -> Unit)?,
+) {
+  if (!visible || onClick == null) return
+  ExpressiveIconButton(
+      onClick = onClick,
+      colors =
+          if (selected) {
+            IconButtonDefaults.filledTonalIconButtonColors()
+          } else {
+            IconButtonDefaults.iconButtonColors()
+          },
+  ) {
+    Icon(
+        imageVector = FaMaterialSymbols.Outlined.Shuffle,
+        contentDescription = stringResource(Res.string.recommendation_random_order),
+    )
+  }
 }
 
 @Composable

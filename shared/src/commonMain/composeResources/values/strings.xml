@@ -78,6 +78,30 @@
   <string name="similar_users_empty">No similar users were found this time. Pull to refresh and try
     another sample.</string>
   <string name="similar_users_load_failed">Failed to find similar users. Please retry.</string>
+  <string name="recommendation_progress_starting">Preparing recommendation run...</string>
+  <string name="recommendation_progress_loading_followers">Loading %1$s's followers...</string>
+  <string name="recommendation_progress_loading_following">Loading %1$s's following...</string>
+  <string name="recommendation_progress_loading_followers_page">Loading %1$s's followers
+    (%2$d/%3$s)...</string>
+  <string name="recommendation_progress_loading_following_page">Loading %1$s's following
+    (%2$d/%3$s)...</string>
+  <string name="recommendation_progress_loading_user_profile">Loading %1$s's profile for watchlist
+    counts...</string>
+  <string name="recommendation_progress_loading_result_profile">Loading %1$s's profile for
+    avatar...</string>
+  <string name="recommendation_progress_regular_needs_count">First page for %1$s suggests a large
+    alphabetical list; loading profile counts.</string>
+  <string name="recommendation_progress_regular_sequential">First page for %1$s suggests a small
+    list; continuing sequentially.</string>
+  <string name="recommendation_progress_random_pages">Random pages: %1$s</string>
+  <string name="recommendation_progress_random_users_collected">Collected %1$d random users.</string>
+  <string name="recommendation_progress_sample_prepared">Prepared %1$d source users, up to %2$d
+    rounds.</string>
+  <string name="recommendation_progress_round_started">Round %1$d: sampling %2$d users, minimum
+    shared count %3$d.</string>
+  <string name="recommendation_progress_round_completed">Round %1$d: found %2$d candidates, target
+    %3$d.</string>
+  <string name="recommendation_progress_completed">Finished with %1$d users.</string>
   <string name="following_recommendation_blocklist">Hidden Recommendations</string>
   <string name="following_recommendation_blocklist_summary">Manage users hidden from follow
     recommendations</string>
@@ -87,6 +111,7 @@
     blocklist: %1$s</string>
   <string name="following_recommendation_block">Don't recommend</string>
   <string name="following_recommendation_unblock">Unhide</string>
+  <string name="recommendation_random_order">Random order</string>
   <string name="favorite_more_summary">Open this account's favorited submissions</string>
   <string name="about_summary">View app info, project links, open-source libraries, and
     acknowledgements</string>

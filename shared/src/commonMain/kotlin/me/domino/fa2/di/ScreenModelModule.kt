@@ -104,6 +104,7 @@ fun screenModelModule(): Module = module {
         recommendationService = get(),
         blocklistRepository = get(),
         settingsService = get(),
+        authSessionController = get(),
     )
   }
 }

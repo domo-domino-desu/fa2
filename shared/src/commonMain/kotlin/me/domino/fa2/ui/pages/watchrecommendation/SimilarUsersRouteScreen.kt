@@ -42,14 +42,26 @@ class SimilarUsersRouteScreen(
     val navigator = LocalNavigator.currentOrThrow
     val screenModel = koinScreenModel<SimilarUsersScreenModel> { parametersOf(username) }
     val state by screenModel.state.collectAsState()
-    val listState = rememberLazyListState()
+    val rankedListState = rememberLazyListState()
+    val randomListState = rememberLazyListState()
+    val activeListState =
+        if ((state as? WatchRecommendationUiState.Success)?.useRandomOrder == true) {
+          randomListState
+        } else {
+          rankedListState
+        }
     val coroutineScope = rememberCoroutineScope()
 
     Column(modifier = Modifier.fillMaxSize()) {
       SimilarUsersRouteTopBar(
           onBack = { navigator.pop() },
           onGoHome = { navigator.goBackHome() },
-          onTitleClick = { coroutineScope.launch { listState.animateScrollToItem(0) } },
+          showRandomOrder =
+              (state as? WatchRecommendationUiState.Success)?.users?.isNotEmpty() == true,
+          randomOrderEnabled =
+              (state as? WatchRecommendationUiState.Success)?.useRandomOrder == true,
+          onToggleRandomOrder = screenModel::toggleRandomOrder,
+          onTitleClick = { coroutineScope.launch { activeListState.animateScrollToItem(0) } },
       )
 
       when (val snapshot = state) {
@@ -61,13 +73,13 @@ class SimilarUsersRouteScreen(
           )
         }
 
-        WatchRecommendationUiState.Loading -> {
-          RecommendationLoadingContent()
+        is WatchRecommendationUiState.Loading -> {
+          RecommendationLoadingContent(logLines = snapshot.logLines)
         }
 
         is WatchRecommendationUiState.Error -> {
           LazyColumn(
-              state = listState,
+              state = rankedListState,
               modifier = Modifier.fillMaxSize().padding(top = 6.dp),
           ) {
             item("similar-users-error") {
@@ -86,7 +98,7 @@ class SimilarUsersRouteScreen(
         is WatchRecommendationUiState.Success -> {
           WatchRecommendationSuccessContent(
               state = snapshot,
-              listState = listState,
+              listState = activeListState,
               emptyMessage = Res.string.similar_users_empty,
               onRefresh = screenModel::refreshSimilarUsers,
               onRetry = screenModel::loadSimilarUsers,

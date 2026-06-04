@@ -5,10 +5,25 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import fa2.shared.generated.resources.Res
 import fa2.shared.generated.resources.following_recommendation_blocklist_update_failed
 import fa2.shared.generated.resources.load_failed_please_retry
+import fa2.shared.generated.resources.recommendation_progress_completed
+import fa2.shared.generated.resources.recommendation_progress_loading_followers_page
+import fa2.shared.generated.resources.recommendation_progress_loading_following_page
+import fa2.shared.generated.resources.recommendation_progress_loading_result_profile
+import fa2.shared.generated.resources.recommendation_progress_loading_user_profile
+import fa2.shared.generated.resources.recommendation_progress_random_pages
+import fa2.shared.generated.resources.recommendation_progress_random_users_collected
+import fa2.shared.generated.resources.recommendation_progress_regular_needs_count
+import fa2.shared.generated.resources.recommendation_progress_regular_sequential
+import fa2.shared.generated.resources.recommendation_progress_round_completed
+import fa2.shared.generated.resources.recommendation_progress_round_started
+import fa2.shared.generated.resources.recommendation_progress_sample_prepared
+import fa2.shared.generated.resources.recommendation_progress_starting
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.domino.fa2.application.watchrecommendation.RecommendedWatchUser
+import me.domino.fa2.application.watchrecommendation.WatchRecommendationProgress
 import me.domino.fa2.application.watchrecommendation.WatchRecommendationService
+import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.repository.WatchRecommendationBlocklistRepository
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.i18n.appString
@@ -17,14 +32,19 @@ import me.domino.fa2.util.logging.FaLog
 sealed interface WatchRecommendationUiState {
   data object Idle : WatchRecommendationUiState
 
-  data object Loading : WatchRecommendationUiState
+  data class Loading(val logLines: List<String> = emptyList()) : WatchRecommendationUiState
 
   data class Success(
       val users: List<RecommendedWatchUser>,
+      val randomUsers: List<RecommendedWatchUser> = users.shuffled(),
+      val useRandomOrder: Boolean = false,
       val refreshing: Boolean = false,
       val inlineErrorMessage: String? = null,
       val blockingUsernames: Set<String> = emptySet(),
-  ) : WatchRecommendationUiState
+  ) : WatchRecommendationUiState {
+    val visibleUsers: List<RecommendedWatchUser>
+      get() = if (useRandomOrder) randomUsers else users
+  }
 
   data class Error(val message: String) : WatchRecommendationUiState
 }
@@ -50,7 +70,10 @@ class WatchRecommendationScreenModel(
                   blockingUsernames = emptySet(),
               )
 
-          else -> WatchRecommendationUiState.Loading
+          else ->
+              WatchRecommendationUiState.Loading(
+                  logLines = listOf(appString(Res.string.recommendation_progress_starting))
+              )
         }
 
     loadJob =
@@ -61,10 +84,16 @@ class WatchRecommendationScreenModel(
                     username = username,
                     recommendationCount =
                         settingsService.settings.value.watchRecommendationPageSize,
+                    excludeFollowingUsername = username,
+                    onProgress = ::appendProgressLog,
                 )
               }
               .onSuccess { users ->
-                mutableState.value = WatchRecommendationUiState.Success(users = users)
+                mutableState.value =
+                    WatchRecommendationUiState.Success(
+                        users = users,
+                        randomUsers = users.shuffled(),
+                    )
                 log.i { "关注推荐 -> 成功(user=$username,count=${users.size})" }
               }
               .onFailure { error ->
@@ -87,6 +116,11 @@ class WatchRecommendationScreenModel(
     loadRecommendations()
   }
 
+  fun toggleRandomOrder() {
+    val snapshot = state.value as? WatchRecommendationUiState.Success ?: return
+    mutableState.value = snapshot.copy(useRandomOrder = !snapshot.useRandomOrder)
+  }
+
   fun blockRecommendation(username: String) {
     val snapshot = state.value as? WatchRecommendationUiState.Success ?: return
     val normalizedUsername = username.trim().lowercase()
@@ -105,6 +139,10 @@ class WatchRecommendationScreenModel(
                 current.copy(
                     users =
                         current.users.filterNot { candidate ->
+                          candidate.user.username.equals(username, ignoreCase = true)
+                        },
+                    randomUsers =
+                        current.randomUsers.filterNot { candidate ->
                           candidate.user.username.equals(username, ignoreCase = true)
                         },
                     blockingUsernames = current.blockingUsernames - normalizedUsername,
@@ -127,4 +165,84 @@ class WatchRecommendationScreenModel(
           }
     }
   }
+
+  private fun appendProgressLog(progress: WatchRecommendationProgress) {
+    val message = recommendationProgressMessage(progress)
+    val snapshot = state.value as? WatchRecommendationUiState.Loading ?: return
+    val nextLines = (snapshot.logLines + message).takeLast(maxRecommendationProgressLogLines)
+    mutableState.value = snapshot.copy(logLines = nextLines)
+  }
 }
+
+internal const val maxRecommendationProgressLogLines: Int = 6
+
+internal fun recommendationProgressMessage(progress: WatchRecommendationProgress): String =
+    when (progress) {
+      is WatchRecommendationProgress.LoadingWatchlist -> {
+        val totalPages = progress.totalPages?.toString() ?: "?"
+        when (progress.category) {
+          WatchlistCategory.WatchedBy ->
+              appString(
+                  Res.string.recommendation_progress_loading_followers_page,
+                  progress.username,
+                  progress.page,
+                  totalPages,
+              )
+
+          WatchlistCategory.Watching ->
+              appString(
+                  Res.string.recommendation_progress_loading_following_page,
+                  progress.username,
+                  progress.page,
+                  totalPages,
+              )
+        }
+      }
+
+      is WatchRecommendationProgress.LoadingUserProfile ->
+          appString(Res.string.recommendation_progress_loading_user_profile, progress.username)
+
+      is WatchRecommendationProgress.LoadingResultUserProfile ->
+          appString(Res.string.recommendation_progress_loading_result_profile, progress.username)
+
+      is WatchRecommendationProgress.RegularUserNeedsCount ->
+          appString(Res.string.recommendation_progress_regular_needs_count, progress.username)
+
+      is WatchRecommendationProgress.RegularUserSequential ->
+          appString(Res.string.recommendation_progress_regular_sequential, progress.username)
+
+      is WatchRecommendationProgress.RandomPagesSelected ->
+          appString(
+              Res.string.recommendation_progress_random_pages,
+              progress.pages.joinToString(),
+          )
+
+      is WatchRecommendationProgress.RandomUsersCollected ->
+          appString(Res.string.recommendation_progress_random_users_collected, progress.count)
+
+      is WatchRecommendationProgress.SamplePrepared ->
+          appString(
+              Res.string.recommendation_progress_sample_prepared,
+              progress.sourceCount,
+              progress.maxRounds,
+          )
+
+      is WatchRecommendationProgress.RoundStarted ->
+          appString(
+              Res.string.recommendation_progress_round_started,
+              progress.round,
+              progress.sampleSize,
+              progress.minimumSharedFollowCount,
+          )
+
+      is WatchRecommendationProgress.RoundCompleted ->
+          appString(
+              Res.string.recommendation_progress_round_completed,
+              progress.round,
+              progress.candidateCount,
+              progress.recommendationCount,
+          )
+
+      is WatchRecommendationProgress.Completed ->
+          appString(Res.string.recommendation_progress_completed, progress.resultCount)
+    }

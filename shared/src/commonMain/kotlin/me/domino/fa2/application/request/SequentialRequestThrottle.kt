@@ -5,7 +5,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import me.domino.fa2.util.logging.FaLog
 
-internal const val defaultSequentialRequestThrottleMs: Long = 500L
+internal const val defaultSequentialRequestThrottleMs: Long = 600L
 
 /**
  * 为同一批顺序请求施加固定间隔节流。

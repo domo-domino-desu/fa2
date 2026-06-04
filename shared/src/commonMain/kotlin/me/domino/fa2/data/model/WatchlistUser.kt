@@ -11,4 +11,6 @@ data class WatchlistUser(
     val displayName: String,
     /** 用户主页地址。 */
     val profileUrl: String,
+    /** 头像地址（watchlist 页面可能不提供）。 */
+    val avatarUrl: String = "",
 )

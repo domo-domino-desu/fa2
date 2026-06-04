@@ -46,7 +46,7 @@ fun UserHorizontalCard(
         verticalAlignment = Alignment.CenterVertically,
     ) {
       AvatarImage(
-          url = "",
+          url = user.avatarUrl,
           displayName = user.displayName,
           size = 42.dp,
           placeholderTextStyle = MaterialTheme.typography.titleMedium,
