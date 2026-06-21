@@ -19,7 +19,6 @@ import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.repository.UserRepository
 import me.domino.fa2.data.repository.WatchRecommendationBlocklistRepository
 import me.domino.fa2.data.settings.AppSettingsService
@@ -28,8 +27,6 @@ import me.domino.fa2.ui.layouts.UserRouteTopBar
 import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.pages.user.profile.UserHeaderCard
 import me.domino.fa2.ui.pages.user.profile.UserScreenModel
-import me.domino.fa2.ui.pages.user.shout.UserShoutsRouteScreen
-import me.domino.fa2.ui.pages.user.watchlist.UserWatchlistRouteScreen
 import me.domino.fa2.ui.pages.watchrecommendation.SimilarUsersRouteScreen
 import me.domino.fa2.util.FaUrls
 import org.koin.compose.koinInject
@@ -121,35 +118,12 @@ internal fun UserRouteBody(
                   onToggleWatch = userScreenModel::toggleWatch,
                   onHideFromRecommendations = userScreenModel::hideFromRecommendations,
                   onUnhideFromRecommendations = userScreenModel::unhideFromRecommendations,
-                  onOpenWatchedBy = {
-                    val initialUrl =
-                        userState.header?.watchedByListUrl?.trim()?.takeIf { value ->
-                          value.isNotBlank()
-                        } ?: FaUrls.watchlistTo(username)
-                    parentNavigator.push(
-                        UserWatchlistRouteScreen(
-                            username = username,
-                            category = WatchlistCategory.WatchedBy,
-                            initialUrl = initialUrl,
-                        )
-                    )
-                  },
-                  onOpenWatching = {
-                    val initialUrl =
-                        userState.header?.watchingListUrl?.trim()?.takeIf { value ->
-                          value.isNotBlank()
-                        } ?: FaUrls.watchlistBy(username)
-                    parentNavigator.push(
-                        UserWatchlistRouteScreen(
-                            username = username,
-                            category = WatchlistCategory.Watching,
-                            initialUrl = initialUrl,
-                        )
-                    )
-                  },
-                  onOpenShouts = {
-                    parentNavigator.push(UserShoutsRouteScreen(username = username))
-                  },
+                  navigationActions =
+                      userHeaderNavigationActions(
+                          username = username,
+                          header = userState.header,
+                          navigator = parentNavigator,
+                      ),
               )
             },
         LocalUserHeaderRefreshAction provides { userScreenModel.load(forceRefresh = true) },

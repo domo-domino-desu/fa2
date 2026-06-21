@@ -21,13 +21,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
+import me.domino.fa2.data.model.User
 import me.domino.fa2.ui.components.ExpressiveButton
 import me.domino.fa2.ui.components.ExpressiveIconButton
 import me.domino.fa2.ui.components.ExpressiveTextButton
-import me.domino.fa2.ui.components.settings.SettingsAccountHeader
+import me.domino.fa2.ui.components.UserHeaderSummaryCard
 import me.domino.fa2.ui.components.settings.SettingsGroup
 import me.domino.fa2.ui.components.settings.SettingsListItem
 import me.domino.fa2.ui.icons.FaMaterialSymbols
+import me.domino.fa2.ui.pages.user.route.UserHeaderNavigationActions
 import org.jetbrains.compose.resources.stringResource
 
 /** More 页面。 */
@@ -37,12 +39,10 @@ fun MoreScreen(
     state: MoreUiState,
     /** 打开当前用户页面。 */
     onOpenUser: (() -> Unit)?,
-    /** 打开当前用户已关注列表。 */
-    onOpenFollowing: (() -> Unit)?,
+    /** 用户头部统计入口导航。 */
+    headerNavigationActions: UserHeaderNavigationActions?,
     /** 打开关注推荐页面。 */
     onOpenWatchRecommendations: (() -> Unit)?,
-    /** 打开当前用户收藏列表。 */
-    onOpenFavorites: (() -> Unit)?,
     /** 打开设置页。 */
     onOpenSettings: () -> Unit,
     /** 打开投稿浏览记录。 */
@@ -67,9 +67,8 @@ fun MoreScreen(
       MoreContent(
           state = state,
           onOpenUser = onOpenUser,
-          onOpenFollowing = onOpenFollowing,
+          headerNavigationActions = headerNavigationActions,
           onOpenWatchRecommendations = onOpenWatchRecommendations,
-          onOpenFavorites = onOpenFavorites,
           onOpenSettings = onOpenSettings,
           onOpenSubmissionHistory = onOpenSubmissionHistory,
           onOpenSearchHistory = onOpenSearchHistory,
@@ -87,12 +86,10 @@ private fun MoreContent(
     state: MoreUiState.Ready,
     /** 打开用户页回调。 */
     onOpenUser: (() -> Unit)?,
-    /** 打开当前用户已关注列表。 */
-    onOpenFollowing: (() -> Unit)?,
+    /** 用户头部统计入口导航。 */
+    headerNavigationActions: UserHeaderNavigationActions?,
     /** 打开关注推荐页。 */
     onOpenWatchRecommendations: (() -> Unit)?,
-    /** 打开当前用户收藏列表。 */
-    onOpenFavorites: (() -> Unit)?,
     /** 打开设置页回调。 */
     onOpenSettings: () -> Unit,
     /** 打开投稿浏览记录。 */
@@ -111,10 +108,22 @@ private fun MoreContent(
       verticalArrangement = Arrangement.spacedBy(10.dp),
   ) {
     item {
-      SettingsAccountHeader(
-          title = state.username ?: stringResource(Res.string.account_center),
-          subtitle = stringResource(Res.string.account_center),
+      val displayUsername = state.username ?: stringResource(Res.string.account_center)
+      UserHeaderSummaryCard(
+          user =
+              state.userHeader
+                  ?: User(
+                      username = state.username.orEmpty(),
+                      displayName = displayUsername,
+                      avatarUrl = "",
+                      userTitle = "",
+                      registeredAt = "",
+                  ),
+          fallbackUsername = displayUsername,
           onClick = { onOpenUser?.invoke() },
+          onOpenShouts = headerNavigationActions?.onOpenShouts,
+          onOpenWatchedBy = headerNavigationActions?.onOpenWatchedBy,
+          onOpenWatching = headerNavigationActions?.onOpenWatching,
           enabled = onOpenUser != null,
           modifier = Modifier.padding(top = 4.dp),
       )
@@ -122,28 +131,12 @@ private fun MoreContent(
     item {
       SettingsGroup(titleHorizontalPadding = 0.dp, containerHorizontalPadding = 0.dp) {
         SettingsListItem(
-            icon = FaMaterialSymbols.Filled.Notifications,
-            title = stringResource(Res.string.following),
-            subtitle = stringResource(Res.string.following_more_summary),
-            onClick = { onOpenFollowing?.invoke() },
-            enabled = onOpenFollowing != null,
-            modifier = Modifier.testTag("more-following"),
-        )
-        SettingsListItem(
             icon = FaMaterialSymbols.Outlined.Troubleshoot,
             title = stringResource(Res.string.following_recommendation),
             subtitle = stringResource(Res.string.following_recommendation_summary),
             onClick = { onOpenWatchRecommendations?.invoke() },
             enabled = onOpenWatchRecommendations != null,
             modifier = Modifier.testTag("more-following-recommendation"),
-        )
-        SettingsListItem(
-            icon = FaMaterialSymbols.Filled.Favorite,
-            title = stringResource(Res.string.favorites),
-            subtitle = stringResource(Res.string.favorite_more_summary),
-            onClick = { onOpenFavorites?.invoke() },
-            enabled = onOpenFavorites != null,
-            modifier = Modifier.testTag("more-favorites"),
         )
         SettingsListItem(
             icon = FaMaterialSymbols.Filled.History,

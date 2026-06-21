@@ -288,7 +288,7 @@ data class OpenAiTranslationConfig(
     const val defaultModel: String = "gpt-4o-mini"
     val defaultPromptTemplate: String =
         """
-        你是专业翻译助手。请把输入文本翻译为 {TARGET_LANG}。
+        你是一位文学家和翻译大师。请把输入文本翻译为 {TARGET_LANG}。
         请严格保留段落分隔标记 {SEPARATOR} 的数量和顺序。
         只输出译文，不要输出解释或额外内容。
 

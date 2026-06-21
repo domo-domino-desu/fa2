@@ -5,8 +5,11 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import me.domino.fa2.application.auth.AuthSessionController
+import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.User
 import me.domino.fa2.data.repository.ActivityHistoryRepository
 import me.domino.fa2.data.repository.AuthRepository
+import me.domino.fa2.data.repository.UserRepository
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.i18n.SystemLanguageProvider
 import me.domino.fa2.i18n.appString
@@ -19,6 +22,7 @@ class MoreScreenModel(
     private val authSessionController: AuthSessionController,
     /** 历史记录仓储。 */
     private val historyRepository: ActivityHistoryRepository,
+    private val userRepository: UserRepository,
     private val settingsService: AppSettingsService? = null,
     private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) : StateScreenModel<MoreUiState>(MoreUiState.Loading) {
@@ -37,9 +41,19 @@ class MoreScreenModel(
             val username = authSessionController.loadPersistedUsername()
             val submissionHistoryCount = historyRepository.loadSubmissionHistory().size
             val searchHistoryCount = historyRepository.loadSearchHistory().size
+            val userHeader =
+                username
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { currentUsername ->
+                      when (val userState = userRepository.loadUser(currentUsername)) {
+                        is PageState.Success -> userState.data
+                        else -> null
+                      }
+                    }
             mutableState.value =
                 MoreUiState.Ready(
                     username = username,
+                    userHeader = userHeader,
                     hasCookie = hasCookie,
                     submissionHistoryCount = submissionHistoryCount,
                     searchHistoryCount = searchHistoryCount,
@@ -70,6 +84,7 @@ class MoreScreenModel(
             mutableState.value =
                 snapshot.copy(
                     username = null,
+                    userHeader = null,
                     hasCookie = false,
                     submissionHistoryCount = snapshot.submissionHistoryCount,
                     searchHistoryCount = snapshot.searchHistoryCount,
@@ -101,6 +116,7 @@ sealed interface MoreUiState {
    * 可展示状态。
    *
    * @property username 当前用户名。
+   * @property userHeader 当前用户资料头部，进入 More 时加载一次。
    * @property hasCookie 当前是否仍有 cookie 会话。
    * @property submissionHistoryCount 投稿历史数量。
    * @property searchHistoryCount 搜索历史数量。
@@ -111,6 +127,8 @@ sealed interface MoreUiState {
   data class Ready(
       /** 当前用户名。 */
       val username: String?,
+      /** 当前用户资料头部。 */
+      val userHeader: User?,
       /** 当前是否有 cookie。 */
       val hasCookie: Boolean,
       /** 投稿历史数量。 */

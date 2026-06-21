@@ -18,6 +18,7 @@
   <string name="rollback_saved_settings">Restore saved settings</string>
   <string name="restored_saved_settings">Restored saved settings</string>
   <string name="save_settings">Save settings</string>
+  <string name="set_to_default">Set to default</string>
   <string name="settings_saved">Settings saved</string>
   <string name="settings_unsaved_changes_title">Unsaved settings</string>
   <string name="settings_unsaved_changes_body">You have unsaved changes. Leaving now will discard
@@ -37,6 +38,7 @@
   <string name="close_search_overlay">Close search overlay</string>
   <string name="open_search_overlay">Open search overlay</string>
   <string name="run_search">Run search</string>
+  <string name="clear_search_query">Clear search query</string>
   <string name="open_filters">Open filters</string>
   <string name="close">Close</string>
   <string name="reload">Reload</string>
@@ -240,32 +242,55 @@
   <string name="shouts">Shouts</string>
   <string name="processing">Processing...</string>
   <string name="chunk_word_limit">Chunk Word Limit</string>
+  <string name="chunk_word_limit_desc">Split long text before translation. Range: %1$d-%2$d</string>
   <string name="max_concurrency">Max Concurrency</string>
+  <string name="max_concurrency_desc">Limit simultaneous translation requests. Range:
+    %1$d-%2$d</string>
   <string name="translation">Translation Features</string>
   <string name="provider">Provider</string>
+  <string name="translation_provider_desc">Choose translation provider</string>
   <string name="enable_translation">Enable translation</string>
+  <string name="enable_translation_desc">Show translation actions for supported content</string>
   <string name="translation_target_language">Translation Target Language</string>
+  <string name="translation_target_language_desc">Choose translation target language</string>
   <string name="field_translation">Field Translation</string>
+  <string name="field_translation_desc">Show translated metadata fields</string>
   <string name="waterfall_min_column_width_dp">Card Width</string>
+  <string name="waterfall_min_column_width_desc">Minimum waterfall card width. Range:
+    %1$d-%2$d dp</string>
   <string name="watch_recommendation_page_size">Recommendations Per Run</string>
+  <string name="watch_recommendation_page_size_desc">Number of users returned in one run. Range:
+    %1$d-%2$d</string>
   <string name="base_url">Base URL</string>
+  <string name="openai_base_url_desc">Endpoint for an OpenAI-compatible translation API</string>
   <string name="api_key">API Key</string>
+  <string name="openai_api_key_desc">Credential sent to the compatible API provider</string>
   <string name="model">Model</string>
+  <string name="openai_model_desc">Model name used by the compatible API provider</string>
   <string name="prompt_template">Prompt Template</string>
+  <string name="openai_prompt_template_desc">Translation prompt. Supports {INPUT} {TARGET_LANG}
+    {SEPARATOR}</string>
   <string name="prompt_template_variables_hint">Supports {INPUT} {TARGET_LANG} {SEPARATOR}</string>
   <string name="download_settings">Download</string>
   <string name="download_save_path">Save Path</string>
   <string name="choose_save_path">Choose save path</string>
-  <string name="download_allow_media_indexing">Allow system media indexing</string>
+  <string name="download_allow_media_indexing">Allow gallery indexing</string>
+  <string name="download_allow_media_indexing_desc">Allow saved media to appear in system
+    galleries</string>
   <string name="download_subfolder_mode">Subfolder Mode</string>
+  <string name="download_subfolder_mode_desc">Choose the folder grouping mode for downloaded
+    files</string>
   <string name="download_subfolder_mode_flat">Flat</string>
   <string name="download_subfolder_mode_by_username">By username</string>
   <string name="download_file_name_mode">File Name Mode</string>
+  <string name="download_file_name_mode_desc">Choose the naming pattern for saved files</string>
   <string name="download_file_name_mode_id_title">id-title</string>
   <string name="download_file_name_mode_username_id">username-id</string>
   <string name="download_file_name_mode_username_id_title">username-id-title</string>
   <string name="download_file_name_mode_custom">Custom template</string>
   <string name="download_file_name_template">File name template</string>
+  <string name="download_file_name_template_desc">Custom naming pattern. Supports {username}
+    {title} {submission_id} {category} {rating} {type} {species}</string>
   <string name="download_file_name_template_variables_hint">Supports {username} {title}
     {submission_id} {category} {rating} {type} {species}</string>
   <string name="download_save_path_not_configured">Please choose a save path in Settings first</string>
@@ -281,10 +306,18 @@
   <string name="download_save_error_cannot_create_target_file">Cannot create target file</string>
   <string name="download_save_error_cannot_write_target_file">Cannot write target file</string>
   <string name="blocked_content">Blocking Features</string>
-  <string name="blur_blocked_submissions_in_waterfalls">Blur blocked submissions in waterfalls</string>
-  <string name="blur_blocked_submissions_in_detail_pages">Blur blocked submissions in detail pages</string>
+  <string name="blur_blocked_submissions_in_waterfalls">Blur blocked (waterfall)</string>
+  <string name="blur_blocked_submissions_in_waterfalls_desc">Blur blocked submissions in waterfall
+    cards</string>
+  <string name="blur_blocked_submissions_in_detail_pages">Blur blocked (detail page)</string>
+  <string name="blur_blocked_submissions_in_detail_pages_desc">Blur blocked submissions in detail
+    pages</string>
   <string name="return_to_current_submission_in_waterfall">When leaving a submission, move the
     waterfall to the current submission</string>
+  <string name="return_to_current_submission_in_waterfall_desc">Restore the list position after
+    returning from a detail page</string>
+  <string name="theme_mode_desc">Choose theme mode</string>
+  <string name="app_language_desc">Choose app language</string>
   <string name="show">Show</string>
   <string name="hide">Hide</string>
   <string name="watch">Watch</string>

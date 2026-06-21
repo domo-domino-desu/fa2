@@ -64,12 +64,7 @@ fun SettingsAccountHeader(
                   mergeDescendants = false,
               ),
       shape = RoundedCornerShape(14.dp),
-      color = MaterialTheme.colorScheme.surface,
-      border =
-          BorderStroke(
-              width = 1.dp,
-              color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-          ),
+      color = MaterialTheme.colorScheme.surfaceContainer,
   ) {
     Row(
         modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
@@ -219,7 +214,7 @@ fun SettingsListItem(
     if (showDivider) {
       HorizontalDivider(
           modifier = Modifier.padding(start = 60.dp),
-          color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
+          color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
       )
     }
   }
@@ -238,7 +233,7 @@ fun SettingsControlRow(
         modifier =
             Modifier.fillMaxWidth().defaultMinSize(minHeight = 52.dp).padding(vertical = 6.dp)
     ) {
-      val stacked = maxWidth < 520.dp
+      val stacked = maxWidth < 320.dp
       if (stacked) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -264,7 +259,6 @@ fun SettingsControlRow(
         }
       }
     }
-    SettingsRowDivider()
   }
 }
 
@@ -326,6 +320,51 @@ fun SettingsInputRow(
   }
 }
 
+/** 设置页纵向输入项：标题/说明在上，输入框在下占满整行。 */
+@Composable
+fun SettingsStackedInputRow(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    supportingText: String? = null,
+    headerAction: @Composable (() -> Unit)? = null,
+    readOnly: Boolean = false,
+    singleLine: Boolean = true,
+    minLines: Int = 1,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    trailingIcon: @Composable (() -> Unit)? = null,
+) {
+  Column(
+      modifier = modifier.fillMaxWidth().padding(vertical = 6.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp),
+  ) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+      SettingsControlLabel(
+          title = label,
+          supportingText = supportingText,
+          modifier = Modifier.weight(1f),
+      )
+      headerAction?.invoke()
+    }
+    CompactSettingsTextField(
+        value = value,
+        onValueChange = onValueChange,
+        readOnly = readOnly,
+        singleLine = singleLine,
+        minLines = minLines,
+        visualTransformation = visualTransformation,
+        trailingIcon = trailingIcon,
+        modifier = Modifier.fillMaxWidth(),
+        constrainWidth = false,
+    )
+  }
+}
+
 @Composable
 private fun CompactSettingsTextField(
     value: String,
@@ -335,19 +374,27 @@ private fun CompactSettingsTextField(
     minLines: Int,
     visualTransformation: VisualTransformation,
     trailingIcon: @Composable (() -> Unit)?,
+    modifier: Modifier = Modifier,
+    constrainWidth: Boolean = true,
 ) {
   val shape = RoundedCornerShape(8.dp)
+  val sizeModifier =
+      if (constrainWidth) {
+        modifier.widthIn(min = 88.dp, max = if (minLines > 1) 180.dp else 160.dp)
+      } else {
+        modifier.fillMaxWidth()
+      }
   Surface(
       modifier =
-          Modifier.widthIn(min = 112.dp, max = 240.dp)
+          sizeModifier
               .heightIn(min = if (minLines > 1) 96.dp else 36.dp)
               .border(
                   width = 1.dp,
-                  color = MaterialTheme.colorScheme.outline,
+                  color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f),
                   shape = shape,
               ),
       shape = shape,
-      color = MaterialTheme.colorScheme.surface,
+      color = MaterialTheme.colorScheme.surfaceContainerHighest,
   ) {
     Row(
         modifier =
@@ -403,7 +450,6 @@ fun SettingsNavigationRow(
           tint = MaterialTheme.colorScheme.onSurfaceVariant,
       )
     }
-    SettingsRowDivider()
   }
 }
 

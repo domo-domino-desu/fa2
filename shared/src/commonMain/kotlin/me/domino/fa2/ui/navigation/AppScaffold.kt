@@ -13,6 +13,7 @@ import androidx.compose.material3.ShortNavigationBar
 import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.WideNavigationRail
+import androidx.compose.material3.WideNavigationRailDefaults
 import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.material3.WideNavigationRailValue
 import androidx.compose.material3.rememberWideNavigationRailState
@@ -80,6 +81,10 @@ fun AppScaffold(
         WideNavigationRail(
             modifier = Modifier.fillMaxHeight(),
             state = rememberWideNavigationRailState(WideNavigationRailValue.Collapsed),
+            colors =
+                WideNavigationRailDefaults.colors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
         ) {
           destinations.forEach { destination ->
             val selected = currentTopLevelDestination == destination.destination
@@ -97,9 +102,9 @@ fun AppScaffold(
       }
     } else {
       Scaffold(
-          containerColor = MaterialTheme.colorScheme.surface,
+          containerColor = MaterialTheme.colorScheme.background,
           bottomBar = {
-            ShortNavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
+            ShortNavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
               destinations.forEach { destination ->
                 val selected = currentTopLevelDestination == destination.destination
                 ShortNavigationBarItem(

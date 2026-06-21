@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,14 +17,18 @@ import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
 import me.domino.fa2.data.settings.DownloadFileNameMode
 import me.domino.fa2.data.settings.MetadataDisplayMode
+import me.domino.fa2.data.settings.OpenAiTranslationConfig
 import me.domino.fa2.data.settings.TranslationProvider
+import me.domino.fa2.ui.components.ExpressiveIconButton
 import me.domino.fa2.ui.components.ExpressiveTextButton
 import me.domino.fa2.ui.components.platform.rememberPlatformDirectoryPicker
 import me.domino.fa2.ui.components.settings.SettingsDropdownField
 import me.domino.fa2.ui.components.settings.SettingsGroup
 import me.domino.fa2.ui.components.settings.SettingsInputRow
 import me.domino.fa2.ui.components.settings.SettingsNavigationRow
+import me.domino.fa2.ui.components.settings.SettingsStackedInputRow
 import me.domino.fa2.ui.components.settings.SettingsSwitchRow
+import me.domino.fa2.ui.icons.FaMaterialSymbols
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -38,6 +43,7 @@ internal fun AppearanceSettingsSection(
     ) {
       SettingsDropdownField(
           label = stringResource(Res.string.theme_mode),
+          supportingText = stringResource(Res.string.theme_mode_desc),
           selected = draft.themeMode,
           options = AppSettings.supportedThemeModes,
           optionLabel = { option -> themeModeLabel(option) },
@@ -46,6 +52,7 @@ internal fun AppearanceSettingsSection(
 
       SettingsDropdownField(
           label = stringResource(Res.string.app_language),
+          supportingText = stringResource(Res.string.app_language_desc),
           selected = draft.uiLanguage,
           options = AppSettings.supportedUiLanguages,
           optionLabel = { option -> uiLanguageLabel(option) },
@@ -58,10 +65,18 @@ internal fun AppearanceSettingsSection(
             onDraftChange(draft.copy(waterfallMinCardWidthInput = next.filter(Char::isDigit)))
           },
           label = stringResource(Res.string.waterfall_min_column_width_dp),
+          supportingText =
+              stringResource(
+                  Res.string.waterfall_min_column_width_desc,
+                  AppSettings.minWaterfallMinCardWidthDp,
+                  AppSettings.maxWaterfallMinCardWidthDp,
+              ),
       )
 
       SettingsSwitchRow(
           label = stringResource(Res.string.return_to_current_submission_in_waterfall),
+          supportingText =
+              stringResource(Res.string.return_to_current_submission_in_waterfall_desc),
           checked = draft.returnToCurrentSubmissionInWaterfall,
           onCheckedChange = { enabled ->
             onDraftChange(draft.copy(returnToCurrentSubmissionInWaterfall = enabled))
@@ -85,6 +100,7 @@ internal fun TranslationSettingsSection(
     ) {
       SettingsSwitchRow(
           label = stringResource(Res.string.enable_translation),
+          supportingText = stringResource(Res.string.enable_translation_desc),
           checked = draft.translationEnabled,
           onCheckedChange = { enabled -> onDraftChange(draft.copy(translationEnabled = enabled)) },
       )
@@ -92,6 +108,7 @@ internal fun TranslationSettingsSection(
       if (draft.translationEnabled) {
         SettingsDropdownField(
             label = stringResource(Res.string.provider),
+            supportingText = stringResource(Res.string.translation_provider_desc),
             selected = draft.translationProvider,
             options = AppSettings.supportedTranslationProviders,
             optionLabel = { option -> translationProviderLabel(option) },
@@ -100,6 +117,7 @@ internal fun TranslationSettingsSection(
 
         SettingsDropdownField(
             label = stringResource(Res.string.translation_target_language),
+            supportingText = stringResource(Res.string.translation_target_language_desc),
             selected = draft.translationTargetLanguage,
             options = AppSettings.supportedTranslationTargetLanguages,
             optionLabel = { option -> translationTargetLanguageLabel(option) },
@@ -110,6 +128,7 @@ internal fun TranslationSettingsSection(
 
         SettingsSwitchRow(
             label = stringResource(Res.string.field_translation),
+            supportingText = stringResource(Res.string.field_translation_desc),
             checked = draft.metadataDisplayMode == MetadataDisplayMode.TRANSLATED,
             onCheckedChange = { enabled ->
               onDraftChange(
@@ -133,7 +152,7 @@ internal fun TranslationSettingsSection(
             label = stringResource(Res.string.chunk_word_limit),
             supportingText =
                 stringResource(
-                    Res.string.numeric_range,
+                    Res.string.chunk_word_limit_desc,
                     AppSettings.minTranslationChunkWordLimit,
                     AppSettings.maxTranslationChunkWordLimit,
                 ),
@@ -147,23 +166,39 @@ internal fun TranslationSettingsSection(
             label = stringResource(Res.string.max_concurrency),
             supportingText =
                 stringResource(
-                    Res.string.numeric_range,
+                    Res.string.max_concurrency_desc,
                     AppSettings.minTranslationMaxConcurrency,
                     AppSettings.maxTranslationMaxConcurrency,
                 ),
         )
 
         if (draft.translationProvider == TranslationProvider.OPENAI_COMPATIBLE) {
-          SettingsInputRow(
+          SettingsStackedInputRow(
               value = draft.openAiBaseUrl,
               onValueChange = { next -> onDraftChange(draft.copy(openAiBaseUrl = next)) },
               label = stringResource(Res.string.base_url),
+              supportingText = stringResource(Res.string.openai_base_url_desc),
+              headerAction = {
+                ExpressiveIconButton(
+                    onClick = {
+                      onDraftChange(
+                          draft.copy(openAiBaseUrl = OpenAiTranslationConfig.defaultBaseUrl)
+                      )
+                    }
+                ) {
+                  Icon(
+                      imageVector = FaMaterialSymbols.Filled.RestartAlt,
+                      contentDescription = stringResource(Res.string.set_to_default),
+                  )
+                }
+              },
           )
 
-          SettingsInputRow(
+          SettingsStackedInputRow(
               value = draft.openAiApiKey,
               onValueChange = { next -> onDraftChange(draft.copy(openAiApiKey = next)) },
               label = stringResource(Res.string.api_key),
+              supportingText = stringResource(Res.string.openai_api_key_desc),
               visualTransformation =
                   if (showApiKey) {
                     VisualTransformation.None
@@ -184,13 +219,30 @@ internal fun TranslationSettingsSection(
               value = draft.openAiModel,
               onValueChange = { next -> onDraftChange(draft.copy(openAiModel = next)) },
               label = stringResource(Res.string.model),
+              supportingText = stringResource(Res.string.openai_model_desc),
           )
 
-          SettingsInputRow(
+          SettingsStackedInputRow(
               value = draft.openAiPromptTemplate,
               onValueChange = { next -> onDraftChange(draft.copy(openAiPromptTemplate = next)) },
               label = stringResource(Res.string.prompt_template),
-              supportingText = stringResource(Res.string.prompt_template_variables_hint),
+              supportingText = stringResource(Res.string.openai_prompt_template_desc),
+              headerAction = {
+                ExpressiveIconButton(
+                    onClick = {
+                      onDraftChange(
+                          draft.copy(
+                              openAiPromptTemplate = OpenAiTranslationConfig.defaultPromptTemplate
+                          )
+                      )
+                    }
+                ) {
+                  Icon(
+                      imageVector = FaMaterialSymbols.Filled.RestartAlt,
+                      contentDescription = stringResource(Res.string.set_to_default),
+                  )
+                }
+              },
               singleLine = false,
               minLines = 5,
           )
@@ -225,6 +277,7 @@ internal fun DownloadSettingsSection(
 
       SettingsSwitchRow(
           label = stringResource(Res.string.download_allow_media_indexing),
+          supportingText = stringResource(Res.string.download_allow_media_indexing_desc),
           checked = draft.downloadAllowMediaIndexing,
           onCheckedChange = { enabled ->
             onDraftChange(draft.copy(downloadAllowMediaIndexing = enabled))
@@ -233,6 +286,7 @@ internal fun DownloadSettingsSection(
 
       SettingsDropdownField(
           label = stringResource(Res.string.download_subfolder_mode),
+          supportingText = stringResource(Res.string.download_subfolder_mode_desc),
           selected = draft.downloadSubfolderMode,
           options = AppSettings.supportedDownloadSubfolderModes,
           optionLabel = { option -> downloadSubfolderModeLabel(option) },
@@ -241,6 +295,7 @@ internal fun DownloadSettingsSection(
 
       SettingsDropdownField(
           label = stringResource(Res.string.download_file_name_mode),
+          supportingText = stringResource(Res.string.download_file_name_mode_desc),
           selected = draft.downloadFileNameMode,
           options = AppSettings.supportedDownloadFileNameModes,
           optionLabel = { option -> downloadFileNameModeLabel(option) },
@@ -254,7 +309,7 @@ internal fun DownloadSettingsSection(
               onDraftChange(draft.copy(downloadCustomFileNameTemplate = next))
             },
             label = stringResource(Res.string.download_file_name_template),
-            supportingText = stringResource(Res.string.download_file_name_template_variables_hint),
+            supportingText = stringResource(Res.string.download_file_name_template_desc),
         )
       }
     }
@@ -280,7 +335,7 @@ internal fun RecommendationSettingsSection(
           label = stringResource(Res.string.watch_recommendation_page_size),
           supportingText =
               stringResource(
-                  Res.string.numeric_range,
+                  Res.string.watch_recommendation_page_size_desc,
                   AppSettings.minWatchRecommendationPageSize,
                   AppSettings.maxWatchRecommendationPageSize,
               ),
@@ -307,6 +362,7 @@ internal fun BlockedContentSettingsSection(
     ) {
       SettingsSwitchRow(
           label = stringResource(Res.string.blur_blocked_submissions_in_waterfalls),
+          supportingText = stringResource(Res.string.blur_blocked_submissions_in_waterfalls_desc),
           checked =
               draft.blockedSubmissionWaterfallMode == BlockedSubmissionWaterfallMode.BLUR_THEN_OPEN,
           onCheckedChange = { enabled ->
@@ -324,6 +380,7 @@ internal fun BlockedContentSettingsSection(
       )
       SettingsSwitchRow(
           label = stringResource(Res.string.blur_blocked_submissions_in_detail_pages),
+          supportingText = stringResource(Res.string.blur_blocked_submissions_in_detail_pages_desc),
           checked = draft.blockedSubmissionPagerMode == BlockedSubmissionPagerMode.BLUR_THEN_OPEN,
           onCheckedChange = { enabled ->
             onDraftChange(

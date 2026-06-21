@@ -157,7 +157,6 @@ private fun SearchBarShell(query: String, overlayVisible: Boolean, onToggleOverl
       }
   Surface(
       color = MaterialTheme.colorScheme.surface,
-      shadowElevation = 2.dp,
       modifier = Modifier.fillMaxWidth(),
   ) {
     Row(

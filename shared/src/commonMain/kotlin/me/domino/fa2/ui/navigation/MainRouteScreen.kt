@@ -21,7 +21,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import me.domino.fa2.application.auth.PendingFaRouteStore
 import me.domino.fa2.data.model.PageState
-import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.repository.BrowseRepository
 import me.domino.fa2.data.repository.FeedRepository
 import me.domino.fa2.data.repository.SearchRepository
@@ -57,7 +56,7 @@ import me.domino.fa2.ui.pages.submission.pageNumberForSid
 import me.domino.fa2.ui.pages.submission.toWaterfallPageControls
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.pages.user.route.UserRouteScreen
-import me.domino.fa2.ui.pages.user.watchlist.UserWatchlistRouteScreen
+import me.domino.fa2.ui.pages.user.route.userHeaderNavigationActions
 import me.domino.fa2.ui.pages.watchrecommendation.WatchRecommendationRouteScreen
 import me.domino.fa2.util.FaUrls
 import org.koin.compose.koinInject
@@ -590,9 +589,8 @@ private fun MoreDestinationContent(
   MoreScreen(
       state = moreState,
       onOpenUser = moreState.openUserAction(navigator),
-      onOpenFollowing = moreState.openFollowingAction(navigator),
+      headerNavigationActions = moreState.headerNavigationActions(navigator),
       onOpenWatchRecommendations = moreState.openWatchRecommendationsAction(navigator),
-      onOpenFavorites = moreState.openFavoritesAction(navigator),
       onOpenSettings = { navigator.push(SettingsRouteScreen()) },
       onOpenSubmissionHistory = { navigator.push(SubmissionHistoryRouteScreen()) },
       onOpenSearchHistory = { navigator.push(SearchHistoryRouteScreen()) },
@@ -617,20 +615,17 @@ private fun MoreUiState.openUserAction(navigator: Navigator): (() -> Unit)? =
           }
         }
 
-/** 构建打开关注列表页的点击操作，用户名为空时返回 null。 */
-private fun MoreUiState.openFollowingAction(navigator: Navigator): (() -> Unit)? =
+/** 构建用户头部统计入口导航，用户名为空时返回 null。 */
+private fun MoreUiState.headerNavigationActions(navigator: Navigator) =
     (this as? MoreUiState.Ready)
         ?.username
         ?.takeIf { it.isNotBlank() }
         ?.let { username ->
-          {
-            navigator.push(
-                UserWatchlistRouteScreen(
-                    username = username,
-                    category = WatchlistCategory.Watching,
-                )
-            )
-          }
+          userHeaderNavigationActions(
+              username = username,
+              header = userHeader,
+              navigator = navigator,
+          )
         }
 
 /** 构建打开关注推荐页的点击操作，用户名为空时返回 null。 */
@@ -640,22 +635,6 @@ private fun MoreUiState.openWatchRecommendationsAction(navigator: Navigator): ((
         ?.takeIf { it.isNotBlank() }
         ?.let { username ->
           { navigator.push(WatchRecommendationRouteScreen(username = username)) }
-        }
-
-/** 构建打开收藏页的点击操作，用户名为空时返回 null。 */
-private fun MoreUiState.openFavoritesAction(navigator: Navigator): (() -> Unit)? =
-    (this as? MoreUiState.Ready)
-        ?.username
-        ?.takeIf { it.isNotBlank() }
-        ?.let { username ->
-          {
-            navigator.push(
-                UserRouteScreen(
-                    username = username,
-                    initialChildRoute = UserChildRoute.Favorites,
-                )
-            )
-          }
         }
 
 /** 顶层导航目标状态持有器。 */

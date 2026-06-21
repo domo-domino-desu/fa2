@@ -144,7 +144,7 @@ fun SettingsScreen(
   PlatformBackHandler(enabled = true) { requestExit(PendingExitAction.Back) }
 
   Scaffold(
-      containerColor = MaterialTheme.colorScheme.surface,
+      containerColor = MaterialTheme.colorScheme.background,
       topBar = {
         SettingsRouteTopBar(
             onBack = { requestExit(PendingExitAction.Back) },
@@ -177,8 +177,8 @@ fun SettingsScreen(
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxSize().padding(innerPadding),
-        contentPadding = PaddingValues(vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       item { AppearanceSettingsSection(draft = draft, onDraftChange = { next -> draft = next }) }
 

@@ -26,7 +26,7 @@ fun screenModelModule(): Module = module {
   factory { FeedScreenModel(get(), get(), get()) }
   factory { BrowseScreenModel(get(), get(), get()) }
   factory { SearchScreenModel(get(), get(), get(), get(), get(), get()) }
-  factory { MoreScreenModel(get(), get(), get(), get(), get()) }
+  factory { MoreScreenModel(get(), get(), get(), get(), get(), get()) }
   factory { (username: String, initialChildRoute: UserChildRoute, initialFolderUrl: String?) ->
     UserScreenModel(
         username = username,
