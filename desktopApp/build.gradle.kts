@@ -25,6 +25,7 @@ kotlin {
         implementation(libs.ksafe)
         implementation(project(":shared"))
         implementation(libs.koin.core)
+        implementation(libs.ktor.client.core)
         implementation(libs.kermit)
         implementation(libs.rapidocr4j)
         implementation(libs.room.runtime)

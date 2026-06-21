@@ -5,12 +5,11 @@ import androidx.compose.ui.window.application
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.runBlocking
-import me.domino.fa2.data.network.FaCookiesStorage
-import me.domino.fa2.data.network.ImageProgressTracker
-import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.data.network.installCoilImageProgressSupport
 import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.di.KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT
 import me.domino.fa2.di.startAppKoin
 import me.domino.fa2.di.stopAppKoin
 import me.domino.fa2.ui.host.Fa2App
@@ -18,6 +17,7 @@ import me.domino.fa2.util.logging.FaLog
 import okio.Path
 import okio.Path.Companion.toPath
 import org.koin.core.context.GlobalContext
+import org.koin.core.qualifier.named
 
 private const val coilDiskCacheMaxBytes = 1024L * 1024L * 1024L
 private const val desktopLogLevelProp: String = "fa2.log.level"
@@ -45,15 +45,11 @@ fun main() = application {
       title = "fa2",
   ) {
     setSingletonImageLoaderFactory { platformContext ->
-      val progressTracker = GlobalContext.get().get<ImageProgressTracker>()
-      val cookiesStorage = GlobalContext.get().get<FaCookiesStorage>()
-      val userAgentStorage = GlobalContext.get().get<UserAgentStorage>()
+      val cachedDownloadClient =
+          GlobalContext.get()
+              .get<HttpClient>(qualifier = named(KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT))
       ImageLoader.Builder(platformContext)
-          .installCoilImageProgressSupport(
-              progressTracker = progressTracker,
-              cookiesStorage = cookiesStorage,
-              userAgentStorage = userAgentStorage,
-          )
+          .installCoilImageProgressSupport(cachedDownloadClient = cachedDownloadClient)
           .diskCache {
             DiskCache.Builder()
                 .directory(desktopCoilDiskCachePath())

@@ -10,15 +10,15 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
 import coil3.gif.GifDecoder
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import me.domino.fa2.data.network.FaCookiesStorage
-import me.domino.fa2.data.network.ImageProgressTracker
-import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.data.network.installCoilImageProgressSupport
+import me.domino.fa2.di.KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT
 import me.domino.fa2.ui.host.Fa2App
 import okio.Path.Companion.toPath
 import org.koin.core.context.GlobalContext
+import org.koin.core.qualifier.named
 
 private const val coilDiskCacheMaxBytes = 1024L * 1024L * 1024L
 private val supportedFaHosts = setOf("furaffinity.net", "www.furaffinity.net")
@@ -40,16 +40,12 @@ class MainActivity : ComponentActivity() {
     enableEdgeToEdge()
     setContent {
       setSingletonImageLoaderFactory { platformContext ->
-        val progressTracker = GlobalContext.get().get<ImageProgressTracker>()
-        val cookiesStorage = GlobalContext.get().get<FaCookiesStorage>()
-        val userAgentStorage = GlobalContext.get().get<UserAgentStorage>()
+        val cachedDownloadClient =
+            GlobalContext.get()
+                .get<HttpClient>(qualifier = named(KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT))
         ImageLoader.Builder(platformContext)
             .components { add(GifDecoder.Factory()) }
-            .installCoilImageProgressSupport(
-                progressTracker = progressTracker,
-                cookiesStorage = cookiesStorage,
-                userAgentStorage = userAgentStorage,
-            )
+            .installCoilImageProgressSupport(cachedDownloadClient = cachedDownloadClient)
             .diskCache {
               DiskCache.Builder()
                   .directory("${platformContext.cacheDir.absolutePath}/coil-image-cache".toPath())

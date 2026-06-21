@@ -14,3 +14,6 @@ const val KOIN_QUALIFIER_CHALLENGE_AWARE_HTML_DATA_SOURCE: String = "challengeAw
 
 /** 社交动作专用 HTTP 客户端 qualifier。 */
 const val KOIN_QUALIFIER_SOCIAL_ACTION_CLIENT: String = "socialActionClient"
+
+/** 图片、OCR、附件下载共用的带缓存 HTTP 客户端 qualifier。 */
+const val KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT: String = "cachedDownloadClient"

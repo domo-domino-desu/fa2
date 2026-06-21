@@ -46,7 +46,12 @@ fun repositoryModule(): Module = module {
   single { FaTaxonomyRepository() }
   single { SearchUiLabelsRepository() }
   single { AttachmentTextService(get()) }
-  single<SubmissionImageOcrService> { RemoteSubmissionImageOcrService(get(), get()) }
+  single<SubmissionImageOcrService> {
+    RemoteSubmissionImageOcrService(
+        client = get(qualifier = named(KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT)),
+        recognitionPort = get(),
+    )
+  }
   single { SubmissionImageOcrTranslationService(get(), get()) }
   single { ActivityHistoryRepository(get()) }
   single { SubmissionDescriptionTranslationService(get(), get()) }

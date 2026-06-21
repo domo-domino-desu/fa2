@@ -5,9 +5,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
-import me.domino.fa2.data.network.FaCookiesStorage
 import me.domino.fa2.data.network.HtmlResponseResult
-import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.domain.attachmenttext.extensionIn
 import me.domino.fa2.domain.challenge.CfChallengeSignal
 import me.domino.fa2.domain.challenge.ChallengeResolver
@@ -37,8 +35,6 @@ sealed interface AttachmentDownloadResult {
 /** 附件下载端点。 */
 class AttachmentDownloadEndpoint(
     private val client: HttpClient,
-    private val cookiesStorage: FaCookiesStorage,
-    private val userAgentStorage: UserAgentStorage,
     private val challengeResolver: ChallengeResolver,
 ) : AttachmentDownloadSource {
   private val log = FaLog.withTag("AttachmentDownloadEndpoint")
@@ -67,23 +63,10 @@ class AttachmentDownloadEndpoint(
       "下载附件 -> 开始(file=$fileName,url=${summarizeUrl(url)},challengeRetry=$challengeRetryCount)"
     }
 
-    userAgentStorage.loadPersistedIfNeeded()
-    val cookieHeader = cookiesStorage.loadRawCookieHeader()
-    val userAgent = userAgentStorage.currentUserAgent()
-    val response =
-        client.get(url) {
-          if (cookieHeader.isNotBlank()) {
-            header(HttpHeaders.Cookie, cookieHeader)
-          }
-          header(HttpHeaders.UserAgent, userAgent)
-          header(HttpHeaders.Accept, "*/*")
-          header(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9")
-        }
+    val response = client.get(url) { header(HttpHeaders.Accept, "*/*") }
 
     val statusCode = response.status.value
     val headers = response.headers.entries().associate { (key, values) -> key to values }
-    val setCookieValues = response.headers.getAll(HttpHeaders.SetCookie).orEmpty()
-    cookiesStorage.mergeSetCookieValues(setCookieValues)
     val bytes: ByteArray = response.body()
     val contentType = response.headers[HttpHeaders.ContentType]
 

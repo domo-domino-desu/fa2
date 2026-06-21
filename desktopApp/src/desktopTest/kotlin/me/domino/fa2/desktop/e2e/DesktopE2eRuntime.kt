@@ -4,15 +4,15 @@ import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
+import io.ktor.client.HttpClient
 import java.io.File
-import me.domino.fa2.data.network.FaCookiesStorage
-import me.domino.fa2.data.network.ImageProgressTracker
-import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.data.network.installCoilImageProgressSupport
+import me.domino.fa2.di.KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT
 import me.domino.fa2.di.startAppKoin
 import me.domino.fa2.di.stopAppKoin
 import me.domino.fa2.ui.host.Fa2App
 import okio.Path.Companion.toPath
+import org.koin.core.qualifier.named
 
 /** E2E 测试中用于临时替换 user.home 系统属性的工具类。 */
 internal class DesktopE2eHomeOverride(private val newHome: File) {
@@ -43,18 +43,13 @@ internal class DesktopE2eRuntime(
   /** 启动 Koin 依赖图并在 Compose 测试规则中渲染应用。 */
   fun start(composeRule: ComposeContentTestRule) {
     val koin = startAppKoin(desktopE2eTestPlatformModule(profile = profile, stores = stores))
-    val progressTracker = koin.get<ImageProgressTracker>()
-    val cookiesStorage = koin.get<FaCookiesStorage>()
-    val userAgentStorage = koin.get<UserAgentStorage>()
+    val cachedDownloadClient =
+        koin.get<HttpClient>(qualifier = named(KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT))
     composeRule.setContent {
       setSingletonImageLoaderFactory { platformContext ->
         ensureParentDir(profile.coilCacheDir)
         ImageLoader.Builder(platformContext)
-            .installCoilImageProgressSupport(
-                progressTracker = progressTracker,
-                cookiesStorage = cookiesStorage,
-                userAgentStorage = userAgentStorage,
-            )
+            .installCoilImageProgressSupport(cachedDownloadClient = cachedDownloadClient)
             .diskCache {
               DiskCache.Builder()
                   .directory(profile.coilCacheDir.absolutePath.toPath())

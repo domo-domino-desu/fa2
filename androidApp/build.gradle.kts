@@ -70,6 +70,7 @@ dependencies {
   implementation(libs.datastore.preferences.core)
   implementation(libs.ksafe)
   implementation(libs.koin.core)
+  implementation(libs.ktor.client.core)
   implementation(libs.kermit)
   implementation(libs.mlkit.text.recognition)
   implementation(libs.room.runtime)

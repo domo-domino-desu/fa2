@@ -20,6 +20,7 @@ import me.domino.fa2.data.network.KSafeCookiePersistence
 import me.domino.fa2.data.network.UserAgentStorage
 import me.domino.fa2.data.network.challenge.AuthAwareFaHtmlDataSource
 import me.domino.fa2.data.network.challenge.ChallengeAwareFaHtmlDataSource
+import me.domino.fa2.data.network.createCachedDownloadHttpClient
 import me.domino.fa2.data.network.endpoint.AttachmentDownloadEndpoint
 import me.domino.fa2.data.network.endpoint.AttachmentDownloadSource
 import me.domino.fa2.data.network.endpoint.BrowseEndpoint
@@ -55,6 +56,13 @@ fun networkModule(): Module = module {
   }
 
   single<HttpClient> { HttpClient { expectSuccess = false } }
+  single<HttpClient>(qualifier = named(KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT)) {
+    createCachedDownloadHttpClient(
+        progressTracker = get(),
+        cookiesStorage = get(),
+        userAgentStorage = get(),
+    )
+  }
   single<TranslationPort> { KtorTranslationPort(get()) }
   single<FaHtmlDataSource>(qualifier = named(KOIN_QUALIFIER_RAW_HTML_DATA_SOURCE)) {
     FaHttpClient(client = get(), cookiesStorage = get(), userAgentStorage = get())
@@ -94,9 +102,7 @@ fun networkModule(): Module = module {
   }
   single<AttachmentDownloadSource> {
     AttachmentDownloadEndpoint(
-        client = get(),
-        cookiesStorage = get(),
-        userAgentStorage = get(),
+        client = get(qualifier = named(KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT)),
         challengeResolver = get<ChallengeResolver>(),
     )
   }
