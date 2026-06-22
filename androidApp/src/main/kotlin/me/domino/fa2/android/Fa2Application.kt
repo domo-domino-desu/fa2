@@ -3,9 +3,9 @@ package me.domino.fa2.android
 import android.app.Application
 import co.touchlab.kermit.Severity
 import kotlinx.coroutines.runBlocking
-import me.domino.fa2.data.attachmenttext.initializeAttachmentTextPlatform
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.di.startAppKoin
+import me.domino.fa2.domain.attachmenttext.initializeAttachmentTextPlatform
 import me.domino.fa2.ui.pages.about.AboutLibrariesAndroidContextHolder
 import me.domino.fa2.utils.logging.FaLog
 
