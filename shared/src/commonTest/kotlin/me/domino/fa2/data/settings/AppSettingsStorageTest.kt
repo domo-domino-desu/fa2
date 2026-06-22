@@ -10,6 +10,7 @@ import kotlin.test.assertNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.local.KeyValueStorage
+import me.domino.fa2.data.local.settings.AppSettingsStorage
 import okio.FileSystem
 import okio.Path.Companion.toPath
 

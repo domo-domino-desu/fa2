@@ -31,14 +31,14 @@ import fa2.shared.generated.resources.*
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.WatchlistCategory
-import me.domino.fa2.ui.components.PaginationRetryBar
-import me.domino.fa2.ui.components.PaginationRetryDirection
-import me.domino.fa2.ui.layouts.UserWatchlistRouteTopBar
-import me.domino.fa2.ui.navigation.goBackHome
+import me.domino.fa2.ui.app.navigation.goBackHome
+import me.domino.fa2.ui.app.scaffold.UserWatchlistRouteTopBar
+import me.domino.fa2.ui.components.state.PaginationRetryBar
+import me.domino.fa2.ui.components.state.PaginationRetryDirection
 import me.domino.fa2.ui.pages.user.route.UserPagerContextScreenModel
 import me.domino.fa2.ui.pages.user.route.UserPagerRouteScreen
 import me.domino.fa2.ui.pages.user.route.UserPagerSource
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
 

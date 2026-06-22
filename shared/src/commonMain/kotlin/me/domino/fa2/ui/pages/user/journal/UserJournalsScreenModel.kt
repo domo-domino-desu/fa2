@@ -5,16 +5,16 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import me.domino.fa2.data.fa.journal.JournalsRepository
+import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.model.JournalSummary
 import me.domino.fa2.data.model.PageState
-import me.domino.fa2.data.repository.JournalsRepository
+import me.domino.fa2.data.model.summarizePageState
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.i18n.SystemLanguageProvider
-import me.domino.fa2.i18n.appString
+import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.state.PaginationReducer
 import me.domino.fa2.ui.state.PaginationSnapshot
-import me.domino.fa2.util.logging.FaLog
-import me.domino.fa2.util.logging.summarizePageState
+import me.domino.fa2.utils.logging.FaLog
 
 private const val journalsAutoLoadThreshold = 6
 

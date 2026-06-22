@@ -1,10 +1,10 @@
-package me.domino.fa2.data.network.endpoint
+package me.domino.fa2.data.fa.social
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.network.FaHtmlDataSource
-import me.domino.fa2.data.network.HtmlResponseResult
+import me.domino.fa2.data.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.fa.core.HtmlResponseResult
 
 class SocialActionBackendTest {
   @Test
@@ -104,12 +104,12 @@ private class ScriptedHtmlDataSource(vararg responses: HtmlResponseResult) : FaH
 }
 
 private class BackendChallengeResolver(vararg decisions: Boolean) :
-    me.domino.fa2.domain.challenge.ChallengeResolver {
+    me.domino.fa2.data.fa.session.ChallengeResolver {
   private val queue = ArrayDeque(decisions.toList())
-  val requests = mutableListOf<me.domino.fa2.domain.challenge.CfChallengeSignal>()
+  val requests = mutableListOf<me.domino.fa2.data.fa.session.CfChallengeSignal>()
 
   override suspend fun awaitResolution(
-      challenge: me.domino.fa2.domain.challenge.CfChallengeSignal
+      challenge: me.domino.fa2.data.fa.session.CfChallengeSignal
   ): Boolean {
     requests += challenge
     return queue.removeFirstOrNull() ?: false

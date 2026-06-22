@@ -23,10 +23,10 @@ import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.Res
 import fa2.shared.generated.resources.copied_to_clipboard
 import me.domino.fa2.data.model.UserContact
-import me.domino.fa2.ui.components.LocalShowToast
+import me.domino.fa2.ui.components.feedback.LocalShowToast
 import me.domino.fa2.ui.components.platform.rememberPlatformTextCopier
 import me.domino.fa2.ui.icons.FaContactIcons
-import me.domino.fa2.util.logging.FaLog
+import me.domino.fa2.utils.logging.FaLog
 import org.jetbrains.compose.resources.stringResource
 
 private val log = FaLog.withTag("UserContactActions")

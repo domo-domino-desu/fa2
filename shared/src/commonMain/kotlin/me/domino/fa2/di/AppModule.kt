@@ -2,7 +2,7 @@ package me.domino.fa2.di
 
 import io.ktor.client.HttpClient
 import me.domino.fa2.data.local.AppDatabase
-import me.domino.fa2.util.logging.FaLog
+import me.domino.fa2.utils.logging.FaLog
 import org.koin.core.Koin
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
@@ -14,12 +14,9 @@ private val log = FaLog.withTag("AppModule")
 /** 汇总应用模块。 */
 fun appModules(platformModule: Module): List<Module> =
     listOf(
-        networkModule(),
-        databaseModule(),
-        dataSourceModule(),
-        storeModule(),
-        repositoryModule(),
-        screenModelModule(),
+        dataModule(),
+        domainModule(),
+        uiModule(),
         platformModule,
     )
 

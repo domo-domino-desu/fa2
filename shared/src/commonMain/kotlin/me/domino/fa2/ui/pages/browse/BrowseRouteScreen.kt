@@ -16,11 +16,11 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.repository.BrowseRepository
-import me.domino.fa2.ui.components.PageStateWrapper
-import me.domino.fa2.ui.layouts.BrowseRouteTopBar
-import me.domino.fa2.ui.navigation.goBackHome
-import me.domino.fa2.ui.navigation.openSubmissionFromList
+import me.domino.fa2.data.fa.browse.BrowseRepository
+import me.domino.fa2.ui.app.navigation.goBackHome
+import me.domino.fa2.ui.app.navigation.openSubmissionFromList
+import me.domino.fa2.ui.app.scaffold.BrowseRouteTopBar
+import me.domino.fa2.ui.components.state.PageStateWrapper
 import me.domino.fa2.ui.pages.submission.BrowseSubmissionSourceAdapter
 import me.domino.fa2.ui.pages.submission.SubmissionContextScreenModel
 import me.domino.fa2.ui.pages.submission.SubmissionContextSourceKind
@@ -28,7 +28,7 @@ import me.domino.fa2.ui.pages.submission.SubmissionLoadedPage
 import me.domino.fa2.ui.pages.submission.WaterfallViewportState
 import me.domino.fa2.ui.pages.submission.pageNumberForSid
 import me.domino.fa2.ui.pages.submission.toWaterfallPageControls
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 import org.koin.compose.koinInject
 
 /** 独立 Browse 路由页面（用于从投稿详情跳转）。 */

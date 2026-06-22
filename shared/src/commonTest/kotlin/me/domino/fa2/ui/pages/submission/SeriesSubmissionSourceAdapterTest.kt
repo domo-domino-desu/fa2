@@ -4,13 +4,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
-import me.domino.fa2.application.submissionseries.SubmissionSeriesRule
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.data.repository.SubmissionDetailRepository
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
+import me.domino.fa2.domain.submissionseries.SubmissionSeriesRule
+import me.domino.fa2.domain.submissionseries.SubmissionSeriesSubmissionSource
+import me.domino.fa2.utils.FaUrls
 
 class SeriesSubmissionSourceAdapterTest {
   @Test
@@ -131,7 +131,7 @@ class SeriesSubmissionSourceAdapterTest {
 
 private class FakeSeriesSubmissionRepository(
     details: List<Submission>,
-) : SubmissionDetailRepository {
+) : SubmissionSeriesSubmissionSource {
   private val detailsByUrl = details.associateBy(Submission::submissionUrl)
 
   override suspend fun loadSubmissionDetailBySid(sid: Int): PageState<Submission> =

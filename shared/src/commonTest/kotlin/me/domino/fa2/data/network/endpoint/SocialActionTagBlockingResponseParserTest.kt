@@ -1,4 +1,4 @@
-package me.domino.fa2.data.network.endpoint
+package me.domino.fa2.data.fa.social
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

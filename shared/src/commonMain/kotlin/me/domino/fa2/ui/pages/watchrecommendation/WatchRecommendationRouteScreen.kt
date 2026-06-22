@@ -35,13 +35,13 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
-import me.domino.fa2.application.watchrecommendation.RecommendedWatchUser
+import me.domino.fa2.domain.watchrecommendation.RecommendedWatchUser
+import me.domino.fa2.ui.app.navigation.goBackHome
+import me.domino.fa2.ui.app.scaffold.WatchRecommendationRouteTopBar
 import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
 import me.domino.fa2.ui.components.ExpressiveIconButton
-import me.domino.fa2.ui.components.UserHorizontalCard
+import me.domino.fa2.ui.components.user.UserHorizontalCard
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.layouts.WatchRecommendationRouteTopBar
-import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.pages.user.route.UserPagerContextScreenModel
 import me.domino.fa2.ui.pages.user.route.UserPagerRouteScreen
 import me.domino.fa2.ui.pages.user.route.UserPagerSource

@@ -15,20 +15,20 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import me.domino.fa2.application.auth.DefaultAuthSessionController
-import me.domino.fa2.application.auth.PendingFaRouteStore
-import me.domino.fa2.data.datasource.AuthDataSource
+import me.domino.fa2.data.fa.auth.AuthDataSource
+import me.domino.fa2.data.fa.auth.AuthRepository
+import me.domino.fa2.data.fa.auth.HomeEndpoint
+import me.domino.fa2.data.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.fa.core.HtmlResponseResult
+import me.domino.fa2.data.fa.session.CookiePersistence
+import me.domino.fa2.data.fa.session.DefaultAuthSessionController
+import me.domino.fa2.data.fa.session.FaCookiesStorage
+import me.domino.fa2.data.fa.session.PendingFaRouteStore
+import me.domino.fa2.data.fa.session.SessionWebViewPort
+import me.domino.fa2.data.fa.session.UserAgentStorage
 import me.domino.fa2.data.local.KeyValueStorage
-import me.domino.fa2.data.network.CookiePersistence
-import me.domino.fa2.data.network.FaCookiesStorage
-import me.domino.fa2.data.network.FaHtmlDataSource
-import me.domino.fa2.data.network.HtmlResponseResult
-import me.domino.fa2.data.network.UserAgentStorage
-import me.domino.fa2.data.network.endpoint.HomeEndpoint
-import me.domino.fa2.data.repository.AuthRepository
-import me.domino.fa2.domain.challenge.SessionWebViewPort
 import me.domino.fa2.fake.TestFixtures
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 import okio.FileSystem
 import okio.Path.Companion.toPath
 
@@ -165,7 +165,7 @@ private fun createAuthScreenModelFixture(): AuthScreenModelFixture {
               authSessionController =
                   DefaultAuthSessionController(
                       profileStore =
-                          me.domino.fa2.data.repository.AuthSessionProfileStore(keyValueStorage),
+                          me.domino.fa2.data.fa.auth.AuthSessionProfileStore(keyValueStorage),
                       pendingFaRouteStore = pendingFaRouteStore,
                   ),
               pendingFaRouteStore = pendingFaRouteStore,

@@ -1,10 +1,10 @@
-package me.domino.fa2.data.parser
+package me.domino.fa2.data.fa.journal
 
 import kotlin.test.Test
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import me.domino.fa2.fake.TestFixtures
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 
 /** JournalsParser 解析测试。 */
 class JournalsParserTest {

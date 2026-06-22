@@ -15,7 +15,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SubmissionContextScreenModelTest {

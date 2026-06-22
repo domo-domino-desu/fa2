@@ -1,11 +1,11 @@
-package me.domino.fa2.data.network.endpoint
+package me.domino.fa2.data.fa.social
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.domain.challenge.CfChallengeSignal
-import me.domino.fa2.domain.challenge.ChallengeResolver
+import me.domino.fa2.data.fa.session.CfChallengeSignal
+import me.domino.fa2.data.fa.session.ChallengeResolver
 
 class SocialActionChallengePolicyTest {
   @Test

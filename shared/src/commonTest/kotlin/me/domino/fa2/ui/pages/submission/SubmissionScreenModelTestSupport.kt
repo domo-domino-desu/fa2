@@ -4,17 +4,18 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import eu.anifantakis.lib.ksafe.KSafe
 import kotlin.random.Random
 import kotlinx.coroutines.runBlocking
-import me.domino.fa2.application.ocr.SubmissionImageOcrService
-import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
-import me.domino.fa2.application.translation.SubmissionImageOcrTranslationService
+import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.local.KeyValueStorage
+import me.domino.fa2.data.local.settings.AppSettingsStorage
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.data.settings.AppSettingsStorage
+import me.domino.fa2.data.translation.SubmissionTextTranslationEngine
+import me.domino.fa2.data.translation.TranslationPort
+import me.domino.fa2.data.translation.TranslationRequest
 import me.domino.fa2.domain.ocr.ImageOcrResult
-import me.domino.fa2.domain.translation.TranslationPort
-import me.domino.fa2.domain.translation.TranslationRequest
-import me.domino.fa2.i18n.SystemLanguageProvider
+import me.domino.fa2.domain.ocr.SubmissionImageOcrService
+import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.domain.translation.SubmissionImageOcrTranslationService
 import okio.FileSystem
 import okio.Path.Companion.toPath
 
@@ -25,7 +26,7 @@ internal suspend fun createTestSubmissionTranslationService(
   val resolvedSettingsService = settingsService ?: createTestAppSettingsService()
   val translationPort = createTestTranslationPort(translate)
   return SubmissionDescriptionTranslationService(
-      translationPort = translationPort,
+      translationEngine = SubmissionTextTranslationEngine(translationPort),
       settingsService = resolvedSettingsService,
   )
 }
@@ -37,7 +38,7 @@ internal suspend fun createTestSubmissionImageOcrTranslationService(
   val resolvedSettingsService = settingsService ?: createTestAppSettingsService()
   val translationPort = createTestTranslationPort(translate)
   return SubmissionImageOcrTranslationService(
-      translationPort = translationPort,
+      translationEngine = SubmissionTextTranslationEngine(translationPort),
       settingsService = resolvedSettingsService,
   )
 }

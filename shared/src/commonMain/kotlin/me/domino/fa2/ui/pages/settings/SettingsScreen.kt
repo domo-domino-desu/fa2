@@ -41,13 +41,13 @@ import fa2.shared.generated.resources.settings_unsaved_changes_title
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.i18n.appString
+import me.domino.fa2.ui.app.scaffold.SettingsRouteTopBar
 import me.domino.fa2.ui.components.ExpressiveButton
 import me.domino.fa2.ui.components.ExpressiveIconButton
 import me.domino.fa2.ui.components.ExpressiveTextButton
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
+import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.layouts.SettingsRouteTopBar
 import org.jetbrains.compose.resources.stringResource
 
 private enum class PendingExitAction {

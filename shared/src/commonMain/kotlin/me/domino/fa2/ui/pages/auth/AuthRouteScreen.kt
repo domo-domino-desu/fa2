@@ -12,8 +12,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.kdroidfilter.webview.web.LoadingState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.domino.fa2.ui.navigation.MainRouteScreen
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.ui.app.navigation.MainRouteScreen
+import me.domino.fa2.utils.FaUrls
 
 /** 认证路由页面。 */
 class AuthRouteScreen : Screen {

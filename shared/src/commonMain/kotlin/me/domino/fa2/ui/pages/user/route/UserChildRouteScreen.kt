@@ -15,9 +15,9 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import me.domino.fa2.data.repository.FavoritesRepository
-import me.domino.fa2.data.repository.GalleryRepository
-import me.domino.fa2.ui.navigation.rootNavigator
+import me.domino.fa2.data.fa.favorites.FavoritesRepository
+import me.domino.fa2.data.fa.gallery.GalleryRepository
+import me.domino.fa2.ui.app.navigation.rootNavigator
 import me.domino.fa2.ui.pages.submission.SubmissionContextScreenModel
 import me.domino.fa2.ui.pages.submission.SubmissionContextSourceKind
 import me.domino.fa2.ui.pages.submission.SubmissionLoadedPage
@@ -34,7 +34,7 @@ import me.domino.fa2.ui.pages.user.journal.UserJournalsScreenModel
 import me.domino.fa2.ui.pages.user.profile.resolveInitialUserScrollPosition
 import me.domino.fa2.ui.pages.user.profile.userJournalsScrollLayout
 import me.domino.fa2.ui.pages.user.profile.userSubmissionSectionScrollLayout
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 

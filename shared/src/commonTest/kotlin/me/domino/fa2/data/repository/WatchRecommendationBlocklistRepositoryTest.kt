@@ -1,4 +1,4 @@
-package me.domino.fa2.data.repository
+package me.domino.fa2.data.fa.watchlist
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import kotlin.random.Random
@@ -6,10 +6,11 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.local.KeyValueStorage
+import me.domino.fa2.data.local.watchrecommendation.PersistedWatchRecommendationBlocklistRepository
 import okio.FileSystem
 import okio.Path.Companion.toPath
 
-class WatchRecommendationBlocklistRepositoryTest {
+class PersistedWatchRecommendationBlocklistRepositoryTest {
   @Test
   fun returnsEmptyWhenStorageIsBlank() = runTest {
     val repository = buildRepository()
@@ -67,7 +68,7 @@ class WatchRecommendationBlocklistRepositoryTest {
     assertEquals(listOf("artist-b"), repository.listBlockedUsernames())
   }
 
-  private fun buildRepository(): WatchRecommendationBlocklistRepository {
+  private fun buildRepository(): PersistedWatchRecommendationBlocklistRepository {
     val randomSuffix = Random.nextLong().toString().replace('-', '0')
     val tempPath =
         "${FileSystem.SYSTEM_TEMPORARY_DIRECTORY}/fa2-watch-recommendation-blocklist-$randomSuffix.preferences_pb"

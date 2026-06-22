@@ -13,9 +13,9 @@ import coil3.gif.GifDecoder
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import me.domino.fa2.data.network.installCoilImageProgressSupport
+import me.domino.fa2.data.fa.media.installCoilImageProgressSupport
 import me.domino.fa2.di.KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT
-import me.domino.fa2.ui.host.Fa2App
+import me.domino.fa2.ui.app.Fa2App
 import okio.Path.Companion.toPath
 import org.koin.core.context.GlobalContext
 import org.koin.core.qualifier.named

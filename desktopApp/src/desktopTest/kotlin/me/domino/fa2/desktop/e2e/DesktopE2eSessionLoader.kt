@@ -1,8 +1,8 @@
 package me.domino.fa2.desktop.e2e
 
+import me.domino.fa2.data.fa.auth.AuthRepository
+import me.domino.fa2.data.fa.session.UserAgentStorage
 import me.domino.fa2.data.model.AuthProbeResult
-import me.domino.fa2.data.network.UserAgentStorage
-import me.domino.fa2.data.repository.AuthRepository
 import me.domino.fa2.di.startAppKoin
 import me.domino.fa2.di.stopAppKoin
 
@@ -38,7 +38,7 @@ internal object DesktopE2eSessionLoader {
           )
         }
 
-        is AuthProbeResult.Error -> {
+        is AuthProbeResult.ProbeFailed -> {
           if (result.message.contains("Cloudflare", ignoreCase = true)) {
             DesktopE2ePreflightResult.Skip(
                 "Desktop e2e skipped because preflight hit Cloudflare: ${result.message}"

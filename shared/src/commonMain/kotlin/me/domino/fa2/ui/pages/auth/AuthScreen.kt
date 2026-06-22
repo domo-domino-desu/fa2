@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import me.domino.fa2.ui.components.ExpressiveButton
 import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
-import me.domino.fa2.ui.components.HardFallbackScreen
+import me.domino.fa2.ui.components.state.HardFallbackScreen
 import org.jetbrains.compose.resources.stringResource
 
 /** 登录页主界面。 */

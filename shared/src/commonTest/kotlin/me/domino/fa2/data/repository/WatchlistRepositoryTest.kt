@@ -1,22 +1,18 @@
-package me.domino.fa2.data.repository
+package me.domino.fa2.data.fa.watchlist
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.datasource.WatchlistDataSource
+import me.domino.fa2.data.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.fa.core.HtmlResponseResult
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistUser
-import me.domino.fa2.data.network.FaHtmlDataSource
-import me.domino.fa2.data.network.HtmlResponseResult
-import me.domino.fa2.data.network.endpoint.WatchlistEndpoint
-import me.domino.fa2.data.parser.WatchlistParser
-import me.domino.fa2.data.store.WatchlistStore
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 
 /** WatchlistRepository 链路测试。 */
 class WatchlistRepositoryTest {
@@ -207,7 +203,7 @@ class WatchlistRepositoryTest {
 
   private fun buildRepository(source: FaHtmlDataSource): WatchlistRepository {
     val store =
-        WatchlistStore(
+        WatchlistPageCache(
             dataSource =
                 WatchlistDataSource(
                     endpoint = WatchlistEndpoint(source),

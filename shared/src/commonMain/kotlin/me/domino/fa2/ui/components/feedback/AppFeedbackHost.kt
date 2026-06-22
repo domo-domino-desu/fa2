@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.components
+package me.domino.fa2.ui.components.feedback
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import me.domino.fa2.ui.components.accessibilitySnackbarModifier
 
 /** 全局反馈宿主：负责提供 toast/snackbar 能力并渲染 SnackbarHost。 */
 @Composable

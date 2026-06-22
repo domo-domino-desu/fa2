@@ -1,20 +1,16 @@
-package me.domino.fa2.data.repository
+package me.domino.fa2.data.fa.feed
 
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.datasource.FeedDataSource
+import me.domino.fa2.data.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.fa.core.HtmlResponseResult
 import me.domino.fa2.data.model.PageState
-import me.domino.fa2.data.network.FaHtmlDataSource
-import me.domino.fa2.data.network.HtmlResponseResult
-import me.domino.fa2.data.network.endpoint.FeedEndpoint
-import me.domino.fa2.data.parser.FeedParser
-import me.domino.fa2.data.store.FeedStore
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 
 /** FeedRepository 分页链路测试。 */
 class FeedRepositoryPaginationTest {
@@ -79,7 +75,7 @@ class FeedRepositoryPaginationTest {
 
   private fun buildRepository(source: FaHtmlDataSource): FeedRepository {
     val feedStore =
-        FeedStore(
+        FeedPageCache(
             dataSource = FeedDataSource(endpoint = FeedEndpoint(source), parser = FeedParser()),
             pageCacheDao = InMemoryPageCacheDao(),
         )

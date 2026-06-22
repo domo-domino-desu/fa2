@@ -34,11 +34,11 @@ import fa2.shared.generated.resources.Res
 import fa2.shared.generated.resources.no_content
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.repository.WatchlistRepository
-import me.domino.fa2.ui.layouts.UserRouteTopBar
-import me.domino.fa2.ui.navigation.goBackHome
+import me.domino.fa2.data.fa.watchlist.WatchlistRepository
+import me.domino.fa2.ui.app.navigation.goBackHome
+import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
 import me.domino.fa2.ui.pages.watchrecommendation.SimilarUsersRouteScreen
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 

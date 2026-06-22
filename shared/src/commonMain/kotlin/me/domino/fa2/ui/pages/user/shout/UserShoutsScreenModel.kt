@@ -3,11 +3,11 @@ package me.domino.fa2.ui.pages.user.shout
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.coroutines.launch
+import me.domino.fa2.data.fa.user.UserRepository
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.User
-import me.domino.fa2.data.repository.UserRepository
-import me.domino.fa2.util.logging.FaLog
-import me.domino.fa2.util.logging.summarizePageState
+import me.domino.fa2.data.model.summarizePageState
+import me.domino.fa2.utils.logging.FaLog
 
 internal sealed interface UserShoutsUiState {
   data object Loading : UserShoutsUiState

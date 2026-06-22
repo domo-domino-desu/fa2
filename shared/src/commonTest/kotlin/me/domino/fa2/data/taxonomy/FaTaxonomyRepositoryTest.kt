@@ -5,12 +5,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
+import me.domino.fa2.data.i18n.AppI18nSnapshot
+import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.MetadataDisplayMode
 import me.domino.fa2.data.settings.TranslationTargetLanguage
 import me.domino.fa2.data.settings.UiLanguageSetting
-import me.domino.fa2.i18n.AppI18nSnapshot
-import me.domino.fa2.i18n.SystemLanguageProvider
 
 class FaTaxonomyRepositoryTest {
   @Test

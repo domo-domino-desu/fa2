@@ -7,13 +7,14 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
-import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.data.fa.journal.JournalRepository
+import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.model.JournalDetail
 import me.domino.fa2.data.model.PageState
-import me.domino.fa2.data.repository.JournalDetailRepository
+import me.domino.fa2.data.model.summarizePageState
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.i18n.SystemLanguageProvider
-import me.domino.fa2.i18n.appString
+import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationSourceMode
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
 import me.domino.fa2.ui.pages.submission.canReuseTranslationResult
@@ -23,8 +24,7 @@ import me.domino.fa2.ui.pages.submission.toPendingState
 import me.domino.fa2.ui.pages.submission.variantOf
 import me.domino.fa2.ui.pages.submission.withBlockResult
 import me.domino.fa2.ui.pages.submission.withVariant
-import me.domino.fa2.util.logging.FaLog
-import me.domino.fa2.util.logging.summarizePageState
+import me.domino.fa2.utils.logging.FaLog
 
 /** Journal 详情状态。 */
 sealed interface JournalDetailUiState {
@@ -53,7 +53,7 @@ class JournalDetailScreenModel(
     /** Journal URL（兜底）。 */
     private val journalUrl: String?,
     /** Journal 仓储。 */
-    private val repository: JournalDetailRepository,
+    private val repository: JournalRepository,
     /** 正文翻译编排服务。 */
     private val translationService: SubmissionDescriptionTranslationService,
     private val settingsService: AppSettingsService? = null,

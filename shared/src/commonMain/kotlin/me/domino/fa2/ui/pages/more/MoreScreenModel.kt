@@ -4,16 +4,16 @@ import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
-import me.domino.fa2.application.auth.AuthSessionController
+import me.domino.fa2.data.fa.auth.AuthRepository
+import me.domino.fa2.data.fa.session.AuthSessionController
+import me.domino.fa2.data.fa.user.ActivityHistoryRepository
+import me.domino.fa2.data.fa.user.UserRepository
+import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.User
-import me.domino.fa2.data.repository.ActivityHistoryRepository
-import me.domino.fa2.data.repository.AuthRepository
-import me.domino.fa2.data.repository.UserRepository
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.i18n.SystemLanguageProvider
-import me.domino.fa2.i18n.appString
-import me.domino.fa2.util.logging.FaLog
+import me.domino.fa2.ui.i18n.appString
+import me.domino.fa2.utils.logging.FaLog
 
 /** More 页面状态模型。 */
 class MoreScreenModel(

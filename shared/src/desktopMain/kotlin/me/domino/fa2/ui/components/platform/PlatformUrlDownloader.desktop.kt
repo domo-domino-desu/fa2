@@ -6,10 +6,10 @@ import fa2.shared.generated.resources.*
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import me.domino.fa2.data.network.endpoint.AttachmentDownloadResult
-import me.domino.fa2.data.network.endpoint.AttachmentDownloadSource
+import me.domino.fa2.data.fa.media.AttachmentDownloadResult
+import me.domino.fa2.data.fa.media.AttachmentDownloadSource
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.i18n.appString
+import me.domino.fa2.ui.i18n.appString
 import org.koin.compose.koinInject
 
 @Composable

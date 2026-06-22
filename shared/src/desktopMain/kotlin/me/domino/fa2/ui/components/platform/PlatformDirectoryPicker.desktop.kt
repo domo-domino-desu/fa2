@@ -6,7 +6,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import fa2.shared.generated.resources.*
 import java.awt.EventQueue
 import javax.swing.JFileChooser
-import me.domino.fa2.i18n.appString
+import me.domino.fa2.ui.i18n.appString
 
 @Composable
 actual fun rememberPlatformDirectoryPicker(onDirectoryPicked: (String?) -> Unit): () -> Unit {

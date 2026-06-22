@@ -2,10 +2,10 @@ package me.domino.fa2.ui.pages.submission
 
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
-import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
-import me.domino.fa2.application.submissionseries.SubmissionSeriesRule
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
+import me.domino.fa2.domain.submissionseries.SubmissionSeriesRule
+import me.domino.fa2.utils.FaUrls
 
 class SubmissionRouteScreenKeyTest {
   @Test

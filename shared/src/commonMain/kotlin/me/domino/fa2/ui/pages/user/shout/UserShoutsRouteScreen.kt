@@ -24,15 +24,15 @@ import fa2.shared.generated.resources.no_displayable_shouts
 import fa2.shared.generated.resources.shouts
 import fa2.shared.generated.resources.shouts_count
 import kotlinx.coroutines.launch
-import me.domino.fa2.ui.components.SkeletonBlock
-import me.domino.fa2.ui.components.StatusSurface
-import me.domino.fa2.ui.components.StatusSurfaceVariant
-import me.domino.fa2.ui.components.submission.SubmissionCommentsCard
-import me.domino.fa2.ui.layouts.UserRouteTopBar
-import me.domino.fa2.ui.navigation.goBackHome
+import me.domino.fa2.ui.app.navigation.goBackHome
+import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
+import me.domino.fa2.ui.components.html.PageCommentsCard
+import me.domino.fa2.ui.components.state.SkeletonBlock
+import me.domino.fa2.ui.components.state.StatusSurface
+import me.domino.fa2.ui.components.state.StatusSurfaceVariant
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.pages.user.route.UserRouteScreen
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
 
@@ -67,7 +67,7 @@ class UserShoutsRouteScreen(private val username: String) : Screen {
               verticalArrangement = Arrangement.spacedBy(10.dp),
           ) {
             item {
-              SubmissionCommentsCard(
+              PageCommentsCard(
                   commentCount = snapshot.user.shoutCount,
                   comments = snapshot.user.shouts,
                   onOpenAuthor = { author ->

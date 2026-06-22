@@ -12,14 +12,14 @@ import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.Res
 import fa2.shared.generated.resources.load_failed
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.ui.components.StatusSurface
-import me.domino.fa2.ui.components.StatusSurfaceVariant
-import me.domino.fa2.ui.components.submission.SubmissionWaterfall
-import me.domino.fa2.ui.components.submission.SubmissionWaterfallPageControls
-import me.domino.fa2.ui.components.submission.SubmissionWaterfallViewportSnapshot
-import me.domino.fa2.ui.components.submission.WaterfallLoadingSkeleton
-import me.domino.fa2.ui.components.submission.WaterfallRefreshBox
-import me.domino.fa2.ui.host.LocalAppSettings
+import me.domino.fa2.ui.app.LocalAppSettings
+import me.domino.fa2.ui.components.state.StatusSurface
+import me.domino.fa2.ui.components.state.StatusSurfaceVariant
+import me.domino.fa2.ui.components.waterfall.SubmissionWaterfall
+import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallPageControls
+import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallViewportSnapshot
+import me.domino.fa2.ui.components.waterfall.WaterfallLoadingSkeleton
+import me.domino.fa2.ui.components.waterfall.WaterfallRefreshBox
 import me.domino.fa2.ui.pages.submission.WaterfallScrollRequest
 import org.jetbrains.compose.resources.stringResource
 

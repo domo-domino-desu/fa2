@@ -1,0 +1,23 @@
+package me.domino.fa2.data.fa.core
+
+import me.domino.fa2.data.model.PageState
+
+/** 远端 HTML 响应到 PageState 的映射工具。 */
+internal inline fun <T> HtmlResponseResult.toPageState(
+    parseSuccess: (HtmlResponseResult.Success) -> T
+): PageState<T> =
+    when (this) {
+      is HtmlResponseResult.Success ->
+          runCatching { parseSuccess(this) }
+              .fold(
+                  onSuccess = { data -> PageState.Success(data) },
+                  onFailure = { error -> PageState.Error(error) },
+              )
+
+      is HtmlResponseResult.AuthRequired ->
+          PageState.AuthRequired(requestUrl = requestUrl, message = message)
+      is HtmlResponseResult.CfChallenge -> PageState.CfChallenge
+      HtmlResponseResult.ChallengeAborted -> PageState.CfChallenge
+      is HtmlResponseResult.MatureBlocked -> PageState.MatureBlocked(reason)
+      is HtmlResponseResult.Error -> PageState.Error(IllegalStateException(message))
+    }

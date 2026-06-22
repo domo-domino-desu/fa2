@@ -1,4 +1,4 @@
-package me.domino.fa2.data.network
+package me.domino.fa2.data.fa.core
 
 import kotlin.test.Test
 import kotlin.test.assertFalse

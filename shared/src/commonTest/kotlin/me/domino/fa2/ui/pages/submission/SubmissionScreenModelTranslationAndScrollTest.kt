@@ -25,9 +25,10 @@ import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.domain.attachmenttext.AttachmentTextFormat
 import me.domino.fa2.domain.attachmenttext.AttachmentTextParagraph
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
+import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
 import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
-import me.domino.fa2.util.FaUrls
-import me.domino.fa2.util.parseSubmissionSid
+import me.domino.fa2.utils.FaUrls
+import me.domino.fa2.utils.parseSubmissionSid
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SubmissionScreenModelTranslationAndScrollTest {
@@ -361,7 +362,8 @@ class SubmissionScreenModelTranslationAndScrollTest {
                     )
             )
         val requestedProviders = mutableListOf<TranslationProvider>()
-        val feedbackEvents = mutableListOf<me.domino.fa2.ui.components.AppFeedbackRequest>()
+        val feedbackEvents =
+            mutableListOf<me.domino.fa2.ui.components.feedback.AppFeedbackRequest>()
         val model =
             createSubmissionScreenModelForTest(
                 initialSid = 1,
@@ -438,7 +440,8 @@ class SubmissionScreenModelTranslationAndScrollTest {
                     ),
             )
         val requestedProviders = mutableListOf<TranslationProvider>()
-        val feedbackEvents = mutableListOf<me.domino.fa2.ui.components.AppFeedbackRequest>()
+        val feedbackEvents =
+            mutableListOf<me.domino.fa2.ui.components.feedback.AppFeedbackRequest>()
         val model =
             createSubmissionScreenModelForTest(
                 initialSid = 1,

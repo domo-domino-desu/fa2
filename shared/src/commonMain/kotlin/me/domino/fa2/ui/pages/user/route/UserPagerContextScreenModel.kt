@@ -9,7 +9,7 @@ import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
-import me.domino.fa2.i18n.appString
+import me.domino.fa2.ui.i18n.appString
 
 internal sealed interface UserPagerSource {
   data class Watchlist(val ownerUsername: String, val category: WatchlistCategory) : UserPagerSource

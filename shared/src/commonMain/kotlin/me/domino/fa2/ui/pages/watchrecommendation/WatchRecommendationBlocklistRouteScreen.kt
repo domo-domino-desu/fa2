@@ -29,17 +29,17 @@ import fa2.shared.generated.resources.load_failed
 import fa2.shared.generated.resources.no_content
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.WatchlistUser
+import me.domino.fa2.ui.app.navigation.goBackHome
+import me.domino.fa2.ui.app.scaffold.WatchRecommendationBlocklistRouteTopBar
 import me.domino.fa2.ui.components.ExpressiveIconButton
-import me.domino.fa2.ui.components.UserHorizontalCard
+import me.domino.fa2.ui.components.user.UserHorizontalCard
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.layouts.WatchRecommendationBlocklistRouteTopBar
-import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.pages.user.route.UserPagerContextScreenModel
 import me.domino.fa2.ui.pages.user.route.UserPagerRouteScreen
 import me.domino.fa2.ui.pages.user.route.UserPagerSource
 import me.domino.fa2.ui.pages.user.watchlist.WatchlistSkeleton
 import me.domino.fa2.ui.pages.user.watchlist.WatchlistStatusCard
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 import org.jetbrains.compose.resources.stringResource
 
 class WatchRecommendationBlocklistRouteScreen : Screen {

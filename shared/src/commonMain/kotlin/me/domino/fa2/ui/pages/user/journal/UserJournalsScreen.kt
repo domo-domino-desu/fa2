@@ -34,12 +34,12 @@ import fa2.shared.generated.resources.*
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.JournalSummary
-import me.domino.fa2.ui.components.PaginationRetryBar
-import me.domino.fa2.ui.components.PaginationRetryDirection
-import me.domino.fa2.ui.components.SkeletonBlock
-import me.domino.fa2.ui.components.StatusSurface
-import me.domino.fa2.ui.components.StatusSurfaceVariant
 import me.domino.fa2.ui.components.accessibleClickableSummary
+import me.domino.fa2.ui.components.state.PaginationRetryBar
+import me.domino.fa2.ui.components.state.PaginationRetryDirection
+import me.domino.fa2.ui.components.state.SkeletonBlock
+import me.domino.fa2.ui.components.state.StatusSurface
+import me.domino.fa2.ui.components.state.StatusSurfaceVariant
 import me.domino.fa2.ui.pages.user.profile.UserBodyScrollPosition
 import me.domino.fa2.ui.pages.user.profile.UserChildRouteTabs
 import me.domino.fa2.ui.pages.user.profile.UserSectionTopDefaults

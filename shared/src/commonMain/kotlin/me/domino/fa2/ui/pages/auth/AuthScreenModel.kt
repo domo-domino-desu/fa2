@@ -8,16 +8,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import me.domino.fa2.application.auth.AuthSessionController
-import me.domino.fa2.application.auth.PendingFaRouteStore
+import me.domino.fa2.data.fa.auth.AuthRepository
+import me.domino.fa2.data.fa.session.AuthSessionController
+import me.domino.fa2.data.fa.session.PendingFaRouteStore
+import me.domino.fa2.data.fa.session.SessionWebViewPort
+import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.model.AuthProbeResult
-import me.domino.fa2.data.repository.AuthRepository
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.domain.challenge.SessionWebViewPort
-import me.domino.fa2.i18n.SystemLanguageProvider
-import me.domino.fa2.i18n.appString
-import me.domino.fa2.util.FaUrls
-import me.domino.fa2.util.logging.FaLog
+import me.domino.fa2.ui.i18n.appString
+import me.domino.fa2.utils.FaUrls
+import me.domino.fa2.utils.logging.FaLog
 
 /** 登录页面状态模型。 */
 class AuthScreenModel(

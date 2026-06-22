@@ -32,27 +32,27 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
-import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
-import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
-import me.domino.fa2.data.repository.JournalDetailRepository
+import me.domino.fa2.data.fa.journal.JournalRepository
+import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.i18n.SystemLanguageProvider
-import me.domino.fa2.ui.components.AvatarImage
-import me.domino.fa2.ui.components.DetailSectionCardSurface
-import me.domino.fa2.ui.components.HtmlText
-import me.domino.fa2.ui.components.SkeletonBlock
-import me.domino.fa2.ui.components.StatusSurface
-import me.domino.fa2.ui.components.StatusSurfaceVariant
-import me.domino.fa2.ui.components.SubmissionSeriesProbeConfig
-import me.domino.fa2.ui.components.TranslatableBlocksCard
-import me.domino.fa2.ui.host.LocalAppI18n
-import me.domino.fa2.ui.host.LocalAppSettings
-import me.domino.fa2.ui.layouts.JournalDetailRouteTopBar
-import me.domino.fa2.ui.navigation.goBackHome
-import me.domino.fa2.ui.navigation.openSubmissionSeries
+import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
+import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.ui.app.LocalAppI18n
+import me.domino.fa2.ui.app.LocalAppSettings
+import me.domino.fa2.ui.app.navigation.goBackHome
+import me.domino.fa2.ui.app.navigation.openSubmissionSeries
+import me.domino.fa2.ui.app.scaffold.JournalDetailRouteTopBar
+import me.domino.fa2.ui.components.html.DetailSectionCardSurface
+import me.domino.fa2.ui.components.html.HtmlText
+import me.domino.fa2.ui.components.html.TranslatableBlocksCard
+import me.domino.fa2.ui.components.media.AvatarImage
+import me.domino.fa2.ui.components.state.SkeletonBlock
+import me.domino.fa2.ui.components.state.StatusSurface
+import me.domino.fa2.ui.components.state.StatusSurfaceVariant
+import me.domino.fa2.ui.pages.submission.components.SubmissionSeriesProbeConfig
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.pages.user.route.UserRouteScreen
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
@@ -148,7 +148,7 @@ internal fun JournalDetailBody(
     listState: LazyListState = rememberLazyListState(),
 ) {
   val navigator = LocalNavigator.currentOrThrow
-  val repository = koinInject<JournalDetailRepository>()
+  val repository = koinInject<JournalRepository>()
   val translationService = koinInject<SubmissionDescriptionTranslationService>()
   val settingsService = koinInject<AppSettingsService>()
   val systemLanguageProvider = koinInject<SystemLanguageProvider>()

@@ -5,12 +5,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import me.domino.fa2.i18n.AppLanguage
-import me.domino.fa2.i18n.MetadataDisplayPreferences
-import me.domino.fa2.i18n.defaultMetadataDisplayPreferences
-import me.domino.fa2.i18n.localizedFor
-import me.domino.fa2.i18n.localizedOrOriginal
-import me.domino.fa2.util.logging.FaLog
+import me.domino.fa2.data.i18n.AppLanguage
+import me.domino.fa2.data.i18n.MetadataDisplayPreferences
+import me.domino.fa2.data.i18n.defaultMetadataDisplayPreferences
+import me.domino.fa2.data.i18n.localizedFor
+import me.domino.fa2.data.i18n.localizedOrOriginal
+import me.domino.fa2.utils.logging.FaLog
 
 /** FA 分类目录仓库，负责加载和查询分类、类型、物种等元数据。 */
 class FaTaxonomyRepository {

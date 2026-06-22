@@ -33,9 +33,9 @@ import fa2.shared.generated.resources.Res
 import fa2.shared.generated.resources.no_content
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.repository.JournalsRepository
-import me.domino.fa2.ui.layouts.JournalDetailRouteTopBar
-import me.domino.fa2.ui.navigation.goBackHome
+import me.domino.fa2.data.fa.journal.JournalsRepository
+import me.domino.fa2.ui.app.navigation.goBackHome
+import me.domino.fa2.ui.app.scaffold.JournalDetailRouteTopBar
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 

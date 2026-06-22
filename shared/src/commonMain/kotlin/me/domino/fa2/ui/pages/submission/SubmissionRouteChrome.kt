@@ -20,14 +20,14 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
-import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
-import me.domino.fa2.ui.components.PageStateWrapper
+import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
+import me.domino.fa2.ui.app.scaffold.SubmissionRouteTopBar
 import me.domino.fa2.ui.components.platform.PlatformDownloadRequest
-import me.domino.fa2.ui.components.submission.SubmissionPager
+import me.domino.fa2.ui.components.state.PageStateWrapper
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.layouts.SubmissionRouteTopBar
+import me.domino.fa2.ui.pages.submission.components.SubmissionPager
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)

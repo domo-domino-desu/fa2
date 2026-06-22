@@ -19,14 +19,14 @@ import fa2.shared.generated.resources.recommendation_progress_sample_prepared
 import fa2.shared.generated.resources.recommendation_progress_starting
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import me.domino.fa2.application.watchrecommendation.RecommendedWatchUser
-import me.domino.fa2.application.watchrecommendation.WatchRecommendationProgress
-import me.domino.fa2.application.watchrecommendation.WatchRecommendationService
+import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.data.model.WatchlistCategory
-import me.domino.fa2.data.repository.WatchRecommendationBlocklistRepository
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.i18n.appString
-import me.domino.fa2.util.logging.FaLog
+import me.domino.fa2.domain.watchrecommendation.RecommendedWatchUser
+import me.domino.fa2.domain.watchrecommendation.WatchRecommendationProgress
+import me.domino.fa2.domain.watchrecommendation.WatchRecommendationService
+import me.domino.fa2.ui.i18n.appString
+import me.domino.fa2.utils.logging.FaLog
 
 sealed interface WatchRecommendationUiState {
   data object Idle : WatchRecommendationUiState
@@ -51,7 +51,7 @@ sealed interface WatchRecommendationUiState {
 class WatchRecommendationScreenModel(
     private val username: String,
     private val recommendationService: WatchRecommendationService,
-    private val blocklistRepository: WatchRecommendationBlocklistRepository,
+    private val blocklistRepository: WatchRecommendationBlocklist,
     private val settingsService: AppSettingsService,
 ) : StateScreenModel<WatchRecommendationUiState>(WatchRecommendationUiState.Idle) {
   private val log = FaLog.withTag("WatchRecommendationScreenModel")

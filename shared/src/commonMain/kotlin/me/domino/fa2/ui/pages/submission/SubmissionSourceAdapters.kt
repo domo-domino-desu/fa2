@@ -1,23 +1,23 @@
 package me.domino.fa2.ui.pages.submission
 
 import io.ktor.http.encodeURLParameter
-import me.domino.fa2.application.submissionseries.SubmissionSeriesResolvedSeries
-import me.domino.fa2.application.submissionseries.SubmissionSeriesResolver
-import me.domino.fa2.application.submissionseries.SubmissionSeriesRule
-import me.domino.fa2.application.submissionseries.normalizeSubmissionSeriesUrl
-import me.domino.fa2.application.submissionseries.toSubmissionThumbnail
+import me.domino.fa2.data.fa.browse.BrowseRepository
+import me.domino.fa2.data.fa.favorites.FavoritesRepository
+import me.domino.fa2.data.fa.feed.FeedRepository
+import me.domino.fa2.data.fa.gallery.GalleryRepository
+import me.domino.fa2.data.fa.search.SearchRepository
 import me.domino.fa2.data.model.FeedPage
 import me.domino.fa2.data.model.GalleryPage
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionListingPage
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.data.repository.BrowseRepository
-import me.domino.fa2.data.repository.FavoritesRepository
-import me.domino.fa2.data.repository.FeedRepository
-import me.domino.fa2.data.repository.GalleryRepository
-import me.domino.fa2.data.repository.SearchRepository
-import me.domino.fa2.data.repository.SubmissionDetailRepository
+import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
+import me.domino.fa2.domain.submissionseries.SubmissionSeriesRule
+import me.domino.fa2.domain.submissionseries.SubmissionSeriesService
+import me.domino.fa2.domain.submissionseries.SubmissionSeriesSubmissionSource
+import me.domino.fa2.domain.submissionseries.normalizeSubmissionSeriesUrl
+import me.domino.fa2.domain.submissionseries.toSubmissionThumbnail
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 
 internal interface SubmissionSourceAdapter {
@@ -72,9 +72,9 @@ internal class FeedSubmissionSourceAdapter(
       }
 
   override suspend fun loadFirstPage(): PageState<SubmissionLoadedPage> =
-      repository.loadPageByUrl(me.domino.fa2.util.FaUrls.submissions()).mapLoadedPage { page ->
+      repository.loadPageByUrl(me.domino.fa2.utils.FaUrls.submissions()).mapLoadedPage { page ->
         page.toLoadedPage(
-            requestKey = page.currentPageUrl ?: me.domino.fa2.util.FaUrls.submissions(),
+            requestKey = page.currentPageUrl ?: me.domino.fa2.utils.FaUrls.submissions(),
             pageId = page.currentPageUrl ?: "feed:first",
         )
       }
@@ -468,10 +468,10 @@ private object UserSubmissionLastPageHintCache {
 }
 
 internal class SeriesSubmissionSourceAdapter(
-    private val repository: SubmissionDetailRepository,
+    private val repository: SubmissionSeriesSubmissionSource,
     private val series: SubmissionSeriesResolvedSeries,
 ) : SubmissionSourceAdapter {
-  private val resolver = SubmissionSeriesResolver(repository = repository)
+  private val resolver = SubmissionSeriesService(repository = repository)
   private val loadedUrls =
       series.seedSubmissions
           .map(SubmissionThumbnail::submissionUrl)
@@ -724,10 +724,10 @@ private fun buildGalleryPageUrl(firstPageUrl: String, pageNumber: Int): String {
   return "$base/$pageNumber/"
 }
 
-private fun galleryRootUrl(username: String): String = me.domino.fa2.util.FaUrls.gallery(username)
+private fun galleryRootUrl(username: String): String = me.domino.fa2.utils.FaUrls.gallery(username)
 
 private fun favoritesRootUrl(username: String): String =
-    me.domino.fa2.util.FaUrls.favorites(username)
+    me.domino.fa2.utils.FaUrls.favorites(username)
 
 private const val searchPageSize: Int = 72
 private const val searchResultCountUpperBound: Int = 5000

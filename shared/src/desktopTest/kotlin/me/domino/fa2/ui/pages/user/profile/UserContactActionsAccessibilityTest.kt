@@ -6,7 +6,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import me.domino.fa2.data.model.UserContact
-import me.domino.fa2.ui.theme.Fa2Theme
+import me.domino.fa2.ui.app.theme.Fa2Theme
 import org.junit.Rule
 import org.junit.Test
 

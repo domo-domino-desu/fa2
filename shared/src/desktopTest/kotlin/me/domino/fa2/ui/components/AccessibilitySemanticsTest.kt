@@ -15,9 +15,11 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
 import java.util.Locale
 import kotlin.test.assertTrue
-import me.domino.fa2.ui.components.settings.SettingsGroup
-import me.domino.fa2.ui.components.settings.SettingsSwitchRow
-import me.domino.fa2.ui.theme.Fa2Theme
+import me.domino.fa2.ui.app.theme.Fa2Theme
+import me.domino.fa2.ui.components.feedback.AppFeedbackHost
+import me.domino.fa2.ui.components.forms.FilterDialogTriggerField
+import me.domino.fa2.ui.pages.settings.components.SettingsGroup
+import me.domino.fa2.ui.pages.settings.components.SettingsSwitchRow
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule

@@ -3,8 +3,8 @@ package me.domino.fa2.ui.components.platform
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.DownloadFileNameMode
 import me.domino.fa2.data.settings.DownloadSubfolderMode
-import me.domino.fa2.util.cleanupTemplateRenderedText
-import me.domino.fa2.util.renderBraceTemplate
+import me.domino.fa2.utils.cleanupTemplateRenderedText
+import me.domino.fa2.utils.renderBraceTemplate
 
 /** 平台下载请求。 */
 data class PlatformDownloadRequest(

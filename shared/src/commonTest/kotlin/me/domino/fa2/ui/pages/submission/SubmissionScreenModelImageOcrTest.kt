@@ -28,8 +28,9 @@ import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.domain.ocr.ImageOcrResult
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.ocr.RecognizedTextBlock
-import me.domino.fa2.util.FaUrls
-import me.domino.fa2.util.parseSubmissionSid
+import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
+import me.domino.fa2.utils.FaUrls
+import me.domino.fa2.utils.parseSubmissionSid
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SubmissionScreenModelImageOcrTest {
@@ -308,7 +309,8 @@ class SubmissionScreenModelImageOcrTest {
       runTest(dispatcher.scheduler) {
         val settingsService = createTestAppSettingsService()
         val requestedProviders = mutableListOf<TranslationProvider>()
-        val feedbackEvents = mutableListOf<me.domino.fa2.ui.components.AppFeedbackRequest>()
+        val feedbackEvents =
+            mutableListOf<me.domino.fa2.ui.components.feedback.AppFeedbackRequest>()
         val model =
             createSubmissionScreenModelForTest(
                 initialSid = 1,

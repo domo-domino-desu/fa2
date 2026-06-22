@@ -6,19 +6,19 @@ import fa2.shared.generated.resources.*
 import kotlin.random.Random
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import me.domino.fa2.data.fa.watchlist.WatchlistRepository
+import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
-import me.domino.fa2.data.repository.WatchlistRepository
+import me.domino.fa2.data.model.summarizePageState
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.i18n.SystemLanguageProvider
-import me.domino.fa2.i18n.appString
-import me.domino.fa2.i18n.appStringOrFallback
+import me.domino.fa2.ui.i18n.appString
+import me.domino.fa2.ui.i18n.appStringOrFallback
 import me.domino.fa2.ui.state.PaginationReducer
 import me.domino.fa2.ui.state.PaginationSnapshot
-import me.domino.fa2.util.logging.FaLog
-import me.domino.fa2.util.logging.summarizePageState
+import me.domino.fa2.utils.logging.FaLog
 
 private const val watchlistAutoLoadThreshold = 14
 

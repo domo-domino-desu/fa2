@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.i18n.appString
-import me.domino.fa2.util.logging.FaLog
+import me.domino.fa2.ui.i18n.appString
+import me.domino.fa2.utils.logging.FaLog
 
 class SubmissionContextScreenModel : ScreenModel {
   private val log = FaLog.withTag("SubmissionContext")

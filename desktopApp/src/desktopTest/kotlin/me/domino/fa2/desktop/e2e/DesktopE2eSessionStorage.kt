@@ -2,10 +2,10 @@ package me.domino.fa2.desktop.e2e
 
 import eu.anifantakis.lib.ksafe.KSafe
 import kotlinx.coroutines.runBlocking
+import me.domino.fa2.data.fa.session.FaCookiesStorage
+import me.domino.fa2.data.fa.session.KSafeCookiePersistence
+import me.domino.fa2.data.fa.session.UserAgentStorage
 import me.domino.fa2.data.local.KeyValueStorage
-import me.domino.fa2.data.network.FaCookiesStorage
-import me.domino.fa2.data.network.KSafeCookiePersistence
-import me.domino.fa2.data.network.UserAgentStorage
 
 /** E2E 测试会话数据辅助工具，负责读写测试用的 Cookie 与用户代理数据。 */
 internal object DesktopE2eSessionStorage {

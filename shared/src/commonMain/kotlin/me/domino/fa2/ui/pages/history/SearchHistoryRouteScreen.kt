@@ -31,11 +31,11 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
+import me.domino.fa2.data.fa.user.ActivityHistoryRepository
 import me.domino.fa2.data.model.SearchHistoryRecord
-import me.domino.fa2.data.repository.ActivityHistoryRepository
+import me.domino.fa2.ui.app.navigation.goBackHome
+import me.domino.fa2.ui.app.scaffold.SearchHistoryRouteTopBar
 import me.domino.fa2.ui.components.accessibleClickableSummary
-import me.domino.fa2.ui.layouts.SearchHistoryRouteTopBar
-import me.domino.fa2.ui.navigation.goBackHome
 import me.domino.fa2.ui.pages.search.SearchRouteScreen
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject

@@ -14,11 +14,11 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import me.domino.fa2.data.fa.watchlist.WatchlistRepository
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
-import me.domino.fa2.data.repository.WatchlistRepository
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserWatchlistScreenModelTest {
@@ -251,21 +251,21 @@ private fun createScreenModelFixture(
     WatchlistScreenModelFixture(
         repository =
             WatchlistRepository(
-                me.domino.fa2.data.store.WatchlistStore(
+                me.domino.fa2.data.fa.watchlist.WatchlistPageCache(
                     dataSource =
-                        me.domino.fa2.data.datasource.WatchlistDataSource(
+                        me.domino.fa2.data.fa.watchlist.WatchlistDataSource(
                             endpoint =
-                                me.domino.fa2.data.network.endpoint.WatchlistEndpoint(
+                                me.domino.fa2.data.fa.watchlist.WatchlistEndpoint(
                                     dataSource =
-                                        object : me.domino.fa2.data.network.FaHtmlDataSource {
+                                        object : me.domino.fa2.data.fa.core.FaHtmlDataSource {
                                           override suspend fun get(url: String) =
-                                              me.domino.fa2.data.network.HtmlResponseResult.Error(
+                                              me.domino.fa2.data.fa.core.HtmlResponseResult.Error(
                                                   statusCode = 500,
                                                   message = "unused",
                                               )
                                         }
                                 ),
-                            parser = me.domino.fa2.data.parser.WatchlistParser(),
+                            parser = me.domino.fa2.data.fa.watchlist.WatchlistParser(),
                         ),
                     pageCacheDao = me.domino.fa2.fake.InMemoryPageCacheDao(),
                 )

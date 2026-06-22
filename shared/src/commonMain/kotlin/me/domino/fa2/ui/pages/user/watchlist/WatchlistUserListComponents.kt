@@ -10,10 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import me.domino.fa2.data.model.WatchlistUser
-import me.domino.fa2.ui.components.SkeletonBlock
-import me.domino.fa2.ui.components.StatusSurface
-import me.domino.fa2.ui.components.StatusSurfaceVariant
-import me.domino.fa2.ui.components.UserHorizontalCard
+import me.domino.fa2.ui.components.state.SkeletonBlock
+import me.domino.fa2.ui.components.state.StatusSurface
+import me.domino.fa2.ui.components.state.StatusSurfaceVariant
+import me.domino.fa2.ui.components.user.UserHorizontalCard
 
 @Composable
 fun WatchlistSkeleton() {

@@ -1,13 +1,13 @@
 package me.domino.fa2.ui.pages.submission
 
-import me.domino.fa2.application.attachmenttext.AttachmentTextService
+import me.domino.fa2.data.fa.feed.FeedRepository
+import me.domino.fa2.data.fa.submission.SubmissionRepository
 import me.domino.fa2.data.model.FeedPage
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.Submission
-import me.domino.fa2.data.repository.FeedRepository
-import me.domino.fa2.data.repository.SubmissionRepository
 import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
+import me.domino.fa2.domain.attachmenttext.AttachmentTextService
 
 interface SubmissionPagerFeedSource {
   suspend fun loadPageByNextUrl(nextPageUrl: String): PageState<FeedPage>

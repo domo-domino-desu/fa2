@@ -93,8 +93,6 @@ nohup.out
 .kotlin
 .githooks
 
-ARCH.md
-AGENT.md
 repomix*
 .repomix*
 local.properties

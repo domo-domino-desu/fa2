@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.components
+package me.domino.fa2.ui.components.feedback
 
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf

@@ -25,10 +25,10 @@ import me.domino.fa2.data.model.User
 import me.domino.fa2.ui.components.ExpressiveButton
 import me.domino.fa2.ui.components.ExpressiveIconButton
 import me.domino.fa2.ui.components.ExpressiveTextButton
-import me.domino.fa2.ui.components.UserHeaderSummaryCard
-import me.domino.fa2.ui.components.settings.SettingsGroup
-import me.domino.fa2.ui.components.settings.SettingsListItem
+import me.domino.fa2.ui.components.user.UserHeaderSummaryCard
 import me.domino.fa2.ui.icons.FaMaterialSymbols
+import me.domino.fa2.ui.pages.settings.components.SettingsGroup
+import me.domino.fa2.ui.pages.settings.components.SettingsListItem
 import me.domino.fa2.ui.pages.user.route.UserHeaderNavigationActions
 import org.jetbrains.compose.resources.stringResource
 

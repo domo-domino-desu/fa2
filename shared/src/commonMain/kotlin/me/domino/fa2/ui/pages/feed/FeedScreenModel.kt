@@ -8,16 +8,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import me.domino.fa2.data.fa.feed.FeedRepository
+import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.data.repository.FeedRepository
+import me.domino.fa2.data.model.summarizePageState
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.i18n.SystemLanguageProvider
-import me.domino.fa2.i18n.appString
+import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.state.PaginationReducer
 import me.domino.fa2.ui.state.PaginationSnapshot
-import me.domino.fa2.util.logging.FaLog
-import me.domino.fa2.util.logging.summarizePageState
+import me.domino.fa2.utils.logging.FaLog
 
 private const val autoLoadThreshold = 10
 

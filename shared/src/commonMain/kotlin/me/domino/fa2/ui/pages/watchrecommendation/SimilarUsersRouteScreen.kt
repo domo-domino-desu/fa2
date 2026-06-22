@@ -25,8 +25,8 @@ import fa2.shared.generated.resources.similar_users_description
 import fa2.shared.generated.resources.similar_users_empty
 import fa2.shared.generated.resources.similar_users_load_failed
 import kotlinx.coroutines.launch
-import me.domino.fa2.ui.layouts.SimilarUsersRouteTopBar
-import me.domino.fa2.ui.navigation.goBackHome
+import me.domino.fa2.ui.app.navigation.goBackHome
+import me.domino.fa2.ui.app.scaffold.SimilarUsersRouteTopBar
 import me.domino.fa2.ui.pages.user.route.UserPagerContextScreenModel
 import me.domino.fa2.ui.pages.user.route.UserPagerRouteScreen
 import me.domino.fa2.ui.pages.user.route.UserPagerSource

@@ -32,11 +32,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
-import me.domino.fa2.ui.components.HtmlText
-import me.domino.fa2.ui.components.SkeletonBlock
-import me.domino.fa2.ui.components.StatusSurface
-import me.domino.fa2.ui.components.StatusSurfaceVariant
-import me.domino.fa2.ui.components.UserHeaderSummaryCard
+import me.domino.fa2.ui.components.html.HtmlText
+import me.domino.fa2.ui.components.state.SkeletonBlock
+import me.domino.fa2.ui.components.state.StatusSurface
+import me.domino.fa2.ui.components.state.StatusSurfaceVariant
+import me.domino.fa2.ui.components.user.UserHeaderSummaryCard
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.user.route.UserHeaderNavigationActions
 import org.jetbrains.compose.resources.stringResource
@@ -127,7 +127,7 @@ internal fun UserHeaderCard(
       bodyContent = {
         UserMetadataAndContactsRow(
             userTitle = header.userTitle,
-            registeredAtText = me.domino.fa2.i18n.registeredAtText(header.registeredAt),
+            registeredAtText = me.domino.fa2.ui.i18n.registeredAtText(header.registeredAt),
             contacts = header.contacts,
         )
 

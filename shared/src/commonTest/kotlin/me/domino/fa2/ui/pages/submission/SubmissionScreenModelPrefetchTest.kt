@@ -18,8 +18,8 @@ import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
-import me.domino.fa2.util.FaUrls
-import me.domino.fa2.util.parseSubmissionSid
+import me.domino.fa2.utils.FaUrls
+import me.domino.fa2.utils.parseSubmissionSid
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SubmissionScreenModelPrefetchTest {

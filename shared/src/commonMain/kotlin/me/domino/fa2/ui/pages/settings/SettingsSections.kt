@@ -22,13 +22,13 @@ import me.domino.fa2.data.settings.TranslationProvider
 import me.domino.fa2.ui.components.ExpressiveIconButton
 import me.domino.fa2.ui.components.ExpressiveTextButton
 import me.domino.fa2.ui.components.platform.rememberPlatformDirectoryPicker
-import me.domino.fa2.ui.components.settings.SettingsDropdownField
-import me.domino.fa2.ui.components.settings.SettingsGroup
-import me.domino.fa2.ui.components.settings.SettingsInputRow
-import me.domino.fa2.ui.components.settings.SettingsNavigationRow
-import me.domino.fa2.ui.components.settings.SettingsStackedInputRow
-import me.domino.fa2.ui.components.settings.SettingsSwitchRow
 import me.domino.fa2.ui.icons.FaMaterialSymbols
+import me.domino.fa2.ui.pages.settings.components.SettingsDropdownField
+import me.domino.fa2.ui.pages.settings.components.SettingsGroup
+import me.domino.fa2.ui.pages.settings.components.SettingsInputRow
+import me.domino.fa2.ui.pages.settings.components.SettingsNavigationRow
+import me.domino.fa2.ui.pages.settings.components.SettingsStackedInputRow
+import me.domino.fa2.ui.pages.settings.components.SettingsSwitchRow
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

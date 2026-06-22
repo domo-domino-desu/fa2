@@ -7,10 +7,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.documentfile.provider.DocumentFile
 import fa2.shared.generated.resources.*
-import me.domino.fa2.data.network.endpoint.AttachmentDownloadResult
-import me.domino.fa2.data.network.endpoint.AttachmentDownloadSource
+import me.domino.fa2.data.fa.media.AttachmentDownloadResult
+import me.domino.fa2.data.fa.media.AttachmentDownloadSource
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.i18n.appString
+import me.domino.fa2.ui.i18n.appString
 import org.koin.compose.koinInject
 
 @Composable

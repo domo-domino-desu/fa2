@@ -4,8 +4,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import java.util.Locale
 import kotlin.test.assertTrue
-import me.domino.fa2.ui.layouts.UserRouteTopBar
-import me.domino.fa2.ui.theme.Fa2Theme
+import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
+import me.domino.fa2.ui.app.theme.Fa2Theme
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule

@@ -13,14 +13,14 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import me.domino.fa2.data.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.fa.core.HtmlResponseResult
+import me.domino.fa2.data.fa.social.SocialActionEndpoint
+import me.domino.fa2.data.fa.user.UserPageCache
+import me.domino.fa2.data.fa.user.UserRepository
+import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.User
-import me.domino.fa2.data.network.FaHtmlDataSource
-import me.domino.fa2.data.network.HtmlResponseResult
-import me.domino.fa2.data.network.endpoint.SocialActionEndpoint
-import me.domino.fa2.data.repository.UserRepository
-import me.domino.fa2.data.repository.WatchRecommendationBlocklistRepository
-import me.domino.fa2.data.store.UserStore
 import me.domino.fa2.fake.InMemoryPageCacheDao
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -41,7 +41,7 @@ class UserScreenModelRecommendationHideTest {
   fun initializesHiddenStateFromRecommendationBlocklist() =
       runTest(dispatcher.scheduler) {
         val repository = FakeUserRepository(user = testUser(isWatching = false))
-        val blocklist = FakeWatchRecommendationBlocklistRepository("artist-alpha")
+        val blocklist = FakeWatchRecommendationBlocklist("artist-alpha")
 
         val model = buildModel(repository = repository, blocklist = blocklist)
         advanceUntilIdle()
@@ -53,7 +53,7 @@ class UserScreenModelRecommendationHideTest {
   fun hidesOnlyWhenUserIsNotWatchingAndNotAlreadyHidden() =
       runTest(dispatcher.scheduler) {
         val repository = FakeUserRepository(user = testUser(isWatching = false))
-        val blocklist = FakeWatchRecommendationBlocklistRepository()
+        val blocklist = FakeWatchRecommendationBlocklist()
 
         val model = buildModel(repository = repository, blocklist = blocklist)
         advanceUntilIdle()
@@ -70,7 +70,7 @@ class UserScreenModelRecommendationHideTest {
   fun hideIsNoOpWhenUserIsWatching() =
       runTest(dispatcher.scheduler) {
         val repository = FakeUserRepository(user = testUser(isWatching = true))
-        val blocklist = FakeWatchRecommendationBlocklistRepository()
+        val blocklist = FakeWatchRecommendationBlocklist()
 
         val model = buildModel(repository = repository, blocklist = blocklist)
         advanceUntilIdle()
@@ -86,7 +86,7 @@ class UserScreenModelRecommendationHideTest {
   fun unhidesHiddenUser() =
       runTest(dispatcher.scheduler) {
         val repository = FakeUserRepository(user = testUser(isWatching = false))
-        val blocklist = FakeWatchRecommendationBlocklistRepository("artist-alpha")
+        val blocklist = FakeWatchRecommendationBlocklist("artist-alpha")
 
         val model = buildModel(repository = repository, blocklist = blocklist)
         advanceUntilIdle()
@@ -103,7 +103,7 @@ class UserScreenModelRecommendationHideTest {
   fun toggleWatchUsesRepositoryActionFlow() =
       runTest(dispatcher.scheduler) {
         val repository = FakeUserRepository(user = testUser(isWatching = true))
-        val blocklist = FakeWatchRecommendationBlocklistRepository()
+        val blocklist = FakeWatchRecommendationBlocklist()
 
         val model = buildModel(repository = repository, blocklist = blocklist)
         advanceUntilIdle()
@@ -118,7 +118,7 @@ class UserScreenModelRecommendationHideTest {
 
   private fun buildModel(
       repository: UserRepository,
-      blocklist: WatchRecommendationBlocklistRepository,
+      blocklist: WatchRecommendationBlocklist,
   ): UserScreenModel =
       UserScreenModel(
           username = "artist-alpha",
@@ -148,12 +148,11 @@ private class FakeUserRepository(
 ) :
     UserRepository(
         userStore =
-            UserStore(
+            UserPageCache(
                 dataSource =
-                    me.domino.fa2.data.datasource.UserDataSource(
-                        endpoint =
-                            me.domino.fa2.data.network.endpoint.UserEndpoint(DummyHtmlDataSource),
-                        parser = me.domino.fa2.data.parser.UserParser(),
+                    me.domino.fa2.data.fa.user.UserDataSource(
+                        endpoint = me.domino.fa2.data.fa.user.UserEndpoint(DummyHtmlDataSource),
+                        parser = me.domino.fa2.data.fa.user.UserParser(),
                     ),
                 pageCacheDao = InMemoryPageCacheDao(),
             ),
@@ -172,9 +171,9 @@ private class FakeUserRepository(
   }
 }
 
-private class FakeWatchRecommendationBlocklistRepository(
+private class FakeWatchRecommendationBlocklist(
     initialUsernames: String = "",
-) : WatchRecommendationBlocklistRepository {
+) : WatchRecommendationBlocklist {
   val usernames: MutableSet<String> =
       initialUsernames
           .split(",")

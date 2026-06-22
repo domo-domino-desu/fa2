@@ -5,17 +5,17 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import me.domino.fa2.data.fa.user.UserRepository
+import me.domino.fa2.data.i18n.SystemLanguageProvider
+import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.User
-import me.domino.fa2.data.repository.UserRepository
-import me.domino.fa2.data.repository.WatchRecommendationBlocklistRepository
+import me.domino.fa2.data.model.summarizePageState
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.i18n.SystemLanguageProvider
-import me.domino.fa2.i18n.appString
+import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.pages.user.gallery.UserSubmissionSectionUiState
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
-import me.domino.fa2.util.logging.FaLog
-import me.domino.fa2.util.logging.summarizePageState
+import me.domino.fa2.utils.logging.FaLog
 
 /** User 页面状态。 */
 data class UserUiState(
@@ -49,7 +49,7 @@ class UserScreenModel(
     initialChildRoute: UserChildRoute = UserChildRoute.Gallery,
     /** 初始 folder URL（可选）。 */
     initialFolderUrl: String? = null,
-    private val blocklistRepository: WatchRecommendationBlocklistRepository,
+    private val blocklistRepository: WatchRecommendationBlocklist,
     private val settingsService: AppSettingsService? = null,
     private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) :

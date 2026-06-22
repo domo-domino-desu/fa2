@@ -76,22 +76,22 @@ import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.settings.LogLevelSetting
 import me.domino.fa2.generated.AboutMetadata
-import me.domino.fa2.ui.components.LocalShowToast
+import me.domino.fa2.ui.app.LocalAppSettings
+import me.domino.fa2.ui.app.navigation.goBackHome
+import me.domino.fa2.ui.app.scaffold.AboutRouteTopBar
 import me.domino.fa2.ui.components.accessibilityHeading
 import me.domino.fa2.ui.components.accessibleClickableSummary
+import me.domino.fa2.ui.components.feedback.LocalShowToast
 import me.domino.fa2.ui.components.platform.PlatformTextFileDestination
 import me.domino.fa2.ui.components.platform.PlatformTextFileWriteRequest
 import me.domino.fa2.ui.components.platform.PlatformTextFileWriteResult
 import me.domino.fa2.ui.components.platform.rememberPlatformFileSavePicker
 import me.domino.fa2.ui.components.platform.rememberPlatformTextCopier
 import me.domino.fa2.ui.components.platform.rememberPlatformTextFileWriter
-import me.domino.fa2.ui.host.LocalAppSettings
 import me.domino.fa2.ui.icons.FaBrandIcons
 import me.domino.fa2.ui.icons.FaContactIcons
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.layouts.AboutRouteTopBar
-import me.domino.fa2.ui.navigation.goBackHome
-import me.domino.fa2.util.logging.FaLog
+import me.domino.fa2.utils.logging.FaLog
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 

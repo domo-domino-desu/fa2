@@ -1,19 +1,15 @@
-package me.domino.fa2.data.repository
+package me.domino.fa2.data.fa.user
 
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.datasource.UserDataSource
+import me.domino.fa2.data.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.fa.core.HtmlResponseResult
+import me.domino.fa2.data.fa.social.SocialActionEndpoint
 import me.domino.fa2.data.model.PageState
-import me.domino.fa2.data.network.FaHtmlDataSource
-import me.domino.fa2.data.network.HtmlResponseResult
-import me.domino.fa2.data.network.endpoint.SocialActionEndpoint
-import me.domino.fa2.data.network.endpoint.UserEndpoint
-import me.domino.fa2.data.parser.UserParser
-import me.domino.fa2.data.store.UserStore
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 
 /** UserRepository 链路测试。 */
 class UserRepositoryTest {
@@ -56,7 +52,7 @@ class UserRepositoryTest {
 
   private fun buildRepository(source: FaHtmlDataSource): UserRepository {
     val store =
-        UserStore(
+        UserPageCache(
             dataSource = UserDataSource(endpoint = UserEndpoint(source), parser = UserParser()),
             pageCacheDao = InMemoryPageCacheDao(),
         )

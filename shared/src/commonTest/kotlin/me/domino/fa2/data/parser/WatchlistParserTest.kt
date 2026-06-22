@@ -1,11 +1,11 @@
-package me.domino.fa2.data.parser
+package me.domino.fa2.data.fa.watchlist
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import me.domino.fa2.fake.TestFixtures
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 
 /** WatchlistParser 解析测试。 */
 class WatchlistParserTest {

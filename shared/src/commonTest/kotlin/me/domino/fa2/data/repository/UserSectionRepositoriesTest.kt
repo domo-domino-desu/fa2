@@ -1,29 +1,33 @@
-package me.domino.fa2.data.repository
+package me.domino.fa2.data.fa.user
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.datasource.FavoritesDataSource
-import me.domino.fa2.data.datasource.GalleryDataSource
-import me.domino.fa2.data.datasource.JournalDataSource
-import me.domino.fa2.data.datasource.JournalsDataSource
+import me.domino.fa2.data.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.fa.core.HtmlResponseResult
+import me.domino.fa2.data.fa.favorites.FavoritesDataSource
+import me.domino.fa2.data.fa.favorites.FavoritesEndpoint
+import me.domino.fa2.data.fa.favorites.FavoritesRepository
+import me.domino.fa2.data.fa.gallery.GalleryDataSource
+import me.domino.fa2.data.fa.gallery.GalleryEndpoint
+import me.domino.fa2.data.fa.gallery.GalleryPageCache
+import me.domino.fa2.data.fa.gallery.GalleryParser
+import me.domino.fa2.data.fa.gallery.GalleryRepository
+import me.domino.fa2.data.fa.journal.JournalDataSource
+import me.domino.fa2.data.fa.journal.JournalEndpoint
+import me.domino.fa2.data.fa.journal.JournalPageCache
+import me.domino.fa2.data.fa.journal.JournalParser
+import me.domino.fa2.data.fa.journal.JournalRepository
+import me.domino.fa2.data.fa.journal.JournalsDataSource
+import me.domino.fa2.data.fa.journal.JournalsEndpoint
+import me.domino.fa2.data.fa.journal.JournalsPageCache
+import me.domino.fa2.data.fa.journal.JournalsParser
+import me.domino.fa2.data.fa.journal.JournalsRepository
 import me.domino.fa2.data.model.PageState
-import me.domino.fa2.data.network.FaHtmlDataSource
-import me.domino.fa2.data.network.HtmlResponseResult
-import me.domino.fa2.data.network.endpoint.FavoritesEndpoint
-import me.domino.fa2.data.network.endpoint.GalleryEndpoint
-import me.domino.fa2.data.network.endpoint.JournalEndpoint
-import me.domino.fa2.data.network.endpoint.JournalsEndpoint
-import me.domino.fa2.data.parser.GalleryParser
-import me.domino.fa2.data.parser.JournalParser
-import me.domino.fa2.data.parser.JournalsParser
-import me.domino.fa2.data.store.GalleryStore
-import me.domino.fa2.data.store.JournalStore
-import me.domino.fa2.data.store.JournalsStore
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 
 /** User 子分区仓储链路测试。 */
 class UserSectionRepositoriesTest {
@@ -90,7 +94,7 @@ class UserSectionRepositoriesTest {
   private fun buildStores(source: FaHtmlDataSource): StoreBundle {
     val pageCacheDao = InMemoryPageCacheDao()
     val galleryStore =
-        GalleryStore(
+        GalleryPageCache(
             galleryDataSource =
                 GalleryDataSource(endpoint = GalleryEndpoint(source), parser = GalleryParser()),
             favoritesDataSource =
@@ -101,7 +105,7 @@ class UserSectionRepositoriesTest {
             pageCacheDao = pageCacheDao,
         )
     val journalsStore =
-        JournalsStore(
+        JournalsPageCache(
             dataSource =
                 JournalsDataSource(
                     endpoint = JournalsEndpoint(source),
@@ -110,7 +114,7 @@ class UserSectionRepositoriesTest {
             pageCacheDao = pageCacheDao,
         )
     val journalStore =
-        JournalStore(
+        JournalPageCache(
             dataSource =
                 JournalDataSource(endpoint = JournalEndpoint(source), parser = JournalParser()),
             pageCacheDao = pageCacheDao,

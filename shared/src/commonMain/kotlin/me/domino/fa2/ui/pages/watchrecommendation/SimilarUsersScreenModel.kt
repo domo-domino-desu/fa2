@@ -8,18 +8,18 @@ import fa2.shared.generated.resources.load_failed_please_retry
 import fa2.shared.generated.resources.recommendation_progress_starting
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import me.domino.fa2.application.auth.AuthSessionController
-import me.domino.fa2.application.watchrecommendation.WatchRecommendationProgress
-import me.domino.fa2.application.watchrecommendation.WatchRecommendationService
-import me.domino.fa2.data.repository.WatchRecommendationBlocklistRepository
+import me.domino.fa2.data.fa.session.AuthSessionController
+import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.i18n.appString
-import me.domino.fa2.util.logging.FaLog
+import me.domino.fa2.domain.watchrecommendation.WatchRecommendationProgress
+import me.domino.fa2.domain.watchrecommendation.WatchRecommendationService
+import me.domino.fa2.ui.i18n.appString
+import me.domino.fa2.utils.logging.FaLog
 
 class SimilarUsersScreenModel(
     private val username: String,
     private val recommendationService: WatchRecommendationService,
-    private val blocklistRepository: WatchRecommendationBlocklistRepository,
+    private val blocklistRepository: WatchRecommendationBlocklist,
     private val settingsService: AppSettingsService,
     private val authSessionController: AuthSessionController,
 ) : StateScreenModel<WatchRecommendationUiState>(WatchRecommendationUiState.Idle) {

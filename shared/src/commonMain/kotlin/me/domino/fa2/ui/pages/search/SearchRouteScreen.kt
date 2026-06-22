@@ -16,11 +16,11 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.repository.SearchRepository
-import me.domino.fa2.ui.components.PageStateWrapper
-import me.domino.fa2.ui.layouts.SearchRouteTopBar
-import me.domino.fa2.ui.navigation.goBackHome
-import me.domino.fa2.ui.navigation.openSubmissionFromList
+import me.domino.fa2.data.fa.search.SearchRepository
+import me.domino.fa2.ui.app.navigation.goBackHome
+import me.domino.fa2.ui.app.navigation.openSubmissionFromList
+import me.domino.fa2.ui.app.scaffold.SearchRouteTopBar
+import me.domino.fa2.ui.components.state.PageStateWrapper
 import me.domino.fa2.ui.pages.submission.SearchSubmissionSourceAdapter
 import me.domino.fa2.ui.pages.submission.SubmissionContextScreenModel
 import me.domino.fa2.ui.pages.submission.SubmissionContextSourceKind

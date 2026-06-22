@@ -12,8 +12,8 @@ import me.domino.fa2.data.settings.ThemeMode
 import me.domino.fa2.data.settings.TranslationProvider
 import me.domino.fa2.data.settings.TranslationTargetLanguage
 import me.domino.fa2.data.settings.UiLanguageSetting
-import me.domino.fa2.i18n.appString
-import me.domino.fa2.i18n.mustBeInRangeText
+import me.domino.fa2.ui.i18n.appString
+import me.domino.fa2.ui.i18n.mustBeInRangeText
 
 /** 设置页面的草稿状态，持有用户编辑中的各项配置输入值。 */
 internal data class SettingsDraft(

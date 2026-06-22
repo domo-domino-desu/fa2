@@ -7,9 +7,9 @@ import fa2.shared.generated.resources.following_recommendation_blocklist_update_
 import fa2.shared.generated.resources.load_failed_please_retry
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.repository.WatchRecommendationBlocklistRepository
-import me.domino.fa2.i18n.appString
-import me.domino.fa2.util.logging.FaLog
+import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
+import me.domino.fa2.ui.i18n.appString
+import me.domino.fa2.utils.logging.FaLog
 
 data class WatchRecommendationBlocklistUiState(
     val usernames: List<String> = emptyList(),
@@ -21,7 +21,7 @@ data class WatchRecommendationBlocklistUiState(
 )
 
 class WatchRecommendationBlocklistScreenModel(
-    private val blocklistRepository: WatchRecommendationBlocklistRepository,
+    private val blocklistRepository: WatchRecommendationBlocklist,
 ) : StateScreenModel<WatchRecommendationBlocklistUiState>(WatchRecommendationBlocklistUiState()) {
   private val log = FaLog.withTag("WatchRecommendationBlocklistScreenModel")
   private var loadJob: Job? = null

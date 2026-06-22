@@ -5,22 +5,22 @@ import fa2.shared.generated.resources.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import me.domino.fa2.data.fa.search.SearchRepository
+import me.domino.fa2.data.fa.user.ActivityHistoryRepository
+import me.domino.fa2.data.i18n.AppI18nSnapshot
+import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.data.repository.ActivityHistoryRepository
-import me.domino.fa2.data.repository.SearchRepository
+import me.domino.fa2.data.model.summarizePageState
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
-import me.domino.fa2.i18n.AppI18nSnapshot
-import me.domino.fa2.i18n.SystemLanguageProvider
-import me.domino.fa2.i18n.appString
+import me.domino.fa2.ui.i18n.appString
+import me.domino.fa2.ui.metadata.SearchUiLabelsRepository
 import me.domino.fa2.ui.pages.search.util.SearchDateRangeShiftAction
 import me.domino.fa2.ui.pages.search.util.normalizeManualDateFields
 import me.domino.fa2.ui.pages.search.util.resolveSearchDateFields
 import me.domino.fa2.ui.pages.search.util.shiftSearchDateFields
-import me.domino.fa2.ui.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.state.PaginationReducer
-import me.domino.fa2.util.logging.summarizePageState
 
 internal data class SearchAppliedRequest(
     val applied: SearchFormState,

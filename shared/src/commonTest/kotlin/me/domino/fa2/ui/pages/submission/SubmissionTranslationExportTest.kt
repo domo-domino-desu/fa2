@@ -114,8 +114,7 @@ class SubmissionTranslationExportTest {
 private fun translatedState(
     sourceHtml: String,
     translatedTexts: List<String>,
-    translationService:
-        me.domino.fa2.application.translation.SubmissionDescriptionTranslationService,
+    translationService: me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService,
     status: SubmissionDescriptionTranslationStatus = SubmissionDescriptionTranslationStatus.SUCCESS,
 ): SubmissionTranslationUiState {
   val state = resolveTranslationState(sourceHtml, null, null, translationService)

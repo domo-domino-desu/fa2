@@ -19,16 +19,16 @@ import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import me.domino.fa2.data.repository.UserRepository
-import me.domino.fa2.data.repository.WatchRecommendationBlocklistRepository
+import me.domino.fa2.data.fa.user.UserRepository
+import me.domino.fa2.data.i18n.SystemLanguageProvider
+import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.i18n.SystemLanguageProvider
-import me.domino.fa2.ui.layouts.UserRouteTopBar
-import me.domino.fa2.ui.navigation.goBackHome
+import me.domino.fa2.ui.app.navigation.goBackHome
+import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
 import me.domino.fa2.ui.pages.user.profile.UserHeaderCard
 import me.domino.fa2.ui.pages.user.profile.UserScreenModel
 import me.domino.fa2.ui.pages.watchrecommendation.SimilarUsersRouteScreen
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 import org.koin.compose.koinInject
 
 /** User 父路由页面。 */
@@ -80,7 +80,7 @@ internal fun UserRouteBody(
 ) {
   val parentNavigator = LocalNavigator.currentOrThrow
   val repository = koinInject<UserRepository>()
-  val blocklistRepository = koinInject<WatchRecommendationBlocklistRepository>()
+  val blocklistRepository = koinInject<WatchRecommendationBlocklist>()
   val settingsService = koinInject<AppSettingsService>()
   val systemLanguageProvider = koinInject<SystemLanguageProvider>()
   val userScreenModel =

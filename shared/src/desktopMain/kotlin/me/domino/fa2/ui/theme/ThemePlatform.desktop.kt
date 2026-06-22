@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.theme
+package me.domino.fa2.ui.app.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme

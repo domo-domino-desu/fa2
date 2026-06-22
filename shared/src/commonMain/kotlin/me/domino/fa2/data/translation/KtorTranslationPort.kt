@@ -2,8 +2,6 @@ package me.domino.fa2.data.translation
 
 import io.ktor.client.HttpClient
 import me.domino.fa2.data.settings.TranslationProvider
-import me.domino.fa2.domain.translation.TranslationPort
-import me.domino.fa2.domain.translation.TranslationRequest
 
 /** 基于 Ktor 的翻译端口实现，按 TranslationProvider 分发到对应客户端。 */
 class KtorTranslationPort

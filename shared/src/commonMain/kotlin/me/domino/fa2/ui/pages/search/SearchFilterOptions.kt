@@ -1,9 +1,9 @@
 package me.domino.fa2.ui.pages.search
 
-import me.domino.fa2.i18n.AppLanguage
-import me.domino.fa2.ui.components.FilterOption
-import me.domino.fa2.ui.search.SearchUiLabelsRepository
-import me.domino.fa2.ui.search.SearchUiOptionKey
+import me.domino.fa2.data.i18n.AppLanguage
+import me.domino.fa2.ui.components.forms.FilterOption
+import me.domino.fa2.ui.metadata.SearchUiLabelsRepository
+import me.domino.fa2.ui.metadata.SearchUiOptionKey
 
 internal fun orderByOptions(
     labelsRepository: SearchUiLabelsRepository,

@@ -18,8 +18,8 @@ import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.produceLibraries
 import fa2.shared.generated.resources.Res
 import fa2.shared.generated.resources.about_libraries_metadata_source
-import me.domino.fa2.ui.layouts.AboutLibrariesRouteTopBar
-import me.domino.fa2.ui.navigation.goBackHome
+import me.domino.fa2.ui.app.navigation.goBackHome
+import me.domino.fa2.ui.app.scaffold.AboutLibrariesRouteTopBar
 import org.jetbrains.compose.resources.stringResource
 
 /** 开源库页面。 */

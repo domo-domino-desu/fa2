@@ -12,14 +12,14 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import me.domino.fa2.data.fa.journal.JournalRepository
 import me.domino.fa2.data.model.JournalDetail
 import me.domino.fa2.data.model.PageComment
 import me.domino.fa2.data.model.PageState
-import me.domino.fa2.data.repository.JournalDetailRepository
 import me.domino.fa2.ui.pages.submission.SubmissionTranslationSourceMode
 import me.domino.fa2.ui.pages.submission.createTestSubmissionTranslationService
 import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class JournalDetailScreenModelTest {
@@ -39,7 +39,7 @@ class JournalDetailScreenModelTest {
   fun togglesWrapAndCachesRawAndWrappedTranslationsSeparately() =
       runTest(dispatcher.scheduler) {
         val repository =
-            FakeJournalDetailRepository(
+            FakeJournalRepository(
                 details = mutableMapOf(1 to journalDetail(1, bodyHtml = "<p>hello<br>world</p>"))
             )
         val translatedRequests = mutableListOf<String>()
@@ -146,7 +146,7 @@ class JournalDetailScreenModelTest {
   fun resetsBodyTranslationWhenJournalBodyChanges() =
       runTest(dispatcher.scheduler) {
         val repository =
-            FakeJournalDetailRepository(
+            FakeJournalRepository(
                 details = mutableMapOf(1 to journalDetail(1, bodyHtml = "<p>hello</p>"))
             )
         val model =
@@ -186,9 +186,9 @@ class JournalDetailScreenModelTest {
       }
 }
 
-private class FakeJournalDetailRepository(
+private class FakeJournalRepository(
     val details: MutableMap<Int, JournalDetail>,
-) : JournalDetailRepository {
+) : JournalRepository() {
   override suspend fun loadJournalDetail(journalId: Int): PageState<JournalDetail> =
       details[journalId]?.let { detail -> PageState.Success(detail) }
           ?: PageState.Error(IllegalStateException("Missing journalId=$journalId"))

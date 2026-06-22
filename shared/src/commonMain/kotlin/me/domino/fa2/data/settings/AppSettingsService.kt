@@ -7,7 +7,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /** 全局设置服务。 */
-class AppSettingsService(private val storage: AppSettingsStorage) {
+class AppSettingsService(private val storage: AppSettingsStore) {
   private val mutex = Mutex()
   private var loaded: Boolean = false
 

@@ -10,7 +10,6 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import me.domino.fa2.domain.translation.TranslationRequest
 
 internal class MicrosoftTranslationClient(
     private val transport: TranslationHttpTransport,

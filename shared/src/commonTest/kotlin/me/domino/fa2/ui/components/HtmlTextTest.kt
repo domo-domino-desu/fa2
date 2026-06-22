@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.components
+package me.domino.fa2.ui.components.html
 
 import androidx.compose.ui.text.LinkAnnotation
 import be.digitalia.compose.htmlconverter.htmlToAnnotatedString

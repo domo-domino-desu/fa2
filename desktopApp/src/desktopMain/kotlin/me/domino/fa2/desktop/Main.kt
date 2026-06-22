@@ -7,13 +7,13 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.runBlocking
-import me.domino.fa2.data.network.installCoilImageProgressSupport
+import me.domino.fa2.data.fa.media.installCoilImageProgressSupport
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.di.KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT
 import me.domino.fa2.di.startAppKoin
 import me.domino.fa2.di.stopAppKoin
-import me.domino.fa2.ui.host.Fa2App
-import me.domino.fa2.util.logging.FaLog
+import me.domino.fa2.ui.app.Fa2App
+import me.domino.fa2.utils.logging.FaLog
 import okio.Path
 import okio.Path.Companion.toPath
 import org.koin.core.context.GlobalContext

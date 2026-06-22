@@ -10,15 +10,15 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
-import me.domino.fa2.application.ocr.SubmissionImageOcrService
-import me.domino.fa2.application.translation.SubmissionDescriptionTranslationService
-import me.domino.fa2.application.translation.SubmissionImageOcrTranslationService
+import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
-import me.domino.fa2.i18n.SystemLanguageProvider
-import me.domino.fa2.ui.components.AppFeedbackRequest
-import me.domino.fa2.util.logging.FaLog
+import me.domino.fa2.domain.ocr.SubmissionImageOcrService
+import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.domain.translation.SubmissionImageOcrTranslationService
+import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
+import me.domino.fa2.utils.logging.FaLog
 
 /** 投稿详情浏览页面状态模型。 */
 class SubmissionScreenModel(

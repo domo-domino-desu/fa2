@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.JournalPage
 import me.domino.fa2.data.model.JournalSummary
 import me.domino.fa2.data.model.PageState
-import me.domino.fa2.i18n.appString
+import me.domino.fa2.ui.i18n.appString
 
 internal data class JournalPagerUiState(
     val ownerUsername: String = "",

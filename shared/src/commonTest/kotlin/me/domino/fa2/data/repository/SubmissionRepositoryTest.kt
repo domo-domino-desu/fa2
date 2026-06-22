@@ -1,26 +1,22 @@
-package me.domino.fa2.data.repository
+package me.domino.fa2.data.fa.submission
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.datasource.FavoritesDataSource
-import me.domino.fa2.data.datasource.GalleryDataSource
-import me.domino.fa2.data.datasource.SubmissionDataSource
+import me.domino.fa2.data.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.fa.core.HtmlResponseResult
+import me.domino.fa2.data.fa.favorites.FavoritesDataSource
+import me.domino.fa2.data.fa.favorites.FavoritesEndpoint
+import me.domino.fa2.data.fa.gallery.GalleryDataSource
+import me.domino.fa2.data.fa.gallery.GalleryEndpoint
+import me.domino.fa2.data.fa.gallery.GalleryPageCache
+import me.domino.fa2.data.fa.gallery.GalleryParser
+import me.domino.fa2.data.fa.social.SocialActionEndpoint
 import me.domino.fa2.data.model.PageState
-import me.domino.fa2.data.network.FaHtmlDataSource
-import me.domino.fa2.data.network.HtmlResponseResult
-import me.domino.fa2.data.network.endpoint.FavoritesEndpoint
-import me.domino.fa2.data.network.endpoint.GalleryEndpoint
-import me.domino.fa2.data.network.endpoint.SocialActionEndpoint
-import me.domino.fa2.data.network.endpoint.SubmissionEndpoint
-import me.domino.fa2.data.parser.GalleryParser
-import me.domino.fa2.data.parser.SubmissionParser
-import me.domino.fa2.data.store.GalleryStore
-import me.domino.fa2.data.store.SubmissionStore
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
-import me.domino.fa2.util.FaUrls
+import me.domino.fa2.utils.FaUrls
 
 /** SubmissionRepository 详情链路测试。 */
 class SubmissionRepositoryTest {
@@ -78,7 +74,7 @@ class SubmissionRepositoryTest {
   private fun buildRepository(source: FaHtmlDataSource): SubmissionRepository {
     val pageCacheDao = InMemoryPageCacheDao()
     val store =
-        SubmissionStore(
+        SubmissionPageCache(
             dataSource =
                 SubmissionDataSource(
                     endpoint = SubmissionEndpoint(source),
@@ -87,7 +83,7 @@ class SubmissionRepositoryTest {
             pageCacheDao = pageCacheDao,
         )
     val galleryStore =
-        GalleryStore(
+        GalleryPageCache(
             galleryDataSource =
                 GalleryDataSource(endpoint = GalleryEndpoint(source), parser = GalleryParser()),
             favoritesDataSource =

@@ -1,6 +1,6 @@
 package me.domino.fa2.ui.pages.submission
 
-import me.domino.fa2.ui.components.submission.SubmissionWaterfallPageControls
+import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallPageControls
 
 internal fun SubmissionContextSnapshot.pageNumberForSid(sid: Int?): Int? {
   if (sid == null) return null

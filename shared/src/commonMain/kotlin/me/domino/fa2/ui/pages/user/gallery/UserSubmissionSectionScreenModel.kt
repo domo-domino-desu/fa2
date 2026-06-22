@@ -5,21 +5,21 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import me.domino.fa2.data.fa.favorites.FavoritesRepository
+import me.domino.fa2.data.fa.gallery.GalleryRepository
+import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.model.GalleryFolderGroup
 import me.domino.fa2.data.model.GalleryPage
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.data.repository.FavoritesRepository
-import me.domino.fa2.data.repository.GalleryRepository
+import me.domino.fa2.data.model.summarizePageState
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.i18n.SystemLanguageProvider
-import me.domino.fa2.i18n.appString
+import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.pages.user.route.UserChildRoute
 import me.domino.fa2.ui.state.PaginationReducer
 import me.domino.fa2.ui.state.PaginationSnapshot
-import me.domino.fa2.util.logging.FaLog
-import me.domino.fa2.util.logging.summarizePageState
-import me.domino.fa2.util.logging.summarizeUrl
+import me.domino.fa2.utils.logging.FaLog
+import me.domino.fa2.utils.logging.summarizeUrl
 
 private const val userAutoLoadThreshold = 10
 

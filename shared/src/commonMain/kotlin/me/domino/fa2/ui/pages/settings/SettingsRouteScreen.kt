@@ -5,7 +5,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.ui.navigation.goBackHome
+import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.pages.watchrecommendation.WatchRecommendationBlocklistRouteScreen
 import org.koin.compose.koinInject
 
