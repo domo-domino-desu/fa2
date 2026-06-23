@@ -27,7 +27,10 @@ import me.domino.fa2.ui.app.scaffold.SubmissionRouteTopBar
 import me.domino.fa2.ui.components.platform.PlatformDownloadRequest
 import me.domino.fa2.ui.components.state.PageStateWrapper
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.pages.submission.components.SubmissionPager
+import me.domino.fa2.ui.pages.submission.content.*
+import me.domino.fa2.ui.pages.submission.imageocr.*
+import me.domino.fa2.ui.pages.submission.pager.*
+import me.domino.fa2.ui.pages.submission.pager.SubmissionPager
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)

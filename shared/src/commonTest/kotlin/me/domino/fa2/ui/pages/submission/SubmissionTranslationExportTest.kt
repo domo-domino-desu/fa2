@@ -6,7 +6,13 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.settings.TranslationProvider
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
-import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
+import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
+import me.domino.fa2.ui.pages.submission.attachmenttext.*
+import me.domino.fa2.ui.pages.submission.content.*
+import me.domino.fa2.ui.pages.submission.imageocr.*
+import me.domino.fa2.ui.pages.submission.pager.*
+import me.domino.fa2.ui.pages.submission.series.*
+import me.domino.fa2.ui.pages.submission.translation.*
 
 class SubmissionTranslationExportTest {
   @Test

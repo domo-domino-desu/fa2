@@ -30,45 +30,45 @@ class UiColorUsageTest {
         listOf(
             AllowedHardcodedColor(
                 path =
-                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/submission/components/SubmissionOverlayAndAuthor.kt",
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/submission/imageocr/SubmissionOverlayAndAuthor.kt",
                 snippet =
                     "LoadingIndicator(modifier = Modifier.size(18.dp), color = Color(0xD8D8D8D8))",
             ),
             AllowedHardcodedColor(
                 path =
-                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/submission/components/SubmissionOverlayAndAuthor.kt",
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/submission/imageocr/SubmissionOverlayAndAuthor.kt",
                 snippet =
                     "LoadingIndicator(modifier = Modifier.size(18.dp), color = Color(0xD8D8D8D8))",
             ),
             AllowedHardcodedColor(
                 path =
-                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/submission/components/SubmissionOverlayAndAuthor.kt",
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/submission/imageocr/SubmissionOverlayAndAuthor.kt",
                 snippet = "SubmissionImageOcrUiState.Loading -> Color(0xD8D8D8D8)",
             ),
             AllowedHardcodedColor(
                 path =
-                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/submission/components/SubmissionOverlayAndAuthor.kt",
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/submission/imageocr/SubmissionOverlayAndAuthor.kt",
                 snippet = "SubmissionImageOcrTranslationMode.LOADING -> Color(0xD8D8D8D8)",
             ),
             AllowedHardcodedColor(
                 path =
-                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/submission/components/SubmissionOverlayAndAuthor.kt",
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/submission/imageocr/SubmissionOverlayAndAuthor.kt",
                 snippet = "tint = Color(0xD8D8D8D8),",
             ),
             AllowedHardcodedColor(
                 path =
-                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/submission/components/SubmissionOverlayAndAuthor.kt",
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/submission/imageocr/SubmissionOverlayAndAuthor.kt",
                 snippet = "else Color.White.copy(alpha = 0.96f),",
             ),
             AllowedHardcodedColor(
                 path =
-                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/submission/components/SubmissionOverlayAndAuthor.kt",
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/submission/imageocr/SubmissionOverlayAndAuthor.kt",
                 snippet =
                     "contentColor = if (isMergeDragging) mergeOverlayBorderColor else Color.Black,",
             ),
             AllowedHardcodedColor(
                 path =
-                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/about/AboutRouteScreen.kt",
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/overlays/about/AboutRouteScreen.kt",
                 snippet = "private val aboutHeaderBackground = Color(0xFF12284F)",
             ),
         )

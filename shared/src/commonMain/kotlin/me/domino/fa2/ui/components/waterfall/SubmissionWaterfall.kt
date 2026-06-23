@@ -72,7 +72,7 @@ import me.domino.fa2.ui.components.media.ThumbnailImage
 import me.domino.fa2.ui.components.state.PaginationRetryBar
 import me.domino.fa2.ui.components.state.PaginationRetryDirection
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.pages.submission.SubmissionPaginationKind
+import me.domino.fa2.ui.pages.submission.pager.SubmissionPaginationKind
 import org.jetbrains.compose.resources.stringResource
 
 /** 瀑布流卡片最小宽度。 */
@@ -184,7 +184,7 @@ fun SubmissionWaterfall(
     /** 加载最后一页。 */
     onLoadLastPage: (() -> Unit)? = null,
     /** 待消费的滚动请求。 */
-    pendingScrollRequest: me.domino.fa2.ui.pages.submission.WaterfallScrollRequest? = null,
+    pendingScrollRequest: me.domino.fa2.ui.pages.submission.pager.WaterfallScrollRequest? = null,
     /** 消费滚动请求。 */
     onConsumeScrollRequest: ((Long) -> Unit)? = null,
     /** waterfall 视口变化。 */
@@ -693,7 +693,7 @@ private fun categoryBadgeIcon(iconToken: String): ImageVector =
     }
 
 internal fun resolveWaterfallScrollTargetSid(
-    request: me.domino.fa2.ui.pages.submission.WaterfallScrollRequest,
+    request: me.domino.fa2.ui.pages.submission.pager.WaterfallScrollRequest,
     itemIds: Set<Int>,
     visibleItems: List<WaterfallVisibleItem>,
 ): Int {

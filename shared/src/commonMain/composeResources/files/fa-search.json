@@ -134,6 +134,10 @@
       }
     },
     "genders": {
+      "": {
+        "en": "Any",
+        "zh-Hans": "任意"
+      },
       "male": {
         "en": "Male",
         "zh-Hans": "雄性"

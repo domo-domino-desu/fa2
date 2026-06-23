@@ -21,13 +21,13 @@ import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.navigation.openSubmissionFromList
 import me.domino.fa2.ui.app.scaffold.SearchRouteTopBar
 import me.domino.fa2.ui.components.state.PageStateWrapper
-import me.domino.fa2.ui.pages.submission.SearchSubmissionSourceAdapter
-import me.domino.fa2.ui.pages.submission.SubmissionContextScreenModel
-import me.domino.fa2.ui.pages.submission.SubmissionContextSourceKind
-import me.domino.fa2.ui.pages.submission.SubmissionLoadedPage
-import me.domino.fa2.ui.pages.submission.WaterfallViewportState
-import me.domino.fa2.ui.pages.submission.pageNumberForSid
-import me.domino.fa2.ui.pages.submission.toWaterfallPageControls
+import me.domino.fa2.ui.pages.submission.pager.SearchSubmissionSourceAdapter
+import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
+import me.domino.fa2.ui.pages.submission.pager.SubmissionContextSourceKind
+import me.domino.fa2.ui.pages.submission.pager.SubmissionLoadedPage
+import me.domino.fa2.ui.pages.submission.pager.WaterfallViewportState
+import me.domino.fa2.ui.pages.submission.pager.pageNumberForSid
+import me.domino.fa2.ui.pages.submission.pager.toWaterfallPageControls
 import org.koin.compose.koinInject
 
 /** 独立搜索路由页面（用于从投稿关键词跳转）。 */

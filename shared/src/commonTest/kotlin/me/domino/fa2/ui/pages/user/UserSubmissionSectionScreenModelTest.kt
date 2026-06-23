@@ -6,9 +6,6 @@ import kotlin.test.assertSame
 import me.domino.fa2.data.model.GalleryFolder
 import me.domino.fa2.data.model.GalleryFolderGroup
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.ui.pages.user.gallery.UserSubmissionSectionUiState
-import me.domino.fa2.ui.pages.user.gallery.prepareForFolderSwitch
-import me.domino.fa2.ui.pages.user.gallery.withActiveFolder
 
 class UserSubmissionSectionScreenModelTest {
   @Test

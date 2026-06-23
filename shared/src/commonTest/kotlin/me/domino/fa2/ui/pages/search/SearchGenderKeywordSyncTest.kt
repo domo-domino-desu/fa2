@@ -14,10 +14,10 @@ import me.domino.fa2.data.settings.MetadataDisplayMode
 import me.domino.fa2.data.settings.TranslationTargetLanguage
 import me.domino.fa2.data.settings.UiLanguageSetting
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
-import me.domino.fa2.ui.metadata.SearchUiLabelsRepository
-import me.domino.fa2.ui.metadata.SearchUiMetadataKey
-import me.domino.fa2.ui.metadata.SearchUiOptionKey
-import me.domino.fa2.ui.metadata.SearchUiTextKey
+import me.domino.fa2.ui.i18n.search.SearchUiLabelsRepository
+import me.domino.fa2.ui.i18n.search.SearchUiMetadataKey
+import me.domino.fa2.ui.i18n.search.SearchUiOptionKey
+import me.domino.fa2.ui.i18n.search.SearchUiTextKey
 
 /** Search gender 与 query 同步测试。 */
 class SearchGenderKeywordSyncTest {

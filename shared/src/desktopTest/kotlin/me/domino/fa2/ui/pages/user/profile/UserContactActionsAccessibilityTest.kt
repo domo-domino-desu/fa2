@@ -7,6 +7,13 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import me.domino.fa2.data.model.UserContact
 import me.domino.fa2.ui.app.theme.Fa2Theme
+import me.domino.fa2.ui.pages.overlays.journaldetail.*
+import me.domino.fa2.ui.pages.overlays.journalpager.*
+import me.domino.fa2.ui.pages.overlays.userpager.*
+import me.domino.fa2.ui.pages.overlays.usershouts.*
+import me.domino.fa2.ui.pages.overlays.userwatchlist.*
+import me.domino.fa2.ui.pages.overlays.watchrecommendation.*
+import me.domino.fa2.ui.pages.user.*
 import org.junit.Rule
 import org.junit.Test
 

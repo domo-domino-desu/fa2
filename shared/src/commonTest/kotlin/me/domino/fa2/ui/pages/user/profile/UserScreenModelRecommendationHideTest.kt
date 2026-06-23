@@ -22,6 +22,13 @@ import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.User
 import me.domino.fa2.fake.InMemoryPageCacheDao
+import me.domino.fa2.ui.pages.overlays.journaldetail.*
+import me.domino.fa2.ui.pages.overlays.journalpager.*
+import me.domino.fa2.ui.pages.overlays.userpager.*
+import me.domino.fa2.ui.pages.overlays.usershouts.*
+import me.domino.fa2.ui.pages.overlays.userwatchlist.*
+import me.domino.fa2.ui.pages.overlays.watchrecommendation.*
+import me.domino.fa2.ui.pages.user.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserScreenModelRecommendationHideTest {

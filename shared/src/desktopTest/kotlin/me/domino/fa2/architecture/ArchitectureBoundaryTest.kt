@@ -200,9 +200,15 @@ class ArchitectureBoundaryTest {
 
     val expectedUiDirectories =
         listOf(
-            "metadata",
+            "i18n/search",
             "components/waterfall",
-            "pages/submission/components",
+            "pages/submission/attachmenttext",
+            "pages/submission/content",
+            "pages/submission/imageocr",
+            "pages/submission/pager",
+            "pages/submission/series",
+            "pages/submission/translation",
+            "pages/overlays",
             "pages/settings/components",
             "app",
             "app/challenge",

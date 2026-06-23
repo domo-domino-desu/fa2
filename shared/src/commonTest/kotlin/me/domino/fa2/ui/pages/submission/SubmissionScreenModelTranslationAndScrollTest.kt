@@ -26,7 +26,13 @@ import me.domino.fa2.domain.attachmenttext.AttachmentTextFormat
 import me.domino.fa2.domain.attachmenttext.AttachmentTextParagraph
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
-import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
+import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
+import me.domino.fa2.ui.pages.submission.attachmenttext.*
+import me.domino.fa2.ui.pages.submission.content.*
+import me.domino.fa2.ui.pages.submission.imageocr.*
+import me.domino.fa2.ui.pages.submission.pager.*
+import me.domino.fa2.ui.pages.submission.series.*
+import me.domino.fa2.ui.pages.submission.translation.*
 import me.domino.fa2.utils.FaUrls
 import me.domino.fa2.utils.parseSubmissionSid
 

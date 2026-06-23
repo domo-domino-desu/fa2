@@ -60,8 +60,11 @@ import me.domino.fa2.ui.components.platform.resolveDownloadRelativeDirectories
 import me.domino.fa2.ui.pages.browse.BrowseFilterState
 import me.domino.fa2.ui.pages.browse.BrowseRouteScreen
 import me.domino.fa2.ui.pages.search.SearchRouteScreen
-import me.domino.fa2.ui.pages.user.route.UserChildRoute
-import me.domino.fa2.ui.pages.user.route.UserRouteScreen
+import me.domino.fa2.ui.pages.submission.content.*
+import me.domino.fa2.ui.pages.submission.pager.*
+import me.domino.fa2.ui.pages.submission.translation.*
+import me.domino.fa2.ui.pages.user.UserChildRoute
+import me.domino.fa2.ui.pages.user.UserRouteScreen
 import me.domino.fa2.utils.FaUrls
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject

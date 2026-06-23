@@ -14,8 +14,8 @@ import me.domino.fa2.data.settings.UiLanguageSetting
 import me.domino.fa2.data.taxonomy.FaTaxonomyCatalog
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.ui.i18n.ProvideAppLocale
-import me.domino.fa2.ui.metadata.SearchUiLabelsCatalog
-import me.domino.fa2.ui.metadata.SearchUiLabelsRepository
+import me.domino.fa2.ui.i18n.search.SearchUiLabelsCatalog
+import me.domino.fa2.ui.i18n.search.SearchUiLabelsRepository
 import org.koin.compose.koinInject
 
 internal val LocalAppSettings = staticCompositionLocalOf { AppSettings() }

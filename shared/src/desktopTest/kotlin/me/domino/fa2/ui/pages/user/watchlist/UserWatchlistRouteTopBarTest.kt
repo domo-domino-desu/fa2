@@ -5,6 +5,13 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import java.util.Locale
 import me.domino.fa2.ui.app.scaffold.UserWatchlistRouteTopBar
 import me.domino.fa2.ui.app.theme.Fa2Theme
+import me.domino.fa2.ui.pages.overlays.journaldetail.*
+import me.domino.fa2.ui.pages.overlays.journalpager.*
+import me.domino.fa2.ui.pages.overlays.userpager.*
+import me.domino.fa2.ui.pages.overlays.usershouts.*
+import me.domino.fa2.ui.pages.overlays.userwatchlist.*
+import me.domino.fa2.ui.pages.overlays.watchrecommendation.*
+import me.domino.fa2.ui.pages.user.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule

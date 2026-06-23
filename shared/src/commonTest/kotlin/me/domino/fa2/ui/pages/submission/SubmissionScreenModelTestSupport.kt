@@ -16,6 +16,12 @@ import me.domino.fa2.domain.ocr.ImageOcrResult
 import me.domino.fa2.domain.ocr.SubmissionImageOcrService
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.domain.translation.SubmissionImageOcrTranslationService
+import me.domino.fa2.ui.pages.submission.attachmenttext.*
+import me.domino.fa2.ui.pages.submission.content.*
+import me.domino.fa2.ui.pages.submission.imageocr.*
+import me.domino.fa2.ui.pages.submission.pager.*
+import me.domino.fa2.ui.pages.submission.series.*
+import me.domino.fa2.ui.pages.submission.translation.*
 import okio.FileSystem
 import okio.Path.Companion.toPath
 

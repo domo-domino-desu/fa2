@@ -30,10 +30,10 @@ import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.navigation.rootNavigator
 import me.domino.fa2.ui.app.scaffold.SubmissionHistoryRouteTopBar
 import me.domino.fa2.ui.components.waterfall.SubmissionWaterfall
-import me.domino.fa2.ui.pages.submission.SubmissionContextScreenModel
-import me.domino.fa2.ui.pages.submission.SubmissionContextSourceKind
 import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
-import me.domino.fa2.ui.pages.submission.WaterfallViewportState
+import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
+import me.domino.fa2.ui.pages.submission.pager.SubmissionContextSourceKind
+import me.domino.fa2.ui.pages.submission.pager.WaterfallViewportState
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 

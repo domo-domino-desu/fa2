@@ -13,14 +13,14 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import me.domino.fa2.data.fa.feed.FeedRepository
 import me.domino.fa2.ui.components.state.PageStateWrapper
-import me.domino.fa2.ui.pages.submission.FeedSubmissionSourceAdapter
-import me.domino.fa2.ui.pages.submission.SubmissionContextScreenModel
-import me.domino.fa2.ui.pages.submission.SubmissionContextSourceKind
-import me.domino.fa2.ui.pages.submission.SubmissionLoadedPage
 import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
-import me.domino.fa2.ui.pages.submission.WaterfallViewportState
-import me.domino.fa2.ui.pages.submission.pageNumberForSid
-import me.domino.fa2.ui.pages.submission.toWaterfallPageControls
+import me.domino.fa2.ui.pages.submission.pager.FeedSubmissionSourceAdapter
+import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
+import me.domino.fa2.ui.pages.submission.pager.SubmissionContextSourceKind
+import me.domino.fa2.ui.pages.submission.pager.SubmissionLoadedPage
+import me.domino.fa2.ui.pages.submission.pager.WaterfallViewportState
+import me.domino.fa2.ui.pages.submission.pager.pageNumberForSid
+import me.domino.fa2.ui.pages.submission.pager.toWaterfallPageControls
 import me.domino.fa2.utils.FaUrls
 import org.koin.compose.koinInject
 

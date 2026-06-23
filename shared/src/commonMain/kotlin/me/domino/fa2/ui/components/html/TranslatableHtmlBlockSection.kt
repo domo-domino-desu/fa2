@@ -39,13 +39,11 @@ import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import kotlin.math.roundToInt
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.pages.submission.SubmissionTranslationUiState
-import me.domino.fa2.ui.pages.submission.components.SubmissionSeriesProbeConfig
-import me.domino.fa2.ui.pages.submission.components.SubmissionSeriesTrailingAction
-import me.domino.fa2.ui.pages.submission.components.SubmissionSeriesTrailingActionState
-import me.domino.fa2.ui.pages.submission.components.rememberSubmissionSeriesTrailingActions
-import me.domino.fa2.ui.state.SubmissionDescriptionDisplayBlock
-import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
+import me.domino.fa2.ui.pages.submission.series.SubmissionSeriesProbeConfig
+import me.domino.fa2.ui.pages.submission.series.SubmissionSeriesTrailingAction
+import me.domino.fa2.ui.pages.submission.series.SubmissionSeriesTrailingActionState
+import me.domino.fa2.ui.pages.submission.series.rememberSubmissionSeriesTrailingActions
+import me.domino.fa2.ui.pages.submission.translation.SubmissionTranslationUiState
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

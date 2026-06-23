@@ -15,8 +15,8 @@ import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.model.summarizePageState
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.ui.i18n.appString
-import me.domino.fa2.ui.state.PaginationReducer
-import me.domino.fa2.ui.state.PaginationSnapshot
+import me.domino.fa2.ui.utils.PaginationReducer
+import me.domino.fa2.ui.utils.PaginationSnapshot
 import me.domino.fa2.utils.logging.FaLog
 
 private const val autoLoadThreshold = 10

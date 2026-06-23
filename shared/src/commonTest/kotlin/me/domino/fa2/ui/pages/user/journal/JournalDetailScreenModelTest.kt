@@ -16,9 +16,16 @@ import me.domino.fa2.data.fa.journal.JournalRepository
 import me.domino.fa2.data.model.JournalDetail
 import me.domino.fa2.data.model.PageComment
 import me.domino.fa2.data.model.PageState
-import me.domino.fa2.ui.pages.submission.SubmissionTranslationSourceMode
+import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
+import me.domino.fa2.ui.pages.overlays.journaldetail.*
+import me.domino.fa2.ui.pages.overlays.journalpager.*
+import me.domino.fa2.ui.pages.overlays.userpager.*
+import me.domino.fa2.ui.pages.overlays.usershouts.*
+import me.domino.fa2.ui.pages.overlays.userwatchlist.*
+import me.domino.fa2.ui.pages.overlays.watchrecommendation.*
 import me.domino.fa2.ui.pages.submission.createTestSubmissionTranslationService
-import me.domino.fa2.ui.state.SubmissionDescriptionTranslationStatus
+import me.domino.fa2.ui.pages.submission.translation.SubmissionTranslationSourceMode
+import me.domino.fa2.ui.pages.user.*
 import me.domino.fa2.utils.FaUrls
 
 @OptIn(ExperimentalCoroutinesApi::class)

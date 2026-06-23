@@ -29,11 +29,11 @@ import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallViewportSnapshot
 import me.domino.fa2.ui.components.waterfall.WaterfallLoadingSkeleton
 import me.domino.fa2.ui.components.waterfall.WaterfallRefreshBox
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.pages.search.component.SearchHint
-import me.domino.fa2.ui.pages.search.component.SearchOverlayContent
-import me.domino.fa2.ui.pages.search.component.SearchStatusCard
-import me.domino.fa2.ui.pages.search.component.rememberSearchOverlayUiData
-import me.domino.fa2.ui.pages.submission.WaterfallScrollRequest
+import me.domino.fa2.ui.pages.search.components.SearchHint
+import me.domino.fa2.ui.pages.search.components.SearchOverlayContent
+import me.domino.fa2.ui.pages.search.components.SearchStatusCard
+import me.domino.fa2.ui.pages.search.components.rememberSearchOverlayUiData
+import me.domino.fa2.ui.pages.submission.pager.WaterfallScrollRequest
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

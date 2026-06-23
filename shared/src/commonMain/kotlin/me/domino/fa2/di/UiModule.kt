@@ -1,23 +1,23 @@
 package me.domino.fa2.di
 
 import me.domino.fa2.data.model.WatchlistCategory
-import me.domino.fa2.ui.metadata.SearchUiLabelsRepository
+import me.domino.fa2.ui.i18n.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.pages.auth.AuthScreenModel
 import me.domino.fa2.ui.pages.browse.BrowseScreenModel
 import me.domino.fa2.ui.pages.feed.FeedScreenModel
 import me.domino.fa2.ui.pages.more.MoreScreenModel
+import me.domino.fa2.ui.pages.overlays.journaldetail.JournalDetailScreenModel
+import me.domino.fa2.ui.pages.overlays.usershouts.UserShoutsScreenModel
+import me.domino.fa2.ui.pages.overlays.userwatchlist.UserWatchlistScreenModel
+import me.domino.fa2.ui.pages.overlays.watchrecommendation.SimilarUsersScreenModel
+import me.domino.fa2.ui.pages.overlays.watchrecommendation.WatchRecommendationBlocklistScreenModel
+import me.domino.fa2.ui.pages.overlays.watchrecommendation.WatchRecommendationScreenModel
 import me.domino.fa2.ui.pages.search.SearchScreenModel
-import me.domino.fa2.ui.pages.user.gallery.UserSubmissionSectionScreenModel
-import me.domino.fa2.ui.pages.user.gallery.UserSubmissionSectionUiState
-import me.domino.fa2.ui.pages.user.journal.JournalDetailScreenModel
-import me.domino.fa2.ui.pages.user.journal.UserJournalsScreenModel
-import me.domino.fa2.ui.pages.user.profile.UserScreenModel
-import me.domino.fa2.ui.pages.user.route.UserChildRoute
-import me.domino.fa2.ui.pages.user.shout.UserShoutsScreenModel
-import me.domino.fa2.ui.pages.user.watchlist.UserWatchlistScreenModel
-import me.domino.fa2.ui.pages.watchrecommendation.SimilarUsersScreenModel
-import me.domino.fa2.ui.pages.watchrecommendation.WatchRecommendationBlocklistScreenModel
-import me.domino.fa2.ui.pages.watchrecommendation.WatchRecommendationScreenModel
+import me.domino.fa2.ui.pages.user.UserChildRoute
+import me.domino.fa2.ui.pages.user.UserJournalsScreenModel
+import me.domino.fa2.ui.pages.user.UserScreenModel
+import me.domino.fa2.ui.pages.user.UserSubmissionSectionScreenModel
+import me.domino.fa2.ui.pages.user.UserSubmissionSectionUiState
 import org.koin.core.module.Module
 import org.koin.dsl.module
 

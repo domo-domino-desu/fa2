@@ -29,7 +29,7 @@ import me.domino.fa2.ui.components.user.UserHeaderSummaryCard
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.settings.components.SettingsGroup
 import me.domino.fa2.ui.pages.settings.components.SettingsListItem
-import me.domino.fa2.ui.pages.user.route.UserHeaderNavigationActions
+import me.domino.fa2.ui.pages.user.UserHeaderNavigationActions
 import org.jetbrains.compose.resources.stringResource
 
 /** More 页面。 */

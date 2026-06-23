@@ -5,8 +5,14 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import me.domino.fa2.ui.pages.submission.SubmissionImageOcrTranslationMode
-import me.domino.fa2.ui.pages.submission.SubmissionImageOcrUiState
+import me.domino.fa2.ui.pages.submission.attachmenttext.*
+import me.domino.fa2.ui.pages.submission.content.*
+import me.domino.fa2.ui.pages.submission.imageocr.*
+import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrTranslationMode
+import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrUiState
+import me.domino.fa2.ui.pages.submission.pager.*
+import me.domino.fa2.ui.pages.submission.series.*
+import me.domino.fa2.ui.pages.submission.translation.*
 
 class SubmissionOverlayAccessibilityStateTest {
   @Test

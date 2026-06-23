@@ -20,7 +20,7 @@ import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallPageControls
 import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallViewportSnapshot
 import me.domino.fa2.ui.components.waterfall.WaterfallLoadingSkeleton
 import me.domino.fa2.ui.components.waterfall.WaterfallRefreshBox
-import me.domino.fa2.ui.pages.submission.WaterfallScrollRequest
+import me.domino.fa2.ui.pages.submission.pager.WaterfallScrollRequest
 import org.jetbrains.compose.resources.stringResource
 
 /** Feed 页面。 */
