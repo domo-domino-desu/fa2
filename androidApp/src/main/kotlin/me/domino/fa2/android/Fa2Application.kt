@@ -6,7 +6,7 @@ import kotlinx.coroutines.runBlocking
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.di.startAppKoin
 import me.domino.fa2.domain.attachmenttext.initializeAttachmentTextPlatform
-import me.domino.fa2.ui.pages.about.AboutLibrariesAndroidContextHolder
+import me.domino.fa2.ui.pages.overlays.about.AboutLibrariesAndroidContextHolder
 import me.domino.fa2.utils.logging.FaLog
 
 /** Android 应用进程入口。 */
