@@ -52,7 +52,14 @@ class BrowseScreenModel(
     private val repository: BrowseRepository,
     private val settingsService: AppSettingsService? = null,
     private val systemLanguageProvider: SystemLanguageProvider? = null,
-) : StateScreenModel<BrowseUiState>(BrowseUiState()) {
+    initialFilter: BrowseFilterState = BrowseFilterState(),
+) :
+    StateScreenModel<BrowseUiState>(
+        BrowseUiState(
+            draftFilter = initialFilter,
+            appliedFilter = initialFilter,
+        )
+    ) {
   private val log = FaLog.withTag("BrowseScreenModel")
   private val paginationStateMachine =
       PaginationReducer<SubmissionThumbnail, Int>(
@@ -240,19 +247,19 @@ class BrowseScreenModel(
           }
         }
   }
-
-  private fun buildBrowseUrl(filter: BrowseFilterState): String =
-      FaUrls.browse(
-          cat = filter.category,
-          atype = filter.type,
-          species = filter.species,
-          gender = filter.gender,
-          page = 1,
-          ratingGeneral = filter.ratingGeneral,
-          ratingMature = filter.ratingMature,
-          ratingAdult = filter.ratingAdult,
-      )
 }
+
+internal fun buildBrowseUrl(filter: BrowseFilterState): String =
+    FaUrls.browse(
+        cat = filter.category,
+        atype = filter.type,
+        species = filter.species,
+        gender = filter.gender,
+        page = 1,
+        ratingGeneral = filter.ratingGeneral,
+        ratingMature = filter.ratingMature,
+        ratingAdult = filter.ratingAdult,
+    )
 
 private fun BrowseUiState.toPaginationSnapshot(): PaginationSnapshot<SubmissionThumbnail> =
     PaginationSnapshot(

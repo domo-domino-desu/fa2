@@ -11,12 +11,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.fa.browse.BrowseRepository
+import me.domino.fa2.data.i18n.SystemLanguageProvider
+import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.navigation.openSubmissionFromList
 import me.domino.fa2.ui.app.scaffold.BrowseRouteTopBar
@@ -47,8 +49,17 @@ class BrowseRouteScreen(private val initialFilter: BrowseFilterState) : Screen {
         ) {
           SubmissionContextScreenModel()
         }
-    val screenModel = koinScreenModel<BrowseScreenModel>()
     val browseRepository = koinInject<BrowseRepository>()
+    val settingsService = koinInject<AppSettingsService>()
+    val systemLanguageProvider = koinInject<SystemLanguageProvider>()
+    val screenModel = rememberScreenModel {
+      BrowseScreenModel(
+          repository = browseRepository,
+          settingsService = settingsService,
+          systemLanguageProvider = systemLanguageProvider,
+          initialFilter = initialFilter,
+      )
+    }
     val state by screenModel.state.collectAsState()
     val pageState by screenModel.pageState.collectAsState()
     val contextState by contextScreenModel.state(holderTag).collectAsState()
@@ -63,7 +74,6 @@ class BrowseRouteScreen(private val initialFilter: BrowseFilterState) : Screen {
         )
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(initialFilter) { screenModel.applyFilter(initialFilter) }
     LaunchedEffect(state.appliedFilter, state.submissions, state.nextPageUrl) {
       if (state.submissions.isEmpty()) return@LaunchedEffect
       val firstUrl =
