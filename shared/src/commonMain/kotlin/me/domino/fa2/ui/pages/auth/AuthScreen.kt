@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.ButtonGroupDefaults
@@ -56,7 +57,7 @@ fun AuthScreen(
     onConfirmWebViewLogin: () -> Unit,
 ) {
   Column(
-      modifier = Modifier.fillMaxSize().padding(20.dp).testTag("auth-screen"),
+      modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(20.dp).testTag("auth-screen"),
       verticalArrangement = Arrangement.spacedBy(12.dp),
   ) {
     val webViewLabel = stringResource(Res.string.web_view)
@@ -179,7 +180,10 @@ private fun CookieLoginTab(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AuthLoadingScreen() {
-  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+  Box(
+      modifier = Modifier.fillMaxSize().safeDrawingPadding(),
+      contentAlignment = Alignment.Center,
+  ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -213,7 +217,7 @@ fun AuthProbeFailedScreen(
               append(state.message)
             }
           },
-      modifier = Modifier.testTag("auth-probe-failed-screen"),
+      modifier = Modifier.safeDrawingPadding().testTag("auth-probe-failed-screen"),
       onAction = onRetry,
   )
 }
