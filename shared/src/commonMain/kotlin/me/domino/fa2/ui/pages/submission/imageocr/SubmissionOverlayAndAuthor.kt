@@ -67,7 +67,6 @@ import me.domino.fa2.ui.components.ExpressiveIconButton
 import me.domino.fa2.ui.components.media.AvatarImage
 import me.domino.fa2.ui.components.media.CenterCircularWavyImageLoadingProgress
 import me.domino.fa2.ui.components.media.ImageLoadLifecycleState
-import me.domino.fa2.ui.components.media.NetworkImage
 import me.domino.fa2.ui.components.media.rememberImageLoadProgressState
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.content.*
@@ -128,67 +127,57 @@ internal fun SubmissionZoomImageOverlay(
         imageUrl.trim().let { url -> if (url.startsWith("//")) "https:$url" else url }
     val isGif = isGifUrl(normalizedUrl)
     val tapToDismissEnabled = submissionImageTapToDismissEnabled(ocrState)
-    if (isGif) {
-      NetworkImage(
-          url = normalizedUrl,
-          modifier = Modifier.fillMaxSize().padding(12.dp).clickable { onDismiss() },
-          contentDescription = stringResource(Res.string.original_image),
-          contentScale = ContentScale.Fit,
-          showLoadingPlaceholder = false,
-      )
-    } else {
-      var loadLifecycleState by
-          remember(normalizedUrl) { mutableStateOf(ImageLoadLifecycleState.Idle) }
-      val progressState =
-          rememberImageLoadProgressState(
-              progressKey = normalizedUrl,
-              lifecycleState = loadLifecycleState,
-          )
-      val zoomState = rememberCoilZoomState()
-      Box(modifier = Modifier.fillMaxSize().padding(12.dp)) {
-        CoilZoomAsyncImage(
-            model = normalizedUrl,
-            contentDescription = stringResource(Res.string.original_image),
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Fit,
-            filterQuality = FilterQuality.High,
-            zoomState = zoomState,
-            onLoading = {
-              loadLifecycleState = ImageLoadLifecycleState.Loading
-              submissionZoomImageLog.d { "详情放大图开始加载 -> url=$normalizedUrl" }
-            },
-            onSuccess = {
-              loadLifecycleState = ImageLoadLifecycleState.Success
-              submissionZoomImageLog.d { "详情放大图加载成功 -> url=$normalizedUrl" }
-            },
-            onError = { state ->
-              loadLifecycleState = ImageLoadLifecycleState.Error
-              submissionZoomImageLog.e(state.result.throwable) { "详情放大图加载失败 -> url=$normalizedUrl" }
-            },
-            onTap = {
-              if (tapToDismissEnabled) {
-                onDismiss()
-              }
-            },
+    var loadLifecycleState by
+        remember(normalizedUrl) { mutableStateOf(ImageLoadLifecycleState.Idle) }
+    val progressState =
+        rememberImageLoadProgressState(
+            progressKey = normalizedUrl,
+            lifecycleState = loadLifecycleState,
         )
-        if (ocrState is SubmissionImageOcrUiState.Showing) {
-          SubmissionImageOcrOverlay(
-              blocks = ocrState.blocks,
-              contentDisplayRect = zoomState.zoomable.contentDisplayRect,
-              canOpenBlockDialog =
-                  translationEnabled &&
-                      ocrState.translationMode == SubmissionImageOcrTranslationMode.APPLIED,
-              dragEnabled = ocrState.translationMode != SubmissionImageOcrTranslationMode.LOADING,
-              onBlockClick = onOpenBlockDialog,
-              onMergeBlocks = onMergeBlocks,
-              modifier = Modifier.fillMaxSize(),
-          )
-        }
-        CenterCircularWavyImageLoadingProgress(
-            progressState = progressState,
-            modifier = Modifier.align(Alignment.Center),
+    val zoomState = rememberCoilZoomState()
+    Box(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+      CoilZoomAsyncImage(
+          model = normalizedUrl,
+          contentDescription = stringResource(Res.string.original_image),
+          modifier = Modifier.fillMaxSize(),
+          contentScale = ContentScale.Fit,
+          filterQuality = FilterQuality.High,
+          zoomState = zoomState,
+          onLoading = {
+            loadLifecycleState = ImageLoadLifecycleState.Loading
+            submissionZoomImageLog.d { "详情放大图开始加载 -> url=$normalizedUrl" }
+          },
+          onSuccess = {
+            loadLifecycleState = ImageLoadLifecycleState.Success
+            submissionZoomImageLog.d { "详情放大图加载成功 -> url=$normalizedUrl" }
+          },
+          onError = { state ->
+            loadLifecycleState = ImageLoadLifecycleState.Error
+            submissionZoomImageLog.e(state.result.throwable) { "详情放大图加载失败 -> url=$normalizedUrl" }
+          },
+          onTap = {
+            if (tapToDismissEnabled) {
+              onDismiss()
+            }
+          },
+      )
+      if (!isGif && ocrState is SubmissionImageOcrUiState.Showing) {
+        SubmissionImageOcrOverlay(
+            blocks = ocrState.blocks,
+            contentDisplayRect = zoomState.zoomable.contentDisplayRect,
+            canOpenBlockDialog =
+                translationEnabled &&
+                    ocrState.translationMode == SubmissionImageOcrTranslationMode.APPLIED,
+            dragEnabled = ocrState.translationMode != SubmissionImageOcrTranslationMode.LOADING,
+            onBlockClick = onOpenBlockDialog,
+            onMergeBlocks = onMergeBlocks,
+            modifier = Modifier.fillMaxSize(),
         )
       }
+      CenterCircularWavyImageLoadingProgress(
+          progressState = progressState,
+          modifier = Modifier.align(Alignment.Center),
+      )
     }
     Row(
         modifier =
