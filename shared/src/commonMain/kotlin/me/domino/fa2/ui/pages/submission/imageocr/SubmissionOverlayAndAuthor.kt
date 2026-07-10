@@ -69,8 +69,6 @@ import me.domino.fa2.ui.components.media.CenterCircularWavyImageLoadingProgress
 import me.domino.fa2.ui.components.media.ImageLoadLifecycleState
 import me.domino.fa2.ui.components.media.rememberImageLoadProgressState
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.translation.*
 import me.domino.fa2.ui.utils.isGifUrl
 import me.domino.fa2.utils.logging.FaLog
 import org.jetbrains.compose.resources.StringResource
@@ -326,10 +324,7 @@ private fun SubmissionImageOcrOverlay(
     blockRenderOrder.forEach { block ->
       key(block.id) {
         val offset =
-            IntOffset(
-                x = block.visualRect.left.roundToInt(),
-                y = block.visualRect.top.roundToInt(),
-            )
+            IntOffset(x = block.visualRect.left.roundToInt(), y = block.visualRect.top.roundToInt())
         val canOpenThisBlock = canOpenBlockDialog && block.hasTranslation
         Surface(
             color =
@@ -455,10 +450,7 @@ private fun SubmissionImageOcrOverlay(
                             vertical = overlayVerticalPadding,
                         )
             ) {
-              Text(
-                  text = block.text,
-                  style = overlayTextStyle,
-              )
+              Text(text = block.text, style = overlayTextStyle)
             }
           }
         }
@@ -480,11 +472,7 @@ private fun SubmissionImageOcrOverlay(
                   )
                   .clip(mergeOverlayShape)
                   .background(mergeOverlayBackgroundColor)
-                  .border(
-                      width = 2.dp,
-                      color = mergeOverlayBorderColor,
-                      shape = mergeOverlayShape,
-                  ),
+                  .border(width = 2.dp, color = mergeOverlayBorderColor, shape = mergeOverlayShape)
       )
     }
   }
@@ -718,10 +706,7 @@ private fun SubmissionImageOcrEditDialog(
           )
           Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             if (hasRefreshAction) {
-              ExpressiveIconButton(
-                  onClick = onRefresh,
-                  enabled = !dialogState.refreshing,
-              ) {
+              ExpressiveIconButton(onClick = onRefresh, enabled = !dialogState.refreshing) {
                 if (dialogState.refreshing) {
                   LoadingIndicator(
                       modifier = Modifier.size(18.dp),

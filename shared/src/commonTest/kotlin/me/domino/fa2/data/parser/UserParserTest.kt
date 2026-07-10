@@ -18,7 +18,11 @@ class UserParserTest {
 
     assertEquals("artist-alpha", header.username.lowercase())
     assertTrue(header.displayName.isNotBlank())
-    assertTrue(header.registeredAt.isNotBlank())
+    assertEquals(
+        "",
+        header.registeredAt,
+        "Missing metadata must not become a localized data sentinel",
+    )
     assertTrue(header.profileHtml.contains("bbcode"))
     assertTrue(header.isWatching)
     assertTrue(
@@ -46,10 +50,7 @@ class UserParserTest {
     assertEquals("Artist Alpha", header.galleryPreviews.first().author)
     assertTrue(header.galleryPreviews.first().thumbnailUrl.startsWith("https://t.furaffinity.net/"))
     assertEquals(57803262, header.favoritesPreviews.first().id)
-    assertEquals(
-        "Sanitized Favorite Preview",
-        header.favoritesPreviews.first().title,
-    )
+    assertEquals("Sanitized Favorite Preview", header.favoritesPreviews.first().title)
     assertEquals("artist-favorite-001", header.favoritesPreviews.first().author)
     assertTrue(
         header.favoritesPreviews.first().thumbnailUrl.startsWith("https://t.furaffinity.net/")

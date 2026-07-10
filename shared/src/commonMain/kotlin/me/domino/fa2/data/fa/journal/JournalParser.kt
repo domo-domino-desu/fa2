@@ -3,7 +3,7 @@ package me.domino.fa2.data.fa.journal
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.nodes.Element
-import me.domino.fa2.data.fa.user.ensureUserPageAccessible
+import me.domino.fa2.data.fa.parsing.ensureUserPageAccessible
 import me.domino.fa2.data.model.JournalDetail
 import me.domino.fa2.data.model.PageComment
 import me.domino.fa2.utils.parseJournalId
@@ -29,7 +29,7 @@ class JournalParser {
 
     val timestampNode = document.selectFirst("#c-journalTitleTop__date .popup_date")
     val timestampRaw = timestampNode?.attr("title")?.trim()?.takeIf { it.isNotBlank() }
-    val timestampNatural = timestampNode?.text()?.trim().orEmpty().ifBlank { "未知时间" }
+    val timestampNatural = timestampNode?.text()?.trim().orEmpty()
 
     val rating =
         document
@@ -116,7 +116,7 @@ class JournalParser {
 
     val timestampNode = commentNode.selectFirst("comment-date .popup_date")
     val timestampRaw = timestampNode?.attr("title")?.trim()?.takeIf { it.isNotBlank() }
-    val timestampNatural = timestampNode?.text()?.trim().orEmpty().ifBlank { "未知时间" }
+    val timestampNatural = timestampNode?.text()?.trim().orEmpty()
 
     val bodyHtml =
         commentNode.selectFirst("comment-user-text .user-submitted-links")?.html()?.trim()?.takeIf {

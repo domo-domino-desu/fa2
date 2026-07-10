@@ -31,10 +31,7 @@ class AboutLibrariesRouteScreen : Screen {
     val navigator = LocalNavigator.currentOrThrow
     val libraries by produceLibraries { loadAboutLibrariesJson() }
     Column(modifier = Modifier.fillMaxSize()) {
-      AboutLibrariesRouteTopBar(
-          onBack = { navigator.pop() },
-          onGoHome = { navigator.goBackHome() },
-      )
+      AboutLibrariesRouteTopBar(onBack = { navigator.pop() }, onGoHome = { navigator.goBackHome() })
 
       LibrariesContainer(
           libraries = libraries,

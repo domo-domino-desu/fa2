@@ -19,7 +19,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.TranslationProvider
@@ -29,12 +29,12 @@ import me.domino.fa2.domain.ocr.ImageOcrResult
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.ocr.RecognizedTextBlock
 import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.pager.*
-import me.domino.fa2.ui.pages.submission.series.*
-import me.domino.fa2.ui.pages.submission.translation.*
+import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
+import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrTranslationMode
+import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrTranslationStatus
+import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrUiState
+import me.domino.fa2.ui.pages.submission.pager.SubmissionPagerUiState
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerDetailSource
 import me.domino.fa2.utils.FaUrls
 import me.domino.fa2.utils.parseSubmissionSid
 
@@ -300,10 +300,7 @@ class SubmissionScreenModelImageOcrTest {
         assertEquals("changed text", refreshedBlock.originalText)
         assertEquals("CHANGED TEXT", refreshedBlock.translatedText)
         assertEquals("CHANGED TEXT", refreshedBlock.displayText)
-        assertEquals(
-            SubmissionImageOcrTranslationStatus.SUCCESS,
-            refreshedBlock.translationStatus,
-        )
+        assertEquals(SubmissionImageOcrTranslationStatus.SUCCESS, refreshedBlock.translationStatus)
         val dialogState = showingState.dialog
         assertTrue(dialogState != null)
         assertEquals("changed text", dialogState.draftOriginalText)
@@ -552,32 +549,32 @@ class SubmissionScreenModelImageOcrTest {
 }
 
 private class ImageOcrRecordingDetailSource : SubmissionPagerDetailSource {
-  override suspend fun loadBySid(sid: Int): PageState<Submission> =
-      PageState.Success(imageOcrTestSubmission(sid))
+  override suspend fun loadBySid(sid: Int): ResourceResult<Submission> =
+      ResourceResult.Success(imageOcrTestSubmission(sid))
 
-  override suspend fun loadByUrl(url: String): PageState<Submission> {
+  override suspend fun loadByUrl(url: String): ResourceResult<Submission> {
     val sid =
         parseSubmissionSid(url)
-            ?: return PageState.Error(IllegalArgumentException("Invalid submission url: $url"))
-    return PageState.Success(imageOcrTestSubmission(sid))
+            ?: return ResourceResult.Error(IllegalArgumentException("Invalid submission url: $url"))
+    return ResourceResult.Success(imageOcrTestSubmission(sid))
   }
 
   override suspend fun loadAttachmentText(
       downloadUrl: String,
       downloadFileName: String,
       onProgress: (AttachmentTextProgress) -> Unit,
-  ): PageState<AttachmentTextDocument> =
-      PageState.Error(IllegalStateException("No attachment parsing expected in OCR test"))
+  ): ResourceResult<AttachmentTextDocument> =
+      ResourceResult.Error(IllegalStateException("No attachment parsing expected in OCR test"))
 
-  override suspend fun toggleFavorite(sid: Int, actionUrl: String): PageState<Unit> =
-      PageState.Success(Unit)
+  override suspend fun toggleFavorite(sid: Int, actionUrl: String): ResourceResult<Unit> =
+      ResourceResult.Success(Unit)
 
   override suspend fun blockTag(
       sid: Int,
       tagName: String,
       nonce: String,
       toAdd: Boolean,
-  ): PageState<Unit> = PageState.Success(Unit)
+  ): ResourceResult<Unit> = ResourceResult.Success(Unit)
 }
 
 private fun imageOcrTestThumbnail(sid: Int): SubmissionThumbnail =

@@ -3,7 +3,7 @@ package me.domino.fa2.ui.pages.user
 /** User 子路由。 */
 enum class UserChildRoute(
     /** 路由键。 */
-    val routeKey: String,
+    val routeKey: String
 ) {
   /** Gallery。 */
   Gallery(routeKey = "gallery"),

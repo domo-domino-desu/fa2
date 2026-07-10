@@ -21,11 +21,7 @@ class PageCacheTtlPolicyTest {
     val expired = fresh.copy(cachedAtMs = now - 4 * 60 * 1000L)
 
     val freshValue =
-        readCacheIfValid(
-            entity = fresh,
-            expectedPageType = "feed_page_v1",
-            decode = { "fresh" },
-        )
+        readCacheIfValid(entity = fresh, expectedPageType = "feed_page_v1", decode = { "fresh" })
     val expiredValue =
         readCacheIfValid(
             entity = expired,
@@ -50,11 +46,7 @@ class PageCacheTtlPolicyTest {
     val expired = fresh.copy(cachedAtMs = now - 40 * 60 * 1000L)
 
     val freshValue =
-        readCacheIfValid(
-            entity = fresh,
-            expectedPageType = "user_header_v1",
-            decode = { "fresh" },
-        )
+        readCacheIfValid(entity = fresh, expectedPageType = "user_header_v1", decode = { "fresh" })
     val expiredValue =
         readCacheIfValid(
             entity = expired,

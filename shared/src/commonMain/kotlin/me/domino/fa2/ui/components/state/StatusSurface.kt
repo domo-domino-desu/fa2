@@ -78,11 +78,7 @@ internal fun StatusSurface(
     ) {
       Text(text = title, style = titleStyle)
       if (body.isNotBlank()) {
-        Text(
-            text = body,
-            style = bodyStyle,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Text(text = body, style = bodyStyle, color = MaterialTheme.colorScheme.onSurfaceVariant)
       }
       if (onAction != null) {
         val resolvedActionLabel = actionLabel ?: stringResource(Res.string.retry)
@@ -104,10 +100,7 @@ internal fun HardFallbackScreen(
     actionLabel: String? = null,
     onAction: (() -> Unit)? = null,
 ) {
-  Box(
-      modifier = modifier.fillMaxSize().padding(20.dp),
-      contentAlignment = Alignment.Center,
-  ) {
+  Box(modifier = modifier.fillMaxSize().padding(20.dp), contentAlignment = Alignment.Center) {
     StatusSurface(
         title = title,
         body = body,

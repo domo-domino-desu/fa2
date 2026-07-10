@@ -2,7 +2,7 @@ package me.domino.fa2.data.fa.watchlist
 
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Element
-import me.domino.fa2.data.fa.user.ensureUserPageAccessible
+import me.domino.fa2.data.fa.parsing.ensureUserPageAccessible
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
 import me.domino.fa2.utils.toAbsoluteUrl

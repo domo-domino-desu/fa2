@@ -27,14 +27,8 @@ object AttachmentTextExtractor {
         parsers.firstOrNull { candidate -> candidate.supports(fileName) }
             ?: throw UnsupportedAttachmentTextFormatException(fileName)
     val reporter =
-        AttachmentTextProgressReporter.create(
-            format = parser.format,
-            onProgress = onProgress,
-        )
-    reporter.start(
-        message = "准备解析附件",
-        currentItemLabel = fileName.trim().ifBlank { null },
-    )
+        AttachmentTextProgressReporter.create(format = parser.format, onProgress = onProgress)
+    reporter.start(message = "准备解析附件", currentItemLabel = fileName.trim().ifBlank { null })
     val document = parser.parse(fileName = fileName, bytes = bytes, reporter = reporter)
     reporter.complete(
         message = "附件解析完成",

@@ -12,11 +12,7 @@ class SocialActionChallengePolicyTest {
   fun returnsChallengeWhenResolverMissing() = runTest {
     val decision =
         SocialActionChallengePolicy(challengeResolver = null)
-            .decide(
-                requestUrl = "https://example.com/action",
-                cfRay = "ray-1",
-                retryCount = 0,
-            )
+            .decide(requestUrl = "https://example.com/action", cfRay = "ray-1", retryCount = 0)
 
     val terminal = assertIs<SocialActionChallengeDecision.Terminal>(decision)
     assertEquals(SocialActionResult.Challenge(cfRay = "ray-1"), terminal.result)
@@ -28,17 +24,10 @@ class SocialActionChallengePolicyTest {
 
     val decision =
         SocialActionChallengePolicy(challengeResolver = resolver)
-            .decide(
-                requestUrl = "https://example.com/action",
-                cfRay = "ray-2",
-                retryCount = 0,
-            )
+            .decide(requestUrl = "https://example.com/action", cfRay = "ray-2", retryCount = 0)
 
     val terminal = assertIs<SocialActionChallengeDecision.Terminal>(decision)
-    assertEquals(
-        SocialActionResult.Failed("Cloudflare challenge unresolved"),
-        terminal.result,
-    )
+    assertEquals(SocialActionResult.Failed("Cloudflare challenge unresolved"), terminal.result)
     assertEquals(
         listOf(CfChallengeSignal(requestUrl = "https://example.com/action", cfRay = "ray-2")),
         resolver.requests,
@@ -49,11 +38,7 @@ class SocialActionChallengePolicyTest {
   fun retriesWhenResolverSucceedsAndRetryBudgetRemains() = runTest {
     val decision =
         SocialActionChallengePolicy(challengeResolver = RecordingChallengeResolver(true))
-            .decide(
-                requestUrl = "https://example.com/action",
-                cfRay = "ray-3",
-                retryCount = 0,
-            )
+            .decide(requestUrl = "https://example.com/action", cfRay = "ray-3", retryCount = 0)
 
     assertEquals(SocialActionChallengeDecision.Retry, decision)
   }
@@ -62,11 +47,7 @@ class SocialActionChallengePolicyTest {
   fun returnsChallengeWhenRetryBudgetIsExhausted() = runTest {
     val decision =
         SocialActionChallengePolicy(challengeResolver = RecordingChallengeResolver(true))
-            .decide(
-                requestUrl = "https://example.com/action",
-                cfRay = "ray-4",
-                retryCount = 1,
-            )
+            .decide(requestUrl = "https://example.com/action", cfRay = "ray-4", retryCount = 1)
 
     val terminal = assertIs<SocialActionChallengeDecision.Terminal>(decision)
     assertEquals(SocialActionResult.Challenge(cfRay = "ray-4"), terminal.result)

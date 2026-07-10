@@ -67,7 +67,7 @@ import me.domino.fa2.ui.i18n.search.SearchUiMetadataKey
 import me.domino.fa2.ui.i18n.search.SearchUiOptionKey
 import me.domino.fa2.ui.i18n.search.SearchUiTextKey
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.pages.submission.pager.WaterfallScrollRequest
+import me.domino.fa2.ui.submissionviewer.api.WaterfallScrollRequest
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -156,10 +156,7 @@ fun BrowseScreen(
 
   Box(modifier = Modifier.fillMaxSize()) {
     if (state.loading && state.submissions.isEmpty()) {
-      Column(
-          modifier = Modifier.fillMaxSize(),
-          verticalArrangement = Arrangement.spacedBy(10.dp),
-      ) {
+      Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         filterBar()
         WaterfallLoadingSkeleton(
             minCardWidthDp = settings.waterfallMinCardWidthDp,
@@ -168,10 +165,7 @@ fun BrowseScreen(
         )
       }
     } else {
-      Column(
-          modifier = Modifier.fillMaxSize(),
-          verticalArrangement = Arrangement.spacedBy(10.dp),
-      ) {
+      Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         state.errorMessage
             ?.takeIf { message -> message.isNotBlank() && state.submissions.isNotEmpty() }
             ?.let { inlineErrorMessage ->
@@ -453,10 +447,7 @@ private fun BrowseFilterPage(
   if (speciesPickerVisible) {
     GroupedTextPickerDialog(
         title =
-            searchUiLabelsRepository.metadataLabel(
-                SearchUiMetadataKey.SPECIES,
-                appI18n.metadata,
-            ),
+            searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.SPECIES, appI18n.metadata),
         groups = speciesOptionGroups,
         selected = filter.species,
         onSelected = onUpdateSpecies,

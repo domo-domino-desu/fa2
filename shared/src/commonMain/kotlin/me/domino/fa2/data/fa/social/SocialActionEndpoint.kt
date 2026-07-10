@@ -2,7 +2,7 @@ package me.domino.fa2.data.fa.social
 
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CancellationException
-import me.domino.fa2.data.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.fa.core.FaOriginPolicy
 import me.domino.fa2.data.fa.core.toUserFacingRequestMessage
 import me.domino.fa2.data.fa.session.ChallengeResolver
 import me.domino.fa2.data.fa.session.FaCookiesStorage
@@ -11,21 +11,19 @@ import me.domino.fa2.utils.logging.FaLog
 import me.domino.fa2.utils.logging.summarizeUrl
 
 /** 社交动作端点（Fav/Watch 等）。 */
-class SocialActionEndpoint
-private constructor(
-    private val backend: SocialActionBackend?,
-) {
-  private val log = FaLog.withTag("SocialActionEndpoint")
+interface SocialActionSource {
+  suspend fun execute(actionUrl: String): SocialActionResult
 
-  constructor(
-      dataSource: FaHtmlDataSource
-  ) : this(
-      backend =
-          DataSourceSocialActionBackend(
-              dataSource = dataSource,
-              challengePolicy = SocialActionChallengePolicy(challengeResolver = null),
-          )
-  )
+  suspend fun updateTagBlocklist(
+      tagName: String,
+      nonce: String,
+      toAdd: Boolean = true,
+  ): SocialActionResult
+}
+
+class SocialActionEndpoint private constructor(private val backend: SocialActionBackend) :
+    SocialActionSource {
+  private val log = FaLog.withTag("SocialActionEndpoint")
 
   constructor(
       client: HttpClient,
@@ -47,17 +45,26 @@ private constructor(
   )
 
   /** 执行动作 URL。 */
-  suspend fun execute(actionUrl: String): SocialActionResult {
+  override suspend fun execute(actionUrl: String): SocialActionResult {
     val targetUrl = actionUrl.trim()
     if (targetUrl.isBlank()) {
       log.w { "社交动作端点 -> 执行失败(空URL)" }
       return SocialActionResult.Failed(message = "Empty social action url")
     }
+    val trustedUrl =
+        FaOriginPolicy.trustedActionUrlOrNull(
+            targetUrl,
+            allowedPathPrefixes = setOf("/fav/", "/unfav/", "/watch/", "/unwatch/"),
+        )
+    if (trustedUrl == null) {
+      log.w { "社交动作端点 -> 拒绝不受信任地址(url=${summarizeUrl(targetUrl)})" }
+      return SocialActionResult.Failed(message = "Untrusted FA action URL")
+    }
     log.i { "社交动作端点 -> 执行(url=${summarizeUrl(targetUrl)})" }
     return try {
-      (backend?.execute(targetUrl)
-              ?: SocialActionResult.Failed("No HTTP backend for social action"))
-          .also { result -> log.i { "社交动作端点 -> ${summarizeSocialActionResult(result)}" } }
+      backend.execute(trustedUrl).also { result ->
+        log.i { "社交动作端点 -> ${summarizeSocialActionResult(result)}" }
+      }
     } catch (cancelled: CancellationException) {
       throw cancelled
     } catch (error: Throwable) {
@@ -68,10 +75,10 @@ private constructor(
   }
 
   /** 屏蔽/取消屏蔽标签（POST /route/tag_blocking）。 */
-  suspend fun updateTagBlocklist(
+  override suspend fun updateTagBlocklist(
       tagName: String,
       nonce: String,
-      toAdd: Boolean = true,
+      toAdd: Boolean,
   ): SocialActionResult {
     val normalizedTagName = tagName.trim()
     val normalizedNonce = nonce.trim()
@@ -87,15 +94,8 @@ private constructor(
 
     return try {
       backend
-          ?.updateTagBlocklist(
-              tagName = normalizedTagName,
-              nonce = normalizedNonce,
-              toAdd = toAdd,
-          )
-          ?.also { result -> log.i { "社交动作端点 -> 标签屏蔽${summarizeSocialActionResult(result)}" } }
-          ?: SocialActionResult.Failed("No HTTP backend for tag blocking").also { result ->
-            log.w { "社交动作端点 -> 标签屏蔽${summarizeSocialActionResult(result)}" }
-          }
+          .updateTagBlocklist(tagName = normalizedTagName, nonce = normalizedNonce, toAdd = toAdd)
+          .also { result -> log.i { "社交动作端点 -> 标签屏蔽${summarizeSocialActionResult(result)}" } }
     } catch (cancelled: CancellationException) {
       throw cancelled
     } catch (error: Throwable) {

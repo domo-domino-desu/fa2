@@ -17,7 +17,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.TranslationProvider
@@ -27,12 +27,11 @@ import me.domino.fa2.domain.attachmenttext.AttachmentTextParagraph
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
 import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.pager.*
-import me.domino.fa2.ui.pages.submission.series.*
-import me.domino.fa2.ui.pages.submission.translation.*
+import me.domino.fa2.ui.pages.submission.attachmenttext.SubmissionAttachmentTextUiState
+import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
+import me.domino.fa2.ui.pages.submission.pager.SubmissionPagerUiState
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerDetailSource
+import me.domino.fa2.ui.translation.SubmissionTranslationSourceMode
 import me.domino.fa2.utils.FaUrls
 import me.domino.fa2.utils.parseSubmissionSid
 
@@ -114,10 +113,7 @@ class SubmissionScreenModelTranslationAndScrollTest {
                 .descriptionTranslationState
         assertEquals(false, resetState.hasTriggered)
         assertEquals("<p>changed</p>", resetState.sourceHtml)
-        assertEquals(
-            SubmissionDescriptionTranslationStatus.IDLE,
-            resetState.blocks.single().status,
-        )
+        assertEquals(SubmissionDescriptionTranslationStatus.IDLE, resetState.blocks.single().status)
         assertEquals(null, resetState.blocks.single().translated)
       }
 
@@ -138,7 +134,7 @@ class SubmissionScreenModelTranslationAndScrollTest {
                     ),
                 attachmentResults =
                     ArrayDeque(
-                        listOf(PageState.Success(translationTestAttachmentDocument("hello")))
+                        listOf(ResourceResult.Success(translationTestAttachmentDocument("hello")))
                     ),
             )
         val model =
@@ -442,7 +438,7 @@ class SubmissionScreenModelTranslationAndScrollTest {
                     ),
                 attachmentResults =
                     ArrayDeque(
-                        listOf(PageState.Success(translationTestAttachmentDocument("hello")))
+                        listOf(ResourceResult.Success(translationTestAttachmentDocument("hello")))
                     ),
             )
         val requestedProviders = mutableListOf<TranslationProvider>()
@@ -551,16 +547,17 @@ class SubmissionScreenModelTranslationAndScrollTest {
 
 private class MutableSubmissionDetailSource(
     val submissions: MutableMap<Int, Submission>,
-    private val attachmentResults: ArrayDeque<PageState<AttachmentTextDocument>> = ArrayDeque(),
+    private val attachmentResults: ArrayDeque<ResourceResult<AttachmentTextDocument>> =
+        ArrayDeque(),
 ) : SubmissionPagerDetailSource {
-  override suspend fun loadBySid(sid: Int): PageState<Submission> =
-      submissions[sid]?.let { submission -> PageState.Success(submission) }
-          ?: PageState.Error(IllegalStateException("Missing submission for sid=$sid"))
+  override suspend fun loadBySid(sid: Int): ResourceResult<Submission> =
+      submissions[sid]?.let { submission -> ResourceResult.Success(submission) }
+          ?: ResourceResult.Error(IllegalStateException("Missing submission for sid=$sid"))
 
-  override suspend fun loadByUrl(url: String): PageState<Submission> {
+  override suspend fun loadByUrl(url: String): ResourceResult<Submission> {
     val sid =
         parseSubmissionSid(url)
-            ?: return PageState.Error(IllegalArgumentException("Invalid submission url: $url"))
+            ?: return ResourceResult.Error(IllegalArgumentException("Invalid submission url: $url"))
     return loadBySid(sid)
   }
 
@@ -568,32 +565,29 @@ private class MutableSubmissionDetailSource(
       downloadUrl: String,
       downloadFileName: String,
       onProgress: (AttachmentTextProgress) -> Unit,
-  ): PageState<AttachmentTextDocument> {
+  ): ResourceResult<AttachmentTextDocument> {
     onProgress(
         AttachmentTextProgress(
             overallFraction = 0.5f,
             stageIndex = 1,
             stageCount = 1,
             stageId = "decode_bytes",
-            stageLabel = "解析附件",
             stageFraction = 0.5f,
-            message = "处理中",
-            currentItemLabel = downloadFileName,
         )
     )
     return attachmentResults.removeFirstOrNull()
-        ?: PageState.Error(IllegalStateException("No attachment result prepared"))
+        ?: ResourceResult.Error(IllegalStateException("No attachment result prepared"))
   }
 
-  override suspend fun toggleFavorite(sid: Int, actionUrl: String): PageState<Unit> =
-      PageState.Success(Unit)
+  override suspend fun toggleFavorite(sid: Int, actionUrl: String): ResourceResult<Unit> =
+      ResourceResult.Success(Unit)
 
   override suspend fun blockTag(
       sid: Int,
       tagName: String,
       nonce: String,
       toAdd: Boolean,
-  ): PageState<Unit> = PageState.Success(Unit)
+  ): ResourceResult<Unit> = ResourceResult.Success(Unit)
 }
 
 private fun translationTestAttachmentDocument(text: String): AttachmentTextDocument =

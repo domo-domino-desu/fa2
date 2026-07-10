@@ -7,10 +7,7 @@ private val minSearchEpochDay = epochDayFromCivil(2005, 12, 4)
 
 internal const val minSearchDateIso = "2005-12-04"
 
-internal data class SearchDateBounds(
-    val minEpochDay: Long,
-    val maxEpochDay: Long,
-) {
+internal data class SearchDateBounds(val minEpochDay: Long, val maxEpochDay: Long) {
   val minIsoDate: String
     get() = epochDayToIsoDate(minEpochDay)
 
@@ -18,10 +15,7 @@ internal data class SearchDateBounds(
     get() = epochDayToIsoDate(maxEpochDay)
 }
 
-internal data class SearchDateFields(
-    val from: String,
-    val to: String,
-)
+internal data class SearchDateFields(val from: String, val to: String)
 
 enum class SearchDateRangeShiftAction {
   PreviousYear,
@@ -65,10 +59,7 @@ internal fun currentSearchDateBounds(
     nowEpochMillis: Long = Clock.System.now().toEpochMilliseconds()
 ): SearchDateBounds {
   val todayEpochDay = floorDiv(nowEpochMillis, millisPerDay)
-  return SearchDateBounds(
-      minEpochDay = minSearchEpochDay,
-      maxEpochDay = todayEpochDay + 1L,
-  )
+  return SearchDateBounds(minEpochDay = minSearchEpochDay, maxEpochDay = todayEpochDay + 1L)
 }
 
 internal fun normalizeManualDateFields(

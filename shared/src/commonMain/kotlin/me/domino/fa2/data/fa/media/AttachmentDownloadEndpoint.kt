@@ -20,11 +20,7 @@ class AttachmentDownloadEndpoint(
   private val log = FaLog.withTag("AttachmentDownloadEndpoint")
 
   override suspend fun fetch(url: String, fileName: String): AttachmentDownloadResult =
-      fetchInternal(
-          url = url.trim(),
-          fileName = fileName.trim(),
-          challengeRetryCount = 0,
-      )
+      fetchInternal(url = url.trim(), fileName = fileName.trim(), challengeRetryCount = 0)
 
   private suspend fun fetchInternal(
       url: String,
@@ -121,10 +117,7 @@ class AttachmentDownloadEndpoint(
 
     log.i { "下载附件 -> 成功(file=$fileName,bytes=${bytes.size},contentType=${contentType ?: "-"})" }
     return AttachmentDownloadResult.Success(
-        AttachmentDownloadPayload(
-            bytes = bytes,
-            contentType = contentType,
-        )
+        AttachmentDownloadPayload(bytes = bytes, contentType = contentType)
     )
   }
 

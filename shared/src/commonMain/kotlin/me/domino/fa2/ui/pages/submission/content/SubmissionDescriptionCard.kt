@@ -10,12 +10,8 @@ import fa2.shared.generated.resources.*
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.ui.app.LocalAppSettings
 import me.domino.fa2.ui.components.html.TranslatableBlocksCard
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.pager.*
-import me.domino.fa2.ui.pages.submission.series.*
-import me.domino.fa2.ui.pages.submission.translation.*
-import me.domino.fa2.ui.pages.submission.translation.SubmissionTranslationUiState
+import me.domino.fa2.ui.pages.submission.series.rememberSubmissionSeriesTrailingActions
+import me.domino.fa2.ui.translation.SubmissionTranslationUiState
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -40,8 +36,9 @@ internal fun SubmissionDescriptionCard(
         onToggleWrapText()
         requestPagerFocus()
       },
-      seriesProbeConfig =
-          SubmissionSeriesProbeConfig(
+      blockTrailingActions =
+          rememberSubmissionSeriesTrailingActions(
+              translationState = translationState,
               baseUrl = submissionUrl,
               onOpenSeries = onOpenSubmissionSeries,
           ),

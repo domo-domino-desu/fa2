@@ -165,7 +165,7 @@ private fun createAuthScreenModelFixture(): AuthScreenModelFixture {
               authSessionController =
                   DefaultAuthSessionController(
                       profileStore =
-                          me.domino.fa2.data.fa.auth.AuthSessionProfileStore(keyValueStorage),
+                          me.domino.fa2.data.fa.session.AuthSessionProfileStore(keyValueStorage),
                       pendingFaRouteStore = pendingFaRouteStore,
                   ),
               pendingFaRouteStore = pendingFaRouteStore,

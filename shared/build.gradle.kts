@@ -48,11 +48,15 @@ val generateAboutMetadata =
     }
 
 kotlin {
+  compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
+
   android {
     namespace = "me.domino.fa2.shared"
     compileSdk = 36
     minSdk = 29
     androidResources { enable = true }
+    withHostTestBuilder { sourceSetTreeName = "androidHostTest" }
+        .configure { isReturnDefaultValues = true }
   }
 
   jvm("desktop")
@@ -114,7 +118,7 @@ kotlin {
     val desktopTest by getting {
       dependencies {
         implementation(compose.desktop.currentOs)
-        implementation(compose.desktop.uiTestJUnit4)
+        implementation(libs.compose.ui.test.junit4)
       }
     }
 
@@ -127,6 +131,8 @@ kotlin {
         implementation(libs.pdfbox.android)
       }
     }
+
+    val androidHostTest by getting { dependencies { implementation(kotlin("test")) } }
   }
 }
 

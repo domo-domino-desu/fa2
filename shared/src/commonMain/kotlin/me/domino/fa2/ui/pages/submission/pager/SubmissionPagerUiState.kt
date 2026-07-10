@@ -1,10 +1,8 @@
 package me.domino.fa2.ui.pages.submission.pager
 
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.translation.*
+import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
+import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrUiState
 
 private const val nextPrefetchCount = 3
 private const val previousPrefetchCount = 1

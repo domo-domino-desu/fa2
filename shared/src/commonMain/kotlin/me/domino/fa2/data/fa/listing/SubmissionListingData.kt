@@ -1,4 +1,4 @@
-package me.domino.fa2.data.fa.submission
+package me.domino.fa2.data.fa.listing
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.contentOrNull
@@ -16,12 +16,6 @@ private val submissionDataScriptRegex =
 /** 用于解析 submissionData JSON 的宽松配置实例。 */
 private val submissionDataJson = Json { ignoreUnknownKeys = true }
 
-/** 从原图路径中提取时间戳数字的正则。 */
-private val fullImageTimestampRegex = Regex("""(?:^|/)art/[^/]+/(\d{9,})/""")
-
-/** 允许作为原图来源的 CDN 域名集合。 */
-private val fullImageAllowedHosts = setOf("d.furaffinity.net", "d.facdn.net")
-
 /** 投稿的标题与作者摘要信息。 */
 data class SubmissionDataSummary(
     /** 投稿标题。 */
@@ -31,25 +25,6 @@ data class SubmissionDataSummary(
     /** 作者用户名（全小写）。 */
     val authorLowercase: String = "",
 )
-
-/** 根据原图 URL 推导缩略图 URL。 需要 submission sid 与原图路径中的时间戳目录（`/art/{author}/{timestamp}/...`）。 */
-fun deriveSubmissionThumbnailUrlFromFullImage(
-    sid: Int,
-    fullImageUrl: String,
-    size: Int = 600,
-): String? {
-  if (sid <= 0 || size <= 0) return null
-  val normalized = fullImageUrl.trim()
-  val host = parseUrlHost(normalized)?.lowercase() ?: return null
-  if (host !in fullImageAllowedHosts) return null
-
-  val pathOnly = extractUrlPath(normalized)
-  val timestamp =
-      fullImageTimestampRegex.find(pathOnly)?.groupValues?.getOrNull(1)?.trim()?.takeIf { value ->
-        value.isNotBlank()
-      } ?: return null
-  return "https://t.furaffinity.net/$sid@$size-$timestamp.jpg"
-}
 
 /** 解析页面中提交项对应的标题与作者信息。 依赖页面内 `#js-submissionData` JSON，返回 `sid -> summary`。 */
 fun parseSubmissionDataSummaries(html: String): Map<Int, SubmissionDataSummary> {
@@ -66,11 +41,7 @@ fun parseSubmissionDataSummaries(html: String): Map<Int, SubmissionDataSummary> 
               ?: author.lowercase()
       put(
           sid,
-          SubmissionDataSummary(
-              title = title,
-              author = author,
-              authorLowercase = authorLowercase,
-          ),
+          SubmissionDataSummary(title = title, author = author, authorLowercase = authorLowercase),
       )
     }
   }
@@ -109,29 +80,3 @@ private fun parseSubmissionDataRoot(html: String) =
           }
         }
         .getOrNull()
-
-/** 从 URL 字符串中解析域名（host）部分。 */
-private fun parseUrlHost(url: String): String? {
-  val normalized = if (url.startsWith("//")) "https:$url" else url
-  val schemeIndex = normalized.indexOf("://")
-  if (schemeIndex < 0) return null
-  val hostStart = schemeIndex + 3
-  if (hostStart >= normalized.length) return null
-  val hostEnd = normalized.indexOfAny(charArrayOf('/', '?', '#'), startIndex = hostStart)
-  val host =
-      if (hostEnd >= 0) normalized.substring(hostStart, hostEnd)
-      else normalized.substring(hostStart)
-  return host.trim().ifBlank { null }
-}
-
-/** 从 URL 字符串中提取路径部分（不含查询字符串和片段）。 */
-private fun extractUrlPath(url: String): String {
-  val normalized = if (url.startsWith("//")) "https:$url" else url
-  val schemeIndex = normalized.indexOf("://")
-  if (schemeIndex < 0) return ""
-  val hostStart = schemeIndex + 3
-  val pathStart = normalized.indexOf('/', startIndex = hostStart)
-  if (pathStart < 0) return ""
-  val rawPath = normalized.substring(pathStart)
-  return rawPath.substringBefore('?').substringBefore('#')
-}

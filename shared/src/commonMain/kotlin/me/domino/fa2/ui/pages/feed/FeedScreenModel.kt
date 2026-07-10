@@ -9,12 +9,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.fa.feed.FeedRepository
-import me.domino.fa2.data.i18n.SystemLanguageProvider
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.data.model.summarizePageState
-import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.ui.i18n.appString
+import me.domino.fa2.ui.state.UiPageState
 import me.domino.fa2.ui.utils.PaginationReducer
 import me.domino.fa2.ui.utils.PaginationSnapshot
 import me.domino.fa2.utils.logging.FaLog
@@ -38,20 +37,17 @@ data class FeedUiState(
 /** Feed 页面状态模型。 负责分页聚合、加载状态管理与共享列表同步。 */
 class FeedScreenModel(
     /** Feed 仓储。 */
-    private val repository: FeedRepository,
-    private val settingsService: AppSettingsService? = null,
-    private val systemLanguageProvider: SystemLanguageProvider? = null,
+    private val repository: FeedRepository
 ) : StateScreenModel<FeedUiState>(FeedUiState()) {
   private val log = FaLog.withTag("FeedScreenModel")
   private val paginationStateMachine =
       PaginationReducer<SubmissionThumbnail, Int>(
           keyOf = { item -> item.id },
           challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
-          appendFallbackErrorMessage = { appString(Res.string.load_failed_please_retry) },
       )
 
-  private val mutablePageState = MutableStateFlow<PageState<FeedUiState>>(PageState.Loading)
-  val pageState: StateFlow<PageState<FeedUiState>> = mutablePageState.asStateFlow()
+  private val mutablePageState = MutableStateFlow<UiPageState<FeedUiState>>(UiPageState.Loading)
+  val pageState: StateFlow<UiPageState<FeedUiState>> = mutablePageState.asStateFlow()
 
   /** 当前首页加载任务。 */
   private var loadJob: Job? = null
@@ -84,7 +80,7 @@ class FeedScreenModel(
             )
         )
     if (current.submissions.isEmpty()) {
-      mutablePageState.value = PageState.Loading
+      mutablePageState.value = UiPageState.Loading
     }
 
     loadJob =
@@ -105,34 +101,29 @@ class FeedScreenModel(
           val updated = state.value.applyPagination(reduced)
           mutableState.value = updated
           when (val next = firstPageState) {
-            is PageState.Success -> {
-              mutablePageState.value = PageState.Success(updated)
+            is ResourceResult.Success -> {
+              mutablePageState.value = UiPageState.Success(updated)
               log.i { "加载Feed -> 成功(count=${updated.submissions.size})" }
             }
 
-            is PageState.AuthRequired -> {
-              mutablePageState.value = PageState.AuthRequired(next.requestUrl, next.message)
+            is ResourceResult.AuthRequired -> {
+              mutablePageState.value = UiPageState.AuthRequired(next.requestUrl, next.message)
               log.w { "加载Feed -> 需要重新登录" }
             }
 
-            PageState.CfChallenge -> {
-              mutablePageState.value = PageState.CfChallenge
+            ResourceResult.CfChallenge -> {
+              mutablePageState.value = UiPageState.CfChallenge
               log.w { "加载Feed -> Cloudflare验证" }
             }
 
-            is PageState.MatureBlocked -> {
-              mutablePageState.value = PageState.MatureBlocked(next.reason)
+            is ResourceResult.MatureBlocked -> {
+              mutablePageState.value = UiPageState.MatureBlocked(next.reason)
               log.w { "加载Feed -> 受限(${next.reason})" }
             }
 
-            is PageState.Error -> {
-              mutablePageState.value = PageState.Error(next.exception)
+            is ResourceResult.Error -> {
+              mutablePageState.value = UiPageState.Error(next.exception)
               log.e(next.exception) { "加载Feed -> 失败" }
-            }
-
-            PageState.Loading -> {
-              mutablePageState.value = PageState.Loading
-              log.d { "加载Feed -> 加载中" }
             }
           }
         }
@@ -206,16 +197,17 @@ class FeedScreenModel(
           val updated = state.value.applyPagination(reduced)
           mutableState.value = updated
           when (val next = pageState) {
-            is PageState.Success -> {
-              mutablePageState.value = PageState.Success(updated)
-              log.d { "自动加载Feed -> ${summarizePageState(next)}(count=${updated.submissions.size})" }
+            is ResourceResult.Success -> {
+              mutablePageState.value = UiPageState.Success(updated)
+              log.d {
+                "自动加载Feed -> ${summarizeResourceResult(next)}(count=${updated.submissions.size})"
+              }
             }
 
-            is PageState.AuthRequired -> log.w { "自动加载Feed -> 需要重新登录" }
-            PageState.CfChallenge -> log.w { "自动加载Feed -> Cloudflare验证" }
-            is PageState.MatureBlocked -> log.w { "自动加载Feed -> 受限(${next.reason})" }
-            is PageState.Error -> log.e(next.exception) { "自动加载Feed -> 失败" }
-            PageState.Loading -> log.d { "自动加载Feed -> 加载中" }
+            is ResourceResult.AuthRequired -> log.w { "自动加载Feed -> 需要重新登录" }
+            ResourceResult.CfChallenge -> log.w { "自动加载Feed -> Cloudflare验证" }
+            is ResourceResult.MatureBlocked -> log.w { "自动加载Feed -> 受限(${next.reason})" }
+            is ResourceResult.Error -> log.e(next.exception) { "自动加载Feed -> 失败" }
           }
         }
   }

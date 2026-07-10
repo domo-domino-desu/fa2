@@ -1,8 +1,6 @@
 package me.domino.fa2.ui.pages.submission.imageocr
 
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.translation.*
 
 data class SubmissionImageOcrBlockUiState(
     val id: String,
@@ -56,7 +54,5 @@ sealed interface SubmissionImageOcrUiState {
       val translationErrorMessage: String? = null,
   ) : SubmissionImageOcrUiState
 
-  data class Error(
-      val message: String,
-  ) : SubmissionImageOcrUiState
+  data class Error(val message: String) : SubmissionImageOcrUiState
 }

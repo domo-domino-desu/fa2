@@ -113,10 +113,7 @@ class WatchRecommendationBlocklistRouteScreen : Screen {
                   )
                 }
               } else {
-                items(
-                    items = state.usernames,
-                    key = { username -> username },
-                ) { username ->
+                items(items = state.usernames, key = { username -> username }) { username ->
                   val user =
                       WatchlistUser(
                           username = username,

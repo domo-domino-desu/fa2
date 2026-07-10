@@ -6,11 +6,9 @@ import fa2.shared.generated.resources.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.fa.journal.JournalsRepository
-import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.model.JournalSummary
-import me.domino.fa2.data.model.PageState
-import me.domino.fa2.data.model.summarizePageState
-import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.data.model.ResourceResult
+import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.utils.PaginationReducer
 import me.domino.fa2.ui.utils.PaginationSnapshot
@@ -46,15 +44,12 @@ class UserJournalsScreenModel(
     private val username: String,
     /** Journals 仓储。 */
     private val repository: JournalsRepository,
-    private val settingsService: AppSettingsService? = null,
-    private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) : StateScreenModel<UserJournalsUiState>(UserJournalsUiState()) {
   private val log = FaLog.withTag("UserJournalsScreenModel")
   private val paginationStateMachine =
       PaginationReducer<JournalSummary, Int>(
           keyOf = { item -> item.id },
           challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
-          appendFallbackErrorMessage = { appString(Res.string.load_failed_please_retry) },
       )
   private var loadJob: Job? = null
   private var appendJob: Job? = null
@@ -102,15 +97,16 @@ class UserJournalsScreenModel(
           val updated = state.value.applyPagination(reduced)
           mutableState.value = updated
           when (val next = firstPageState) {
-            is PageState.Success -> {
-              log.i { "加载Journals页 -> ${summarizePageState(next)}(count=${updated.journals.size})" }
+            is ResourceResult.Success -> {
+              log.i {
+                "加载Journals页 -> ${summarizeResourceResult(next)}(count=${updated.journals.size})"
+              }
             }
 
-            is PageState.AuthRequired -> log.w { "加载Journals页 -> 需要重新登录" }
-            PageState.CfChallenge -> log.w { "加载Journals页 -> Cloudflare验证" }
-            is PageState.MatureBlocked -> log.w { "加载Journals页 -> 受限(${next.reason})" }
-            is PageState.Error -> log.e(next.exception) { "加载Journals页 -> 失败" }
-            PageState.Loading -> log.d { "加载Journals页 -> 加载中" }
+            is ResourceResult.AuthRequired -> log.w { "加载Journals页 -> 需要重新登录" }
+            ResourceResult.CfChallenge -> log.w { "加载Journals页 -> Cloudflare验证" }
+            is ResourceResult.MatureBlocked -> log.w { "加载Journals页 -> 受限(${next.reason})" }
+            is ResourceResult.Error -> log.e(next.exception) { "加载Journals页 -> 失败" }
           }
         }
   }
@@ -161,17 +157,16 @@ class UserJournalsScreenModel(
           val updated = state.value.applyPagination(reduced)
           mutableState.value = updated
           when (next) {
-            is PageState.Success -> {
+            is ResourceResult.Success -> {
               log.d {
-                "自动加载Journals页 -> ${summarizePageState(next)}(count=${updated.journals.size})"
+                "自动加载Journals页 -> ${summarizeResourceResult(next)}(count=${updated.journals.size})"
               }
             }
 
-            is PageState.AuthRequired -> log.w { "自动加载Journals页 -> 需要重新登录" }
-            PageState.CfChallenge -> log.w { "自动加载Journals页 -> Cloudflare验证" }
-            is PageState.MatureBlocked -> log.w { "自动加载Journals页 -> 受限(${next.reason})" }
-            is PageState.Error -> log.e(next.exception) { "自动加载Journals页 -> 失败" }
-            PageState.Loading -> log.d { "自动加载Journals页 -> 加载中" }
+            is ResourceResult.AuthRequired -> log.w { "自动加载Journals页 -> 需要重新登录" }
+            ResourceResult.CfChallenge -> log.w { "自动加载Journals页 -> Cloudflare验证" }
+            is ResourceResult.MatureBlocked -> log.w { "自动加载Journals页 -> 受限(${next.reason})" }
+            is ResourceResult.Error -> log.e(next.exception) { "自动加载Journals页 -> 失败" }
           }
         }
   }

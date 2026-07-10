@@ -2,7 +2,7 @@ package me.domino.fa2.domain.watchrecommendation
 
 import kotlin.math.ceil
 import kotlin.random.Random
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.User
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
@@ -20,10 +20,10 @@ enum class WatchlistUserGuess {
 
 class RandomWatchlistSampler(
     private val loadWatchlistPage:
-        suspend (username: String, category: WatchlistCategory, nextPageUrl: String?) -> PageState<
-                WatchlistPage
-            >,
-    private val loadUser: suspend (username: String) -> PageState<User>,
+        suspend (
+            username: String, category: WatchlistCategory, nextPageUrl: String?,
+        ) -> ResourceResult<WatchlistPage>,
+    private val loadUser: suspend (username: String) -> ResourceResult<User>,
     private val random: Random = Random.Default,
     private val requestThrottleMs: Long = watchRecommendationRequestThrottleMs,
 ) {
@@ -35,7 +35,7 @@ class RandomWatchlistSampler(
       targetCount: Int,
       guess: WatchlistUserGuess,
       skipOnFailure: Boolean,
-      onProgress: (WatchRecommendationProgress) -> Unit,
+      onProgress: suspend (WatchRecommendationProgress) -> Unit,
   ): List<WatchlistUser>? {
     if (targetCount <= 0) return emptyList()
     val normalizedUsername = username.trim()
@@ -64,12 +64,12 @@ class RandomWatchlistSampler(
                   pageUrl(username = normalizedUsername, category = category, page = pageNumber),
               )
       ) {
-        is PageState.Success -> {
+        is ResourceResult.Success -> {
           loadedPages[pageNumber] = result.data
           result.data
         }
 
-        PageState.CfChallenge -> {
+        ResourceResult.CfChallenge -> {
           if (skipOnFailure) {
             log.w {
               "随机Watchlist采样 -> 跳过用户(Cloudflare,user=$normalizedUsername,category=$category)"
@@ -80,7 +80,7 @@ class RandomWatchlistSampler(
           }
         }
 
-        is PageState.AuthRequired -> {
+        is ResourceResult.AuthRequired -> {
           if (skipOnFailure) {
             log.w { "随机Watchlist采样 -> 跳过用户(需要登录,user=$normalizedUsername,category=$category)" }
             null
@@ -89,7 +89,7 @@ class RandomWatchlistSampler(
           }
         }
 
-        is PageState.MatureBlocked -> {
+        is ResourceResult.MatureBlocked -> {
           if (skipOnFailure) {
             log.w {
               "随机Watchlist采样 -> 跳过用户(受限,user=$normalizedUsername,category=$category,reason=${result.reason})"
@@ -100,7 +100,7 @@ class RandomWatchlistSampler(
           }
         }
 
-        is PageState.Error -> {
+        is ResourceResult.Error -> {
           if (skipOnFailure) {
             log.w(result.exception) {
               "随机Watchlist采样 -> 跳过用户(失败,user=$normalizedUsername,category=$category)"
@@ -110,8 +110,6 @@ class RandomWatchlistSampler(
             throw result.exception
           }
         }
-
-        PageState.Loading -> null
       }
     }
 
@@ -125,13 +123,12 @@ class RandomWatchlistSampler(
       throttle.awaitReady()
       onProgress(WatchRecommendationProgress.LoadingUserProfile(normalizedUsername))
       return when (val state = loadUser(normalizedUsername)) {
-        is PageState.Success -> totalPagesFor(state.data, category)
-        PageState.CfChallenge ->
+        is ResourceResult.Success -> totalPagesFor(state.data, category)
+        ResourceResult.CfChallenge ->
             if (skipOnFailure) null else error("Cloudflare verification required")
-        is PageState.AuthRequired -> if (skipOnFailure) null else error(state.message)
-        is PageState.MatureBlocked -> if (skipOnFailure) null else error(state.reason)
-        is PageState.Error -> if (skipOnFailure) null else throw state.exception
-        PageState.Loading -> null
+        is ResourceResult.AuthRequired -> if (skipOnFailure) null else error(state.message)
+        is ResourceResult.MatureBlocked -> if (skipOnFailure) null else error(state.reason)
+        is ResourceResult.Error -> if (skipOnFailure) null else throw state.exception
       }
     }
 
@@ -206,7 +203,7 @@ class RandomWatchlistSampler(
       category: WatchlistCategory,
       targetPageCount: Int,
       skipOnFailure: Boolean,
-      onProgress: (WatchRecommendationProgress) -> Unit,
+      onProgress: suspend (WatchRecommendationProgress) -> Unit,
   ): List<WatchlistUser>? {
     if (targetPageCount <= 0) return emptyList()
     val normalizedUsername = username.trim()
@@ -231,24 +228,22 @@ class RandomWatchlistSampler(
                   pageUrl(username = normalizedUsername, category = category, page = pageNumber),
               )
       ) {
-        is PageState.Success -> result.data
-        PageState.CfChallenge -> {
+        is ResourceResult.Success -> result.data
+        ResourceResult.CfChallenge -> {
           if (skipOnFailure) null else error("Cloudflare verification required")
         }
 
-        is PageState.AuthRequired -> {
+        is ResourceResult.AuthRequired -> {
           if (skipOnFailure) null else error(result.message)
         }
 
-        is PageState.MatureBlocked -> {
+        is ResourceResult.MatureBlocked -> {
           if (skipOnFailure) null else error(result.reason)
         }
 
-        is PageState.Error -> {
+        is ResourceResult.Error -> {
           if (skipOnFailure) null else throw result.exception
         }
-
-        PageState.Loading -> null
       }
     }
 
@@ -262,13 +257,12 @@ class RandomWatchlistSampler(
       throttle.awaitReady()
       onProgress(WatchRecommendationProgress.LoadingUserProfile(normalizedUsername))
       return when (val state = loadUser(normalizedUsername)) {
-        is PageState.Success -> totalPagesFor(state.data, category)
-        PageState.CfChallenge ->
+        is ResourceResult.Success -> totalPagesFor(state.data, category)
+        ResourceResult.CfChallenge ->
             if (skipOnFailure) null else error("Cloudflare verification required")
-        is PageState.AuthRequired -> if (skipOnFailure) null else error(state.message)
-        is PageState.MatureBlocked -> if (skipOnFailure) null else error(state.reason)
-        is PageState.Error -> if (skipOnFailure) null else throw state.exception
-        PageState.Loading -> null
+        is ResourceResult.AuthRequired -> if (skipOnFailure) null else error(state.message)
+        is ResourceResult.MatureBlocked -> if (skipOnFailure) null else error(state.reason)
+        is ResourceResult.Error -> if (skipOnFailure) null else throw state.exception
       }
     }
 

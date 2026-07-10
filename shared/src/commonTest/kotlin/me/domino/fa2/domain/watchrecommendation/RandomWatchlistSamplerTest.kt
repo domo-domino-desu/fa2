@@ -5,7 +5,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.User
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
@@ -36,7 +36,7 @@ class RandomWatchlistSamplerTest {
         buildSampler(
             responses = responses,
             userResponses =
-                mapOf("artist" to PageState.Success(testUser("artist", watchedByCount = 600))),
+                mapOf("artist" to ResourceResult.Success(testUser("artist", watchedByCount = 600))),
             userRequests = userRequests,
             watchlistRequests = watchlistRequests,
         )
@@ -140,7 +140,7 @@ class RandomWatchlistSamplerTest {
         buildSampler(
             responses = responses,
             userResponses =
-                mapOf("user" to PageState.Success(testUser("user", watchingCount = 600))),
+                mapOf("user" to ResourceResult.Success(testUser("user", watchingCount = 600))),
             userRequests = userRequests,
             watchlistRequests = watchlistRequests,
         )
@@ -179,7 +179,7 @@ class RandomWatchlistSamplerTest {
     val sampler =
         buildSampler(
             responses = responses,
-            userResponses = mapOf("user" to PageState.Success(testUser("user"))),
+            userResponses = mapOf("user" to ResourceResult.Success(testUser("user"))),
             userRequests = userRequests,
             watchlistRequests = watchlistRequests,
         )
@@ -215,7 +215,7 @@ class RandomWatchlistSamplerTest {
         buildSampler(
             responses = responses,
             userResponses =
-                mapOf("user" to PageState.Success(testUser("user", watchingCount = 2000))),
+                mapOf("user" to ResourceResult.Success(testUser("user", watchingCount = 2000))),
             userRequests = userRequests,
             watchlistRequests = watchlistRequests,
         )
@@ -235,8 +235,8 @@ class RandomWatchlistSamplerTest {
   }
 
   private fun buildSampler(
-      responses: Map<SamplerLoaderKey, PageState<WatchlistPage>>,
-      userResponses: Map<String, PageState<User>> = emptyMap(),
+      responses: Map<SamplerLoaderKey, ResourceResult<WatchlistPage>>,
+      userResponses: Map<String, ResourceResult<User>> = emptyMap(),
       userRequests: MutableList<String> = mutableListOf(),
       watchlistRequests: MutableList<SamplerLoaderKey> = mutableListOf(),
   ): RandomWatchlistSampler =
@@ -245,13 +245,13 @@ class RandomWatchlistSamplerTest {
             val key = SamplerLoaderKey(username.lowercase(), nextPageUrl, category)
             watchlistRequests += key
             responses[key]
-                ?: PageState.Error(
+                ?: ResourceResult.Error(
                     IllegalStateException("missing response for $username::$category::$nextPageUrl")
                 )
           },
           loadUser = { username ->
             userRequests += username.lowercase()
-            userResponses[username.lowercase()] ?: PageState.Success(testUser(username))
+            userResponses[username.lowercase()] ?: ResourceResult.Success(testUser(username))
           },
           random = Random(0),
           requestThrottleMs = 0L,
@@ -260,8 +260,8 @@ class RandomWatchlistSamplerTest {
   private fun successPage(
       users: List<WatchlistUser>,
       nextPageUrl: String? = null,
-  ): PageState<WatchlistPage> =
-      PageState.Success(WatchlistPage(users = users, nextPageUrl = nextPageUrl))
+  ): ResourceResult<WatchlistPage> =
+      ResourceResult.Success(WatchlistPage(users = users, nextPageUrl = nextPageUrl))
 
   private fun watchUser(username: String): WatchlistUser =
       WatchlistUser(

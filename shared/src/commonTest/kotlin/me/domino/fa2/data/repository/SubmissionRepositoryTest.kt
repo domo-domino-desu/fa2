@@ -10,12 +10,12 @@ import me.domino.fa2.data.fa.favorites.FavoritesDataSource
 import me.domino.fa2.data.fa.favorites.FavoritesEndpoint
 import me.domino.fa2.data.fa.gallery.GalleryDataSource
 import me.domino.fa2.data.fa.gallery.GalleryEndpoint
-import me.domino.fa2.data.fa.gallery.GalleryPageCache
-import me.domino.fa2.data.fa.gallery.GalleryParser
-import me.domino.fa2.data.fa.social.SocialActionEndpoint
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.fa.listing.SubmissionListingParser
+import me.domino.fa2.data.fa.listing.UserGalleryPageStore
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
+import me.domino.fa2.fake.UnusedSocialActionSource
 import me.domino.fa2.utils.FaUrls
 
 /** SubmissionRepository 详情链路测试。 */
@@ -37,7 +37,7 @@ class SubmissionRepositoryTest {
     )
 
     val state = repository.loadSubmissionDetailBySid(latestSid)
-    assertTrue(state is PageState.Success)
+    assertTrue(state is ResourceResult.Success)
     val detail = state.data
     assertEquals("Sanitized Latest Submission", detail.title)
     assertEquals(657, detail.viewCount)
@@ -63,7 +63,7 @@ class SubmissionRepositoryTest {
     )
 
     val state = repository.loadSubmissionDetailByUrl(FaUrls.submission(latestSid))
-    assertTrue(state is PageState.Success)
+    assertTrue(state is ResourceResult.Success)
     assertEquals(latestSid, state.data.id)
     assertEquals(
         "1700000009.artist-alpha_sanitized_latest_submission.png",
@@ -83,20 +83,23 @@ class SubmissionRepositoryTest {
             pageCacheDao = pageCacheDao,
         )
     val galleryStore =
-        GalleryPageCache(
+        UserGalleryPageStore(
             galleryDataSource =
-                GalleryDataSource(endpoint = GalleryEndpoint(source), parser = GalleryParser()),
+                GalleryDataSource(
+                    endpoint = GalleryEndpoint(source),
+                    parser = SubmissionListingParser(),
+                ),
             favoritesDataSource =
                 FavoritesDataSource(
                     endpoint = FavoritesEndpoint(source),
-                    parser = GalleryParser(),
+                    parser = SubmissionListingParser(),
                 ),
             pageCacheDao = pageCacheDao,
         )
     return SubmissionRepository(
         submissionStore = store,
-        socialActionEndpoint = SocialActionEndpoint(source),
-        galleryStore = galleryStore,
+        socialActionEndpoint = UnusedSocialActionSource,
+        favoritesCacheInvalidator = galleryStore,
     )
   }
 }
@@ -112,10 +115,7 @@ private class SubmissionScriptedHtmlDataSource : FaHtmlDataSource {
   override suspend fun get(url: String): HtmlResponseResult {
     val queue = queueByUrl[url]
     if (queue == null || queue.isEmpty()) {
-      return HtmlResponseResult.Error(
-          statusCode = 500,
-          message = "No scripted response for $url",
-      )
+      return HtmlResponseResult.Error(statusCode = 500, message = "No scripted response for $url")
     }
     return queue.removeFirst()
   }

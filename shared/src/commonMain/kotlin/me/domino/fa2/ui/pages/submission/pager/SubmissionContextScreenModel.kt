@@ -8,18 +8,26 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.ui.i18n.appString
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.translation.*
+import me.domino.fa2.ui.submissionviewer.adapters.SeedSubmissionSourceAdapter
+import me.domino.fa2.ui.submissionviewer.api.ContextLoadingState
+import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSnapshot
+import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.ui.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPageSnapshot
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPaginationModel
+import me.domino.fa2.ui.submissionviewer.api.SubmissionSourceAdapter
+import me.domino.fa2.ui.submissionviewer.api.WaterfallScrollRequest
+import me.domino.fa2.ui.submissionviewer.api.WaterfallViewportState
+import me.domino.fa2.ui.submissionviewer.api.matches
 import me.domino.fa2.utils.logging.FaLog
 
 class SubmissionContextScreenModel : ScreenModel {
   private val log = FaLog.withTag("SubmissionContext")
   private val contexts: MutableMap<String, SubmissionContextRecord> = mutableMapOf()
+  private val reducer = SubmissionContextSnapshotReducer
 
   private companion object {
     const val pageScrollCandidateCount = 12
@@ -38,12 +46,7 @@ class SubmissionContextScreenModel : ScreenModel {
   ) {
     val record = recordOf(contextId)
     if (record.state.value != null) return
-    val page =
-        SubmissionPageSnapshot(
-            pageId = "seed:$contextId",
-            requestKey = null,
-            items = items,
-        )
+    val page = SubmissionPageSnapshot(pageId = "seed:$contextId", requestKey = null, items = items)
     record.adapter = SeedSubmissionSourceAdapter(sourceKind = sourceKind, items = items)
     record.state.value =
         SubmissionContextSnapshot(
@@ -52,8 +55,8 @@ class SubmissionContextScreenModel : ScreenModel {
             paginationModel = record.adapter?.paginationModel ?: SubmissionPaginationModel(),
             pages = listOf(page),
             flatItems = items,
-            selectedSid = resolveSelectedSid(items, selectedSid),
-            selectedFlatIndex = resolveSelectedIndex(items, selectedSid),
+            selectedSid = reducer.resolveSelectedSid(items, selectedSid),
+            selectedFlatIndex = reducer.resolveSelectedIndex(items, selectedSid),
         )
   }
 
@@ -68,7 +71,7 @@ class SubmissionContextScreenModel : ScreenModel {
     if (record.state.value != null) return
     record.adapter = adapter
     record.state.value =
-        buildSnapshot(
+        reducer.build(
             contextId = contextId,
             sourceKind = adapter.sourceKind,
             paginationModel = adapter.paginationModel,
@@ -94,7 +97,7 @@ class SubmissionContextScreenModel : ScreenModel {
     record.adapter = adapter
     if (current == null) {
       record.state.value =
-          buildSnapshot(
+          reducer.build(
               contextId = contextId,
               sourceKind = sourceKind,
               paginationModel = adapter.paginationModel,
@@ -116,7 +119,7 @@ class SubmissionContextScreenModel : ScreenModel {
                 incomingPage.items.map(SubmissionThumbnail::id)
     val mergedPages =
         if (shouldKeepCachedTail) {
-          keepContinuousTailFromRoot(
+          reducer.keepContinuousTailFromRoot(
               incomingRootPage = incomingPage,
               existingPages = current.pages,
           )
@@ -124,7 +127,7 @@ class SubmissionContextScreenModel : ScreenModel {
           listOf(incomingPage)
         }
     record.state.value =
-        buildSnapshot(
+        reducer.build(
             contextId = contextId,
             sourceKind = sourceKind,
             paginationModel = adapter.paginationModel,
@@ -142,7 +145,7 @@ class SubmissionContextScreenModel : ScreenModel {
     updateSnapshot(contextId) { current ->
       current.copy(
           selectedSid = sid,
-          selectedFlatIndex = resolveSelectedIndex(current.flatItems, sid),
+          selectedFlatIndex = reducer.resolveSelectedIndex(current.flatItems, sid),
       )
     }
   }
@@ -181,11 +184,7 @@ class SubmissionContextScreenModel : ScreenModel {
     requestScrollToSubmission(contextId = contextId, sid = sid, animated = false)
   }
 
-  private fun requestScrollToSubmission(
-      contextId: String,
-      sid: Int,
-      animated: Boolean,
-  ) {
+  private fun requestScrollToSubmission(contextId: String, sid: Int, animated: Boolean) {
     updateSnapshot(contextId) { current ->
       if (current.flatItems.none { item -> item.id == sid }) return@updateSnapshot current
       val nextVersion = (current.waterfallViewport.scrollRequest?.version ?: 0L) + 1L
@@ -194,11 +193,7 @@ class SubmissionContextScreenModel : ScreenModel {
               current.waterfallViewport.copy(
                   anchorSid = sid,
                   scrollRequest =
-                      WaterfallScrollRequest(
-                          sid = sid,
-                          version = nextVersion,
-                          animated = animated,
-                      ),
+                      WaterfallScrollRequest(sid = sid, version = nextVersion, animated = animated),
               )
       )
     }
@@ -213,12 +208,7 @@ class SubmissionContextScreenModel : ScreenModel {
     updateSnapshot(contextId) { current ->
       val request = current.waterfallViewport.scrollRequest ?: return@updateSnapshot current
       if (request.version != version) return@updateSnapshot current
-      current.copy(
-          waterfallViewport =
-              current.waterfallViewport.copy(
-                  scrollRequest = null,
-              )
-      )
+      current.copy(waterfallViewport = current.waterfallViewport.copy(scrollRequest = null))
     }
   }
 
@@ -230,7 +220,9 @@ class SubmissionContextScreenModel : ScreenModel {
     val loading = snapshot.loading
     if (loading.appendLoading || loading.jumpLoading || loading.prependLoading) return
     if (!force && !loading.appendErrorMessage.isNullOrBlank()) return
-    startLoad(contextId = contextId, kind = LoadKind.APPEND) { adapter.loadNextPage(nextKey) }
+    startLoad(contextId = contextId, kind = SubmissionContextLoadKind.APPEND) {
+      adapter.loadNextPage(nextKey)
+    }
   }
 
   fun loadPreviousPageIfNeeded(contextId: String, force: Boolean = false) {
@@ -241,7 +233,7 @@ class SubmissionContextScreenModel : ScreenModel {
     val loading = snapshot.loading
     if (loading.appendLoading || loading.jumpLoading || loading.prependLoading) return
     if (!force && !loading.prependErrorMessage.isNullOrBlank()) return
-    startLoad(contextId = contextId, kind = LoadKind.PREPEND) {
+    startLoad(contextId = contextId, kind = SubmissionContextLoadKind.PREPEND) {
       adapter.loadPreviousPage(previousKey)
     }
   }
@@ -258,11 +250,11 @@ class SubmissionContextScreenModel : ScreenModel {
     val previousKey = currentTarget.page.previousRequestKey ?: return
     startLoad(
         contextId = contextId,
-        kind = LoadKind.JUMP,
+        kind = SubmissionContextLoadKind.JUMP,
         scrollToLoadedPage = true,
         scrollAnimated = true,
         pageMerger = { existing, incoming ->
-          mergeBoundaryPage(
+          reducer.mergeBoundaryPage(
               existing = existing,
               incoming = incoming,
               prepend = true,
@@ -286,11 +278,11 @@ class SubmissionContextScreenModel : ScreenModel {
     val nextKey = currentTarget.page.nextRequestKey ?: return
     startLoad(
         contextId = contextId,
-        kind = LoadKind.JUMP,
+        kind = SubmissionContextLoadKind.JUMP,
         scrollToLoadedPage = true,
         scrollAnimated = true,
         pageMerger = { existing, incoming ->
-          mergeBoundaryPage(
+          reducer.mergeBoundaryPage(
               existing = existing,
               incoming = incoming,
               prepend = false,
@@ -305,7 +297,7 @@ class SubmissionContextScreenModel : ScreenModel {
   fun loadFirstPage(contextId: String) {
     val adapter = contexts[contextId]?.adapter ?: return
     if (!adapter.paginationModel.hasFirstPage) return
-    startLoad(contextId = contextId, kind = LoadKind.JUMP, replace = true) {
+    startLoad(contextId = contextId, kind = SubmissionContextLoadKind.JUMP, replace = true) {
       adapter.loadFirstPage()
     }
   }
@@ -322,10 +314,10 @@ class SubmissionContextScreenModel : ScreenModel {
         }
     startLoad(
         contextId = contextId,
-        kind = LoadKind.JUMP,
+        kind = SubmissionContextLoadKind.JUMP,
         scrollToLoadedPage = true,
         pageMerger = { existing, incoming ->
-          mergeBoundaryPage(
+          reducer.mergeBoundaryPage(
               existing = existing,
               incoming = incoming,
               prepend = true,
@@ -340,7 +332,7 @@ class SubmissionContextScreenModel : ScreenModel {
   fun loadLastPage(contextId: String) {
     val adapter = contexts[contextId]?.adapter ?: return
     if (!adapter.paginationModel.knowsLastPage) return
-    startLoad(contextId = contextId, kind = LoadKind.JUMP, replace = true) {
+    startLoad(contextId = contextId, kind = SubmissionContextLoadKind.JUMP, replace = true) {
       adapter.loadLastPage()
     }
   }
@@ -358,10 +350,10 @@ class SubmissionContextScreenModel : ScreenModel {
         }
     startLoad(
         contextId = contextId,
-        kind = LoadKind.JUMP,
+        kind = SubmissionContextLoadKind.JUMP,
         scrollToLoadedPage = true,
         pageMerger = { existing, incoming ->
-          mergeBoundaryPage(
+          reducer.mergeBoundaryPage(
               existing = existing,
               incoming = incoming,
               prepend = false,
@@ -376,7 +368,7 @@ class SubmissionContextScreenModel : ScreenModel {
   fun jumpToPage(contextId: String, pageNumber: Int) {
     val adapter = contexts[contextId]?.adapter ?: return
     if (!adapter.paginationModel.supportsJumpToPage) return
-    startLoad(contextId = contextId, kind = LoadKind.JUMP, replace = true) {
+    startLoad(contextId = contextId, kind = SubmissionContextLoadKind.JUMP, replace = true) {
       adapter.jumpToPage(pageNumber)
     }
   }
@@ -400,10 +392,10 @@ class SubmissionContextScreenModel : ScreenModel {
             adapter.paginationModel.supportsAdjacentPaging ->
             startLoad(
                 contextId = contextId,
-                kind = LoadKind.JUMP,
+                kind = SubmissionContextLoadKind.JUMP,
                 scrollToLoadedPage = true,
                 pageMerger = { existing, incoming ->
-                  mergeBoundaryPage(
+                  reducer.mergeBoundaryPage(
                       existing = existing,
                       incoming = incoming,
                       prepend = true,
@@ -419,10 +411,10 @@ class SubmissionContextScreenModel : ScreenModel {
             adapter.paginationModel.supportsAdjacentPaging ->
             startLoad(
                 contextId = contextId,
-                kind = LoadKind.JUMP,
+                kind = SubmissionContextLoadKind.JUMP,
                 scrollToLoadedPage = true,
                 pageMerger = { existing, incoming ->
-                  mergeBoundaryPage(
+                  reducer.mergeBoundaryPage(
                       existing = existing,
                       incoming = incoming,
                       prepend = false,
@@ -436,7 +428,7 @@ class SubmissionContextScreenModel : ScreenModel {
         adapter.paginationModel.supportsJumpToPage ->
             startLoad(
                 contextId = contextId,
-                kind = LoadKind.JUMP,
+                kind = SubmissionContextLoadKind.JUMP,
                 replace = true,
                 scrollToLoadedPage = true,
             ) {
@@ -448,7 +440,7 @@ class SubmissionContextScreenModel : ScreenModel {
     if (!adapter.paginationModel.supportsJumpToPage) return
     startLoad(
         contextId = contextId,
-        kind = LoadKind.JUMP,
+        kind = SubmissionContextLoadKind.JUMP,
         replace = true,
         scrollToLoadedPage = true,
     ) {
@@ -467,7 +459,7 @@ class SubmissionContextScreenModel : ScreenModel {
 
   private fun startLoad(
       contextId: String,
-      kind: LoadKind,
+      kind: SubmissionContextLoadKind,
       replace: Boolean = false,
       scrollToLoadedPage: Boolean = false,
       scrollAnimated: Boolean = false,
@@ -476,7 +468,7 @@ class SubmissionContextScreenModel : ScreenModel {
                   SubmissionPageSnapshot
               >)? =
           null,
-      block: suspend () -> PageState<SubmissionLoadedPage>,
+      block: suspend () -> ResourceResult<SubmissionLoadedPage>,
   ) {
     val record = contexts[contextId] ?: return
     record.loadingJob?.cancel()
@@ -484,22 +476,23 @@ class SubmissionContextScreenModel : ScreenModel {
       current.copy(
           loading =
               when (kind) {
-                LoadKind.PREPEND ->
+                SubmissionContextLoadKind.PREPEND ->
                     current.loading.copy(prependLoading = true, prependErrorMessage = null)
-                LoadKind.APPEND ->
+                SubmissionContextLoadKind.APPEND ->
                     current.loading.copy(appendLoading = true, appendErrorMessage = null)
-                LoadKind.JUMP -> current.loading.copy(jumpLoading = true, jumpErrorMessage = null)
+                SubmissionContextLoadKind.JUMP ->
+                    current.loading.copy(jumpLoading = true, jumpErrorMessage = null)
               }
       )
     }
     record.loadingJob =
         screenModelScope.launch {
           when (val result = block()) {
-            is PageState.Success -> {
+            is ResourceResult.Success -> {
               val current = snapshot(contextId) ?: return@launch
               val incomingPage = result.data.toSnapshot()
               val duplicateBoundaryPages =
-                  resolveDuplicateBoundaryPages(
+                  reducer.resolveDuplicateBoundaryPages(
                       existing = current.pages,
                       incoming = incomingPage,
                       kind = kind,
@@ -508,21 +501,21 @@ class SubmissionContextScreenModel : ScreenModel {
                   duplicateBoundaryPages
                       ?: pageMerger?.invoke(current.pages, incomingPage)
                       ?: when (kind) {
-                        LoadKind.PREPEND ->
-                            mergePages(
+                        SubmissionContextLoadKind.PREPEND ->
+                            reducer.mergePages(
                                 existing = current.pages,
                                 incoming = incomingPage,
                                 prepend = true,
                             )
-                        LoadKind.APPEND ->
-                            mergePages(
+                        SubmissionContextLoadKind.APPEND ->
+                            reducer.mergePages(
                                 existing = current.pages,
                                 incoming = incomingPage,
                                 prepend = false,
                             )
-                        LoadKind.JUMP ->
+                        SubmissionContextLoadKind.JUMP ->
                             if (replace) listOf(incomingPage)
-                            else insertPage(current.pages, incomingPage)
+                            else reducer.insertPage(current.pages, incomingPage)
                       }
               logPageMerge(
                   contextId = contextId,
@@ -533,7 +526,7 @@ class SubmissionContextScreenModel : ScreenModel {
               )
               val scrollTarget = mergedPages.firstOrNull { page -> page.matches(incomingPage) }
               updateSnapshot(contextId) {
-                buildSnapshot(
+                reducer.build(
                     contextId = it.contextId,
                     sourceKind = it.sourceKind,
                     paginationModel = it.paginationModel,
@@ -545,44 +538,43 @@ class SubmissionContextScreenModel : ScreenModel {
                 )
               }
               if (scrollToLoadedPage && scrollTarget != null) {
-                scrollToPage(
-                    contextId = contextId,
-                    page = scrollTarget,
-                    animated = scrollAnimated,
-                )
+                scrollToPage(contextId = contextId, page = scrollTarget, animated = scrollAnimated)
               }
             }
 
-            PageState.CfChallenge ->
+            ResourceResult.CfChallenge ->
                 updateLoadingError(
                     contextId,
                     kind,
                     appString(Res.string.cloudflare_challenge_title),
                 )
 
-            is PageState.AuthRequired -> updateLoadingError(contextId, kind, result.message)
-            is PageState.MatureBlocked -> updateLoadingError(contextId, kind, result.reason)
-            is PageState.Error ->
+            is ResourceResult.AuthRequired -> updateLoadingError(contextId, kind, result.message)
+            is ResourceResult.MatureBlocked -> updateLoadingError(contextId, kind, result.reason)
+            is ResourceResult.Error ->
                 updateLoadingError(
                     contextId,
                     kind,
                     result.exception.message ?: result.exception.toString(),
                 )
-            PageState.Loading -> updateLoadingError(contextId, kind, null)
           }
         }
   }
 
-  private fun updateLoadingError(contextId: String, kind: LoadKind, message: String?) {
+  private fun updateLoadingError(
+      contextId: String,
+      kind: SubmissionContextLoadKind,
+      message: String?,
+  ) {
     updateSnapshot(contextId) { current ->
       current.copy(
           loading =
               when (kind) {
-                LoadKind.PREPEND ->
+                SubmissionContextLoadKind.PREPEND ->
                     current.loading.copy(prependLoading = false, prependErrorMessage = message)
-                LoadKind.APPEND ->
+                SubmissionContextLoadKind.APPEND ->
                     current.loading.copy(appendLoading = false, appendErrorMessage = message)
-                LoadKind.JUMP ->
+                SubmissionContextLoadKind.JUMP ->
                     current.loading.copy(jumpLoading = false, jumpErrorMessage = message)
               }
       )
@@ -600,232 +592,6 @@ class SubmissionContextScreenModel : ScreenModel {
 
   private fun recordOf(contextId: String): SubmissionContextRecord =
       contexts.getOrPut(contextId) { SubmissionContextRecord(state = MutableStateFlow(null)) }
-
-  private fun buildSnapshot(
-      contextId: String,
-      sourceKind: SubmissionContextSourceKind,
-      paginationModel: SubmissionPaginationModel,
-      pages: List<SubmissionPageSnapshot>,
-      selectedSid: Int?,
-      loading: ContextLoadingState,
-      viewport: WaterfallViewportState,
-      revisionKey: String?,
-  ): SubmissionContextSnapshot {
-    val flatItems = flattenItems(pages)
-    val resolvedSelectedSid = resolveSelectedSid(flatItems, selectedSid)
-    val sanitizedViewport =
-        sanitizeViewport(
-            viewport = viewport,
-            pages = pages,
-            flatItems = flatItems,
-            fallbackSid = resolvedSelectedSid,
-        )
-    return SubmissionContextSnapshot(
-        contextId = contextId,
-        sourceKind = sourceKind,
-        paginationModel = paginationModel,
-        pages = pages,
-        flatItems = flatItems,
-        selectedSid = resolvedSelectedSid,
-        selectedFlatIndex = resolveSelectedIndex(flatItems, resolvedSelectedSid),
-        loading = loading,
-        waterfallViewport = sanitizedViewport,
-        revisionKey = revisionKey,
-    )
-  }
-
-  private fun mergePages(
-      existing: List<SubmissionPageSnapshot>,
-      incoming: SubmissionPageSnapshot,
-      prepend: Boolean,
-  ): List<SubmissionPageSnapshot> {
-    if (
-        existing.any { page ->
-          page.pageId == incoming.pageId ||
-              (incoming.requestKey != null && page.requestKey == incoming.requestKey)
-        }
-    ) {
-      return existing
-    }
-    return if (prepend) listOf(incoming) + existing else existing + incoming
-  }
-
-  private fun insertPage(
-      existing: List<SubmissionPageSnapshot>,
-      incoming: SubmissionPageSnapshot,
-  ): List<SubmissionPageSnapshot> {
-    if (
-        existing.any { page ->
-          page.pageId == incoming.pageId ||
-              (incoming.requestKey != null && page.requestKey == incoming.requestKey)
-        }
-    ) {
-      return existing
-    }
-    existing.forEachIndexed { index, page ->
-      val shouldInsertBefore =
-          page.requestKey != null &&
-              (incoming.nextRequestKey == page.requestKey ||
-                  page.previousRequestKey == incoming.requestKey)
-      if (shouldInsertBefore) {
-        return existing.toMutableList().apply { add(index, incoming) }
-      }
-      val shouldInsertAfter =
-          page.requestKey != null &&
-              (incoming.previousRequestKey == page.requestKey ||
-                  page.nextRequestKey == incoming.requestKey)
-      if (shouldInsertAfter) {
-        return existing.toMutableList().apply { add(index + 1, incoming) }
-      }
-    }
-    val incomingNumber = incoming.pageNumber
-    if (incomingNumber == null) return existing + incoming
-    val sorted =
-        (existing + incoming).sortedWith(
-            compareBy<SubmissionPageSnapshot> { page -> page.pageNumber ?: Int.MAX_VALUE }
-                .thenBy { page -> page.pageId }
-        )
-    return sorted
-  }
-
-  private fun flattenItems(pages: List<SubmissionPageSnapshot>): List<SubmissionThumbnail> {
-    val map = LinkedHashMap<Int, SubmissionThumbnail>()
-    pages.forEach { page -> page.items.forEach { item -> map[item.id] = item } }
-    return map.values.toList()
-  }
-
-  private fun resolveSelectedSid(
-      items: List<SubmissionThumbnail>,
-      preferredSid: Int?,
-  ): Int? =
-      when {
-        items.isEmpty() -> null
-        preferredSid != null && items.any { item -> item.id == preferredSid } -> preferredSid
-        else -> items.first().id
-      }
-
-  private fun resolveSelectedIndex(items: List<SubmissionThumbnail>, sid: Int?): Int {
-    if (items.isEmpty()) return 0
-    val index = sid?.let { targetSid -> items.indexOfFirst { item -> item.id == targetSid } } ?: 0
-    return index.coerceAtLeast(0)
-  }
-
-  private fun keepContinuousTailFromRoot(
-      incomingRootPage: SubmissionPageSnapshot,
-      existingPages: List<SubmissionPageSnapshot>,
-  ): List<SubmissionPageSnapshot> {
-    if (existingPages.isEmpty()) return listOf(incomingRootPage)
-    val merged = mutableListOf(incomingRootPage)
-    var previous = incomingRootPage
-    existingPages.drop(1).forEach { page ->
-      if (!page.isDirectNextOf(previous)) {
-        return merged
-      }
-      merged += page
-      previous = page
-    }
-    return merged
-  }
-
-  private fun mergeBoundaryPage(
-      existing: List<SubmissionPageSnapshot>,
-      incoming: SubmissionPageSnapshot,
-      prepend: Boolean,
-      replaceOnDiscontinuity: Boolean,
-  ): List<SubmissionPageSnapshot> {
-    if (existing.any { page -> page.matches(incoming) }) return existing
-    if (existing.isEmpty()) return listOf(incoming)
-    val canMerge =
-        if (prepend) {
-          incoming.isDirectPreviousOf(existing.first())
-        } else {
-          incoming.isDirectNextOf(existing.last())
-        }
-    if (canMerge) {
-      return if (prepend) listOf(incoming) + existing else existing + incoming
-    }
-    return if (replaceOnDiscontinuity) listOf(incoming) else existing
-  }
-
-  private fun resolveDuplicateBoundaryPages(
-      existing: List<SubmissionPageSnapshot>,
-      incoming: SubmissionPageSnapshot,
-      kind: LoadKind,
-  ): List<SubmissionPageSnapshot>? {
-    val incomingPageNumber = incoming.pageNumber ?: return null
-    val duplicateIndex = existing.indexOfFirst { page -> page.pageNumber == incomingPageNumber }
-    if (duplicateIndex < 0) return null
-    return when (kind) {
-      LoadKind.APPEND -> {
-        val duplicatePage = existing[duplicateIndex]
-        val resolvedLastRequestKey = duplicatePage.requestKey ?: incoming.requestKey
-        existing.mapIndexed { index, page ->
-          when (index) {
-            duplicateIndex ->
-                page.copy(
-                    nextRequestKey = null,
-                    lastRequestKey = resolvedLastRequestKey ?: page.lastRequestKey,
-                    lastPageNumber = incomingPageNumber,
-                )
-            else -> page.copy(lastPageNumber = incomingPageNumber)
-          }
-        }
-      }
-
-      LoadKind.PREPEND -> {
-        val duplicatePage = existing[duplicateIndex]
-        val resolvedFirstRequestKey =
-            duplicatePage.firstRequestKey ?: duplicatePage.requestKey ?: incoming.requestKey
-        existing.mapIndexed { index, page ->
-          when (index) {
-            duplicateIndex ->
-                page.copy(
-                    previousRequestKey = null,
-                    firstRequestKey = resolvedFirstRequestKey,
-                )
-            else -> page
-          }
-        }
-      }
-
-      LoadKind.JUMP -> null
-    }
-  }
-
-  private fun sanitizeViewport(
-      viewport: WaterfallViewportState,
-      pages: List<SubmissionPageSnapshot>,
-      flatItems: List<SubmissionThumbnail>,
-      fallbackSid: Int?,
-  ): WaterfallViewportState {
-    val validIds = flatItems.mapTo(linkedSetOf()) { item -> item.id }
-    val pageNumbers = pages.mapNotNull { page -> page.pageNumber }
-    val anchorSid = viewport.anchorSid?.takeIf { sid -> sid in validIds } ?: fallbackSid
-    val anchorPage =
-        anchorSid?.let { sid ->
-          pages.firstOrNull { page -> page.items.any { item -> item.id == sid } }
-        }
-    val scrollRequest = viewport.scrollRequest?.takeIf { request -> request.sid in validIds }
-    val currentPageNumber =
-        anchorPage?.pageNumber
-            ?: when {
-              pageNumbers.isEmpty() -> viewport.currentPageNumber
-              else ->
-                  viewport.currentPageNumber?.takeIf { pageNumber ->
-                    pageNumbers.contains(pageNumber)
-                  }
-            }
-            ?: if (pages.size == 1) pages.firstOrNull()?.pageNumber else null
-    val keepScrollPosition = scrollRequest != null || viewport.anchorSid == anchorSid
-    return viewport.copy(
-        firstVisibleItemIndex = if (keepScrollPosition) viewport.firstVisibleItemIndex else 0,
-        firstVisibleItemScrollOffset =
-            if (keepScrollPosition) viewport.firstVisibleItemScrollOffset else 0,
-        anchorSid = anchorSid,
-        currentPageNumber = currentPageNumber,
-        scrollRequest = scrollRequest,
-    )
-  }
 
   private fun scrollToPage(
       contextId: String,
@@ -855,7 +621,7 @@ class SubmissionContextScreenModel : ScreenModel {
 
   private fun logPageMerge(
       contextId: String,
-      kind: LoadKind,
+      kind: SubmissionContextLoadKind,
       existing: List<SubmissionPageSnapshot>,
       incoming: SubmissionPageSnapshot,
       merged: List<SubmissionPageSnapshot>,
@@ -883,9 +649,3 @@ private data class SubmissionContextRecord(
     var adapter: SubmissionSourceAdapter? = null,
     var loadingJob: Job? = null,
 )
-
-private enum class LoadKind {
-  PREPEND,
-  APPEND,
-  JUMP,
-}

@@ -1,12 +1,12 @@
 package me.domino.fa2.desktop
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
 import io.ktor.client.HttpClient
-import kotlinx.coroutines.runBlocking
 import me.domino.fa2.data.fa.media.installCoilImageProgressSupport
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.di.KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT
@@ -28,14 +28,6 @@ fun main() = application {
   FaLog.init(severity)
   FaLog.withTag("DesktopMain").i { "桌面启动 -> 日志级别=${severity.name}" }
   val koin = startAppKoin(desktopPlatformModule())
-  runCatching {
-        runBlocking {
-          val settingsService = koin.get<AppSettingsService>()
-          settingsService.ensureLoaded()
-          FaLog.setMinSeverity(settingsService.settings.value.logLevel.severity)
-        }
-      }
-      .onFailure { error -> FaLog.withTag("DesktopMain").e(error) { "应用保存日志级别失败" } }
   Window(
       onCloseRequest = {
         FaLog.withTag("DesktopMain").i { "窗口关闭 -> 释放资源" }
@@ -44,6 +36,14 @@ fun main() = application {
       },
       title = "fa2",
   ) {
+    LaunchedEffect(koin) {
+      runCatching {
+            val settingsService = koin.get<AppSettingsService>()
+            settingsService.ensureLoaded()
+            FaLog.setMinSeverity(settingsService.settings.value.logLevel.severity)
+          }
+          .onFailure { error -> FaLog.withTag("DesktopMain").e(error) { "应用读取日志级别失败" } }
+    }
     setSingletonImageLoaderFactory { platformContext ->
       val cachedDownloadClient =
           GlobalContext.get()

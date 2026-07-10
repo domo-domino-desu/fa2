@@ -10,10 +10,7 @@ import me.domino.fa2.data.local.KeyValueStorage
 /** E2E 测试会话数据辅助工具，负责读写测试用的 Cookie 与用户代理数据。 */
 internal object DesktopE2eSessionStorage {
   /** 将会话快照写入给定的测试档案存储中。 */
-  suspend fun seedProfile(
-      stores: DesktopE2eProfileStores,
-      snapshot: DesktopE2eSessionSnapshot,
-  ) {
+  suspend fun seedProfile(stores: DesktopE2eProfileStores, snapshot: DesktopE2eSessionSnapshot) {
     val cookiesStorage = FaCookiesStorage(KSafeCookiePersistence(cookieVault = stores.cookieVault))
     val userAgentStorage = UserAgentStorage(KeyValueStorage(stores.dataStore))
     cookiesStorage.saveRawCookieHeader(snapshot.cookieHeader)

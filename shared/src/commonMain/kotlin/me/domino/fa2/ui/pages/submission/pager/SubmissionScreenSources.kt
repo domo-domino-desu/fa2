@@ -3,39 +3,18 @@ package me.domino.fa2.ui.pages.submission.pager
 import me.domino.fa2.data.fa.feed.FeedRepository
 import me.domino.fa2.data.fa.submission.SubmissionRepository
 import me.domino.fa2.data.model.FeedPage
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.domain.attachmenttext.AttachmentTextService
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.translation.*
-
-interface SubmissionPagerFeedSource {
-  suspend fun loadPageByNextUrl(nextPageUrl: String): PageState<FeedPage>
-}
-
-interface SubmissionPagerDetailSource {
-  suspend fun loadBySid(sid: Int): PageState<Submission>
-
-  suspend fun loadByUrl(url: String): PageState<Submission>
-
-  suspend fun loadAttachmentText(
-      downloadUrl: String,
-      downloadFileName: String,
-      onProgress: (AttachmentTextProgress) -> Unit = {},
-  ): PageState<AttachmentTextDocument>
-
-  suspend fun toggleFavorite(sid: Int, actionUrl: String): PageState<Unit>
-
-  suspend fun blockTag(sid: Int, tagName: String, nonce: String, toAdd: Boolean): PageState<Unit>
-}
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerDetailSource
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerFeedSource
+import me.domino.fa2.utils.concurrency.runSuspendCatching
 
 class SubmissionPagerFeedSourceImpl(private val repository: FeedRepository) :
     SubmissionPagerFeedSource {
-  override suspend fun loadPageByNextUrl(nextPageUrl: String): PageState<FeedPage> =
+  override suspend fun loadPageByNextUrl(nextPageUrl: String): ResourceResult<FeedPage> =
       repository.loadPageByNextUrl(nextPageUrl)
 }
 
@@ -43,27 +22,27 @@ class SubmissionPagerDetailSourceImpl(
     private val repository: SubmissionRepository,
     private val attachmentTextService: AttachmentTextService,
 ) : SubmissionPagerDetailSource {
-  override suspend fun loadBySid(sid: Int): PageState<Submission> =
+  override suspend fun loadBySid(sid: Int): ResourceResult<Submission> =
       repository.loadSubmissionDetailBySid(sid)
 
-  override suspend fun loadByUrl(url: String): PageState<Submission> =
+  override suspend fun loadByUrl(url: String): ResourceResult<Submission> =
       repository.loadSubmissionDetailByUrl(url)
 
   override suspend fun loadAttachmentText(
       downloadUrl: String,
       downloadFileName: String,
       onProgress: (AttachmentTextProgress) -> Unit,
-  ): PageState<AttachmentTextDocument> =
-      runCatching {
+  ): ResourceResult<AttachmentTextDocument> =
+      runSuspendCatching {
             attachmentTextService.load(
                 downloadUrl = downloadUrl,
                 downloadFileName = downloadFileName,
                 onProgress = onProgress,
             )
           }
-          .getOrElse { PageState.Error(it) }
+          .getOrElse { ResourceResult.Error(it) }
 
-  override suspend fun toggleFavorite(sid: Int, actionUrl: String): PageState<Unit> =
+  override suspend fun toggleFavorite(sid: Int, actionUrl: String): ResourceResult<Unit> =
       repository.toggleFavorite(sid = sid, actionUrl = actionUrl)
 
   override suspend fun blockTag(
@@ -71,6 +50,6 @@ class SubmissionPagerDetailSourceImpl(
       tagName: String,
       nonce: String,
       toAdd: Boolean,
-  ): PageState<Unit> =
+  ): ResourceResult<Unit> =
       repository.blockTag(sid = sid, tagName = tagName, nonce = nonce, toAdd = toAdd)
 }

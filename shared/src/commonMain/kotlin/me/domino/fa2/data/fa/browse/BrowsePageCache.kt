@@ -7,7 +7,7 @@ import me.domino.fa2.data.fa.core.CachedPageResource
 import me.domino.fa2.data.fa.core.requireStoreValue
 import me.domino.fa2.data.fa.core.storeJson
 import me.domino.fa2.data.local.dao.PageCacheDao
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionListingPage
 
 /** Browse 列表存储层。 */
@@ -28,15 +28,15 @@ class BrowsePageCache(
           },
       )
 
-  fun stream(requestUrl: String): Flow<PageState<SubmissionListingPage>> {
+  fun stream(requestUrl: String): Flow<ResourceResult<SubmissionListingPage>> {
     val key = normalizeRequestUrl(requestUrl)
     return cachedStore.stream(key)
   }
 
-  suspend fun loadPageOnce(requestUrl: String): PageState<SubmissionListingPage> =
+  suspend fun loadPageOnce(requestUrl: String): ResourceResult<SubmissionListingPage> =
       cachedStore.load(normalizeRequestUrl(requestUrl))
 
-  suspend fun refreshPage(requestUrl: String): PageState<SubmissionListingPage> =
+  suspend fun refreshPage(requestUrl: String): ResourceResult<SubmissionListingPage> =
       cachedStore.refresh(normalizeRequestUrl(requestUrl))
 
   private fun normalizeRequestUrl(url: String): String = url.trim()

@@ -11,7 +11,6 @@ import me.domino.fa2.data.fa.user.ActivityHistoryRepository
 import me.domino.fa2.data.i18n.AppI18nSnapshot
 import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.i18n.uiText
-import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
@@ -22,6 +21,7 @@ import me.domino.fa2.ui.i18n.search.SearchUiOptionKey
 import me.domino.fa2.ui.i18n.search.SearchUiTextKey
 import me.domino.fa2.ui.pages.search.util.SearchDateRangeShiftAction
 import me.domino.fa2.ui.pages.search.util.normalizeManualDateFields
+import me.domino.fa2.ui.state.UiPageState
 import me.domino.fa2.ui.utils.PaginationSnapshot
 import me.domino.fa2.utils.FaUrls
 import me.domino.fa2.utils.logging.FaLog
@@ -91,8 +91,8 @@ class SearchScreenModel(
 ) : StateScreenModel<SearchUiState>(SearchUiState()) {
   private val log = FaLog.withTag("SearchScreenModel")
   private val mutablePageState =
-      MutableStateFlow<PageState<SearchUiState>>(PageState.Success(state.value))
-  val pageState: StateFlow<PageState<SearchUiState>> = mutablePageState.asStateFlow()
+      MutableStateFlow<UiPageState<SearchUiState>>(UiPageState.Success(state.value))
+  val pageState: StateFlow<UiPageState<SearchUiState>> = mutablePageState.asStateFlow()
   private val workflow =
       SearchScreenWorkflow(
           repository = repository,
@@ -542,10 +542,7 @@ internal fun buildSearchFiltersSummary(
             types
                 .ifEmpty {
                   listOf(
-                      searchUiLabelsRepository.text(
-                          SearchUiTextKey.PHRASE_NONE,
-                          appI18n.uiLanguage,
-                      )
+                      searchUiLabelsRepository.text(SearchUiTextKey.PHRASE_NONE, appI18n.uiLanguage)
                   )
                 }
                 .joinToString(listDelimiter),
@@ -607,14 +604,7 @@ internal fun parseSearchFormFromUrl(url: String, fallbackQuery: String): SearchF
   val ratingKeys = listOf("rating-general", "rating-mature", "rating-adult")
   val hasAnyRatingFlag = ratingKeys.any(::has)
   val typeKeys =
-      listOf(
-          "type-art",
-          "type-music",
-          "type-flash",
-          "type-story",
-          "type-photo",
-          "type-poetry",
-      )
+      listOf("type-art", "type-music", "type-flash", "type-story", "type-photo", "type-poetry")
   val hasAnyTypeFlag = typeKeys.any(::has)
 
   val parsed =

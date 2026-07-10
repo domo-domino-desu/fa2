@@ -105,12 +105,7 @@ class SubmissionDescriptionTranslationServiceTest {
 
     assertEquals(
         expected =
-            listOf(
-                "First paragraph",
-                "Second paragraph",
-                "Third paragraph",
-                "Fourth paragraph",
-            ),
+            listOf("First paragraph", "Second paragraph", "Third paragraph", "Fourth paragraph"),
         actual = blocks.map { it.sourceText },
     )
     assertTrue(

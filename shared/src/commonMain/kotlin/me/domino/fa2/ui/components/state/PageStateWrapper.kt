@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import fa2.shared.generated.resources.*
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.ui.state.UiPageState
 import org.jetbrains.compose.resources.stringResource
 
 internal enum class PageFailureDisplayMode {
@@ -13,28 +13,28 @@ internal enum class PageFailureDisplayMode {
 }
 
 internal fun <T> resolvePageFailureDisplayMode(
-    state: PageState<T>,
+    state: UiPageState<T>,
     hasContent: Boolean,
 ): PageFailureDisplayMode =
     when (state) {
-      is PageState.AuthRequired,
-      PageState.CfChallenge,
-      is PageState.MatureBlocked -> PageFailureDisplayMode.HardFallback
-      is PageState.Error ->
+      is UiPageState.AuthRequired,
+      UiPageState.CfChallenge,
+      is UiPageState.MatureBlocked -> PageFailureDisplayMode.HardFallback
+      is UiPageState.Error ->
           if (hasContent) {
             PageFailureDisplayMode.PassThrough
           } else {
             PageFailureDisplayMode.HardFallback
           }
-      is PageState.Success,
-      PageState.Loading -> PageFailureDisplayMode.PassThrough
+      is UiPageState.Success,
+      UiPageState.Loading -> PageFailureDisplayMode.PassThrough
     }
 
-/** 统一渲染 `PageState` 的基础组件。 */
+/** 统一渲染 UI 页面状态的基础组件。 */
 @Composable
 fun <T> PageStateWrapper(
     /** 当前页面状态。 */
-    state: PageState<T>,
+    state: UiPageState<T>,
     /** 当前页面是否已有可展示内容。 */
     hasContent: Boolean,
     /** 重试回调。 */
@@ -49,7 +49,7 @@ fun <T> PageStateWrapper(
 
     PageFailureDisplayMode.HardFallback ->
         when (state) {
-          is PageState.AuthRequired -> {
+          is UiPageState.AuthRequired -> {
             HardFallbackScreen(
                 title = stringResource(Res.string.auth_probe_failed_title),
                 body = state.message,
@@ -57,7 +57,7 @@ fun <T> PageStateWrapper(
             )
           }
 
-          PageState.CfChallenge -> {
+          UiPageState.CfChallenge -> {
             HardFallbackScreen(
                 title = stringResource(Res.string.cloudflare_challenge_title),
                 body = stringResource(Res.string.cloudflare_challenge_body),
@@ -66,7 +66,7 @@ fun <T> PageStateWrapper(
             )
           }
 
-          is PageState.MatureBlocked -> {
+          is UiPageState.MatureBlocked -> {
             HardFallbackScreen(
                 title = stringResource(Res.string.page_blocked),
                 body = state.reason,
@@ -74,7 +74,7 @@ fun <T> PageStateWrapper(
             )
           }
 
-          is PageState.Error -> {
+          is UiPageState.Error -> {
             HardFallbackScreen(
                 title = stringResource(Res.string.load_failed),
                 body =
@@ -85,8 +85,8 @@ fun <T> PageStateWrapper(
             )
           }
 
-          is PageState.Success,
-          PageState.Loading -> {
+          is UiPageState.Success,
+          UiPageState.Loading -> {
             content()
           }
         }

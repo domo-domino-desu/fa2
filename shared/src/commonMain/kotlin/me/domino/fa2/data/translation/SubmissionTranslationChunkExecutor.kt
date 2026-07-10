@@ -9,7 +9,7 @@ import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.utils.logging.FaLog
 
 internal class SubmissionTranslationChunkExecutor(
-    private val chunkTranslator: SubmissionTranslationChunkTranslator,
+    private val chunkTranslator: SubmissionTranslationChunkTranslator
 ) {
   private val log = FaLog.withTag("TranslationChunkExecutor")
 

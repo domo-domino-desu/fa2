@@ -4,10 +4,7 @@ interface AttachmentDownloadSource {
   suspend fun fetch(url: String, fileName: String): AttachmentDownloadResult
 }
 
-data class AttachmentDownloadPayload(
-    val bytes: ByteArray,
-    val contentType: String?,
-)
+data class AttachmentDownloadPayload(val bytes: ByteArray, val contentType: String?)
 
 sealed interface AttachmentDownloadResult {
   data class Success(val payload: AttachmentDownloadPayload) : AttachmentDownloadResult

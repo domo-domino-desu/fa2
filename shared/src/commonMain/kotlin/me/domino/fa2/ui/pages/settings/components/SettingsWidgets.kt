@@ -187,10 +187,7 @@ fun SettingsListItem(
           )
         }
       }
-      Column(
-          modifier = Modifier.weight(1f),
-          verticalArrangement = Arrangement.spacedBy(2.dp),
-      ) {
+      Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
             text = title,
             style = MaterialTheme.typography.bodyLarge,
@@ -268,15 +265,8 @@ private fun SettingsControlLabel(
     supportingText: String?,
     modifier: Modifier = Modifier,
 ) {
-  Column(
-      modifier = modifier,
-      verticalArrangement = Arrangement.spacedBy(2.dp),
-  ) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.bodyLarge,
-        fontWeight = FontWeight.Medium,
-    )
+  Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Text(text = title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
     supportingText
         ?.takeIf { it.isNotBlank() }
         ?.let { text ->
@@ -303,11 +293,7 @@ fun SettingsInputRow(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: @Composable (() -> Unit)? = null,
 ) {
-  SettingsControlRow(
-      title = label,
-      supportingText = supportingText,
-      modifier = modifier,
-  ) {
+  SettingsControlRow(title = label, supportingText = supportingText, modifier = modifier) {
     CompactSettingsTextField(
         value = value,
         onValueChange = onValueChange,
@@ -439,11 +425,7 @@ fun SettingsNavigationRow(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-      SettingsControlLabel(
-          title = title,
-          supportingText = subtitle,
-          modifier = Modifier.weight(1f),
-      )
+      SettingsControlLabel(title = title, supportingText = subtitle, modifier = Modifier.weight(1f))
       Icon(
           imageVector = FaMaterialSymbols.AutoMirrored.Filled.KeyboardArrowRight,
           contentDescription = null,

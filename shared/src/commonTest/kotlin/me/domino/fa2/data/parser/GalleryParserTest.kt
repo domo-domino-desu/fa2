@@ -4,16 +4,17 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import me.domino.fa2.data.fa.listing.SubmissionListingParser
 import me.domino.fa2.data.model.GalleryFolderGroup
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.utils.FaUrls
 
-/** GalleryParser 解析测试。 */
+/** SubmissionListingParser 解析测试。 */
 class GalleryParserTest {
   @Test
   fun parsesGalleryAndNextPage() {
     val html = TestFixtures.read("www.furaffinity.net:gallery:artist-alpha:.html")
-    val parser = GalleryParser()
+    val parser = SubmissionListingParser()
 
     val page =
         parser.parse(
@@ -41,7 +42,7 @@ class GalleryParserTest {
   @Test
   fun parsesFavoritesAndNextPage() {
     val html = TestFixtures.read("www.furaffinity.net:favorites:artist-alpha:.html")
-    val parser = GalleryParser()
+    val parser = SubmissionListingParser()
 
     val page =
         parser.parse(
@@ -76,7 +77,7 @@ class GalleryParserTest {
         </html>
         """
             .trimIndent()
-    val parser = GalleryParser()
+    val parser = SubmissionListingParser()
 
     val page = parser.parse(html = html, baseUrl = FaUrls.gallery("demo"), defaultAuthor = "demo")
 

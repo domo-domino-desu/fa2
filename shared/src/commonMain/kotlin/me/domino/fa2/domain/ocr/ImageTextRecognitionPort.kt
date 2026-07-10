@@ -21,7 +21,7 @@ data class RecognizedTextBlock(
 /** 图像 OCR 识别结果。 */
 data class ImageOcrResult(
     /** 识别出的文本块列表。 */
-    val blocks: List<RecognizedTextBlock>,
+    val blocks: List<RecognizedTextBlock>
 )
 
 /** 图像文字识别端口接口。 */

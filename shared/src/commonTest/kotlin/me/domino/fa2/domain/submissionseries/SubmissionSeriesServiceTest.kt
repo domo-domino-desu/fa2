@@ -11,7 +11,8 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.fa.submission.SubmissionSeriesSubmissionSource
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.utils.FaUrls
 
@@ -258,11 +259,7 @@ class SubmissionSeriesServiceTest {
     advanceTimeBy(submissionSeriesRequestThrottleMs)
     runCurrent()
     assertEquals(
-        listOf(
-            FaUrls.submission(502),
-            FaUrls.submission(501),
-            FaUrls.submission(502),
-        ),
+        listOf(FaUrls.submission(502), FaUrls.submission(501), FaUrls.submission(502)),
         repository.requestedUrls,
     )
 
@@ -489,22 +486,19 @@ private class FakeSubmissionSeriesSubmissionSource(
   val requestedUrls: MutableList<String> = mutableListOf()
   val requestTimesMs: MutableList<Long> = mutableListOf()
 
-  override suspend fun loadSubmissionDetailBySid(sid: Int): PageState<Submission> =
+  override suspend fun loadSubmissionDetailBySid(sid: Int): ResourceResult<Submission> =
       loadSubmissionDetailByUrl(FaUrls.submission(sid))
 
-  override suspend fun loadSubmissionDetailByUrl(url: String): PageState<Submission> {
+  override suspend fun loadSubmissionDetailByUrl(url: String): ResourceResult<Submission> {
     val normalizedUrl = FaUrls.submission(url.substringAfter("/view/").substringBefore('/').toInt())
     requestedUrls += normalizedUrl
     requestTimesMs += nowMs()
-    return byUrl[normalizedUrl]?.let { detail -> PageState.Success(detail) }
-        ?: PageState.Error(IllegalStateException("Missing url=$normalizedUrl"))
+    return byUrl[normalizedUrl]?.let { detail -> ResourceResult.Success(detail) }
+        ?: ResourceResult.Error(IllegalStateException("Missing url=$normalizedUrl"))
   }
 }
 
-private fun fakeSubmission(
-    sid: Int,
-    descriptionHtml: String,
-): Submission =
+private fun fakeSubmission(sid: Int, descriptionHtml: String): Submission =
     Submission(
         id = sid,
         submissionUrl = FaUrls.submission(sid),

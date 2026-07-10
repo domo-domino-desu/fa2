@@ -1,6 +1,6 @@
 package me.domino.fa2.ui.utils
 
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 
 /** 分页列表的 UI 状态快照。 */
 data class PaginationSnapshot<Item>(
@@ -25,9 +25,7 @@ class PaginationReducer<Item, Key>(
     /** 从条目中提取去重键的函数。 */
     private val keyOf: (Item) -> Key,
     /** 获取 CF Challenge 错误提示文本的函数。 */
-    private val challengeMessage: () -> String,
-    /** 获取追加加载兜底错误提示文本的函数。 */
-    private val appendFallbackErrorMessage: () -> String,
+    private val challengeMessage: suspend () -> String,
 ) {
   /** 开始首屏/刷新加载，更新快照为加载中状态。 */
   fun beginLoad(
@@ -61,14 +59,14 @@ class PaginationReducer<Item, Key>(
       snapshot.copy(isLoadingMore = true, appendErrorMessage = null)
 
   /** 根据首页加载结果归约快照状态。 */
-  fun <Page> reduceFirstPage(
+  suspend fun <Page> reduceFirstPage(
       snapshot: PaginationSnapshot<Item>,
-      result: PageState<Page>,
+      result: ResourceResult<Page>,
       itemsOf: (Page) -> List<Item>,
       nextPageUrlOf: (Page) -> String?,
   ): PaginationSnapshot<Item> =
       when (result) {
-        is PageState.Success ->
+        is ResourceResult.Success ->
             snapshot.copy(
                 items = itemsOf(result.data),
                 nextPageUrl = nextPageUrlOf(result.data),
@@ -79,7 +77,7 @@ class PaginationReducer<Item, Key>(
                 appendErrorMessage = null,
             )
 
-        is PageState.AuthRequired ->
+        is ResourceResult.AuthRequired ->
             snapshot.copy(
                 loading = false,
                 refreshing = false,
@@ -88,7 +86,7 @@ class PaginationReducer<Item, Key>(
                 appendErrorMessage = null,
             )
 
-        PageState.CfChallenge ->
+        ResourceResult.CfChallenge ->
             snapshot.copy(
                 loading = false,
                 refreshing = false,
@@ -97,7 +95,7 @@ class PaginationReducer<Item, Key>(
                 appendErrorMessage = null,
             )
 
-        is PageState.MatureBlocked ->
+        is ResourceResult.MatureBlocked ->
             snapshot.copy(
                 loading = false,
                 refreshing = false,
@@ -105,26 +103,24 @@ class PaginationReducer<Item, Key>(
                 errorMessage = result.reason,
             )
 
-        is PageState.Error ->
+        is ResourceResult.Error ->
             snapshot.copy(
                 loading = false,
                 refreshing = false,
                 isLoadingMore = false,
                 errorMessage = result.exception.readableMessage(),
             )
-
-        PageState.Loading -> snapshot
       }
 
   /** 根据追加页加载结果归约快照状态，并按键合并去重。 */
-  fun <Page> reduceAppend(
+  suspend fun <Page> reduceAppend(
       snapshot: PaginationSnapshot<Item>,
-      result: PageState<Page>,
+      result: ResourceResult<Page>,
       itemsOf: (Page) -> List<Item>,
       nextPageUrlOf: (Page) -> String?,
   ): PaginationSnapshot<Item> =
       when (result) {
-        is PageState.Success ->
+        is ResourceResult.Success ->
             snapshot.copy(
                 items = mergeByKey(existing = snapshot.items, incoming = itemsOf(result.data)),
                 nextPageUrl = nextPageUrlOf(result.data),
@@ -132,25 +128,19 @@ class PaginationReducer<Item, Key>(
                 appendErrorMessage = null,
             )
 
-        is PageState.AuthRequired ->
+        is ResourceResult.AuthRequired ->
             snapshot.copy(isLoadingMore = false, appendErrorMessage = result.message)
 
-        PageState.CfChallenge ->
+        ResourceResult.CfChallenge ->
             snapshot.copy(isLoadingMore = false, appendErrorMessage = challengeMessage())
 
-        is PageState.MatureBlocked ->
+        is ResourceResult.MatureBlocked ->
             snapshot.copy(isLoadingMore = false, appendErrorMessage = result.reason)
 
-        is PageState.Error ->
+        is ResourceResult.Error ->
             snapshot.copy(
                 isLoadingMore = false,
                 appendErrorMessage = result.exception.readableMessage(),
-            )
-
-        PageState.Loading ->
-            snapshot.copy(
-                isLoadingMore = false,
-                appendErrorMessage = appendFallbackErrorMessage(),
             )
       }
 

@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import me.domino.fa2.data.fa.listing.SubmissionListingParser
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.utils.FaUrls
 
@@ -12,7 +13,7 @@ class BrowseSearchParserTest {
   @Test
   fun parsesBrowseListingAndFormBasedNextPage() {
     val html = TestFixtures.read("www.furaffinity.net:browse:default-page1.html")
-    val parser = GalleryParser()
+    val parser = SubmissionListingParser()
 
     val page = parser.parseListing(html = html, baseUrl = FaUrls.browse())
 
@@ -26,7 +27,7 @@ class BrowseSearchParserTest {
   fun parsesSearchListingAndAnchorNextPage() {
     val html =
         TestFixtures.read("www.furaffinity.net:search:wolf-keywords-female-trans_female.html")
-    val parser = GalleryParser()
+    val parser = SubmissionListingParser()
     val searchUrl = FaUrls.search(FaUrls.SearchParams(q = "dragon @keywords female trans_female"))
 
     val page = parser.parseListing(html = html, baseUrl = searchUrl)
@@ -40,7 +41,7 @@ class BrowseSearchParserTest {
   @Test
   fun parsesBlockedItemsFromBrowseWithTagBlocklist() {
     val html = TestFixtures.read("www.furaffinity.net:browse:blocked-canine.html")
-    val parser = GalleryParser()
+    val parser = SubmissionListingParser()
 
     val page = parser.parseListing(html = html, baseUrl = FaUrls.browse())
 
@@ -70,7 +71,7 @@ class BrowseSearchParserTest {
         </html>
         """
             .trimIndent()
-    val parser = GalleryParser()
+    val parser = SubmissionListingParser()
 
     val page = parser.parseListing(html = html, baseUrl = FaUrls.browse())
 
@@ -102,7 +103,7 @@ class BrowseSearchParserTest {
         </html>
         """
             .trimIndent()
-    val parser = GalleryParser()
+    val parser = SubmissionListingParser()
 
     val page = parser.parseListing(html = html, baseUrl = FaUrls.browse())
 
@@ -131,7 +132,7 @@ class BrowseSearchParserTest {
         </html>
         """
             .trimIndent()
-    val parser = GalleryParser()
+    val parser = SubmissionListingParser()
 
     val page = parser.parseListing(html = html, baseUrl = FaUrls.browse())
 
@@ -160,7 +161,7 @@ class BrowseSearchParserTest {
         </html>
         """
             .trimIndent()
-    val parser = GalleryParser()
+    val parser = SubmissionListingParser()
 
     val page = parser.parseListing(html = html, baseUrl = FaUrls.browse())
 

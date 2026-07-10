@@ -6,7 +6,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.fake.InMemoryPageCacheDao
 
 class CachedPageStoreSupportTest {
@@ -33,10 +33,10 @@ class CachedPageStoreSupportTest {
     support.clear("alpha")
     val afterClear = support.loadOnce("alpha")
 
-    assertEquals(PageState.Success(CachedValue("alpha-1")), first)
-    assertEquals(PageState.Success(CachedValue("alpha-1")), second)
-    assertEquals(PageState.Success(CachedValue("alpha-2")), refreshed)
-    assertEquals(PageState.Success(CachedValue("alpha-3")), afterClear)
+    assertEquals(ResourceResult.Success(CachedValue("alpha-1")), first)
+    assertEquals(ResourceResult.Success(CachedValue("alpha-1")), second)
+    assertEquals(ResourceResult.Success(CachedValue("alpha-2")), refreshed)
+    assertEquals(ResourceResult.Success(CachedValue("alpha-3")), afterClear)
     assertEquals(3, fetchCount)
   }
 }

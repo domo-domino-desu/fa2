@@ -7,23 +7,21 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.journal.JournalRepository
-import me.domino.fa2.data.i18n.SystemLanguageProvider
+import me.domino.fa2.data.fa.journal.JournalDetailRepository
 import me.domino.fa2.data.model.JournalDetail
-import me.domino.fa2.data.model.PageState
-import me.domino.fa2.data.model.summarizePageState
-import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.data.model.ResourceResult
+import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.i18n.appString
-import me.domino.fa2.ui.pages.submission.translation.SubmissionTranslationSourceMode
-import me.domino.fa2.ui.pages.submission.translation.SubmissionTranslationUiState
-import me.domino.fa2.ui.pages.submission.translation.canReuseTranslationResult
-import me.domino.fa2.ui.pages.submission.translation.markPendingBlocksAsFailed
-import me.domino.fa2.ui.pages.submission.translation.resolveTranslationState
-import me.domino.fa2.ui.pages.submission.translation.toPendingState
-import me.domino.fa2.ui.pages.submission.translation.variantOf
-import me.domino.fa2.ui.pages.submission.translation.withBlockResult
-import me.domino.fa2.ui.pages.submission.translation.withVariant
+import me.domino.fa2.ui.translation.SubmissionTranslationSourceMode
+import me.domino.fa2.ui.translation.SubmissionTranslationUiState
+import me.domino.fa2.ui.translation.canReuseTranslationResult
+import me.domino.fa2.ui.translation.markPendingBlocksAsFailed
+import me.domino.fa2.ui.translation.resolveTranslationState
+import me.domino.fa2.ui.translation.toPendingState
+import me.domino.fa2.ui.translation.variantOf
+import me.domino.fa2.ui.translation.withBlockResult
+import me.domino.fa2.ui.translation.withVariant
 import me.domino.fa2.utils.logging.FaLog
 
 /** Journal 详情状态。 */
@@ -53,11 +51,9 @@ class JournalDetailScreenModel(
     /** Journal URL（兜底）。 */
     private val journalUrl: String?,
     /** Journal 仓储。 */
-    private val repository: JournalRepository,
+    private val repository: JournalDetailRepository,
     /** 正文翻译编排服务。 */
     private val translationService: SubmissionDescriptionTranslationService,
-    private val settingsService: AppSettingsService? = null,
-    private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) : StateScreenModel<JournalDetailUiState>(JournalDetailUiState.Loading) {
   private val log = FaLog.withTag("JournalDetailScreenModel")
   private var translationJob: Job? = null
@@ -78,7 +74,7 @@ class JournalDetailScreenModel(
           } else {
             val fallbackUrl = journalUrl?.trim().orEmpty()
             if (fallbackUrl.isBlank()) {
-              PageState.Error(IllegalStateException("Invalid journal id and url"))
+              ResourceResult.Error(IllegalStateException("Invalid journal id and url"))
             } else {
               repository.loadJournalDetailByUrl(fallbackUrl)
             }
@@ -86,41 +82,34 @@ class JournalDetailScreenModel(
 
       mutableState.value =
           when (result) {
-            is PageState.Success ->
+            is ResourceResult.Success ->
                 buildSuccessState(detail = result.data, previous = previousSuccess)
-            is PageState.AuthRequired -> JournalDetailUiState.Error(result.message)
-            PageState.CfChallenge ->
+            is ResourceResult.AuthRequired -> JournalDetailUiState.Error(result.message)
+            ResourceResult.CfChallenge ->
                 JournalDetailUiState.Error(appString(Res.string.cloudflare_challenge_title))
-            is PageState.MatureBlocked -> JournalDetailUiState.Error(result.reason)
-            is PageState.Error ->
+            is ResourceResult.MatureBlocked -> JournalDetailUiState.Error(result.reason)
+            is ResourceResult.Error ->
                 JournalDetailUiState.Error(result.exception.message ?: result.exception.toString())
-
-            PageState.Loading ->
-                JournalDetailUiState.Error(appString(Res.string.interrupted_loading))
           }
       when (result) {
-        is PageState.Success -> {
-          log.i { "加载Journal详情 -> ${summarizePageState(result)}" }
+        is ResourceResult.Success -> {
+          log.i { "加载Journal详情 -> ${summarizeResourceResult(result)}" }
         }
 
-        is PageState.AuthRequired -> {
+        is ResourceResult.AuthRequired -> {
           log.w { "加载Journal详情 -> 需要重新登录" }
         }
 
-        PageState.CfChallenge -> {
+        ResourceResult.CfChallenge -> {
           log.w { "加载Journal详情 -> Cloudflare验证" }
         }
 
-        is PageState.MatureBlocked -> {
+        is ResourceResult.MatureBlocked -> {
           log.w { "加载Journal详情 -> 受限(${result.reason})" }
         }
 
-        is PageState.Error -> {
+        is ResourceResult.Error -> {
           log.e(result.exception) { "加载Journal详情 -> 失败" }
-        }
-
-        PageState.Loading -> {
-          log.w { "加载Journal详情 -> 加载中断" }
         }
       }
     }
@@ -171,11 +160,8 @@ class JournalDetailScreenModel(
                               variant =
                                   latestTranslationState
                                       .variantOf(sourceMode)
-                                      .withBlockResult(
-                                          index = index,
-                                          result = result,
-                                      ),
-                          ),
+                                      .withBlockResult(index = index, result = result),
+                          )
                   )
             }
           } catch (cancelled: CancellationException) {
@@ -193,7 +179,7 @@ class JournalDetailScreenModel(
                                   latestTranslationState
                                       .variantOf(sourceMode)
                                       .markPendingBlocksAsFailed(),
-                          ),
+                          )
                   )
             }
           } finally {
@@ -213,7 +199,7 @@ class JournalDetailScreenModel(
                                   latestTranslationState
                                       .variantOf(sourceMode)
                                       .copy(translating = false),
-                          ),
+                          )
                   )
             }
           }

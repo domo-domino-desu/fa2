@@ -1,4 +1,4 @@
-package me.domino.fa2.data.fa.user
+package me.domino.fa2.data.fa.parsing
 
 import com.fleeksoft.ksoup.nodes.Document
 

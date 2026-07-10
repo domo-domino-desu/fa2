@@ -6,12 +6,13 @@ import androidx.compose.runtime.rememberUpdatedState
 import fa2.shared.generated.resources.*
 import java.awt.EventQueue
 import javax.swing.JFileChooser
-import me.domino.fa2.ui.i18n.appString
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 actual fun rememberPlatformDirectoryPicker(onDirectoryPicked: (String?) -> Unit): () -> Unit {
   /** 持有最新回调，避免触发器捕获旧闭包。 */
   val latestCallback = rememberUpdatedState(onDirectoryPicked)
+  val dialogTitle = stringResource(Res.string.choose_save_path)
   /** 触发目录选择。 */
   return remember {
     {
@@ -22,7 +23,7 @@ actual fun rememberPlatformDirectoryPicker(onDirectoryPicked: (String?) -> Unit)
                     chooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
                     chooser.isMultiSelectionEnabled = false
                     chooser.isAcceptAllFileFilterUsed = false
-                    chooser.dialogTitle = appString(Res.string.choose_save_path)
+                    chooser.dialogTitle = dialogTitle
                     val result = chooser.showOpenDialog(null)
                     if (result == JFileChooser.APPROVE_OPTION) {
                       chooser.selectedFile?.absolutePath

@@ -14,6 +14,7 @@ import me.domino.fa2.data.i18n.MetadataDisplayPreferences
 import me.domino.fa2.data.i18n.defaultMetadataDisplayPreferences
 import me.domino.fa2.data.i18n.localizedFor
 import me.domino.fa2.data.i18n.localizedOrOriginal
+import me.domino.fa2.utils.concurrency.runSuspendCatching
 import me.domino.fa2.utils.logging.FaLog
 
 private const val searchUiLabelsResourcePath = "files/fa-search.json"
@@ -81,9 +82,7 @@ data class SearchPhraseLabels(
 )
 
 @Serializable
-data class SearchPunctuationLabels(
-    val labelValueSeparator: Map<String, String> = emptyMap(),
-)
+data class SearchPunctuationLabels(val labelValueSeparator: Map<String, String> = emptyMap())
 
 class SearchUiLabelsRepository {
   private val log = FaLog.withTag("SearchUiLabelsRepository")
@@ -100,7 +99,7 @@ class SearchUiLabelsRepository {
     loadMutex.withLock {
       if (preparedCatalog != null) return
 
-      runCatching {
+      runSuspendCatching {
             searchUiLabelsJson.decodeFromString<SearchUiLabelsCatalog>(
                 Res.readBytes(searchUiLabelsResourcePath).decodeToString()
             )

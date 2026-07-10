@@ -9,9 +9,7 @@ internal sealed interface SocialActionChallengeDecision {
   data class Terminal(val result: SocialActionResult) : SocialActionChallengeDecision
 }
 
-internal class SocialActionChallengePolicy(
-    private val challengeResolver: ChallengeResolver?,
-) {
+internal class SocialActionChallengePolicy(private val challengeResolver: ChallengeResolver?) {
   suspend fun decide(
       requestUrl: String,
       cfRay: String?,

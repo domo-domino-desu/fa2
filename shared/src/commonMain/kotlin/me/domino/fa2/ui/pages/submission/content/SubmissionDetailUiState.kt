@@ -1,11 +1,9 @@
 package me.domino.fa2.ui.pages.submission.content
 
 import me.domino.fa2.data.model.Submission
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.pager.*
-import me.domino.fa2.ui.pages.submission.series.*
-import me.domino.fa2.ui.pages.submission.translation.*
+import me.domino.fa2.ui.pages.submission.attachmenttext.SubmissionAttachmentTextUiState
+import me.domino.fa2.ui.pages.submission.translation.SubmissionImageOcrTranslationExportSnapshot
+import me.domino.fa2.ui.translation.SubmissionTranslationUiState
 
 /** 投稿详情单页状态。 */
 sealed interface SubmissionDetailUiState {

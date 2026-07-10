@@ -1,10 +1,12 @@
 package me.domino.fa2.ui.pages.submission.pager
 
 import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallPageControls
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.translation.*
+import me.domino.fa2.ui.components.waterfall.WaterfallPaginationKind
+import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSnapshot
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPageTarget
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPaginationKind
+import me.domino.fa2.ui.submissionviewer.api.isDirectNextOf
+import me.domino.fa2.ui.submissionviewer.api.isDirectPreviousOf
 
 internal fun SubmissionContextSnapshot.pageNumberForSid(sid: Int?): Int? {
   if (sid == null) return null
@@ -49,7 +51,7 @@ internal fun SubmissionContextSnapshot.currentWaterfallPageTarget(): SubmissionP
 }
 
 internal fun SubmissionContextSnapshot.cachedPreviousPageTarget(
-    currentTarget: SubmissionPageTarget,
+    currentTarget: SubmissionPageTarget
 ): SubmissionPageTarget? {
   val candidate = pages.getOrNull(currentTarget.index - 1) ?: return null
   return SubmissionPageTarget(page = candidate, index = currentTarget.index - 1).takeIf { target ->
@@ -58,7 +60,7 @@ internal fun SubmissionContextSnapshot.cachedPreviousPageTarget(
 }
 
 internal fun SubmissionContextSnapshot.cachedNextPageTarget(
-    currentTarget: SubmissionPageTarget,
+    currentTarget: SubmissionPageTarget
 ): SubmissionPageTarget? {
   val candidate = pages.getOrNull(currentTarget.index + 1) ?: return null
   return SubmissionPageTarget(page = candidate, index = currentTarget.index + 1).takeIf { target ->
@@ -87,7 +89,12 @@ internal fun SubmissionContextSnapshot.toWaterfallPageControls(): SubmissionWate
           }
   val controls =
       SubmissionWaterfallPageControls(
-          paginationKind = paginationModel.kind,
+          paginationKind =
+              when (paginationModel.kind) {
+                SubmissionPaginationKind.CURSOR -> WaterfallPaginationKind.Cursor
+                SubmissionPaginationKind.NUMBERED -> WaterfallPaginationKind.Numbered
+                null -> null
+              },
           currentPageNumber = currentPageNumber,
           lastPageNumber = knownLastPageNumber,
           showFirstPage = paginationModel.hasFirstPage,

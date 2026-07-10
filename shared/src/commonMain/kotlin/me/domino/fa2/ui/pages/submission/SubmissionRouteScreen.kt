@@ -33,8 +33,7 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.fa.submission.SubmissionRepository
 import me.domino.fa2.data.fa.submission.deriveSubmissionThumbnailUrlFromFullImage
 import me.domino.fa2.data.fa.user.ActivityHistoryRepository
-import me.domino.fa2.data.i18n.SystemLanguageProvider
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.AppSettingsService
@@ -57,14 +56,18 @@ import me.domino.fa2.ui.components.platform.rememberPlatformTextCopier
 import me.domino.fa2.ui.components.platform.rememberPlatformTextFileWriter
 import me.domino.fa2.ui.components.platform.rememberPlatformUrlDownloader
 import me.domino.fa2.ui.components.platform.resolveDownloadRelativeDirectories
-import me.domino.fa2.ui.pages.browse.BrowseFilterState
-import me.domino.fa2.ui.pages.browse.BrowseRouteScreen
-import me.domino.fa2.ui.pages.search.SearchRouteScreen
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.pager.*
-import me.domino.fa2.ui.pages.submission.translation.*
-import me.domino.fa2.ui.pages.user.UserChildRoute
-import me.domino.fa2.ui.pages.user.UserRouteScreen
+import me.domino.fa2.ui.navigation.AppNavigationRequest
+import me.domino.fa2.ui.navigation.LocalAppNavigation
+import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
+import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
+import me.domino.fa2.ui.pages.submission.pager.SubmissionPagerDetailSourceImpl
+import me.domino.fa2.ui.pages.submission.pager.SubmissionPagerUiState
+import me.domino.fa2.ui.pages.submission.pager.SubmissionScreenModel
+import me.domino.fa2.ui.pages.submission.pager.computeSubmissionPrefetchIndices
+import me.domino.fa2.ui.pages.submission.pager.pagerPrefetchDebounceMs
+import me.domino.fa2.ui.pages.submission.translation.buildSubmissionTranslationSidecarFiles
+import me.domino.fa2.ui.submissionviewer.adapters.SeriesSubmissionSourceAdapter
+import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
 import me.domino.fa2.utils.FaUrls
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -87,12 +90,12 @@ class SubmissionRouteScreen(
   @Composable
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
+    val appNavigation = LocalAppNavigation.current
     val submissionRepository = koinInject<SubmissionRepository>()
     val attachmentTextService = koinInject<AttachmentTextService>()
     val translationService = koinInject<SubmissionDescriptionTranslationService>()
     val imageOcrService = koinInject<SubmissionImageOcrService>()
     val imageOcrTranslationService = koinInject<SubmissionImageOcrTranslationService>()
-    val systemLanguageProvider = koinInject<SystemLanguageProvider>()
     val settingsService = koinInject<AppSettingsService>()
     val contextScreenModel =
         navigator.rememberNavigatorScreenModel<SubmissionContextScreenModel>(
@@ -110,7 +113,7 @@ class SubmissionRouteScreen(
                   series = submissionSeries,
               )
           when (val initialPage = adapter.loadInitialPage()) {
-            is PageState.Success ->
+            is ResourceResult.Success ->
                 contextScreenModel.ensureSeedContext(
                     contextId = contextId,
                     adapter = adapter,
@@ -163,7 +166,6 @@ class SubmissionRouteScreen(
               imageOcrService = imageOcrService,
               imageOcrTranslationService = imageOcrTranslationService,
               settingsService = settingsService,
-              systemLanguageProvider = systemLanguageProvider,
           )
         }
     val settings by settingsService.settings.collectAsState()
@@ -262,11 +264,7 @@ class SubmissionRouteScreen(
                   if (sidecarFailures.isEmpty()) {
                     showToast(downloadSavedText)
                   } else {
-                    showToast(
-                        downloadSavedWithSidecarWarningText.format(
-                            sidecarFailures.first(),
-                        )
-                    )
+                    showToast(downloadSavedWithSidecarWarningText.format(sidecarFailures.first()))
                   }
                 }
                 is PlatformDownloadResult.HandledFailure -> showToast(result.message)
@@ -280,18 +278,13 @@ class SubmissionRouteScreen(
           onOpenAuthor = { author ->
             val normalized = author.trim()
             if (normalized.isNotBlank()) {
-              navigator.push(
-                  UserRouteScreen(
-                      username = normalized,
-                      initialChildRoute = UserChildRoute.Gallery,
-                  )
-              )
+              appNavigation(AppNavigationRequest.UserGallery(normalized))
             }
           },
           onSearchKeyword = { query ->
             val normalized = query.trim()
             if (normalized.isNotBlank()) {
-              navigator.push(SearchRouteScreen(initialQuery = normalized))
+              appNavigation(AppNavigationRequest.Search(normalized))
             }
           },
           onKeywordLongPress = { tag ->
@@ -301,16 +294,7 @@ class SubmissionRouteScreen(
             }
           },
           onOpenBrowseFilter = { category, type, species ->
-            navigator.push(
-                BrowseRouteScreen(
-                    initialFilter =
-                        BrowseFilterState(
-                            category = category,
-                            type = type,
-                            species = species,
-                        )
-                )
-            )
+            appNavigation(AppNavigationRequest.BrowseFilter(category, type, species))
           },
           onCopySubmissionUrl = { submissionUrl ->
             val normalizedUrl = submissionUrl.trim()
@@ -510,7 +494,7 @@ private suspend fun writeTranslationSidecarFiles(
 }
 
 private fun SubmissionPagerUiState.successDetailForSubmission(
-    submissionId: Int,
+    submissionId: Int
 ): SubmissionDetailUiState.Success? =
     when (this) {
       SubmissionPagerUiState.Empty -> null

@@ -15,8 +15,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.fa.auth.AuthDataSource
 import me.domino.fa2.data.fa.core.FaHtmlDataSource
@@ -28,7 +27,7 @@ import me.domino.fa2.data.fa.session.UserAgentStorage
 import me.domino.fa2.data.local.AppDatabase
 import me.domino.fa2.data.local.AppDatabaseBuilderFactory
 import me.domino.fa2.data.model.AuthProbeResult
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.di.KOIN_QUALIFIER_COOKIE_VAULT
 import me.domino.fa2.di.KOIN_QUALIFIER_RAW_HTML_DATA_SOURCE
 import me.domino.fa2.di.KOIN_QUALIFIER_SETTINGS_SECRET_VAULT
@@ -92,9 +91,8 @@ class MinimalFlowIntegrationTest {
                   url = FaUrls.submissions(),
               ),
       )
-      val states = feedRepository.streamFirstPage().take(2).toList()
-      assertTrue(states.first() is PageState.Loading)
-      assertTrue(states.last() is PageState.Success)
+      val state = feedRepository.streamFirstPage().first()
+      assertTrue(state is ResourceResult.Success)
     }
   }
 
@@ -104,10 +102,7 @@ class MinimalFlowIntegrationTest {
     withTestApp { source ->
       val authDataSource = authDataSource()
 
-      source.enqueue(
-          url = FaUrls.home,
-          response = HtmlResponseResult.CfChallenge(cfRay = "ray123"),
-      )
+      source.enqueue(url = FaUrls.home, response = HtmlResponseResult.CfChallenge(cfRay = "ray123"))
       val firstProbe = authDataSource.probeLogin()
       assertTrue(firstProbe is AuthProbeResult.AuthInvalid)
     }
@@ -284,10 +279,8 @@ private suspend fun withTestApp(
   }
 }
 
-private class MinimalFlowTestHarness(
-    htmlDataSource: FaHtmlDataSource,
-    storage: TestStorageConfig,
-) : AutoCloseable {
+private class MinimalFlowTestHarness(htmlDataSource: FaHtmlDataSource, storage: TestStorageConfig) :
+    AutoCloseable {
   private val koinApplication: KoinApplication = run {
     stopKoin()
     startKoin {
@@ -352,10 +345,7 @@ private class ScriptedHtmlDataSource : FaHtmlDataSource {
   override suspend fun get(url: String): HtmlResponseResult {
     val queue = queueByUrl[url]
     if (queue == null || queue.isEmpty()) {
-      return HtmlResponseResult.Error(
-          statusCode = 500,
-          message = "No scripted response for $url",
-      )
+      return HtmlResponseResult.Error(statusCode = 500, message = "No scripted response for $url")
     }
     return queue.removeFirst()
   }

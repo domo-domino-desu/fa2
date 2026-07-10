@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <string name="unsupported_attachment_text_format">暂不支持将该附件格式显示为文本。</string>
+  <string name="auth_session_expired">认证已失效，请粘贴新的浏览器 Cookie。</string>
+  <string name="auth_challenge_pending">请先完成 Cloudflare 验证。</string>
+  <string name="auth_challenge_aborted">Cloudflare 验证已取消。</string>
+  <string name="attachment_processing_stage">正在处理附件（%1$d/%2$d）</string>
   <string name="feed">动态</string>
   <string name="browse">浏览</string>
   <string name="search">搜索</string>

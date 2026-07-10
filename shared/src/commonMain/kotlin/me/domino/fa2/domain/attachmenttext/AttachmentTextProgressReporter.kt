@@ -1,5 +1,7 @@
 package me.domino.fa2.domain.attachmenttext
 
+import me.domino.fa2.utils.logging.FaLog
+
 /** 附件解析进度聚合器。 */
 class AttachmentTextProgressReporter
 internal constructor(
@@ -8,6 +10,7 @@ internal constructor(
     /** 回调。 */
     private val onProgress: (AttachmentTextProgress) -> Unit,
 ) {
+  private val log = FaLog.withTag("AttachmentTextProgress")
   /** 总权重。 */
   private val totalWeight: Float = stages.sumOf { stage -> stage.weight.toDouble() }.toFloat()
 
@@ -49,16 +52,16 @@ internal constructor(
         }
     val overallFraction = rawOverall.coerceAtLeast(lastOverallFraction).coerceIn(0f, 1f)
     lastOverallFraction = overallFraction
+    log.d {
+      "stage=$stageId,fraction=$normalizedStageFraction,message=$message,item=${currentItemLabel.orEmpty()}"
+    }
     onProgress(
         AttachmentTextProgress(
             overallFraction = overallFraction,
             stageIndex = index + 1,
             stageCount = stages.size,
             stageId = stage.id,
-            stageLabel = stage.label,
             stageFraction = normalizedStageFraction,
-            message = message,
-            currentItemLabel = currentItemLabel?.trim()?.ifBlank { null },
         )
     )
   }
@@ -85,55 +88,51 @@ internal constructor(
             AttachmentTextFormat.DOCX,
             AttachmentTextFormat.ODT ->
                 listOf(
-                    AttachmentTextProgressStageSpec("detect_format", "识别格式", 0.05f),
-                    AttachmentTextProgressStageSpec("open_archive", "打开压缩包", 0.10f),
-                    AttachmentTextProgressStageSpec("load_document_xml", "读取文档 XML", 0.15f),
-                    AttachmentTextProgressStageSpec("walk_blocks", "提取段落", 0.50f),
-                    AttachmentTextProgressStageSpec("build_html", "构建 HTML", 0.20f),
+                    AttachmentTextProgressStageSpec("detect_format", 0.05f),
+                    AttachmentTextProgressStageSpec("open_archive", 0.10f),
+                    AttachmentTextProgressStageSpec("load_document_xml", 0.15f),
+                    AttachmentTextProgressStageSpec("walk_blocks", 0.50f),
+                    AttachmentTextProgressStageSpec("build_html", 0.20f),
                 )
 
             AttachmentTextFormat.RTF ->
                 listOf(
-                    AttachmentTextProgressStageSpec("decode_bytes", "解码字节", 0.10f),
-                    AttachmentTextProgressStageSpec("tokenize", "切分标记", 0.30f),
-                    AttachmentTextProgressStageSpec("interpret_groups", "解释语法组", 0.40f),
-                    AttachmentTextProgressStageSpec("normalize_paragraphs", "整理段落", 0.10f),
-                    AttachmentTextProgressStageSpec("build_html", "构建 HTML", 0.10f),
+                    AttachmentTextProgressStageSpec("decode_bytes", 0.10f),
+                    AttachmentTextProgressStageSpec("tokenize", 0.30f),
+                    AttachmentTextProgressStageSpec("interpret_groups", 0.40f),
+                    AttachmentTextProgressStageSpec("normalize_paragraphs", 0.10f),
+                    AttachmentTextProgressStageSpec("build_html", 0.10f),
                 )
 
             AttachmentTextFormat.PDF ->
                 listOf(
-                    AttachmentTextProgressStageSpec("open_document", "打开 PDF", 0.10f),
-                    AttachmentTextProgressStageSpec("extract_pages", "提取页面文本", 0.50f),
-                    AttachmentTextProgressStageSpec("merge_paragraphs", "合并段落", 0.25f),
-                    AttachmentTextProgressStageSpec("build_html", "构建 HTML", 0.15f),
+                    AttachmentTextProgressStageSpec("open_document", 0.10f),
+                    AttachmentTextProgressStageSpec("extract_pages", 0.50f),
+                    AttachmentTextProgressStageSpec("merge_paragraphs", 0.25f),
+                    AttachmentTextProgressStageSpec("build_html", 0.15f),
                 )
 
             AttachmentTextFormat.MARKDOWN ->
                 listOf(
-                    AttachmentTextProgressStageSpec("decode_bytes", "解码字节", 0.15f),
-                    AttachmentTextProgressStageSpec("split_paragraphs", "整理段落", 0.25f),
-                    AttachmentTextProgressStageSpec(
-                        "interpret_inline_markdown",
-                        "解释行内 Markdown",
-                        0.40f,
-                    ),
-                    AttachmentTextProgressStageSpec("build_html", "构建 HTML", 0.20f),
+                    AttachmentTextProgressStageSpec("decode_bytes", 0.15f),
+                    AttachmentTextProgressStageSpec("split_paragraphs", 0.25f),
+                    AttachmentTextProgressStageSpec("interpret_inline_markdown", 0.40f),
+                    AttachmentTextProgressStageSpec("build_html", 0.20f),
                 )
 
             AttachmentTextFormat.TEXT ->
                 listOf(
-                    AttachmentTextProgressStageSpec("decode_bytes", "解码字节", 0.25f),
-                    AttachmentTextProgressStageSpec("split_paragraphs", "整理段落", 0.40f),
-                    AttachmentTextProgressStageSpec("build_html", "构建 HTML", 0.35f),
+                    AttachmentTextProgressStageSpec("decode_bytes", 0.25f),
+                    AttachmentTextProgressStageSpec("split_paragraphs", 0.40f),
+                    AttachmentTextProgressStageSpec("build_html", 0.35f),
                 )
 
             AttachmentTextFormat.HTML ->
                 listOf(
-                    AttachmentTextProgressStageSpec("decode_bytes", "解码字节", 0.15f),
-                    AttachmentTextProgressStageSpec("parse_html", "解析 HTML", 0.35f),
-                    AttachmentTextProgressStageSpec("sanitize_html", "清理内容", 0.30f),
-                    AttachmentTextProgressStageSpec("build_html", "整理输出", 0.20f),
+                    AttachmentTextProgressStageSpec("decode_bytes", 0.15f),
+                    AttachmentTextProgressStageSpec("parse_html", 0.35f),
+                    AttachmentTextProgressStageSpec("sanitize_html", 0.30f),
+                    AttachmentTextProgressStageSpec("build_html", 0.20f),
                 )
           }
       return AttachmentTextProgressReporter(stages = stages, onProgress = onProgress)

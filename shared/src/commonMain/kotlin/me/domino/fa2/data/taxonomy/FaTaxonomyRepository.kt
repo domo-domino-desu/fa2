@@ -10,6 +10,7 @@ import me.domino.fa2.data.i18n.MetadataDisplayPreferences
 import me.domino.fa2.data.i18n.defaultMetadataDisplayPreferences
 import me.domino.fa2.data.i18n.localizedFor
 import me.domino.fa2.data.i18n.localizedOrOriginal
+import me.domino.fa2.utils.concurrency.runSuspendCatching
 import me.domino.fa2.utils.logging.FaLog
 
 /** FA 分类目录仓库，负责加载和查询分类、类型、物种等元数据。 */
@@ -34,7 +35,7 @@ class FaTaxonomyRepository {
     loadMutex.withLock {
       if (preparedCatalog != null) return
 
-      runCatching { loadFaTaxonomyCatalog() }
+      runSuspendCatching { loadFaTaxonomyCatalog() }
           .onSuccess { loaded ->
             preparedCatalog = PreparedFaTaxonomyCatalog.from(loaded)
             mutableCatalog.value = loaded

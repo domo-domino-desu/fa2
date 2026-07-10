@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <string name="unsupported_attachment_text_format">This attachment format cannot be shown as text.</string>
+  <string name="auth_session_expired">Your session has expired. Paste a fresh browser cookie.</string>
+  <string name="auth_challenge_pending">Complete the Cloudflare challenge before continuing.</string>
+  <string name="auth_challenge_aborted">The Cloudflare challenge was cancelled.</string>
+  <string name="attachment_processing_stage">Processing attachment (%1$d/%2$d)</string>
   <string name="feed">Feed</string>
   <string name="browse">Browse</string>
   <string name="search">Search</string>

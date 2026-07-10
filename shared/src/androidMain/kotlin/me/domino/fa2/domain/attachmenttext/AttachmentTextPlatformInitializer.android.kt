@@ -2,7 +2,6 @@ package me.domino.fa2.domain.attachmenttext
 
 import android.content.Context
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
-import me.domino.fa2.domain.attachmenttext.*
 import me.domino.fa2.utils.logging.FaLog
 
 private val log = FaLog.withTag("AttachmentTextPlatform")

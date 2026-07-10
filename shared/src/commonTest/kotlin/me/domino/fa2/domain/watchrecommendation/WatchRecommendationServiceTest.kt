@@ -6,19 +6,19 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.User
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
+import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.utils.FaUrls
 
 class WatchRecommendationServiceTest {
   @Test
   fun firstRoundReturnsTopCandidatesWhenEnoughResultsExist() = runTest {
     val followingUsers = (1..10).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    val responses = mutableMapOf<LoaderKey, ResourceResult<WatchlistPage>>()
     responses[LoaderKey("me", null)] = successPage(followingUsers)
     followingUsers.forEach { source ->
       responses[LoaderKey(source.username, null)] =
@@ -43,7 +43,7 @@ class WatchRecommendationServiceTest {
   @Test
   fun expandsSampleAndLowersThresholdAcrossRounds() = runTest {
     val followingUsers = (1..15).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    val responses = mutableMapOf<LoaderKey, ResourceResult<WatchlistPage>>()
     responses[LoaderKey("me", null)] = successPage(followingUsers)
     followingUsers.forEach { source ->
       val extra =
@@ -67,7 +67,7 @@ class WatchRecommendationServiceTest {
   @Test
   fun fourthRoundFallsBackToSingleSharedFollowerBaseline() = runTest {
     val followingUsers = (1..25).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    val responses = mutableMapOf<LoaderKey, ResourceResult<WatchlistPage>>()
     responses[LoaderKey("me", null)] = successPage(followingUsers)
     followingUsers.forEachIndexed { index, source ->
       responses[LoaderKey(source.username, null)] =
@@ -85,17 +85,11 @@ class WatchRecommendationServiceTest {
   @Test
   fun excludesSelfAndExistingFollowing() = runTest {
     val followingUsers = (1..10).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    val responses = mutableMapOf<LoaderKey, ResourceResult<WatchlistPage>>()
     responses[LoaderKey("me", null)] = successPage(followingUsers)
     followingUsers.forEach { source ->
       responses[LoaderKey(source.username, null)] =
-          successPage(
-              listOf(
-                  watchUser("me"),
-                  watchUser("source1"),
-                  candidateUser("artist-a"),
-              )
-          )
+          successPage(listOf(watchUser("me"), watchUser("source1"), candidateUser("artist-a")))
     }
 
     val service = buildService(responses)
@@ -108,7 +102,7 @@ class WatchRecommendationServiceTest {
   @Test
   fun sortsBySharedFollowCountThenUsername() = runTest {
     val followingUsers = (1..10).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    val responses = mutableMapOf<LoaderKey, ResourceResult<WatchlistPage>>()
     responses[LoaderKey("me", null)] = successPage(followingUsers)
     followingUsers.forEachIndexed { index, source ->
       val users = mutableListOf<WatchlistUser>()
@@ -129,7 +123,7 @@ class WatchRecommendationServiceTest {
   @Test
   fun returnsAllCandidatesWhenFewerThanRequested() = runTest {
     val followingUsers = (1..10).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    val responses = mutableMapOf<LoaderKey, ResourceResult<WatchlistPage>>()
     responses[LoaderKey("me", null)] = successPage(followingUsers)
     followingUsers.forEach { source ->
       responses[LoaderKey(source.username, null)] = successPage(listOf(candidateUser("artist-a")))
@@ -145,12 +139,12 @@ class WatchRecommendationServiceTest {
   @Test
   fun skipsSampledUsersThatFailToLoad() = runTest {
     val followingUsers = (1..10).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    val responses = mutableMapOf<LoaderKey, ResourceResult<WatchlistPage>>()
     responses[LoaderKey("me", null)] = successPage(followingUsers)
     followingUsers.forEachIndexed { index, source ->
       responses[LoaderKey(source.username, null)] =
           if (index < 2) {
-            PageState.Error(IllegalStateException("boom-${source.username}"))
+            ResourceResult.Error(IllegalStateException("boom-${source.username}"))
           } else {
             successPage(
                 buildList {
@@ -172,12 +166,12 @@ class WatchRecommendationServiceTest {
   @Test
   fun middleUserFollowingCandidatesAreLoadedFromFiveRandomPages() = runTest {
     val followingUsers = (1..10).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
-    val userResponses = mutableMapOf<String, PageState<User>>()
+    val responses = mutableMapOf<LoaderKey, ResourceResult<WatchlistPage>>()
+    val userResponses = mutableMapOf<String, ResourceResult<User>>()
     responses[LoaderKey("me", null)] = successPage(followingUsers)
     followingUsers.forEach { source ->
       userResponses[source.username] =
-          PageState.Success(testUser(source.username, watchingCount = 1000))
+          ResourceResult.Success(testUser(source.username, watchingCount = 1000))
       (1..5).forEach { page ->
         responses[
             LoaderKey(
@@ -206,7 +200,8 @@ class WatchRecommendationServiceTest {
   fun failsWhenCurrentUserFollowingCannotBeLoaded() = runTest {
     val responses =
         mutableMapOf(
-            LoaderKey("me", null) to PageState.Error(IllegalStateException("missing following"))
+            LoaderKey("me", null) to
+                ResourceResult.Error(IllegalStateException("missing following"))
         )
     val service = buildService(responses)
 
@@ -221,7 +216,7 @@ class WatchRecommendationServiceTest {
   @Test
   fun excludesManuallyBlockedRecommendations() = runTest {
     val followingUsers = (1..10).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    val responses = mutableMapOf<LoaderKey, ResourceResult<WatchlistPage>>()
     responses[LoaderKey("me", null)] = successPage(followingUsers)
     followingUsers.forEachIndexed { index, source ->
       responses[LoaderKey(source.username, null)] =
@@ -245,7 +240,7 @@ class WatchRecommendationServiceTest {
   @Test
   fun manualBlocklistDoesNotChangeAfterRecommend() = runTest {
     val followingUsers = (1..10).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    val responses = mutableMapOf<LoaderKey, ResourceResult<WatchlistPage>>()
     responses[LoaderKey("me", null)] = successPage(followingUsers)
     followingUsers.forEachIndexed { index, source ->
       responses[LoaderKey(source.username, null)] =
@@ -280,7 +275,7 @@ class WatchRecommendationServiceTest {
   @Test
   fun similarUsersStartFromFollowersAndRankCommonFollowing() = runTest {
     val followers = (1..10).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    val responses = mutableMapOf<LoaderKey, ResourceResult<WatchlistPage>>()
     responses[LoaderKey("artist", null, WatchlistCategory.WatchedBy)] = successPage(followers)
     followers.forEachIndexed { index, follower ->
       responses[LoaderKey(follower.username, null)] =
@@ -304,7 +299,7 @@ class WatchRecommendationServiceTest {
   @Test
   fun similarUsersExcludeSelfAndBlockedButNotFollowers() = runTest {
     val followers = (1..10).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    val responses = mutableMapOf<LoaderKey, ResourceResult<WatchlistPage>>()
     responses[LoaderKey("artist", null, WatchlistCategory.WatchedBy)] = successPage(followers)
     followers.forEach { follower ->
       responses[LoaderKey(follower.username, null)] =
@@ -329,17 +324,12 @@ class WatchRecommendationServiceTest {
   @Test
   fun similarUsersExcludeCurrentLoggedInFollowing() = runTest {
     val followers = (1..10).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    val responses = mutableMapOf<LoaderKey, ResourceResult<WatchlistPage>>()
     responses[LoaderKey("artist", null, WatchlistCategory.WatchedBy)] = successPage(followers)
     responses[LoaderKey("me", null)] = successPage(listOf(candidateUser("already-followed")))
     followers.forEach { follower ->
       responses[LoaderKey(follower.username, null)] =
-          successPage(
-              listOf(
-                  candidateUser("already-followed"),
-                  candidateUser("visible-user"),
-              )
-          )
+          successPage(listOf(candidateUser("already-followed"), candidateUser("visible-user")))
     }
     val service = buildService(responses)
 
@@ -356,7 +346,7 @@ class WatchRecommendationServiceTest {
   @Test
   fun recommendationResultsDoNotLoadResultUserProfiles() = runTest {
     val followingUsers = (1..10).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    val responses = mutableMapOf<LoaderKey, ResourceResult<WatchlistPage>>()
     val loadedUsers = mutableListOf<String>()
     responses[LoaderKey("me", null)] = successPage(followingUsers)
     followingUsers.forEach { source ->
@@ -379,7 +369,7 @@ class WatchRecommendationServiceTest {
     val responses =
         mutableMapOf(
             LoaderKey("artist", null, WatchlistCategory.WatchedBy) to
-                PageState.Error(IllegalStateException("missing followers"))
+                ResourceResult.Error(IllegalStateException("missing followers"))
         )
     val service = buildService(responses)
 
@@ -394,12 +384,12 @@ class WatchRecommendationServiceTest {
   @Test
   fun similarUsersSkipFollowersThatFailToLoadFollowing() = runTest {
     val followers = (1..10).map(::sourceUser)
-    val responses = mutableMapOf<LoaderKey, PageState<WatchlistPage>>()
+    val responses = mutableMapOf<LoaderKey, ResourceResult<WatchlistPage>>()
     responses[LoaderKey("artist", null, WatchlistCategory.WatchedBy)] = successPage(followers)
     followers.forEachIndexed { index, follower ->
       responses[LoaderKey(follower.username, null)] =
           if (index < 2) {
-            PageState.Error(IllegalStateException("boom-${follower.username}"))
+            ResourceResult.Error(IllegalStateException("boom-${follower.username}"))
           } else {
             successPage(
                 buildList {
@@ -419,21 +409,21 @@ class WatchRecommendationServiceTest {
   }
 
   private fun buildService(
-      responses: Map<LoaderKey, PageState<WatchlistPage>>,
+      responses: Map<LoaderKey, ResourceResult<WatchlistPage>>,
       blocklistRepository: WatchRecommendationBlocklist = FakeWatchRecommendationBlocklist(),
-      userResponses: Map<String, PageState<User>> = emptyMap(),
+      userResponses: Map<String, ResourceResult<User>> = emptyMap(),
       onLoadUser: (String) -> Unit = {},
   ): WatchRecommendationService =
       WatchRecommendationService(
           loadWatchlistPage = { username, category, nextPageUrl ->
             responses[LoaderKey(username.lowercase(), nextPageUrl, category)]
-                ?: PageState.Error(
+                ?: ResourceResult.Error(
                     IllegalStateException("missing response for $username::$category::$nextPageUrl")
                 )
           },
           loadUser = { username ->
             onLoadUser(username)
-            userResponses[username.lowercase()] ?: PageState.Success(testUser(username))
+            userResponses[username.lowercase()] ?: ResourceResult.Success(testUser(username))
           },
           blocklistRepository = blocklistRepository,
           random = Random(0),
@@ -443,8 +433,8 @@ class WatchRecommendationServiceTest {
   private fun successPage(
       users: List<WatchlistUser>,
       nextPageUrl: String? = null,
-  ): PageState<WatchlistPage> =
-      PageState.Success(WatchlistPage(users = users, nextPageUrl = nextPageUrl))
+  ): ResourceResult<WatchlistPage> =
+      ResourceResult.Success(WatchlistPage(users = users, nextPageUrl = nextPageUrl))
 
   private fun sourceUser(index: Int): WatchlistUser = watchUser("source$index")
 
@@ -483,9 +473,8 @@ private data class LoaderKey(
     val category: WatchlistCategory = WatchlistCategory.Watching,
 )
 
-private class FakeWatchRecommendationBlocklist(
-    initialUsernames: List<String> = emptyList(),
-) : WatchRecommendationBlocklist {
+private class FakeWatchRecommendationBlocklist(initialUsernames: List<String> = emptyList()) :
+    WatchRecommendationBlocklist {
   private val blockedUsernames: MutableList<String> =
       initialUsernames
           .map(String::trim)

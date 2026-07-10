@@ -9,12 +9,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.fa.browse.BrowseRepository
-import me.domino.fa2.data.i18n.SystemLanguageProvider
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.data.model.summarizePageState
-import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.ui.i18n.appString
+import me.domino.fa2.ui.state.UiPageState
 import me.domino.fa2.ui.utils.PaginationReducer
 import me.domino.fa2.ui.utils.PaginationSnapshot
 import me.domino.fa2.utils.FaUrls
@@ -50,25 +49,19 @@ data class BrowseUiState(
 /** Browse 页面状态模型。 */
 class BrowseScreenModel(
     private val repository: BrowseRepository,
-    private val settingsService: AppSettingsService? = null,
-    private val systemLanguageProvider: SystemLanguageProvider? = null,
     initialFilter: BrowseFilterState = BrowseFilterState(),
 ) :
     StateScreenModel<BrowseUiState>(
-        BrowseUiState(
-            draftFilter = initialFilter,
-            appliedFilter = initialFilter,
-        )
+        BrowseUiState(draftFilter = initialFilter, appliedFilter = initialFilter)
     ) {
   private val log = FaLog.withTag("BrowseScreenModel")
   private val paginationStateMachine =
       PaginationReducer<SubmissionThumbnail, Int>(
           keyOf = { item -> item.id },
           challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
-          appendFallbackErrorMessage = { appString(Res.string.load_failed_please_retry) },
       )
-  private val mutablePageState = MutableStateFlow<PageState<BrowseUiState>>(PageState.Loading)
-  val pageState: StateFlow<PageState<BrowseUiState>> = mutablePageState.asStateFlow()
+  private val mutablePageState = MutableStateFlow<UiPageState<BrowseUiState>>(UiPageState.Loading)
+  val pageState: StateFlow<UiPageState<BrowseUiState>> = mutablePageState.asStateFlow()
   private var loadJob: Job? = null
   private var appendJob: Job? = null
 
@@ -152,7 +145,7 @@ class BrowseScreenModel(
             )
         )
     if (snapshot.submissions.isEmpty()) {
-      mutablePageState.value = PageState.Loading
+      mutablePageState.value = UiPageState.Loading
     }
     val firstPageUrl = buildBrowseUrl(snapshot.appliedFilter)
     loadJob =
@@ -173,35 +166,30 @@ class BrowseScreenModel(
           val updated = state.value.applyPagination(reduced)
           mutableState.value = updated
           when (pageState) {
-            is PageState.Success -> {
-              mutablePageState.value = PageState.Success(updated)
+            is ResourceResult.Success -> {
+              mutablePageState.value = UiPageState.Success(updated)
               log.i { "加载Browse -> 成功(count=${updated.submissions.size})" }
             }
 
-            is PageState.AuthRequired -> {
+            is ResourceResult.AuthRequired -> {
               mutablePageState.value =
-                  PageState.AuthRequired(pageState.requestUrl, pageState.message)
+                  UiPageState.AuthRequired(pageState.requestUrl, pageState.message)
               log.w { "加载Browse -> 需要重新登录" }
             }
 
-            PageState.CfChallenge -> {
-              mutablePageState.value = PageState.CfChallenge
+            ResourceResult.CfChallenge -> {
+              mutablePageState.value = UiPageState.CfChallenge
               log.w { "加载Browse -> Cloudflare验证" }
             }
 
-            is PageState.MatureBlocked -> {
-              mutablePageState.value = PageState.MatureBlocked(pageState.reason)
+            is ResourceResult.MatureBlocked -> {
+              mutablePageState.value = UiPageState.MatureBlocked(pageState.reason)
               log.w { "加载Browse -> 受限(${pageState.reason})" }
             }
 
-            is PageState.Error -> {
-              mutablePageState.value = PageState.Error(pageState.exception)
+            is ResourceResult.Error -> {
+              mutablePageState.value = UiPageState.Error(pageState.exception)
               log.e(pageState.exception) { "加载Browse -> 失败" }
-            }
-
-            PageState.Loading -> {
-              mutablePageState.value = PageState.Loading
-              log.d { "加载Browse -> 加载中" }
             }
           }
         }
@@ -232,18 +220,17 @@ class BrowseScreenModel(
           val updated = state.value.applyPagination(reduced)
           mutableState.value = updated
           when (pageState) {
-            is PageState.Success -> {
-              mutablePageState.value = PageState.Success(updated)
+            is ResourceResult.Success -> {
+              mutablePageState.value = UiPageState.Success(updated)
               log.d {
-                "自动加载Browse -> ${summarizePageState(pageState)}(count=${updated.submissions.size})"
+                "自动加载Browse -> ${summarizeResourceResult(pageState)}(count=${updated.submissions.size})"
               }
             }
 
-            is PageState.AuthRequired -> log.w { "自动加载Browse -> 需要重新登录" }
-            PageState.CfChallenge -> log.w { "自动加载Browse -> Cloudflare验证" }
-            is PageState.MatureBlocked -> log.w { "自动加载Browse -> 受限(${pageState.reason})" }
-            is PageState.Error -> log.e(pageState.exception) { "自动加载Browse -> 失败" }
-            PageState.Loading -> log.d { "自动加载Browse -> 加载中" }
+            is ResourceResult.AuthRequired -> log.w { "自动加载Browse -> 需要重新登录" }
+            ResourceResult.CfChallenge -> log.w { "自动加载Browse -> Cloudflare验证" }
+            is ResourceResult.MatureBlocked -> log.w { "自动加载Browse -> 受限(${pageState.reason})" }
+            is ResourceResult.Error -> log.e(pageState.exception) { "自动加载Browse -> 失败" }
           }
         }
   }

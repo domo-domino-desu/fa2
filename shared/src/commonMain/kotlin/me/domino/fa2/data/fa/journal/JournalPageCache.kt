@@ -8,7 +8,7 @@ import me.domino.fa2.data.fa.core.requireStoreValue
 import me.domino.fa2.data.fa.core.storeJson
 import me.domino.fa2.data.local.dao.PageCacheDao
 import me.domino.fa2.data.model.JournalDetail
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.utils.parseJournalId
 
 /** Journal 详情存储层。 */
@@ -30,19 +30,21 @@ class JournalPageCache(
       )
 
   /** 读取详情流。 */
-  fun streamById(journalId: Int): Flow<PageState<JournalDetail>> = cachedStore.stream(journalId)
+  fun streamById(journalId: Int): Flow<ResourceResult<JournalDetail>> =
+      cachedStore.stream(journalId)
 
   /** 单次读取详情。 */
-  suspend fun loadById(journalId: Int): PageState<JournalDetail> = cachedStore.loadOnce(journalId)
+  suspend fun loadById(journalId: Int): ResourceResult<JournalDetail> =
+      cachedStore.loadOnce(journalId)
 
   /** 按 URL 读取详情。 */
-  suspend fun loadByUrl(url: String): PageState<JournalDetail> {
+  suspend fun loadByUrl(url: String): ResourceResult<JournalDetail> {
     val parsedId = parseJournalId(url)
     if (parsedId != null) {
       return loadById(parsedId)
     }
     val remote = dataSource.fetchByUrl(url)
-    if (remote is PageState.Success) {
+    if (remote is ResourceResult.Success) {
       cachedStore.writeThrough(remote.data.id, remote.data)
     }
     return remote

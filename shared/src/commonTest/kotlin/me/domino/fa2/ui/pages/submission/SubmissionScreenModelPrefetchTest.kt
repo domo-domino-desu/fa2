@@ -13,17 +13,20 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.pager.*
-import me.domino.fa2.ui.pages.submission.series.*
-import me.domino.fa2.ui.pages.submission.translation.*
+import me.domino.fa2.ui.pages.submission.pager.SubmissionPagerUiState
+import me.domino.fa2.ui.pages.submission.pager.computeSubmissionPrefetchIndices
+import me.domino.fa2.ui.pages.submission.pager.pagerPrefetchDebounceMs
+import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.ui.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerDetailSource
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPaginationKind
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPaginationModel
+import me.domino.fa2.ui.submissionviewer.api.SubmissionSourceAdapter
 import me.domino.fa2.utils.FaUrls
 import me.domino.fa2.utils.parseSubmissionSid
 
@@ -43,10 +46,7 @@ class SubmissionScreenModelPrefetchTest {
 
   @Test
   fun computesPrefetchWindowIndices() {
-    assertEquals(
-        listOf(1, 2, 3),
-        computeSubmissionPrefetchIndices(currentIndex = 0, lastIndex = 3),
-    )
+    assertEquals(listOf(1, 2, 3), computeSubmissionPrefetchIndices(currentIndex = 0, lastIndex = 3))
     assertEquals(
         listOf(3, 4, 5, 1),
         computeSubmissionPrefetchIndices(currentIndex = 2, lastIndex = 5),
@@ -147,34 +147,34 @@ private fun testThumbnail(sid: Int): SubmissionThumbnail =
 private class RecordingDetailSource : SubmissionPagerDetailSource {
   val sidPrefetchRequests: MutableList<Int> = mutableListOf()
 
-  override suspend fun loadBySid(sid: Int): PageState<Submission> {
+  override suspend fun loadBySid(sid: Int): ResourceResult<Submission> {
     sidPrefetchRequests += sid
-    return PageState.Success(testSubmission(sid))
+    return ResourceResult.Success(testSubmission(sid))
   }
 
-  override suspend fun loadByUrl(url: String): PageState<Submission> {
+  override suspend fun loadByUrl(url: String): ResourceResult<Submission> {
     val sid =
         parseSubmissionSid(url)
-            ?: return PageState.Error(IllegalArgumentException("Invalid submission url: $url"))
-    return PageState.Success(testSubmission(sid))
+            ?: return ResourceResult.Error(IllegalArgumentException("Invalid submission url: $url"))
+    return ResourceResult.Success(testSubmission(sid))
   }
 
   override suspend fun loadAttachmentText(
       downloadUrl: String,
       downloadFileName: String,
       onProgress: (AttachmentTextProgress) -> Unit,
-  ): PageState<AttachmentTextDocument> =
-      PageState.Error(IllegalStateException("No attachment parsing expected in this test"))
+  ): ResourceResult<AttachmentTextDocument> =
+      ResourceResult.Error(IllegalStateException("No attachment parsing expected in this test"))
 
-  override suspend fun toggleFavorite(sid: Int, actionUrl: String): PageState<Unit> =
-      PageState.Success(Unit)
+  override suspend fun toggleFavorite(sid: Int, actionUrl: String): ResourceResult<Unit> =
+      ResourceResult.Success(Unit)
 
   override suspend fun blockTag(
       sid: Int,
       tagName: String,
       nonce: String,
       toAdd: Boolean,
-  ): PageState<Unit> = PageState.Success(Unit)
+  ): ResourceResult<Unit> = ResourceResult.Success(Unit)
 }
 
 private fun testSubmission(sid: Int): Submission =
@@ -234,13 +234,13 @@ private class RecordingSequenceAdapter(
           firstRequestKey = initialItems.firstOrNull()?.submissionUrl,
       )
 
-  override suspend fun loadInitialPage(): PageState<SubmissionLoadedPage> =
-      PageState.Success(initialPage())
+  override suspend fun loadInitialPage(): ResourceResult<SubmissionLoadedPage> =
+      ResourceResult.Success(initialPage())
 
-  override suspend fun loadNextPage(requestKey: String): PageState<SubmissionLoadedPage> {
+  override suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionLoadedPage> {
     nextRequests += requestKey
     val sid = parseSubmissionSid(requestKey) ?: return invalidRequest(requestKey)
-    return PageState.Success(
+    return ResourceResult.Success(
         SubmissionLoadedPage(
             pageId = "next:$sid",
             requestKey = requestKey,
@@ -253,10 +253,10 @@ private class RecordingSequenceAdapter(
     )
   }
 
-  override suspend fun loadPreviousPage(requestKey: String): PageState<SubmissionLoadedPage> {
+  override suspend fun loadPreviousPage(requestKey: String): ResourceResult<SubmissionLoadedPage> {
     previousRequests += requestKey
     val sid = parseSubmissionSid(requestKey) ?: return invalidRequest(requestKey)
-    return PageState.Success(
+    return ResourceResult.Success(
         SubmissionLoadedPage(
             pageId = "previous:$sid",
             requestKey = requestKey,
@@ -268,6 +268,6 @@ private class RecordingSequenceAdapter(
     )
   }
 
-  private fun invalidRequest(requestKey: String): PageState.Error =
-      PageState.Error(IllegalArgumentException("Invalid request key: $requestKey"))
+  private fun invalidRequest(requestKey: String): ResourceResult.Error =
+      ResourceResult.Error(IllegalArgumentException("Invalid request key: $requestKey"))
 }

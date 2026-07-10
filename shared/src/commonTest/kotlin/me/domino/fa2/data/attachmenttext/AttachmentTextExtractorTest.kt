@@ -186,8 +186,10 @@ class AttachmentTextExtractorTest {
     assertTrue(document.paragraphs.isNotEmpty())
     assertProgressCompleted(progresses)
     assertTrue(progresses.any { progress -> progress.stageId == "extract_pages" })
-    assertTrue(progresses.any { progress -> progress.currentItemLabel?.contains("第 1 页") == true })
-    assertTrue(progresses.any { progress -> progress.currentItemLabel?.contains("第 4 页") == true })
+    assertTrue(
+        progresses.count { progress -> progress.stageId == "extract_pages" } >= 4,
+        "Each parsed PDF page should advance the extract-pages stage",
+    )
   }
 
   /** 解析 TXT 并按段落拆分。 */
@@ -266,30 +268,15 @@ class AttachmentTextExtractorTest {
     val paragraphs =
         mergeLinesIntoParagraphs(
             listOf(
-                PdfLine(
-                    text = "This para-",
-                    width = 120.0,
-                    pageIndex = 0,
-                    isEndOfPage = false,
-                ),
+                PdfLine(text = "This para-", width = 120.0, pageIndex = 0, isEndOfPage = false),
                 PdfLine(
                     text = "graph keeps going",
                     width = 130.0,
                     pageIndex = 0,
                     isEndOfPage = false,
                 ),
-                PdfLine(
-                    text = "and ends here.",
-                    width = 90.0,
-                    pageIndex = 0,
-                    isEndOfPage = false,
-                ),
-                PdfLine(
-                    text = "New paragraph",
-                    width = 80.0,
-                    pageIndex = 0,
-                    isEndOfPage = true,
-                ),
+                PdfLine(text = "and ends here.", width = 90.0, pageIndex = 0, isEndOfPage = false),
+                PdfLine(text = "New paragraph", width = 80.0, pageIndex = 0, isEndOfPage = true),
             )
         )
 
@@ -308,6 +295,6 @@ private fun assertProgressCompleted(progresses: List<AttachmentTextProgress>) {
       }
   )
   assertEquals(1f, progresses.last().overallFraction)
-  assertTrue(progresses.all { progress -> progress.stageLabel.isNotBlank() })
-  assertTrue(progresses.all { progress -> progress.message.isNotBlank() })
+  assertTrue(progresses.all { progress -> progress.stageId.isNotBlank() })
+  assertTrue(progresses.all { progress -> progress.stageIndex in 1..progress.stageCount })
 }

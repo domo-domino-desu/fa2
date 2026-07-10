@@ -18,11 +18,6 @@ import me.domino.fa2.ui.app.LocalAppI18n
 import me.domino.fa2.ui.app.LocalSearchUiLabelsRepository
 import me.domino.fa2.ui.components.accessibleClickableSummary
 import me.domino.fa2.ui.i18n.search.SearchUiMetadataKey
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.pager.*
-import me.domino.fa2.ui.pages.submission.series.*
-import me.domino.fa2.ui.pages.submission.translation.*
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -62,10 +57,7 @@ internal fun SubmissionBrowseMetadataSection(
     )
     SubmissionBrowseMetadataField(
         label =
-            searchUiLabelsRepository.metadataLabel(
-                SearchUiMetadataKey.CATEGORY,
-                appI18n.metadata,
-            ),
+            searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.CATEGORY, appI18n.metadata),
         value = normalizedCategory,
         onClick =
             if (browseFilter.category != null) {
@@ -86,10 +78,7 @@ internal fun SubmissionBrowseMetadataSection(
     )
     SubmissionBrowseMetadataField(
         label =
-            searchUiLabelsRepository.metadataLabel(
-                SearchUiMetadataKey.SPECIES,
-                appI18n.metadata,
-            ),
+            searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.SPECIES, appI18n.metadata),
         value = normalizedSpecies,
         onClick =
             if (browseFilter.species != null) {

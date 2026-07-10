@@ -1,7 +1,5 @@
 package me.domino.fa2.domain.attachmenttext
 
-import me.domino.fa2.domain.attachmenttext.*
-
 /** 附件文本解析器。 */
 interface AttachmentTextParser {
   /** 解析器格式。 */

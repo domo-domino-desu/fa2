@@ -27,9 +27,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.Res
+import fa2.shared.generated.resources.api_key
+import fa2.shared.generated.resources.app_language
+import fa2.shared.generated.resources.base_url
+import fa2.shared.generated.resources.blur_blocked_submissions_in_detail_pages
+import fa2.shared.generated.resources.blur_blocked_submissions_in_waterfalls
 import fa2.shared.generated.resources.cancel
+import fa2.shared.generated.resources.cannot_be_empty
+import fa2.shared.generated.resources.chunk_word_limit
 import fa2.shared.generated.resources.close
+import fa2.shared.generated.resources.download_file_name_mode
+import fa2.shared.generated.resources.download_subfolder_mode
+import fa2.shared.generated.resources.field_translation
 import fa2.shared.generated.resources.loading_settings
+import fa2.shared.generated.resources.max_concurrency
+import fa2.shared.generated.resources.model
+import fa2.shared.generated.resources.must_be_in_range
+import fa2.shared.generated.resources.must_be_number
+import fa2.shared.generated.resources.must_start_with_http_or_https
+import fa2.shared.generated.resources.prompt_template
 import fa2.shared.generated.resources.restored_saved_settings
 import fa2.shared.generated.resources.save_failed
 import fa2.shared.generated.resources.save_failed_enter_valid_numbers
@@ -38,6 +54,11 @@ import fa2.shared.generated.resources.settings_save_and_exit
 import fa2.shared.generated.resources.settings_saved
 import fa2.shared.generated.resources.settings_unsaved_changes_body
 import fa2.shared.generated.resources.settings_unsaved_changes_title
+import fa2.shared.generated.resources.theme_mode
+import fa2.shared.generated.resources.translation_target_language
+import fa2.shared.generated.resources.unsupported_setting
+import fa2.shared.generated.resources.watch_recommendation_page_size
+import fa2.shared.generated.resources.waterfall_min_column_width_dp
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.AppSettingsService
@@ -48,11 +69,51 @@ import me.domino.fa2.ui.components.ExpressiveTextButton
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.icons.FaMaterialSymbols
+import me.domino.fa2.utils.concurrency.runSuspendCatching
 import org.jetbrains.compose.resources.stringResource
 
 private enum class PendingExitAction {
   Back,
   Home,
+}
+
+@Composable
+private fun settingsValidationMessage(issue: SettingsValidationIssue): String {
+  val field =
+      when (issue.field) {
+        SettingsField.ChunkWordLimit -> stringResource(Res.string.chunk_word_limit)
+        SettingsField.MaxConcurrency -> stringResource(Res.string.max_concurrency)
+        SettingsField.WaterfallMinColumnWidth ->
+            stringResource(Res.string.waterfall_min_column_width_dp)
+        SettingsField.WatchRecommendationPageSize ->
+            stringResource(Res.string.watch_recommendation_page_size)
+        SettingsField.ThemeMode -> stringResource(Res.string.theme_mode)
+        SettingsField.AppLanguage -> stringResource(Res.string.app_language)
+        SettingsField.TranslationTargetLanguage ->
+            stringResource(Res.string.translation_target_language)
+        SettingsField.MetadataDisplay -> stringResource(Res.string.field_translation)
+        SettingsField.BlurInWaterfalls ->
+            stringResource(Res.string.blur_blocked_submissions_in_waterfalls)
+        SettingsField.BlurInDetailPages ->
+            stringResource(Res.string.blur_blocked_submissions_in_detail_pages)
+        SettingsField.DownloadSubfolderMode -> stringResource(Res.string.download_subfolder_mode)
+        SettingsField.DownloadFileNameMode -> stringResource(Res.string.download_file_name_mode)
+        SettingsField.BaseUrl -> stringResource(Res.string.base_url)
+        SettingsField.ApiKey -> stringResource(Res.string.api_key)
+        SettingsField.Model -> stringResource(Res.string.model)
+        SettingsField.PromptTemplate -> stringResource(Res.string.prompt_template)
+      }
+  return when (issue) {
+    is SettingsValidationIssue.MustBeNumber -> stringResource(Res.string.must_be_number, field)
+    is SettingsValidationIssue.Unsupported -> stringResource(Res.string.unsupported_setting, field)
+    is SettingsValidationIssue.OutOfRange -> {
+      val suffix = issue.suffix.trim().takeIf(String::isNotBlank)?.let { " $it" }.orEmpty()
+      stringResource(Res.string.must_be_in_range, field, issue.min, issue.max, suffix)
+    }
+    is SettingsValidationIssue.CannotBeEmpty -> stringResource(Res.string.cannot_be_empty, field)
+    is SettingsValidationIssue.MustStartWithHttp ->
+        stringResource(Res.string.must_start_with_http_or_https, field)
+  }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,29 +151,34 @@ fun SettingsScreen(
     }
   }
 
-  val validationMessage = draft.validate()
+  val validationIssue = draft.validate()
+  val validationMessage = validationIssue?.let { settingsValidationMessage(it) }
+  val restoredSavedSettingsText = stringResource(Res.string.restored_saved_settings)
+  val invalidNumbersText = stringResource(Res.string.save_failed_enter_valid_numbers)
+  val validationSaveFailureText =
+      validationMessage?.let { stringResource(Res.string.save_failed, it) }
   val hasUnsavedChanges = loaded && initialized && draft.hasChangesComparedTo(settings)
 
   fun resetDraftToPersisted() {
     draft = SettingsDraft.fromSettings(settings)
-    saveStatusText = appString(Res.string.restored_saved_settings)
+    saveStatusText = restoredSavedSettingsText
   }
 
   fun saveDraft(onSaved: (() -> Unit)? = null) {
     val target = draft.toAppSettingsOrNull()
     if (target == null) {
-      saveStatusText = appString(Res.string.save_failed_enter_valid_numbers)
+      saveStatusText = invalidNumbersText
       return
     }
     if (validationMessage != null) {
-      saveStatusText = appString(Res.string.save_failed, validationMessage)
+      saveStatusText = validationSaveFailureText
       return
     }
 
     saving = true
     saveStatusText = null
     scope.launch {
-      runCatching { settingsService.updateSettings(target) }
+      runSuspendCatching { settingsService.updateSettings(target) }
           .onSuccess {
             saveStatusText = appString(Res.string.settings_saved)
             onSaved?.invoke()
@@ -200,10 +266,7 @@ fun SettingsScreen(
       }
 
       item {
-        BlockedContentSettingsSection(
-            draft = draft,
-            onDraftChange = { next -> draft = next },
-        )
+        BlockedContentSettingsSection(draft = draft, onDraftChange = { next -> draft = next })
       }
 
       item { DownloadSettingsSection(draft = draft, onDraftChange = { next -> draft = next }) }

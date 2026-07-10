@@ -10,18 +10,15 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.i18n.SystemLanguageProvider
-import me.domino.fa2.data.model.PageState
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.ocr.SubmissionImageOcrService
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.domain.translation.SubmissionImageOcrTranslationService
 import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.translation.*
+import me.domino.fa2.ui.state.UiPageState
+import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerDetailSource
 import me.domino.fa2.utils.logging.FaLog
 
 /** 投稿详情浏览页面状态模型。 */
@@ -41,12 +38,11 @@ class SubmissionScreenModel(
     /** 原图 OCR 翻译服务。 */
     private val imageOcrTranslationService: SubmissionImageOcrTranslationService,
     private val settingsService: AppSettingsService? = null,
-    private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) : StateScreenModel<SubmissionPagerUiState>(SubmissionPagerUiState.Empty) {
   private val log = FaLog.withTag("SubmissionScreenModel")
   private val mutablePageState =
-      MutableStateFlow<PageState<SubmissionPagerUiState>>(PageState.Loading)
-  val pageState: StateFlow<PageState<SubmissionPagerUiState>> = mutablePageState.asStateFlow()
+      MutableStateFlow<UiPageState<SubmissionPagerUiState>>(UiPageState.Loading)
+  val pageState: StateFlow<UiPageState<SubmissionPagerUiState>> = mutablePageState.asStateFlow()
 
   private val feedbackEventsMutable = MutableSharedFlow<AppFeedbackRequest>(extraBufferCapacity = 8)
   val feedbackEvents: SharedFlow<AppFeedbackRequest> = feedbackEventsMutable.asSharedFlow()
@@ -116,7 +112,6 @@ class SubmissionScreenModel(
           imageOcrService = imageOcrService,
           imageOcrTranslationService = imageOcrTranslationService,
           settingsService = settingsService,
-          systemLanguageProvider = systemLanguageProvider,
           screenModelScope = screenModelScope,
           log = log,
           stateSink = { mutableState.value = it },
@@ -167,10 +162,8 @@ class SubmissionScreenModel(
 
   fun refreshImageOcrDialogTranslation() = workflow.refreshImageOcrDialogTranslation()
 
-  fun mergeImageOcrBlocks(
-      draggedBlockId: String,
-      mergeRegionPoints: List<NormalizedImagePoint>,
-  ) = workflow.mergeImageOcrBlocks(draggedBlockId, mergeRegionPoints)
+  fun mergeImageOcrBlocks(draggedBlockId: String, mergeRegionPoints: List<NormalizedImagePoint>) =
+      workflow.mergeImageOcrBlocks(draggedBlockId, mergeRegionPoints)
 
   fun translateDescriptionCurrent() = workflow.translateDescriptionCurrent()
 

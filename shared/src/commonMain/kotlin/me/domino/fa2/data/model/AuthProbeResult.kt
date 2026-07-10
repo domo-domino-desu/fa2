@@ -2,6 +2,13 @@ package me.domino.fa2.data.model
 
 /** 登录态探测结果。 */
 sealed interface AuthProbeResult {
+  enum class InvalidReason {
+    SessionExpired,
+    ChallengePending,
+    ChallengeAborted,
+    AccessBlocked,
+  }
+
   /**
    * 已登录，允许进入业务页面。
    *
@@ -15,11 +22,12 @@ sealed interface AuthProbeResult {
   /**
    * 认证无效，必须输入或更新 Cookie。
    *
-   * @property message 给登录页展示的提示信息。
+   * @property reason 可供 UI 本地化的原因。
    */
   data class AuthInvalid(
-      /** 提示用户补充登录信息的文案。 */
-      val message: String
+      val reason: InvalidReason,
+      /** 受限页等服务端提供的动态详情。 */
+      val detail: String? = null,
   ) : AuthProbeResult
 
   /**

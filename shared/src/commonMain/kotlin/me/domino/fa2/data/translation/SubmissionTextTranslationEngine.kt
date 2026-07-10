@@ -13,9 +13,7 @@ sealed interface TextTranslationResult {
   data class Failure(val cause: Throwable) : TextTranslationResult
 }
 
-class SubmissionTextTranslationEngine(
-    translationPort: TranslationPort,
-) {
+class SubmissionTextTranslationEngine(translationPort: TranslationPort) {
   private val log = FaLog.withTag("SubmissionTextTranslationEngine")
   private val resultAligner = SubmissionTranslationResultAligner()
   private val blockExtractor =

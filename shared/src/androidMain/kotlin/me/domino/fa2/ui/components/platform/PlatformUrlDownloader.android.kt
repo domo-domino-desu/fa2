@@ -103,24 +103,35 @@ private suspend fun downloadToConfiguredDirectory(
           fetchResult.payload.contentType?.substringBefore(';')?.trim()?.ifBlank { null }
               ?: "application/octet-stream"
 
-      val existing = targetDirectory.findFile(finalFileName)
-      if (existing != null) {
-        existing.delete()
-      }
-      val created = targetDirectory.createFile(mimeType, finalFileName)
-      if (created == null) {
+      val temporaryName =
+          buildAndroidTemporaryDownloadName(
+              submissionId = request.submissionId,
+              timestampMs = kotlin.time.Clock.System.now().toEpochMilliseconds(),
+          )
+      val temporaryFile = targetDirectory.createFile(mimeType, temporaryName)
+      if (temporaryFile == null) {
         return saveFailed(appString(Res.string.download_save_error_cannot_create_target_file))
       }
 
       val writeSuccess =
           runCatching {
-                context.contentResolver.openOutputStream(created.uri, "w")?.use { output ->
+                context.contentResolver.openOutputStream(temporaryFile.uri, "w")?.use { output ->
                   output.write(fetchResult.payload.bytes)
+                  output.flush()
                 } ?: error("Cannot open output stream")
               }
               .isSuccess
       if (!writeSuccess) {
+        temporaryFile.delete()
         return saveFailed(appString(Res.string.download_save_error_cannot_write_target_file))
+      }
+      val existing = targetDirectory.findFile(finalFileName)
+      if (existing != null && !existing.delete()) {
+        temporaryFile.delete()
+        return saveFailed(appString(Res.string.download_save_error_cannot_write_target_file))
+      }
+      if (!temporaryFile.renameTo(finalFileName)) {
+        return saveFailed(appString(Res.string.download_save_error_cannot_create_target_file))
       }
       return PlatformDownloadResult.Saved
     }
@@ -133,6 +144,9 @@ private suspend fun downloadToConfiguredDirectory(
     is AttachmentDownloadResult.Failed -> return saveFailed(fetchResult.message)
   }
 }
+
+internal fun buildAndroidTemporaryDownloadName(submissionId: Int, timestampMs: Long): String =
+    ".fa2-$submissionId-$timestampMs.part"
 
 /** 同步根目录 `.nomedia` 标记。 */
 private fun syncNoMediaFlag(rootDirectory: DocumentFile, allowMediaIndexing: Boolean) {
@@ -147,5 +161,5 @@ private fun syncNoMediaFlag(rootDirectory: DocumentFile, allowMediaIndexing: Boo
 }
 
 /** 构建统一保存失败结果。 */
-private fun saveFailed(reason: String): PlatformDownloadResult.HandledFailure =
+private suspend fun saveFailed(reason: String): PlatformDownloadResult.HandledFailure =
     PlatformDownloadResult.HandledFailure(appString(Res.string.download_save_failed, reason))

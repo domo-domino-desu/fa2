@@ -13,9 +13,6 @@ expect object LocalAppLocale {
 }
 
 @Composable
-fun ProvideAppLocale(
-    localeTag: String?,
-    content: @Composable () -> Unit,
-) {
+fun ProvideAppLocale(localeTag: String?, content: @Composable () -> Unit) {
   CompositionLocalProvider(LocalAppLocale provides localeTag) { key(localeTag) { content() } }
 }

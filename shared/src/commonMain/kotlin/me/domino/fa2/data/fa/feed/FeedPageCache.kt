@@ -8,7 +8,7 @@ import me.domino.fa2.data.fa.core.requireStoreValue
 import me.domino.fa2.data.fa.core.storeJson
 import me.domino.fa2.data.local.dao.PageCacheDao
 import me.domino.fa2.data.model.FeedPage
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.utils.parseSubmissionsFromSid
 
 /** Feed 读取存储层。 */
@@ -32,32 +32,32 @@ class FeedPageCache(
       )
 
   /** 读取 feed 数据流。 */
-  fun stream(fromSid: Int? = null): Flow<PageState<FeedPage>> {
+  fun stream(fromSid: Int? = null): Flow<ResourceResult<FeedPage>> {
     val key = FeedPageKey(fromSid = fromSid)
     return cachedStore.stream(key)
   }
 
   /** 单次读取 feed 页。 */
-  suspend fun loadPageOnce(fromSid: Int?): PageState<FeedPage> =
+  suspend fun loadPageOnce(fromSid: Int?): ResourceResult<FeedPage> =
       cachedStore.load(FeedPageKey(fromSid = fromSid))
 
   /** 强制刷新指定页：先清除缓存，再重新拉取。 */
-  suspend fun refreshPage(fromSid: Int?): PageState<FeedPage> {
+  suspend fun refreshPage(fromSid: Int?): ResourceResult<FeedPage> {
     return cachedStore.refresh(FeedPageKey(fromSid = fromSid))
   }
 
   /** 按下一页 URL 读取 feed 页。 */
-  suspend fun loadPageByNextUrl(nextPageUrl: String): PageState<FeedPage> {
+  suspend fun loadPageByNextUrl(nextPageUrl: String): ResourceResult<FeedPage> {
     val fromSid =
         parseSubmissionsFromSid(nextPageUrl)
-            ?: return PageState.Error(
+            ?: return ResourceResult.Error(
                 IllegalArgumentException("Invalid next page url: $nextPageUrl")
             )
     return loadPageOnce(fromSid = fromSid)
   }
 
   /** 按完整 URL 读取 feed 页。 */
-  suspend fun loadPageByUrl(url: String): PageState<FeedPage> {
+  suspend fun loadPageByUrl(url: String): ResourceResult<FeedPage> {
     val normalizedUrl = url.trim()
     val defaultFirstUrl = me.domino.fa2.utils.FaUrls.submissions()
     return when {

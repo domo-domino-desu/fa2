@@ -38,18 +38,11 @@ internal fun rapidOcrResultToBlocks(
 }
 
 /** 将单条 RapidOCR 识别记录转换为归一化文字块，内容为空或点数不足时返回 null。 */
-private fun RecResult.toRecognizedTextFragment(
-    width: Int,
-    height: Int,
-): RecognizedTextBlock? {
+private fun RecResult.toRecognizedTextFragment(width: Int, height: Int): RecognizedTextBlock? {
   val textValue = text.trim()
   val quad = dtBoxes?.toNormalizedPoints(width, height).orEmpty()
   if (textValue.isBlank() || quad.size < 4) return null
-  return RecognizedTextBlock(
-      text = textValue,
-      points = quad,
-      confidence = confidence,
-  )
+  return RecognizedTextBlock(text = textValue, points = quad, confidence = confidence)
 }
 
 /** 将 OpenCV Point 数组转换为 [0, 1] 范围内的归一化坐标列表。 */

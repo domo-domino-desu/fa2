@@ -2,6 +2,7 @@ package me.domino.fa2.data.translation
 
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.TranslationProvider
+import me.domino.fa2.utils.concurrency.runSuspendCatching
 import me.domino.fa2.utils.logging.FaLog
 
 internal class SubmissionTranslationChunkTranslator(
@@ -24,7 +25,7 @@ internal class SubmissionTranslationChunkTranslator(
 
     val payload = chunk.sourceTexts.joinToString(SubmissionTranslationResultAligner.batchSeparator)
     val translatedLines =
-        runCatching {
+        runSuspendCatching {
               translationPort
                   .translate(
                       TranslationRequest(

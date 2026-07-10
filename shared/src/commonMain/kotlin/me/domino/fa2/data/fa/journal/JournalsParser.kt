@@ -2,7 +2,7 @@ package me.domino.fa2.data.fa.journal
 
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Element
-import me.domino.fa2.data.fa.user.ensureUserPageAccessible
+import me.domino.fa2.data.fa.parsing.ensureUserPageAccessible
 import me.domino.fa2.data.model.JournalPage
 import me.domino.fa2.data.model.JournalSummary
 import me.domino.fa2.utils.toAbsoluteUrl
@@ -38,7 +38,7 @@ class JournalsParser {
         }
     val timestampNode = section.selectFirst("div.section-header span.popup_date")
     val timestampRaw = timestampNode?.attr("title")?.trim()?.takeIf { it.isNotBlank() }
-    val timestampNatural = timestampNode?.text()?.trim().orEmpty().ifBlank { "未知时间" }
+    val timestampNatural = timestampNode?.text()?.trim().orEmpty()
 
     val commentCount =
         section

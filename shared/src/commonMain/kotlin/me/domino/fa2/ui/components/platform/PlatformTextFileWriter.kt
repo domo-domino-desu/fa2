@@ -3,10 +3,8 @@ package me.domino.fa2.ui.components.platform
 import androidx.compose.runtime.Composable
 
 sealed interface PlatformTextFileDestination {
-  data class Directory(
-      val path: String,
-      val relativeDirectories: List<String> = emptyList(),
-  ) : PlatformTextFileDestination
+  data class Directory(val path: String, val relativeDirectories: List<String> = emptyList()) :
+      PlatformTextFileDestination
 
   data class File(val path: String) : PlatformTextFileDestination
 }

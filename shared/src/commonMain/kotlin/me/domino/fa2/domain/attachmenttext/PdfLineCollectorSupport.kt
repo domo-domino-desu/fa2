@@ -1,7 +1,5 @@
 package me.domino.fa2.domain.attachmenttext
 
-import me.domino.fa2.domain.attachmenttext.*
-
 /** PDF 文本块的水平边界（起始 X 与终止 X）。 */
 internal data class PdfChunkBounds(
     /** 文本块起始 X 坐标。 */

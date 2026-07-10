@@ -19,6 +19,9 @@ import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesService
 import me.domino.fa2.domain.translation.SubmissionDescriptionBlock
 import me.domino.fa2.ui.components.feedback.LocalShowToast
+import me.domino.fa2.ui.components.html.HtmlBlockTrailingAction
+import me.domino.fa2.ui.components.html.HtmlBlockTrailingActionState
+import me.domino.fa2.ui.translation.SubmissionTranslationUiState
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -31,19 +34,6 @@ internal data class SubmissionSeriesProbeConfig(
     val onOpenSeries: (SubmissionSeriesResolvedSeries) -> Unit,
 )
 
-internal data class SubmissionSeriesTrailingAction(
-    val state: SubmissionSeriesTrailingActionState,
-    val contentDescription: String,
-    val anchorTextLineEndOffset: Int?,
-    val onClick: () -> Unit,
-)
-
-internal enum class SubmissionSeriesTrailingActionState {
-  IDLE,
-  LOADING,
-  RESOLVED,
-}
-
 private sealed interface SubmissionSeriesProbeUiState {
   data object Idle : SubmissionSeriesProbeUiState
 
@@ -54,8 +44,8 @@ private sealed interface SubmissionSeriesProbeUiState {
 
 @Composable
 internal fun rememberSubmissionSeriesTrailingActions(
-    config: SubmissionSeriesProbeConfig?,
-): Map<Int, SubmissionSeriesTrailingAction> {
+    config: SubmissionSeriesProbeConfig?
+): Map<Int, HtmlBlockTrailingAction> {
   if (config == null) return emptyMap()
 
   val resolver = koinInject<SubmissionSeriesService>()
@@ -63,10 +53,7 @@ internal fun rememberSubmissionSeriesTrailingActions(
   val showToast = LocalShowToast.current
   val candidate =
       remember(config.sourceKey, config.baseUrl, config.sourceBlocks) {
-        resolver.detectCandidate(
-            sourceBlocks = config.sourceBlocks,
-            baseUrl = config.baseUrl,
-        )
+        resolver.detectCandidate(sourceBlocks = config.sourceBlocks, baseUrl = config.baseUrl)
       } ?: return emptyMap()
 
   var uiState by
@@ -79,13 +66,12 @@ internal fun rememberSubmissionSeriesTrailingActions(
       stringResource(Res.string.series_probe_open_first_content_description)
   val notFoundMessage = stringResource(Res.string.series_probe_not_found)
   val action =
-      SubmissionSeriesTrailingAction(
+      HtmlBlockTrailingAction(
           state =
               when (uiState) {
-                SubmissionSeriesProbeUiState.Idle -> SubmissionSeriesTrailingActionState.IDLE
-                SubmissionSeriesProbeUiState.Loading -> SubmissionSeriesTrailingActionState.LOADING
-                is SubmissionSeriesProbeUiState.Resolved ->
-                    SubmissionSeriesTrailingActionState.RESOLVED
+                SubmissionSeriesProbeUiState.Idle -> HtmlBlockTrailingActionState.Idle
+                SubmissionSeriesProbeUiState.Loading -> HtmlBlockTrailingActionState.Loading
+                is SubmissionSeriesProbeUiState.Resolved -> HtmlBlockTrailingActionState.Resolved
               },
           contentDescription =
               when (uiState) {
@@ -125,3 +111,18 @@ internal fun rememberSubmissionSeriesTrailingActions(
     mapOf(candidate.anchorBlockIndex to action)
   }
 }
+
+@Composable
+internal fun rememberSubmissionSeriesTrailingActions(
+    translationState: SubmissionTranslationUiState,
+    baseUrl: String,
+    onOpenSeries: (SubmissionSeriesResolvedSeries) -> Unit,
+): Map<Int, HtmlBlockTrailingAction> =
+    rememberSubmissionSeriesTrailingActions(
+        SubmissionSeriesProbeConfig(
+            sourceKey = translationState.sourceKey,
+            sourceBlocks = translationState.rawVariant.sourceBlocks,
+            baseUrl = baseUrl,
+            onOpenSeries = onOpenSeries,
+        )
+    )

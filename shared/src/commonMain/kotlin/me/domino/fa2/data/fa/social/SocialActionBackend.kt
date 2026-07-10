@@ -1,7 +1,6 @@
 package me.domino.fa2.data.fa.social
 
 import kotlinx.coroutines.delay
-import me.domino.fa2.data.fa.core.FaHtmlDataSource
 import me.domino.fa2.data.fa.core.HtmlResponseResult
 import me.domino.fa2.data.fa.core.summarizeHtmlResult
 import me.domino.fa2.utils.logging.FaLog
@@ -10,79 +9,7 @@ import me.domino.fa2.utils.logging.summarizeUrl
 internal interface SocialActionBackend {
   suspend fun execute(actionUrl: String): SocialActionResult
 
-  suspend fun updateTagBlocklist(
-      tagName: String,
-      nonce: String,
-      toAdd: Boolean,
-  ): SocialActionResult
-}
-
-internal class DataSourceSocialActionBackend(
-    private val dataSource: FaHtmlDataSource,
-    private val challengePolicy: SocialActionChallengePolicy,
-) : SocialActionBackend {
-  private val log = FaLog.withTag("DataSourceSocialActionBackend")
-
-  override suspend fun execute(actionUrl: String): SocialActionResult {
-    log.i { "社交动作后端(DataSource) -> 开始(url=${summarizeUrl(actionUrl)})" }
-    var challengeRetryCount = 0
-    while (true) {
-      when (val response = dataSource.get(actionUrl)) {
-        is HtmlResponseResult.Success ->
-            return SocialActionResult.Completed(redirected = false).also {
-              log.i { "社交动作后端(DataSource) -> 成功(url=${summarizeUrl(actionUrl)})" }
-            }
-        is HtmlResponseResult.AuthRequired ->
-            return SocialActionResult.Failed(response.message).also {
-              log.w { "社交动作后端(DataSource) -> 需要登录(url=${summarizeUrl(actionUrl)})" }
-            }
-        is HtmlResponseResult.MatureBlocked ->
-            return SocialActionResult.Blocked(response.reason).also {
-              log.w {
-                "社交动作后端(DataSource) -> 受限(url=${summarizeUrl(actionUrl)},reason=${response.reason})"
-              }
-            }
-        is HtmlResponseResult.Error ->
-            return SocialActionResult.Failed(response.message).also {
-              log.w {
-                "社交动作后端(DataSource) -> 失败(url=${summarizeUrl(actionUrl)},message=${response.message})"
-              }
-            }
-        is HtmlResponseResult.CfChallenge ->
-            when (
-                val decision =
-                    challengePolicy.decide(
-                        requestUrl = actionUrl,
-                        cfRay = response.cfRay,
-                        retryCount = challengeRetryCount,
-                    )
-            ) {
-              SocialActionChallengeDecision.Retry -> {
-                challengeRetryCount += 1
-                log.w {
-                  "社交动作后端(DataSource) -> Challenge重试(url=${summarizeUrl(actionUrl)},retry=$challengeRetryCount)"
-                }
-              }
-              is SocialActionChallengeDecision.Terminal ->
-                  return decision.result.also {
-                    log.w {
-                      "社交动作后端(DataSource) -> Challenge终止(url=${summarizeUrl(actionUrl)},result=${summarizeSocialActionResult(it)})"
-                    }
-                  }
-            }
-        HtmlResponseResult.ChallengeAborted ->
-            return SocialActionResult.Failed("Cloudflare challenge aborted").also {
-              log.w { "社交动作后端(DataSource) -> Challenge已取消(url=${summarizeUrl(actionUrl)})" }
-            }
-      }
-    }
-  }
-
-  override suspend fun updateTagBlocklist(
-      tagName: String,
-      nonce: String,
-      toAdd: Boolean,
-  ): SocialActionResult = SocialActionResult.Failed("No HTTP backend for tag blocking")
+  suspend fun updateTagBlocklist(tagName: String, nonce: String, toAdd: Boolean): SocialActionResult
 }
 
 internal class RawHttpSocialActionBackend(
@@ -175,12 +102,7 @@ internal class RawHttpSocialActionBackend(
     var rateLimitedRetryCount = 0
 
     while (true) {
-      val response =
-          transport.postTagBlocklist(
-              tagName = tagName,
-              nonce = nonce,
-              toAdd = toAdd,
-          )
+      val response = transport.postTagBlocklist(tagName = tagName, nonce = nonce, toAdd = toAdd)
 
       when (val outcome = tagBlockingResponseParser.parse(response)) {
         is SocialActionTagBlockingOutcome.RetryAfter -> {

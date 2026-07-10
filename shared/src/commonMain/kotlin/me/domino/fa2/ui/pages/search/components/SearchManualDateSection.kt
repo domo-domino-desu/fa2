@@ -95,10 +95,7 @@ internal fun ManualDateRangeSection(
   BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
     val singleColumn = maxWidth < 560.dp
     if (singleColumn) {
-      Column(
-          verticalArrangement = Arrangement.spacedBy(8.dp),
-          modifier = Modifier.fillMaxWidth(),
-      ) {
+      Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
         ManualDateField(
             value = rangeFrom,
             label = stringResource(Res.string.date_from_label),
@@ -113,10 +110,7 @@ internal fun ManualDateRangeSection(
         )
       }
     } else {
-      Row(
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-          modifier = Modifier.fillMaxWidth(),
-      ) {
+      Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
         ManualDateField(
             value = rangeFrom,
             label = stringResource(Res.string.date_from_label),
@@ -181,10 +175,7 @@ internal fun SearchDateShiftButtons(
   BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
     val singleColumn = maxWidth < 560.dp
     val rows = buttons.chunked(if (singleColumn) 2 else 3)
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
       rows.forEach { rowButtons ->
         Row(
             modifier = Modifier.fillMaxWidth(),

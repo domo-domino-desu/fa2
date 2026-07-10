@@ -44,7 +44,7 @@ class UserSubmissionSectionScreenModelTest {
                     listOf(
                         GalleryFolder(title = "A", url = "/folder/a", isActive = true),
                         GalleryFolder(title = "B", url = "/folder/b", isActive = false),
-                    ),
+                    )
             )
         )
 

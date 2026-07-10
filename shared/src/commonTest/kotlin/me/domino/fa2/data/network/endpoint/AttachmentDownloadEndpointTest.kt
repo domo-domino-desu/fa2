@@ -77,11 +77,7 @@ class AttachmentDownloadEndpointTest {
             cookiesStorage = FaCookiesStorage(InMemoryCookiePersistence()),
             userAgentStorage = createTestUserAgentStorage(),
         )
-    val endpoint =
-        AttachmentDownloadEndpoint(
-            client = client,
-            challengeResolver = resolver,
-        )
+    val endpoint = AttachmentDownloadEndpoint(client = client, challengeResolver = resolver)
 
     val result = endpoint.fetch("https://www.furaffinity.net/download/file.bin", "file.bin")
 

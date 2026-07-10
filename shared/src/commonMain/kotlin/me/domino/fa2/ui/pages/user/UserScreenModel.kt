@@ -5,14 +5,13 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.user.UserRepository
-import me.domino.fa2.data.i18n.SystemLanguageProvider
-import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.fa.user.UserResourceRepository
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.User
-import me.domino.fa2.data.model.summarizePageState
-import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.data.model.summarizeResourceResult
+import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.ui.i18n.appString
+import me.domino.fa2.utils.concurrency.runSuspendCatching
 import me.domino.fa2.utils.logging.FaLog
 
 /** User 页面状态。 */
@@ -42,14 +41,12 @@ class UserScreenModel(
     /** 目标用户名。 */
     private val username: String,
     /** User 仓储。 */
-    private val repository: UserRepository,
+    private val repository: UserResourceRepository,
     /** 初始子路由。 */
     initialChildRoute: UserChildRoute = UserChildRoute.Gallery,
     /** 初始 folder URL（可选）。 */
     initialFolderUrl: String? = null,
     private val blocklistRepository: WatchRecommendationBlocklist,
-    private val settingsService: AppSettingsService? = null,
-    private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) :
     StateScreenModel<UserUiState>(
         UserUiState(
@@ -101,7 +98,7 @@ class UserScreenModel(
                     repository.loadUser(username)
                   }
           ) {
-            is PageState.Success -> {
+            is ResourceResult.Success -> {
               mutableState.value =
                   state.value.copy(
                       header = next.data,
@@ -109,10 +106,10 @@ class UserScreenModel(
                       errorMessage = null,
                       recommendationHidden = hidden,
                   )
-              log.i { "加载用户 -> ${summarizePageState(next)}" }
+              log.i { "加载用户 -> ${summarizeResourceResult(next)}" }
             }
 
-            is PageState.AuthRequired -> {
+            is ResourceResult.AuthRequired -> {
               mutableState.value =
                   state.value.copy(
                       loading = false,
@@ -122,7 +119,7 @@ class UserScreenModel(
               log.w { "加载用户 -> 需要重新登录" }
             }
 
-            PageState.CfChallenge -> {
+            ResourceResult.CfChallenge -> {
               mutableState.value =
                   state.value.copy(
                       loading = false,
@@ -132,7 +129,7 @@ class UserScreenModel(
               log.w { "加载用户 -> Cloudflare验证" }
             }
 
-            is PageState.MatureBlocked -> {
+            is ResourceResult.MatureBlocked -> {
               mutableState.value =
                   state.value.copy(
                       loading = false,
@@ -142,7 +139,7 @@ class UserScreenModel(
               log.w { "加载用户 -> 受限(${next.reason})" }
             }
 
-            is PageState.Error -> {
+            is ResourceResult.Error -> {
               mutableState.value =
                   state.value.copy(
                       loading = false,
@@ -151,8 +148,6 @@ class UserScreenModel(
                   )
               log.e(next.exception) { "加载用户 -> 失败" }
             }
-
-            PageState.Loading -> Unit
           }
         }
   }
@@ -224,9 +219,9 @@ class UserScreenModel(
 
     screenModelScope.launch {
       when (val next = repository.toggleWatch(username = username, actionUrl = actionUrl)) {
-        is PageState.Success -> {
+        is ResourceResult.Success -> {
           when (val refreshed = repository.loadUser(username)) {
-            is PageState.Success -> {
+            is ResourceResult.Success -> {
               mutableState.value =
                   state.value.copy(
                       header = refreshed.data,
@@ -237,7 +232,7 @@ class UserScreenModel(
               log.i { "关注操作 -> 成功(isWatching=${refreshed.data.isWatching})" }
             }
 
-            is PageState.AuthRequired -> {
+            is ResourceResult.AuthRequired -> {
               mutableState.value =
                   state.value.copy(
                       loading = false,
@@ -251,7 +246,7 @@ class UserScreenModel(
               log.w { "关注操作 -> 已提交, 但刷新需要重新登录" }
             }
 
-            PageState.CfChallenge -> {
+            ResourceResult.CfChallenge -> {
               mutableState.value =
                   state.value.copy(
                       loading = false,
@@ -262,7 +257,7 @@ class UserScreenModel(
               log.w { "关注操作 -> 已提交, 但刷新需要Cloudflare验证" }
             }
 
-            is PageState.MatureBlocked -> {
+            is ResourceResult.MatureBlocked -> {
               mutableState.value =
                   state.value.copy(
                       loading = false,
@@ -276,7 +271,7 @@ class UserScreenModel(
               log.w { "关注操作 -> 已提交, 但刷新受限(${refreshed.reason})" }
             }
 
-            is PageState.Error -> {
+            is ResourceResult.Error -> {
               mutableState.value =
                   state.value.copy(
                       loading = false,
@@ -289,22 +284,16 @@ class UserScreenModel(
                   )
               log.e(refreshed.exception) { "关注操作 -> 已提交, 但刷新失败" }
             }
-
-            PageState.Loading -> Unit
           }
         }
 
-        is PageState.AuthRequired -> {
+        is ResourceResult.AuthRequired -> {
           mutableState.value =
-              state.value.copy(
-                  header = header,
-                  watchUpdating = false,
-                  errorMessage = next.message,
-              )
+              state.value.copy(header = header, watchUpdating = false, errorMessage = next.message)
           log.w { "关注操作 -> 需要重新登录" }
         }
 
-        PageState.CfChallenge -> {
+        ResourceResult.CfChallenge -> {
           mutableState.value =
               state.value.copy(
                   header = header,
@@ -314,17 +303,13 @@ class UserScreenModel(
           log.w { "关注操作 -> Cloudflare验证" }
         }
 
-        is PageState.MatureBlocked -> {
+        is ResourceResult.MatureBlocked -> {
           mutableState.value =
-              state.value.copy(
-                  header = header,
-                  watchUpdating = false,
-                  errorMessage = next.reason,
-              )
+              state.value.copy(header = header, watchUpdating = false, errorMessage = next.reason)
           log.w { "关注操作 -> 受限(${next.reason})" }
         }
 
-        is PageState.Error -> {
+        is ResourceResult.Error -> {
           mutableState.value =
               state.value.copy(
                   header = header,
@@ -333,8 +318,6 @@ class UserScreenModel(
               )
           log.e(next.exception) { "关注操作 -> 失败" }
         }
-
-        PageState.Loading -> Unit
       }
     }
   }
@@ -356,7 +339,7 @@ class UserScreenModel(
         )
 
     screenModelScope.launch {
-      runCatching { blocklistRepository.addBlockedUsername(normalizedUsername) }
+      runSuspendCatching { blocklistRepository.addBlockedUsername(normalizedUsername) }
           .onSuccess {
             mutableState.value =
                 state.value.copy(
@@ -394,7 +377,7 @@ class UserScreenModel(
         )
 
     screenModelScope.launch {
-      runCatching { blocklistRepository.removeBlockedUsername(normalizedUsername) }
+      runSuspendCatching { blocklistRepository.removeBlockedUsername(normalizedUsername) }
           .onSuccess {
             mutableState.value =
                 state.value.copy(
@@ -419,7 +402,7 @@ class UserScreenModel(
   private suspend fun loadRecommendationHidden(): Boolean {
     val normalizedUsername = normalizedUsername()
     if (normalizedUsername.isBlank()) return false
-    return runCatching { normalizedUsername in blocklistRepository.loadBlockedUsernameSet() }
+    return runSuspendCatching { normalizedUsername in blocklistRepository.loadBlockedUsernameSet() }
         .onFailure { error -> log.e(error) { "用户页推荐隐藏 -> 读取失败(user=$normalizedUsername)" } }
         .getOrDefault(false)
   }
@@ -427,7 +410,7 @@ class UserScreenModel(
   private fun normalizedUsername(): String =
       (state.value.header?.username ?: username).trim().lowercase()
 
-  private fun recommendationBlocklistErrorMessage(error: Throwable): String {
+  private suspend fun recommendationBlocklistErrorMessage(error: Throwable): String {
     val detail = error.message ?: error::class.simpleName.orEmpty()
     return appString(Res.string.following_recommendation_blocklist_update_failed, detail)
   }

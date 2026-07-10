@@ -126,7 +126,12 @@ internal fun UserHeaderCard(
       bodyContent = {
         UserMetadataAndContactsRow(
             userTitle = header.userTitle,
-            registeredAtText = me.domino.fa2.ui.i18n.registeredAtText(header.registeredAt),
+            registeredAtText =
+                header.registeredAt
+                    .trim()
+                    .takeIf(String::isNotBlank)
+                    ?.let { stringResource(Res.string.registered_at, it) }
+                    .orEmpty(),
             contacts = header.contacts,
         )
 
@@ -269,15 +274,9 @@ private fun UserWatchActionButton(
   ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
       if (updating) {
-        LoadingIndicator(
-            modifier = Modifier.size(22.dp),
-            color = MaterialTheme.colorScheme.primary,
-        )
+        LoadingIndicator(modifier = Modifier.size(22.dp), color = MaterialTheme.colorScheme.primary)
       } else {
-        Icon(
-            imageVector = action.icon,
-            contentDescription = null,
-        )
+        Icon(imageVector = action.icon, contentDescription = null)
       }
     }
   }

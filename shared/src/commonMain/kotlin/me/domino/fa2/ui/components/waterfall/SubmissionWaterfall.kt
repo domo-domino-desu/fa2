@@ -72,7 +72,6 @@ import me.domino.fa2.ui.components.media.ThumbnailImage
 import me.domino.fa2.ui.components.state.PaginationRetryBar
 import me.domino.fa2.ui.components.state.PaginationRetryDirection
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.pages.submission.pager.SubmissionPaginationKind
 import org.jetbrains.compose.resources.stringResource
 
 /** 瀑布流卡片最小宽度。 */
@@ -93,7 +92,7 @@ private const val fallbackCardAspectRatio = 1f
 private val waterfallFabMenuButtonHeight = 40.dp
 
 data class SubmissionWaterfallPageControls(
-    val paginationKind: SubmissionPaginationKind? = null,
+    val paginationKind: WaterfallPaginationKind? = null,
     val currentPageNumber: Int? = null,
     val lastPageNumber: Int? = null,
     val showFirstPage: Boolean = false,
@@ -109,10 +108,15 @@ data class SubmissionWaterfallPageControls(
     val loading: Boolean = false,
 ) {
   val showPageIndicator: Boolean
-    get() = paginationKind == SubmissionPaginationKind.NUMBERED
+    get() = paginationKind == WaterfallPaginationKind.Numbered
 
   val hasAnyAction: Boolean
     get() = showFirstPage || showPreviousPage || showPageIndicator || showNextPage || showLastPage
+}
+
+enum class WaterfallPaginationKind {
+  Cursor,
+  Numbered,
 }
 
 data class SubmissionWaterfallViewportSnapshot(
@@ -184,7 +188,7 @@ fun SubmissionWaterfall(
     /** 加载最后一页。 */
     onLoadLastPage: (() -> Unit)? = null,
     /** 待消费的滚动请求。 */
-    pendingScrollRequest: me.domino.fa2.ui.pages.submission.pager.WaterfallScrollRequest? = null,
+    pendingScrollRequest: me.domino.fa2.ui.submissionviewer.api.WaterfallScrollRequest? = null,
     /** 消费滚动请求。 */
     onConsumeScrollRequest: ((Long) -> Unit)? = null,
     /** waterfall 视口变化。 */
@@ -492,10 +496,7 @@ private fun SubmissionWaterfallPageFab(
       expanded = expanded,
       modifier = modifier,
       button = {
-        ToggleFloatingActionButton(
-            checked = expanded,
-            onCheckedChange = onExpandedChange,
-        ) {
+        ToggleFloatingActionButton(checked = expanded, onCheckedChange = onExpandedChange) {
           Icon(
               imageVector =
                   if (checkedProgress >= 0.5f) FaMaterialSymbols.Filled.Close
@@ -693,7 +694,7 @@ private fun categoryBadgeIcon(iconToken: String): ImageVector =
     }
 
 internal fun resolveWaterfallScrollTargetSid(
-    request: me.domino.fa2.ui.pages.submission.pager.WaterfallScrollRequest,
+    request: me.domino.fa2.ui.submissionviewer.api.WaterfallScrollRequest,
     itemIds: Set<Int>,
     visibleItems: List<WaterfallVisibleItem>,
 ): Int {
@@ -715,11 +716,7 @@ internal fun resolveWaterfallScrollTargetSid(
       ?: request.sid
 }
 
-internal data class WaterfallVisibleItem(
-    val sid: Int,
-    val laneOffsetX: Int,
-    val itemOffsetY: Int,
-)
+internal data class WaterfallVisibleItem(val sid: Int, val laneOffsetX: Int, val itemOffsetY: Int)
 
 /** 统一分页状态 Footer。 */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

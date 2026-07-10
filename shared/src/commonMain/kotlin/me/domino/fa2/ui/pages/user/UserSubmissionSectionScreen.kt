@@ -45,7 +45,7 @@ import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallPageControls
 import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallViewportSnapshot
 import me.domino.fa2.ui.components.waterfall.WaterfallLoadingSkeleton
 import me.domino.fa2.ui.components.waterfall.WaterfallRefreshBox
-import me.domino.fa2.ui.pages.submission.pager.WaterfallScrollRequest
+import me.domino.fa2.ui.submissionviewer.api.WaterfallScrollRequest
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -285,10 +285,7 @@ internal fun UserSubmissionSectionScreen(
               preItemsContent = {
                 topItemsContent()
                 if (!inlineError.isNullOrBlank()) {
-                  item(
-                      key = "user-inline-error",
-                      span = StaggeredGridItemSpan.FullLine,
-                  ) {
+                  item(key = "user-inline-error", span = StaggeredGridItemSpan.FullLine) {
                     UserStatusCard(
                         title = stringResource(Res.string.load_failed),
                         body = inlineError,
@@ -338,10 +335,7 @@ private fun UserSubmissionSectionSingleStateGrid(
       modifier = Modifier.fillMaxSize(),
   ) {
     if (headerContent != null) {
-      item(
-          key = "user-submission-single-state-header",
-          span = StaggeredGridItemSpan.FullLine,
-      ) {
+      item(key = "user-submission-single-state-header", span = StaggeredGridItemSpan.FullLine) {
         headerContent()
       }
     }
@@ -366,10 +360,7 @@ private fun UserStatusCard(title: String, body: String, onRetry: () -> Unit) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun UserFolderGroupsCard(groups: List<GalleryFolderGroup>, onOpenFolder: (String) -> Unit) {
-  Column(
-      modifier = Modifier.fillMaxWidth(),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
-  ) {
+  Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
     groups.forEach { group ->
       if (!group.title.isNullOrBlank()) {
         Text(

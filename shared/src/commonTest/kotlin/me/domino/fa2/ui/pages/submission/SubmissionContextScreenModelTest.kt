@@ -13,14 +13,19 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.pager.*
-import me.domino.fa2.ui.pages.submission.series.*
-import me.domino.fa2.ui.pages.submission.translation.*
+import me.domino.fa2.ui.components.waterfall.WaterfallPaginationKind
+import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
+import me.domino.fa2.ui.pages.submission.pager.currentWaterfallPageTarget
+import me.domino.fa2.ui.pages.submission.pager.knownLastPageNumber
+import me.domino.fa2.ui.pages.submission.pager.toWaterfallPageControls
+import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.ui.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPageSnapshot
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPaginationKind
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPaginationModel
+import me.domino.fa2.ui.submissionviewer.api.SubmissionSourceAdapter
 import me.domino.fa2.utils.FaUrls
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -466,7 +471,7 @@ class SubmissionContextScreenModelTest {
         )
 
         val controls = assertNotNull(model.snapshot(contextId)?.toWaterfallPageControls())
-        assertEquals(SubmissionPaginationKind.NUMBERED, controls.paginationKind)
+        assertEquals(WaterfallPaginationKind.Numbered, controls.paginationKind)
         assertEquals(true, controls.showPreviousPage)
         assertEquals(true, controls.showNextPage)
         assertEquals(true, controls.showFirstPage)
@@ -507,7 +512,7 @@ class SubmissionContextScreenModelTest {
         )
 
         val controls = assertNotNull(model.snapshot(contextId)?.toWaterfallPageControls())
-        assertEquals(SubmissionPaginationKind.CURSOR, controls.paginationKind)
+        assertEquals(WaterfallPaginationKind.Cursor, controls.paginationKind)
         assertEquals(true, controls.showPreviousPage)
         assertFalse(controls.canLoadPreviousPage)
         assertEquals(true, controls.showNextPage)
@@ -699,7 +704,7 @@ class SubmissionContextScreenModelTest {
 
 private class FakeSubmissionSourceAdapter(
     override val paginationModel: SubmissionPaginationModel =
-        SubmissionPaginationModel(kind = SubmissionPaginationKind.CURSOR),
+        SubmissionPaginationModel(kind = SubmissionPaginationKind.CURSOR)
 ) : SubmissionSourceAdapter {
   override val sourceKind: SubmissionContextSourceKind = SubmissionContextSourceKind.SEARCH
   val nextResults: MutableMap<String, SubmissionLoadedPage> = mutableMapOf()
@@ -713,30 +718,30 @@ private class FakeSubmissionSourceAdapter(
   var firstCalls: Int = 0
   var lastCalls: Int = 0
 
-  override suspend fun loadInitialPage(): PageState<SubmissionLoadedPage> =
-      PageState.Error(IllegalStateException("Unused in test"))
+  override suspend fun loadInitialPage(): ResourceResult<SubmissionLoadedPage> =
+      ResourceResult.Error(IllegalStateException("Unused in test"))
 
-  override suspend fun loadNextPage(requestKey: String): PageState<SubmissionLoadedPage> =
-      nextResults[requestKey]?.also { nextCalls += 1 }?.let { page -> PageState.Success(page) }
-          ?: PageState.Error(IllegalStateException("Missing next page for $requestKey"))
+  override suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
+      nextResults[requestKey]?.also { nextCalls += 1 }?.let { page -> ResourceResult.Success(page) }
+          ?: ResourceResult.Error(IllegalStateException("Missing next page for $requestKey"))
 
-  override suspend fun loadPreviousPage(requestKey: String): PageState<SubmissionLoadedPage> =
+  override suspend fun loadPreviousPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
       previousResults[requestKey]
           ?.also { previousCalls += 1 }
-          ?.let { page -> PageState.Success(page) }
-          ?: PageState.Error(IllegalStateException("Missing previous page for $requestKey"))
+          ?.let { page -> ResourceResult.Success(page) }
+          ?: ResourceResult.Error(IllegalStateException("Missing previous page for $requestKey"))
 
-  override suspend fun jumpToPage(pageNumber: Int): PageState<SubmissionLoadedPage> =
-      jumpResults[pageNumber]?.also { jumpCalls += 1 }?.let { page -> PageState.Success(page) }
-          ?: PageState.Error(IllegalStateException("Missing jump page for $pageNumber"))
+  override suspend fun jumpToPage(pageNumber: Int): ResourceResult<SubmissionLoadedPage> =
+      jumpResults[pageNumber]?.also { jumpCalls += 1 }?.let { page -> ResourceResult.Success(page) }
+          ?: ResourceResult.Error(IllegalStateException("Missing jump page for $pageNumber"))
 
-  override suspend fun loadFirstPage(): PageState<SubmissionLoadedPage> =
-      firstResult?.also { firstCalls += 1 }?.let { page -> PageState.Success(page) }
-          ?: PageState.Error(IllegalStateException("Missing first page"))
+  override suspend fun loadFirstPage(): ResourceResult<SubmissionLoadedPage> =
+      firstResult?.also { firstCalls += 1 }?.let { page -> ResourceResult.Success(page) }
+          ?: ResourceResult.Error(IllegalStateException("Missing first page"))
 
-  override suspend fun loadLastPage(): PageState<SubmissionLoadedPage> =
-      lastResult?.also { lastCalls += 1 }?.let { page -> PageState.Success(page) }
-          ?: PageState.Error(IllegalStateException("Missing last page"))
+  override suspend fun loadLastPage(): ResourceResult<SubmissionLoadedPage> =
+      lastResult?.also { lastCalls += 1 }?.let { page -> ResourceResult.Success(page) }
+          ?: ResourceResult.Error(IllegalStateException("Missing last page"))
 }
 
 private fun testThumbnail(sid: Int): SubmissionThumbnail =

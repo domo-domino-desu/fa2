@@ -55,7 +55,7 @@ internal class SubmissionCommentsParser {
 
     val timestampNode = commentNode.selectFirst("comment-date .popup_date")
     val timestampRaw = timestampNode?.attr("title")?.trim()?.takeIf { it.isNotBlank() }
-    val timestampNatural = timestampNode?.text()?.trim().orEmpty().ifBlank { "未知时间" }
+    val timestampNatural = timestampNode?.text()?.trim().orEmpty()
 
     val bodyHtml =
         commentNode.selectFirst("comment-user-text .user-submitted-links")?.html()?.trim()?.takeIf {

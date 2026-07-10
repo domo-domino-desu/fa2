@@ -7,7 +7,7 @@ import me.domino.fa2.data.fa.core.CachedPageStoreSupport
 import me.domino.fa2.data.fa.core.requireStoreValue
 import me.domino.fa2.data.fa.core.storeJson
 import me.domino.fa2.data.local.dao.PageCacheDao
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.User
 
 /** User Header 存储层。 */
@@ -27,13 +27,13 @@ class UserPageCache(
       )
 
   /** 读取 user header 流。 */
-  fun stream(username: String): Flow<PageState<User>> {
+  fun stream(username: String): Flow<ResourceResult<User>> {
     val key = normalizeUsername(username)
     return cachedStore.stream(key)
   }
 
   /** 单次读取 user header。 */
-  suspend fun loadOnce(username: String): PageState<User> =
+  suspend fun loadOnce(username: String): ResourceResult<User> =
       cachedStore.loadOnce(normalizeUsername(username))
 
   /** 主动失效指定用户头部缓存。 */

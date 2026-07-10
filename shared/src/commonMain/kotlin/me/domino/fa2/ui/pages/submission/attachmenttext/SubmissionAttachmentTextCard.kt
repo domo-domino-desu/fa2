@@ -27,9 +27,8 @@ import me.domino.fa2.ui.components.html.DetailSectionCardSurface
 import me.domino.fa2.ui.components.html.TranslatableBlocksCard
 import me.domino.fa2.ui.components.html.TranslatableSectionTitleRow
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.pages.submission.series.*
-import me.domino.fa2.ui.pages.submission.translation.*
-import me.domino.fa2.ui.pages.submission.translation.SubmissionTranslationUiState
+import me.domino.fa2.ui.pages.submission.series.rememberSubmissionSeriesTrailingActions
+import me.domino.fa2.ui.translation.SubmissionTranslationUiState
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -65,8 +64,9 @@ internal fun SubmissionAttachmentTextCard(
             onToggleWrapText()
             requestPagerFocus()
           },
-          seriesProbeConfig =
-              SubmissionSeriesProbeConfig(
+          blockTrailingActions =
+              rememberSubmissionSeriesTrailingActions(
+                  translationState = state,
                   baseUrl = submissionUrl,
                   onOpenSeries = onOpenSubmissionSeries,
               ),
@@ -93,9 +93,7 @@ internal fun SubmissionAttachmentTextCard(
           modifier
               .fillMaxWidth()
               .padding(horizontal = 16.dp)
-              .then(
-                  if (clickable) Modifier.clickable(onClick = onLoadAttachmentText) else Modifier
-              ),
+              .then(if (clickable) Modifier.clickable(onClick = onLoadAttachmentText) else Modifier)
   ) {
     when (attachmentTextState) {
       is SubmissionAttachmentTextUiState.Loading -> {
@@ -109,25 +107,19 @@ internal fun SubmissionAttachmentTextCard(
               modifier = Modifier.size(24.dp),
               color = MaterialTheme.colorScheme.primary,
           )
-          Column(
-              modifier = Modifier.weight(1f),
-              verticalArrangement = Arrangement.spacedBy(2.dp),
-          ) {
+          Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
-                text = progress?.message ?: stringResource(Res.string.preparing_attachment),
+                text =
+                    progress?.let {
+                      stringResource(
+                          Res.string.attachment_processing_stage,
+                          it.stageIndex,
+                          it.stageCount,
+                      )
+                    } ?: stringResource(Res.string.preparing_attachment),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            progress
-                ?.currentItemLabel
-                ?.takeIf { it.isNotBlank() }
-                ?.let { label ->
-                  Text(
-                      text = label,
-                      style = MaterialTheme.typography.bodySmall,
-                      color = MaterialTheme.colorScheme.onSurfaceVariant,
-                  )
-                }
           }
           Text(
               text =

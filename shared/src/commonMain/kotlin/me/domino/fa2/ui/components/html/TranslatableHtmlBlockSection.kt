@@ -39,11 +39,7 @@ import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import kotlin.math.roundToInt
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.pages.submission.series.SubmissionSeriesProbeConfig
-import me.domino.fa2.ui.pages.submission.series.SubmissionSeriesTrailingAction
-import me.domino.fa2.ui.pages.submission.series.SubmissionSeriesTrailingActionState
-import me.domino.fa2.ui.pages.submission.series.rememberSubmissionSeriesTrailingActions
-import me.domino.fa2.ui.pages.submission.translation.SubmissionTranslationUiState
+import me.domino.fa2.ui.translation.SubmissionTranslationUiState
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -65,10 +61,7 @@ internal fun TranslateActionButton(
       contentAlignment = Alignment.Center,
   ) {
     if (translating) {
-      LoadingIndicator(
-          modifier = Modifier.size(16.dp),
-          color = MaterialTheme.colorScheme.primary,
-      )
+      LoadingIndicator(modifier = Modifier.size(16.dp), color = MaterialTheme.colorScheme.primary)
     } else {
       Icon(
           imageVector = FaMaterialSymbols.Outlined.Translate,
@@ -236,7 +229,7 @@ internal fun TranslatableBlocksCard(
     onTranslate: () -> Unit,
     onToggleWrapText: () -> Unit,
     translationEnabled: Boolean = true,
-    seriesProbeConfig: SubmissionSeriesProbeConfig? = null,
+    blockTrailingActions: Map<Int, HtmlBlockTrailingAction> = emptyMap(),
     modifier: Modifier = Modifier,
     titleMaxLines: Int = 1,
     supportingText: (@Composable ColumnScope.() -> Unit)? = null,
@@ -251,14 +244,6 @@ internal fun TranslatableBlocksCard(
       } else {
         translationState.copy(showTranslation = false)
       }
-  val effectiveSeriesProbeConfig =
-      remember(seriesProbeConfig, translationState.sourceKey) {
-        seriesProbeConfig?.copy(
-            sourceKey = translationState.sourceKey,
-            sourceBlocks = translationState.rawVariant.sourceBlocks,
-        )
-      }
-  val blockTrailingActions = rememberSubmissionSeriesTrailingActions(effectiveSeriesProbeConfig)
   DetailSectionCardSurface(modifier = modifier) {
     TranslatableSectionTitleRow(
         title = title,
@@ -293,7 +278,7 @@ internal fun TranslatableHtmlBlockContent(
     originalTextColor: Color,
     translatedTextStyle: TextStyle,
     translatedTextColor: Color,
-    blockTrailingActions: Map<Int, SubmissionSeriesTrailingAction> = emptyMap(),
+    blockTrailingActions: Map<Int, HtmlBlockTrailingAction> = emptyMap(),
     modifier: Modifier = Modifier,
     selectable: Boolean = true,
 ) {
@@ -337,18 +322,10 @@ internal fun TranslatableHtmlBlockContent(
           if (translated.isNotBlank()) {
             if (selectable) {
               SelectionContainer {
-                Text(
-                    text = translated,
-                    style = translatedTextStyle,
-                    color = translatedTextColor,
-                )
+                Text(text = translated, style = translatedTextStyle, color = translatedTextColor)
               }
             } else {
-              Text(
-                  text = translated,
-                  style = translatedTextStyle,
-                  color = translatedTextColor,
-              )
+              Text(text = translated, style = translatedTextStyle, color = translatedTextColor)
             }
           }
         }
@@ -391,7 +368,7 @@ private fun OriginalBlockWithTrailingAction(
     textStyle: TextStyle,
     textColor: Color,
     selectable: Boolean,
-    trailingAction: SubmissionSeriesTrailingAction?,
+    trailingAction: HtmlBlockTrailingAction?,
 ) {
   if (trailingAction == null) {
     OriginalBlockText(
@@ -445,13 +422,13 @@ private fun OriginalBlockWithTrailingAction(
                   }
                 }
                 .clickable(
-                    enabled = trailingAction.state != SubmissionSeriesTrailingActionState.LOADING,
+                    enabled = trailingAction.state != HtmlBlockTrailingActionState.Loading,
                     onClick = trailingAction.onClick,
                 )
-                .focusProperties { canFocus = false },
+                .focusProperties { canFocus = false }
     ) {
       when (trailingAction.state) {
-        SubmissionSeriesTrailingActionState.IDLE ->
+        HtmlBlockTrailingActionState.Idle ->
             Icon(
                 imageVector = FaMaterialSymbols.Outlined.Troubleshoot,
                 contentDescription = trailingAction.contentDescription,
@@ -459,13 +436,13 @@ private fun OriginalBlockWithTrailingAction(
                 tint = MaterialTheme.colorScheme.primary,
             )
 
-        SubmissionSeriesTrailingActionState.LOADING ->
+        HtmlBlockTrailingActionState.Loading ->
             LoadingIndicator(
                 modifier = Modifier.size(16.dp),
                 color = MaterialTheme.colorScheme.primary,
             )
 
-        SubmissionSeriesTrailingActionState.RESOLVED ->
+        HtmlBlockTrailingActionState.Resolved ->
             Icon(
                 imageVector = FaMaterialSymbols.Outlined.ArrowCircleRight,
                 contentDescription = trailingAction.contentDescription,

@@ -47,10 +47,7 @@ data class AppSettings(
     val supportedThemeModes: List<ThemeMode> =
         listOf(ThemeMode.SYSTEM, ThemeMode.LIGHT, ThemeMode.DARK)
     val supportedBlockedSubmissionWaterfallModes: List<BlockedSubmissionWaterfallMode> =
-        listOf(
-            BlockedSubmissionWaterfallMode.SHOW,
-            BlockedSubmissionWaterfallMode.BLUR_THEN_OPEN,
-        )
+        listOf(BlockedSubmissionWaterfallMode.SHOW, BlockedSubmissionWaterfallMode.BLUR_THEN_OPEN)
     val supportedBlockedSubmissionPagerModes: List<BlockedSubmissionPagerMode> =
         listOf(BlockedSubmissionPagerMode.SHOW, BlockedSubmissionPagerMode.BLUR_THEN_OPEN)
     val supportedDownloadSubfolderModes: List<DownloadSubfolderMode> =

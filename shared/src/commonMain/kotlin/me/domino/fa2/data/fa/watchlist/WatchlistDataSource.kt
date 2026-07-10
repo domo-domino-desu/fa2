@@ -1,7 +1,7 @@
 package me.domino.fa2.data.fa.watchlist
 
-import me.domino.fa2.data.fa.core.toPageState
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.fa.core.toResourceResult
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 
@@ -15,7 +15,7 @@ class WatchlistDataSource(
       username: String,
       category: WatchlistCategory,
       nextPageUrl: String?,
-  ): PageState<WatchlistPage> {
+  ): ResourceResult<WatchlistPage> {
     val response =
         if (nextPageUrl.isNullOrBlank()) {
           when (category) {
@@ -25,7 +25,7 @@ class WatchlistDataSource(
         } else {
           endpoint.fetchByUrl(nextPageUrl)
         }
-    return response.toPageState { success ->
+    return response.toResourceResult { success ->
       parser.parse(html = success.body, baseUrl = success.url)
     }
   }

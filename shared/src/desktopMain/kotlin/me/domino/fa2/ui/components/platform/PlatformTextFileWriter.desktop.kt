@@ -13,7 +13,7 @@ actual fun rememberPlatformTextFileWriter():
 }
 
 private suspend fun writeTextFile(
-    request: PlatformTextFileWriteRequest,
+    request: PlatformTextFileWriteRequest
 ): PlatformTextFileWriteResult =
     withContext(Dispatchers.IO) {
       val targetFile =

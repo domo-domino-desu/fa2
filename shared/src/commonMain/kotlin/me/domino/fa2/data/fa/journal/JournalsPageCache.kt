@@ -8,7 +8,7 @@ import me.domino.fa2.data.fa.core.requireStoreValue
 import me.domino.fa2.data.fa.core.storeJson
 import me.domino.fa2.data.local.dao.PageCacheDao
 import me.domino.fa2.data.model.JournalPage
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 
 /** Journals 分页存储层。 */
 class JournalsPageCache(
@@ -31,7 +31,7 @@ class JournalsPageCache(
       )
 
   /** 读取 journals 分页流。 */
-  fun stream(username: String, nextPageUrl: String?): Flow<PageState<JournalPage>> {
+  fun stream(username: String, nextPageUrl: String?): Flow<ResourceResult<JournalPage>> {
     val key =
         JournalsPageKey(
             username = normalizeUsername(username),
@@ -41,7 +41,7 @@ class JournalsPageCache(
   }
 
   /** 单次读取 journals 分页。 */
-  suspend fun loadPageOnce(username: String, nextPageUrl: String?): PageState<JournalPage> =
+  suspend fun loadPageOnce(username: String, nextPageUrl: String?): ResourceResult<JournalPage> =
       cachedStore.loadOnce(
           JournalsPageKey(
               username = normalizeUsername(username),

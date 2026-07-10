@@ -3,11 +3,11 @@ package me.domino.fa2.data.fa.core
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import me.domino.fa2.data.local.dao.PageCacheDao
 import me.domino.fa2.data.local.entity.PageCacheEntity
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import org.mobilenativefoundation.store.store5.Fetcher
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import org.mobilenativefoundation.store.store5.Store
@@ -53,13 +53,12 @@ internal class CachedPageStoreSupport<Key : Any, Value : Any>(
           )
           .build()
 
-  fun stream(key: Key): Flow<PageState<Value>> =
-      store.stream(StoreReadRequest.cached(key, true)).map(::toPageState).flowWithInitialLoading()
+  fun stream(key: Key): Flow<ResourceResult<Value>> =
+      store.stream(StoreReadRequest.cached(key, true)).mapNotNull(::toResourceResult)
 
-  suspend fun loadOnce(key: Key): PageState<Value> =
-      stream(key).first { state -> state !is PageState.Loading }
+  suspend fun loadOnce(key: Key): ResourceResult<Value> = stream(key).first()
 
-  suspend fun refresh(key: Key): PageState<Value> {
+  suspend fun refresh(key: Key): ResourceResult<Value> {
     store.clear(key)
     return loadOnce(key)
   }
@@ -82,9 +81,4 @@ internal class CachedPageStoreSupport<Key : Any, Value : Any>(
         )
     )
   }
-}
-
-internal fun <T : Any> Flow<PageState<T>?>.flowWithInitialLoading(): Flow<PageState<T>> = flow {
-  emit(PageState.Loading)
-  collect { state -> if (state != null) emit(state) }
 }

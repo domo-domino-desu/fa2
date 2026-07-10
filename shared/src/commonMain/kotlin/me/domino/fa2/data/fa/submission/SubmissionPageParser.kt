@@ -2,6 +2,7 @@ package me.domino.fa2.data.fa.submission
 
 import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.nodes.Element
+import me.domino.fa2.data.fa.core.FaOriginPolicy
 import me.domino.fa2.data.fa.media.deriveAttachmentFileName
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.utils.parsePositiveFloat
@@ -118,7 +119,7 @@ internal class SubmissionPageParser {
 
     val timestampNode = description.selectFirst("span.popup_date")
     val timestampRaw = timestampNode?.attr("title")?.trim()?.takeIf { it.isNotBlank() }
-    val timestampNatural = timestampNode?.text()?.trim().orEmpty().ifBlank { "未知时间" }
+    val timestampNatural = timestampNode?.text()?.trim().orEmpty()
 
     val statsNode =
         root.selectFirst("div.submission-page-stats")
@@ -234,7 +235,11 @@ internal class SubmissionPageParser {
     val href = actionNode.attr("href").trim()
     if (href.isBlank()) return SubmissionFavoriteAction(actionUrl = "", isFavorited = false)
 
-    val absoluteUrl = toAbsoluteUrl(pageUrl, href)
+    val absoluteUrl =
+        FaOriginPolicy.trustedActionUrlOrNull(
+            url = toAbsoluteUrl(pageUrl, href),
+            allowedPathPrefixes = setOf("/fav/", "/unfav/"),
+        ) ?: return SubmissionFavoriteAction(actionUrl = "", isFavorited = false)
     val label = actionNode.text().trim().replace(" ", "").lowercase()
     return SubmissionFavoriteAction(
         actionUrl = absoluteUrl,

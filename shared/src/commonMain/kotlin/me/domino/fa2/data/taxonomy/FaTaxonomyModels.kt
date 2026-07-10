@@ -2,11 +2,7 @@ package me.domino.fa2.data.taxonomy
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class FaTaxonomyCatalog(
-    val version: Int = 1,
-    val sections: FaTaxonomySections,
-)
+@Serializable data class FaTaxonomyCatalog(val version: Int = 1, val sections: FaTaxonomySections)
 
 @Serializable
 data class FaTaxonomySections(

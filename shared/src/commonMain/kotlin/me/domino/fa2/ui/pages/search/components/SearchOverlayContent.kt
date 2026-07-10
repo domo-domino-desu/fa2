@@ -174,20 +174,14 @@ internal fun SearchOverlayContent(
                       SearchDateRangeShiftAction.PreviousDay,
                   ),
               canShiftNextDay =
-                  canShiftSearchDateFields(
-                      resolvedDateFields,
-                      SearchDateRangeShiftAction.NextDay,
-                  ),
+                  canShiftSearchDateFields(resolvedDateFields, SearchDateRangeShiftAction.NextDay),
               canShiftNextMonth =
                   canShiftSearchDateFields(
                       resolvedDateFields,
                       SearchDateRangeShiftAction.NextMonth,
                   ),
               canShiftNextYear =
-                  canShiftSearchDateFields(
-                      resolvedDateFields,
-                      SearchDateRangeShiftAction.NextYear,
-                  ),
+                  canShiftSearchDateFields(resolvedDateFields, SearchDateRangeShiftAction.NextYear),
               onShift = actions.onShiftDateRange,
           )
         }
@@ -385,10 +379,7 @@ private fun SearchTopFilterGrid(
   BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
     val singleColumn = maxWidth < 560.dp
     if (singleColumn) {
-      Column(
-          modifier = Modifier.fillMaxWidth(),
-          verticalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
+      Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         GroupedFilterDropdownField(
             label =
                 searchUiLabelsRepository.metadataLabel(
@@ -440,11 +431,7 @@ private fun SearchTopFilterGrid(
             modifier = Modifier.fillMaxWidth(),
         )
         FilterDropdownField(
-            label =
-                searchUiLabelsRepository.text(
-                    SearchUiTextKey.FILTER_DATE,
-                    appI18n.uiLanguage,
-                ),
+            label = searchUiLabelsRepository.text(SearchUiTextKey.FILTER_DATE, appI18n.uiLanguage),
             options = rangeOptions,
             selected = form.range,
             onSelected = onUpdateRange,
@@ -452,10 +439,7 @@ private fun SearchTopFilterGrid(
         )
       }
     } else {
-      Column(
-          modifier = Modifier.fillMaxWidth(),
-          verticalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
+      Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth(),
@@ -525,10 +509,7 @@ private fun SearchTopFilterGrid(
           )
           FilterDropdownField(
               label =
-                  searchUiLabelsRepository.text(
-                      SearchUiTextKey.FILTER_DATE,
-                      appI18n.uiLanguage,
-                  ),
+                  searchUiLabelsRepository.text(SearchUiTextKey.FILTER_DATE, appI18n.uiLanguage),
               options = rangeOptions,
               selected = form.range,
               onSelected = onUpdateRange,
@@ -552,10 +533,7 @@ private fun SearchTopFilterGrid(
   if (speciesPickerVisible) {
     GroupedTextPickerDialog(
         title =
-            searchUiLabelsRepository.metadataLabel(
-                SearchUiMetadataKey.SPECIES,
-                appI18n.metadata,
-            ),
+            searchUiLabelsRepository.metadataLabel(SearchUiMetadataKey.SPECIES, appI18n.metadata),
         groups = speciesOptionGroups,
         selected = form.species,
         onSelected = onUpdateSpecies,

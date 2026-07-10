@@ -15,20 +15,11 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import me.domino.fa2.data.fa.core.FaHtmlDataSource
 import me.domino.fa2.data.fa.core.HtmlResponseResult
-import me.domino.fa2.data.fa.social.SocialActionEndpoint
-import me.domino.fa2.data.fa.user.UserPageCache
-import me.domino.fa2.data.fa.user.UserRepository
-import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.fa.user.UserResourceRepository
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.User
-import me.domino.fa2.fake.InMemoryPageCacheDao
-import me.domino.fa2.ui.pages.overlays.journaldetail.*
-import me.domino.fa2.ui.pages.overlays.journalpager.*
-import me.domino.fa2.ui.pages.overlays.userpager.*
-import me.domino.fa2.ui.pages.overlays.usershouts.*
-import me.domino.fa2.ui.pages.overlays.userwatchlist.*
-import me.domino.fa2.ui.pages.overlays.watchrecommendation.*
-import me.domino.fa2.ui.pages.user.*
+import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
+import me.domino.fa2.ui.pages.user.UserScreenModel
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserScreenModelRecommendationHideTest {
@@ -124,7 +115,7 @@ class UserScreenModelRecommendationHideTest {
       }
 
   private fun buildModel(
-      repository: UserRepository,
+      repository: UserResourceRepository,
       blocklist: WatchRecommendationBlocklist,
   ): UserScreenModel =
       UserScreenModel(
@@ -150,37 +141,24 @@ class UserScreenModelRecommendationHideTest {
       )
 }
 
-private class FakeUserRepository(
-    private var user: User,
-) :
-    UserRepository(
-        userStore =
-            UserPageCache(
-                dataSource =
-                    me.domino.fa2.data.fa.user.UserDataSource(
-                        endpoint = me.domino.fa2.data.fa.user.UserEndpoint(DummyHtmlDataSource),
-                        parser = me.domino.fa2.data.fa.user.UserParser(),
-                    ),
-                pageCacheDao = InMemoryPageCacheDao(),
-            ),
-        socialActionEndpoint = SocialActionEndpoint(DummyHtmlDataSource),
-    ) {
+private class FakeUserRepository(private var user: User) : UserResourceRepository {
   val toggleRequests: MutableList<Pair<String, String>> = mutableListOf()
 
-  override suspend fun loadUser(username: String): PageState<User> = PageState.Success(user)
+  override suspend fun loadUser(username: String): ResourceResult<User> =
+      ResourceResult.Success(user)
 
-  override suspend fun refreshUser(username: String): PageState<User> = PageState.Success(user)
+  override suspend fun refreshUser(username: String): ResourceResult<User> =
+      ResourceResult.Success(user)
 
-  override suspend fun toggleWatch(username: String, actionUrl: String): PageState<Unit> {
+  override suspend fun toggleWatch(username: String, actionUrl: String): ResourceResult<Unit> {
     toggleRequests += username to actionUrl
     user = user.copy(isWatching = !user.isWatching)
-    return PageState.Success(Unit)
+    return ResourceResult.Success(Unit)
   }
 }
 
-private class FakeWatchRecommendationBlocklist(
-    initialUsernames: String = "",
-) : WatchRecommendationBlocklist {
+private class FakeWatchRecommendationBlocklist(initialUsernames: String = "") :
+    WatchRecommendationBlocklist {
   val usernames: MutableSet<String> =
       initialUsernames
           .split(",")

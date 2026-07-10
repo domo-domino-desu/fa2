@@ -28,11 +28,10 @@ import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.platform.PlatformVerticalScrollbar
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.content.*
+import me.domino.fa2.ui.pages.submission.content.SubmissionDetailContent
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.translation.*
+import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrUiState
+import me.domino.fa2.ui.pages.submission.imageocr.SubmissionZoomImageOverlay
 import org.jetbrains.compose.resources.stringResource
 
 /** 投稿详情左右滑浏览容器。 */
@@ -141,10 +140,7 @@ fun SubmissionPager(
   )
 
   Box(modifier = Modifier.fillMaxSize()) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
+    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
       HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
         val item = submissions[page]
         val scrollState = rememberScrollState(initial = scrollOffsetOfSid(item.id))

@@ -7,7 +7,7 @@ import me.domino.fa2.data.fa.core.CachedPageStoreSupport
 import me.domino.fa2.data.fa.core.requireStoreValue
 import me.domino.fa2.data.fa.core.storeJson
 import me.domino.fa2.data.local.dao.PageCacheDao
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.utils.parseSubmissionSid
 
@@ -30,19 +30,19 @@ class SubmissionPageCache(
       )
 
   /** 按 ID 读取详情流。 */
-  fun streamBySid(sid: Int): Flow<PageState<Submission>> = cachedStore.stream(sid)
+  fun streamBySid(sid: Int): Flow<ResourceResult<Submission>> = cachedStore.stream(sid)
 
   /** 按 ID 单次读取详情。 */
-  suspend fun loadBySid(sid: Int): PageState<Submission> = cachedStore.loadOnce(sid)
+  suspend fun loadBySid(sid: Int): ResourceResult<Submission> = cachedStore.loadOnce(sid)
 
   /** 按 URL 读取详情。 */
-  suspend fun loadByUrl(url: String): PageState<Submission> {
+  suspend fun loadByUrl(url: String): ResourceResult<Submission> {
     val sid = parseSubmissionSid(url)
     if (sid != null) {
       return loadBySid(sid)
     }
     val remote = dataSource.fetchByUrl(url)
-    if (remote is PageState.Success) {
+    if (remote is ResourceResult.Success) {
       cachedStore.writeThrough(remote.data.id, remote.data)
     }
     return remote

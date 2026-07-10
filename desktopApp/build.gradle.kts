@@ -8,6 +8,7 @@ plugins {
 }
 
 val appVersionName = providers.gradleProperty("APP_VERSION_NAME").get()
+
 val desktopPackageVersion =
     Regex("""^(\d+\.\d+\.\d+)(?:[-+].*)?$""").matchEntire(appVersionName)?.groupValues?.get(1)
         ?: error("APP_VERSION_NAME must be SemVer (e.g. 1.2.3 or 1.2.3-alpha1)")
@@ -37,7 +38,7 @@ kotlin {
     val desktopTest by getting {
       dependencies {
         implementation(kotlin("test"))
-        implementation(compose.desktop.uiTestJUnit4)
+        implementation(libs.compose.ui.test.junit4)
         implementation(compose.desktop.currentOs)
       }
     }

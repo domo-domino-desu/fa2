@@ -17,11 +17,6 @@ import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.ui.components.media.ThumbnailImage
 import me.domino.fa2.ui.components.state.SkeletonBlock
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.pager.*
-import me.domino.fa2.ui.pages.submission.series.*
-import me.domino.fa2.ui.pages.submission.translation.*
 import me.domino.fa2.ui.utils.sanitizeDetailAspectRatio
 
 @Composable

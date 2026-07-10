@@ -1,7 +1,5 @@
 package me.domino.fa2.domain.attachmenttext
 
-import me.domino.fa2.domain.attachmenttext.*
-
 /** RTF 标记。 */
 internal sealed interface RtfToken {
   /** 组开始。 */
@@ -21,13 +19,13 @@ internal sealed interface RtfToken {
   /** 控制符。 */
   data class ControlSymbol(
       /** 符号。 */
-      val symbol: Char,
+      val symbol: Char
   ) : RtfToken
 
   /** 文本。 */
   data class Text(
       /** 内容。 */
-      val value: String,
+      val value: String
   ) : RtfToken
 }
 

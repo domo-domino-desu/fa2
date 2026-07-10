@@ -3,7 +3,6 @@ package me.domino.fa2.data.fa.session
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import me.domino.fa2.data.fa.auth.AuthSessionProfileStore
 import me.domino.fa2.utils.logging.FaLog
 import me.domino.fa2.utils.logging.summarizeUrl
 

@@ -1,7 +1,5 @@
 package me.domino.fa2.domain.attachmenttext
 
-import me.domino.fa2.domain.attachmenttext.*
-
 /** RTF 解释状态。 */
 private data class RtfState(
     /** 粗体。 */

@@ -1,9 +1,8 @@
-package me.domino.fa2.ui.pages.submission.translation
+package me.domino.fa2.ui.translation
 
 import me.domino.fa2.domain.translation.SubmissionDescriptionBlock
 import me.domino.fa2.ui.components.html.SubmissionDescriptionDisplayBlock
 import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
-import me.domino.fa2.ui.pages.submission.imageocr.*
 
 data class SubmissionTranslationUiState(
     val sourceKey: String,

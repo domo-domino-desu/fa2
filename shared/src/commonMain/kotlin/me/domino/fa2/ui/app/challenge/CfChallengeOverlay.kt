@@ -24,8 +24,6 @@ import me.domino.fa2.data.fa.session.CfChallengeUiState
 import me.domino.fa2.ui.components.ExpressiveButton
 import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
 import me.domino.fa2.ui.components.ExpressiveTextButton
-import me.domino.fa2.ui.i18n.challengeAwaitingUserActionText
-import me.domino.fa2.ui.i18n.challengeVerificationFailedText
 import me.domino.fa2.ui.pages.auth.SessionWebView
 import me.domino.fa2.ui.pages.auth.rememberSessionWebViewAdapter
 import org.jetbrains.compose.resources.stringResource
@@ -68,10 +66,7 @@ fun CfChallengeOverlay(
             enabled = state.status !is CfChallengeStatus.Verifying,
             onClick = {
               scope.launch {
-                controller.confirmFromWebView(
-                    port = adapter.port,
-                    triggerUrl = state.triggerUrl,
-                )
+                controller.confirmFromWebView(port = adapter.port, triggerUrl = state.triggerUrl)
               }
             },
         ) {
@@ -102,7 +97,12 @@ fun CfChallengeOverlay(
 @Composable
 private fun challengeStatusMessage(state: CfChallengeUiState.Active): String =
     when (val status = state.status) {
-      CfChallengeStatus.AwaitingUserAction -> challengeAwaitingUserActionText(state.cfRay)
+      CfChallengeStatus.AwaitingUserAction -> {
+        val rayText =
+            state.cfRay?.trim()?.takeIf(String::isNotBlank)?.let { "\nCF-Ray: $it" }.orEmpty()
+        stringResource(Res.string.challenge_awaiting_user_action, rayText)
+      }
       CfChallengeStatus.Verifying -> stringResource(Res.string.challenge_validating_result)
-      is CfChallengeStatus.VerificationFailed -> challengeVerificationFailedText(status.detail)
+      is CfChallengeStatus.VerificationFailed ->
+          stringResource(Res.string.challenge_verification_failed, status.detail?.trim().orEmpty())
     }

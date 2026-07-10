@@ -9,11 +9,7 @@ class TemplateStringUtilsTest {
     val rendered =
         renderBraceTemplate(
             template = "{username}-{unknown}-{title}",
-            values =
-                mapOf(
-                    "username" to "alice",
-                    "title" to "sunset",
-                ),
+            values = mapOf("username" to "alice", "title" to "sunset"),
         )
 
     assertEquals("alice-{unknown}-sunset", rendered)
@@ -24,12 +20,7 @@ class TemplateStringUtilsTest {
     val renderedAndCleaned =
         renderBraceTemplate(
                 template = "{username}-{title}-{submission_id}",
-                values =
-                    mapOf(
-                        "username" to "alice",
-                        "title" to "",
-                        "submission_id" to "123",
-                    ),
+                values = mapOf("username" to "alice", "title" to "", "submission_id" to "123"),
             )
             .let(::cleanupTemplateRenderedText)
 
@@ -41,12 +32,7 @@ class TemplateStringUtilsTest {
     val rendered =
         renderBraceTemplate(
             template = "{username}-{submission_id}-{title}",
-            values =
-                mapOf(
-                    "username" to "alice",
-                    "submission_id" to "123",
-                    "title" to "sunset",
-                ),
+            values = mapOf("username" to "alice", "submission_id" to "123", "title" to "sunset"),
         )
 
     assertEquals("alice-123-sunset", rendered)

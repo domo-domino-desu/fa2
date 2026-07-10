@@ -37,17 +37,14 @@ import me.domino.fa2.ui.app.LocalTaxonomyCatalog
 import me.domino.fa2.ui.app.LocalTaxonomyRepository
 import me.domino.fa2.ui.components.html.PageCommentsCard
 import me.domino.fa2.ui.components.media.NetworkImage
-import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.i18n.search.SearchUiOptionKey
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
+import me.domino.fa2.ui.pages.submission.attachmenttext.SubmissionAttachmentTextCard
 import me.domino.fa2.ui.pages.submission.attachmenttext.SubmissionAttachmentTextUiState
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.pager.*
-import me.domino.fa2.ui.pages.submission.series.*
-import me.domino.fa2.ui.pages.submission.translation.*
-import me.domino.fa2.ui.pages.submission.translation.SubmissionTranslationUiState
+import me.domino.fa2.ui.pages.submission.imageocr.SubmissionAuthorRow
+import me.domino.fa2.ui.translation.SubmissionTranslationUiState
 import me.domino.fa2.ui.utils.sanitizeDetailAspectRatio
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -86,6 +83,7 @@ internal fun SubmissionDetailSuccessContent(
   val commentsBringIntoViewRequester = remember(detail.id) { BringIntoViewRequester() }
   val attachmentBringIntoViewRequester = remember(detail.id) { BringIntoViewRequester() }
   val canScrollToAttachmentText = attachmentTextState != null
+  val submissionIdText = stringResource(Res.string.submission_id, detail.id)
   val fileExtensionLabel =
       remember(detail.downloadUrl, detail.downloadFileName) {
         attachmentFileExtension(detail.downloadFileName)
@@ -93,7 +91,7 @@ internal fun SubmissionDetailSuccessContent(
             ?: extractDownloadFileExtension(detail.downloadUrl)
       }
   val metrics =
-      remember(detail, fileExtensionLabel, canScrollToAttachmentText) {
+      remember(detail, fileExtensionLabel, canScrollToAttachmentText, submissionIdText) {
         buildList {
           add(
               SubmissionInfoMetric(
@@ -119,7 +117,7 @@ internal fun SubmissionDetailSuccessContent(
           add(
               SubmissionInfoMetric(
                   icon = FaMaterialSymbols.Outlined.Tag,
-                  text = appString(Res.string.submission_id, detail.id),
+                  text = submissionIdText,
                   onClick = { currentOnCopySubmissionUrl.value(detail.submissionUrl) },
               )
           )
@@ -154,10 +152,7 @@ internal fun SubmissionDetailSuccessContent(
       }
 
   val derivedThumbnailUrl =
-      deriveSubmissionThumbnailUrlFromFullImage(
-              sid = item.id,
-              fullImageUrl = detail.fullImageUrl,
-          )
+      deriveSubmissionThumbnailUrlFromFullImage(sid = item.id, fullImageUrl = detail.fullImageUrl)
           .orEmpty()
   val thumbnailUrl = item.thumbnailUrl.ifBlank { derivedThumbnailUrl }
   val mediaUrl = detail.fullImageUrl.ifBlank { detail.previewImageUrl }.ifBlank { thumbnailUrl }

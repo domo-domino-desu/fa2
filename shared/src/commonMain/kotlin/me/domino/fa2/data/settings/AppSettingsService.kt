@@ -36,95 +36,101 @@ class AppSettingsService(private val storage: AppSettingsStore) {
 
   suspend fun updateSettings(next: AppSettings) {
     ensureLoaded()
-    mutex.withLock {
-      val normalized = AppSettings.normalize(next)
-      if (normalized == mutableSettings.value) return
-      storage.save(normalized)
-      mutableSettings.value = normalized
-    }
+    mutex.withLock { persistLocked(next) }
+  }
+
+  /** Atomically derives and persists a settings update from the latest committed snapshot. */
+  suspend fun updateSettings(transform: (AppSettings) -> AppSettings) {
+    ensureLoaded()
+    mutex.withLock { persistLocked(transform(mutableSettings.value)) }
   }
 
   suspend fun updateUiLanguage(uiLanguage: UiLanguageSetting) {
-    updateSettings(mutableSettings.value.copy(uiLanguage = uiLanguage))
+    updateSettings { current -> current.copy(uiLanguage = uiLanguage) }
   }
 
   suspend fun updateTranslationEnabled(enabled: Boolean) {
-    updateSettings(mutableSettings.value.copy(translationEnabled = enabled))
+    updateSettings { current -> current.copy(translationEnabled = enabled) }
   }
 
   suspend fun updateTranslationTargetLanguage(language: TranslationTargetLanguage) {
-    updateSettings(mutableSettings.value.copy(translationTargetLanguage = language))
+    updateSettings { current -> current.copy(translationTargetLanguage = language) }
   }
 
   suspend fun updateMetadataDisplayMode(mode: MetadataDisplayMode) {
-    updateSettings(mutableSettings.value.copy(metadataDisplayMode = mode))
+    updateSettings { current -> current.copy(metadataDisplayMode = mode) }
   }
 
   suspend fun updateTranslationProvider(provider: TranslationProvider) {
-    updateSettings(mutableSettings.value.copy(translationProvider = provider))
+    updateSettings { current -> current.copy(translationProvider = provider) }
   }
 
   suspend fun updateOpenAiTranslationConfig(config: OpenAiTranslationConfig) {
-    updateSettings(
-        mutableSettings.value.copy(
-            openAiTranslationConfig = OpenAiTranslationConfig.normalize(config)
-        )
-    )
+    updateSettings { current ->
+      current.copy(openAiTranslationConfig = OpenAiTranslationConfig.normalize(config))
+    }
   }
 
   suspend fun updateChunkWordLimit(wordLimit: Int) {
-    updateSettings(mutableSettings.value.copy(translationChunkWordLimit = wordLimit))
+    updateSettings { current -> current.copy(translationChunkWordLimit = wordLimit) }
   }
 
   suspend fun updateMaxConcurrency(maxConcurrency: Int) {
-    updateSettings(mutableSettings.value.copy(translationMaxConcurrency = maxConcurrency))
+    updateSettings { current -> current.copy(translationMaxConcurrency = maxConcurrency) }
   }
 
   suspend fun updateThemeMode(themeMode: ThemeMode) {
-    updateSettings(mutableSettings.value.copy(themeMode = themeMode))
+    updateSettings { current -> current.copy(themeMode = themeMode) }
   }
 
   suspend fun updateWaterfallMinCardWidthDp(minWidthDp: Int) {
-    updateSettings(mutableSettings.value.copy(waterfallMinCardWidthDp = minWidthDp))
+    updateSettings { current -> current.copy(waterfallMinCardWidthDp = minWidthDp) }
   }
 
   suspend fun updateBlockedSubmissionWaterfallMode(mode: BlockedSubmissionWaterfallMode) {
-    updateSettings(mutableSettings.value.copy(blockedSubmissionWaterfallMode = mode))
+    updateSettings { current -> current.copy(blockedSubmissionWaterfallMode = mode) }
   }
 
   suspend fun updateBlockedSubmissionPagerMode(mode: BlockedSubmissionPagerMode) {
-    updateSettings(mutableSettings.value.copy(blockedSubmissionPagerMode = mode))
+    updateSettings { current -> current.copy(blockedSubmissionPagerMode = mode) }
   }
 
   suspend fun updateReturnToCurrentSubmissionInWaterfall(enabled: Boolean) {
-    updateSettings(mutableSettings.value.copy(returnToCurrentSubmissionInWaterfall = enabled))
+    updateSettings { current -> current.copy(returnToCurrentSubmissionInWaterfall = enabled) }
   }
 
   suspend fun updateDownloadSavePath(path: String) {
-    updateSettings(mutableSettings.value.copy(downloadSavePath = path))
+    updateSettings { current -> current.copy(downloadSavePath = path) }
   }
 
   suspend fun updateDownloadAllowMediaIndexing(allow: Boolean) {
-    updateSettings(mutableSettings.value.copy(downloadAllowMediaIndexing = allow))
+    updateSettings { current -> current.copy(downloadAllowMediaIndexing = allow) }
   }
 
   suspend fun updateDownloadSubfolderMode(mode: DownloadSubfolderMode) {
-    updateSettings(mutableSettings.value.copy(downloadSubfolderMode = mode))
+    updateSettings { current -> current.copy(downloadSubfolderMode = mode) }
   }
 
   suspend fun updateDownloadFileNameMode(mode: DownloadFileNameMode) {
-    updateSettings(mutableSettings.value.copy(downloadFileNameMode = mode))
+    updateSettings { current -> current.copy(downloadFileNameMode = mode) }
   }
 
   suspend fun updateDownloadCustomFileNameTemplate(template: String) {
-    updateSettings(mutableSettings.value.copy(downloadCustomFileNameTemplate = template))
+    updateSettings { current -> current.copy(downloadCustomFileNameTemplate = template) }
   }
 
   suspend fun updateWatchRecommendationPageSize(pageSize: Int) {
-    updateSettings(mutableSettings.value.copy(watchRecommendationPageSize = pageSize))
+    updateSettings { current -> current.copy(watchRecommendationPageSize = pageSize) }
   }
 
   suspend fun updateLogLevel(logLevel: LogLevelSetting) {
-    updateSettings(mutableSettings.value.copy(logLevel = logLevel))
+    updateSettings { current -> current.copy(logLevel = logLevel) }
+  }
+
+  private suspend fun persistLocked(next: AppSettings) {
+    val normalized = AppSettings.normalize(next)
+    if (normalized == mutableSettings.value) return
+    storage.save(normalized)
+    mutableSettings.value = normalized
   }
 }

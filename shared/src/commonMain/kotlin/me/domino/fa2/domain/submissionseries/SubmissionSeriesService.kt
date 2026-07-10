@@ -1,7 +1,8 @@
 package me.domino.fa2.domain.submissionseries
 
 import com.fleeksoft.ksoup.Ksoup
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.fa.submission.SubmissionSeriesSubmissionSource
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.domain.translation.SubmissionDescriptionBlock
@@ -14,12 +15,6 @@ import me.domino.fa2.utils.normalizeFaSubmissionUrl
 
 /** 投稿串联请求节流时间间隔（毫秒）。 */
 internal const val submissionSeriesRequestThrottleMs: Long = 600L
-
-interface SubmissionSeriesSubmissionSource {
-  suspend fun loadSubmissionDetailBySid(sid: Int): PageState<Submission>
-
-  suspend fun loadSubmissionDetailByUrl(url: String): PageState<Submission>
-}
 
 /** 串联首屏初始预加载数量。 */
 internal const val seriesInitialReadyCount: Int = 10
@@ -42,10 +37,7 @@ class SubmissionSeriesService(
   private val blockExtractor = HtmlTextBlockExtractor()
 
   /** 从描述 HTML 中检测串联候选，返回候选对象或 null。 */
-  fun detectCandidate(
-      sourceHtml: String,
-      baseUrl: String,
-  ): SubmissionSeriesCandidate? =
+  fun detectCandidate(sourceHtml: String, baseUrl: String): SubmissionSeriesCandidate? =
       detectCandidate(
               blockExtractor.extract(sourceHtml).map(HtmlTextBlock::toDescriptionBlock),
               baseUrl,
@@ -553,13 +545,12 @@ private class SubmissionSeriesRemoteLoader(
   suspend fun load(url: String): Submission? {
     throttle.awaitReady()
     return when (val state = repository.loadSubmissionDetailByUrl(url)) {
-      is PageState.Success ->
+      is ResourceResult.Success ->
           state.data.also { log.d { "投稿串联远程加载 -> 成功(url=${summarizeUrl(url)},sid=${it.id})" } }
-      is PageState.AuthRequired,
-      PageState.CfChallenge,
-      is PageState.MatureBlocked,
-      is PageState.Error,
-      PageState.Loading ->
+      is ResourceResult.AuthRequired,
+      ResourceResult.CfChallenge,
+      is ResourceResult.MatureBlocked,
+      is ResourceResult.Error ->
           null.also {
             log.w { "投稿串联远程加载 -> 失败(url=${summarizeUrl(url)},state=${state::class.simpleName})" }
           }

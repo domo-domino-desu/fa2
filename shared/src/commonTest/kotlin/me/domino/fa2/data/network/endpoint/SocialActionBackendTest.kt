@@ -3,32 +3,8 @@ package me.domino.fa2.data.fa.social
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.fa.core.FaHtmlDataSource
-import me.domino.fa2.data.fa.core.HtmlResponseResult
 
 class SocialActionBackendTest {
-  @Test
-  fun dataSourceBackendRetriesResolvedChallenge() = runTest {
-    val resolver = BackendChallengeResolver(true)
-    val backend =
-        DataSourceSocialActionBackend(
-            dataSource =
-                ScriptedHtmlDataSource(
-                    HtmlResponseResult.CfChallenge(cfRay = "ray-1"),
-                    HtmlResponseResult.Success(
-                        body = "<html>ok</html>",
-                        url = "https://example.com/a",
-                    ),
-                ),
-            challengePolicy = SocialActionChallengePolicy(resolver),
-        )
-
-    val result = backend.execute("https://example.com/a")
-
-    assertEquals(SocialActionResult.Completed(redirected = false), result)
-    assertEquals(1, resolver.requests.size)
-  }
-
   @Test
   fun rawHttpBackendRetriesGetAfterChallengeResolution() = runTest {
     val resolver = BackendChallengeResolver(true)
@@ -44,7 +20,7 @@ class SocialActionBackendTest {
                             body = "<html>ok</html>",
                         ),
                     )
-                ),
+                )
         )
     val backend =
         RawHttpSocialActionBackend(
@@ -79,7 +55,7 @@ class SocialActionBackendTest {
                             body = """{"success":true}""",
                         ),
                     )
-                ),
+                )
         )
     val backend =
         RawHttpSocialActionBackend(
@@ -93,14 +69,6 @@ class SocialActionBackendTest {
     assertEquals(SocialActionResult.Completed(redirected = false), result)
     assertEquals(2, transport.postCallCount)
   }
-}
-
-private class ScriptedHtmlDataSource(vararg responses: HtmlResponseResult) : FaHtmlDataSource {
-  private val queue = ArrayDeque(responses.toList())
-
-  override suspend fun get(url: String): HtmlResponseResult =
-      queue.removeFirstOrNull()
-          ?: HtmlResponseResult.Error(statusCode = 500, message = "No scripted response for $url")
 }
 
 private class BackendChallengeResolver(vararg decisions: Boolean) :

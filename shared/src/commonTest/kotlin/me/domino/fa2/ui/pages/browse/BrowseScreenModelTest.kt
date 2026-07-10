@@ -16,7 +16,7 @@ import me.domino.fa2.data.fa.browse.BrowsePageCache
 import me.domino.fa2.data.fa.browse.BrowseRepository
 import me.domino.fa2.data.fa.core.FaHtmlDataSource
 import me.domino.fa2.data.fa.core.HtmlResponseResult
-import me.domino.fa2.data.fa.gallery.GalleryParser
+import me.domino.fa2.data.fa.listing.SubmissionListingParser
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.utils.FaUrls
@@ -40,18 +40,9 @@ class BrowseScreenModelTest {
       runTest(dispatcher.scheduler) {
         val htmlDataSource = RecordingBrowseHtmlDataSource()
         val repository = buildRepository(htmlDataSource)
-        val initialFilter =
-            BrowseFilterState(
-                category = 2,
-                type = 3,
-                species = 4,
-            )
+        val initialFilter = BrowseFilterState(category = 2, type = 3, species = 4)
 
-        val screenModel =
-            BrowseScreenModel(
-                repository = repository,
-                initialFilter = initialFilter,
-            )
+        val screenModel = BrowseScreenModel(repository = repository, initialFilter = initialFilter)
 
         val expectedUrl =
             FaUrls.browse(
@@ -75,7 +66,7 @@ class BrowseScreenModelTest {
             dataSource =
                 BrowseDataSource(
                     endpoint = BrowseEndpoint(source),
-                    parser = GalleryParser(),
+                    parser = SubmissionListingParser(),
                 ),
             pageCacheDao = InMemoryPageCacheDao(),
         )

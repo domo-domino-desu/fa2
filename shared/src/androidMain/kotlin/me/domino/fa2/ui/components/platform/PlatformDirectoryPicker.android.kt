@@ -7,6 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
+import me.domino.fa2.utils.logging.FaLog
+
+private val directoryPickerLog = FaLog.withTag("PlatformDirectoryPicker")
 
 @Composable
 actual fun rememberPlatformDirectoryPicker(onDirectoryPicked: (String?) -> Unit): () -> Unit {
@@ -26,7 +29,7 @@ actual fun rememberPlatformDirectoryPicker(onDirectoryPicked: (String?) -> Unit)
                   Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
               context.contentResolver.takePersistableUriPermission(uri, flags)
             }
-            .onFailure { error -> error.printStackTrace() }
+            .onFailure { error -> directoryPickerLog.e(error) { "持久化目录访问权限失败(uri=$uri)" } }
         latestCallback.value(uri.toString())
       }
   /** 对外暴露触发器。 */

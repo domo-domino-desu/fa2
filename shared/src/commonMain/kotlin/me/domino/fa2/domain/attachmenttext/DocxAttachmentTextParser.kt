@@ -3,7 +3,6 @@ package me.domino.fa2.domain.attachmenttext
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
-import me.domino.fa2.domain.attachmenttext.*
 
 /** DOCX 附件文本解析器。 */
 internal object DocxAttachmentTextParser : AttachmentTextParser {
@@ -42,7 +41,8 @@ internal object DocxAttachmentTextParser : AttachmentTextParser {
     )
 
     val body =
-        findFirstDescendant(document, "w:body") ?: throw IllegalStateException("DOCX 文档缺少 w:body")
+        findFirstDescendant(document, "w:body")
+            ?: throw IllegalStateException("DOCX document is missing w:body")
     val paragraphElements = mutableListOf<Element>()
     collectDescendants(body, "w:p", paragraphElements)
     val paragraphs = mutableListOf<AttachmentTextParagraph>()
@@ -52,11 +52,7 @@ internal object DocxAttachmentTextParser : AttachmentTextParser {
       paragraphElement.childNodes().forEach { child ->
         collectDocxRuns(child, AttachmentInlineStyle(), runs)
       }
-      buildParagraphFromRuns(
-              runs = runs,
-              sourceLabel = "段落 ${index + 1}",
-          )
-          ?.let(paragraphs::add)
+      buildParagraphFromRuns(runs = runs)?.let(paragraphs::add)
       reporter.report(
           stageId = "walk_blocks",
           stageFraction = (index + 1) / total.toFloat(),
@@ -66,11 +62,7 @@ internal object DocxAttachmentTextParser : AttachmentTextParser {
       )
     }
 
-    reporter.report(
-        stageId = "build_html",
-        stageFraction = 0f,
-        message = "正在构建 HTML",
-    )
+    reporter.report(stageId = "build_html", stageFraction = 0f, message = "正在构建 HTML")
     val result = buildAttachmentTextDocument(format = format, paragraphs = paragraphs)
     reporter.report(
         stageId = "build_html",

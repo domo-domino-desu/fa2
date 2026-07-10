@@ -45,15 +45,11 @@ class SubmissionImageOcrTranslationService(
 }
 
 sealed interface SubmissionImageOcrTranslationResult {
-  data class Success(
-      val translatedText: String,
-  ) : SubmissionImageOcrTranslationResult
+  data class Success(val translatedText: String) : SubmissionImageOcrTranslationResult
 
   data object Empty : SubmissionImageOcrTranslationResult
 
-  data class Failure(
-      val message: String,
-  ) : SubmissionImageOcrTranslationResult
+  data class Failure(val message: String) : SubmissionImageOcrTranslationResult
 }
 
 private fun TextTranslationResult.toImageOcrTranslationResult():

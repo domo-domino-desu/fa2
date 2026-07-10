@@ -91,6 +91,7 @@ import me.domino.fa2.ui.components.platform.rememberPlatformTextFileWriter
 import me.domino.fa2.ui.icons.FaBrandIcons
 import me.domino.fa2.ui.icons.FaContactIcons
 import me.domino.fa2.ui.icons.FaMaterialSymbols
+import me.domino.fa2.utils.concurrency.runSuspendCatching
 import me.domino.fa2.utils.logging.FaLog
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -234,7 +235,7 @@ class AboutRouteScreen : Screen {
               return@LogLevelDialog
             }
             coroutineScope.launch {
-              runCatching { settingsService.updateLogLevel(logLevel) }
+              runSuspendCatching { settingsService.updateLogLevel(logLevel) }
                   .onSuccess {
                     showToast(logLevelRestartRequiredText)
                     logLevelDialogVisible = false
@@ -335,15 +336,8 @@ private fun AboutActionRow(
         tint = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.size(22.dp),
     )
-    Column(
-        modifier = Modifier.weight(1f),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-      Text(
-          text = title,
-          style = MaterialTheme.typography.bodyLarge,
-          fontWeight = FontWeight.Medium,
-      )
+    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+      Text(text = title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
       if (!subtitle.isNullOrBlank()) {
         Text(
             text = subtitle,
@@ -381,10 +375,7 @@ private fun LogLevelDialog(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
               RadioButton(selected = logLevel == selected, onClick = { onSelect(logLevel) })
-              Text(
-                  text = logLevelLabel(logLevel),
-                  style = MaterialTheme.typography.bodyLarge,
-              )
+              Text(text = logLevelLabel(logLevel), style = MaterialTheme.typography.bodyLarge)
             }
           }
         }
@@ -456,9 +447,7 @@ private fun LicenseDialog(onDismiss: () -> Unit) {
       onDismissRequest = onDismiss,
       title = { Text(text = stringResource(Res.string.about_license)) },
       text = {
-        Column(
-            modifier = Modifier.height(360.dp).horizontalScroll(rememberScrollState()),
-        ) {
+        Column(modifier = Modifier.height(360.dp).horizontalScroll(rememberScrollState())) {
           Text(
               text = AboutMetadata.licenseText,
               style = MaterialTheme.typography.bodySmall,

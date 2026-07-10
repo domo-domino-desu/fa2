@@ -10,14 +10,12 @@ import me.domino.fa2.data.fa.core.HtmlResponseResult
 internal sealed interface SocialActionTagBlockingOutcome {
   data class Result(val result: SocialActionResult) : SocialActionTagBlockingOutcome
 
-  data class RetryAfter(
-      val delayMs: Long,
-      val failureMessage: String,
-  ) : SocialActionTagBlockingOutcome
+  data class RetryAfter(val delayMs: Long, val failureMessage: String) :
+      SocialActionTagBlockingOutcome
 }
 
 internal class SocialActionTagBlockingResponseParser(
-    private val json: Json = Json { ignoreUnknownKeys = true },
+    private val json: Json = Json { ignoreUnknownKeys = true }
 ) {
   fun parse(response: SocialActionHttpResponse): SocialActionTagBlockingOutcome {
     if (response.statusCode in REDIRECT_STATUS_CODES) {

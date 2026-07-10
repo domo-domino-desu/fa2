@@ -1,10 +1,9 @@
-package me.domino.fa2.ui.pages.submission.translation
+package me.domino.fa2.ui.translation
 
 import me.domino.fa2.domain.translation.SubmissionDescriptionBlock
 import me.domino.fa2.domain.translation.SubmissionDescriptionBlockResult
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
-import me.domino.fa2.ui.pages.submission.imageocr.*
 
 internal fun resolveTranslationState(
     sourceHtml: String,

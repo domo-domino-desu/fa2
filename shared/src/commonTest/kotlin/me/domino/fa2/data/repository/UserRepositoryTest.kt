@@ -5,10 +5,10 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.fa.core.FaHtmlDataSource
 import me.domino.fa2.data.fa.core.HtmlResponseResult
-import me.domino.fa2.data.fa.social.SocialActionEndpoint
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
+import me.domino.fa2.fake.UnusedSocialActionSource
 import me.domino.fa2.utils.FaUrls
 
 /** UserRepository 链路测试。 */
@@ -28,7 +28,7 @@ class UserRepositoryTest {
     )
 
     val state = repository.loadUser("artist-alpha")
-    assertTrue(state is PageState.Success)
+    assertTrue(state is ResourceResult.Success)
     assertTrue(state.data.username.isNotBlank())
   }
 
@@ -47,7 +47,7 @@ class UserRepositoryTest {
     )
 
     val state = repository.loadUser("unknown")
-    assertTrue(state is PageState.Error)
+    assertTrue(state is ResourceResult.Error)
   }
 
   private fun buildRepository(source: FaHtmlDataSource): UserRepository {
@@ -56,10 +56,7 @@ class UserRepositoryTest {
             dataSource = UserDataSource(endpoint = UserEndpoint(source), parser = UserParser()),
             pageCacheDao = InMemoryPageCacheDao(),
         )
-    return UserRepository(
-        userStore = store,
-        socialActionEndpoint = SocialActionEndpoint(source),
-    )
+    return UserRepository(userStore = store, socialActionEndpoint = UnusedSocialActionSource)
   }
 }
 
@@ -74,10 +71,7 @@ private class UserScriptedHtmlDataSource : FaHtmlDataSource {
   override suspend fun get(url: String): HtmlResponseResult {
     val queue = queueByUrl[url]
     if (queue == null || queue.isEmpty()) {
-      return HtmlResponseResult.Error(
-          statusCode = 500,
-          message = "No scripted response for $url",
-      )
+      return HtmlResponseResult.Error(statusCode = 500, message = "No scripted response for $url")
     }
     return queue.removeFirst()
   }

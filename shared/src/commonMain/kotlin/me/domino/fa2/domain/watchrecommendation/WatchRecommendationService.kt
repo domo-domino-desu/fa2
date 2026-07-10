@@ -1,12 +1,14 @@
 package me.domino.fa2.domain.watchrecommendation
 
 import kotlin.random.Random
-import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.fa.user.WatchRecommendationUserSource
+import me.domino.fa2.data.fa.watchlist.WatchRecommendationWatchlistSource
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.User
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
+import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.utils.concurrency.SequentialRequestThrottle
 import me.domino.fa2.utils.logging.FaLog
 
@@ -30,25 +32,13 @@ private const val candidateRandomPageCount: Int = 5
 
 internal const val watchRecommendationRequestThrottleMs: Long = 600L
 
-interface WatchRecommendationUserSource {
-  suspend fun loadUser(username: String): PageState<User>
-}
-
-interface WatchRecommendationWatchlistSource {
-  suspend fun loadWatchlistPage(
-      username: String,
-      category: WatchlistCategory,
-      nextPageUrl: String? = null,
-  ): PageState<WatchlistPage>
-}
-
 /** 基于共同关注分析，为当前用户推荐可关注的新用户。 */
 class WatchRecommendationService(
     private val watchlistSampler: RandomWatchlistSampler,
     private val loadWatchlistPage:
-        suspend (username: String, category: WatchlistCategory, nextPageUrl: String?) -> PageState<
-                WatchlistPage
-            >,
+        suspend (
+            username: String, category: WatchlistCategory, nextPageUrl: String?,
+        ) -> ResourceResult<WatchlistPage>,
     private val blocklistRepository: WatchRecommendationBlocklist,
     private val random: Random = Random.Default,
     private val requestThrottleMs: Long = watchRecommendationRequestThrottleMs,
@@ -59,8 +49,8 @@ class WatchRecommendationService(
               username: String,
               category: WatchlistCategory,
               nextPageUrl: String?,
-          ) -> PageState<WatchlistPage>,
-      loadUser: suspend (username: String) -> PageState<User>,
+          ) -> ResourceResult<WatchlistPage>,
+      loadUser: suspend (username: String) -> ResourceResult<User>,
       blocklistRepository: WatchRecommendationBlocklist,
       random: Random = Random.Default,
       requestThrottleMs: Long = watchRecommendationRequestThrottleMs,
@@ -100,7 +90,7 @@ class WatchRecommendationService(
       username: String,
       recommendationCount: Int,
       excludeFollowingUsername: String? = username,
-      onProgress: (WatchRecommendationProgress) -> Unit = {},
+      onProgress: suspend (WatchRecommendationProgress) -> Unit = {},
   ): List<RecommendedWatchUser> =
       recommendFromSources(
           username = username,
@@ -118,7 +108,7 @@ class WatchRecommendationService(
       username: String,
       recommendationCount: Int,
       excludeFollowingUsername: String? = null,
-      onProgress: (WatchRecommendationProgress) -> Unit = {},
+      onProgress: suspend (WatchRecommendationProgress) -> Unit = {},
   ): List<RecommendedWatchUser> =
       recommendFromSources(
           username = username,
@@ -139,7 +129,7 @@ class WatchRecommendationService(
       excludeSourceUsers: Boolean,
       excludeFollowingUsername: String?,
       logLabel: String,
-      onProgress: (WatchRecommendationProgress) -> Unit,
+      onProgress: suspend (WatchRecommendationProgress) -> Unit,
   ): List<RecommendedWatchUser> {
     if (recommendationCount <= 0) return emptyList()
 
@@ -218,10 +208,7 @@ class WatchRecommendationService(
           if (key in excludedUsernames) return@forEach
           val accumulator =
               counts.getOrPut(key) {
-                MutableRecommendedWatchUser(
-                    user = candidate,
-                    sharedFollowCount = 0,
-                )
+                MutableRecommendedWatchUser(user = candidate, sharedFollowCount = 0)
               }
           accumulator.sharedFollowCount += 1
         }
@@ -269,7 +256,7 @@ class WatchRecommendationService(
   /** 完整顺序加载当前用户已关注列表，仅用于排除“已关注”候选。 */
   private suspend fun loadCompleteWatchingForExclusion(
       username: String,
-      onProgress: (WatchRecommendationProgress) -> Unit,
+      onProgress: suspend (WatchRecommendationProgress) -> Unit,
   ): List<WatchlistUser> {
     val normalizedUsername = username.trim()
     val throttle = SequentialRequestThrottle(requestThrottleMs)
@@ -287,14 +274,9 @@ class WatchRecommendationService(
           )
       )
       when (
-          val state =
-              loadWatchlistPage(
-                  normalizedUsername,
-                  WatchlistCategory.Watching,
-                  nextPageUrl,
-              )
+          val state = loadWatchlistPage(normalizedUsername, WatchlistCategory.Watching, nextPageUrl)
       ) {
-        is PageState.Success -> {
+        is ResourceResult.Success -> {
           state.data.users.forEach { user ->
             uniqueUsers.putIfAbsent(user.username.lowercase(), user)
           }
@@ -303,11 +285,10 @@ class WatchRecommendationService(
           page += 1
         }
 
-        PageState.CfChallenge -> error("Cloudflare verification required")
-        is PageState.AuthRequired -> error(state.message)
-        is PageState.MatureBlocked -> error(state.reason)
-        is PageState.Error -> throw state.exception
-        PageState.Loading -> Unit
+        ResourceResult.CfChallenge -> error("Cloudflare verification required")
+        is ResourceResult.AuthRequired -> error(state.message)
+        is ResourceResult.MatureBlocked -> error(state.reason)
+        is ResourceResult.Error -> throw state.exception
       }
     }
   }
@@ -322,46 +303,25 @@ sealed interface WatchRecommendationProgress {
       val totalPages: Int?,
   ) : WatchRecommendationProgress
 
-  data class LoadingUserProfile(
-      val username: String,
-  ) : WatchRecommendationProgress
+  data class LoadingUserProfile(val username: String) : WatchRecommendationProgress
 
-  data class RegularUserNeedsCount(
-      val username: String,
-  ) : WatchRecommendationProgress
+  data class RegularUserNeedsCount(val username: String) : WatchRecommendationProgress
 
-  data class RegularUserSequential(
-      val username: String,
-  ) : WatchRecommendationProgress
+  data class RegularUserSequential(val username: String) : WatchRecommendationProgress
 
-  data class RandomPagesSelected(
-      val pages: List<Int>,
-  ) : WatchRecommendationProgress
+  data class RandomPagesSelected(val pages: List<Int>) : WatchRecommendationProgress
 
-  data class RandomUsersCollected(
-      val count: Int,
-  ) : WatchRecommendationProgress
+  data class RandomUsersCollected(val count: Int) : WatchRecommendationProgress
 
-  data class SamplePrepared(
-      val sourceCount: Int,
-      val maxRounds: Int,
-  ) : WatchRecommendationProgress
+  data class SamplePrepared(val sourceCount: Int, val maxRounds: Int) : WatchRecommendationProgress
 
-  data class RoundStarted(
-      val round: Int,
-      val sampleSize: Int,
-      val minimumSharedFollowCount: Int,
-  ) : WatchRecommendationProgress
+  data class RoundStarted(val round: Int, val sampleSize: Int, val minimumSharedFollowCount: Int) :
+      WatchRecommendationProgress
 
-  data class RoundCompleted(
-      val round: Int,
-      val candidateCount: Int,
-      val recommendationCount: Int,
-  ) : WatchRecommendationProgress
+  data class RoundCompleted(val round: Int, val candidateCount: Int, val recommendationCount: Int) :
+      WatchRecommendationProgress
 
-  data class Completed(
-      val resultCount: Int,
-  ) : WatchRecommendationProgress
+  data class Completed(val resultCount: Int) : WatchRecommendationProgress
 }
 
 /** 推荐关注的用户及其共同关注数。 */

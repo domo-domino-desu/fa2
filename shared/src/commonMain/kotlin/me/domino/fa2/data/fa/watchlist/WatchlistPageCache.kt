@@ -3,17 +3,17 @@ package me.domino.fa2.data.fa.watchlist
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import me.domino.fa2.data.fa.core.readCacheIfValid
 import me.domino.fa2.data.fa.core.requireStoreValue
 import me.domino.fa2.data.fa.core.storeJson
-import me.domino.fa2.data.fa.core.toPageState
+import me.domino.fa2.data.fa.core.toResourceResult
 import me.domino.fa2.data.local.dao.PageCacheDao
 import me.domino.fa2.data.local.entity.PageCacheEntity
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import org.mobilenativefoundation.store.store5.Fetcher
@@ -34,17 +34,14 @@ class WatchlistPageCache(
       username: String,
       category: WatchlistCategory,
       nextPageUrl: String?,
-  ): Flow<PageState<WatchlistPage>> {
+  ): Flow<ResourceResult<WatchlistPage>> {
     val key =
         WatchlistPageKey(
             username = normalizeUsername(username),
             category = category,
             nextPageUrl = nextPageUrl?.trim()?.takeIf { it.isNotBlank() },
         )
-    return store
-        .stream(StoreReadRequest.cached(key, true))
-        .map(::toPageState)
-        .flowWithInitialLoading()
+    return store.stream(StoreReadRequest.cached(key, true)).mapNotNull(::toResourceResult)
   }
 
   /** 单次读取 watchlist 分页。 */
@@ -52,8 +49,7 @@ class WatchlistPageCache(
       username: String,
       category: WatchlistCategory,
       nextPageUrl: String?,
-  ): PageState<WatchlistPage> =
-      stream(username, category, nextPageUrl).first { state -> state !is PageState.Loading }
+  ): ResourceResult<WatchlistPage> = stream(username, category, nextPageUrl).first()
 
   /** 失效指定用户 + 分类下全部 watchlist 缓存（含 Store 内存层）。 */
   suspend fun invalidateUserCategory(username: String, category: WatchlistCategory) {
@@ -170,9 +166,3 @@ private fun String.toWatchlistCategory(): WatchlistCategory? =
       "watching" -> WatchlistCategory.Watching
       else -> null
     }
-
-private fun Flow<PageState<WatchlistPage>?>.flowWithInitialLoading():
-    Flow<PageState<WatchlistPage>> = flow {
-  emit(PageState.Loading)
-  collect { state -> if (state != null) emit(state) }
-}

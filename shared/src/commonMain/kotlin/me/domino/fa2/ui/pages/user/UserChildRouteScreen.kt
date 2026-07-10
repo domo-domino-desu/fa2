@@ -22,11 +22,12 @@ import me.domino.fa2.ui.pages.overlays.journalpager.JournalPagerContextScreenMod
 import me.domino.fa2.ui.pages.overlays.journalpager.JournalPagerRouteScreen
 import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
 import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
-import me.domino.fa2.ui.pages.submission.pager.SubmissionContextSourceKind
-import me.domino.fa2.ui.pages.submission.pager.SubmissionLoadedPage
-import me.domino.fa2.ui.pages.submission.pager.UserSubmissionSourceAdapter
 import me.domino.fa2.ui.pages.submission.pager.pageNumberForSid
 import me.domino.fa2.ui.pages.submission.pager.toWaterfallPageControls
+import me.domino.fa2.ui.submissionviewer.adapters.UserSubmissionSourceAdapter
+import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.ui.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.ui.submissionviewer.api.UserSubmissionSection
 import me.domino.fa2.utils.FaUrls
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
@@ -166,12 +167,7 @@ class UserChildRouteScreen(
         val initialSnapshot = remember(scrollKey) { resolveSubmissionSnapshot(scrollKey) }
         val screenModel =
             koinScreenModel<UserSubmissionSectionScreenModel> {
-              parametersOf(
-                  username,
-                  route,
-                  routeInitialFolderUrl,
-                  initialSnapshot,
-              )
+              parametersOf(username, route, routeInitialFolderUrl, initialSnapshot)
             }
         val state by screenModel.state.collectAsState()
         val contextState by contextScreenModel.state(holderTag).collectAsState()
@@ -198,7 +194,12 @@ class UserChildRouteScreen(
                     },
                 adapter =
                     UserSubmissionSourceAdapter(
-                        route = route,
+                        route =
+                            when (route) {
+                              UserChildRoute.Gallery -> UserSubmissionSection.Gallery
+                              UserChildRoute.Favorites -> UserSubmissionSection.Favorites
+                              UserChildRoute.Journals -> UserSubmissionSection.Journals
+                            },
                         username = username,
                         initialPageUrl = routeInitialFolderUrl,
                         galleryRepository = galleryRepository,

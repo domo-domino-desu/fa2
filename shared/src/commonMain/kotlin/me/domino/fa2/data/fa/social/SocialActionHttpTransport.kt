@@ -10,6 +10,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Parameters
+import me.domino.fa2.data.fa.core.FaOriginPolicy
 import me.domino.fa2.data.fa.session.FaCookiesStorage
 import me.domino.fa2.data.fa.session.UserAgentStorage
 import me.domino.fa2.utils.logging.FaLog
@@ -51,6 +52,7 @@ internal class DefaultSocialActionHttpTransport(
   private val log = FaLog.withTag("SocialActionHttpTransport")
 
   override suspend fun get(url: String): SocialActionHttpResponse {
+    require(FaOriginPolicy.isTrustedPageOrigin(url)) { "Untrusted FA action URL" }
     log.d { "社交动作传输 -> GET(url=${summarizeUrl(url)})" }
     val context = loadRequestContext()
     val response =
@@ -122,12 +124,11 @@ internal class DefaultSocialActionHttpTransport(
     val body = bodyAsText()
     val headersMap = headers.entries().associate { (key, values) -> key to values }
     val setCookieValues = headers.getAll(HttpHeaders.SetCookie).orEmpty()
-    cookiesStorage.mergeSetCookieValues(setCookieValues)
-    return SocialActionHttpResponse(
-        statusCode = status.value,
-        headers = headersMap,
-        body = body,
-    )
+    val responseUrl = call.request.url.toString()
+    if (FaOriginPolicy.isTrustedCookieOrigin(responseUrl)) {
+      cookiesStorage.mergeSetCookieValues(setCookieValues)
+    }
+    return SocialActionHttpResponse(statusCode = status.value, headers = headersMap, body = body)
   }
 }
 

@@ -23,7 +23,6 @@ import me.domino.fa2.data.fa.browse.BrowseRepository
 import me.domino.fa2.data.fa.feed.FeedRepository
 import me.domino.fa2.data.fa.search.SearchRepository
 import me.domino.fa2.data.fa.session.PendingFaRouteStore
-import me.domino.fa2.data.model.PageState
 import me.domino.fa2.ui.components.state.PageStateWrapper
 import me.domino.fa2.ui.pages.auth.AuthRouteScreen
 import me.domino.fa2.ui.pages.browse.BrowseScreen
@@ -45,26 +44,27 @@ import me.domino.fa2.ui.pages.search.SearchScreenModel
 import me.domino.fa2.ui.pages.search.SearchUiState
 import me.domino.fa2.ui.pages.search.buildSearchUrl
 import me.domino.fa2.ui.pages.settings.SettingsRouteScreen
-import me.domino.fa2.ui.pages.submission.pager.BrowseSubmissionSourceAdapter
-import me.domino.fa2.ui.pages.submission.pager.FeedSubmissionSourceAdapter
-import me.domino.fa2.ui.pages.submission.pager.SearchSubmissionSourceAdapter
 import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
-import me.domino.fa2.ui.pages.submission.pager.SubmissionContextSnapshot
-import me.domino.fa2.ui.pages.submission.pager.SubmissionContextSourceKind
-import me.domino.fa2.ui.pages.submission.pager.SubmissionLoadedPage
-import me.domino.fa2.ui.pages.submission.pager.WaterfallViewportState
 import me.domino.fa2.ui.pages.submission.pager.pageNumberForSid
 import me.domino.fa2.ui.pages.submission.pager.toWaterfallPageControls
 import me.domino.fa2.ui.pages.user.UserChildRoute
 import me.domino.fa2.ui.pages.user.UserRouteScreen
 import me.domino.fa2.ui.pages.user.userHeaderNavigationActions
+import me.domino.fa2.ui.state.UiPageState
+import me.domino.fa2.ui.submissionviewer.adapters.BrowseSubmissionSourceAdapter
+import me.domino.fa2.ui.submissionviewer.adapters.FeedSubmissionSourceAdapter
+import me.domino.fa2.ui.submissionviewer.adapters.SearchSubmissionSourceAdapter
+import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSnapshot
+import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.ui.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.ui.submissionviewer.api.WaterfallViewportState
 import me.domino.fa2.utils.FaUrls
 import org.koin.compose.koinInject
 
 /** 登录后的主路由页面。 */
 class MainRouteScreen(
     /** 是否延后 Feed 首次加载。 */
-    private val deferInitialFeedLoad: Boolean = false,
+    private val deferInitialFeedLoad: Boolean = false
 ) : Screen {
   /** 页面内容。 */
   @Composable
@@ -356,7 +356,7 @@ class MainRouteScreen(
 /** Feed 导航目标内容。 */
 @Composable
 private fun FeedDestinationContent(
-    feedPageState: PageState<FeedUiState>,
+    feedPageState: UiPageState<FeedUiState>,
     feedDisplayState: FeedUiState,
     feedContextState: SubmissionContextSnapshot?,
     feedWaterfallState: LazyStaggeredGridState,
@@ -418,7 +418,7 @@ private fun FeedDestinationContent(
 /** Browse 导航目标内容。 */
 @Composable
 private fun BrowseDestinationContent(
-    browsePageState: PageState<BrowseUiState>,
+    browsePageState: UiPageState<BrowseUiState>,
     browseDisplayState: BrowseUiState,
     browseContextState: SubmissionContextSnapshot?,
     browseWaterfallState: LazyStaggeredGridState,
@@ -488,7 +488,7 @@ private fun BrowseDestinationContent(
 /** Search 导航目标内容。 */
 @Composable
 private fun SearchDestinationContent(
-    searchPageState: PageState<SearchUiState>,
+    searchPageState: UiPageState<SearchUiState>,
     searchDisplayState: SearchUiState,
     searchContextState: SubmissionContextSnapshot?,
     searchWaterfallState: LazyStaggeredGridState,
@@ -607,10 +607,7 @@ private fun MoreUiState.openUserAction(navigator: Navigator): (() -> Unit)? =
         ?.let { username ->
           {
             navigator.push(
-                UserRouteScreen(
-                    username = username,
-                    initialChildRoute = UserChildRoute.Gallery,
-                )
+                UserRouteScreen(username = username, initialChildRoute = UserChildRoute.Gallery)
             )
           }
         }

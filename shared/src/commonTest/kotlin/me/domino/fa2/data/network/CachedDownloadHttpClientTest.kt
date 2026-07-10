@@ -92,6 +92,63 @@ class CachedDownloadHttpClientTest {
 
     assertEquals("*/*", capturedAccept)
   }
+
+  @Test
+  fun externalResponseCannotMutateFaCookieSession() = runTest {
+    val cookiesStorage = FaCookiesStorage(InMemoryCookiePersistence("a=1"))
+    var capturedCookie: String? = "not-called"
+    val client =
+        createCachedDownloadHttpClient(
+            engine =
+                MockEngine { request ->
+                  capturedCookie = request.headers[HttpHeaders.Cookie]
+                  respond(
+                      content = byteArrayOf(1),
+                      status = HttpStatusCode.OK,
+                      headers = headersOf(HttpHeaders.SetCookie to listOf("a=poisoned; Path=/")),
+                  )
+                },
+            progressTracker = ImageProgressTracker(),
+            cookiesStorage = cookiesStorage,
+            userAgentStorage = createTestUserAgentStorage(),
+        )
+
+    client.get("https://cdn.example.test/image.png").body<ByteArray>()
+
+    assertEquals(null, capturedCookie)
+    assertEquals("a=1", cookiesStorage.loadRawCookieHeader())
+  }
+
+  @Test
+  fun redirectFromFaToExternalOriginDropsCookie() = runTest {
+    val cookiesStorage = FaCookiesStorage(InMemoryCookiePersistence("session=secret"))
+    val cookiesByHost = mutableMapOf<String, String?>()
+    val client =
+        createCachedDownloadHttpClient(
+            engine =
+                MockEngine { request ->
+                  cookiesByHost[request.url.host] = request.headers[HttpHeaders.Cookie]
+                  if (request.url.host == "www.furaffinity.net") {
+                    respond(
+                        content = byteArrayOf(),
+                        status = HttpStatusCode.Found,
+                        headers =
+                            headersOf(HttpHeaders.Location, "https://cdn.example.test/file.png"),
+                    )
+                  } else {
+                    respond(content = byteArrayOf(1), status = HttpStatusCode.OK)
+                  }
+                },
+            progressTracker = ImageProgressTracker(),
+            cookiesStorage = cookiesStorage,
+            userAgentStorage = createTestUserAgentStorage(),
+        )
+
+    client.get("https://www.furaffinity.net/file.png").body<ByteArray>()
+
+    assertEquals("session=secret", cookiesByHost["www.furaffinity.net"])
+    assertEquals(null, cookiesByHost["cdn.example.test"])
+  }
 }
 
 internal fun createTestUserAgentStorage(): UserAgentStorage {

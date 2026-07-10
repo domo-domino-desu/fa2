@@ -33,7 +33,7 @@ import me.domino.fa2.ui.pages.search.components.SearchHint
 import me.domino.fa2.ui.pages.search.components.SearchOverlayContent
 import me.domino.fa2.ui.pages.search.components.SearchStatusCard
 import me.domino.fa2.ui.pages.search.components.rememberSearchOverlayUiData
-import me.domino.fa2.ui.pages.submission.pager.WaterfallScrollRequest
+import me.domino.fa2.ui.submissionviewer.api.WaterfallScrollRequest
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -71,10 +71,7 @@ fun SearchScreen(
       )
 
       if (!state.hasSearched) {
-        SearchHint(
-            text = stringResource(Res.string.search_hint),
-            modifier = Modifier.fillMaxSize(),
-        )
+        SearchHint(text = stringResource(Res.string.search_hint), modifier = Modifier.fillMaxSize())
       } else {
         if (state.loading && state.submissions.isEmpty()) {
           WaterfallLoadingSkeleton(
@@ -155,10 +152,7 @@ private fun SearchBarShell(query: String, overlayVisible: Boolean, onToggleOverl
       } else {
         stringResource(Res.string.open_search_overlay)
       }
-  Surface(
-      color = MaterialTheme.colorScheme.surface,
-      modifier = Modifier.fillMaxWidth(),
-  ) {
+  Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),

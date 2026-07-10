@@ -40,10 +40,7 @@ class PlatformDownloadSupportTest {
             downloadCustomFileNameTemplate = "{username}-{unknown}-{title}-{submission_id}",
         )
     val emptyTitleRequest = request.copy(title = "")
-    assertEquals(
-        "alice-{unknown}-456",
-        buildDownloadFileBaseName(settings, emptyTitleRequest),
-    )
+    assertEquals("alice-{unknown}-456", buildDownloadFileBaseName(settings, emptyTitleRequest))
   }
 
   @Test

@@ -9,9 +9,9 @@ import me.domino.fa2.data.fa.search.SearchRepository
 import me.domino.fa2.data.fa.user.ActivityHistoryRepository
 import me.domino.fa2.data.i18n.AppI18nSnapshot
 import me.domino.fa2.data.i18n.SystemLanguageProvider
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.data.model.summarizePageState
+import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.ui.i18n.appString
@@ -20,12 +20,10 @@ import me.domino.fa2.ui.pages.search.util.SearchDateRangeShiftAction
 import me.domino.fa2.ui.pages.search.util.normalizeManualDateFields
 import me.domino.fa2.ui.pages.search.util.resolveSearchDateFields
 import me.domino.fa2.ui.pages.search.util.shiftSearchDateFields
+import me.domino.fa2.ui.state.UiPageState
 import me.domino.fa2.ui.utils.PaginationReducer
 
-internal data class SearchAppliedRequest(
-    val applied: SearchFormState,
-    val firstUrl: String,
-)
+internal data class SearchAppliedRequest(val applied: SearchFormState, val firstUrl: String)
 
 internal class SearchQueryStateCoordinator(
     private val stateProvider: () -> SearchUiState,
@@ -195,7 +193,7 @@ internal class SearchPaginationCoordinator(
     private val screenModelScope: CoroutineScope,
     private val stateProvider: () -> SearchUiState,
     private val stateSink: (SearchUiState) -> Unit,
-    private val pageStateSink: (PageState<SearchUiState>) -> Unit,
+    private val pageStateSink: (UiPageState<SearchUiState>) -> Unit,
 ) {
   private var loadJob: Job? = null
   private var appendJob: Job? = null
@@ -216,7 +214,7 @@ internal class SearchPaginationCoordinator(
         )
     )
     if (snapshot.submissions.isEmpty()) {
-      pageStateSink(PageState.Loading)
+      pageStateSink(UiPageState.Loading)
     }
     loadJob =
         screenModelScope.launch {
@@ -238,40 +236,36 @@ internal class SearchPaginationCoordinator(
                   .applyPagination(reduced)
                   .copy(
                       totalCount =
-                          (pageState as? PageState.Success)?.data?.totalCount ?: snapshot.totalCount
+                          (pageState as? ResourceResult.Success)?.data?.totalCount
+                              ?: snapshot.totalCount
                   )
           stateSink(updated)
           when (pageState) {
-            is PageState.Success -> {
-              pageStateSink(PageState.Success(updated))
+            is ResourceResult.Success -> {
+              pageStateSink(UiPageState.Success(updated))
               log.i {
-                "加载Search -> ${summarizePageState(pageState)}(count=${updated.submissions.size})"
+                "加载Search -> ${summarizeResourceResult(pageState)}(count=${updated.submissions.size})"
               }
             }
 
-            is PageState.AuthRequired -> {
-              pageStateSink(PageState.AuthRequired(pageState.requestUrl, pageState.message))
+            is ResourceResult.AuthRequired -> {
+              pageStateSink(UiPageState.AuthRequired(pageState.requestUrl, pageState.message))
               log.w { "加载Search -> 需要重新登录" }
             }
 
-            PageState.CfChallenge -> {
-              pageStateSink(PageState.CfChallenge)
+            ResourceResult.CfChallenge -> {
+              pageStateSink(UiPageState.CfChallenge)
               log.w { "加载Search -> Cloudflare验证" }
             }
 
-            is PageState.MatureBlocked -> {
-              pageStateSink(PageState.MatureBlocked(pageState.reason))
+            is ResourceResult.MatureBlocked -> {
+              pageStateSink(UiPageState.MatureBlocked(pageState.reason))
               log.w { "加载Search -> 受限(${pageState.reason})" }
             }
 
-            is PageState.Error -> {
-              pageStateSink(PageState.Error(pageState.exception))
+            is ResourceResult.Error -> {
+              pageStateSink(UiPageState.Error(pageState.exception))
               log.e(pageState.exception) { "加载Search -> 失败" }
-            }
-
-            PageState.Loading -> {
-              pageStateSink(PageState.Loading)
-              log.d { "加载Search -> 加载中" }
             }
           }
         }
@@ -311,22 +305,22 @@ internal class SearchPaginationCoordinator(
                   .applyPagination(reduced)
                   .copy(
                       totalCount =
-                          (pageState as? PageState.Success)?.data?.totalCount ?: snapshot.totalCount
+                          (pageState as? ResourceResult.Success)?.data?.totalCount
+                              ?: snapshot.totalCount
                   )
           stateSink(updated)
           when (pageState) {
-            is PageState.Success -> {
-              pageStateSink(PageState.Success(updated))
+            is ResourceResult.Success -> {
+              pageStateSink(UiPageState.Success(updated))
               log.d {
-                "自动加载Search -> ${summarizePageState(pageState)}(count=${updated.submissions.size})"
+                "自动加载Search -> ${summarizeResourceResult(pageState)}(count=${updated.submissions.size})"
               }
             }
 
-            is PageState.AuthRequired -> log.w { "自动加载Search -> 需要重新登录" }
-            PageState.CfChallenge -> log.w { "自动加载Search -> Cloudflare验证" }
-            is PageState.MatureBlocked -> log.w { "自动加载Search -> 受限(${pageState.reason})" }
-            is PageState.Error -> log.e(pageState.exception) { "自动加载Search -> 失败" }
-            PageState.Loading -> log.d { "自动加载Search -> 加载中" }
+            is ResourceResult.AuthRequired -> log.w { "自动加载Search -> 需要重新登录" }
+            ResourceResult.CfChallenge -> log.w { "自动加载Search -> Cloudflare验证" }
+            is ResourceResult.MatureBlocked -> log.w { "自动加载Search -> 受限(${pageState.reason})" }
+            is ResourceResult.Error -> log.e(pageState.exception) { "自动加载Search -> 失败" }
           }
         }
   }
@@ -343,13 +337,10 @@ internal class SearchScreenWorkflow(
     private val log: Logger,
     private val stateProvider: () -> SearchUiState,
     private val stateSink: (SearchUiState) -> Unit,
-    private val pageStateSink: (PageState<SearchUiState>) -> Unit,
+    private val pageStateSink: (UiPageState<SearchUiState>) -> Unit,
 ) {
   private val queryStateCoordinator =
-      SearchQueryStateCoordinator(
-          stateProvider = stateProvider,
-          stateSink = stateSink,
-      )
+      SearchQueryStateCoordinator(stateProvider = stateProvider, stateSink = stateSink)
   private val historyCoordinator =
       SearchHistoryCoordinator(
           historyRepository = historyRepository,
@@ -366,7 +357,6 @@ internal class SearchScreenWorkflow(
               PaginationReducer<SubmissionThumbnail, Int>(
                   keyOf = { item -> item.id },
                   challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
-                  appendFallbackErrorMessage = { appString(Res.string.load_failed_please_retry) },
               ),
           screenModelScope = screenModelScope,
           stateProvider = stateProvider,
@@ -432,7 +422,7 @@ internal class SearchScreenWorkflow(
     }
     firstPageUrl = request.firstUrl
     queryStateCoordinator.applySubmittedSearch(request)
-    pageStateSink(PageState.Loading)
+    pageStateSink(UiPageState.Loading)
     screenModelScope.launch { historyCoordinator.recordAppliedSearch(request) }
     log.i { "应用Search -> 已提交(keywordLen=${request.applied.query.length})" }
     paginationCoordinator.load(firstPageUrl = request.firstUrl, forceRefresh = true)
@@ -442,14 +432,12 @@ internal class SearchScreenWorkflow(
     val normalizedUrl = url.trim()
     if (normalizedUrl.isBlank()) return
     val restored =
-        queryStateCoordinator.restoreSearchForm(
-            url = normalizedUrl,
-            fallbackQuery = fallbackQuery,
-        ) ?: return
+        queryStateCoordinator.restoreSearchForm(url = normalizedUrl, fallbackQuery = fallbackQuery)
+            ?: return
     log.i { "应用Search(历史) -> 开始" }
     firstPageUrl = normalizedUrl
     queryStateCoordinator.applyRestoredSearch(restored)
-    pageStateSink(PageState.Loading)
+    pageStateSink(UiPageState.Loading)
     paginationCoordinator.load(firstPageUrl = normalizedUrl, forceRefresh = true)
   }
 

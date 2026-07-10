@@ -50,3 +50,13 @@ allprojects {
 }
 
 registerGenerateAppIconsTask()
+
+tasks.register("qualityCheck") {
+  group = "verification"
+  description = "Runs the repository-wide architecture, unit, desktop, and Android quality gates."
+  dependsOn(
+      ":shared:check",
+      ":desktopApp:check",
+      ":androidApp:check",
+  )
+}

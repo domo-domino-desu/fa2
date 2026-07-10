@@ -3,10 +3,10 @@ package me.domino.fa2.ui.pages.overlays.usershouts
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.user.UserRepository
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.fa.user.UserResourceRepository
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.User
-import me.domino.fa2.data.model.summarizePageState
+import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.utils.logging.FaLog
 
 internal sealed interface UserShoutsUiState {
@@ -19,7 +19,7 @@ internal sealed interface UserShoutsUiState {
 
 internal class UserShoutsScreenModel(
     private val username: String,
-    private val repository: UserRepository,
+    private val repository: UserResourceRepository,
 ) : StateScreenModel<UserShoutsUiState>(UserShoutsUiState.Loading) {
   private val log = FaLog.withTag("UserShoutsScreenModel")
 
@@ -35,33 +35,31 @@ internal class UserShoutsScreenModel(
           val next =
               if (forceRefresh) repository.refreshUser(username) else repository.loadUser(username)
       ) {
-        is PageState.Success -> {
+        is ResourceResult.Success -> {
           mutableState.value = UserShoutsUiState.Success(next.data)
-          log.i { "加载用户留言 -> ${summarizePageState(next)}" }
+          log.i { "加载用户留言 -> ${summarizeResourceResult(next)}" }
         }
 
-        is PageState.AuthRequired -> {
+        is ResourceResult.AuthRequired -> {
           mutableState.value = UserShoutsUiState.Error(next.message)
           log.w { "加载用户留言 -> 需要重新登录" }
         }
 
-        PageState.CfChallenge -> {
+        ResourceResult.CfChallenge -> {
           mutableState.value = UserShoutsUiState.Error("Cloudflare verification required")
           log.w { "加载用户留言 -> Cloudflare验证" }
         }
 
-        is PageState.MatureBlocked -> {
+        is ResourceResult.MatureBlocked -> {
           mutableState.value = UserShoutsUiState.Error(next.reason)
           log.w { "加载用户留言 -> 受限(${next.reason})" }
         }
 
-        is PageState.Error -> {
+        is ResourceResult.Error -> {
           mutableState.value =
               UserShoutsUiState.Error(next.exception.message ?: next.exception.toString())
           log.e(next.exception) { "加载用户留言 -> 失败" }
         }
-
-        PageState.Loading -> Unit
       }
     }
   }

@@ -2,7 +2,7 @@ package me.domino.fa2.ui.components.state
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.ui.state.UiPageState
 
 class PageStateWrapperPolicyTest {
   @Test
@@ -10,7 +10,7 @@ class PageStateWrapperPolicyTest {
     assertEquals(
         PageFailureDisplayMode.HardFallback,
         resolvePageFailureDisplayMode(
-            state = PageState.Error(IllegalStateException("boom")),
+            state = UiPageState.Error(IllegalStateException("boom")),
             hasContent = false,
         ),
     )
@@ -21,7 +21,7 @@ class PageStateWrapperPolicyTest {
     assertEquals(
         PageFailureDisplayMode.PassThrough,
         resolvePageFailureDisplayMode(
-            state = PageState.Error(IllegalStateException("boom")),
+            state = UiPageState.Error(IllegalStateException("boom")),
             hasContent = true,
         ),
     )
@@ -32,21 +32,18 @@ class PageStateWrapperPolicyTest {
     assertEquals(
         PageFailureDisplayMode.HardFallback,
         resolvePageFailureDisplayMode(
-            state = PageState.AuthRequired(requestUrl = "https://example.com", message = "auth"),
+            state = UiPageState.AuthRequired(requestUrl = "https://example.com", message = "auth"),
             hasContent = true,
         ),
     )
     assertEquals(
         PageFailureDisplayMode.HardFallback,
-        resolvePageFailureDisplayMode(
-            state = PageState.CfChallenge,
-            hasContent = true,
-        ),
+        resolvePageFailureDisplayMode(state = UiPageState.CfChallenge, hasContent = true),
     )
     assertEquals(
         PageFailureDisplayMode.HardFallback,
         resolvePageFailureDisplayMode(
-            state = PageState.MatureBlocked(reason = "mature"),
+            state = UiPageState.MatureBlocked(reason = "mature"),
             hasContent = true,
         ),
     )

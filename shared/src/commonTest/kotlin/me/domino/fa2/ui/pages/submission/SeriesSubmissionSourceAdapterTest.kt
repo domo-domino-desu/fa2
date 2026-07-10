@@ -4,18 +4,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.fa.submission.SubmissionSeriesSubmissionSource
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesRule
-import me.domino.fa2.domain.submissionseries.SubmissionSeriesSubmissionSource
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.pager.*
-import me.domino.fa2.ui.pages.submission.series.*
-import me.domino.fa2.ui.pages.submission.translation.*
+import me.domino.fa2.ui.submissionviewer.adapters.SeriesSubmissionSourceAdapter
 import me.domino.fa2.utils.FaUrls
 
 class SeriesSubmissionSourceAdapterTest {
@@ -23,13 +18,7 @@ class SeriesSubmissionSourceAdapterTest {
   fun numberedSeriesCanContinuePastTwentiethSubmission() =
       kotlinx.coroutines.test.runTest {
         val repository =
-            FakeSeriesSubmissionRepository(
-                details =
-                    listOf(
-                        testSubmission(11),
-                        testSubmission(20),
-                    )
-            )
+            FakeSeriesSubmissionRepository(details = listOf(testSubmission(11), testSubmission(20)))
         val adapter =
             SeriesSubmissionSourceAdapter(
                 repository = repository,
@@ -46,9 +35,9 @@ class SeriesSubmissionSourceAdapterTest {
                     ),
             )
 
-        val initialPage = adapter.loadInitialPage() as? PageState.Success
-        val eleventhPage = adapter.loadNextPage(FaUrls.submission(11)) as? PageState.Success
-        val twentiethPage = adapter.loadNextPage(FaUrls.submission(20)) as? PageState.Success
+        val initialPage = adapter.loadInitialPage() as? ResourceResult.Success
+        val eleventhPage = adapter.loadNextPage(FaUrls.submission(11)) as? ResourceResult.Success
+        val twentiethPage = adapter.loadNextPage(FaUrls.submission(20)) as? ResourceResult.Success
 
         assertNotNull(initialPage)
         assertNotNull(eleventhPage)
@@ -122,9 +111,9 @@ class SeriesSubmissionSourceAdapterTest {
                     ),
             )
 
-        val nextPage = adapter.loadNextPage(FaUrls.submission(4)) as? PageState.Success
+        val nextPage = adapter.loadNextPage(FaUrls.submission(4)) as? ResourceResult.Success
         val previousPage =
-            backwardAdapter.loadPreviousPage(FaUrls.submission(9)) as? PageState.Success
+            backwardAdapter.loadPreviousPage(FaUrls.submission(9)) as? ResourceResult.Success
 
         assertNotNull(nextPage)
         assertNotNull(previousPage)
@@ -135,17 +124,16 @@ class SeriesSubmissionSourceAdapterTest {
       }
 }
 
-private class FakeSeriesSubmissionRepository(
-    details: List<Submission>,
-) : SubmissionSeriesSubmissionSource {
+private class FakeSeriesSubmissionRepository(details: List<Submission>) :
+    SubmissionSeriesSubmissionSource {
   private val detailsByUrl = details.associateBy(Submission::submissionUrl)
 
-  override suspend fun loadSubmissionDetailBySid(sid: Int): PageState<Submission> =
+  override suspend fun loadSubmissionDetailBySid(sid: Int): ResourceResult<Submission> =
       loadSubmissionDetailByUrl(FaUrls.submission(sid))
 
-  override suspend fun loadSubmissionDetailByUrl(url: String): PageState<Submission> =
-      detailsByUrl[url]?.let { detail -> PageState.Success(detail) }
-          ?: PageState.Error(IllegalStateException("Missing detail for $url"))
+  override suspend fun loadSubmissionDetailByUrl(url: String): ResourceResult<Submission> =
+      detailsByUrl[url]?.let { detail -> ResourceResult.Success(detail) }
+          ?: ResourceResult.Error(IllegalStateException("Missing detail for $url"))
 }
 
 private fun testThumbnail(sid: Int): SubmissionThumbnail =

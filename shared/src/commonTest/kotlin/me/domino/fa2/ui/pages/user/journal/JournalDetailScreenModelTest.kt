@@ -12,20 +12,15 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import me.domino.fa2.data.fa.journal.JournalRepository
+import me.domino.fa2.data.fa.journal.JournalDetailRepository
 import me.domino.fa2.data.model.JournalDetail
 import me.domino.fa2.data.model.PageComment
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
-import me.domino.fa2.ui.pages.overlays.journaldetail.*
-import me.domino.fa2.ui.pages.overlays.journalpager.*
-import me.domino.fa2.ui.pages.overlays.userpager.*
-import me.domino.fa2.ui.pages.overlays.usershouts.*
-import me.domino.fa2.ui.pages.overlays.userwatchlist.*
-import me.domino.fa2.ui.pages.overlays.watchrecommendation.*
+import me.domino.fa2.ui.pages.overlays.journaldetail.JournalDetailScreenModel
+import me.domino.fa2.ui.pages.overlays.journaldetail.JournalDetailUiState
 import me.domino.fa2.ui.pages.submission.createTestSubmissionTranslationService
-import me.domino.fa2.ui.pages.submission.translation.SubmissionTranslationSourceMode
-import me.domino.fa2.ui.pages.user.*
+import me.domino.fa2.ui.translation.SubmissionTranslationSourceMode
 import me.domino.fa2.utils.FaUrls
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -193,24 +188,20 @@ class JournalDetailScreenModelTest {
       }
 }
 
-private class FakeJournalRepository(
-    val details: MutableMap<Int, JournalDetail>,
-) : JournalRepository() {
-  override suspend fun loadJournalDetail(journalId: Int): PageState<JournalDetail> =
-      details[journalId]?.let { detail -> PageState.Success(detail) }
-          ?: PageState.Error(IllegalStateException("Missing journalId=$journalId"))
+private class FakeJournalRepository(val details: MutableMap<Int, JournalDetail>) :
+    JournalDetailRepository {
+  override suspend fun loadJournalDetail(journalId: Int): ResourceResult<JournalDetail> =
+      details[journalId]?.let { detail -> ResourceResult.Success(detail) }
+          ?: ResourceResult.Error(IllegalStateException("Missing journalId=$journalId"))
 
-  override suspend fun loadJournalDetailByUrl(url: String): PageState<JournalDetail> {
+  override suspend fun loadJournalDetailByUrl(url: String): ResourceResult<JournalDetail> {
     val matched = details.values.firstOrNull { detail -> detail.journalUrl == url }
-    return matched?.let { detail -> PageState.Success(detail) }
-        ?: PageState.Error(IllegalStateException("Missing journalUrl=$url"))
+    return matched?.let { detail -> ResourceResult.Success(detail) }
+        ?: ResourceResult.Error(IllegalStateException("Missing journalUrl=$url"))
   }
 }
 
-private fun journalDetail(
-    journalId: Int,
-    bodyHtml: String,
-) =
+private fun journalDetail(journalId: Int, bodyHtml: String) =
     JournalDetail(
         id = journalId,
         title = "Journal $journalId",

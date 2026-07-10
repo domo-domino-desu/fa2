@@ -5,20 +5,11 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import me.domino.fa2.data.fa.core.storeJson
 import me.domino.fa2.data.local.KeyValueStorage
+import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.utils.logging.FaLog
 
-interface WatchRecommendationBlocklist {
-  suspend fun loadBlockedUsernameSet(): Set<String>
-
-  suspend fun listBlockedUsernames(): List<String>
-
-  suspend fun addBlockedUsername(username: String)
-
-  suspend fun removeBlockedUsername(username: String)
-}
-
 class PersistedWatchRecommendationBlocklistRepository(
-    private val keyValueStorage: KeyValueStorage,
+    private val keyValueStorage: KeyValueStorage
 ) : WatchRecommendationBlocklist {
   private val log = FaLog.withTag("WatchRecommendationBlocklist")
 
@@ -96,9 +87,7 @@ class PersistedWatchRecommendationBlocklistRepository(
 }
 
 @Serializable
-data class WatchRecommendationBlocklistSnapshot(
-    val blockedUsernames: List<String> = emptyList(),
-) {
+data class WatchRecommendationBlocklistSnapshot(val blockedUsernames: List<String> = emptyList()) {
   fun normalized(): WatchRecommendationBlocklistSnapshot =
       copy(
           blockedUsernames =

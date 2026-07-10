@@ -39,13 +39,6 @@ class SequentialRequestThrottleTest {
 
     advanceTimeBy(throttleIntervalMs)
     runCurrent()
-    assertEquals(
-        listOf(
-            0L,
-            throttleIntervalMs,
-            throttleIntervalMs * 2,
-        ),
-        requestTimes,
-    )
+    assertEquals(listOf(0L, throttleIntervalMs, throttleIntervalMs * 2), requestTimes)
   }
 }

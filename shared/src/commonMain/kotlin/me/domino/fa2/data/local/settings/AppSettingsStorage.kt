@@ -17,10 +17,8 @@ import me.domino.fa2.data.settings.TranslationTargetLanguage
 import me.domino.fa2.data.settings.UiLanguageSetting
 
 /** 基于 KV 的设置持久化。 */
-class AppSettingsStorage(
-    private val kv: KeyValueStorage,
-    private val secretVault: KSafe,
-) : AppSettingsStore {
+class AppSettingsStorage(private val kv: KeyValueStorage, private val secretVault: KSafe) :
+    AppSettingsStore {
   override suspend fun load(): AppSettings {
     val uiLanguage =
         UiLanguageSetting.fromPersistedValue(kv.load(KEY_UI_LANGUAGE))
@@ -124,55 +122,55 @@ class AppSettingsStorage(
 
   override suspend fun save(settings: AppSettings) {
     val normalized = AppSettings.normalize(settings)
-    kv.save(KEY_UI_LANGUAGE, normalized.uiLanguage.persistedValue)
-    kv.save(KEY_TRANSLATION_ENABLED, normalized.translationEnabled.toString())
-    kv.save(
-        KEY_TRANSLATION_TARGET_LANGUAGE,
-        normalized.translationTargetLanguage.persistedValue,
-    )
-    kv.save(KEY_METADATA_DISPLAY_MODE, normalized.metadataDisplayMode.persistedValue)
-    kv.save(KEY_TRANSLATION_PROVIDER, normalized.translationProvider.persistedValue)
-    kv.save(KEY_OPENAI_BASE_URL, normalized.openAiTranslationConfig.baseUrl)
     val apiKey = normalized.openAiTranslationConfig.apiKey.trim()
+    val previousApiKey = secretVault.get(KEY_SECRET_OPENAI_API_KEY, defaultValue = "")
+    val preferences =
+        mapOf(
+            KEY_UI_LANGUAGE to normalized.uiLanguage.persistedValue,
+            KEY_TRANSLATION_ENABLED to normalized.translationEnabled.toString(),
+            KEY_TRANSLATION_TARGET_LANGUAGE to normalized.translationTargetLanguage.persistedValue,
+            KEY_METADATA_DISPLAY_MODE to normalized.metadataDisplayMode.persistedValue,
+            KEY_TRANSLATION_PROVIDER to normalized.translationProvider.persistedValue,
+            KEY_OPENAI_BASE_URL to normalized.openAiTranslationConfig.baseUrl,
+            KEY_OPENAI_MODEL to normalized.openAiTranslationConfig.model,
+            KEY_OPENAI_PROMPT to normalized.openAiTranslationConfig.promptTemplate,
+            KEY_TRANSLATION_CHUNK_WORD_LIMIT to normalized.translationChunkWordLimit.toString(),
+            KEY_TRANSLATION_MAX_CONCURRENCY to normalized.translationMaxConcurrency.toString(),
+            KEY_THEME_MODE to normalized.themeMode.persistedValue,
+            KEY_WATERFALL_MIN_CARD_WIDTH_DP to normalized.waterfallMinCardWidthDp.toString(),
+            KEY_BLOCKED_SUBMISSION_WATERFALL_MODE to
+                normalized.blockedSubmissionWaterfallMode.persistedValue,
+            KEY_BLOCKED_SUBMISSION_PAGER_MODE to
+                normalized.blockedSubmissionPagerMode.persistedValue,
+            KEY_RETURN_TO_CURRENT_SUBMISSION_IN_WATERFALL to
+                normalized.returnToCurrentSubmissionInWaterfall.toString(),
+            KEY_DOWNLOAD_SAVE_PATH to normalized.downloadSavePath,
+            KEY_DOWNLOAD_ALLOW_MEDIA_INDEXING to normalized.downloadAllowMediaIndexing.toString(),
+            KEY_DOWNLOAD_SUBFOLDER_MODE to normalized.downloadSubfolderMode.persistedValue,
+            KEY_DOWNLOAD_FILE_NAME_MODE to normalized.downloadFileNameMode.persistedValue,
+            KEY_DOWNLOAD_CUSTOM_FILE_NAME_TEMPLATE to normalized.downloadCustomFileNameTemplate,
+            KEY_WATCH_RECOMMENDATION_PAGE_SIZE to normalized.watchRecommendationPageSize.toString(),
+            KEY_LOG_LEVEL to normalized.logLevel.persistedValue,
+        )
+    saveApiKey(apiKey)
+    try {
+      kv.saveAll(preferences)
+    } catch (error: Throwable) {
+      try {
+        saveApiKey(previousApiKey)
+      } catch (_: Throwable) {
+        // Preserve the original persistence failure; the next explicit save reconciles both stores.
+      }
+      throw error
+    }
+  }
+
+  private suspend fun saveApiKey(apiKey: String) {
     if (apiKey.isBlank()) {
       secretVault.delete(KEY_SECRET_OPENAI_API_KEY)
     } else {
       secretVault.put(key = KEY_SECRET_OPENAI_API_KEY, value = apiKey)
     }
-    kv.save(KEY_OPENAI_MODEL, normalized.openAiTranslationConfig.model)
-    kv.save(KEY_OPENAI_PROMPT, normalized.openAiTranslationConfig.promptTemplate)
-    kv.save(KEY_TRANSLATION_CHUNK_WORD_LIMIT, normalized.translationChunkWordLimit.toString())
-    kv.save(KEY_TRANSLATION_MAX_CONCURRENCY, normalized.translationMaxConcurrency.toString())
-    kv.save(KEY_THEME_MODE, normalized.themeMode.persistedValue)
-    kv.save(KEY_WATERFALL_MIN_CARD_WIDTH_DP, normalized.waterfallMinCardWidthDp.toString())
-    kv.save(
-        KEY_BLOCKED_SUBMISSION_WATERFALL_MODE,
-        normalized.blockedSubmissionWaterfallMode.persistedValue,
-    )
-    kv.save(
-        KEY_BLOCKED_SUBMISSION_PAGER_MODE,
-        normalized.blockedSubmissionPagerMode.persistedValue,
-    )
-    kv.save(
-        KEY_RETURN_TO_CURRENT_SUBMISSION_IN_WATERFALL,
-        normalized.returnToCurrentSubmissionInWaterfall.toString(),
-    )
-    kv.save(KEY_DOWNLOAD_SAVE_PATH, normalized.downloadSavePath)
-    kv.save(
-        KEY_DOWNLOAD_ALLOW_MEDIA_INDEXING,
-        normalized.downloadAllowMediaIndexing.toString(),
-    )
-    kv.save(KEY_DOWNLOAD_SUBFOLDER_MODE, normalized.downloadSubfolderMode.persistedValue)
-    kv.save(KEY_DOWNLOAD_FILE_NAME_MODE, normalized.downloadFileNameMode.persistedValue)
-    kv.save(
-        KEY_DOWNLOAD_CUSTOM_FILE_NAME_TEMPLATE,
-        normalized.downloadCustomFileNameTemplate,
-    )
-    kv.save(
-        KEY_WATCH_RECOMMENDATION_PAGE_SIZE,
-        normalized.watchRecommendationPageSize.toString(),
-    )
-    kv.save(KEY_LOG_LEVEL, normalized.logLevel.persistedValue)
   }
 
   companion object {

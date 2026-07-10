@@ -8,9 +8,7 @@ import com.fleeksoft.ksoup.nodes.Node
 data class HtmlTextBlock(val originalHtml: String, val sourceText: String)
 
 /** 从 HTML 中按块边界提取可处理文本。 */
-class HtmlTextBlockExtractor(
-    private val normalizeText: (String) -> String = ::normalizeHtmlText,
-) {
+class HtmlTextBlockExtractor(private val normalizeText: (String) -> String = ::normalizeHtmlText) {
   fun extract(html: String): List<HtmlTextBlock> {
     if (html.isBlank()) return emptyList()
 

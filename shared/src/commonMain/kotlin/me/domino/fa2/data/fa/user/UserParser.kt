@@ -2,13 +2,15 @@ package me.domino.fa2.data.fa.user
 
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Element
-import me.domino.fa2.data.fa.submission.SubmissionDataSummary
-import me.domino.fa2.data.fa.submission.TagBlockSettings
-import me.domino.fa2.data.fa.submission.isBlockedByTagSettings
-import me.domino.fa2.data.fa.submission.parseImageTags
-import me.domino.fa2.data.fa.submission.parseSubmissionAvatarUrls
-import me.domino.fa2.data.fa.submission.parseSubmissionDataSummaries
-import me.domino.fa2.data.fa.submission.parseTagBlockSettings
+import me.domino.fa2.data.fa.core.FaOriginPolicy
+import me.domino.fa2.data.fa.listing.SubmissionDataSummary
+import me.domino.fa2.data.fa.listing.TagBlockSettings
+import me.domino.fa2.data.fa.listing.isBlockedByTagSettings
+import me.domino.fa2.data.fa.listing.parseImageTags
+import me.domino.fa2.data.fa.listing.parseSubmissionAvatarUrls
+import me.domino.fa2.data.fa.listing.parseSubmissionDataSummaries
+import me.domino.fa2.data.fa.listing.parseTagBlockSettings
+import me.domino.fa2.data.fa.parsing.ensureUserPageAccessible
 import me.domino.fa2.data.model.PageComment
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.model.User
@@ -57,13 +59,7 @@ class UserParser {
     val registeredAt =
         document.selectFirst(".user-title span.popup_date")?.attr("title")?.trim()?.takeIf {
           it.isNotBlank()
-        }
-            ?: document
-                .selectFirst(".user-title span.popup_date")
-                ?.text()
-                ?.trim()
-                .orEmpty()
-                .ifBlank { "未知" }
+        } ?: document.selectFirst(".user-title span.popup_date")?.text()?.trim().orEmpty()
 
     val watchState = parseWatchState(document, url)
     val watchlistInfo = parseWatchlistInfo(document, url)
@@ -168,7 +164,11 @@ class UserParser {
     if (href.isBlank()) {
       return WatchState(isWatching = false, actionUrl = "")
     }
-    val absoluteUrl = toAbsoluteUrl(baseUrl, href)
+    val absoluteUrl =
+        FaOriginPolicy.trustedActionUrlOrNull(
+            url = toAbsoluteUrl(baseUrl, href),
+            allowedPathPrefixes = setOf("/watch/", "/unwatch/"),
+        ) ?: return WatchState(isWatching = false, actionUrl = "")
     val label = actionNode.text().trim().replace(" ", "").lowercase()
     val isWatching =
         absoluteUrl.contains("/unwatch/") || label.startsWith("-watch") || label.contains("unwatch")
@@ -294,11 +294,7 @@ class UserParser {
         resolvedValue
             .takeIf { it.isNotBlank() || resolvedUrl.isNotBlank() }
             ?.let { value ->
-              UserContact(
-                  label = label,
-                  value = value.ifBlank { resolvedUrl },
-                  url = resolvedUrl,
-              )
+              UserContact(label = label, value = value.ifBlank { resolvedUrl }, url = resolvedUrl)
             }
       }
 
@@ -348,7 +344,7 @@ class UserParser {
 
     val timestampNode = shoutNode.selectFirst("comment-date .popup_date")
     val timestampRaw = timestampNode?.attr("title")?.trim()?.takeIf { it.isNotBlank() }
-    val timestampNatural = timestampNode?.text()?.trim().orEmpty().ifBlank { "未知时间" }
+    val timestampNatural = timestampNode?.text()?.trim().orEmpty()
 
     val bodyHtml =
         shoutNode.selectFirst("comment-user-text .user-submitted-links")?.html()?.trim()?.takeIf {
@@ -410,10 +406,7 @@ class UserParser {
   ): SubmissionThumbnail? {
     val rawSubmissionUrl = node.selectFirst("a[href*='/view/']")?.attr("href").orEmpty()
     val submissionUrl =
-        toAbsoluteUrl(
-            baseUrl = "https://www.furaffinity.net/",
-            maybeRelativeUrl = rawSubmissionUrl,
-        )
+        toAbsoluteUrl(baseUrl = "https://www.furaffinity.net/", maybeRelativeUrl = rawSubmissionUrl)
     val id =
         node.attr("id").removePrefix("sid-").toIntOrNull()
             ?: parseSubmissionSid(submissionUrl)

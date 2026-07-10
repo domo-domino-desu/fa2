@@ -99,9 +99,7 @@ object FaLog {
   fun isInitialized(): Boolean = initialized
 }
 
-private class RuntimeLogBuffer(
-    private val maxEntries: Int = 500,
-) {
+private class RuntimeLogBuffer(private val maxEntries: Int = 500) {
   private val lock = Any()
   private val entries = ArrayDeque<String>()
 

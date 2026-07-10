@@ -1,7 +1,5 @@
 package me.domino.fa2.domain.attachmenttext
 
-import me.domino.fa2.domain.attachmenttext.*
-
 /** RTF 附件文本解析器。 */
 internal object RtfAttachmentTextParser : AttachmentTextParser {
   /** 解析器格式。 */
@@ -32,26 +30,15 @@ internal object RtfAttachmentTextParser : AttachmentTextParser {
 
     val tokens = tokenizeRtf(raw = raw, reporter = reporter)
     val parsedParagraphs = interpretRtfTokens(tokens = tokens, reporter = reporter)
-    reporter.report(
-        stageId = "normalize_paragraphs",
-        stageFraction = 0f,
-        message = "正在整理段落",
-    )
-    val paragraphs =
-        parsedParagraphs.mapIndexedNotNull { index, runs ->
-          buildParagraphFromRuns(runs = runs, sourceLabel = "段落 ${index + 1}")
-        }
+    reporter.report(stageId = "normalize_paragraphs", stageFraction = 0f, message = "正在整理段落")
+    val paragraphs = parsedParagraphs.mapNotNull { runs -> buildParagraphFromRuns(runs = runs) }
     reporter.report(
         stageId = "normalize_paragraphs",
         stageFraction = 1f,
         message = "段落整理完成",
         currentItemLabel = "${paragraphs.size} 段",
     )
-    reporter.report(
-        stageId = "build_html",
-        stageFraction = 0f,
-        message = "正在构建 HTML",
-    )
+    reporter.report(stageId = "build_html", stageFraction = 0f, message = "正在构建 HTML")
     val result = buildAttachmentTextDocument(format = format, paragraphs = paragraphs)
     reporter.report(
         stageId = "build_html",

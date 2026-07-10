@@ -12,9 +12,7 @@ import me.domino.fa2.data.fa.auth.AuthRepository
 import me.domino.fa2.data.fa.session.AuthSessionController
 import me.domino.fa2.data.fa.session.PendingFaRouteStore
 import me.domino.fa2.data.fa.session.SessionWebViewPort
-import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.model.AuthProbeResult
-import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.utils.FaUrls
 import me.domino.fa2.utils.logging.FaLog
@@ -25,8 +23,6 @@ class AuthScreenModel(
     private val authRepository: AuthRepository,
     private val authSessionController: AuthSessionController,
     private val pendingFaRouteStore: PendingFaRouteStore,
-    private val settingsService: AppSettingsService? = null,
-    private val systemLanguageProvider: SystemLanguageProvider? = null,
 ) : StateScreenModel<AuthUiState>(AuthUiState.Loading) {
   private val log = FaLog.withTag("AuthScreenModel")
 
@@ -38,12 +34,7 @@ class AuthScreenModel(
 
   /** WebView 登录交互状态。 */
   private val webViewUiState =
-      MutableStateFlow(
-          AuthWebViewUiState(
-              isConfirming = false,
-              statusMessage = appString(Res.string.default_web_view_login_status),
-          )
-      )
+      MutableStateFlow(AuthWebViewUiState(isConfirming = false, statusMessage = ""))
 
   /** 最近一次已同步的 WebView cookie 快照。 */
   private var lastSyncedWebViewCookieSnapshot: String = ""
@@ -217,7 +208,7 @@ class AuthScreenModel(
             }
 
             is AuthProbeResult.AuthInvalid -> {
-              AuthUiState.AuthInvalid(message = result.message)
+              AuthUiState.AuthInvalid(message = authInvalidMessage(result))
             }
 
             is AuthProbeResult.ProbeFailed -> {
@@ -236,10 +227,21 @@ class AuthScreenModel(
     return nextState
   }
 
+  private suspend fun authInvalidMessage(result: AuthProbeResult.AuthInvalid): String =
+      when (result.reason) {
+        AuthProbeResult.InvalidReason.SessionExpired -> appString(Res.string.auth_session_expired)
+        AuthProbeResult.InvalidReason.ChallengePending ->
+            appString(Res.string.auth_challenge_pending)
+        AuthProbeResult.InvalidReason.ChallengeAborted ->
+            appString(Res.string.auth_challenge_aborted)
+        AuthProbeResult.InvalidReason.AccessBlocked ->
+            result.detail?.takeIf(String::isNotBlank) ?: appString(Res.string.page_blocked)
+      }
+
   fun hasPendingRestoreUri(): Boolean = pendingFaRouteStore.peek() != null
 
   /** 重置认证交互状态。 */
-  private fun resetAuthInteractionState() {
+  private suspend fun resetAuthInteractionState() {
     loginMethodState.value = AuthLoginMethod.WebView
     updateWebViewUiState(
         isConfirming = false,
@@ -308,10 +310,7 @@ class AuthScreenModel(
       statusMessage: String = webViewUiState.value.statusMessage,
   ) {
     webViewUiState.value =
-        AuthWebViewUiState(
-            isConfirming = isConfirming,
-            statusMessage = statusMessage,
-        )
+        AuthWebViewUiState(isConfirming = isConfirming, statusMessage = statusMessage)
   }
 
   private fun summarizeAuthUiState(state: AuthUiState): String =

@@ -22,11 +22,8 @@ sealed interface HtmlResponseResult {
    * @property finalUrl 最终页面地址。
    * @property message 提示文案。
    */
-  data class AuthRequired(
-      val requestUrl: String,
-      val finalUrl: String,
-      val message: String,
-  ) : HtmlResponseResult
+  data class AuthRequired(val requestUrl: String, val finalUrl: String, val message: String) :
+      HtmlResponseResult
 
   /**
    * 请求错误。

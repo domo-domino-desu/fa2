@@ -177,10 +177,7 @@ class UserWatchlistRouteScreen(
                 }
               }
 
-              items(
-                  items = state.users,
-                  key = { item -> item.username.lowercase() },
-              ) { item ->
+              items(items = state.users, key = { item -> item.username.lowercase() }) { item ->
                 WatchlistUserCard(
                     item = item,
                     onClick = {

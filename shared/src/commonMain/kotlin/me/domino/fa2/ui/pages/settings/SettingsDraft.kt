@@ -1,6 +1,5 @@
 package me.domino.fa2.ui.pages.settings
 
-import fa2.shared.generated.resources.*
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
@@ -12,8 +11,44 @@ import me.domino.fa2.data.settings.ThemeMode
 import me.domino.fa2.data.settings.TranslationProvider
 import me.domino.fa2.data.settings.TranslationTargetLanguage
 import me.domino.fa2.data.settings.UiLanguageSetting
-import me.domino.fa2.ui.i18n.appString
-import me.domino.fa2.ui.i18n.mustBeInRangeText
+
+internal enum class SettingsField {
+  ChunkWordLimit,
+  MaxConcurrency,
+  WaterfallMinColumnWidth,
+  WatchRecommendationPageSize,
+  ThemeMode,
+  AppLanguage,
+  TranslationTargetLanguage,
+  MetadataDisplay,
+  BlurInWaterfalls,
+  BlurInDetailPages,
+  DownloadSubfolderMode,
+  DownloadFileNameMode,
+  BaseUrl,
+  ApiKey,
+  Model,
+  PromptTemplate,
+}
+
+internal sealed interface SettingsValidationIssue {
+  val field: SettingsField
+
+  data class MustBeNumber(override val field: SettingsField) : SettingsValidationIssue
+
+  data class Unsupported(override val field: SettingsField) : SettingsValidationIssue
+
+  data class OutOfRange(
+      override val field: SettingsField,
+      val min: Int,
+      val max: Int,
+      val suffix: String = "",
+  ) : SettingsValidationIssue
+
+  data class CannotBeEmpty(override val field: SettingsField) : SettingsValidationIssue
+
+  data class MustStartWithHttp(override val field: SettingsField) : SettingsValidationIssue
+}
 
 /** 设置页面的草稿状态，持有用户编辑中的各项配置输入值。 */
 internal data class SettingsDraft(
@@ -103,70 +138,55 @@ internal data class SettingsDraft(
     return AppSettings.normalize(current) != settings
   }
 
-  fun validate(): String? {
-    val chunkWordLimitLabel = appString(Res.string.chunk_word_limit)
-    val maxConcurrencyLabel = appString(Res.string.max_concurrency)
-    val waterfallMinColumnWidthLabel = appString(Res.string.waterfall_min_column_width_dp)
-    val watchRecommendationPageSizeLabel = appString(Res.string.watch_recommendation_page_size)
-    val themeModeLabel = appString(Res.string.theme_mode)
-    val appLanguageLabel = appString(Res.string.app_language)
-    val translationTargetLanguageLabel = appString(Res.string.translation_target_language)
-    val metadataDisplayLabel = appString(Res.string.field_translation)
-    val blurInWaterfallsLabel = appString(Res.string.blur_blocked_submissions_in_waterfalls)
-    val blurInDetailPagesLabel = appString(Res.string.blur_blocked_submissions_in_detail_pages)
-    val downloadSubfolderModeLabel = appString(Res.string.download_subfolder_mode)
-    val downloadFileNameModeLabel = appString(Res.string.download_file_name_mode)
-    val baseUrlLabel = appString(Res.string.base_url)
-    val apiKeyLabel = appString(Res.string.api_key)
-    val modelLabel = appString(Res.string.model)
-    val promptTemplateLabel = appString(Res.string.prompt_template)
-
+  fun validate(): SettingsValidationIssue? {
     val chunkWordLimit =
         chunkWordLimitInput.toIntOrNull()
-            ?: return appString(Res.string.must_be_number, chunkWordLimitLabel)
+            ?: return SettingsValidationIssue.MustBeNumber(SettingsField.ChunkWordLimit)
     val maxConcurrency =
         maxConcurrencyInput.toIntOrNull()
-            ?: return appString(Res.string.must_be_number, maxConcurrencyLabel)
+            ?: return SettingsValidationIssue.MustBeNumber(SettingsField.MaxConcurrency)
     val waterfallWidth =
         waterfallMinCardWidthInput.toIntOrNull()
-            ?: return appString(Res.string.must_be_number, waterfallMinColumnWidthLabel)
+            ?: return SettingsValidationIssue.MustBeNumber(SettingsField.WaterfallMinColumnWidth)
     val watchRecommendationPageSize =
         watchRecommendationPageSizeInput.toIntOrNull()
-            ?: return appString(Res.string.must_be_number, watchRecommendationPageSizeLabel)
+            ?: return SettingsValidationIssue.MustBeNumber(
+                SettingsField.WatchRecommendationPageSize
+            )
 
     if (themeMode !in AppSettings.supportedThemeModes) {
-      return appString(Res.string.unsupported_setting, themeModeLabel)
+      return SettingsValidationIssue.Unsupported(SettingsField.ThemeMode)
     }
     if (uiLanguage !in AppSettings.supportedUiLanguages) {
-      return appString(Res.string.unsupported_setting, appLanguageLabel)
+      return SettingsValidationIssue.Unsupported(SettingsField.AppLanguage)
     }
     if (translationTargetLanguage !in AppSettings.supportedTranslationTargetLanguages) {
-      return appString(Res.string.unsupported_setting, translationTargetLanguageLabel)
+      return SettingsValidationIssue.Unsupported(SettingsField.TranslationTargetLanguage)
     }
     if (metadataDisplayMode !in AppSettings.supportedMetadataDisplayModes) {
-      return appString(Res.string.unsupported_setting, metadataDisplayLabel)
+      return SettingsValidationIssue.Unsupported(SettingsField.MetadataDisplay)
     }
     if (blockedSubmissionWaterfallMode !in AppSettings.supportedBlockedSubmissionWaterfallModes) {
-      return appString(Res.string.unsupported_setting, blurInWaterfallsLabel)
+      return SettingsValidationIssue.Unsupported(SettingsField.BlurInWaterfalls)
     }
     if (blockedSubmissionPagerMode !in AppSettings.supportedBlockedSubmissionPagerModes) {
-      return appString(Res.string.unsupported_setting, blurInDetailPagesLabel)
+      return SettingsValidationIssue.Unsupported(SettingsField.BlurInDetailPages)
     }
     if (downloadSubfolderMode !in AppSettings.supportedDownloadSubfolderModes) {
-      return appString(Res.string.unsupported_setting, downloadSubfolderModeLabel)
+      return SettingsValidationIssue.Unsupported(SettingsField.DownloadSubfolderMode)
     }
     if (downloadFileNameMode !in AppSettings.supportedDownloadFileNameModes) {
-      return appString(Res.string.unsupported_setting, downloadFileNameModeLabel)
+      return SettingsValidationIssue.Unsupported(SettingsField.DownloadFileNameMode)
     }
 
     if (
         chunkWordLimit !in
             AppSettings.minTranslationChunkWordLimit..AppSettings.maxTranslationChunkWordLimit
     ) {
-      return mustBeInRangeText(
-          chunkWordLimitLabel,
-          AppSettings.minTranslationChunkWordLimit,
-          AppSettings.maxTranslationChunkWordLimit,
+      return SettingsValidationIssue.OutOfRange(
+          SettingsField.ChunkWordLimit,
+          min = AppSettings.minTranslationChunkWordLimit,
+          max = AppSettings.maxTranslationChunkWordLimit,
       )
     }
 
@@ -174,10 +194,10 @@ internal data class SettingsDraft(
         maxConcurrency !in
             AppSettings.minTranslationMaxConcurrency..AppSettings.maxTranslationMaxConcurrency
     ) {
-      return mustBeInRangeText(
-          maxConcurrencyLabel,
-          AppSettings.minTranslationMaxConcurrency,
-          AppSettings.maxTranslationMaxConcurrency,
+      return SettingsValidationIssue.OutOfRange(
+          SettingsField.MaxConcurrency,
+          min = AppSettings.minTranslationMaxConcurrency,
+          max = AppSettings.maxTranslationMaxConcurrency,
       )
     }
 
@@ -185,10 +205,10 @@ internal data class SettingsDraft(
         waterfallWidth !in
             AppSettings.minWaterfallMinCardWidthDp..AppSettings.maxWaterfallMinCardWidthDp
     ) {
-      return mustBeInRangeText(
-          waterfallMinColumnWidthLabel,
-          AppSettings.minWaterfallMinCardWidthDp,
-          AppSettings.maxWaterfallMinCardWidthDp,
+      return SettingsValidationIssue.OutOfRange(
+          SettingsField.WaterfallMinColumnWidth,
+          min = AppSettings.minWaterfallMinCardWidthDp,
+          max = AppSettings.maxWaterfallMinCardWidthDp,
           suffix = "dp",
       )
     }
@@ -197,23 +217,29 @@ internal data class SettingsDraft(
         watchRecommendationPageSize !in
             AppSettings.minWatchRecommendationPageSize..AppSettings.maxWatchRecommendationPageSize
     ) {
-      return mustBeInRangeText(
-          watchRecommendationPageSizeLabel,
-          AppSettings.minWatchRecommendationPageSize,
-          AppSettings.maxWatchRecommendationPageSize,
+      return SettingsValidationIssue.OutOfRange(
+          SettingsField.WatchRecommendationPageSize,
+          min = AppSettings.minWatchRecommendationPageSize,
+          max = AppSettings.maxWatchRecommendationPageSize,
       )
     }
 
     if (translationEnabled && translationProvider == TranslationProvider.OPENAI_COMPATIBLE) {
       val baseUrl = openAiBaseUrl.trim()
-      if (baseUrl.isBlank()) return appString(Res.string.cannot_be_empty, baseUrlLabel)
-      if (!baseUrl.startsWith("https://") && !baseUrl.startsWith("http://")) {
-        return appString(Res.string.must_start_with_http_or_https, baseUrlLabel)
+      if (baseUrl.isBlank()) {
+        return SettingsValidationIssue.CannotBeEmpty(SettingsField.BaseUrl)
       }
-      if (openAiApiKey.isBlank()) return appString(Res.string.cannot_be_empty, apiKeyLabel)
-      if (openAiModel.isBlank()) return appString(Res.string.cannot_be_empty, modelLabel)
+      if (!baseUrl.startsWith("https://") && !baseUrl.startsWith("http://")) {
+        return SettingsValidationIssue.MustStartWithHttp(SettingsField.BaseUrl)
+      }
+      if (openAiApiKey.isBlank()) {
+        return SettingsValidationIssue.CannotBeEmpty(SettingsField.ApiKey)
+      }
+      if (openAiModel.isBlank()) {
+        return SettingsValidationIssue.CannotBeEmpty(SettingsField.Model)
+      }
       if (openAiPromptTemplate.isBlank()) {
-        return appString(Res.string.cannot_be_empty, promptTemplateLabel)
+        return SettingsValidationIssue.CannotBeEmpty(SettingsField.PromptTemplate)
       }
     }
 

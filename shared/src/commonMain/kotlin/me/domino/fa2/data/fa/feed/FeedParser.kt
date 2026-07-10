@@ -2,11 +2,11 @@ package me.domino.fa2.data.fa.feed
 
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Element
-import me.domino.fa2.data.fa.submission.TagBlockSettings
-import me.domino.fa2.data.fa.submission.isBlockedByTagSettings
-import me.domino.fa2.data.fa.submission.parseImageTags
-import me.domino.fa2.data.fa.submission.parseSubmissionAvatarUrls
-import me.domino.fa2.data.fa.submission.parseTagBlockSettings
+import me.domino.fa2.data.fa.listing.TagBlockSettings
+import me.domino.fa2.data.fa.listing.isBlockedByTagSettings
+import me.domino.fa2.data.fa.listing.parseImageTags
+import me.domino.fa2.data.fa.listing.parseSubmissionAvatarUrls
+import me.domino.fa2.data.fa.listing.parseTagBlockSettings
 import me.domino.fa2.data.model.FeedPage
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.utils.FaUrls
@@ -39,11 +39,7 @@ class FeedParser {
     val avatarUrls = parseSubmissionAvatarUrls(html)
     val submissions =
         figureNodes.mapNotNull { node ->
-          parseSubmission(
-              node = node,
-              avatarUrls = avatarUrls,
-              tagBlockSettings = tagBlockSettings,
-          )
+          parseSubmission(node = node, avatarUrls = avatarUrls, tagBlockSettings = tagBlockSettings)
         }
     val currentPageUrl = normalizeCurrentPageUrl(baseUrl)
     val nextPageUrl =
@@ -77,10 +73,7 @@ class FeedParser {
   ): SubmissionThumbnail? {
     val rawSubmissionUrl = node.selectFirst("a[href*=\"/view/\"]")?.attr("href").orEmpty()
     val submissionUrl =
-        toAbsoluteUrl(
-            baseUrl = "https://www.furaffinity.net/",
-            maybeRelativeUrl = rawSubmissionUrl,
-        )
+        toAbsoluteUrl(baseUrl = "https://www.furaffinity.net/", maybeRelativeUrl = rawSubmissionUrl)
 
     val id =
         node.attr("id").removePrefix("sid-").toIntOrNull()
@@ -111,10 +104,7 @@ class FeedParser {
 
     val thumbnailRaw = resolveThumbnailRawUrl(image)
     val thumbnailUrl =
-        toAbsoluteUrl(
-            baseUrl = "https://www.furaffinity.net/",
-            maybeRelativeUrl = thumbnailRaw,
-        )
+        toAbsoluteUrl(baseUrl = "https://www.furaffinity.net/", maybeRelativeUrl = thumbnailRaw)
     val resolvedSubmissionUrl = submissionUrl.ifBlank { FaUrls.submission(id) }
     val imageTags = parseImageTags(image)
     val categoryTag = imageTags.sorted().firstOrNull { tag -> tag.startsWith("c_") }.orEmpty()

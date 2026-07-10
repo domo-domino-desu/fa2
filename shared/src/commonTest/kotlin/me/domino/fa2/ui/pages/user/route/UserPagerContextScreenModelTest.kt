@@ -11,17 +11,12 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
-import me.domino.fa2.ui.pages.overlays.journaldetail.*
-import me.domino.fa2.ui.pages.overlays.journalpager.*
-import me.domino.fa2.ui.pages.overlays.userpager.*
-import me.domino.fa2.ui.pages.overlays.usershouts.*
-import me.domino.fa2.ui.pages.overlays.userwatchlist.*
-import me.domino.fa2.ui.pages.overlays.watchrecommendation.*
-import me.domino.fa2.ui.pages.user.*
+import me.domino.fa2.ui.pages.overlays.userpager.UserPagerContextScreenModel
+import me.domino.fa2.ui.pages.overlays.userpager.UserPagerSource
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserPagerContextScreenModelTest {
@@ -85,13 +80,13 @@ class UserPagerContextScreenModelTest {
 
         model.requestAppend {
           loadCount++
-          PageState.Success(
+          ResourceResult.Success(
               WatchlistPage(users = listOf(user("beta"), user("gamma")), nextPageUrl = null)
           )
         }
         model.requestAppend {
           loadCount++
-          PageState.Success(WatchlistPage(users = listOf(user("delta")), nextPageUrl = null))
+          ResourceResult.Success(WatchlistPage(users = listOf(user("delta")), nextPageUrl = null))
         }
         runCurrent()
 

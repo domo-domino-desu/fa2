@@ -1,7 +1,5 @@
 package me.domino.fa2.domain.attachmenttext
 
-import me.domino.fa2.domain.attachmenttext.*
-
 /** 纯文本附件解析。 */
 object PlainTextAttachmentTextParser : AttachmentTextParser {
   override val format: AttachmentTextFormat = AttachmentTextFormat.TEXT
@@ -15,12 +13,7 @@ object PlainTextAttachmentTextParser : AttachmentTextParser {
   ): AttachmentTextDocument {
     reporter.report("decode_bytes", 0f, "准备解码文本", currentItemLabel = fileName)
     val decoded = bytes.decodeToString().removePrefix("\uFEFF")
-    reporter.report(
-        "decode_bytes",
-        1f,
-        "文本解码完成",
-        currentItemLabel = toProgressSnippet(decoded),
-    )
+    reporter.report("decode_bytes", 1f, "文本解码完成", currentItemLabel = toProgressSnippet(decoded))
 
     reporter.report("split_paragraphs", 0f, "正在整理段落")
     val paragraphTexts = splitPlainTextParagraphs(decoded)

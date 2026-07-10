@@ -1,14 +1,9 @@
-package me.domino.fa2.data.fa.gallery
+package me.domino.fa2.data.fa.listing
 
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Element
 import io.ktor.http.encodeURLParameter
-import me.domino.fa2.data.fa.submission.TagBlockSettings
-import me.domino.fa2.data.fa.submission.isBlockedByTagSettings
-import me.domino.fa2.data.fa.submission.parseImageTags
-import me.domino.fa2.data.fa.submission.parseSubmissionAvatarUrls
-import me.domino.fa2.data.fa.submission.parseTagBlockSettings
-import me.domino.fa2.data.fa.user.ensureUserPageAccessible
+import me.domino.fa2.data.fa.parsing.ensureUserPageAccessible
 import me.domino.fa2.data.model.GalleryFolder
 import me.domino.fa2.data.model.GalleryFolderGroup
 import me.domino.fa2.data.model.GalleryPage
@@ -20,7 +15,7 @@ import me.domino.fa2.utils.parseSubmissionSid
 import me.domino.fa2.utils.toAbsoluteUrl
 
 /** User 投稿类分页解析器（Gallery/Favorites/Scraps）。 */
-class GalleryParser {
+class SubmissionListingParser {
   private val folderIdRegex = Regex("""/folder/(\d+)/""")
 
   private val figureSelectors = listOf("section.gallery-section figure", "section.gallery figure")
@@ -121,10 +116,7 @@ class GalleryParser {
   ): SubmissionThumbnail? {
     val rawSubmissionUrl = node.selectFirst("a[href*='/view/']")?.attr("href").orEmpty()
     val submissionUrl =
-        toAbsoluteUrl(
-            baseUrl = "https://www.furaffinity.net/",
-            maybeRelativeUrl = rawSubmissionUrl,
-        )
+        toAbsoluteUrl(baseUrl = "https://www.furaffinity.net/", maybeRelativeUrl = rawSubmissionUrl)
     val id =
         node.attr("id").removePrefix("sid-").toIntOrNull()
             ?: parseSubmissionSid(submissionUrl)
@@ -162,10 +154,7 @@ class GalleryParser {
 
     val thumbnailRaw = resolveThumbnailRawUrl(image)
     val thumbnailUrl =
-        toAbsoluteUrl(
-            baseUrl = "https://www.furaffinity.net/",
-            maybeRelativeUrl = thumbnailRaw,
-        )
+        toAbsoluteUrl(baseUrl = "https://www.furaffinity.net/", maybeRelativeUrl = thumbnailRaw)
     val resolvedSubmissionUrl = submissionUrl.ifBlank { FaUrls.submission(id) }
     val imageTags = parseImageTags(image)
     val categoryTag = imageTags.sorted().firstOrNull { tag -> tag.startsWith("c_") }.orEmpty()

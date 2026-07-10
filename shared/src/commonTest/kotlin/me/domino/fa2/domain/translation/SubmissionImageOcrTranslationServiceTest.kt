@@ -58,7 +58,7 @@ class SubmissionImageOcrTranslationServiceTest {
 }
 
 private fun createService(
-    translate: suspend (TranslationRequest) -> String,
+    translate: suspend (TranslationRequest) -> String
 ): SubmissionImageOcrTranslationService = runBlocking {
   val randomSuffix = Random.nextLong().toString().replace('-', '0')
   val tempPath =

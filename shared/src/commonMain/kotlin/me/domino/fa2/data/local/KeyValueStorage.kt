@@ -32,6 +32,14 @@ class KeyValueStorage(
     dataStore.edit { preferences -> preferences[preferenceKey] = value }
   }
 
+  /** Atomically saves a complete group of string preferences in one DataStore transaction. */
+  suspend fun saveAll(values: Map<String, String>) {
+    if (values.isEmpty()) return
+    dataStore.edit { preferences ->
+      values.forEach { (key, value) -> preferences[stringPreferencesKey(key)] = value }
+    }
+  }
+
   /**
    * 删除指定键。
    *

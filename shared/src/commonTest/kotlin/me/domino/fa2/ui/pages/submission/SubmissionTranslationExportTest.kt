@@ -7,12 +7,13 @@ import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.settings.TranslationProvider
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.pager.*
-import me.domino.fa2.ui.pages.submission.series.*
-import me.domino.fa2.ui.pages.submission.translation.*
+import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrBlockUiState
+import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrTranslationStatus
+import me.domino.fa2.ui.pages.submission.translation.SubmissionImageOcrTranslationExportSnapshot
+import me.domino.fa2.ui.pages.submission.translation.buildSubmissionTranslationSidecarFiles
+import me.domino.fa2.ui.translation.SubmissionTranslationUiState
+import me.domino.fa2.ui.translation.resolveTranslationState
+import me.domino.fa2.ui.translation.toDisplayBlock
 
 class SubmissionTranslationExportTest {
   @Test
@@ -61,11 +62,7 @@ class SubmissionTranslationExportTest {
         )
 
     assertEquals(
-        listOf(
-            "42-translate-img.json",
-            "42-translate-desc.txt",
-            "42-translate-file.txt",
-        ),
+        listOf("42-translate-img.json", "42-translate-desc.txt", "42-translate-file.txt"),
         files.map { it.fileName },
     )
     val imageJson = files.first { it.fileName.endsWith("-img.json") }.content

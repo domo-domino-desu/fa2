@@ -33,8 +33,6 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.fa.journal.JournalRepository
-import me.domino.fa2.data.i18n.SystemLanguageProvider
-import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.app.LocalAppI18n
@@ -49,7 +47,7 @@ import me.domino.fa2.ui.components.media.AvatarImage
 import me.domino.fa2.ui.components.state.SkeletonBlock
 import me.domino.fa2.ui.components.state.StatusSurface
 import me.domino.fa2.ui.components.state.StatusSurfaceVariant
-import me.domino.fa2.ui.pages.submission.series.SubmissionSeriesProbeConfig
+import me.domino.fa2.ui.pages.submission.series.rememberSubmissionSeriesTrailingActions
 import me.domino.fa2.ui.pages.user.UserChildRoute
 import me.domino.fa2.ui.pages.user.UserRouteScreen
 import me.domino.fa2.utils.FaUrls
@@ -150,8 +148,6 @@ internal fun JournalDetailBody(
   val navigator = LocalNavigator.currentOrThrow
   val repository = koinInject<JournalRepository>()
   val translationService = koinInject<SubmissionDescriptionTranslationService>()
-  val settingsService = koinInject<AppSettingsService>()
-  val systemLanguageProvider = koinInject<SystemLanguageProvider>()
   val screenModel =
       navigator.rememberNavigatorScreenModel<JournalDetailScreenModel>(
           tag = "journal-detail:$journalId:${journalUrl.orEmpty()}"
@@ -161,8 +157,6 @@ internal fun JournalDetailBody(
             journalUrl = journalUrl,
             repository = repository,
             translationService = translationService,
-            settingsService = settingsService,
-            systemLanguageProvider = systemLanguageProvider,
         )
       }
   val settings = LocalAppSettings.current
@@ -202,10 +196,7 @@ internal fun JournalDetailBody(
             val normalized = author.trim()
             if (normalized.isNotBlank()) {
               navigator.push(
-                  UserRouteScreen(
-                      username = normalized,
-                      initialChildRoute = UserChildRoute.Gallery,
-                  )
+                  UserRouteScreen(username = normalized, initialChildRoute = UserChildRoute.Gallery)
               )
             }
           },
@@ -273,8 +264,9 @@ private fun JournalDetailContent(
           emptyText = stringResource(Res.string.no_content),
           onTranslate = onTranslate,
           onToggleWrapText = onToggleWrapText,
-          seriesProbeConfig =
-              SubmissionSeriesProbeConfig(
+          blockTrailingActions =
+              rememberSubmissionSeriesTrailingActions(
+                  translationState = state.bodyTranslationState,
                   baseUrl = detail.journalUrl,
                   onOpenSeries = onOpenSubmissionSeries,
               ),

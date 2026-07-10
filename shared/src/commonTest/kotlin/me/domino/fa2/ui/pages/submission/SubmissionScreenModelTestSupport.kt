@@ -4,7 +4,6 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import eu.anifantakis.lib.ksafe.KSafe
 import kotlin.random.Random
 import kotlinx.coroutines.runBlocking
-import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.local.KeyValueStorage
 import me.domino.fa2.data.local.settings.AppSettingsStorage
 import me.domino.fa2.data.model.SubmissionThumbnail
@@ -16,12 +15,12 @@ import me.domino.fa2.domain.ocr.ImageOcrResult
 import me.domino.fa2.domain.ocr.SubmissionImageOcrService
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.domain.translation.SubmissionImageOcrTranslationService
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.pager.*
-import me.domino.fa2.ui.pages.submission.series.*
-import me.domino.fa2.ui.pages.submission.translation.*
+import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
+import me.domino.fa2.ui.pages.submission.pager.SubmissionScreenModel
+import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.ui.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerDetailSource
+import me.domino.fa2.ui.submissionviewer.api.SubmissionSourceAdapter
 import okio.FileSystem
 import okio.Path.Companion.toPath
 
@@ -68,7 +67,7 @@ internal suspend fun createTestAppSettingsService(): AppSettingsService {
 }
 
 internal fun createTestTranslationPort(
-    translate: suspend (TranslationRequest) -> String,
+    translate: suspend (TranslationRequest) -> String
 ): TranslationPort =
     object : TranslationPort {
       override suspend fun translate(request: TranslationRequest): String = translate(request)
@@ -88,7 +87,6 @@ internal fun createSubmissionScreenModelForTest(
       createTestSubmissionImageOcrTranslationService()
     },
     settingsService: AppSettingsService? = null,
-    systemLanguageProvider: SystemLanguageProvider? = null,
     contextId: String = "test-context:$initialSid",
 ): SubmissionScreenModel {
   val contextScreenModel = SubmissionContextScreenModel()
@@ -107,7 +105,6 @@ internal fun createSubmissionScreenModelForTest(
       imageOcrService = imageOcrService,
       imageOcrTranslationService = imageOcrTranslationService,
       settingsService = settingsService,
-      systemLanguageProvider = systemLanguageProvider,
   )
 }
 
@@ -122,7 +119,6 @@ internal fun createSubmissionScreenModelForTest(
       createTestSubmissionImageOcrTranslationService()
     },
     settingsService: AppSettingsService? = null,
-    systemLanguageProvider: SystemLanguageProvider? = null,
     contextId: String = "test-context:$initialSid",
 ): SubmissionScreenModel {
   val contextScreenModel = SubmissionContextScreenModel()
@@ -141,6 +137,5 @@ internal fun createSubmissionScreenModelForTest(
       imageOcrService = imageOcrService,
       imageOcrTranslationService = imageOcrTranslationService,
       settingsService = settingsService,
-      systemLanguageProvider = systemLanguageProvider,
   )
 }

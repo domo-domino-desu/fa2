@@ -28,11 +28,7 @@ fun <T> SettingsDropdownField(
 ) {
   var expanded by remember { mutableStateOf(false) }
 
-  SettingsControlRow(
-      title = label,
-      supportingText = supportingText,
-      modifier = modifier,
-  ) {
+  SettingsControlRow(title = label, supportingText = supportingText, modifier = modifier) {
     Box {
       FilterChip(
           selected = true,

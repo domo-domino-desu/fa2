@@ -1,10 +1,6 @@
-package me.domino.fa2.ui.pages.submission.pager
+package me.domino.fa2.ui.submissionviewer.api
 
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.translation.*
 
 enum class SubmissionContextSourceKind {
   FEED,
@@ -15,6 +11,12 @@ enum class SubmissionContextSourceKind {
   SEQUENCE,
   DETACHED,
   HISTORY,
+}
+
+enum class UserSubmissionSection(val routeKey: String) {
+  Gallery("gallery"),
+  Favorites("favorites"),
+  Journals("journals"),
 }
 
 enum class SubmissionPaginationKind {
@@ -73,10 +75,7 @@ data class WaterfallScrollRequest(
     val targetPageLeadingSids: List<Int> = emptyList(),
 )
 
-internal data class SubmissionPageTarget(
-    val page: SubmissionPageSnapshot,
-    val index: Int,
-)
+internal data class SubmissionPageTarget(val page: SubmissionPageSnapshot, val index: Int)
 
 internal fun SubmissionPageSnapshot.matches(other: SubmissionPageSnapshot): Boolean =
     pageId == other.pageId || (requestKey != null && requestKey == other.requestKey)

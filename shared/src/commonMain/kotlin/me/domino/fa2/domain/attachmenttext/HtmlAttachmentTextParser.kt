@@ -1,7 +1,6 @@
 package me.domino.fa2.domain.attachmenttext
 
 import com.fleeksoft.ksoup.Ksoup
-import me.domino.fa2.domain.attachmenttext.*
 
 /** HTML 附件解析。 */
 object HtmlAttachmentTextParser : AttachmentTextParser {
@@ -16,12 +15,7 @@ object HtmlAttachmentTextParser : AttachmentTextParser {
   ): AttachmentTextDocument {
     reporter.report("decode_bytes", 0f, "准备解码 HTML", currentItemLabel = fileName)
     val decoded = bytes.decodeToString().removePrefix("\uFEFF")
-    reporter.report(
-        "decode_bytes",
-        1f,
-        "HTML 解码完成",
-        currentItemLabel = toProgressSnippet(decoded),
-    )
+    reporter.report("decode_bytes", 1f, "HTML 解码完成", currentItemLabel = toProgressSnippet(decoded))
 
     reporter.report("parse_html", 0f, "正在解析 HTML")
     val document = Ksoup.parse(decoded)
@@ -39,10 +33,7 @@ object HtmlAttachmentTextParser : AttachmentTextParser {
     )
 
     reporter.report("build_html", 0f, "正在整理 HTML")
-    val paragraph =
-        AttachmentTextParagraph(
-            html = sanitizedHtml.ifBlank { "<p>（空 HTML）</p>" },
-        )
+    val paragraph = AttachmentTextParagraph(html = sanitizedHtml.ifBlank { "<p>（空 HTML）</p>" })
     val result = buildAttachmentTextDocument(format = format, paragraphs = listOf(paragraph))
     reporter.report(
         "build_html",

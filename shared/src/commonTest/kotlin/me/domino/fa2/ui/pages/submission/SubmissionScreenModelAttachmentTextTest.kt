@@ -12,19 +12,17 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.domain.attachmenttext.AttachmentTextFormat
 import me.domino.fa2.domain.attachmenttext.AttachmentTextParagraph
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
-import me.domino.fa2.ui.pages.submission.attachmenttext.*
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.pager.*
-import me.domino.fa2.ui.pages.submission.series.*
-import me.domino.fa2.ui.pages.submission.translation.*
+import me.domino.fa2.ui.pages.submission.attachmenttext.SubmissionAttachmentTextUiState
+import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
+import me.domino.fa2.ui.pages.submission.pager.SubmissionPagerUiState
+import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerDetailSource
 import me.domino.fa2.utils.FaUrls
 import me.domino.fa2.utils.parseSubmissionSid
 
@@ -48,7 +46,7 @@ class SubmissionScreenModelAttachmentTextTest {
         val detailSource =
             AttachmentRecordingDetailSource(
                 attachmentResults =
-                    ArrayDeque(listOf(PageState.Success(testAttachmentDocument("hello"))))
+                    ArrayDeque(listOf(ResourceResult.Success(testAttachmentDocument("hello"))))
             )
         val model =
             createSubmissionScreenModelForTest(
@@ -81,8 +79,8 @@ class SubmissionScreenModelAttachmentTextTest {
                 attachmentResults =
                     ArrayDeque(
                         listOf(
-                            PageState.Error(IllegalStateException("boom")),
-                            PageState.Success(testAttachmentDocument("recovered")),
+                            ResourceResult.Error(IllegalStateException("boom")),
+                            ResourceResult.Success(testAttachmentDocument("recovered")),
                         )
                     )
             )
@@ -115,23 +113,20 @@ class SubmissionScreenModelAttachmentTextTest {
 }
 
 private class AttachmentRecordingDetailSource(
-    private val attachmentResults: ArrayDeque<PageState<AttachmentTextDocument>>
+    private val attachmentResults: ArrayDeque<ResourceResult<AttachmentTextDocument>>
 ) : SubmissionPagerDetailSource {
   val attachmentRequests: MutableList<Pair<String, String>> = mutableListOf()
 
-  override suspend fun loadBySid(sid: Int): PageState<Submission> =
-      PageState.Success(testSubmission(sid))
+  override suspend fun loadBySid(sid: Int): ResourceResult<Submission> =
+      ResourceResult.Success(testSubmission(sid))
 
-  override suspend fun loadByUrl(url: String): PageState<Submission> {
+  override suspend fun loadByUrl(url: String): ResourceResult<Submission> {
     val sid =
         parseSubmissionSid(url)
-            ?: return PageState.Error(IllegalArgumentException("Invalid submission url: $url"))
-    return PageState.Success(
+            ?: return ResourceResult.Error(IllegalArgumentException("Invalid submission url: $url"))
+    return ResourceResult.Success(
         testSubmission(sid)
-            .copy(
-                downloadUrl = "https://example.com/sample.txt",
-                downloadFileName = "sample.txt",
-            )
+            .copy(downloadUrl = "https://example.com/sample.txt", downloadFileName = "sample.txt")
     )
   }
 
@@ -139,7 +134,7 @@ private class AttachmentRecordingDetailSource(
       downloadUrl: String,
       downloadFileName: String,
       onProgress: (AttachmentTextProgress) -> Unit,
-  ): PageState<AttachmentTextDocument> {
+  ): ResourceResult<AttachmentTextDocument> {
     attachmentRequests += downloadUrl to downloadFileName
     onProgress(
         AttachmentTextProgress(
@@ -147,24 +142,21 @@ private class AttachmentRecordingDetailSource(
             stageIndex = 1,
             stageCount = 2,
             stageId = "decode_bytes",
-            stageLabel = "解码字节",
             stageFraction = 1f,
-            message = "处理中",
-            currentItemLabel = downloadFileName,
         )
     )
     return attachmentResults.removeFirst()
   }
 
-  override suspend fun toggleFavorite(sid: Int, actionUrl: String): PageState<Unit> =
-      PageState.Success(Unit)
+  override suspend fun toggleFavorite(sid: Int, actionUrl: String): ResourceResult<Unit> =
+      ResourceResult.Success(Unit)
 
   override suspend fun blockTag(
       sid: Int,
       tagName: String,
       nonce: String,
       toAdd: Boolean,
-  ): PageState<Unit> = PageState.Success(Unit)
+  ): ResourceResult<Unit> = ResourceResult.Success(Unit)
 }
 
 private fun testAttachmentDocument(text: String): AttachmentTextDocument =

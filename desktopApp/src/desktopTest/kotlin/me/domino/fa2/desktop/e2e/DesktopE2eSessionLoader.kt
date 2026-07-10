@@ -33,8 +33,11 @@ internal object DesktopE2eSessionLoader {
         }
 
         is AuthProbeResult.AuthInvalid -> {
+          val diagnostic =
+              result.detail?.takeIf { it.isNotBlank() }?.let { "${result.reason}: $it" }
+                  ?: result.reason.name
           DesktopE2ePreflightResult.Fail(
-              "Persisted desktop session is present but invalid: ${result.message}"
+              "Persisted desktop session is present but invalid: $diagnostic"
           )
         }
 

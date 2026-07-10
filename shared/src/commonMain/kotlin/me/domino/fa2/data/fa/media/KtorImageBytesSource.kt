@@ -7,9 +7,7 @@ import io.ktor.http.isSuccess
 import me.domino.fa2.utils.logging.FaLog
 import me.domino.fa2.utils.logging.summarizeUrl
 
-class KtorImageBytesSource(
-    private val client: HttpClient,
-) : ImageBytesSource {
+class KtorImageBytesSource(private val client: HttpClient) : ImageBytesSource {
   private val log = FaLog.withTag("ImageBytesSource")
 
   override suspend fun fetch(imageUrl: String): ByteArray {

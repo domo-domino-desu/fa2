@@ -7,13 +7,11 @@ import kotlin.random.Random
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.fa.watchlist.WatchlistRepository
-import me.domino.fa2.data.i18n.SystemLanguageProvider
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
-import me.domino.fa2.data.model.summarizePageState
-import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.i18n.appStringOrFallback
 import me.domino.fa2.ui.utils.PaginationReducer
@@ -62,23 +60,21 @@ class UserWatchlistScreenModel(
     private val category: WatchlistCategory,
     private val repository: WatchlistRepository,
     private val initialPageUrl: String? = null,
-    private val settingsService: AppSettingsService? = null,
-    private val systemLanguageProvider: SystemLanguageProvider? = null,
     private val random: Random = Random.Default,
     private val loadWatchlistPage:
-        suspend (username: String, category: WatchlistCategory, nextPageUrl: String?) -> PageState<
-                WatchlistPage
-            > =
+        suspend (
+            username: String, category: WatchlistCategory, nextPageUrl: String?,
+        ) -> ResourceResult<WatchlistPage> =
         repository::loadWatchlistPage,
     private val refreshWatchlistFirstPage:
-        suspend (username: String, category: WatchlistCategory) -> PageState<WatchlistPage> =
+        suspend (username: String, category: WatchlistCategory) -> ResourceResult<WatchlistPage> =
         repository::refreshWatchlistFirstPage,
     private val loadAllWatchlistUsers:
         suspend (
             username: String,
             category: WatchlistCategory,
             useFreshFirstPage: Boolean,
-        ) -> PageState<List<WatchlistUser>> =
+        ) -> ResourceResult<List<WatchlistUser>> =
         repository::loadAllWatchlistUsers,
 ) : StateScreenModel<UserWatchlistUiState>(UserWatchlistUiState()) {
   private val log = FaLog.withTag("UserWatchlistScreenModel")
@@ -86,7 +82,6 @@ class UserWatchlistScreenModel(
       PaginationReducer<WatchlistUser, String>(
           keyOf = { item -> item.username.lowercase() },
           challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
-          appendFallbackErrorMessage = { appString(Res.string.load_failed_please_retry) },
       )
   private var loadJob: Job? = null
   private var appendJob: Job? = null
@@ -131,16 +126,9 @@ class UserWatchlistScreenModel(
         screenModelScope.launch {
           val next =
               if (forceRefresh) {
-                refreshWatchlistFirstPage(
-                    username,
-                    category,
-                )
+                refreshWatchlistFirstPage(username, category)
               } else {
-                loadWatchlistPage(
-                    username,
-                    category,
-                    firstPageUrl,
-                )
+                loadWatchlistPage(username, category, firstPageUrl)
               }
           val reduced =
               paginationStateMachine.reduceFirstPage(
@@ -151,7 +139,7 @@ class UserWatchlistScreenModel(
               )
           val updated = state.value.applyPagination(reduced)
           mutableState.value =
-              if (forceRefresh && next is PageState.Success) {
+              if (forceRefresh && next is ResourceResult.Success) {
                 updated.copy(
                     isShuffling = false,
                     hasShuffledAllUsers = false,
@@ -161,17 +149,16 @@ class UserWatchlistScreenModel(
                 updated.copy(isShuffling = false)
               }
           when (next) {
-            is PageState.Success -> {
+            is ResourceResult.Success -> {
               log.i {
-                "加载Watchlist页 -> ${summarizePageState(next)}(count=${mutableState.value.users.size})"
+                "加载Watchlist页 -> ${summarizeResourceResult(next)}(count=${mutableState.value.users.size})"
               }
             }
 
-            is PageState.AuthRequired -> log.w { "加载Watchlist页 -> 需要重新登录" }
-            PageState.CfChallenge -> log.w { "加载Watchlist页 -> Cloudflare验证" }
-            is PageState.MatureBlocked -> log.w { "加载Watchlist页 -> 受限(${next.reason})" }
-            is PageState.Error -> log.e(next.exception) { "加载Watchlist页 -> 失败" }
-            PageState.Loading -> log.d { "加载Watchlist页 -> 加载中" }
+            is ResourceResult.AuthRequired -> log.w { "加载Watchlist页 -> 需要重新登录" }
+            ResourceResult.CfChallenge -> log.w { "加载Watchlist页 -> Cloudflare验证" }
+            is ResourceResult.MatureBlocked -> log.w { "加载Watchlist页 -> 受限(${next.reason})" }
+            is ResourceResult.Error -> log.e(next.exception) { "加载Watchlist页 -> 失败" }
           }
         }
   }
@@ -243,12 +230,7 @@ class UserWatchlistScreenModel(
 
     appendJob =
         screenModelScope.launch {
-          val next =
-              loadWatchlistPage(
-                  username,
-                  category,
-                  nextUrl,
-              )
+          val next = loadWatchlistPage(username, category, nextUrl)
           val reduced =
               paginationStateMachine.reduceAppend(
                   snapshot = state.value.toPaginationSnapshot(),
@@ -259,15 +241,16 @@ class UserWatchlistScreenModel(
           val updated = state.value.applyPagination(reduced)
           mutableState.value = updated
           when (next) {
-            is PageState.Success -> {
-              log.d { "自动加载Watchlist页 -> ${summarizePageState(next)}(count=${updated.users.size})" }
+            is ResourceResult.Success -> {
+              log.d {
+                "自动加载Watchlist页 -> ${summarizeResourceResult(next)}(count=${updated.users.size})"
+              }
             }
 
-            is PageState.AuthRequired -> log.w { "自动加载Watchlist页 -> 需要重新登录" }
-            PageState.CfChallenge -> log.w { "自动加载Watchlist页 -> Cloudflare验证" }
-            is PageState.MatureBlocked -> log.w { "自动加载Watchlist页 -> 受限(${next.reason})" }
-            is PageState.Error -> log.e(next.exception) { "自动加载Watchlist页 -> 失败" }
-            PageState.Loading -> log.d { "自动加载Watchlist页 -> 加载中" }
+            is ResourceResult.AuthRequired -> log.w { "自动加载Watchlist页 -> 需要重新登录" }
+            ResourceResult.CfChallenge -> log.w { "自动加载Watchlist页 -> Cloudflare验证" }
+            is ResourceResult.MatureBlocked -> log.w { "自动加载Watchlist页 -> 受限(${next.reason})" }
+            is ResourceResult.Error -> log.e(next.exception) { "自动加载Watchlist页 -> 失败" }
           }
         }
   }
@@ -303,23 +286,12 @@ class UserWatchlistScreenModel(
     }
 
     mutableState.value =
-        snapshot.copy(
-            isShuffling = true,
-            errorMessage = null,
-            appendErrorMessage = null,
-        )
+        snapshot.copy(isShuffling = true, errorMessage = null, appendErrorMessage = null)
     log.i { "随机打乱已关注 -> 开始(user=$username)" }
     shuffleJob =
         screenModelScope.launch {
-          when (
-              val next =
-                  loadAllWatchlistUsers(
-                      username,
-                      category,
-                      false,
-                  )
-          ) {
-            is PageState.Success -> {
+          when (val next = loadAllWatchlistUsers(username, category, false)) {
+            is ResourceResult.Success -> {
               val shuffled = next.data.shuffled(random)
               mutableState.value =
                   state.value.copy(
@@ -340,16 +312,13 @@ class UserWatchlistScreenModel(
               log.i { "随机打乱已关注 -> 成功(count=${shuffled.size})" }
             }
 
-            is PageState.AuthRequired -> {
+            is ResourceResult.AuthRequired -> {
               mutableState.value =
-                  state.value.copy(
-                      isShuffling = false,
-                      errorMessage = next.message,
-                  )
+                  state.value.copy(isShuffling = false, errorMessage = next.message)
               log.w { "随机打乱已关注 -> 需要重新登录" }
             }
 
-            PageState.CfChallenge -> {
+            ResourceResult.CfChallenge -> {
               mutableState.value =
                   state.value.copy(
                       isShuffling = false,
@@ -358,16 +327,12 @@ class UserWatchlistScreenModel(
               log.w { "随机打乱已关注 -> Cloudflare验证" }
             }
 
-            is PageState.MatureBlocked -> {
-              mutableState.value =
-                  state.value.copy(
-                      isShuffling = false,
-                      errorMessage = next.reason,
-                  )
+            is ResourceResult.MatureBlocked -> {
+              mutableState.value = state.value.copy(isShuffling = false, errorMessage = next.reason)
               log.w { "随机打乱已关注 -> 受限(${next.reason})" }
             }
 
-            is PageState.Error -> {
+            is ResourceResult.Error -> {
               val detail =
                   next.exception.message?.takeIf { it.isNotBlank() } ?: next.exception.toString()
               mutableState.value =
@@ -381,10 +346,6 @@ class UserWatchlistScreenModel(
                           ),
                   )
               log.e(next.exception) { "随机打乱已关注 -> 失败" }
-            }
-
-            PageState.Loading -> {
-              mutableState.value = state.value.copy(isShuffling = false)
             }
           }
         }

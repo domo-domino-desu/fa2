@@ -11,8 +11,6 @@ import me.domino.fa2.data.fa.favorites.FavoritesEndpoint
 import me.domino.fa2.data.fa.favorites.FavoritesRepository
 import me.domino.fa2.data.fa.gallery.GalleryDataSource
 import me.domino.fa2.data.fa.gallery.GalleryEndpoint
-import me.domino.fa2.data.fa.gallery.GalleryPageCache
-import me.domino.fa2.data.fa.gallery.GalleryParser
 import me.domino.fa2.data.fa.gallery.GalleryRepository
 import me.domino.fa2.data.fa.journal.JournalDataSource
 import me.domino.fa2.data.fa.journal.JournalEndpoint
@@ -24,7 +22,9 @@ import me.domino.fa2.data.fa.journal.JournalsEndpoint
 import me.domino.fa2.data.fa.journal.JournalsPageCache
 import me.domino.fa2.data.fa.journal.JournalsParser
 import me.domino.fa2.data.fa.journal.JournalsRepository
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.fa.listing.SubmissionListingParser
+import me.domino.fa2.data.fa.listing.UserGalleryPageStore
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.utils.FaUrls
@@ -45,7 +45,7 @@ class UserSectionRepositoriesTest {
             ),
     )
     val galleryState = stores.galleryRepository.loadGalleryPage("artist-alpha")
-    assertTrue(galleryState is PageState.Success)
+    assertTrue(galleryState is ResourceResult.Success)
     assertTrue(galleryState.data.submissions.isNotEmpty())
 
     source.enqueue(
@@ -57,7 +57,7 @@ class UserSectionRepositoriesTest {
             ),
     )
     val favoritesState = stores.favoritesRepository.loadFavoritesPage("artist-alpha")
-    assertTrue(favoritesState is PageState.Success)
+    assertTrue(favoritesState is ResourceResult.Success)
     assertTrue(favoritesState.data.submissions.isNotEmpty())
   }
 
@@ -75,7 +75,7 @@ class UserSectionRepositoriesTest {
             ),
     )
     val journalsState = stores.journalsRepository.loadJournalsPage("artist-alpha")
-    assertTrue(journalsState is PageState.Success)
+    assertTrue(journalsState is ResourceResult.Success)
     assertTrue(journalsState.data.journals.isNotEmpty())
 
     source.enqueue(
@@ -87,30 +87,30 @@ class UserSectionRepositoriesTest {
             ),
     )
     val detailState = stores.journalRepository.loadJournalDetail(20000001)
-    assertTrue(detailState is PageState.Success)
+    assertTrue(detailState is ResourceResult.Success)
     assertEquals(20000001, detailState.data.id)
   }
 
   private fun buildStores(source: FaHtmlDataSource): StoreBundle {
     val pageCacheDao = InMemoryPageCacheDao()
     val galleryStore =
-        GalleryPageCache(
+        UserGalleryPageStore(
             galleryDataSource =
-                GalleryDataSource(endpoint = GalleryEndpoint(source), parser = GalleryParser()),
+                GalleryDataSource(
+                    endpoint = GalleryEndpoint(source),
+                    parser = SubmissionListingParser(),
+                ),
             favoritesDataSource =
                 FavoritesDataSource(
                     endpoint = FavoritesEndpoint(source),
-                    parser = GalleryParser(),
+                    parser = SubmissionListingParser(),
                 ),
             pageCacheDao = pageCacheDao,
         )
     val journalsStore =
         JournalsPageCache(
             dataSource =
-                JournalsDataSource(
-                    endpoint = JournalsEndpoint(source),
-                    parser = JournalsParser(),
-                ),
+                JournalsDataSource(endpoint = JournalsEndpoint(source), parser = JournalsParser()),
             pageCacheDao = pageCacheDao,
         )
     val journalStore =
@@ -147,10 +147,7 @@ private class UserSectionScriptedHtmlDataSource : FaHtmlDataSource {
   override suspend fun get(url: String): HtmlResponseResult {
     val queue = queueByUrl[url]
     if (queue == null || queue.isEmpty()) {
-      return HtmlResponseResult.Error(
-          statusCode = 500,
-          message = "No scripted response for $url",
-      )
+      return HtmlResponseResult.Error(statusCode = 500, message = "No scripted response for $url")
     }
     return queue.removeFirst()
   }

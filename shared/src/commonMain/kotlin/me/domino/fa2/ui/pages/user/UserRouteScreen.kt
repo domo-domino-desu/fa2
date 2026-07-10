@@ -19,10 +19,8 @@ import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import me.domino.fa2.data.fa.user.UserRepository
-import me.domino.fa2.data.i18n.SystemLanguageProvider
-import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
-import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.data.fa.user.UserResourceRepository
+import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
 import me.domino.fa2.ui.pages.overlays.watchrecommendation.SimilarUsersRouteScreen
@@ -77,10 +75,8 @@ internal fun UserRouteBody(
     },
 ) {
   val parentNavigator = LocalNavigator.currentOrThrow
-  val repository = koinInject<UserRepository>()
+  val repository = koinInject<UserResourceRepository>()
   val blocklistRepository = koinInject<WatchRecommendationBlocklist>()
-  val settingsService = koinInject<AppSettingsService>()
-  val systemLanguageProvider = koinInject<SystemLanguageProvider>()
   val userScreenModel =
       parentNavigator.rememberNavigatorScreenModel<UserScreenModel>(
           tag =
@@ -92,8 +88,6 @@ internal fun UserRouteBody(
             initialChildRoute = initialChildRoute,
             initialFolderUrl = initialFolderUrl,
             blocklistRepository = blocklistRepository,
-            settingsService = settingsService,
-            systemLanguageProvider = systemLanguageProvider,
         )
       }
   val userState by userScreenModel.state.collectAsState()

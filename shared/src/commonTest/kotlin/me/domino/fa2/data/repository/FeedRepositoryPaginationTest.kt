@@ -7,7 +7,7 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.fa.core.FaHtmlDataSource
 import me.domino.fa2.data.fa.core.HtmlResponseResult
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.utils.FaUrls
@@ -29,7 +29,7 @@ class FeedRepositoryPaginationTest {
     )
 
     val first = repository.loadFirstPage()
-    assertTrue(first is PageState.Success)
+    assertTrue(first is ResourceResult.Success)
     val firstPage = first.data
     assertNotNull(firstPage.nextPageUrl)
 
@@ -42,7 +42,7 @@ class FeedRepositoryPaginationTest {
             ),
     )
     val middle = repository.loadPageByNextUrl(firstPage.nextPageUrl)
-    assertTrue(middle is PageState.Success)
+    assertTrue(middle is ResourceResult.Success)
     val middlePage = middle.data
     assertNotNull(middlePage.nextPageUrl)
 
@@ -51,7 +51,7 @@ class FeedRepositoryPaginationTest {
         response = HtmlResponseResult.Error(statusCode = 503, message = "temporary unavailable"),
     )
     val failedAppend = repository.loadPageByNextUrl(middlePage.nextPageUrl)
-    assertTrue(failedAppend is PageState.Error)
+    assertTrue(failedAppend is ResourceResult.Error)
 
     source.enqueue(
         url = middlePage.nextPageUrl,
@@ -62,7 +62,7 @@ class FeedRepositoryPaginationTest {
             ),
     )
     val retriedAppend = repository.loadPageByNextUrl(middlePage.nextPageUrl)
-    assertTrue(retriedAppend is PageState.Success)
+    assertTrue(retriedAppend is ResourceResult.Success)
     assertNull(retriedAppend.data.nextPageUrl)
   }
 
@@ -70,7 +70,7 @@ class FeedRepositoryPaginationTest {
   fun loadPageByNextUrlReturnsErrorForInvalidUrl() = runTest {
     val repository = buildRepository(FeedScriptedHtmlDataSource())
     val state = repository.loadPageByNextUrl("https://www.furaffinity.net/msg/submissions/invalid/")
-    assertTrue(state is PageState.Error)
+    assertTrue(state is ResourceResult.Error)
   }
 
   private fun buildRepository(source: FaHtmlDataSource): FeedRepository {
@@ -95,10 +95,7 @@ private class FeedScriptedHtmlDataSource : FaHtmlDataSource {
   override suspend fun get(url: String): HtmlResponseResult {
     val queue = queueByUrl[url]
     if (queue == null || queue.isEmpty()) {
-      return HtmlResponseResult.Error(
-          statusCode = 500,
-          message = "No scripted response for $url",
-      )
+      return HtmlResponseResult.Error(statusCode = 500, message = "No scripted response for $url")
     }
     return queue.removeFirst()
   }

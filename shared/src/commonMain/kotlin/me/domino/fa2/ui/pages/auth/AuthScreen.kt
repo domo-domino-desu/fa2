@@ -180,18 +180,12 @@ private fun CookieLoginTab(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AuthLoadingScreen() {
-  Box(
-      modifier = Modifier.fillMaxSize().safeDrawingPadding(),
-      contentAlignment = Alignment.Center,
-  ) {
+  Box(modifier = Modifier.fillMaxSize().safeDrawingPadding(), contentAlignment = Alignment.Center) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-      LoadingIndicator(
-          modifier = Modifier.size(56.dp),
-          color = MaterialTheme.colorScheme.primary,
-      )
+      LoadingIndicator(modifier = Modifier.size(56.dp), color = MaterialTheme.colorScheme.primary)
       Text(
           text = stringResource(Res.string.checking_login_state),
           style = MaterialTheme.typography.bodyMedium,
@@ -203,10 +197,7 @@ fun AuthLoadingScreen() {
 
 /** 登录态探测失败页面。 */
 @Composable
-fun AuthProbeFailedScreen(
-    state: AuthUiState.ProbeFailed,
-    onRetry: () -> Unit,
-) {
+fun AuthProbeFailedScreen(state: AuthUiState.ProbeFailed, onRetry: () -> Unit) {
   HardFallbackScreen(
       title = stringResource(Res.string.auth_probe_failed_title),
       body =

@@ -29,10 +29,8 @@ internal data class UserScrollLayout(val hasHeader: Boolean, val bodyStartIndex:
 }
 
 internal sealed interface UserSharedTopScrollState {
-  data class Inline(
-      val firstVisibleItemIndex: Int = 0,
-      val firstVisibleItemScrollOffset: Int = 0,
-  ) : UserSharedTopScrollState
+  data class Inline(val firstVisibleItemIndex: Int = 0, val firstVisibleItemScrollOffset: Int = 0) :
+      UserSharedTopScrollState
 
   data object Sticky : UserSharedTopScrollState
 }

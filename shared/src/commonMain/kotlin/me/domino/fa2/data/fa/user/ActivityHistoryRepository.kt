@@ -53,11 +53,7 @@ class ActivityHistoryRepository(private val historyDao: HistoryDao) {
     return history
   }
 
-  suspend fun recordSearchQuery(
-      query: String,
-      filtersSummary: String,
-      searchUrl: String?,
-  ) {
+  suspend fun recordSearchQuery(query: String, filtersSummary: String, searchUrl: String?) {
     val normalized = query.trim()
     if (normalized.isBlank()) return
     val normalizedSummary = filtersSummary.trim()

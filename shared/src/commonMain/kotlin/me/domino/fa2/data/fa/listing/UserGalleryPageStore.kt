@@ -1,21 +1,20 @@
-package me.domino.fa2.data.fa.gallery
+package me.domino.fa2.data.fa.listing
 
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import me.domino.fa2.data.fa.core.readCacheIfValid
 import me.domino.fa2.data.fa.core.requireStoreValue
 import me.domino.fa2.data.fa.core.storeJson
-import me.domino.fa2.data.fa.core.toPageState
-import me.domino.fa2.data.fa.favorites.FavoritesDataSource
+import me.domino.fa2.data.fa.core.toResourceResult
 import me.domino.fa2.data.local.dao.PageCacheDao
 import me.domino.fa2.data.local.entity.PageCacheEntity
 import me.domino.fa2.data.model.GalleryPage
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import org.mobilenativefoundation.store.store5.Fetcher
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import org.mobilenativefoundation.store.store5.Store
@@ -23,11 +22,11 @@ import org.mobilenativefoundation.store.store5.StoreBuilder
 import org.mobilenativefoundation.store.store5.StoreReadRequest
 
 /** Gallery/Favorites/Scraps 存储层。 */
-class GalleryPageCache(
-    private val galleryDataSource: GalleryDataSource,
-    private val favoritesDataSource: FavoritesDataSource,
+class UserGalleryPageStore(
+    private val galleryDataSource: UserGalleryPageSource,
+    private val favoritesDataSource: UserGalleryPageSource,
     private val pageCacheDao: PageCacheDao,
-) {
+) : FavoritesCacheInvalidator {
   private val store: Store<SectionPageKey, GalleryPage> = buildStore()
 
   /** 子分区类型。 */
@@ -41,17 +40,14 @@ class GalleryPageCache(
       section: Section,
       username: String,
       nextPageUrl: String?,
-  ): Flow<PageState<GalleryPage>> {
+  ): Flow<ResourceResult<GalleryPage>> {
     val key =
         SectionPageKey(
             section = section,
             username = normalizeUsername(username),
             nextPageUrl = nextPageUrl?.trim()?.takeIf { it.isNotBlank() },
         )
-    return store
-        .stream(StoreReadRequest.cached(key, true))
-        .map(::toPageState)
-        .flowWithInitialLoading()
+    return store.stream(StoreReadRequest.cached(key, true)).mapNotNull(::toResourceResult)
   }
 
   /** 单次读取分页。 */
@@ -59,8 +55,7 @@ class GalleryPageCache(
       section: Section,
       username: String,
       nextPageUrl: String?,
-  ): PageState<GalleryPage> =
-      stream(section, username, nextPageUrl).first { state -> state !is PageState.Loading }
+  ): ResourceResult<GalleryPage> = stream(section, username, nextPageUrl).first()
 
   /** 失效指定分区的全部缓存（含 Store 内存层）。 */
   suspend fun invalidateSection(section: Section) {
@@ -73,6 +68,10 @@ class GalleryPageCache(
         pageCacheDao.delete(entity.cacheKey)
       }
     }
+  }
+
+  override suspend fun invalidateFavorites() {
+    invalidateSection(Section.Favorites)
   }
 
   private fun buildStore(): Store<SectionPageKey, GalleryPage> {
@@ -145,9 +144,3 @@ class GalleryPageCache(
       val nextPageUrl: String?,
   )
 }
-
-private fun Flow<PageState<GalleryPage>?>.flowWithInitialLoading(): Flow<PageState<GalleryPage>> =
-    flow {
-      emit(PageState.Loading)
-      collect { state -> if (state != null) emit(state) }
-    }

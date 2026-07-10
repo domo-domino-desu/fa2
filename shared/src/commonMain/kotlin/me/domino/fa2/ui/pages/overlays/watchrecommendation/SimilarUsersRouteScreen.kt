@@ -34,9 +34,7 @@ import me.domino.fa2.ui.pages.overlays.userwatchlist.WatchlistStatusCard
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
 
-class SimilarUsersRouteScreen(
-    private val username: String,
-) : Screen {
+class SimilarUsersRouteScreen(private val username: String) : Screen {
   override val key: String = "similar-users:${username.lowercase()}"
 
   @OptIn(ExperimentalMaterial3Api::class)

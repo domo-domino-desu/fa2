@@ -7,12 +7,11 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.fa.auth.AuthRepository
 import me.domino.fa2.data.fa.session.AuthSessionController
 import me.domino.fa2.data.fa.user.ActivityHistoryRepository
-import me.domino.fa2.data.fa.user.UserRepository
-import me.domino.fa2.data.i18n.SystemLanguageProvider
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.fa.user.UserResourceRepository
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.User
-import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.ui.i18n.appString
+import me.domino.fa2.utils.concurrency.runSuspendCatching
 import me.domino.fa2.utils.logging.FaLog
 
 /** More 页面状态模型。 */
@@ -22,9 +21,7 @@ class MoreScreenModel(
     private val authSessionController: AuthSessionController,
     /** 历史记录仓储。 */
     private val historyRepository: ActivityHistoryRepository,
-    private val userRepository: UserRepository,
-    private val settingsService: AppSettingsService? = null,
-    private val systemLanguageProvider: SystemLanguageProvider? = null,
+    private val userRepository: UserResourceRepository,
 ) : StateScreenModel<MoreUiState>(MoreUiState.Loading) {
   private val log = FaLog.withTag("MoreScreenModel")
 
@@ -36,7 +33,7 @@ class MoreScreenModel(
   fun load() {
     log.i { "加载More -> 开始" }
     screenModelScope.launch {
-      runCatching {
+      runSuspendCatching {
             val hasCookie = authRepository.hasAuthCookie()
             val username = authSessionController.loadPersistedUsername()
             val submissionHistoryCount = historyRepository.loadSubmissionHistory().size
@@ -46,7 +43,7 @@ class MoreScreenModel(
                     ?.takeIf { it.isNotBlank() }
                     ?.let { currentUsername ->
                       when (val userState = userRepository.loadUser(currentUsername)) {
-                        is PageState.Success -> userState.data
+                        is ResourceResult.Success -> userState.data
                         else -> null
                       }
                     }
@@ -78,7 +75,7 @@ class MoreScreenModel(
 
     screenModelScope.launch {
       mutableState.value = snapshot.copy(loggingOut = true, errorMessage = null)
-      runCatching { authRepository.clearSession() }
+      runSuspendCatching { authRepository.clearSession() }
           .onSuccess {
             authSessionController.clearSessionProfile()
             mutableState.value =

@@ -100,24 +100,27 @@ class AuthDataSource(
           if (isLoggedIn(response.body)) {
             AuthProbeResult.LoggedIn(username = extractUsername(response.body))
           } else {
-            AuthProbeResult.AuthInvalid(message = "认证失效，请粘贴浏览器 Cookie。")
+            AuthProbeResult.AuthInvalid(AuthProbeResult.InvalidReason.SessionExpired)
           }
         }
 
         is HtmlResponseResult.AuthRequired -> {
-          AuthProbeResult.AuthInvalid(message = "认证失效，请粘贴浏览器 Cookie。")
+          AuthProbeResult.AuthInvalid(AuthProbeResult.InvalidReason.SessionExpired)
         }
 
         is HtmlResponseResult.CfChallenge -> {
-          AuthProbeResult.AuthInvalid(message = "Cloudflare challenge 尚未完成，请先在覆盖层完成验证。")
+          AuthProbeResult.AuthInvalid(AuthProbeResult.InvalidReason.ChallengePending)
         }
 
         HtmlResponseResult.ChallengeAborted -> {
-          AuthProbeResult.AuthInvalid(message = "Cloudflare challenge 已取消。")
+          AuthProbeResult.AuthInvalid(AuthProbeResult.InvalidReason.ChallengeAborted)
         }
 
         is HtmlResponseResult.MatureBlocked -> {
-          AuthProbeResult.AuthInvalid(message = response.reason)
+          AuthProbeResult.AuthInvalid(
+              reason = AuthProbeResult.InvalidReason.AccessBlocked,
+              detail = response.reason,
+          )
         }
 
         is HtmlResponseResult.Error -> {

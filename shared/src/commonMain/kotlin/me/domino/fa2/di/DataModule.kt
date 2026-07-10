@@ -4,14 +4,12 @@ import eu.anifantakis.lib.ksafe.KSafe
 import io.ktor.client.HttpClient
 import me.domino.fa2.data.fa.auth.AuthDataSource
 import me.domino.fa2.data.fa.auth.AuthRepository
-import me.domino.fa2.data.fa.auth.AuthSessionProfileStore
 import me.domino.fa2.data.fa.auth.HomeEndpoint
 import me.domino.fa2.data.fa.browse.BrowseDataSource
 import me.domino.fa2.data.fa.browse.BrowseEndpoint
 import me.domino.fa2.data.fa.browse.BrowsePageCache
 import me.domino.fa2.data.fa.browse.BrowseRepository
 import me.domino.fa2.data.fa.core.FaHtmlDataSource
-import me.domino.fa2.data.fa.core.FaHttpClient
 import me.domino.fa2.data.fa.favorites.FavoritesDataSource
 import me.domino.fa2.data.fa.favorites.FavoritesEndpoint
 import me.domino.fa2.data.fa.favorites.FavoritesRepository
@@ -22,10 +20,9 @@ import me.domino.fa2.data.fa.feed.FeedParser
 import me.domino.fa2.data.fa.feed.FeedRepository
 import me.domino.fa2.data.fa.gallery.GalleryDataSource
 import me.domino.fa2.data.fa.gallery.GalleryEndpoint
-import me.domino.fa2.data.fa.gallery.GalleryPageCache
-import me.domino.fa2.data.fa.gallery.GalleryParser
 import me.domino.fa2.data.fa.gallery.GalleryRepository
 import me.domino.fa2.data.fa.journal.JournalDataSource
+import me.domino.fa2.data.fa.journal.JournalDetailRepository
 import me.domino.fa2.data.fa.journal.JournalEndpoint
 import me.domino.fa2.data.fa.journal.JournalPageCache
 import me.domino.fa2.data.fa.journal.JournalParser
@@ -35,6 +32,9 @@ import me.domino.fa2.data.fa.journal.JournalsEndpoint
 import me.domino.fa2.data.fa.journal.JournalsPageCache
 import me.domino.fa2.data.fa.journal.JournalsParser
 import me.domino.fa2.data.fa.journal.JournalsRepository
+import me.domino.fa2.data.fa.listing.FavoritesCacheInvalidator
+import me.domino.fa2.data.fa.listing.SubmissionListingParser
+import me.domino.fa2.data.fa.listing.UserGalleryPageStore
 import me.domino.fa2.data.fa.media.AttachmentDownloadEndpoint
 import me.domino.fa2.data.fa.media.AttachmentDownloadSource
 import me.domino.fa2.data.fa.media.ImageBytesSource
@@ -47,6 +47,7 @@ import me.domino.fa2.data.fa.search.SearchPageCache
 import me.domino.fa2.data.fa.search.SearchRepository
 import me.domino.fa2.data.fa.session.AuthAwareFaHtmlDataSource
 import me.domino.fa2.data.fa.session.AuthSessionController
+import me.domino.fa2.data.fa.session.AuthSessionProfileStore
 import me.domino.fa2.data.fa.session.CfChallengeController
 import me.domino.fa2.data.fa.session.CfChallengeCoordinator
 import me.domino.fa2.data.fa.session.ChallengeAwareFaHtmlDataSource
@@ -58,21 +59,28 @@ import me.domino.fa2.data.fa.session.CloudflareChallengeCookiePolicy
 import me.domino.fa2.data.fa.session.CookiePersistence
 import me.domino.fa2.data.fa.session.DefaultAuthSessionController
 import me.domino.fa2.data.fa.session.FaCookiesStorage
+import me.domino.fa2.data.fa.session.FaHttpClient
 import me.domino.fa2.data.fa.session.KSafeCookiePersistence
 import me.domino.fa2.data.fa.session.PendingFaRouteStore
 import me.domino.fa2.data.fa.session.UserAgentStorage
+import me.domino.fa2.data.fa.session.createFaPageHttpClient
 import me.domino.fa2.data.fa.social.SocialActionEndpoint
+import me.domino.fa2.data.fa.social.SocialActionSource
 import me.domino.fa2.data.fa.submission.SubmissionDataSource
 import me.domino.fa2.data.fa.submission.SubmissionEndpoint
 import me.domino.fa2.data.fa.submission.SubmissionPageCache
 import me.domino.fa2.data.fa.submission.SubmissionParser
 import me.domino.fa2.data.fa.submission.SubmissionRepository
+import me.domino.fa2.data.fa.submission.SubmissionSeriesSubmissionSource
 import me.domino.fa2.data.fa.user.ActivityHistoryRepository
 import me.domino.fa2.data.fa.user.UserDataSource
 import me.domino.fa2.data.fa.user.UserEndpoint
 import me.domino.fa2.data.fa.user.UserPageCache
 import me.domino.fa2.data.fa.user.UserParser
 import me.domino.fa2.data.fa.user.UserRepository
+import me.domino.fa2.data.fa.user.UserResourceRepository
+import me.domino.fa2.data.fa.user.WatchRecommendationUserSource
+import me.domino.fa2.data.fa.watchlist.WatchRecommendationWatchlistSource
 import me.domino.fa2.data.fa.watchlist.WatchlistDataSource
 import me.domino.fa2.data.fa.watchlist.WatchlistEndpoint
 import me.domino.fa2.data.fa.watchlist.WatchlistPageCache
@@ -83,19 +91,16 @@ import me.domino.fa2.data.local.AppDatabaseBuilderFactory
 import me.domino.fa2.data.local.KeyValueStorage
 import me.domino.fa2.data.local.settings.AppSettingsStorage
 import me.domino.fa2.data.local.watchrecommendation.PersistedWatchRecommendationBlocklistRepository
-import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.settings.AppSettingsStore
 import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.data.translation.KtorTranslationPort
 import me.domino.fa2.data.translation.SubmissionTextTranslationEngine
 import me.domino.fa2.data.translation.TranslationPort
+import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.domain.attachmenttext.AttachmentTextService
 import me.domino.fa2.domain.ocr.DefaultSubmissionImageOcrService
 import me.domino.fa2.domain.ocr.SubmissionImageOcrService
-import me.domino.fa2.domain.submissionseries.SubmissionSeriesSubmissionSource
-import me.domino.fa2.domain.watchrecommendation.WatchRecommendationUserSource
-import me.domino.fa2.domain.watchrecommendation.WatchRecommendationWatchlistSource
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.bind
@@ -119,6 +124,7 @@ fun dataModule(): Module = module {
     DefaultAuthSessionController(profileStore = get(), pendingFaRouteStore = get())
   }
   single<HttpClient> { HttpClient { expectSuccess = false } }
+  single<HttpClient>(qualifier = named(KOIN_QUALIFIER_FA_PAGE_CLIENT)) { createFaPageHttpClient() }
   single<HttpClient>(qualifier = named(KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT)) {
     createCachedDownloadHttpClient(
         progressTracker = get(),
@@ -129,7 +135,11 @@ fun dataModule(): Module = module {
   single<TranslationPort> { KtorTranslationPort(get()) }
   single { SubmissionTextTranslationEngine(get()) }
   single<FaHtmlDataSource>(qualifier = named(KOIN_QUALIFIER_RAW_HTML_DATA_SOURCE)) {
-    FaHttpClient(client = get(), cookiesStorage = get(), userAgentStorage = get())
+    FaHttpClient(
+        client = get(qualifier = named(KOIN_QUALIFIER_FA_PAGE_CLIENT)),
+        cookiesStorage = get(),
+        userAgentStorage = get(),
+    )
   }
   single<ChallengeCookiePolicy> { CloudflareChallengeCookiePolicy() }
   single { ChallengeSessionStorage() }
@@ -185,7 +195,7 @@ fun dataModule(): Module = module {
   single { FavoritesEndpoint(get()) }
   single { JournalsEndpoint(get()) }
   single { JournalEndpoint(get()) }
-  single {
+  single<SocialActionSource> {
     SocialActionEndpoint(
         client = get(qualifier = named(KOIN_QUALIFIER_SOCIAL_ACTION_CLIENT)),
         cookiesStorage = get(),
@@ -197,7 +207,7 @@ fun dataModule(): Module = module {
   single { FeedParser() }
   single { SubmissionParser() }
   single { UserParser() }
-  single { GalleryParser() }
+  single { SubmissionListingParser() }
   single { JournalsParser() }
   single { JournalParser() }
   single { WatchlistParser() }
@@ -219,8 +229,12 @@ fun dataModule(): Module = module {
   single { SubmissionPageCache(dataSource = get(), pageCacheDao = get()) }
   single { UserPageCache(dataSource = get(), pageCacheDao = get()) }
   single {
-    GalleryPageCache(galleryDataSource = get(), favoritesDataSource = get(), pageCacheDao = get())
-  }
+    UserGalleryPageStore(
+        galleryDataSource = get<GalleryDataSource>(),
+        favoritesDataSource = get<FavoritesDataSource>(),
+        pageCacheDao = get(),
+    )
+  } bind FavoritesCacheInvalidator::class
   single { JournalsPageCache(dataSource = get(), pageCacheDao = get()) }
   single { JournalPageCache(dataSource = get(), pageCacheDao = get()) }
   single { WatchlistPageCache(dataSource = get(), pageCacheDao = get()) }
@@ -235,10 +249,7 @@ fun dataModule(): Module = module {
   single { FaTaxonomyRepository() }
   single { AttachmentTextService(get()) }
   single<SubmissionImageOcrService> {
-    DefaultSubmissionImageOcrService(
-        imageBytesSource = get(),
-        recognitionPort = get(),
-    )
+    DefaultSubmissionImageOcrService(imageBytesSource = get(), recognitionPort = get())
   }
   single { ActivityHistoryRepository(get()) }
   single { AuthRepository(get()) }
@@ -249,10 +260,12 @@ fun dataModule(): Module = module {
   single { SubmissionRepository(get(), get(), get()) } bind SubmissionSeriesSubmissionSource::class
   single { PersistedWatchRecommendationBlocklistRepository(get()) } bind
       WatchRecommendationBlocklist::class
-  single { UserRepository(get(), get()) } bind WatchRecommendationUserSource::class
+  single { UserRepository(get(), get()) }
+  single<UserResourceRepository> { get<UserRepository>() }
+  single<WatchRecommendationUserSource> { get<UserRepository>() }
   single { GalleryRepository(get()) }
   single { FavoritesRepository(get()) }
   single { JournalsRepository(get()) }
-  single { JournalRepository(get()) }
+  single { JournalRepository(get()) } bind JournalDetailRepository::class
   single { WatchlistRepository(get()) } bind WatchRecommendationWatchlistSource::class
 }

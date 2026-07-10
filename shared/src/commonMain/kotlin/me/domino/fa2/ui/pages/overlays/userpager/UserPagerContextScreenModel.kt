@@ -5,7 +5,7 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
@@ -87,7 +87,7 @@ internal class UserPagerContextScreenModel :
 
   fun requestAppend(
       force: Boolean = false,
-      loadPage: suspend (nextPageUrl: String) -> PageState<WatchlistPage>,
+      loadPage: suspend (nextPageUrl: String) -> ResourceResult<WatchlistPage>,
   ) {
     val snapshot = state.value
     val nextUrl = snapshot.nextPageUrl?.trim().takeUnless { it.isNullOrBlank() } ?: return
@@ -100,7 +100,7 @@ internal class UserPagerContextScreenModel :
           val current = state.value
           mutableState.value =
               when (result) {
-                is PageState.Success -> {
+                is ResourceResult.Success -> {
                   val merged =
                       (current.users + result.data.users).distinctBy { it.username.lowercase() }
                   val anchoredIndex =
@@ -119,27 +119,25 @@ internal class UserPagerContextScreenModel :
                   )
                 }
 
-                is PageState.AuthRequired ->
+                is ResourceResult.AuthRequired ->
                     current.copy(loadingMore = false, appendErrorMessage = result.message)
 
-                PageState.CfChallenge ->
+                ResourceResult.CfChallenge ->
                     current.copy(
                         loadingMore = false,
                         appendErrorMessage = appString(Res.string.cloudflare_challenge_title),
                     )
 
-                is PageState.MatureBlocked ->
+                is ResourceResult.MatureBlocked ->
                     current.copy(loadingMore = false, appendErrorMessage = result.reason)
 
-                is PageState.Error ->
+                is ResourceResult.Error ->
                     current.copy(
                         loadingMore = false,
                         appendErrorMessage =
                             result.exception.message
                                 ?: appString(Res.string.load_failed_please_retry),
                     )
-
-                PageState.Loading -> current.copy(loadingMore = false)
               }
         }
   }

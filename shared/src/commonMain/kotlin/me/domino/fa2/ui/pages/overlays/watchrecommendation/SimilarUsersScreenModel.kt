@@ -9,11 +9,12 @@ import fa2.shared.generated.resources.recommendation_progress_starting
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.fa.session.AuthSessionController
-import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.domain.watchrecommendation.WatchRecommendationProgress
 import me.domino.fa2.domain.watchrecommendation.WatchRecommendationService
 import me.domino.fa2.ui.i18n.appString
+import me.domino.fa2.utils.concurrency.runSuspendCatching
 import me.domino.fa2.utils.logging.FaLog
 
 class SimilarUsersScreenModel(
@@ -38,15 +39,13 @@ class SimilarUsersScreenModel(
                   blockingUsernames = emptySet(),
               )
 
-          else ->
-              WatchRecommendationUiState.Loading(
-                  logLines = listOf(appString(Res.string.recommendation_progress_starting))
-              )
+          else -> WatchRecommendationUiState.Loading(logLines = emptyList())
         }
 
     loadJob =
         screenModelScope.launch {
-          runCatching {
+          appendProgressMessage(appString(Res.string.recommendation_progress_starting))
+          runSuspendCatching {
                 settingsService.ensureLoaded()
                 val currentUsername = authSessionController.loadPersistedUsername()
                 recommendationService.recommendFromFollowers(
@@ -101,7 +100,7 @@ class SimilarUsersScreenModel(
         )
 
     screenModelScope.launch {
-      runCatching { blocklistRepository.addBlockedUsername(username) }
+      runSuspendCatching { blocklistRepository.addBlockedUsername(username) }
           .onSuccess {
             val current = state.value as? WatchRecommendationUiState.Success ?: return@onSuccess
             mutableState.value =
@@ -135,8 +134,11 @@ class SimilarUsersScreenModel(
     }
   }
 
-  private fun appendProgressLog(progress: WatchRecommendationProgress) {
-    val message = recommendationProgressMessage(progress)
+  private suspend fun appendProgressLog(progress: WatchRecommendationProgress) {
+    appendProgressMessage(recommendationProgressMessage(progress))
+  }
+
+  private fun appendProgressMessage(message: String) {
     val snapshot = state.value as? WatchRecommendationUiState.Loading ?: return
     val nextLines = (snapshot.logLines + message).takeLast(maxRecommendationProgressLogLines)
     mutableState.value = snapshot.copy(logLines = nextLines)

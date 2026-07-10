@@ -51,10 +51,7 @@ class PersistedWatchRecommendationBlocklistRepositoryTest {
     repository.addBlockedUsername("artist-b")
     repository.addBlockedUsername("artist-c")
 
-    assertEquals(
-        listOf("artist-a", "artist-b", "artist-c"),
-        repository.listBlockedUsernames(),
-    )
+    assertEquals(listOf("artist-a", "artist-b", "artist-c"), repository.listBlockedUsernames())
   }
 
   @Test

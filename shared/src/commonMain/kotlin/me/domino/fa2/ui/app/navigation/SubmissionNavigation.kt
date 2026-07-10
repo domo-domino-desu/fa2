@@ -5,10 +5,7 @@ import kotlin.random.Random
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
 
-internal fun Navigator.openSubmissionFromList(
-    sid: Int,
-    contextId: String,
-) {
+internal fun Navigator.openSubmissionFromList(sid: Int, contextId: String) {
   push(SubmissionRouteScreen(initialSid = sid, contextId = contextId))
 }
 

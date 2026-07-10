@@ -1,7 +1,5 @@
 package me.domino.fa2.domain.attachmenttext
 
-import me.domino.fa2.domain.attachmenttext.*
-
 /** PDF 附件文本解析器。 */
 internal object PdfAttachmentTextParser : AttachmentTextParser {
   /** 解析器格式。 */
@@ -32,17 +30,10 @@ internal object PdfAttachmentTextParser : AttachmentTextParser {
           currentItemLabel = toProgressSnippet(paragraph),
       )
     }
-    reporter.report(
-        stageId = "build_html",
-        stageFraction = 0f,
-        message = "正在构建 HTML",
-    )
+    reporter.report(stageId = "build_html", stageFraction = 0f, message = "正在构建 HTML")
     val paragraphs =
-        paragraphTexts.mapIndexedNotNull { index, paragraphText ->
-          buildParagraphFromPlainText(
-              text = paragraphText,
-              sourceLabel = "段落 ${index + 1}",
-          )
+        paragraphTexts.mapNotNull { paragraphText ->
+          buildParagraphFromPlainText(text = paragraphText)
         }
     val result = buildAttachmentTextDocument(format = format, paragraphs = paragraphs)
     reporter.report(

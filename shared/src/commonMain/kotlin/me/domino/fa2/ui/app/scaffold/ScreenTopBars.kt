@@ -253,10 +253,7 @@ fun UserWatchlistRouteTopBar(
     if (showShuffleAction && onShuffle != null) {
       val shuffleFollowingText = stringResource(Res.string.shuffle_following)
       val shufflingFollowingText = stringResource(Res.string.shuffling_following)
-      ExpressiveIconButton(
-          onClick = onShuffle,
-          enabled = shuffleEnabled && !isShuffling,
-      ) {
+      ExpressiveIconButton(onClick = onShuffle, enabled = shuffleEnabled && !isShuffling) {
         if (isShuffling) {
           CircularProgressIndicator(
               modifier =

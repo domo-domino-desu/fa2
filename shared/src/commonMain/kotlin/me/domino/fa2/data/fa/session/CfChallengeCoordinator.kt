@@ -47,10 +47,7 @@ class CfChallengeCoordinator(
     log.d { "验证会话 -> 同步UA成功" }
   }
 
-  override suspend fun confirmFromWebView(
-      port: SessionWebViewPort,
-      triggerUrl: String,
-  ): Boolean {
+  override suspend fun confirmFromWebView(port: SessionWebViewPort, triggerUrl: String): Boolean {
     log.i { "验证会话 -> 开始确认(url=${summarizeUrl(triggerUrl)})" }
     val userAgent = readNonBlankUserAgent(port)
     if (userAgent.isNotBlank()) {

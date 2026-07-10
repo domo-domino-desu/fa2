@@ -27,10 +27,7 @@ class KtorTranslationPortTest {
 
     val translated =
         client.translate(
-            TranslationRequest(
-                provider = TranslationProvider.GOOGLE,
-                sourceText = "hello",
-            )
+            TranslationRequest(provider = TranslationProvider.GOOGLE, sourceText = "hello")
         )
 
     assertEquals("你好", translated)
@@ -55,10 +52,7 @@ class KtorTranslationPortTest {
 
     val translated =
         client.translate(
-            TranslationRequest(
-                provider = TranslationProvider.MICROSOFT,
-                sourceText = "hello",
-            )
+            TranslationRequest(provider = TranslationProvider.MICROSOFT, sourceText = "hello")
         )
 
     assertEquals("你好", translated)
@@ -96,7 +90,7 @@ class KtorTranslationPortTest {
                                     .trimIndent(),
                         )
                     )
-                ),
+                )
         )
     val client = OpenAiCompatibleTranslationClient(transport = transport)
 
@@ -131,19 +125,13 @@ class KtorTranslationPortTest {
     assertEquals(
         "google",
         port.translate(
-            TranslationRequest(
-                provider = TranslationProvider.GOOGLE,
-                sourceText = "hello",
-            )
+            TranslationRequest(provider = TranslationProvider.GOOGLE, sourceText = "hello")
         ),
     )
     assertEquals(
         "microsoft",
         port.translate(
-            TranslationRequest(
-                provider = TranslationProvider.MICROSOFT,
-                sourceText = "hello",
-            )
+            TranslationRequest(provider = TranslationProvider.MICROSOFT, sourceText = "hello")
         ),
     )
     assertEquals(
@@ -166,18 +154,12 @@ private class FakeTranslationHttpTransport(
   val getRequests = mutableListOf<Pair<String, TranslationHttpRequest>>()
   val postRequests = mutableListOf<Pair<String, TranslationHttpRequest>>()
 
-  override suspend fun get(
-      url: String,
-      request: TranslationHttpRequest,
-  ): TranslationHttpResponse {
+  override suspend fun get(url: String, request: TranslationHttpRequest): TranslationHttpResponse {
     getRequests += url to request
     return getResponses.removeFirst()
   }
 
-  override suspend fun post(
-      url: String,
-      request: TranslationHttpRequest,
-  ): TranslationHttpResponse {
+  override suspend fun post(url: String, request: TranslationHttpRequest): TranslationHttpResponse {
     postRequests += url to request
     return postResponses.removeFirst()
   }

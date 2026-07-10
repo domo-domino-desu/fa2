@@ -60,11 +60,7 @@ internal fun rememberHtmlInlineContent(
                   style.copy(color = textColor, fontWeight = style.fontWeight ?: FontWeight.Medium)
               val labelWidthPx =
                   textMeasurer
-                      .measure(
-                          text = AnnotatedString(labelText),
-                          style = labelStyle,
-                          maxLines = 1,
-                      )
+                      .measure(text = AnnotatedString(labelText), style = labelStyle, maxLines = 1)
                       .size
                       .width
                       .toFloat()
@@ -78,7 +74,7 @@ internal fun rememberHtmlInlineContent(
                           width = with(density) { widthPx.toSp() },
                           height = avatarPlaceholderSize,
                           placeholderVerticalAlign = PlaceholderVerticalAlign.Center,
-                      ),
+                      )
               ) {
                 HtmlInlineUserChip(
                     placeholder = placeholder,
@@ -96,7 +92,7 @@ internal fun rememberHtmlInlineContent(
                             width = avatarPlaceholderSize,
                             height = avatarPlaceholderSize,
                             placeholderVerticalAlign = PlaceholderVerticalAlign.Center,
-                        ),
+                        )
                 ) {
                   HtmlInlineAvatarImage(placeholder = placeholder)
                 }
@@ -166,10 +162,7 @@ private fun resolveLineHeight(style: TextStyle, fallback: TextStyle): TextUnit {
   return fontSize * 1.35f
 }
 
-private fun TextUnit.toPxWithFontSize(
-    density: Density,
-    fontSize: TextUnit,
-): Float {
+private fun TextUnit.toPxWithFontSize(density: Density, fontSize: TextUnit): Float {
   return when (type) {
     TextUnitType.Sp -> with(density) { toPx() }
     TextUnitType.Em -> with(density) { fontSize.toPx() } * value

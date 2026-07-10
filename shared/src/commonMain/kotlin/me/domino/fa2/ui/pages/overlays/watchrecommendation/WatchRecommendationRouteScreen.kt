@@ -50,9 +50,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
 
-class WatchRecommendationRouteScreen(
-    private val username: String,
-) : Screen {
+class WatchRecommendationRouteScreen(private val username: String) : Screen {
   override val key: String = "watch-recommendation:${username.lowercase()}"
 
   @OptIn(ExperimentalMaterial3Api::class)
@@ -159,10 +157,7 @@ internal fun RecommendationIdleContent(
         verticalArrangement = Arrangement.spacedBy(18.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-      Text(
-          text = stringResource(description),
-          style = MaterialTheme.typography.bodyLarge,
-      )
+      Text(text = stringResource(description), style = MaterialTheme.typography.bodyLarge)
       ExpressiveFilledTonalButton(onClick = onStart) { Text(text = stringResource(action)) }
     }
   }
@@ -170,9 +165,7 @@ internal fun RecommendationIdleContent(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun RecommendationLoadingContent(
-    logLines: List<String>,
-) {
+internal fun RecommendationLoadingContent(logLines: List<String>) {
   Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
@@ -253,10 +246,8 @@ internal fun WatchRecommendationSuccessContent(
           )
         }
       } else {
-        items(
-            items = state.visibleUsers,
-            key = { item -> item.user.username.lowercase() },
-        ) { item ->
+        items(items = state.visibleUsers, key = { item -> item.user.username.lowercase() }) { item
+          ->
           UserHorizontalCard(
               user = item.user,
               onClick = { onOpenUser(item) },

@@ -13,14 +13,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import me.domino.fa2.data.model.JournalPage
 import me.domino.fa2.data.model.JournalSummary
-import me.domino.fa2.data.model.PageState
-import me.domino.fa2.ui.pages.overlays.journaldetail.*
-import me.domino.fa2.ui.pages.overlays.journalpager.*
-import me.domino.fa2.ui.pages.overlays.userpager.*
-import me.domino.fa2.ui.pages.overlays.usershouts.*
-import me.domino.fa2.ui.pages.overlays.userwatchlist.*
-import me.domino.fa2.ui.pages.overlays.watchrecommendation.*
-import me.domino.fa2.ui.pages.user.*
+import me.domino.fa2.data.model.ResourceResult
+import me.domino.fa2.ui.pages.overlays.journalpager.JournalPagerContextScreenModel
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class JournalPagerContextScreenModelTest {
@@ -66,13 +60,13 @@ class JournalPagerContextScreenModelTest {
 
         model.requestAppend {
           loadCount++
-          PageState.Success(
+          ResourceResult.Success(
               JournalPage(journals = listOf(journal(2), journal(3)), nextPageUrl = null)
           )
         }
         model.requestAppend {
           loadCount++
-          PageState.Success(JournalPage(journals = listOf(journal(4)), nextPageUrl = null))
+          ResourceResult.Success(JournalPage(journals = listOf(journal(4)), nextPageUrl = null))
         }
         runCurrent()
 

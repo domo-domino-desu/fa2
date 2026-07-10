@@ -1,7 +1,5 @@
 package me.domino.fa2.domain.attachmenttext
 
-import me.domino.fa2.domain.attachmenttext.*
-
 /** Markdown 附件解析。 */
 object MarkdownAttachmentTextParser : AttachmentTextParser {
   override val format: AttachmentTextFormat = AttachmentTextFormat.MARKDOWN

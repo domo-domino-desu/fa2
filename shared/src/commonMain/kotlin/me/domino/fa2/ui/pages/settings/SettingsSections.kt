@@ -253,10 +253,7 @@ internal fun TranslationSettingsSection(
 }
 
 @Composable
-internal fun DownloadSettingsSection(
-    draft: SettingsDraft,
-    onDraftChange: (SettingsDraft) -> Unit,
-) {
+internal fun DownloadSettingsSection(draft: SettingsDraft, onDraftChange: (SettingsDraft) -> Unit) {
   val triggerDirectoryPicker = rememberPlatformDirectoryPicker { selectedPath ->
     if (selectedPath != null) {
       onDraftChange(draft.copy(downloadSavePath = selectedPath))

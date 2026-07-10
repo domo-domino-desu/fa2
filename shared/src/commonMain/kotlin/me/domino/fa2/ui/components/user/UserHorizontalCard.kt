@@ -54,10 +54,7 @@ fun UserHorizontalCard(
           size = 42.dp,
           placeholderTextStyle = MaterialTheme.typography.titleMedium,
       )
-      Column(
-          modifier = Modifier.weight(1f),
-          verticalArrangement = Arrangement.spacedBy(4.dp),
-      ) {
+      Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = user.displayName,
             style = MaterialTheme.typography.titleMedium,

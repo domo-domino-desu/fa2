@@ -17,19 +17,17 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.fa.browse.BrowseRepository
-import me.domino.fa2.data.i18n.SystemLanguageProvider
-import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.navigation.openSubmissionFromList
 import me.domino.fa2.ui.app.scaffold.BrowseRouteTopBar
 import me.domino.fa2.ui.components.state.PageStateWrapper
-import me.domino.fa2.ui.pages.submission.pager.BrowseSubmissionSourceAdapter
 import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
-import me.domino.fa2.ui.pages.submission.pager.SubmissionContextSourceKind
-import me.domino.fa2.ui.pages.submission.pager.SubmissionLoadedPage
-import me.domino.fa2.ui.pages.submission.pager.WaterfallViewportState
 import me.domino.fa2.ui.pages.submission.pager.pageNumberForSid
 import me.domino.fa2.ui.pages.submission.pager.toWaterfallPageControls
+import me.domino.fa2.ui.submissionviewer.adapters.BrowseSubmissionSourceAdapter
+import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.ui.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.ui.submissionviewer.api.WaterfallViewportState
 import me.domino.fa2.utils.FaUrls
 import org.koin.compose.koinInject
 
@@ -50,15 +48,8 @@ class BrowseRouteScreen(private val initialFilter: BrowseFilterState) : Screen {
           SubmissionContextScreenModel()
         }
     val browseRepository = koinInject<BrowseRepository>()
-    val settingsService = koinInject<AppSettingsService>()
-    val systemLanguageProvider = koinInject<SystemLanguageProvider>()
     val screenModel = rememberScreenModel {
-      BrowseScreenModel(
-          repository = browseRepository,
-          settingsService = settingsService,
-          systemLanguageProvider = systemLanguageProvider,
-          initialFilter = initialFilter,
-      )
+      BrowseScreenModel(repository = browseRepository, initialFilter = initialFilter)
     }
     val state by screenModel.state.collectAsState()
     val pageState by screenModel.pageState.collectAsState()

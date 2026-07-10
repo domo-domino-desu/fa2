@@ -5,10 +5,7 @@ import me.domino.fa2.ui.components.forms.FilterOption
 import me.domino.fa2.ui.i18n.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.i18n.search.SearchUiOptionKey
 
-internal fun orderByOptions(
-    labelsRepository: SearchUiLabelsRepository,
-    language: AppLanguage,
-) =
+internal fun orderByOptions(labelsRepository: SearchUiLabelsRepository, language: AppLanguage) =
     listOf(
         FilterOption(
             "relevancy",
@@ -39,10 +36,7 @@ internal fun orderDirectionOptions(
         ),
     )
 
-internal fun rangeOptions(
-    labelsRepository: SearchUiLabelsRepository,
-    language: AppLanguage,
-) =
+internal fun rangeOptions(labelsRepository: SearchUiLabelsRepository, language: AppLanguage) =
     listOf(
         FilterOption(
             "1day",

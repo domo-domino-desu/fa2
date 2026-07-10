@@ -7,8 +7,9 @@ import fa2.shared.generated.resources.following_recommendation_blocklist_update_
 import fa2.shared.generated.resources.load_failed_please_retry
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
+import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.ui.i18n.appString
+import me.domino.fa2.utils.concurrency.runSuspendCatching
 import me.domino.fa2.utils.logging.FaLog
 
 data class WatchRecommendationBlocklistUiState(
@@ -21,7 +22,7 @@ data class WatchRecommendationBlocklistUiState(
 )
 
 class WatchRecommendationBlocklistScreenModel(
-    private val blocklistRepository: WatchRecommendationBlocklist,
+    private val blocklistRepository: WatchRecommendationBlocklist
 ) : StateScreenModel<WatchRecommendationBlocklistUiState>(WatchRecommendationBlocklistUiState()) {
   private val log = FaLog.withTag("WatchRecommendationBlocklistScreenModel")
   private var loadJob: Job? = null
@@ -43,13 +44,10 @@ class WatchRecommendationBlocklistScreenModel(
 
     loadJob =
         screenModelScope.launch {
-          runCatching { blocklistRepository.listBlockedUsernames() }
+          runSuspendCatching { blocklistRepository.listBlockedUsernames() }
               .onSuccess { usernames ->
                 mutableState.value =
-                    WatchRecommendationBlocklistUiState(
-                        usernames = usernames,
-                        loading = false,
-                    )
+                    WatchRecommendationBlocklistUiState(usernames = usernames, loading = false)
                 log.i { "推荐屏蔽名单 -> 加载成功(count=${usernames.size})" }
               }
               .onFailure { error ->
@@ -62,11 +60,7 @@ class WatchRecommendationBlocklistScreenModel(
                           inlineErrorMessage = message,
                       )
                     } else {
-                      previous.copy(
-                          loading = false,
-                          refreshing = false,
-                          errorMessage = message,
-                      )
+                      previous.copy(loading = false, refreshing = false, errorMessage = message)
                     }
                 log.e(error) { "推荐屏蔽名单 -> 加载失败" }
               }
@@ -84,7 +78,7 @@ class WatchRecommendationBlocklistScreenModel(
         )
 
     screenModelScope.launch {
-      runCatching { blocklistRepository.removeBlockedUsername(username) }
+      runSuspendCatching { blocklistRepository.removeBlockedUsername(username) }
           .onSuccess {
             val current = state.value
             mutableState.value =

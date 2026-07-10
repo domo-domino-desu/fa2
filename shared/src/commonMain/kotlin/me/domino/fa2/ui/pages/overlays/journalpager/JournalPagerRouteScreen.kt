@@ -157,10 +157,7 @@ internal class JournalPagerRouteScreen(
       )
 
       if (journals.isEmpty()) {
-        Text(
-            text = stringResource(Res.string.no_content),
-            modifier = Modifier.padding(16.dp),
-        )
+        Text(text = stringResource(Res.string.no_content), modifier = Modifier.padding(16.dp))
         return@Column
       }
 

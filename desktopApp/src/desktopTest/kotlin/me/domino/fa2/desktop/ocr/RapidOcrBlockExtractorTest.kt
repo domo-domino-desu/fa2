@@ -63,12 +63,7 @@ private fun recResult(
     confidence: Float? = 0.9f,
 ): RecResult =
     RecResult(
-        arrayOf(
-            Point(left, top),
-            Point(right, top),
-            Point(right, bottom),
-            Point(left, bottom),
-        ),
+        arrayOf(Point(left, top), Point(right, top), Point(right, bottom), Point(left, bottom)),
         text,
         confidence ?: 0f,
         null,

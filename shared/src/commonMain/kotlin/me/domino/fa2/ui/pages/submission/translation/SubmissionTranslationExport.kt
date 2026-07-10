@@ -4,7 +4,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import me.domino.fa2.data.settings.TranslationProvider
 import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
-import me.domino.fa2.ui.pages.submission.imageocr.*
+import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrBlockUiState
+import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrTranslationStatus
+import me.domino.fa2.ui.translation.SubmissionTranslationUiState
+import me.domino.fa2.ui.translation.variantOf
 
 data class SubmissionImageOcrTranslationExportSnapshot(
     val imageUrl: String,
@@ -12,10 +15,7 @@ data class SubmissionImageOcrTranslationExportSnapshot(
     val blocks: List<SubmissionImageOcrBlockUiState>,
 )
 
-data class SubmissionTranslationSidecarFile(
-    val fileName: String,
-    val content: String,
-)
+data class SubmissionTranslationSidecarFile(val fileName: String, val content: String)
 
 fun buildSubmissionTranslationSidecarFiles(
     submissionId: Int,
@@ -137,10 +137,6 @@ private data class SubmissionImageOcrTranslationExportBlock(
     val points: List<SubmissionImagePointExport>,
 )
 
-@Serializable
-private data class SubmissionImagePointExport(
-    val x: Float,
-    val y: Float,
-)
+@Serializable private data class SubmissionImagePointExport(val x: Float, val y: Float)
 
 private val submissionTranslationExportJson = Json { prettyPrint = true }

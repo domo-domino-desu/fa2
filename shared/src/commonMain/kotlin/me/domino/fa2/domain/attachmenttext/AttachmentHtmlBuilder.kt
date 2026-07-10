@@ -1,7 +1,5 @@
 package me.domino.fa2.domain.attachmenttext
 
-import me.domino.fa2.domain.attachmenttext.*
-
 /** 构建解析结果。 */
 internal fun buildAttachmentTextDocument(
     format: AttachmentTextFormat,
@@ -14,23 +12,16 @@ internal fun buildAttachmentTextDocument(
     )
 
 /** 从纯文本构建段落。 */
-internal fun buildParagraphFromPlainText(
-    text: String,
-    sourceLabel: String? = null,
-): AttachmentTextParagraph? {
+internal fun buildParagraphFromPlainText(text: String): AttachmentTextParagraph? {
   val normalized = normalizeParagraphText(text)
   if (normalized.isBlank()) return null
   return AttachmentTextParagraph(
-      html = "<p>${escapeTextAsHtml(normalized, preserveLineBreaks = true)}</p>",
-      sourceLabel = sourceLabel?.trim()?.ifBlank { null },
+      html = "<p>${escapeTextAsHtml(normalized, preserveLineBreaks = true)}</p>"
   )
 }
 
 /** 从样式片段构建段落。 */
-internal fun buildParagraphFromRuns(
-    runs: List<StyledTextRun>,
-    sourceLabel: String? = null,
-): AttachmentTextParagraph? {
+internal fun buildParagraphFromRuns(runs: List<StyledTextRun>): AttachmentTextParagraph? {
   val merged = mergeAdjacentRuns(runs).filter { run -> run.text.isNotEmpty() }
   if (merged.isEmpty()) return null
   val content = buildString {
@@ -41,10 +32,7 @@ internal fun buildParagraphFromRuns(
   }
   val normalizedContent = content.trim()
   if (normalizedContent.isBlank()) return null
-  return AttachmentTextParagraph(
-      html = "<p>$normalizedContent</p>",
-      sourceLabel = sourceLabel?.trim()?.ifBlank { null },
-  )
+  return AttachmentTextParagraph(html = "<p>$normalizedContent</p>")
 }
 
 /** 生成进度摘要片段。 */

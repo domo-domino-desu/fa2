@@ -2,7 +2,7 @@ package me.domino.fa2.data.fa.core
 
 import kotlin.time.Clock
 import me.domino.fa2.data.local.entity.PageCacheEntity
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import org.mobilenativefoundation.store.store5.StoreReadResponse
 
 /** 检测到 Cloudflare 挑战时抛出的异常。 */
@@ -22,38 +22,38 @@ internal data class MatureBlockedException(val reason: String) : IllegalStateExc
 /** 远程请求失败时抛出的通用异常。 */
 internal class RemoteRequestException(message: String) : IllegalStateException(message)
 
-/** 从 PageState 中取出成功数据，否则将状态转换为对应异常并抛出。 */
-internal fun <T> PageState<T>.requireStoreValue(): T =
+/** 从 ResourceResult 中取出成功数据，否则将状态转换为对应异常并抛出。 */
+internal fun <T> ResourceResult<T>.requireStoreValue(): T =
     when (this) {
-      is PageState.Success -> data
-      is PageState.AuthRequired -> throw AuthRequiredException(requestUrl, message)
-      PageState.CfChallenge -> throw CfChallengeException
-      is PageState.MatureBlocked -> throw MatureBlockedException(reason)
-      is PageState.Error -> throw exception
-      PageState.Loading -> throw IllegalStateException("Unexpected loading state in fetcher")
+      is ResourceResult.Success -> data
+      is ResourceResult.AuthRequired -> throw AuthRequiredException(requestUrl, message)
+      ResourceResult.CfChallenge -> throw CfChallengeException
+      is ResourceResult.MatureBlocked -> throw MatureBlockedException(reason)
+      is ResourceResult.Error -> throw exception
     }
 
-/** 将已知的 Store 异常映射为对应的 PageState 错误状态。 */
-internal fun <T> mapStoreException(error: Throwable): PageState<T> =
+/** 将已知的 Store 异常映射为对应的 ResourceResult 错误状态。 */
+internal fun <T> mapStoreException(error: Throwable): ResourceResult<T> =
     when (error) {
-      CfChallengeException -> PageState.CfChallenge
-      is AuthRequiredException -> PageState.AuthRequired(error.requestUrl, error.detail)
-      is MatureBlockedException -> PageState.MatureBlocked(error.reason)
-      else -> PageState.Error(error)
+      CfChallengeException -> ResourceResult.CfChallenge
+      is AuthRequiredException -> ResourceResult.AuthRequired(error.requestUrl, error.detail)
+      is MatureBlockedException -> ResourceResult.MatureBlocked(error.reason)
+      else -> ResourceResult.Error(error)
     }
 
-/** 将 StoreReadResponse 转换为 PageState，Loading/Initial/NoNewData 返回 null。 */
-internal fun <T> toPageState(response: StoreReadResponse<T>): PageState<T>? =
+/** 将 StoreReadResponse 转换为 ResourceResult，Loading/Initial/NoNewData 返回 null。 */
+internal fun <T> toResourceResult(response: StoreReadResponse<T>): ResourceResult<T>? =
     when (response) {
       is StoreReadResponse.Loading,
       StoreReadResponse.Initial,
       is StoreReadResponse.NoNewData -> null
 
-      is StoreReadResponse.Data -> PageState.Success(response.value)
+      is StoreReadResponse.Data -> ResourceResult.Success(response.value)
       is StoreReadResponse.Error.Exception -> mapStoreException(response.error)
-      is StoreReadResponse.Error.Message -> PageState.Error(IllegalStateException(response.message))
+      is StoreReadResponse.Error.Message ->
+          ResourceResult.Error(IllegalStateException(response.message))
       is StoreReadResponse.Error.Custom<*> ->
-          PageState.Error(IllegalStateException(response.error.toString()))
+          ResourceResult.Error(IllegalStateException(response.error.toString()))
     }
 
 /** 判断 StoreReadResponse 是否为终态（不再有后续响应）。 */

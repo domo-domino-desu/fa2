@@ -14,6 +14,7 @@ import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import me.domino.fa2.data.fa.core.FaOriginPolicy
 import me.domino.fa2.data.fa.session.FaCookiesStorage
 import me.domino.fa2.data.fa.session.UserAgentStorage
 import me.domino.fa2.utils.logging.FaLog
@@ -80,9 +81,12 @@ private fun HttpClient.installCachedDownloadInterceptors(
       return@intercept execute(request)
     }
     deduplicator.awaitOrExecute(deduplicationKey = "${request.method.value} $progressKey") {
-      val isFaHost = isFuraffinityHost(request.url.host)
+      val isFaHost = FaOriginPolicy.isTrustedCookieOrigin(request.url.toString())
       userAgentStorage.loadPersistedIfNeeded()
       val cookieHeader = if (isFaHost) cookiesStorage.loadRawCookieHeader() else ""
+      if (!isFaHost) {
+        request.headers.remove(HttpHeaders.Cookie)
+      }
       val cookieNames = extractCookieNames(cookieHeader)
       if (cookieHeader.isNotBlank() && request.headers[HttpHeaders.Cookie].isNullOrBlank()) {
         request.header(HttpHeaders.Cookie, cookieHeader)
@@ -117,9 +121,11 @@ private fun HttpClient.installCachedDownloadInterceptors(
         val contentLength =
             call.response.headers[HttpHeaders.ContentLength].orEmpty().ifBlank { "-" }
         val cfRay = call.response.headers["cf-ray"].orEmpty().ifBlank { "-" }
-        cookiesStorage.mergeSetCookieValues(
-            call.response.headers.getAll(HttpHeaders.SetCookie).orEmpty()
-        )
+        if (FaOriginPolicy.isTrustedCookieOrigin(call.response.call.request.url.toString())) {
+          cookiesStorage.mergeSetCookieValues(
+              call.response.headers.getAll(HttpHeaders.SetCookie).orEmpty()
+          )
+        }
         val message =
             "缓存下载请求结束 -> status=${status.value}, contentType=$contentType, " +
                 "contentLength=$contentLength, cf-ray=$cfRay, url=$progressKey"
@@ -136,11 +142,6 @@ private fun HttpClient.installCachedDownloadInterceptors(
     }
   }
   return this
-}
-
-private fun isFuraffinityHost(host: String): Boolean {
-  val normalized = host.lowercase()
-  return normalized == "furaffinity.net" || normalized.endsWith(".furaffinity.net")
 }
 
 private fun extractCookieNames(cookieHeader: String): List<String> =

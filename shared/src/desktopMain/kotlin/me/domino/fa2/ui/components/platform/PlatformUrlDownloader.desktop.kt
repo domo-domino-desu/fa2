@@ -4,6 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import fa2.shared.generated.resources.*
 import java.io.File
+import java.nio.file.AtomicMoveNotSupportedException
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.domino.fa2.data.fa.media.AttachmentDownloadResult
@@ -98,10 +101,7 @@ private suspend fun downloadToConfiguredDirectory(
           val finalName = composeFileName(baseName, finalExtension)
           val targetFile = File(targetDirectory, finalName)
           val writeSuccess =
-              runCatching {
-                    targetFile.outputStream().use { output -> output.write(result.payload.bytes) }
-                  }
-                  .isSuccess
+              runCatching { writeAtomically(targetFile, result.payload.bytes) }.isSuccess
           if (!writeSuccess) {
             return@withContext saveFailed(
                 appString(Res.string.download_save_error_cannot_write_target_file)
@@ -119,6 +119,29 @@ private suspend fun downloadToConfiguredDirectory(
       }
     }
 
+private fun writeAtomically(targetFile: File, bytes: ByteArray) {
+  val directory = checkNotNull(targetFile.parentFile)
+  val temporaryFile = File.createTempFile(".fa2-", ".part", directory)
+  try {
+    temporaryFile.outputStream().use { output ->
+      output.write(bytes)
+      output.flush()
+    }
+    try {
+      Files.move(
+          temporaryFile.toPath(),
+          targetFile.toPath(),
+          StandardCopyOption.ATOMIC_MOVE,
+          StandardCopyOption.REPLACE_EXISTING,
+      )
+    } catch (_: AtomicMoveNotSupportedException) {
+      Files.move(temporaryFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+    }
+  } finally {
+    temporaryFile.delete()
+  }
+}
+
 /** 同步根目录 `.nomedia` 标记。 */
 private fun syncNoMediaFlag(rootDirectory: File, allowMediaIndexing: Boolean) {
   val marker = File(rootDirectory, ".nomedia")
@@ -134,5 +157,5 @@ private fun syncNoMediaFlag(rootDirectory: File, allowMediaIndexing: Boolean) {
 }
 
 /** 构建统一保存失败结果。 */
-private fun saveFailed(reason: String): PlatformDownloadResult.HandledFailure =
+private suspend fun saveFailed(reason: String): PlatformDownloadResult.HandledFailure =
     PlatformDownloadResult.HandledFailure(appString(Res.string.download_save_failed, reason))

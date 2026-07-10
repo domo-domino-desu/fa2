@@ -7,13 +7,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.fa.favorites.FavoritesRepository
 import me.domino.fa2.data.fa.gallery.GalleryRepository
-import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.model.GalleryFolderGroup
 import me.domino.fa2.data.model.GalleryPage
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.data.model.summarizePageState
-import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.utils.PaginationReducer
 import me.domino.fa2.ui.utils.PaginationSnapshot
@@ -92,8 +90,6 @@ class UserSubmissionSectionScreenModel(
     private val galleryRepository: GalleryRepository,
     /** Favorites 仓储。 */
     private val favoritesRepository: FavoritesRepository,
-    private val settingsService: AppSettingsService? = null,
-    private val systemLanguageProvider: SystemLanguageProvider? = null,
     /** 初始文件夹 URL（可选）。 */
     initialFolderUrl: String? = null,
     /** 初始快照（可选）。 */
@@ -113,7 +109,6 @@ class UserSubmissionSectionScreenModel(
       PaginationReducer<SubmissionThumbnail, Int>(
           keyOf = { item -> item.id },
           challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
-          appendFallbackErrorMessage = { appString(Res.string.load_failed_please_retry) },
       )
   private var loadJob: Job? = null
   private var appendJob: Job? = null
@@ -144,10 +139,7 @@ class UserSubmissionSectionScreenModel(
     val basePageUrl = basePageUrlOverride
     val effectiveSnapshot =
         if (clearExisting) {
-          snapshot.copy(
-              submissions = emptyList(),
-              nextPageUrl = null,
-          )
+          snapshot.copy(submissions = emptyList(), nextPageUrl = null)
         } else {
           snapshot
         }
@@ -176,20 +168,21 @@ class UserSubmissionSectionScreenModel(
                   nextPageUrlOf = { page -> page.nextPageUrl },
               )
           var updated = state.value.applyPagination(reduced)
-          if (firstPageState is PageState.Success) {
+          if (firstPageState is ResourceResult.Success) {
             updated = updated.copy(folderGroups = firstPageState.data.folderGroups)
           }
           mutableState.value = updated
           when (val next = firstPageState) {
-            is PageState.Success -> {
-              log.i { "加载用户投稿分区 -> ${summarizePageState(next)}(count=${updated.submissions.size})" }
+            is ResourceResult.Success -> {
+              log.i {
+                "加载用户投稿分区 -> ${summarizeResourceResult(next)}(count=${updated.submissions.size})"
+              }
             }
 
-            is PageState.AuthRequired -> log.w { "加载用户投稿分区 -> 需要重新登录" }
-            PageState.CfChallenge -> log.w { "加载用户投稿分区 -> Cloudflare验证" }
-            is PageState.MatureBlocked -> log.w { "加载用户投稿分区 -> 受限(${next.reason})" }
-            is PageState.Error -> log.e(next.exception) { "加载用户投稿分区 -> 失败" }
-            PageState.Loading -> log.d { "加载用户投稿分区 -> 加载中" }
+            is ResourceResult.AuthRequired -> log.w { "加载用户投稿分区 -> 需要重新登录" }
+            ResourceResult.CfChallenge -> log.w { "加载用户投稿分区 -> Cloudflare验证" }
+            is ResourceResult.MatureBlocked -> log.w { "加载用户投稿分区 -> 受限(${next.reason})" }
+            is ResourceResult.Error -> log.e(next.exception) { "加载用户投稿分区 -> 失败" }
           }
         }
   }
@@ -254,31 +247,30 @@ class UserSubmissionSectionScreenModel(
           val updated = state.value.applyPagination(reduced)
           mutableState.value = updated
           when (next) {
-            is PageState.Success -> {
+            is ResourceResult.Success -> {
               log.d {
-                "自动加载用户投稿分区 -> ${summarizePageState(next)}(count=${updated.submissions.size})"
+                "自动加载用户投稿分区 -> ${summarizeResourceResult(next)}(count=${updated.submissions.size})"
               }
             }
 
-            is PageState.AuthRequired -> log.w { "自动加载用户投稿分区 -> 需要重新登录" }
-            PageState.CfChallenge -> log.w { "自动加载用户投稿分区 -> Cloudflare验证" }
-            is PageState.MatureBlocked -> log.w { "自动加载用户投稿分区 -> 受限(${next.reason})" }
-            is PageState.Error -> log.e(next.exception) { "自动加载用户投稿分区 -> 失败" }
-            PageState.Loading -> log.d { "自动加载用户投稿分区 -> 加载中" }
+            is ResourceResult.AuthRequired -> log.w { "自动加载用户投稿分区 -> 需要重新登录" }
+            ResourceResult.CfChallenge -> log.w { "自动加载用户投稿分区 -> Cloudflare验证" }
+            is ResourceResult.MatureBlocked -> log.w { "自动加载用户投稿分区 -> 受限(${next.reason})" }
+            is ResourceResult.Error -> log.e(next.exception) { "自动加载用户投稿分区 -> 失败" }
           }
         }
   }
 
-  private suspend fun loadPage(nextPageUrl: String?): PageState<GalleryPage> {
+  private suspend fun loadPage(nextPageUrl: String?): ResourceResult<GalleryPage> {
     return when (route) {
       UserChildRoute.Gallery -> galleryRepository.loadGalleryPage(username, nextPageUrl)
       UserChildRoute.Favorites -> favoritesRepository.loadFavoritesPage(username, nextPageUrl)
       UserChildRoute.Journals ->
-          PageState.Error(IllegalStateException("Invalid route for submissions: $route"))
+          ResourceResult.Error(IllegalStateException("Invalid route for submissions: $route"))
     }
   }
 
-  private suspend fun loadFirstPage(basePageUrl: String?): PageState<GalleryPage> {
+  private suspend fun loadFirstPage(basePageUrl: String?): ResourceResult<GalleryPage> {
     return when (route) {
       UserChildRoute.Gallery ->
           galleryRepository.refreshGalleryFirstPage(
@@ -293,7 +285,7 @@ class UserSubmissionSectionScreenModel(
           )
 
       UserChildRoute.Journals ->
-          PageState.Error(IllegalStateException("Invalid route for submissions: $route"))
+          ResourceResult.Error(IllegalStateException("Invalid route for submissions: $route"))
     }
   }
 }

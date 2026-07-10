@@ -25,11 +25,11 @@ import org.koin.dsl.module
 fun uiModule(): Module = module {
   single { SearchUiLabelsRepository() }
 
-  factory { AuthScreenModel(get(), get(), get(), get(), get()) }
-  factory { FeedScreenModel(get(), get(), get()) }
-  factory { BrowseScreenModel(get(), get(), get()) }
+  factory { AuthScreenModel(get(), get(), get()) }
+  factory { FeedScreenModel(get()) }
+  factory { BrowseScreenModel(get()) }
   factory { SearchScreenModel(get(), get(), get(), get(), get(), get()) }
-  factory { MoreScreenModel(get(), get(), get(), get(), get(), get()) }
+  factory { MoreScreenModel(get(), get(), get(), get()) }
   factory { (username: String, initialChildRoute: UserChildRoute, initialFolderUrl: String?) ->
     UserScreenModel(
         username = username,
@@ -37,8 +37,6 @@ fun uiModule(): Module = module {
         initialChildRoute = initialChildRoute,
         initialFolderUrl = initialFolderUrl,
         blocklistRepository = get(),
-        settingsService = get(),
-        systemLanguageProvider = get(),
     )
   }
   factory {
@@ -55,32 +53,16 @@ fun uiModule(): Module = module {
         favoritesRepository = get(),
         initialFolderUrl = initialFolderUrl,
         initialSnapshot = initialSnapshot,
-        settingsService = get(),
-        systemLanguageProvider = get(),
     )
   }
-  factory { (username: String) ->
-    UserJournalsScreenModel(
-        username = username,
-        repository = get(),
-        settingsService = get(),
-        systemLanguageProvider = get(),
-    )
-  }
-  factory { (username: String) ->
-    UserShoutsScreenModel(
-        username = username,
-        repository = get(),
-    )
-  }
+  factory { (username: String) -> UserJournalsScreenModel(username = username, repository = get()) }
+  factory { (username: String) -> UserShoutsScreenModel(username = username, repository = get()) }
   factory { (journalId: Int, journalUrl: String?) ->
     JournalDetailScreenModel(
         journalId = journalId,
         journalUrl = journalUrl,
         repository = get(),
         translationService = get(),
-        settingsService = get(),
-        systemLanguageProvider = get(),
     )
   }
   factory { (username: String, category: WatchlistCategory, initialUrl: String?) ->
@@ -89,8 +71,6 @@ fun uiModule(): Module = module {
         category = category,
         repository = get(),
         initialPageUrl = initialUrl,
-        settingsService = get(),
-        systemLanguageProvider = get(),
     )
   }
   factory { WatchRecommendationBlocklistScreenModel(get()) }

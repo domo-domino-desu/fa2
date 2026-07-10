@@ -1,4 +1,4 @@
-package me.domino.fa2.data.fa.auth
+package me.domino.fa2.data.fa.session
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -6,9 +6,7 @@ import me.domino.fa2.data.local.KeyValueStorage
 import me.domino.fa2.utils.logging.FaLog
 
 /** 认证会话补充资料存储。 */
-class AuthSessionProfileStore(
-    private val keyValueStorage: KeyValueStorage,
-) {
+class AuthSessionProfileStore(private val keyValueStorage: KeyValueStorage) {
   private val log = FaLog.withTag("AuthSessionProfileStore")
   private val mutex = Mutex()
 

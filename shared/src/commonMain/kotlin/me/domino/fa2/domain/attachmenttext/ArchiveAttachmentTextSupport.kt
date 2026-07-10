@@ -1,7 +1,5 @@
 package me.domino.fa2.domain.attachmenttext
 
-import me.domino.fa2.domain.attachmenttext.*
-
 /** 读取压缩包内文本条目。 */
 internal expect fun readArchiveTextEntry(
     bytes: ByteArray,

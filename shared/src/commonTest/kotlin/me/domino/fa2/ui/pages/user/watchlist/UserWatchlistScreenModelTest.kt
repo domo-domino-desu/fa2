@@ -15,17 +15,11 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import me.domino.fa2.data.fa.watchlist.WatchlistRepository
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
-import me.domino.fa2.ui.pages.overlays.journaldetail.*
-import me.domino.fa2.ui.pages.overlays.journalpager.*
-import me.domino.fa2.ui.pages.overlays.userpager.*
-import me.domino.fa2.ui.pages.overlays.usershouts.*
-import me.domino.fa2.ui.pages.overlays.userwatchlist.*
-import me.domino.fa2.ui.pages.overlays.watchrecommendation.*
-import me.domino.fa2.ui.pages.user.*
+import me.domino.fa2.ui.pages.overlays.userwatchlist.UserWatchlistScreenModel
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserWatchlistScreenModelTest {
@@ -49,14 +43,11 @@ class UserWatchlistScreenModelTest {
                 initialPage =
                     WatchlistPage(
                         users =
-                            listOf(
-                                watchlistUser("alpha", "Alpha"),
-                                watchlistUser("beta", "Beta"),
-                            ),
+                            listOf(watchlistUser("alpha", "Alpha"), watchlistUser("beta", "Beta")),
                         nextPageUrl = "page-2",
                     ),
                 allUsers =
-                    PageState.Success(
+                    ResourceResult.Success(
                         listOf(
                             watchlistUser("alpha", "Alpha"),
                             watchlistUser("beta", "Beta"),
@@ -101,14 +92,11 @@ class UserWatchlistScreenModelTest {
                 initialPage =
                     WatchlistPage(
                         users =
-                            listOf(
-                                watchlistUser("alpha", "Alpha"),
-                                watchlistUser("beta", "Beta"),
-                            ),
+                            listOf(watchlistUser("alpha", "Alpha"), watchlistUser("beta", "Beta")),
                         nextPageUrl = "page-2",
                     ),
                 allUsers =
-                    PageState.Success(
+                    ResourceResult.Success(
                         listOf(
                             watchlistUser("alpha", "Alpha"),
                             watchlistUser("beta", "Beta"),
@@ -152,13 +140,10 @@ class UserWatchlistScreenModelTest {
                 initialPage =
                     WatchlistPage(
                         users =
-                            listOf(
-                                watchlistUser("alpha", "Alpha"),
-                                watchlistUser("beta", "Beta"),
-                            ),
+                            listOf(watchlistUser("alpha", "Alpha"), watchlistUser("beta", "Beta")),
                         nextPageUrl = "page-2",
                     ),
-                allUsers = PageState.Error(IllegalStateException("boom")),
+                allUsers = ResourceResult.Error(IllegalStateException("boom")),
                 random = Random(0),
             )
         val screenModel =
@@ -195,7 +180,7 @@ class UserWatchlistScreenModelTest {
                         users = listOf(watchlistUser("alpha", "Alpha")),
                         nextPageUrl = null,
                     ),
-                allUsers = PageState.Success(listOf(watchlistUser("alpha", "Alpha"))),
+                allUsers = ResourceResult.Success(listOf(watchlistUser("alpha", "Alpha"))),
                 random = Random(0),
             )
         val screenModel =
@@ -223,7 +208,7 @@ private data class WatchlistScreenModelFixture(
     val repository: WatchlistRepository,
     val random: Random,
     val initialPage: WatchlistPage,
-    val allUsers: PageState<List<WatchlistUser>>,
+    val allUsers: ResourceResult<List<WatchlistUser>>,
 ) {
   var loadPageCallCount: Int = 0
     private set
@@ -235,16 +220,16 @@ private data class WatchlistScreenModelFixture(
       username: String,
       category: WatchlistCategory,
       nextPageUrl: String?,
-  ): PageState<WatchlistPage> {
+  ): ResourceResult<WatchlistPage> {
     loadPageCallCount += 1
-    return PageState.Success(initialPage)
+    return ResourceResult.Success(initialPage)
   }
 
   suspend fun loadAllUsers(
       username: String,
       category: WatchlistCategory,
       useFreshFirstPage: Boolean,
-  ): PageState<List<WatchlistUser>> {
+  ): ResourceResult<List<WatchlistUser>> {
     loadAllCallCount += 1
     return allUsers
   }
@@ -252,7 +237,7 @@ private data class WatchlistScreenModelFixture(
 
 private fun createScreenModelFixture(
     initialPage: WatchlistPage,
-    allUsers: PageState<List<WatchlistUser>>,
+    allUsers: ResourceResult<List<WatchlistUser>>,
     random: Random,
 ): WatchlistScreenModelFixture =
     WatchlistScreenModelFixture(

@@ -15,7 +15,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import me.domino.fa2.data.fa.session.AuthSessionController
 import me.domino.fa2.data.fa.session.PendingFaRouteStore
+import me.domino.fa2.ui.navigation.AppNavigationRequest
+import me.domino.fa2.ui.navigation.LocalAppNavigation
 import me.domino.fa2.ui.pages.auth.AuthRouteScreen
+import me.domino.fa2.ui.pages.browse.BrowseFilterState
+import me.domino.fa2.ui.pages.browse.BrowseRouteScreen
+import me.domino.fa2.ui.pages.search.SearchRouteScreen
+import me.domino.fa2.ui.pages.user.UserChildRoute
+import me.domino.fa2.ui.pages.user.UserRouteScreen
 import org.koin.compose.koinInject
 
 /** 应用导航容器。 */
@@ -52,6 +59,38 @@ fun AppNavigator(externalFaLinkEvents: Flow<String> = emptyFlow()) {
       pendingFaRouteStore.consume(nextUri)
     }
 
-    CompositionLocalProvider(LocalUriHandler provides faLinkUriHandler) { CurrentScreen() }
+    val appNavigation =
+        remember(rootNavigator) {
+          { request: AppNavigationRequest ->
+            when (request) {
+              is AppNavigationRequest.UserGallery ->
+                  rootNavigator.push(
+                      UserRouteScreen(
+                          username = request.username,
+                          initialChildRoute = UserChildRoute.Gallery,
+                      )
+                  )
+              is AppNavigationRequest.Search ->
+                  rootNavigator.push(SearchRouteScreen(initialQuery = request.query))
+              is AppNavigationRequest.BrowseFilter ->
+                  rootNavigator.push(
+                      BrowseRouteScreen(
+                          initialFilter =
+                              BrowseFilterState(
+                                  category = request.category,
+                                  type = request.type,
+                                  species = request.species,
+                              )
+                      )
+                  )
+            }
+          }
+        }
+    CompositionLocalProvider(
+        LocalUriHandler provides faLinkUriHandler,
+        LocalAppNavigation provides appNavigation,
+    ) {
+      CurrentScreen()
+    }
   }
 }

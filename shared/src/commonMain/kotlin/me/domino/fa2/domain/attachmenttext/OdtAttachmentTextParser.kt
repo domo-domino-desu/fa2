@@ -5,7 +5,6 @@ import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
-import me.domino.fa2.domain.attachmenttext.*
 
 /** ODT 附件文本解析器。 */
 internal object OdtAttachmentTextParser : AttachmentTextParser {
@@ -45,7 +44,7 @@ internal object OdtAttachmentTextParser : AttachmentTextParser {
     val styleMap = extractOdtInlineStyleMap(document)
     val body =
         findFirstDescendant(document, "office:text")
-            ?: throw IllegalStateException("ODT 文档缺少 office:text")
+            ?: throw IllegalStateException("ODT document is missing office:text")
     val paragraphElements = mutableListOf<Element>()
     collectMatchingDescendants(
         node = body,
@@ -65,11 +64,7 @@ internal object OdtAttachmentTextParser : AttachmentTextParser {
             output = runs,
         )
       }
-      buildParagraphFromRuns(
-              runs = runs,
-              sourceLabel = "段落 ${index + 1}",
-          )
-          ?.let(paragraphs::add)
+      buildParagraphFromRuns(runs = runs)?.let(paragraphs::add)
       reporter.report(
           stageId = "walk_blocks",
           stageFraction = (index + 1) / total.toFloat(),
@@ -79,11 +74,7 @@ internal object OdtAttachmentTextParser : AttachmentTextParser {
       )
     }
 
-    reporter.report(
-        stageId = "build_html",
-        stageFraction = 0f,
-        message = "正在构建 HTML",
-    )
+    reporter.report(stageId = "build_html", stageFraction = 0f, message = "正在构建 HTML")
     val result = buildAttachmentTextDocument(format = format, paragraphs = paragraphs)
     reporter.report(
         stageId = "build_html",
@@ -98,11 +89,7 @@ internal object OdtAttachmentTextParser : AttachmentTextParser {
 /** 提取 ODT 文本样式映射。 */
 private fun extractOdtInlineStyleMap(document: Document): Map<String, AttachmentInlineStyle> {
   val styleNodes = mutableListOf<Element>()
-  collectMatchingDescendants(
-      node = document,
-      tagNames = setOf("style:style"),
-      output = styleNodes,
-  )
+  collectMatchingDescendants(node = document, tagNames = setOf("style:style"), output = styleNodes)
   return buildMap {
     styleNodes.forEach { styleNode ->
       val styleName = styleNode.attr("style:name").trim().ifBlank { styleNode.attr("name").trim() }

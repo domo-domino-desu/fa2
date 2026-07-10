@@ -129,10 +129,7 @@ class UiColorUsageTest {
     error("Unable to locate repository root from $start")
   }
 
-  private data class AllowedHardcodedColor(
-      val path: String,
-      val snippet: String,
-  ) {
+  private data class AllowedHardcodedColor(val path: String, val snippet: String) {
     fun matches(relativePath: String, trimmedLine: String): Boolean =
         relativePath == path && trimmedLine == snippet
   }

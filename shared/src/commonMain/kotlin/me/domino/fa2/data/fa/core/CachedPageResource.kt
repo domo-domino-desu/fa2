@@ -1,7 +1,7 @@
 package me.domino.fa2.data.fa.core
 
 import kotlinx.coroutines.flow.Flow
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 
 /**
  * Shared page-resource facade for FA resources that follow fetch -> cache -> load/refresh/prefetch.
@@ -26,11 +26,11 @@ internal class CachedPageResource<Key : Any, Value : Any>(
           decode = decode,
       )
 
-  fun stream(key: Key): Flow<PageState<Value>> = store.stream(key)
+  fun stream(key: Key): Flow<ResourceResult<Value>> = store.stream(key)
 
-  suspend fun load(key: Key): PageState<Value> = store.loadOnce(key)
+  suspend fun load(key: Key): ResourceResult<Value> = store.loadOnce(key)
 
-  suspend fun refresh(key: Key): PageState<Value> = store.refresh(key)
+  suspend fun refresh(key: Key): ResourceResult<Value> = store.refresh(key)
 
   suspend fun prefetch(key: Key) {
     store.prefetch(key)

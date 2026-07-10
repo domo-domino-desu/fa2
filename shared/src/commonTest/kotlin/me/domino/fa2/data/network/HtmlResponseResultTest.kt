@@ -33,10 +33,7 @@ class HtmlResponseResultTest {
         HtmlResponseResult.classify(
             statusCode = 200,
             headers =
-                mapOf(
-                    "Server" to listOf("cloudflare"),
-                    "CF-Ray" to listOf("9ddd33023806e170-NRT"),
-                ),
+                mapOf("Server" to listOf("cloudflare"), "CF-Ray" to listOf("9ddd33023806e170-NRT")),
             body = matureHtml,
             requestUrl = "https://www.furaffinity.net/view/10000008/",
             finalUrl = "https://www.furaffinity.net/view/10000008/",

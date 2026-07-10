@@ -14,9 +14,7 @@ enum class AttachmentTextFormat {
 /** 单个段落。 */
 data class AttachmentTextParagraph(
     /** 段落 HTML。 */
-    val html: String,
-    /** 来源标签。 */
-    val sourceLabel: String? = null,
+    val html: String
 )
 
 /** 解析结果。 */
@@ -39,14 +37,8 @@ data class AttachmentTextProgress(
     val stageCount: Int,
     /** 当前阶段 ID。 */
     val stageId: String,
-    /** 当前阶段标题。 */
-    val stageLabel: String,
     /** 当前阶段内进度。 */
     val stageFraction: Float,
-    /** 当前动作描述。 */
-    val message: String,
-    /** 当前处理对象。 */
-    val currentItemLabel: String? = null,
 )
 
 /** 内联样式。 */
@@ -85,8 +77,6 @@ internal data class PdfLine(
 internal data class AttachmentTextProgressStageSpec(
     /** 阶段 ID。 */
     val id: String,
-    /** 阶段标题。 */
-    val label: String,
     /** 阶段权重。 */
     val weight: Float,
 )

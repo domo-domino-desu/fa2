@@ -1,17 +1,17 @@
 package me.domino.fa2.data.fa.watchlist
 
-import me.domino.fa2.data.model.PageState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
-import me.domino.fa2.data.model.summarizePageState
+import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.utils.concurrency.SequentialRequestThrottle
 import me.domino.fa2.utils.logging.FaLog
 import me.domino.fa2.utils.logging.summarizeUrl
 
 /** watchlist 仓储。 */
 class WatchlistRepository(private val store: WatchlistPageCache) :
-    me.domino.fa2.domain.watchrecommendation.WatchRecommendationWatchlistSource {
+    WatchRecommendationWatchlistSource {
   private val log = FaLog.withTag("WatchlistRepository")
 
   private companion object {
@@ -23,13 +23,13 @@ class WatchlistRepository(private val store: WatchlistPageCache) :
       username: String,
       category: WatchlistCategory,
       nextPageUrl: String?,
-  ): PageState<WatchlistPage> {
+  ): ResourceResult<WatchlistPage> {
     log.d {
       "加载Watchlist -> user=$username,category=$category,cursor=${nextPageUrl?.let(::summarizeUrl) ?: "first"}"
     }
     val state =
         store.loadPageOnce(username = username, category = category, nextPageUrl = nextPageUrl)
-    log.d { "加载Watchlist -> ${summarizePageState(state)}" }
+    log.d { "加载Watchlist -> ${summarizeResourceResult(state)}" }
     return state
   }
 
@@ -37,11 +37,11 @@ class WatchlistRepository(private val store: WatchlistPageCache) :
   suspend fun refreshWatchlistFirstPage(
       username: String,
       category: WatchlistCategory,
-  ): PageState<WatchlistPage> {
+  ): ResourceResult<WatchlistPage> {
     log.i { "刷新Watchlist -> user=$username,category=$category" }
     store.invalidateUserCategory(username = username, category = category)
     val state = loadWatchlistPage(username = username, category = category, nextPageUrl = null)
-    log.i { "刷新Watchlist -> ${summarizePageState(state)}" }
+    log.i { "刷新Watchlist -> ${summarizeResourceResult(state)}" }
     return state
   }
 
@@ -50,7 +50,7 @@ class WatchlistRepository(private val store: WatchlistPageCache) :
       username: String,
       category: WatchlistCategory,
       useFreshFirstPage: Boolean = false,
-  ): PageState<List<WatchlistUser>> {
+  ): ResourceResult<List<WatchlistUser>> {
     log.i {
       "加载全部Watchlist -> 开始(user=$username,category=$category,useFreshFirstPage=$useFreshFirstPage)"
     }
@@ -65,14 +65,10 @@ class WatchlistRepository(private val store: WatchlistPageCache) :
           if (pageCount == 0 && useFreshFirstPage) {
             refreshWatchlistFirstPage(username = username, category = category)
           } else {
-            loadWatchlistPage(
-                username = username,
-                category = category,
-                nextPageUrl = nextPageUrl,
-            )
+            loadWatchlistPage(username = username, category = category, nextPageUrl = nextPageUrl)
           }
       when (state) {
-        is PageState.Success -> {
+        is ResourceResult.Success -> {
           pageCount += 1
           state.data.users.forEach { user ->
             uniqueUsers.putIfAbsent(user.username.lowercase(), user)
@@ -84,31 +80,29 @@ class WatchlistRepository(private val store: WatchlistPageCache) :
           if (nextPageUrl.isNullOrBlank()) {
             val result = uniqueUsers.values.toList()
             log.i { "加载全部Watchlist -> 成功(user=$username,category=$category,count=${result.size})" }
-            return PageState.Success(result)
+            return ResourceResult.Success(result)
           }
         }
 
-        is PageState.AuthRequired -> {
+        is ResourceResult.AuthRequired -> {
           log.w { "加载全部Watchlist -> 需要重新登录(user=$username,category=$category)" }
           return state
         }
 
-        PageState.CfChallenge -> {
+        ResourceResult.CfChallenge -> {
           log.w { "加载全部Watchlist -> Cloudflare验证(user=$username,category=$category)" }
-          return PageState.CfChallenge
+          return ResourceResult.CfChallenge
         }
 
-        is PageState.MatureBlocked -> {
+        is ResourceResult.MatureBlocked -> {
           log.w { "加载全部Watchlist -> 受限(user=$username,category=$category,reason=${state.reason})" }
           return state
         }
 
-        is PageState.Error -> {
+        is ResourceResult.Error -> {
           log.e(state.exception) { "加载全部Watchlist -> 失败(user=$username,category=$category)" }
           return state
         }
-
-        PageState.Loading -> Unit
       }
     }
   }

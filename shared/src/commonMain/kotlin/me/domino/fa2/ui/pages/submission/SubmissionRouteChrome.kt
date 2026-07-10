@@ -27,17 +27,17 @@ import me.domino.fa2.ui.app.scaffold.SubmissionRouteTopBar
 import me.domino.fa2.ui.components.platform.PlatformDownloadRequest
 import me.domino.fa2.ui.components.state.PageStateWrapper
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.pages.submission.content.*
-import me.domino.fa2.ui.pages.submission.imageocr.*
-import me.domino.fa2.ui.pages.submission.pager.*
+import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
 import me.domino.fa2.ui.pages.submission.pager.SubmissionPager
+import me.domino.fa2.ui.pages.submission.pager.SubmissionPagerUiState
+import me.domino.fa2.ui.state.UiPageState
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun SubmissionRouteChrome(
     state: SubmissionPagerUiState,
-    pageState: me.domino.fa2.data.model.PageState<SubmissionPagerUiState>,
+    pageState: UiPageState<SubmissionPagerUiState>,
     topBarActions: SubmissionTopBarActions,
     zoomOverlayVisible: Boolean,
     blockedSubmissionMode: BlockedSubmissionPagerMode,
