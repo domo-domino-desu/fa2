@@ -6,9 +6,9 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.yield
-import me.domino.fa2.data.fa.auth.AuthRepository
-import me.domino.fa2.data.fa.session.AuthSessionController
-import me.domino.fa2.data.fa.session.PendingFaRouteStore
+import me.domino.fa2.data.remote.fa.auth.AuthRepository
+import me.domino.fa2.data.remote.fa.session.AuthSessionController
+import me.domino.fa2.data.remote.fa.session.PendingFaRouteStore
 import me.domino.fa2.ui.pages.auth.AuthLoadingScreen
 import me.domino.fa2.ui.pages.auth.AuthRouteScreen
 import org.koin.compose.koinInject

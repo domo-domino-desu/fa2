@@ -15,18 +15,18 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import me.domino.fa2.data.fa.auth.AuthDataSource
-import me.domino.fa2.data.fa.auth.AuthRepository
-import me.domino.fa2.data.fa.auth.HomeEndpoint
-import me.domino.fa2.data.fa.core.FaHtmlDataSource
-import me.domino.fa2.data.fa.core.HtmlResponseResult
-import me.domino.fa2.data.fa.session.CookiePersistence
-import me.domino.fa2.data.fa.session.DefaultAuthSessionController
-import me.domino.fa2.data.fa.session.FaCookiesStorage
-import me.domino.fa2.data.fa.session.PendingFaRouteStore
-import me.domino.fa2.data.fa.session.SessionWebViewPort
-import me.domino.fa2.data.fa.session.UserAgentStorage
 import me.domino.fa2.data.local.KeyValueStorage
+import me.domino.fa2.data.remote.fa.auth.AuthDataSource
+import me.domino.fa2.data.remote.fa.auth.AuthRepository
+import me.domino.fa2.data.remote.fa.auth.HomeEndpoint
+import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
+import me.domino.fa2.data.remote.fa.session.CookiePersistence
+import me.domino.fa2.data.remote.fa.session.DefaultAuthSessionController
+import me.domino.fa2.data.remote.fa.session.FaCookiesStorage
+import me.domino.fa2.data.remote.fa.session.PendingFaRouteStore
+import me.domino.fa2.data.remote.fa.session.SessionWebViewPort
+import me.domino.fa2.data.remote.fa.session.UserAgentStorage
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.utils.FaUrls
 import okio.FileSystem
@@ -165,7 +165,9 @@ private fun createAuthScreenModelFixture(): AuthScreenModelFixture {
               authSessionController =
                   DefaultAuthSessionController(
                       profileStore =
-                          me.domino.fa2.data.fa.session.AuthSessionProfileStore(keyValueStorage),
+                          me.domino.fa2.data.remote.fa.session.AuthSessionProfileStore(
+                              keyValueStorage
+                          ),
                       pendingFaRouteStore = pendingFaRouteStore,
                   ),
               pendingFaRouteStore = pendingFaRouteStore,

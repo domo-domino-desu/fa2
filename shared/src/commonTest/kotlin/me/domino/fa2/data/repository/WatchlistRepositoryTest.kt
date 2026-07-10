@@ -1,15 +1,15 @@
-package me.domino.fa2.data.fa.watchlist
+package me.domino.fa2.data.remote.fa.watchlist
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.fa.core.FaHtmlDataSource
-import me.domino.fa2.data.fa.core.HtmlResponseResult
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistUser
+import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.utils.FaUrls

@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import me.domino.fa2.data.fa.session.CfChallengeController
-import me.domino.fa2.data.fa.session.CfChallengeUiState
+import me.domino.fa2.data.remote.fa.session.CfChallengeController
+import me.domino.fa2.data.remote.fa.session.CfChallengeUiState
 import org.koin.compose.koinInject
 
 /** 全局 challenge 覆盖层宿主。 */

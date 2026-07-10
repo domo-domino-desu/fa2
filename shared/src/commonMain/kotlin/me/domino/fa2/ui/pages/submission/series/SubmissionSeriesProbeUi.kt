@@ -21,7 +21,7 @@ import me.domino.fa2.domain.translation.SubmissionDescriptionBlock
 import me.domino.fa2.ui.components.feedback.LocalShowToast
 import me.domino.fa2.ui.components.html.HtmlBlockTrailingAction
 import me.domino.fa2.ui.components.html.HtmlBlockTrailingActionState
-import me.domino.fa2.ui.translation.SubmissionTranslationUiState
+import me.domino.fa2.ui.state.SubmissionTranslationUiState
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 

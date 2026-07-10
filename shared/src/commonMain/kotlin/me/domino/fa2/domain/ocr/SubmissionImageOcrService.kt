@@ -1,6 +1,6 @@
 package me.domino.fa2.domain.ocr
 
-import me.domino.fa2.data.fa.media.ImageBytesSource
+import me.domino.fa2.data.remote.fa.media.ImageBytesSource
 import me.domino.fa2.utils.logging.FaLog
 import me.domino.fa2.utils.logging.summarizeUrl
 

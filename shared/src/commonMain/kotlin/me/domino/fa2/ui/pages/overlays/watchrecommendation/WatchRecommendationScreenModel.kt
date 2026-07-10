@@ -19,9 +19,9 @@ import fa2.shared.generated.resources.recommendation_progress_sample_prepared
 import fa2.shared.generated.resources.recommendation_progress_starting
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.domain.watchrecommendation.RecommendedWatchUser
 import me.domino.fa2.domain.watchrecommendation.WatchRecommendationProgress
 import me.domino.fa2.domain.watchrecommendation.WatchRecommendationService

@@ -28,13 +28,13 @@ import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.domain.ocr.ImageOcrResult
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.ocr.RecognizedTextBlock
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerDetailSource
 import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrTranslationMode
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrTranslationStatus
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrUiState
 import me.domino.fa2.ui.pages.submission.pager.SubmissionPagerUiState
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerDetailSource
 import me.domino.fa2.utils.FaUrls
 import me.domino.fa2.utils.parseSubmissionSid
 

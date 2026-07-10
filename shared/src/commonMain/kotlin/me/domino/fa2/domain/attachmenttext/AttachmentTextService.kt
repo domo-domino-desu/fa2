@@ -1,8 +1,8 @@
 package me.domino.fa2.domain.attachmenttext
 
-import me.domino.fa2.data.fa.media.AttachmentDownloadResult
-import me.domino.fa2.data.fa.media.AttachmentDownloadSource
 import me.domino.fa2.data.model.ResourceResult
+import me.domino.fa2.data.remote.fa.media.AttachmentDownloadResult
+import me.domino.fa2.data.remote.fa.media.AttachmentDownloadSource
 import me.domino.fa2.utils.concurrency.runSuspendCatching
 import me.domino.fa2.utils.logging.FaLog
 import me.domino.fa2.utils.logging.summarizeUrl

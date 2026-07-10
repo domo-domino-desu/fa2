@@ -4,12 +4,12 @@ import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.auth.AuthRepository
-import me.domino.fa2.data.fa.session.AuthSessionController
-import me.domino.fa2.data.fa.user.ActivityHistoryRepository
-import me.domino.fa2.data.fa.user.UserResourceRepository
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.User
+import me.domino.fa2.data.remote.fa.auth.AuthRepository
+import me.domino.fa2.data.remote.fa.session.AuthSessionController
+import me.domino.fa2.data.remote.fa.user.ActivityHistoryRepository
+import me.domino.fa2.data.remote.fa.user.UserResourceRepository
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.utils.concurrency.runSuspendCatching
 import me.domino.fa2.utils.logging.FaLog

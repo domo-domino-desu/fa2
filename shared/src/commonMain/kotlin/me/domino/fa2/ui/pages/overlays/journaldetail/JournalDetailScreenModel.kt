@@ -7,21 +7,21 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.journal.JournalDetailRepository
 import me.domino.fa2.data.model.JournalDetail
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.summarizeResourceResult
+import me.domino.fa2.data.remote.fa.journal.JournalDetailRepository
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.i18n.appString
-import me.domino.fa2.ui.translation.SubmissionTranslationSourceMode
-import me.domino.fa2.ui.translation.SubmissionTranslationUiState
-import me.domino.fa2.ui.translation.canReuseTranslationResult
-import me.domino.fa2.ui.translation.markPendingBlocksAsFailed
-import me.domino.fa2.ui.translation.resolveTranslationState
-import me.domino.fa2.ui.translation.toPendingState
-import me.domino.fa2.ui.translation.variantOf
-import me.domino.fa2.ui.translation.withBlockResult
-import me.domino.fa2.ui.translation.withVariant
+import me.domino.fa2.ui.state.SubmissionTranslationSourceMode
+import me.domino.fa2.ui.state.SubmissionTranslationUiState
+import me.domino.fa2.ui.state.canReuseTranslationResult
+import me.domino.fa2.ui.state.markPendingBlocksAsFailed
+import me.domino.fa2.ui.state.resolveTranslationState
+import me.domino.fa2.ui.state.toPendingState
+import me.domino.fa2.ui.state.variantOf
+import me.domino.fa2.ui.state.withBlockResult
+import me.domino.fa2.ui.state.withVariant
 import me.domino.fa2.utils.logging.FaLog
 
 /** Journal 详情状态。 */

@@ -1,4 +1,4 @@
-package me.domino.fa2.data.fa.core
+package me.domino.fa2.data.remote.fa.core
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import io.ktor.client.call.body
@@ -13,12 +13,12 @@ import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.fa.media.ImageProgressTracker
-import me.domino.fa2.data.fa.media.createCachedDownloadHttpClient
-import me.domino.fa2.data.fa.session.CookiePersistence
-import me.domino.fa2.data.fa.session.FaCookiesStorage
-import me.domino.fa2.data.fa.session.UserAgentStorage
 import me.domino.fa2.data.local.KeyValueStorage
+import me.domino.fa2.data.remote.fa.media.ImageProgressTracker
+import me.domino.fa2.data.remote.fa.media.createCachedDownloadHttpClient
+import me.domino.fa2.data.remote.fa.session.CookiePersistence
+import me.domino.fa2.data.remote.fa.session.FaCookiesStorage
+import me.domino.fa2.data.remote.fa.session.UserAgentStorage
 import okio.FileSystem
 import okio.Path.Companion.toPath
 

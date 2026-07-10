@@ -6,7 +6,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerDetailSource
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerDetailSource
 
 /** Owns debounce, deduplication, and lifecycle for adjacent submission detail prefetches. */
 internal class SubmissionDetailPrefetchController(

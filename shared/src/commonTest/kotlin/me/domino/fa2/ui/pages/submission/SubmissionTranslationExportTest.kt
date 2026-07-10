@@ -11,9 +11,9 @@ import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrBlockUiState
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrTranslationStatus
 import me.domino.fa2.ui.pages.submission.translation.SubmissionImageOcrTranslationExportSnapshot
 import me.domino.fa2.ui.pages.submission.translation.buildSubmissionTranslationSidecarFiles
-import me.domino.fa2.ui.translation.SubmissionTranslationUiState
-import me.domino.fa2.ui.translation.resolveTranslationState
-import me.domino.fa2.ui.translation.toDisplayBlock
+import me.domino.fa2.ui.state.SubmissionTranslationUiState
+import me.domino.fa2.ui.state.resolveTranslationState
+import me.domino.fa2.ui.state.toDisplayBlock
 
 class SubmissionTranslationExportTest {
   @Test

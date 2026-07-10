@@ -7,7 +7,7 @@ import fa2.shared.generated.resources.following_recommendation_blocklist_update_
 import fa2.shared.generated.resources.load_failed_please_retry
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
+import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.utils.concurrency.runSuspendCatching
 import me.domino.fa2.utils.logging.FaLog

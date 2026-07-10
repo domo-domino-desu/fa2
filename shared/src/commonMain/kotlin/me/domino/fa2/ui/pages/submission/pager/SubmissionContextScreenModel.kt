@@ -10,18 +10,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.domain.submissionviewer.adapters.SeedSubmissionSourceAdapter
+import me.domino.fa2.domain.submissionviewer.api.ContextLoadingState
+import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSnapshot
+import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPaginationModel
+import me.domino.fa2.domain.submissionviewer.api.SubmissionSourceAdapter
+import me.domino.fa2.domain.submissionviewer.api.WaterfallScrollRequest
+import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
+import me.domino.fa2.domain.submissionviewer.api.matches
 import me.domino.fa2.ui.i18n.appString
-import me.domino.fa2.ui.submissionviewer.adapters.SeedSubmissionSourceAdapter
-import me.domino.fa2.ui.submissionviewer.api.ContextLoadingState
-import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSnapshot
-import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.ui.submissionviewer.api.SubmissionLoadedPage
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPageSnapshot
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPaginationModel
-import me.domino.fa2.ui.submissionviewer.api.SubmissionSourceAdapter
-import me.domino.fa2.ui.submissionviewer.api.WaterfallScrollRequest
-import me.domino.fa2.ui.submissionviewer.api.WaterfallViewportState
-import me.domino.fa2.ui.submissionviewer.api.matches
 import me.domino.fa2.utils.logging.FaLog
 
 class SubmissionContextScreenModel : ScreenModel {

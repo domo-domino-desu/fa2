@@ -15,8 +15,12 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import me.domino.fa2.data.fa.favorites.FavoritesRepository
-import me.domino.fa2.data.fa.gallery.GalleryRepository
+import me.domino.fa2.data.remote.fa.favorites.FavoritesRepository
+import me.domino.fa2.data.remote.fa.gallery.GalleryRepository
+import me.domino.fa2.domain.submissionviewer.adapters.UserSubmissionSourceAdapter
+import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.domain.submissionviewer.api.UserSubmissionSection
 import me.domino.fa2.ui.app.navigation.rootNavigator
 import me.domino.fa2.ui.pages.overlays.journalpager.JournalPagerContextScreenModel
 import me.domino.fa2.ui.pages.overlays.journalpager.JournalPagerRouteScreen
@@ -24,10 +28,6 @@ import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
 import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
 import me.domino.fa2.ui.pages.submission.pager.pageNumberForSid
 import me.domino.fa2.ui.pages.submission.pager.toWaterfallPageControls
-import me.domino.fa2.ui.submissionviewer.adapters.UserSubmissionSourceAdapter
-import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.ui.submissionviewer.api.SubmissionLoadedPage
-import me.domino.fa2.ui.submissionviewer.api.UserSubmissionSection
 import me.domino.fa2.utils.FaUrls
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf

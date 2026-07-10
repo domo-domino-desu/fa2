@@ -14,10 +14,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerDetailSource
 import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerDetailSource
 import me.domino.fa2.utils.FaUrls
 
 /** Owns optimistic favorite updates and tag block/unblock actions for the current submission. */

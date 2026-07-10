@@ -1,7 +1,7 @@
 package me.domino.fa2.ui.components.forms
 
-import me.domino.fa2.data.taxonomy.FaTaxonomyChoice
-import me.domino.fa2.data.taxonomy.FaTaxonomyChoiceGroup
+import me.domino.fa2.data.local.taxonomy.FaTaxonomyChoice
+import me.domino.fa2.data.local.taxonomy.FaTaxonomyChoiceGroup
 
 internal fun <T> FaTaxonomyChoice<T>.toFilterOption(): FilterOption<T> =
     FilterOption(value = value, label = label)

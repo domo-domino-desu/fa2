@@ -9,11 +9,11 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import me.domino.fa2.data.i18n.AppLanguage
-import me.domino.fa2.data.i18n.MetadataDisplayPreferences
-import me.domino.fa2.data.i18n.defaultMetadataDisplayPreferences
-import me.domino.fa2.data.i18n.localizedFor
-import me.domino.fa2.data.i18n.localizedOrOriginal
+import me.domino.fa2.data.settings.AppLanguage
+import me.domino.fa2.data.settings.MetadataDisplayPreferences
+import me.domino.fa2.data.settings.defaultMetadataDisplayPreferences
+import me.domino.fa2.data.settings.localizedFor
+import me.domino.fa2.data.settings.localizedOrOriginal
 import me.domino.fa2.utils.concurrency.runSuspendCatching
 import me.domino.fa2.utils.logging.FaLog
 

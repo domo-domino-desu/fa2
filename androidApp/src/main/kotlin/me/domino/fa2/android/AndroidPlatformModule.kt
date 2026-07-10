@@ -8,9 +8,9 @@ import androidx.room.Room
 import eu.anifantakis.lib.ksafe.KSafe
 import java.io.File
 import me.domino.fa2.android.ocr.MlKitImageTextRecognitionPort
-import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.local.AppDatabase
 import me.domino.fa2.data.local.AppDatabaseBuilderFactory
+import me.domino.fa2.data.settings.SystemLanguageProvider
 import me.domino.fa2.di.KOIN_QUALIFIER_COOKIE_VAULT
 import me.domino.fa2.di.KOIN_QUALIFIER_SETTINGS_SECRET_VAULT
 import me.domino.fa2.domain.ocr.ImageTextRecognitionPort

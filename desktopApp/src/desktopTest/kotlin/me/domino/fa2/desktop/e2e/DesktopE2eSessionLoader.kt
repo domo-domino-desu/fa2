@@ -1,8 +1,8 @@
 package me.domino.fa2.desktop.e2e
 
-import me.domino.fa2.data.fa.auth.AuthRepository
-import me.domino.fa2.data.fa.session.UserAgentStorage
 import me.domino.fa2.data.model.AuthProbeResult
+import me.domino.fa2.data.remote.fa.auth.AuthRepository
+import me.domino.fa2.data.remote.fa.session.UserAgentStorage
 import me.domino.fa2.di.startAppKoin
 import me.domino.fa2.di.stopAppKoin
 

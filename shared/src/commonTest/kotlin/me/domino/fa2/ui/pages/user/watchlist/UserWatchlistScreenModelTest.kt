@@ -14,11 +14,11 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import me.domino.fa2.data.fa.watchlist.WatchlistRepository
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
+import me.domino.fa2.data.remote.fa.watchlist.WatchlistRepository
 import me.domino.fa2.ui.pages.overlays.userwatchlist.UserWatchlistScreenModel
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -243,21 +243,23 @@ private fun createScreenModelFixture(
     WatchlistScreenModelFixture(
         repository =
             WatchlistRepository(
-                me.domino.fa2.data.fa.watchlist.WatchlistPageCache(
+                me.domino.fa2.data.remote.fa.watchlist.WatchlistPageCache(
                     dataSource =
-                        me.domino.fa2.data.fa.watchlist.WatchlistDataSource(
+                        me.domino.fa2.data.remote.fa.watchlist.WatchlistDataSource(
                             endpoint =
-                                me.domino.fa2.data.fa.watchlist.WatchlistEndpoint(
+                                me.domino.fa2.data.remote.fa.watchlist.WatchlistEndpoint(
                                     dataSource =
-                                        object : me.domino.fa2.data.fa.core.FaHtmlDataSource {
+                                        object :
+                                            me.domino.fa2.data.remote.fa.core.FaHtmlDataSource {
                                           override suspend fun get(url: String) =
-                                              me.domino.fa2.data.fa.core.HtmlResponseResult.Error(
-                                                  statusCode = 500,
-                                                  message = "unused",
-                                              )
+                                              me.domino.fa2.data.remote.fa.core.HtmlResponseResult
+                                                  .Error(
+                                                      statusCode = 500,
+                                                      message = "unused",
+                                                  )
                                         }
                                 ),
-                            parser = me.domino.fa2.data.fa.watchlist.WatchlistParser(),
+                            parser = me.domino.fa2.data.remote.fa.watchlist.WatchlistParser(),
                         ),
                     pageCacheDao = me.domino.fa2.fake.InMemoryPageCacheDao(),
                 )

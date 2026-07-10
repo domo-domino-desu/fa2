@@ -1,4 +1,4 @@
-package me.domino.fa2.data.fa.core
+package me.domino.fa2.data.remote.fa.core
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import io.ktor.client.engine.mock.MockEngine
@@ -10,11 +10,11 @@ import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.fa.session.FaCookiesStorage
-import me.domino.fa2.data.fa.session.FaHttpClient
-import me.domino.fa2.data.fa.session.UserAgentStorage
-import me.domino.fa2.data.fa.session.createFaPageHttpClient
 import me.domino.fa2.data.local.KeyValueStorage
+import me.domino.fa2.data.remote.fa.session.FaCookiesStorage
+import me.domino.fa2.data.remote.fa.session.FaHttpClient
+import me.domino.fa2.data.remote.fa.session.UserAgentStorage
+import me.domino.fa2.data.remote.fa.session.createFaPageHttpClient
 import okio.FileSystem
 import okio.Path.Companion.toPath
 

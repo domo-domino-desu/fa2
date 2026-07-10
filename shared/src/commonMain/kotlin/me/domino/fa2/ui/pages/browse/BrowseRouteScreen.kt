@@ -16,7 +16,11 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.browse.BrowseRepository
+import me.domino.fa2.data.remote.fa.browse.BrowseRepository
+import me.domino.fa2.domain.submissionviewer.adapters.BrowseSubmissionSourceAdapter
+import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.navigation.openSubmissionFromList
 import me.domino.fa2.ui.app.scaffold.BrowseRouteTopBar
@@ -24,10 +28,6 @@ import me.domino.fa2.ui.components.state.PageStateWrapper
 import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
 import me.domino.fa2.ui.pages.submission.pager.pageNumberForSid
 import me.domino.fa2.ui.pages.submission.pager.toWaterfallPageControls
-import me.domino.fa2.ui.submissionviewer.adapters.BrowseSubmissionSourceAdapter
-import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.ui.submissionviewer.api.SubmissionLoadedPage
-import me.domino.fa2.ui.submissionviewer.api.WaterfallViewportState
 import me.domino.fa2.utils.FaUrls
 import org.koin.compose.koinInject
 

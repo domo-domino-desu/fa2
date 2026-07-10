@@ -1,4 +1,4 @@
-package me.domino.fa2.data.fa.media
+package me.domino.fa2.data.remote.fa.media
 
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -9,11 +9,11 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.fa.core.InMemoryCookiePersistence
-import me.domino.fa2.data.fa.core.createTestUserAgentStorage
-import me.domino.fa2.data.fa.session.CfChallengeSignal
-import me.domino.fa2.data.fa.session.ChallengeResolver
-import me.domino.fa2.data.fa.session.FaCookiesStorage
+import me.domino.fa2.data.remote.fa.core.InMemoryCookiePersistence
+import me.domino.fa2.data.remote.fa.core.createTestUserAgentStorage
+import me.domino.fa2.data.remote.fa.session.CfChallengeSignal
+import me.domino.fa2.data.remote.fa.session.ChallengeResolver
+import me.domino.fa2.data.remote.fa.session.FaCookiesStorage
 
 class AttachmentDownloadEndpointTest {
   @Test

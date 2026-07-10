@@ -34,7 +34,7 @@ import fa2.shared.generated.resources.Res
 import fa2.shared.generated.resources.no_content
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.watchlist.WatchlistRepository
+import me.domino.fa2.data.remote.fa.watchlist.WatchlistRepository
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
 import me.domino.fa2.ui.pages.overlays.watchrecommendation.SimilarUsersRouteScreen

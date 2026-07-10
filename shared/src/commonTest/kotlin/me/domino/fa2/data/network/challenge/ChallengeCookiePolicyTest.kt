@@ -1,4 +1,4 @@
-package me.domino.fa2.data.fa.session
+package me.domino.fa2.data.remote.fa.session
 
 import kotlin.test.Test
 import kotlin.test.assertFalse

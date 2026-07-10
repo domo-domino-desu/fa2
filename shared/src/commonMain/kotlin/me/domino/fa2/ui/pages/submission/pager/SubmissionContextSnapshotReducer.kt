@@ -1,15 +1,15 @@
 package me.domino.fa2.ui.pages.submission.pager
 
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.ui.submissionviewer.api.ContextLoadingState
-import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSnapshot
-import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPageSnapshot
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPaginationModel
-import me.domino.fa2.ui.submissionviewer.api.WaterfallViewportState
-import me.domino.fa2.ui.submissionviewer.api.isDirectNextOf
-import me.domino.fa2.ui.submissionviewer.api.isDirectPreviousOf
-import me.domino.fa2.ui.submissionviewer.api.matches
+import me.domino.fa2.domain.submissionviewer.api.ContextLoadingState
+import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSnapshot
+import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPaginationModel
+import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
+import me.domino.fa2.domain.submissionviewer.api.isDirectNextOf
+import me.domino.fa2.domain.submissionviewer.api.isDirectPreviousOf
+import me.domino.fa2.domain.submissionviewer.api.matches
 
 internal enum class SubmissionContextLoadKind {
   PREPEND,

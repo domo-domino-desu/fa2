@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.auth.AuthRepository
-import me.domino.fa2.data.fa.session.AuthSessionController
-import me.domino.fa2.data.fa.session.PendingFaRouteStore
-import me.domino.fa2.data.fa.session.SessionWebViewPort
 import me.domino.fa2.data.model.AuthProbeResult
+import me.domino.fa2.data.remote.fa.auth.AuthRepository
+import me.domino.fa2.data.remote.fa.session.AuthSessionController
+import me.domino.fa2.data.remote.fa.session.PendingFaRouteStore
+import me.domino.fa2.data.remote.fa.session.SessionWebViewPort
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.utils.FaUrls
 import me.domino.fa2.utils.logging.FaLog

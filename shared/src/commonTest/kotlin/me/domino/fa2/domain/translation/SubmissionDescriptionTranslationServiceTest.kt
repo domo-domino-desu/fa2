@@ -7,13 +7,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.fa.submission.SubmissionParser
 import me.domino.fa2.data.local.KeyValueStorage
 import me.domino.fa2.data.local.settings.AppSettingsStorage
+import me.domino.fa2.data.remote.fa.submission.SubmissionParser
+import me.domino.fa2.data.remote.translation.SubmissionTextTranslationEngine
+import me.domino.fa2.data.remote.translation.TranslationPort
+import me.domino.fa2.data.remote.translation.TranslationRequest
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.data.translation.SubmissionTextTranslationEngine
-import me.domino.fa2.data.translation.TranslationPort
-import me.domino.fa2.data.translation.TranslationRequest
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.utils.FaUrls
 import okio.FileSystem

@@ -33,9 +33,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.i18n.AppLanguage
-import me.domino.fa2.data.i18n.MetadataDisplayPreferences
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.data.settings.AppLanguage
+import me.domino.fa2.data.settings.MetadataDisplayPreferences
+import me.domino.fa2.domain.submissionviewer.api.WaterfallScrollRequest
 import me.domino.fa2.ui.app.LocalAppI18n
 import me.domino.fa2.ui.app.LocalAppSettings
 import me.domino.fa2.ui.app.LocalSearchUiLabelsCatalog
@@ -67,7 +68,6 @@ import me.domino.fa2.ui.i18n.search.SearchUiMetadataKey
 import me.domino.fa2.ui.i18n.search.SearchUiOptionKey
 import me.domino.fa2.ui.i18n.search.SearchUiTextKey
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.submissionviewer.api.WaterfallScrollRequest
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

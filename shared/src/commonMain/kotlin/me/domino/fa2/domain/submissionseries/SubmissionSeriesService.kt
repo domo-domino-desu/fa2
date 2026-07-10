@@ -1,10 +1,10 @@
 package me.domino.fa2.domain.submissionseries
 
 import com.fleeksoft.ksoup.Ksoup
-import me.domino.fa2.data.fa.submission.SubmissionSeriesSubmissionSource
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.data.remote.fa.submission.SubmissionSeriesSubmissionSource
 import me.domino.fa2.domain.translation.SubmissionDescriptionBlock
 import me.domino.fa2.utils.concurrency.SequentialRequestThrottle
 import me.domino.fa2.utils.html.HtmlTextBlock

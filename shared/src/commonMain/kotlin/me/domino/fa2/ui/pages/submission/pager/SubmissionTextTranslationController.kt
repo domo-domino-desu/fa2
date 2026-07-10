@@ -11,14 +11,14 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
-import me.domino.fa2.ui.translation.SubmissionTranslationSourceMode
-import me.domino.fa2.ui.translation.SubmissionTranslationUiState
-import me.domino.fa2.ui.translation.canReuseTranslationResult
-import me.domino.fa2.ui.translation.markPendingBlocksAsFailed
-import me.domino.fa2.ui.translation.toPendingState
-import me.domino.fa2.ui.translation.variantOf
-import me.domino.fa2.ui.translation.withBlockResult
-import me.domino.fa2.ui.translation.withVariant
+import me.domino.fa2.ui.state.SubmissionTranslationSourceMode
+import me.domino.fa2.ui.state.SubmissionTranslationUiState
+import me.domino.fa2.ui.state.canReuseTranslationResult
+import me.domino.fa2.ui.state.markPendingBlocksAsFailed
+import me.domino.fa2.ui.state.toPendingState
+import me.domino.fa2.ui.state.variantOf
+import me.domino.fa2.ui.state.withBlockResult
+import me.domino.fa2.ui.state.withVariant
 
 internal enum class SubmissionTranslationTarget {
   DESCRIPTION,

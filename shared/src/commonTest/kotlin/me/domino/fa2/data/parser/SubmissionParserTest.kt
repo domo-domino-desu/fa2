@@ -1,4 +1,4 @@
-package me.domino.fa2.data.fa.submission
+package me.domino.fa2.data.remote.fa.submission
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

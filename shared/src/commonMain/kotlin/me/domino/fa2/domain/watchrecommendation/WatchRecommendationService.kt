@@ -1,14 +1,14 @@
 package me.domino.fa2.domain.watchrecommendation
 
 import kotlin.random.Random
-import me.domino.fa2.data.fa.user.WatchRecommendationUserSource
-import me.domino.fa2.data.fa.watchlist.WatchRecommendationWatchlistSource
+import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.User
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
-import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
+import me.domino.fa2.data.remote.fa.user.WatchRecommendationUserSource
+import me.domino.fa2.data.remote.fa.watchlist.WatchRecommendationWatchlistSource
 import me.domino.fa2.utils.concurrency.SequentialRequestThrottle
 import me.domino.fa2.utils.logging.FaLog
 
@@ -37,7 +37,9 @@ class WatchRecommendationService(
     private val watchlistSampler: RandomWatchlistSampler,
     private val loadWatchlistPage:
         suspend (
-            username: String, category: WatchlistCategory, nextPageUrl: String?,
+            username: String,
+            category: WatchlistCategory,
+            nextPageUrl: String?,
         ) -> ResourceResult<WatchlistPage>,
     private val blocklistRepository: WatchRecommendationBlocklist,
     private val random: Random = Random.Default,

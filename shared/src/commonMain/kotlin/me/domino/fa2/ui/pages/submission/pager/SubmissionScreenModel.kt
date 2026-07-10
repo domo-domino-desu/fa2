@@ -13,12 +13,12 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.ocr.SubmissionImageOcrService
+import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerDetailSource
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.domain.translation.SubmissionImageOcrTranslationService
 import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
 import me.domino.fa2.ui.state.UiPageState
-import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerDetailSource
 import me.domino.fa2.utils.logging.FaLog
 
 /** 投稿详情浏览页面状态模型。 */

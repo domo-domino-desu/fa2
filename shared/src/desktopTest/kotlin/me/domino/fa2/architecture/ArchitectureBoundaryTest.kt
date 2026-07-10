@@ -62,8 +62,8 @@ class ArchitectureBoundaryTest {
 
   @Test
   fun dataResourcePackagesAreAcyclic() {
-    val faRoot = commonMainRoot.resolve("data/fa")
-    val packagePattern = Regex("me\\.domino\\.fa2\\.data\\.fa\\.([a-z0-9_]+)")
+    val faRoot = commonMainRoot.resolve("data/remote/fa")
+    val packagePattern = Regex("me\\.domino\\.fa2\\.data\\.remote\\.fa\\.([a-z0-9_]+)")
     val graph = mutableMapOf<String, MutableSet<String>>()
 
     kotlinFilesUnder(faRoot).forEach { file ->
@@ -89,9 +89,8 @@ class ArchitectureBoundaryTest {
     val protectedRoots =
         listOf(
             commonMainRoot.resolve("ui/components"),
-            commonMainRoot.resolve("ui/submissionviewer/api"),
-            commonMainRoot.resolve("ui/navigation"),
-            commonMainRoot.resolve("ui/translation"),
+            commonMainRoot.resolve("domain/submissionviewer/api"),
+            commonMainRoot.resolve("ui/state"),
         )
     val offenders =
         protectedRoots.flatMap(::kotlinFilesUnder).flatMap { file ->

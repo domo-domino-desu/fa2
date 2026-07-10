@@ -7,7 +7,7 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
 import io.ktor.client.HttpClient
-import me.domino.fa2.data.fa.media.installCoilImageProgressSupport
+import me.domino.fa2.data.remote.fa.media.installCoilImageProgressSupport
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.di.KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT
 import me.domino.fa2.di.startAppKoin

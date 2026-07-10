@@ -19,10 +19,17 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.browse.BrowseRepository
-import me.domino.fa2.data.fa.feed.FeedRepository
-import me.domino.fa2.data.fa.search.SearchRepository
-import me.domino.fa2.data.fa.session.PendingFaRouteStore
+import me.domino.fa2.data.remote.fa.browse.BrowseRepository
+import me.domino.fa2.data.remote.fa.feed.FeedRepository
+import me.domino.fa2.data.remote.fa.search.SearchRepository
+import me.domino.fa2.data.remote.fa.session.PendingFaRouteStore
+import me.domino.fa2.domain.submissionviewer.adapters.BrowseSubmissionSourceAdapter
+import me.domino.fa2.domain.submissionviewer.adapters.FeedSubmissionSourceAdapter
+import me.domino.fa2.domain.submissionviewer.adapters.SearchSubmissionSourceAdapter
+import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSnapshot
+import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
 import me.domino.fa2.ui.components.state.PageStateWrapper
 import me.domino.fa2.ui.pages.auth.AuthRouteScreen
 import me.domino.fa2.ui.pages.browse.BrowseScreen
@@ -51,13 +58,6 @@ import me.domino.fa2.ui.pages.user.UserChildRoute
 import me.domino.fa2.ui.pages.user.UserRouteScreen
 import me.domino.fa2.ui.pages.user.userHeaderNavigationActions
 import me.domino.fa2.ui.state.UiPageState
-import me.domino.fa2.ui.submissionviewer.adapters.BrowseSubmissionSourceAdapter
-import me.domino.fa2.ui.submissionviewer.adapters.FeedSubmissionSourceAdapter
-import me.domino.fa2.ui.submissionviewer.adapters.SearchSubmissionSourceAdapter
-import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSnapshot
-import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.ui.submissionviewer.api.SubmissionLoadedPage
-import me.domino.fa2.ui.submissionviewer.api.WaterfallViewportState
 import me.domino.fa2.utils.FaUrls
 import org.koin.compose.koinInject
 

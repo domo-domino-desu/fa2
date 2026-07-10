@@ -1,13 +1,13 @@
-package me.domino.fa2.data.fa.feed
+package me.domino.fa2.data.remote.fa.feed
 
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.fa.core.FaHtmlDataSource
-import me.domino.fa2.data.fa.core.HtmlResponseResult
 import me.domino.fa2.data.model.ResourceResult
+import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.utils.FaUrls

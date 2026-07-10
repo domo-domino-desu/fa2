@@ -8,10 +8,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.browse.BrowseRepository
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.model.summarizeResourceResult
+import me.domino.fa2.data.remote.fa.browse.BrowseRepository
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.state.UiPageState
 import me.domino.fa2.ui.utils.PaginationReducer

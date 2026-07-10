@@ -15,17 +15,17 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPaginationKind
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPaginationModel
+import me.domino.fa2.domain.submissionviewer.api.SubmissionSourceAdapter
 import me.domino.fa2.ui.components.waterfall.WaterfallPaginationKind
 import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
 import me.domino.fa2.ui.pages.submission.pager.currentWaterfallPageTarget
 import me.domino.fa2.ui.pages.submission.pager.knownLastPageNumber
 import me.domino.fa2.ui.pages.submission.pager.toWaterfallPageControls
-import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.ui.submissionviewer.api.SubmissionLoadedPage
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPageSnapshot
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPaginationKind
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPaginationModel
-import me.domino.fa2.ui.submissionviewer.api.SubmissionSourceAdapter
 import me.domino.fa2.utils.FaUrls
 
 @OptIn(ExperimentalCoroutinesApi::class)

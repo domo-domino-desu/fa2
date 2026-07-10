@@ -1,8 +1,8 @@
 package me.domino.fa2.di
 
-import me.domino.fa2.data.fa.user.WatchRecommendationUserSource
-import me.domino.fa2.data.fa.watchlist.WatchRecommendationWatchlistSource
-import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
+import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
+import me.domino.fa2.data.remote.fa.user.WatchRecommendationUserSource
+import me.domino.fa2.data.remote.fa.watchlist.WatchRecommendationWatchlistSource
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesService
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.domain.translation.SubmissionImageOcrTranslationService

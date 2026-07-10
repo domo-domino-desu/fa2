@@ -1,15 +1,15 @@
 package me.domino.fa2.ui.pages.submission.pager
 
-import me.domino.fa2.data.fa.feed.FeedRepository
-import me.domino.fa2.data.fa.submission.SubmissionRepository
 import me.domino.fa2.data.model.FeedPage
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
+import me.domino.fa2.data.remote.fa.feed.FeedRepository
+import me.domino.fa2.data.remote.fa.submission.SubmissionRepository
 import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.domain.attachmenttext.AttachmentTextService
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerDetailSource
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerFeedSource
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerDetailSource
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerFeedSource
 import me.domino.fa2.utils.concurrency.runSuspendCatching
 
 class SubmissionPagerFeedSourceImpl(private val repository: FeedRepository) :

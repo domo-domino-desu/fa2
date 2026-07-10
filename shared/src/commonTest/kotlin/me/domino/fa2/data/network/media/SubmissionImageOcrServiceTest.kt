@@ -4,7 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.fa.media.ImageBytesSource
+import me.domino.fa2.data.remote.fa.media.ImageBytesSource
 
 class SubmissionImageOcrServiceTest {
   @Test

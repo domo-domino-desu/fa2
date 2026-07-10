@@ -32,7 +32,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.journal.JournalRepository
+import me.domino.fa2.data.remote.fa.journal.JournalRepository
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.app.LocalAppI18n

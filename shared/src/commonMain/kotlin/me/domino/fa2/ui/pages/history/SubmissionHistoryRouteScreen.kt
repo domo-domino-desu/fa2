@@ -23,17 +23,17 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.user.ActivityHistoryRepository
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.data.remote.fa.user.ActivityHistoryRepository
 import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.navigation.rootNavigator
 import me.domino.fa2.ui.app.scaffold.SubmissionHistoryRouteTopBar
 import me.domino.fa2.ui.components.waterfall.SubmissionWaterfall
 import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
 import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
-import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.ui.submissionviewer.api.WaterfallViewportState
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 

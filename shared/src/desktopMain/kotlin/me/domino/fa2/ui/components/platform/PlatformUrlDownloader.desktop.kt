@@ -9,8 +9,8 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import me.domino.fa2.data.fa.media.AttachmentDownloadResult
-import me.domino.fa2.data.fa.media.AttachmentDownloadSource
+import me.domino.fa2.data.remote.fa.media.AttachmentDownloadResult
+import me.domino.fa2.data.remote.fa.media.AttachmentDownloadSource
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.ui.i18n.appString
 import org.koin.compose.koinInject

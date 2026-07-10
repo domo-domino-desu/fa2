@@ -1,4 +1,4 @@
-package me.domino.fa2.data.fa.social
+package me.domino.fa2.data.remote.fa.social
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -72,12 +72,12 @@ class SocialActionBackendTest {
 }
 
 private class BackendChallengeResolver(vararg decisions: Boolean) :
-    me.domino.fa2.data.fa.session.ChallengeResolver {
+    me.domino.fa2.data.remote.fa.session.ChallengeResolver {
   private val queue = ArrayDeque(decisions.toList())
-  val requests = mutableListOf<me.domino.fa2.data.fa.session.CfChallengeSignal>()
+  val requests = mutableListOf<me.domino.fa2.data.remote.fa.session.CfChallengeSignal>()
 
   override suspend fun awaitResolution(
-      challenge: me.domino.fa2.data.fa.session.CfChallengeSignal
+      challenge: me.domino.fa2.data.remote.fa.session.CfChallengeSignal
   ): Boolean {
     requests += challenge
     return queue.removeFirstOrNull() ?: false

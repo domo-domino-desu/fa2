@@ -10,10 +10,10 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.local.KeyValueStorage
 import me.domino.fa2.data.local.settings.AppSettingsStorage
+import me.domino.fa2.data.remote.translation.SubmissionTextTranslationEngine
+import me.domino.fa2.data.remote.translation.TranslationPort
+import me.domino.fa2.data.remote.translation.TranslationRequest
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.data.translation.SubmissionTextTranslationEngine
-import me.domino.fa2.data.translation.TranslationPort
-import me.domino.fa2.data.translation.TranslationRequest
 import okio.FileSystem
 import okio.Path.Companion.toPath
 

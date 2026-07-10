@@ -28,7 +28,7 @@ import me.domino.fa2.ui.components.html.TranslatableBlocksCard
 import me.domino.fa2.ui.components.html.TranslatableSectionTitleRow
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.series.rememberSubmissionSeriesTrailingActions
-import me.domino.fa2.ui.translation.SubmissionTranslationUiState
+import me.domino.fa2.ui.state.SubmissionTranslationUiState
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

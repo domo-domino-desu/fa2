@@ -14,9 +14,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.flowOf
-import me.domino.fa2.data.fa.media.ImageDownloadProgressSnapshot
-import me.domino.fa2.data.fa.media.ImageProgressTracker
-import me.domino.fa2.data.fa.media.normalizeProgressKey
+import me.domino.fa2.data.remote.fa.media.ImageDownloadProgressSnapshot
+import me.domino.fa2.data.remote.fa.media.ImageProgressTracker
+import me.domino.fa2.data.remote.fa.media.normalizeProgressKey
 import org.koin.compose.koinInject
 
 /** 图片加载生命周期。 */

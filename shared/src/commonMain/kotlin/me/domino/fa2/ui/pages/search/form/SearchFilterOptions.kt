@@ -1,6 +1,6 @@
 package me.domino.fa2.ui.pages.search
 
-import me.domino.fa2.data.i18n.AppLanguage
+import me.domino.fa2.data.settings.AppLanguage
 import me.domino.fa2.ui.components.forms.FilterOption
 import me.domino.fa2.ui.i18n.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.i18n.search.SearchUiOptionKey

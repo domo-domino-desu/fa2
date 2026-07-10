@@ -1,10 +1,10 @@
-package me.domino.fa2.data.fa.submission
+package me.domino.fa2.data.remote.fa.submission
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
-import me.domino.fa2.data.fa.listing.parseSubmissionAvatarUrls
+import me.domino.fa2.data.remote.fa.listing.parseSubmissionAvatarUrls
 import me.domino.fa2.fake.TestFixtures
 
 class ParserUtilsTest {

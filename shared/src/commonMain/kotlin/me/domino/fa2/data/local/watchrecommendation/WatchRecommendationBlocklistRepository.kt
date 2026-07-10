@@ -3,9 +3,8 @@ package me.domino.fa2.data.local.watchrecommendation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import me.domino.fa2.data.fa.core.storeJson
 import me.domino.fa2.data.local.KeyValueStorage
-import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
+import me.domino.fa2.data.remote.fa.core.storeJson
 import me.domino.fa2.utils.logging.FaLog
 
 class PersistedWatchRecommendationBlocklistRepository(

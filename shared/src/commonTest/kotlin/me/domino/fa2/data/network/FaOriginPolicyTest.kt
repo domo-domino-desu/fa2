@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import me.domino.fa2.data.fa.core.FaOriginPolicy
+import me.domino.fa2.data.remote.fa.core.FaOriginPolicy
 
 class FaOriginPolicyTest {
   @Test

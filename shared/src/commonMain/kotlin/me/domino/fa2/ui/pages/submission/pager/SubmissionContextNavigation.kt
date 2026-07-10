@@ -1,12 +1,12 @@
 package me.domino.fa2.ui.pages.submission.pager
 
+import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSnapshot
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPageTarget
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPaginationKind
+import me.domino.fa2.domain.submissionviewer.api.isDirectNextOf
+import me.domino.fa2.domain.submissionviewer.api.isDirectPreviousOf
 import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallPageControls
 import me.domino.fa2.ui.components.waterfall.WaterfallPaginationKind
-import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSnapshot
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPageTarget
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPaginationKind
-import me.domino.fa2.ui.submissionviewer.api.isDirectNextOf
-import me.domino.fa2.ui.submissionviewer.api.isDirectPreviousOf
 
 internal fun SubmissionContextSnapshot.pageNumberForSid(sid: Int?): Int? {
   if (sid == null) return null

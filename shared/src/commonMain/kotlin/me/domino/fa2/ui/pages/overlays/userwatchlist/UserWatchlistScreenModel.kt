@@ -6,12 +6,12 @@ import fa2.shared.generated.resources.*
 import kotlin.random.Random
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.watchlist.WatchlistRepository
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
 import me.domino.fa2.data.model.summarizeResourceResult
+import me.domino.fa2.data.remote.fa.watchlist.WatchlistRepository
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.i18n.appStringOrFallback
 import me.domino.fa2.ui.utils.PaginationReducer
@@ -63,7 +63,9 @@ class UserWatchlistScreenModel(
     private val random: Random = Random.Default,
     private val loadWatchlistPage:
         suspend (
-            username: String, category: WatchlistCategory, nextPageUrl: String?,
+            username: String,
+            category: WatchlistCategory,
+            nextPageUrl: String?,
         ) -> ResourceResult<WatchlistPage> =
         repository::loadWatchlistPage,
     private val refreshWatchlistFirstPage:

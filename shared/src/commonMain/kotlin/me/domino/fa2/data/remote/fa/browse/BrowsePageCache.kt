@@ -1,0 +1,49 @@
+package me.domino.fa2.data.remote.fa.browse
+
+import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import me.domino.fa2.data.local.dao.PageCacheDao
+import me.domino.fa2.data.model.ResourceResult
+import me.domino.fa2.data.model.SubmissionListingPage
+import me.domino.fa2.data.remote.fa.core.CachedPageResource
+import me.domino.fa2.data.remote.fa.core.requireStoreValue
+import me.domino.fa2.data.remote.fa.core.storeJson
+
+/** Browse 列表存储层。 */
+class BrowsePageCache(
+    private val dataSource: BrowseDataSource,
+    private val pageCacheDao: PageCacheDao,
+) {
+  private val cachedStore =
+      CachedPageResource(
+          storeName = "browse-fetcher",
+          pageCacheDao = pageCacheDao,
+          pageTypeOf = { PAGE_TYPE_BROWSE },
+          cacheKeyFor = ::cacheKeyFor,
+          fetch = { url -> dataSource.fetchPage(url).requireStoreValue() },
+          encode = { page -> storeJson.encodeToString(page) },
+          decode = { json ->
+            runCatching { storeJson.decodeFromString<SubmissionListingPage>(json) }.getOrNull()
+          },
+      )
+
+  fun stream(requestUrl: String): Flow<ResourceResult<SubmissionListingPage>> {
+    val key = normalizeRequestUrl(requestUrl)
+    return cachedStore.stream(key)
+  }
+
+  suspend fun loadPageOnce(requestUrl: String): ResourceResult<SubmissionListingPage> =
+      cachedStore.load(normalizeRequestUrl(requestUrl))
+
+  suspend fun refreshPage(requestUrl: String): ResourceResult<SubmissionListingPage> =
+      cachedStore.refresh(normalizeRequestUrl(requestUrl))
+
+  private fun normalizeRequestUrl(url: String): String = url.trim()
+
+  private fun cacheKeyFor(url: String): String = "browse:url=$url"
+
+  companion object {
+    private const val PAGE_TYPE_BROWSE: String = "browse_page_v1"
+  }
+}

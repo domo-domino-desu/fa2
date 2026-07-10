@@ -1,8 +1,8 @@
 package me.domino.fa2.domain.translation
 
+import me.domino.fa2.data.remote.translation.SubmissionTextTranslationEngine
+import me.domino.fa2.data.remote.translation.TextTranslationResult
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.data.translation.SubmissionTextTranslationEngine
-import me.domino.fa2.data.translation.TextTranslationResult
 import me.domino.fa2.utils.logging.FaLog
 
 class SubmissionImageOcrTranslationService(

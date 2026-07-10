@@ -3,7 +3,7 @@ package me.domino.fa2.ui.components.media
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
-import me.domino.fa2.data.fa.media.ImageDownloadProgressSnapshot
+import me.domino.fa2.data.remote.fa.media.ImageDownloadProgressSnapshot
 
 /** 图片加载状态合成测试。 */
 class ImageLoadingProgressStateTest {

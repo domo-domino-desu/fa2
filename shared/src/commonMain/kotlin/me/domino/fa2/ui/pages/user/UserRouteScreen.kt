@@ -19,8 +19,8 @@ import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import me.domino.fa2.data.fa.user.UserResourceRepository
-import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
+import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
+import me.domino.fa2.data.remote.fa.user.UserResourceRepository
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
 import me.domino.fa2.ui.pages.overlays.watchrecommendation.SimilarUsersRouteScreen

@@ -6,8 +6,8 @@ import me.domino.fa2.data.settings.TranslationProvider
 import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrBlockUiState
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrTranslationStatus
-import me.domino.fa2.ui.translation.SubmissionTranslationUiState
-import me.domino.fa2.ui.translation.variantOf
+import me.domino.fa2.ui.state.SubmissionTranslationUiState
+import me.domino.fa2.ui.state.variantOf
 
 data class SubmissionImageOcrTranslationExportSnapshot(
     val imageUrl: String,

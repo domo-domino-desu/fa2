@@ -12,15 +12,15 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import me.domino.fa2.data.fa.journal.JournalDetailRepository
 import me.domino.fa2.data.model.JournalDetail
 import me.domino.fa2.data.model.PageComment
 import me.domino.fa2.data.model.ResourceResult
+import me.domino.fa2.data.remote.fa.journal.JournalDetailRepository
 import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
 import me.domino.fa2.ui.pages.overlays.journaldetail.JournalDetailScreenModel
 import me.domino.fa2.ui.pages.overlays.journaldetail.JournalDetailUiState
 import me.domino.fa2.ui.pages.submission.createTestSubmissionTranslationService
-import me.domino.fa2.ui.translation.SubmissionTranslationSourceMode
+import me.domino.fa2.ui.state.SubmissionTranslationSourceMode
 import me.domino.fa2.utils.FaUrls
 
 @OptIn(ExperimentalCoroutinesApi::class)

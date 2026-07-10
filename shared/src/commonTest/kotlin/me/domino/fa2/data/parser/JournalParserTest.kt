@@ -1,4 +1,4 @@
-package me.domino.fa2.data.fa.journal
+package me.domino.fa2.data.remote.fa.journal
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

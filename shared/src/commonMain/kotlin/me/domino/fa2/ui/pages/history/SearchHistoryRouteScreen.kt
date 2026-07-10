@@ -31,8 +31,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.user.ActivityHistoryRepository
 import me.domino.fa2.data.model.SearchHistoryRecord
+import me.domino.fa2.data.remote.fa.user.ActivityHistoryRepository
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.SearchHistoryRouteTopBar
 import me.domino.fa2.ui.components.accessibleClickableSummary

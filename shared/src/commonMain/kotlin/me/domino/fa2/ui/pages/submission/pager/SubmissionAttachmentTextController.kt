@@ -8,13 +8,13 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.domain.attachmenttext.UnsupportedAttachmentTextFormatException
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerDetailSource
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.pages.submission.attachmenttext.SubmissionAttachmentTextUiState
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerDetailSource
-import me.domino.fa2.ui.translation.SubmissionTranslationUiState
-import me.domino.fa2.ui.translation.resolveTranslationState
+import me.domino.fa2.ui.state.SubmissionTranslationUiState
+import me.domino.fa2.ui.state.resolveTranslationState
 
 /** Owns attachment download/extraction progress and its derived translation source state. */
 internal class SubmissionAttachmentTextController(

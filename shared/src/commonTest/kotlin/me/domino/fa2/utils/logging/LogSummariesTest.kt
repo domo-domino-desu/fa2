@@ -2,10 +2,10 @@ package me.domino.fa2.utils.logging
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import me.domino.fa2.data.fa.core.HtmlResponseResult
-import me.domino.fa2.data.fa.core.summarizeHtmlResult
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.summarizeResourceResult
+import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
+import me.domino.fa2.data.remote.fa.core.summarizeHtmlResult
 
 /** 日志摘要函数测试。 */
 class LogSummariesTest {

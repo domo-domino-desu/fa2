@@ -13,12 +13,12 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import me.domino.fa2.data.fa.core.FaHtmlDataSource
-import me.domino.fa2.data.fa.core.HtmlResponseResult
-import me.domino.fa2.data.fa.user.UserResourceRepository
+import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.User
-import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
+import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
+import me.domino.fa2.data.remote.fa.user.UserResourceRepository
 import me.domino.fa2.ui.pages.user.UserScreenModel
 
 @OptIn(ExperimentalCoroutinesApi::class)

@@ -4,28 +4,28 @@ import co.touchlab.kermit.Logger
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.media.deriveAttachmentFileName
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.model.summarizeResourceResult
+import me.domino.fa2.data.remote.fa.media.deriveAttachmentFileName
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.domain.attachmenttext.AttachmentTextExtractor
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.ocr.SubmissionImageOcrService
 import me.domino.fa2.domain.submissionseries.seriesInitialReadyCount
 import me.domino.fa2.domain.submissionseries.seriesWarmBufferCount
+import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerDetailSource
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.domain.translation.SubmissionImageOcrTranslationService
 import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.pages.submission.attachmenttext.SubmissionAttachmentTextUiState
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
+import me.domino.fa2.ui.state.SubmissionTranslationUiState
 import me.domino.fa2.ui.state.UiPageState
-import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerDetailSource
-import me.domino.fa2.ui.translation.SubmissionTranslationUiState
-import me.domino.fa2.ui.translation.resolveTranslationState
+import me.domino.fa2.ui.state.resolveTranslationState
 import me.domino.fa2.utils.FaUrls
 
 internal const val pagerPrefetchDebounceMs: Long = 500L

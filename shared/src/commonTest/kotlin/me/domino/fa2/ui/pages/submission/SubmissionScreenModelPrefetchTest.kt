@@ -18,15 +18,15 @@ import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
+import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerDetailSource
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPaginationKind
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPaginationModel
+import me.domino.fa2.domain.submissionviewer.api.SubmissionSourceAdapter
 import me.domino.fa2.ui.pages.submission.pager.SubmissionPagerUiState
 import me.domino.fa2.ui.pages.submission.pager.computeSubmissionPrefetchIndices
 import me.domino.fa2.ui.pages.submission.pager.pagerPrefetchDebounceMs
-import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.ui.submissionviewer.api.SubmissionLoadedPage
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPagerDetailSource
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPaginationKind
-import me.domino.fa2.ui.submissionviewer.api.SubmissionPaginationModel
-import me.domino.fa2.ui.submissionviewer.api.SubmissionSourceAdapter
 import me.domino.fa2.utils.FaUrls
 import me.domino.fa2.utils.parseSubmissionSid
 

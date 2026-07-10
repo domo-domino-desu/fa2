@@ -5,13 +5,13 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.favorites.FavoritesRepository
-import me.domino.fa2.data.fa.gallery.GalleryRepository
 import me.domino.fa2.data.model.GalleryFolderGroup
 import me.domino.fa2.data.model.GalleryPage
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.model.summarizeResourceResult
+import me.domino.fa2.data.remote.fa.favorites.FavoritesRepository
+import me.domino.fa2.data.remote.fa.gallery.GalleryRepository
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.utils.PaginationReducer
 import me.domino.fa2.ui.utils.PaginationSnapshot

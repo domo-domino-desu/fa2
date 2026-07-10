@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
+import me.domino.fa2.domain.submissionviewer.api.WaterfallScrollRequest
 import me.domino.fa2.ui.app.LocalAppSettings
 import me.domino.fa2.ui.components.accessibleReadOnlyFieldTrigger
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
@@ -33,7 +34,6 @@ import me.domino.fa2.ui.pages.search.components.SearchHint
 import me.domino.fa2.ui.pages.search.components.SearchOverlayContent
 import me.domino.fa2.ui.pages.search.components.SearchStatusCard
 import me.domino.fa2.ui.pages.search.components.rememberSearchOverlayUiData
-import me.domino.fa2.ui.submissionviewer.api.WaterfallScrollRequest
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

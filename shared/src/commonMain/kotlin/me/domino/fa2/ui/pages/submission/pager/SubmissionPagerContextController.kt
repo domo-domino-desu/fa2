@@ -1,7 +1,7 @@
 package me.domino.fa2.ui.pages.submission.pager
 
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.ui.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
 
 internal interface SubmissionPagerContextController {
   fun initializeSelection(initialSid: Int)

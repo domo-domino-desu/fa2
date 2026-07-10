@@ -4,13 +4,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import me.domino.fa2.data.fa.submission.SubmissionSeriesSubmissionSource
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.data.remote.fa.submission.SubmissionSeriesSubmissionSource
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesRule
-import me.domino.fa2.ui.submissionviewer.adapters.SeriesSubmissionSourceAdapter
+import me.domino.fa2.domain.submissionviewer.adapters.SeriesSubmissionSourceAdapter
 import me.domino.fa2.utils.FaUrls
 
 class SeriesSubmissionSourceAdapterTest {

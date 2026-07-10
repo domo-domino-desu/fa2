@@ -1,10 +1,10 @@
-package me.domino.fa2.data.fa.gallery
+package me.domino.fa2.data.remote.fa.gallery
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import me.domino.fa2.data.fa.listing.SubmissionListingParser
+import me.domino.fa2.data.remote.fa.listing.SubmissionListingParser
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.utils.FaUrls
 

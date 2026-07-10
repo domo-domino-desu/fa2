@@ -7,9 +7,9 @@ import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import eu.anifantakis.lib.ksafe.KSafe
 import java.io.File
-import me.domino.fa2.data.i18n.SystemLanguageProvider
 import me.domino.fa2.data.local.AppDatabase
 import me.domino.fa2.data.local.AppDatabaseBuilderFactory
+import me.domino.fa2.data.settings.SystemLanguageProvider
 import me.domino.fa2.desktop.ocr.DesktopOcrBlockExtractor
 import me.domino.fa2.desktop.ocr.RapidImageTextRecognitionPort
 import me.domino.fa2.desktop.ocr.RapidOcrBlockExtractor

@@ -1,18 +1,18 @@
-package me.domino.fa2.data.fa.submission
+package me.domino.fa2.data.remote.fa.submission
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.fa.core.FaHtmlDataSource
-import me.domino.fa2.data.fa.core.HtmlResponseResult
-import me.domino.fa2.data.fa.favorites.FavoritesDataSource
-import me.domino.fa2.data.fa.favorites.FavoritesEndpoint
-import me.domino.fa2.data.fa.gallery.GalleryDataSource
-import me.domino.fa2.data.fa.gallery.GalleryEndpoint
-import me.domino.fa2.data.fa.listing.SubmissionListingParser
-import me.domino.fa2.data.fa.listing.UserGalleryPageStore
 import me.domino.fa2.data.model.ResourceResult
+import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
+import me.domino.fa2.data.remote.fa.favorites.FavoritesDataSource
+import me.domino.fa2.data.remote.fa.favorites.FavoritesEndpoint
+import me.domino.fa2.data.remote.fa.gallery.GalleryDataSource
+import me.domino.fa2.data.remote.fa.gallery.GalleryEndpoint
+import me.domino.fa2.data.remote.fa.listing.SubmissionListingParser
+import me.domino.fa2.data.remote.fa.listing.UserGalleryPageStore
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.fake.UnusedSocialActionSource

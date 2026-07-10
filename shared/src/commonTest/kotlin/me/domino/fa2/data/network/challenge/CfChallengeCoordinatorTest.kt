@@ -1,4 +1,4 @@
-package me.domino.fa2.data.fa.session
+package me.domino.fa2.data.remote.fa.session
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import kotlin.random.Random
@@ -9,9 +9,9 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.runTest
-import me.domino.fa2.data.fa.core.FaHtmlDataSource
-import me.domino.fa2.data.fa.core.HtmlResponseResult
 import me.domino.fa2.data.local.KeyValueStorage
+import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
 import me.domino.fa2.utils.FaUrls
 import okio.FileSystem
 import okio.Path.Companion.toPath

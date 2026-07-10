@@ -6,12 +6,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlinx.coroutines.test.runTest
+import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.User
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
-import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.utils.FaUrls
 
 class WatchRecommendationServiceTest {

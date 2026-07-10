@@ -8,9 +8,9 @@ import fa2.shared.generated.resources.load_failed_please_retry
 import fa2.shared.generated.resources.recommendation_progress_starting
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.session.AuthSessionController
+import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
+import me.domino.fa2.data.remote.fa.session.AuthSessionController
 import me.domino.fa2.data.settings.AppSettingsService
-import me.domino.fa2.data.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.domain.watchrecommendation.WatchRecommendationProgress
 import me.domino.fa2.domain.watchrecommendation.WatchRecommendationService
 import me.domino.fa2.ui.i18n.appString

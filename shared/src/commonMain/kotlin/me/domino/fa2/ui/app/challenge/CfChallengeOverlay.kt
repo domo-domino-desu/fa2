@@ -18,9 +18,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.session.CfChallengeController
-import me.domino.fa2.data.fa.session.CfChallengeStatus
-import me.domino.fa2.data.fa.session.CfChallengeUiState
+import me.domino.fa2.data.remote.fa.session.CfChallengeController
+import me.domino.fa2.data.remote.fa.session.CfChallengeStatus
+import me.domino.fa2.data.remote.fa.session.CfChallengeUiState
 import me.domino.fa2.ui.components.ExpressiveButton
 import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
 import me.domino.fa2.ui.components.ExpressiveTextButton

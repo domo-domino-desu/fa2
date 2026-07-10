@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.Res
 import fa2.shared.generated.resources.load_failed
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.domain.submissionviewer.api.WaterfallScrollRequest
 import me.domino.fa2.ui.app.LocalAppSettings
 import me.domino.fa2.ui.components.state.StatusSurface
 import me.domino.fa2.ui.components.state.StatusSurfaceVariant
@@ -20,7 +21,6 @@ import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallPageControls
 import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallViewportSnapshot
 import me.domino.fa2.ui.components.waterfall.WaterfallLoadingSkeleton
 import me.domino.fa2.ui.components.waterfall.WaterfallRefreshBox
-import me.domino.fa2.ui.submissionviewer.api.WaterfallScrollRequest
 import org.jetbrains.compose.resources.stringResource
 
 /** Feed 页面。 */

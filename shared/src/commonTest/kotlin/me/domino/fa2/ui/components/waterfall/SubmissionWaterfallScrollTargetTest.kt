@@ -2,7 +2,7 @@ package me.domino.fa2.ui.components.waterfall
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import me.domino.fa2.ui.submissionviewer.api.WaterfallScrollRequest
+import me.domino.fa2.domain.submissionviewer.api.WaterfallScrollRequest
 
 class SubmissionWaterfallScrollTargetTest {
   @Test

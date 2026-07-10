@@ -1,4 +1,4 @@
-package me.domino.fa2.data.fa.watchlist
+package me.domino.fa2.data.remote.fa.watchlist
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import kotlin.random.Random

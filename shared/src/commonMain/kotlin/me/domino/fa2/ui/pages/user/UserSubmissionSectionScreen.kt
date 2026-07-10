@@ -38,6 +38,7 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.GalleryFolderGroup
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.domain.submissionviewer.api.WaterfallScrollRequest
 import me.domino.fa2.ui.components.state.StatusSurface
 import me.domino.fa2.ui.components.state.StatusSurfaceVariant
 import me.domino.fa2.ui.components.waterfall.SubmissionWaterfall
@@ -45,7 +46,6 @@ import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallPageControls
 import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallViewportSnapshot
 import me.domino.fa2.ui.components.waterfall.WaterfallLoadingSkeleton
 import me.domino.fa2.ui.components.waterfall.WaterfallRefreshBox
-import me.domino.fa2.ui.submissionviewer.api.WaterfallScrollRequest
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 

@@ -6,13 +6,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
-import me.domino.fa2.data.i18n.AppI18nSnapshot
-import me.domino.fa2.data.i18n.SystemLanguageProvider
+import me.domino.fa2.data.local.taxonomy.FaTaxonomyCatalog
+import me.domino.fa2.data.local.taxonomy.FaTaxonomyRepository
+import me.domino.fa2.data.settings.AppI18nSnapshot
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.data.settings.SystemLanguageProvider
 import me.domino.fa2.data.settings.UiLanguageSetting
-import me.domino.fa2.data.taxonomy.FaTaxonomyCatalog
-import me.domino.fa2.data.taxonomy.FaTaxonomyRepository
 import me.domino.fa2.ui.i18n.ProvideAppLocale
 import me.domino.fa2.ui.i18n.search.SearchUiLabelsCatalog
 import me.domino.fa2.ui.i18n.search.SearchUiLabelsRepository

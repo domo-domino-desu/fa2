@@ -11,7 +11,7 @@ import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.ui.app.LocalAppSettings
 import me.domino.fa2.ui.components.html.TranslatableBlocksCard
 import me.domino.fa2.ui.pages.submission.series.rememberSubmissionSeriesTrailingActions
-import me.domino.fa2.ui.translation.SubmissionTranslationUiState
+import me.domino.fa2.ui.state.SubmissionTranslationUiState
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

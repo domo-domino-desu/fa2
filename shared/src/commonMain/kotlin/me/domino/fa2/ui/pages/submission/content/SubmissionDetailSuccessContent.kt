@@ -25,10 +25,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
-import me.domino.fa2.data.fa.media.attachmentFileExtension
-import me.domino.fa2.data.fa.submission.deriveSubmissionThumbnailUrlFromFullImage
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.data.remote.fa.media.attachmentFileExtension
+import me.domino.fa2.data.remote.fa.submission.deriveSubmissionThumbnailUrlFromFullImage
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.ui.app.LocalAppI18n
@@ -42,7 +42,7 @@ import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.attachmenttext.SubmissionAttachmentTextCard
 import me.domino.fa2.ui.pages.submission.attachmenttext.SubmissionAttachmentTextUiState
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionAuthorRow
-import me.domino.fa2.ui.translation.SubmissionTranslationUiState
+import me.domino.fa2.ui.state.SubmissionTranslationUiState
 import me.domino.fa2.ui.utils.sanitizeDetailAspectRatio
 import org.jetbrains.compose.resources.stringResource
 

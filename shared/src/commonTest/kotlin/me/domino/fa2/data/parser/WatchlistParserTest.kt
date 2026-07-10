@@ -1,4 +1,4 @@
-package me.domino.fa2.data.fa.watchlist
+package me.domino.fa2.data.remote.fa.watchlist
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

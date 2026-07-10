@@ -1,4 +1,4 @@
-package me.domino.fa2.data.fa.user
+package me.domino.fa2.data.remote.fa.user
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
