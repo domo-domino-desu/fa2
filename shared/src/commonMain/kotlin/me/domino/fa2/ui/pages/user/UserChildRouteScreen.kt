@@ -22,8 +22,8 @@ import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
 import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
 import me.domino.fa2.domain.submissionviewer.api.UserSubmissionSection
 import me.domino.fa2.ui.app.navigation.rootNavigator
-import me.domino.fa2.ui.pages.overlays.journalpager.JournalPagerContextScreenModel
-import me.domino.fa2.ui.pages.overlays.journalpager.JournalPagerRouteScreen
+import me.domino.fa2.ui.pages.journal.JournalPagerContextScreenModel
+import me.domino.fa2.ui.pages.journal.JournalPagerRouteScreen
 import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
 import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
 import me.domino.fa2.ui.pages.submission.pager.pageNumberForSid

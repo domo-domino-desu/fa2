@@ -15,14 +15,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import me.domino.fa2.data.remote.fa.session.AuthSessionController
 import me.domino.fa2.data.remote.fa.session.PendingFaRouteStore
+import me.domino.fa2.ui.components.navigation.AppNavigationRequest
+import me.domino.fa2.ui.components.navigation.LocalAppNavigation
 import me.domino.fa2.ui.pages.auth.AuthRouteScreen
 import me.domino.fa2.ui.pages.browse.BrowseFilterState
 import me.domino.fa2.ui.pages.browse.BrowseRouteScreen
 import me.domino.fa2.ui.pages.search.SearchRouteScreen
 import me.domino.fa2.ui.pages.user.UserChildRoute
 import me.domino.fa2.ui.pages.user.UserRouteScreen
-import me.domino.fa2.ui.state.AppNavigationRequest
-import me.domino.fa2.ui.state.LocalAppNavigation
 import org.koin.compose.koinInject
 
 /** 应用导航容器。 */

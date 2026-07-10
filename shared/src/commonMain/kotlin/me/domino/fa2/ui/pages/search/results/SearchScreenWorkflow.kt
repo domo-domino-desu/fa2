@@ -14,13 +14,13 @@ import me.domino.fa2.data.remote.fa.user.ActivityHistoryRepository
 import me.domino.fa2.data.settings.AppI18nSnapshot
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.settings.SystemLanguageProvider
+import me.domino.fa2.ui.components.state.UiPageState
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.i18n.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.pages.search.util.SearchDateRangeShiftAction
 import me.domino.fa2.ui.pages.search.util.normalizeManualDateFields
 import me.domino.fa2.ui.pages.search.util.resolveSearchDateFields
 import me.domino.fa2.ui.pages.search.util.shiftSearchDateFields
-import me.domino.fa2.ui.state.UiPageState
 import me.domino.fa2.ui.utils.PaginationReducer
 
 internal data class SearchAppliedRequest(val applied: SearchFormState, val firstUrl: String)

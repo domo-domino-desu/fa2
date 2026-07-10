@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.overlays.about
+package me.domino.fa2.ui.pages.about
 
 import fa2.shared.generated.resources.Res
 import me.domino.fa2.utils.concurrency.runSuspendCatching

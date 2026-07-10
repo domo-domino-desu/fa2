@@ -1,11 +1,10 @@
-package me.domino.fa2.data.network
+package me.domino.fa2.data.remote.fa.core
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import me.domino.fa2.data.remote.fa.core.FaOriginPolicy
 
 class FaOriginPolicyTest {
   @Test

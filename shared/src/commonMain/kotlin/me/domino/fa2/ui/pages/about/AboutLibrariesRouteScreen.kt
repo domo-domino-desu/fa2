@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.overlays.about
+package me.domino.fa2.ui.pages.about
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues

@@ -23,7 +23,7 @@ import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.data.remote.fa.user.UserResourceRepository
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
-import me.domino.fa2.ui.pages.overlays.watchrecommendation.SimilarUsersRouteScreen
+import me.domino.fa2.ui.pages.watchrecommendation.SimilarUsersRouteScreen
 import me.domino.fa2.utils.FaUrls
 import org.koin.compose.koinInject
 

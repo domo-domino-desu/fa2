@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.overlays.userwatchlist
+package me.domino.fa2.ui.pages.user.watchlist
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,9 +35,9 @@ import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.UserWatchlistRouteTopBar
 import me.domino.fa2.ui.components.state.PaginationRetryBar
 import me.domino.fa2.ui.components.state.PaginationRetryDirection
-import me.domino.fa2.ui.pages.overlays.userpager.UserPagerContextScreenModel
-import me.domino.fa2.ui.pages.overlays.userpager.UserPagerRouteScreen
-import me.domino.fa2.ui.pages.overlays.userpager.UserPagerSource
+import me.domino.fa2.ui.pages.user.pager.UserPagerContextScreenModel
+import me.domino.fa2.ui.pages.user.pager.UserPagerRouteScreen
+import me.domino.fa2.ui.pages.user.pager.UserPagerSource
 import me.domino.fa2.utils.FaUrls
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf

@@ -15,8 +15,8 @@ import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
-import me.domino.fa2.ui.pages.overlays.userpager.UserPagerContextScreenModel
-import me.domino.fa2.ui.pages.overlays.userpager.UserPagerSource
+import me.domino.fa2.ui.pages.user.pager.UserPagerContextScreenModel
+import me.domino.fa2.ui.pages.user.pager.UserPagerSource
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserPagerContextScreenModelTest {

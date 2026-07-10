@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.overlays.about
+package me.domino.fa2.ui.pages.about
 
 private const val aboutLibrariesComposeAssetPath =
     "composeResources/fa2.shared.generated.resources/files/aboutlibraries.json"

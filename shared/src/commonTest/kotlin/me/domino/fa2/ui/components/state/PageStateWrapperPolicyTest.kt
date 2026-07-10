@@ -2,7 +2,6 @@ package me.domino.fa2.ui.components.state
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import me.domino.fa2.ui.state.UiPageState
 
 class PageStateWrapperPolicyTest {
   @Test

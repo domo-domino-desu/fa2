@@ -18,7 +18,7 @@ import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerDetailSource
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.domain.translation.SubmissionImageOcrTranslationService
 import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
-import me.domino.fa2.ui.state.UiPageState
+import me.domino.fa2.ui.components.state.UiPageState
 import me.domino.fa2.utils.logging.FaLog
 
 /** 投稿详情浏览页面状态模型。 */

@@ -3,8 +3,8 @@ package me.domino.fa2.ui.pages.user
 import cafe.adriel.voyager.navigator.Navigator
 import me.domino.fa2.data.model.User
 import me.domino.fa2.data.model.WatchlistCategory
-import me.domino.fa2.ui.pages.overlays.usershouts.UserShoutsRouteScreen
-import me.domino.fa2.ui.pages.overlays.userwatchlist.UserWatchlistRouteScreen
+import me.domino.fa2.ui.pages.user.shouts.UserShoutsRouteScreen
+import me.domino.fa2.ui.pages.user.watchlist.UserWatchlistRouteScreen
 import me.domino.fa2.utils.FaUrls
 
 data class UserHeaderNavigationActions(

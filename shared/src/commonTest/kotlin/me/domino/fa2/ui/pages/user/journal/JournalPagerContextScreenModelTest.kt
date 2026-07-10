@@ -14,7 +14,7 @@ import kotlinx.coroutines.test.setMain
 import me.domino.fa2.data.model.JournalPage
 import me.domino.fa2.data.model.JournalSummary
 import me.domino.fa2.data.model.ResourceResult
-import me.domino.fa2.ui.pages.overlays.journalpager.JournalPagerContextScreenModel
+import me.domino.fa2.ui.pages.journal.JournalPagerContextScreenModel
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class JournalPagerContextScreenModelTest {

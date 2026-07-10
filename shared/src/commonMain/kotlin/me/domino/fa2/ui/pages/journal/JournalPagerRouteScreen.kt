@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.overlays.journalpager
+package me.domino.fa2.ui.pages.journal
 
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
@@ -36,7 +36,6 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.remote.fa.journal.JournalsRepository
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.JournalDetailRouteTopBar
-import me.domino.fa2.ui.pages.overlays.journaldetail.JournalDetailBody
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 

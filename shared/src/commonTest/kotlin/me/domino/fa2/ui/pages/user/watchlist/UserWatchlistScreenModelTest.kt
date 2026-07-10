@@ -19,7 +19,6 @@ import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
 import me.domino.fa2.data.remote.fa.watchlist.WatchlistRepository
-import me.domino.fa2.ui.pages.overlays.userwatchlist.UserWatchlistScreenModel
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserWatchlistScreenModelTest {

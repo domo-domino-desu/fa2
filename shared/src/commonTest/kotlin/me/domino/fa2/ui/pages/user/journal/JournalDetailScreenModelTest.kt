@@ -17,10 +17,10 @@ import me.domino.fa2.data.model.PageComment
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.remote.fa.journal.JournalDetailRepository
 import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
-import me.domino.fa2.ui.pages.overlays.journaldetail.JournalDetailScreenModel
-import me.domino.fa2.ui.pages.overlays.journaldetail.JournalDetailUiState
+import me.domino.fa2.ui.components.html.TranslationSourceMode
+import me.domino.fa2.ui.pages.journal.JournalDetailScreenModel
+import me.domino.fa2.ui.pages.journal.JournalDetailUiState
 import me.domino.fa2.ui.pages.submission.createTestSubmissionTranslationService
-import me.domino.fa2.ui.state.SubmissionTranslationSourceMode
 import me.domino.fa2.utils.FaUrls
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -61,7 +61,7 @@ class JournalDetailScreenModelTest {
 
         val initialState = model.state.value as JournalDetailUiState.Success
         assertEquals(
-            SubmissionTranslationSourceMode.RAW,
+            TranslationSourceMode.RAW,
             initialState.bodyTranslationState.sourceMode,
         )
         assertEquals(false, initialState.bodyTranslationState.showTranslation)
@@ -92,7 +92,7 @@ class JournalDetailScreenModelTest {
 
         val wrappedIdleState = model.state.value as JournalDetailUiState.Success
         assertEquals(
-            SubmissionTranslationSourceMode.WRAPPED,
+            TranslationSourceMode.WRAPPED,
             wrappedIdleState.bodyTranslationState.sourceMode,
         )
         assertEquals(false, wrappedIdleState.bodyTranslationState.showTranslation)
@@ -133,7 +133,7 @@ class JournalDetailScreenModelTest {
 
         val restoredRawTranslatedState = model.state.value as JournalDetailUiState.Success
         assertEquals(
-            SubmissionTranslationSourceMode.RAW,
+            TranslationSourceMode.RAW,
             restoredRawTranslatedState.bodyTranslationState.sourceMode,
         )
         assertEquals(true, restoredRawTranslatedState.bodyTranslationState.showTranslation)

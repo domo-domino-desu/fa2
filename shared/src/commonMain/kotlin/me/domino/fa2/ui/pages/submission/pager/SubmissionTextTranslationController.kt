@@ -10,15 +10,15 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
+import me.domino.fa2.ui.components.html.TranslationSourceMode
+import me.domino.fa2.ui.components.html.TranslationUiState
+import me.domino.fa2.ui.components.html.canReuseTranslationResult
+import me.domino.fa2.ui.components.html.markPendingBlocksAsFailed
+import me.domino.fa2.ui.components.html.toPendingState
+import me.domino.fa2.ui.components.html.variantOf
+import me.domino.fa2.ui.components.html.withBlockResult
+import me.domino.fa2.ui.components.html.withVariant
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
-import me.domino.fa2.ui.state.SubmissionTranslationSourceMode
-import me.domino.fa2.ui.state.SubmissionTranslationUiState
-import me.domino.fa2.ui.state.canReuseTranslationResult
-import me.domino.fa2.ui.state.markPendingBlocksAsFailed
-import me.domino.fa2.ui.state.toPendingState
-import me.domino.fa2.ui.state.variantOf
-import me.domino.fa2.ui.state.withBlockResult
-import me.domino.fa2.ui.state.withVariant
 
 internal enum class SubmissionTranslationTarget {
   DESCRIPTION,
@@ -105,8 +105,8 @@ internal class SubmissionTextTranslationController(
     if (state.showTranslation || state.translating) return
     val nextMode =
         when (state.sourceMode) {
-          SubmissionTranslationSourceMode.RAW -> SubmissionTranslationSourceMode.WRAPPED
-          SubmissionTranslationSourceMode.WRAPPED -> SubmissionTranslationSourceMode.RAW
+          TranslationSourceMode.RAW -> TranslationSourceMode.WRAPPED
+          TranslationSourceMode.WRAPPED -> TranslationSourceMode.RAW
         }
     viewState.detailBySid[current.id] =
         detail.withTranslationState(target, state.copy(sourceMode = nextMode))
@@ -120,7 +120,7 @@ internal class SubmissionTextTranslationController(
   private fun markPendingAsFailed(
       sid: Int,
       target: SubmissionTranslationTarget,
-      sourceMode: SubmissionTranslationSourceMode,
+      sourceMode: TranslationSourceMode,
       sourceKey: String,
   ) {
     val latest = viewState.detailBySid[sid] as? SubmissionDetailUiState.Success ?: return
@@ -137,7 +137,7 @@ internal class SubmissionTextTranslationController(
   private suspend fun finishTranslation(
       sid: Int,
       target: SubmissionTranslationTarget,
-      sourceMode: SubmissionTranslationSourceMode,
+      sourceMode: TranslationSourceMode,
       sourceKey: String,
   ) {
     val latest = viewState.detailBySid[sid] as? SubmissionDetailUiState.Success ?: return
@@ -197,7 +197,7 @@ internal class SubmissionTextTranslationController(
 
 private fun SubmissionDetailUiState.Success.translationStateOf(
     target: SubmissionTranslationTarget
-): SubmissionTranslationUiState? =
+): TranslationUiState? =
     when (target) {
       SubmissionTranslationTarget.DESCRIPTION -> descriptionTranslationState
       SubmissionTranslationTarget.ATTACHMENT -> attachmentTranslationState
@@ -205,7 +205,7 @@ private fun SubmissionDetailUiState.Success.translationStateOf(
 
 private fun SubmissionDetailUiState.Success.withTranslationState(
     target: SubmissionTranslationTarget,
-    state: SubmissionTranslationUiState,
+    state: TranslationUiState,
 ): SubmissionDetailUiState.Success =
     when (target) {
       SubmissionTranslationTarget.DESCRIPTION -> copy(descriptionTranslationState = state)

@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.overlays.about
+package me.domino.fa2.ui.pages.about
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable

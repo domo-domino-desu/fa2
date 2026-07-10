@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.overlays.usershouts
+package me.domino.fa2.ui.pages.user.shouts
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

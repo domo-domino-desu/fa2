@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.overlays.usershouts
+package me.domino.fa2.ui.pages.user.shouts
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope

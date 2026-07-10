@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.overlays.userpager
+package me.domino.fa2.ui.pages.user.pager
 
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
@@ -37,9 +37,9 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.remote.fa.watchlist.WatchlistRepository
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
-import me.domino.fa2.ui.pages.overlays.watchrecommendation.SimilarUsersRouteScreen
 import me.domino.fa2.ui.pages.user.UserChildRoute
 import me.domino.fa2.ui.pages.user.UserRouteBody
+import me.domino.fa2.ui.pages.watchrecommendation.SimilarUsersRouteScreen
 import me.domino.fa2.utils.FaUrls
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject

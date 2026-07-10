@@ -85,12 +85,112 @@ class ArchitectureBoundaryTest {
   }
 
   @Test
+  fun faFeaturePackagesOnlyDependOnSharedInfrastructure() {
+    val faRoot = commonMainRoot.resolve("data/remote/fa")
+    val infrastructurePackages = setOf("core", "parsing", "listing", "session", "media", "social")
+    val packagePattern = Regex("me\\.domino\\.fa2\\.data\\.remote\\.fa\\.([a-z0-9_]+)")
+
+    val offenders =
+        kotlinFilesUnder(faRoot).flatMap { file ->
+          val owner = file.relativeTo(faRoot).getName(0).toString()
+          file.readLines().withIndex().flatMap { (index, line) ->
+            packagePattern
+                .findAll(line)
+                .map { match -> match.groupValues[1] }
+                .filter { dependency ->
+                  dependency != owner && dependency !in infrastructurePackages
+                }
+                .map { dependency ->
+                  "${file.relativeTo(repoRoot)}:${index + 1}: depends on fa.$dependency"
+                }
+                .toList()
+          }
+        }
+
+    assertTrue(
+        offenders.isEmpty(),
+        "fa feature packages may only depend on shared infrastructure " +
+            "($infrastructurePackages):\n${offenders.joinToString("\n")}",
+    )
+  }
+
+  @Test
+  fun topLevelCategoryDirectoriesAreCurated() {
+    val allowedByLayer =
+        mapOf(
+            "ui" to setOf("app", "components", "pages", "icons", "i18n", "utils"),
+            "data" to setOf("local", "model", "remote", "settings"),
+        )
+
+    val offenders =
+        allowedByLayer.flatMap { (layer, allowed) ->
+          val layerRoot = commonMainRoot.resolve(layer)
+          if (!layerRoot.exists()) return@flatMap emptyList()
+          Files.list(layerRoot).use { stream ->
+            stream
+                .filter { path -> Files.isDirectory(path) }
+                .map { path -> path.fileName.toString() }
+                .filter { name -> name !in allowed }
+                .map { name -> "$layer/$name" }
+                .toList()
+          }
+        }
+
+    assertTrue(
+        offenders.isEmpty(),
+        "New top-level directories under ui/ and data/ must be curated categories, " +
+            "not feature names. Unexpected: $offenders",
+    )
+  }
+
+  @Test
+  fun singleFileLeafPackagesAreExplicitlyJustified() {
+    val exemptions =
+        setOf(
+            "ui/components/navigation",
+            "ui/app/theme",
+            "ui/pages/search/util",
+            "ui/pages/search/form",
+            "ui/pages/search/results",
+            "ui/pages/submission/translation",
+            "ui/pages/submission/series",
+            "data/local/settings",
+            "data/remote/fa/parsing",
+        )
+
+    val offenders =
+        listOf("ui", "data").flatMap { layer ->
+          val layerRoot = commonMainRoot.resolve(layer)
+          if (!layerRoot.exists()) return@flatMap emptyList()
+          Files.walk(layerRoot).use { stream ->
+            stream
+                .filter(Files::isDirectory)
+                .filter { dir ->
+                  Files.list(dir).use { children ->
+                    val entries = children.toList()
+                    entries.count { it.isRegularFile() && it.extension == "kt" } == 1 &&
+                        entries.none { Files.isDirectory(it) }
+                  }
+                }
+                .map { dir -> commonMainRoot.relativize(dir).toString() }
+                .filter { relative -> relative !in exemptions }
+                .toList()
+          }
+        }
+
+    assertTrue(
+        offenders.isEmpty(),
+        "Single-file leaf packages usually mean a file in the wrong place. Either move the " +
+            "file to an existing package or add a justified exemption: $offenders",
+    )
+  }
+
+  @Test
   fun reusableUiAndViewerApiDoNotDependOnFeatureImplementations() {
     val protectedRoots =
         listOf(
             commonMainRoot.resolve("ui/components"),
             commonMainRoot.resolve("domain/submissionviewer/api"),
-            commonMainRoot.resolve("ui/state"),
         )
     val offenders =
         protectedRoots.flatMap(::kotlinFilesUnder).flatMap { file ->

@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import fa2.shared.generated.resources.*
-import me.domino.fa2.ui.state.UiPageState
 import org.jetbrains.compose.resources.stringResource
 
 internal enum class PageFailureDisplayMode {

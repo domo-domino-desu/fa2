@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.overlays.watchrecommendation
+package me.domino.fa2.ui.pages.watchrecommendation
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,10 +27,10 @@ import fa2.shared.generated.resources.similar_users_load_failed
 import kotlinx.coroutines.launch
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.SimilarUsersRouteTopBar
-import me.domino.fa2.ui.pages.overlays.userpager.UserPagerContextScreenModel
-import me.domino.fa2.ui.pages.overlays.userpager.UserPagerRouteScreen
-import me.domino.fa2.ui.pages.overlays.userpager.UserPagerSource
-import me.domino.fa2.ui.pages.overlays.userwatchlist.WatchlistStatusCard
+import me.domino.fa2.ui.pages.user.pager.UserPagerContextScreenModel
+import me.domino.fa2.ui.pages.user.pager.UserPagerRouteScreen
+import me.domino.fa2.ui.pages.user.pager.UserPagerSource
+import me.domino.fa2.ui.pages.user.watchlist.WatchlistStatusCard
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
 

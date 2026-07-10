@@ -48,6 +48,8 @@ import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.navigation.openSubmissionSeries
 import me.domino.fa2.ui.components.feedback.LocalShowFeedback
 import me.domino.fa2.ui.components.feedback.LocalShowToast
+import me.domino.fa2.ui.components.navigation.AppNavigationRequest
+import me.domino.fa2.ui.components.navigation.LocalAppNavigation
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.platform.PlatformDownloadRequest
 import me.domino.fa2.ui.components.platform.PlatformDownloadResult
@@ -66,8 +68,6 @@ import me.domino.fa2.ui.pages.submission.pager.SubmissionScreenModel
 import me.domino.fa2.ui.pages.submission.pager.computeSubmissionPrefetchIndices
 import me.domino.fa2.ui.pages.submission.pager.pagerPrefetchDebounceMs
 import me.domino.fa2.ui.pages.submission.translation.buildSubmissionTranslationSidecarFiles
-import me.domino.fa2.ui.state.AppNavigationRequest
-import me.domino.fa2.ui.state.LocalAppNavigation
 import me.domino.fa2.utils.FaUrls
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject

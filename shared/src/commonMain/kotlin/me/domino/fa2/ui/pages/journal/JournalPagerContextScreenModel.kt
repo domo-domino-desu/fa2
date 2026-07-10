@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.overlays.journalpager
+package me.domino.fa2.ui.pages.journal
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope

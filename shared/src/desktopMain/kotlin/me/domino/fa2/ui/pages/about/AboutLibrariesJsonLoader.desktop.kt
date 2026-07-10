@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.overlays.about
+package me.domino.fa2.ui.pages.about
 
 private val aboutLibrariesResourceCandidates =
     listOf("files/aboutlibraries.json", "aboutlibraries.json")

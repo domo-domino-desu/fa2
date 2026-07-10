@@ -4,10 +4,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import me.domino.fa2.data.settings.TranslationProvider
 import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
+import me.domino.fa2.ui.components.html.TranslationUiState
+import me.domino.fa2.ui.components.html.variantOf
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrBlockUiState
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrTranslationStatus
-import me.domino.fa2.ui.state.SubmissionTranslationUiState
-import me.domino.fa2.ui.state.variantOf
 
 data class SubmissionImageOcrTranslationExportSnapshot(
     val imageUrl: String,
@@ -19,8 +19,8 @@ data class SubmissionTranslationSidecarFile(val fileName: String, val content: S
 
 fun buildSubmissionTranslationSidecarFiles(
     submissionId: Int,
-    descriptionTranslationState: SubmissionTranslationUiState?,
-    attachmentTranslationState: SubmissionTranslationUiState?,
+    descriptionTranslationState: TranslationUiState?,
+    attachmentTranslationState: TranslationUiState?,
     imageOcrSnapshot: SubmissionImageOcrTranslationExportSnapshot?,
 ): List<SubmissionTranslationSidecarFile> {
   val files = mutableListOf<SubmissionTranslationSidecarFile>()
@@ -77,7 +77,7 @@ private fun buildImageOcrTranslationSidecarFile(
 private fun buildTextTranslationSidecarFile(
     submissionId: Int,
     suffix: String,
-    translationState: SubmissionTranslationUiState?,
+    translationState: TranslationUiState?,
 ): SubmissionTranslationSidecarFile? {
   val currentState = translationState ?: return null
   val exportBlocks =
@@ -96,8 +96,7 @@ private fun buildTextTranslationSidecarFile(
   )
 }
 
-private fun SubmissionTranslationUiState.successfulExportBlocks():
-    List<SubmissionTranslationExportBlock> {
+private fun TranslationUiState.successfulExportBlocks(): List<SubmissionTranslationExportBlock> {
   val sourceBlocks = variantOf(sourceMode).sourceBlocks
   val resultBlocks = variantOf(sourceMode).blocks
   return resultBlocks.mapIndexedNotNull { index, block ->

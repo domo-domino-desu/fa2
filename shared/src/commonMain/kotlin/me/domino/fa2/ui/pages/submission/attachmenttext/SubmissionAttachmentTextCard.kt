@@ -26,16 +26,16 @@ import me.domino.fa2.ui.app.LocalAppSettings
 import me.domino.fa2.ui.components.html.DetailSectionCardSurface
 import me.domino.fa2.ui.components.html.TranslatableBlocksCard
 import me.domino.fa2.ui.components.html.TranslatableSectionTitleRow
+import me.domino.fa2.ui.components.html.TranslationUiState
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.series.rememberSubmissionSeriesTrailingActions
-import me.domino.fa2.ui.state.SubmissionTranslationUiState
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun SubmissionAttachmentTextCard(
     attachmentTextState: SubmissionAttachmentTextUiState,
-    translationState: SubmissionTranslationUiState?,
+    translationState: TranslationUiState?,
     submissionUrl: String,
     onLoadAttachmentText: () -> Unit,
     onTranslate: () -> Unit,
@@ -174,7 +174,7 @@ internal fun SubmissionAttachmentTextCard(
 @Composable
 private fun AttachmentCardHeader(
     fileName: String,
-    translationState: SubmissionTranslationUiState? = null,
+    translationState: TranslationUiState? = null,
     onTranslate: (() -> Unit)? = null,
     onToggleWrapText: (() -> Unit)? = null,
 ) {

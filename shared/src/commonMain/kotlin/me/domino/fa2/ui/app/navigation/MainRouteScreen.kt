@@ -31,6 +31,8 @@ import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
 import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
 import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
 import me.domino.fa2.ui.components.state.PageStateWrapper
+import me.domino.fa2.ui.components.state.UiPageState
+import me.domino.fa2.ui.pages.about.AboutRouteScreen
 import me.domino.fa2.ui.pages.auth.AuthRouteScreen
 import me.domino.fa2.ui.pages.browse.BrowseScreen
 import me.domino.fa2.ui.pages.browse.BrowseScreenModel
@@ -43,8 +45,6 @@ import me.domino.fa2.ui.pages.history.SubmissionHistoryRouteScreen
 import me.domino.fa2.ui.pages.more.MoreScreen
 import me.domino.fa2.ui.pages.more.MoreScreenModel
 import me.domino.fa2.ui.pages.more.MoreUiState
-import me.domino.fa2.ui.pages.overlays.about.AboutRouteScreen
-import me.domino.fa2.ui.pages.overlays.watchrecommendation.WatchRecommendationRouteScreen
 import me.domino.fa2.ui.pages.search.SearchScreen
 import me.domino.fa2.ui.pages.search.SearchScreenActions
 import me.domino.fa2.ui.pages.search.SearchScreenModel
@@ -57,7 +57,7 @@ import me.domino.fa2.ui.pages.submission.pager.toWaterfallPageControls
 import me.domino.fa2.ui.pages.user.UserChildRoute
 import me.domino.fa2.ui.pages.user.UserRouteScreen
 import me.domino.fa2.ui.pages.user.userHeaderNavigationActions
-import me.domino.fa2.ui.state.UiPageState
+import me.domino.fa2.ui.pages.watchrecommendation.WatchRecommendationRouteScreen
 import me.domino.fa2.utils.FaUrls
 import org.koin.compose.koinInject
 

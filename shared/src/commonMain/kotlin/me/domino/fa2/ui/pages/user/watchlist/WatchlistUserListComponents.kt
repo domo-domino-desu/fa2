@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.overlays.userwatchlist
+package me.domino.fa2.ui.pages.user.watchlist
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

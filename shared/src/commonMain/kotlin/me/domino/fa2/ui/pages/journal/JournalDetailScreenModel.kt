@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.overlays.journaldetail
+package me.domino.fa2.ui.pages.journal
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
@@ -12,16 +12,16 @@ import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.data.remote.fa.journal.JournalDetailRepository
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.ui.components.html.TranslationSourceMode
+import me.domino.fa2.ui.components.html.TranslationUiState
+import me.domino.fa2.ui.components.html.canReuseTranslationResult
+import me.domino.fa2.ui.components.html.markPendingBlocksAsFailed
+import me.domino.fa2.ui.components.html.resolveTranslationState
+import me.domino.fa2.ui.components.html.toPendingState
+import me.domino.fa2.ui.components.html.variantOf
+import me.domino.fa2.ui.components.html.withBlockResult
+import me.domino.fa2.ui.components.html.withVariant
 import me.domino.fa2.ui.i18n.appString
-import me.domino.fa2.ui.state.SubmissionTranslationSourceMode
-import me.domino.fa2.ui.state.SubmissionTranslationUiState
-import me.domino.fa2.ui.state.canReuseTranslationResult
-import me.domino.fa2.ui.state.markPendingBlocksAsFailed
-import me.domino.fa2.ui.state.resolveTranslationState
-import me.domino.fa2.ui.state.toPendingState
-import me.domino.fa2.ui.state.variantOf
-import me.domino.fa2.ui.state.withBlockResult
-import me.domino.fa2.ui.state.withVariant
 import me.domino.fa2.utils.logging.FaLog
 
 /** Journal 详情状态。 */
@@ -34,7 +34,7 @@ sealed interface JournalDetailUiState {
       /** 详情数据。 */
       val detail: JournalDetail,
       /** 正文翻译状态。 */
-      val bodyTranslationState: SubmissionTranslationUiState,
+      val bodyTranslationState: TranslationUiState,
   ) : JournalDetailUiState
 
   /** 错误态。 */
@@ -213,8 +213,8 @@ class JournalDetailScreenModel(
 
     val nextMode =
         when (translationState.sourceMode) {
-          SubmissionTranslationSourceMode.RAW -> SubmissionTranslationSourceMode.WRAPPED
-          SubmissionTranslationSourceMode.WRAPPED -> SubmissionTranslationSourceMode.RAW
+          TranslationSourceMode.RAW -> TranslationSourceMode.WRAPPED
+          TranslationSourceMode.WRAPPED -> TranslationSourceMode.RAW
         }
     mutableState.value =
         current.copy(bodyTranslationState = translationState.copy(sourceMode = nextMode))

@@ -36,13 +36,13 @@ import me.domino.fa2.ui.app.LocalSearchUiLabelsRepository
 import me.domino.fa2.ui.app.LocalTaxonomyCatalog
 import me.domino.fa2.ui.app.LocalTaxonomyRepository
 import me.domino.fa2.ui.components.html.PageCommentsCard
+import me.domino.fa2.ui.components.html.TranslationUiState
 import me.domino.fa2.ui.components.media.NetworkImage
 import me.domino.fa2.ui.i18n.search.SearchUiOptionKey
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.attachmenttext.SubmissionAttachmentTextCard
 import me.domino.fa2.ui.pages.submission.attachmenttext.SubmissionAttachmentTextUiState
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionAuthorRow
-import me.domino.fa2.ui.state.SubmissionTranslationUiState
 import me.domino.fa2.ui.utils.sanitizeDetailAspectRatio
 import org.jetbrains.compose.resources.stringResource
 
@@ -63,11 +63,11 @@ internal fun SubmissionDetailSuccessContent(
     blockedSubmissionMode: BlockedSubmissionPagerMode,
     isBlockedMediaRevealed: Boolean,
     onRevealBlockedMedia: () -> Unit,
-    descriptionTranslationState: SubmissionTranslationUiState,
+    descriptionTranslationState: TranslationUiState,
     onTranslateDescription: () -> Unit,
     onWrapDescriptionText: () -> Unit,
     attachmentTextState: SubmissionAttachmentTextUiState?,
-    attachmentTranslationState: SubmissionTranslationUiState?,
+    attachmentTranslationState: TranslationUiState?,
     onLoadAttachmentText: () -> Unit,
     onTranslateAttachment: () -> Unit,
     onWrapAttachmentText: () -> Unit,

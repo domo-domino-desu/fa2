@@ -15,13 +15,13 @@ import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.settings.SystemLanguageProvider
 import me.domino.fa2.data.settings.uiText
 import me.domino.fa2.ui.components.forms.FilterOption
+import me.domino.fa2.ui.components.state.UiPageState
 import me.domino.fa2.ui.i18n.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.i18n.search.SearchUiMetadataKey
 import me.domino.fa2.ui.i18n.search.SearchUiOptionKey
 import me.domino.fa2.ui.i18n.search.SearchUiTextKey
 import me.domino.fa2.ui.pages.search.util.SearchDateRangeShiftAction
 import me.domino.fa2.ui.pages.search.util.normalizeManualDateFields
-import me.domino.fa2.ui.state.UiPageState
 import me.domino.fa2.ui.utils.PaginationSnapshot
 import me.domino.fa2.utils.FaUrls
 import me.domino.fa2.utils.logging.FaLog

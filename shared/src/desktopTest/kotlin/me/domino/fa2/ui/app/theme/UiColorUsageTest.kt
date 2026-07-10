@@ -68,7 +68,7 @@ class UiColorUsageTest {
             ),
             AllowedHardcodedColor(
                 path =
-                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/overlays/about/AboutRouteScreen.kt",
+                    "shared/src/commonMain/kotlin/me/domino/fa2/ui/pages/about/AboutRouteScreen.kt",
                 snippet = "private val aboutHeaderBackground = Color(0xFF12284F)",
             ),
         )

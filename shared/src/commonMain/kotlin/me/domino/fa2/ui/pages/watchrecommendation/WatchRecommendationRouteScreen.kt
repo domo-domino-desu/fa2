@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.pages.overlays.watchrecommendation
+package me.domino.fa2.ui.pages.watchrecommendation
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -42,10 +42,10 @@ import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
 import me.domino.fa2.ui.components.ExpressiveIconButton
 import me.domino.fa2.ui.components.user.UserHorizontalCard
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.pages.overlays.userpager.UserPagerContextScreenModel
-import me.domino.fa2.ui.pages.overlays.userpager.UserPagerRouteScreen
-import me.domino.fa2.ui.pages.overlays.userpager.UserPagerSource
-import me.domino.fa2.ui.pages.overlays.userwatchlist.WatchlistStatusCard
+import me.domino.fa2.ui.pages.user.pager.UserPagerContextScreenModel
+import me.domino.fa2.ui.pages.user.pager.UserPagerRouteScreen
+import me.domino.fa2.ui.pages.user.pager.UserPagerSource
+import me.domino.fa2.ui.pages.user.watchlist.WatchlistStatusCard
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf

@@ -20,12 +20,12 @@ import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerDetailSource
 import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.domain.translation.SubmissionImageOcrTranslationService
 import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
+import me.domino.fa2.ui.components.html.TranslationUiState
+import me.domino.fa2.ui.components.html.resolveTranslationState
+import me.domino.fa2.ui.components.state.UiPageState
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.pages.submission.attachmenttext.SubmissionAttachmentTextUiState
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
-import me.domino.fa2.ui.state.SubmissionTranslationUiState
-import me.domino.fa2.ui.state.UiPageState
-import me.domino.fa2.ui.state.resolveTranslationState
 import me.domino.fa2.utils.FaUrls
 
 internal const val pagerPrefetchDebounceMs: Long = 500L
@@ -512,9 +512,9 @@ private fun resolveAttachmentTextState(
 
 private fun resolveAttachmentTranslationState(
     attachmentTextState: SubmissionAttachmentTextUiState?,
-    previous: SubmissionTranslationUiState?,
+    previous: TranslationUiState?,
     translationService: SubmissionDescriptionTranslationService,
-): SubmissionTranslationUiState? {
+): TranslationUiState? {
   val successState = attachmentTextState as? SubmissionAttachmentTextUiState.Success ?: return null
   return resolveTranslationState(
       sourceHtml = successState.document.html,

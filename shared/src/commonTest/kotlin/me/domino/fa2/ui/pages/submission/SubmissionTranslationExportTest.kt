@@ -7,13 +7,13 @@ import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.settings.TranslationProvider
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
+import me.domino.fa2.ui.components.html.TranslationUiState
+import me.domino.fa2.ui.components.html.resolveTranslationState
+import me.domino.fa2.ui.components.html.toDisplayBlock
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrBlockUiState
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrTranslationStatus
 import me.domino.fa2.ui.pages.submission.translation.SubmissionImageOcrTranslationExportSnapshot
 import me.domino.fa2.ui.pages.submission.translation.buildSubmissionTranslationSidecarFiles
-import me.domino.fa2.ui.state.SubmissionTranslationUiState
-import me.domino.fa2.ui.state.resolveTranslationState
-import me.domino.fa2.ui.state.toDisplayBlock
 
 class SubmissionTranslationExportTest {
   @Test
@@ -119,7 +119,7 @@ private fun translatedState(
     translatedTexts: List<String>,
     translationService: me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService,
     status: SubmissionDescriptionTranslationStatus = SubmissionDescriptionTranslationStatus.SUCCESS,
-): SubmissionTranslationUiState {
+): TranslationUiState {
   val state = resolveTranslationState(sourceHtml, null, null, translationService)
   val sourceBlocks = state.rawVariant.sourceBlocks
   val translatedBlocks =

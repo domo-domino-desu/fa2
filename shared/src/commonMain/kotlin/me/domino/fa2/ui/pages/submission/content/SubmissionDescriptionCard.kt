@@ -10,13 +10,13 @@ import fa2.shared.generated.resources.*
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.ui.app.LocalAppSettings
 import me.domino.fa2.ui.components.html.TranslatableBlocksCard
+import me.domino.fa2.ui.components.html.TranslationUiState
 import me.domino.fa2.ui.pages.submission.series.rememberSubmissionSeriesTrailingActions
-import me.domino.fa2.ui.state.SubmissionTranslationUiState
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun SubmissionDescriptionCard(
-    translationState: SubmissionTranslationUiState,
+    translationState: TranslationUiState,
     submissionUrl: String,
     onTranslate: () -> Unit,
     onToggleWrapText: () -> Unit,

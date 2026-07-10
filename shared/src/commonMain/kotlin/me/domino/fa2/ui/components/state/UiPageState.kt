@@ -1,4 +1,4 @@
-package me.domino.fa2.ui.state
+package me.domino.fa2.ui.components.state
 
 import me.domino.fa2.data.model.ResourceResult
 

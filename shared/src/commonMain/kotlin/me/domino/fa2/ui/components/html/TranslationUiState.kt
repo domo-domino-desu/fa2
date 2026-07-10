@@ -1,20 +1,18 @@
-package me.domino.fa2.ui.state
+package me.domino.fa2.ui.components.html
 
 import me.domino.fa2.domain.translation.SubmissionDescriptionBlock
-import me.domino.fa2.ui.components.html.SubmissionDescriptionDisplayBlock
-import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
 
-data class SubmissionTranslationUiState(
+data class TranslationUiState(
     val sourceKey: String,
     val sourceHtml: String,
     val sourceFileName: String? = null,
-    val sourceMode: SubmissionTranslationSourceMode = SubmissionTranslationSourceMode.RAW,
+    val sourceMode: TranslationSourceMode = TranslationSourceMode.RAW,
     val showTranslation: Boolean = false,
-    val rawVariant: SubmissionTranslationVariantUiState,
-    val wrappedVariant: SubmissionTranslationVariantUiState,
+    val rawVariant: TranslationVariantUiState,
+    val wrappedVariant: TranslationVariantUiState,
 ) {
   val isWrapped: Boolean
-    get() = sourceMode == SubmissionTranslationSourceMode.WRAPPED
+    get() = sourceMode == TranslationSourceMode.WRAPPED
 
   val sourceBlocks: List<SubmissionDescriptionBlock>
     get() = variantOf(sourceMode).sourceBlocks
@@ -26,7 +24,7 @@ data class SubmissionTranslationUiState(
         } else {
           variantOf(sourceMode)
               .toIdleDisplayBlocks(
-                  useWrappedOriginalText = sourceMode == SubmissionTranslationSourceMode.WRAPPED
+                  useWrappedOriginalText = sourceMode == TranslationSourceMode.WRAPPED
               )
         }
 
@@ -37,40 +35,38 @@ data class SubmissionTranslationUiState(
     get() = variantOf(sourceMode).hasTriggered
 }
 
-enum class SubmissionTranslationSourceMode {
+enum class TranslationSourceMode {
   RAW,
   WRAPPED,
 }
 
-data class SubmissionTranslationVariantUiState(
+data class TranslationVariantUiState(
     val sourceBlocks: List<SubmissionDescriptionBlock>,
     val blocks: List<SubmissionDescriptionDisplayBlock>,
     val translating: Boolean = false,
     val hasTriggered: Boolean = false,
 )
 
-internal fun SubmissionTranslationVariantUiState.canReuseTranslationResult(): Boolean =
+internal fun TranslationVariantUiState.canReuseTranslationResult(): Boolean =
     hasTriggered &&
         blocks.none { block -> block.status == SubmissionDescriptionTranslationStatus.FAILURE }
 
-internal fun SubmissionTranslationUiState.variantOf(
-    mode: SubmissionTranslationSourceMode
-): SubmissionTranslationVariantUiState =
+internal fun TranslationUiState.variantOf(mode: TranslationSourceMode): TranslationVariantUiState =
     when (mode) {
-      SubmissionTranslationSourceMode.RAW -> rawVariant
-      SubmissionTranslationSourceMode.WRAPPED -> wrappedVariant
+      TranslationSourceMode.RAW -> rawVariant
+      TranslationSourceMode.WRAPPED -> wrappedVariant
     }
 
-internal fun SubmissionTranslationUiState.withVariant(
-    mode: SubmissionTranslationSourceMode,
-    variant: SubmissionTranslationVariantUiState,
-): SubmissionTranslationUiState =
+internal fun TranslationUiState.withVariant(
+    mode: TranslationSourceMode,
+    variant: TranslationVariantUiState,
+): TranslationUiState =
     when (mode) {
-      SubmissionTranslationSourceMode.RAW -> copy(rawVariant = variant)
-      SubmissionTranslationSourceMode.WRAPPED -> copy(wrappedVariant = variant)
+      TranslationSourceMode.RAW -> copy(rawVariant = variant)
+      TranslationSourceMode.WRAPPED -> copy(wrappedVariant = variant)
     }
 
-internal fun SubmissionTranslationVariantUiState.toIdleDisplayBlocks(
+internal fun TranslationVariantUiState.toIdleDisplayBlocks(
     useWrappedOriginalText: Boolean
 ): List<SubmissionDescriptionDisplayBlock> =
     sourceBlocks.map { block ->

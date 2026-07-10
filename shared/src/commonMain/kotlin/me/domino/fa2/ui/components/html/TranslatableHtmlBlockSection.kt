@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import kotlin.math.roundToInt
 import me.domino.fa2.ui.icons.FaMaterialSymbols
-import me.domino.fa2.ui.state.SubmissionTranslationUiState
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -224,7 +223,7 @@ internal fun DetailSectionCardSurface(
 @Composable
 internal fun TranslatableBlocksCard(
     title: String,
-    translationState: SubmissionTranslationUiState,
+    translationState: TranslationUiState,
     emptyText: String,
     onTranslate: () -> Unit,
     onToggleWrapText: () -> Unit,

@@ -28,10 +28,10 @@ import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerDetailSource
 import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
 import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
+import me.domino.fa2.ui.components.html.TranslationSourceMode
 import me.domino.fa2.ui.pages.submission.attachmenttext.SubmissionAttachmentTextUiState
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
 import me.domino.fa2.ui.pages.submission.pager.SubmissionPagerUiState
-import me.domino.fa2.ui.state.SubmissionTranslationSourceMode
 import me.domino.fa2.utils.FaUrls
 import me.domino.fa2.utils.parseSubmissionSid
 
@@ -214,7 +214,7 @@ class SubmissionScreenModelTranslationAndScrollTest {
             ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
                     as SubmissionDetailUiState.Success)
                 .descriptionTranslationState
-        assertEquals(SubmissionTranslationSourceMode.RAW, initialState.sourceMode)
+        assertEquals(TranslationSourceMode.RAW, initialState.sourceMode)
         assertEquals(false, initialState.showTranslation)
         assertEquals("hello\nworld", initialState.sourceBlocks.single().sourceText)
 
@@ -243,7 +243,7 @@ class SubmissionScreenModelTranslationAndScrollTest {
             ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
                     as SubmissionDetailUiState.Success)
                 .descriptionTranslationState
-        assertEquals(SubmissionTranslationSourceMode.WRAPPED, wrappedIdleState.sourceMode)
+        assertEquals(TranslationSourceMode.WRAPPED, wrappedIdleState.sourceMode)
         assertEquals(false, wrappedIdleState.showTranslation)
         assertEquals("hello world", wrappedIdleState.sourceBlocks.single().sourceText)
         assertEquals("hello world", wrappedIdleState.blocks.single().originalText)
@@ -279,7 +279,7 @@ class SubmissionScreenModelTranslationAndScrollTest {
             ((model.state.value as SubmissionPagerUiState.Data).detailBySid.getValue(1)
                     as SubmissionDetailUiState.Success)
                 .descriptionTranslationState
-        assertEquals(SubmissionTranslationSourceMode.RAW, restoredRawTranslatedState.sourceMode)
+        assertEquals(TranslationSourceMode.RAW, restoredRawTranslatedState.sourceMode)
         assertEquals(true, restoredRawTranslatedState.showTranslation)
         assertEquals("HELLO\nWORLD", restoredRawTranslatedState.blocks.single().translated)
         assertEquals(listOf("hello\nworld", "hello world"), translatedRequests)
