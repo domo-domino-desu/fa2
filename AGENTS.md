@@ -17,52 +17,50 @@ ui -> domain -> data
 
 参考：[Android 官方架构文档](https://developer.android.com/courses/pathways/android-architecture?hl=zh-cn)将应用分为界面层、数据层，以及可选的网域层；网域层用于封装复杂业务逻辑或多个 ViewModel 复用的逻辑。
 
-各层职责：
+## 项目架构
 
-- `ui`：Compose UI、Voyager screen、screen model、路由、app shell、交互状态。
-- `data`：应用数据、资源仓储、FA/session/network/local persistence/provider 的具体实现，以及简单业务逻辑。data 不应知道 UI。
-- `domain`：少量复杂、独立、可复用的业务链路。domain service 可以调用 `data` 来获取资源或执行持久化。
-- `utils`：少量跨层通用工具，例如 URL、模板字符串、并发节流、HTML 文本块抽取。避免放 feature 专属 helper。
-- `di`：Koin 装配层。DI 负责组装依赖图，因此允许引用所有层。
+整体形态是 React Query 式的 `ui = f(QueryState)`：data 层输出带缓存语义的状态流，UI 纯粹订阅渲染。
 
-稳定边界规则：
+### 核心类型（`data/model`）
 
-- `data` 不得引用 `domain`/`ui`；domain 所需的资源 source contract 放在对应的 `data` 资源包，由 repository 实现。
-- `data/fa/*` 资源包的依赖图必须无环。共享 listing/parsing 能力下沉到专用叶子包，跨资源失效使用窄接口，由 DI 组装。
-- 可观察资源暴露 `Flow<QueryState<T>>`，由查询流携带加载、刷新、错误和陈旧数据；一次性 suspend 操作返回终态 `ResourceResult`。
-- `ui/components`、`ui/navigation`、`ui/translation` 和 `ui/submissionviewer/api` 不得依赖 `ui/pages` 的实现。
-- 页面导航直接使用 Voyager；只有真正跨宿主边界的深链请求才定义共享 contract。
-- suspend 路径捕获异常时必须重抛 `CancellationException`，统一使用 `runSuspendCatching` 或显式处理。
-- Cookie 只能由 `data/fa/session` 的凭据传输边界读写；裸媒体请求和不可信 origin 不得读取或污染 FA Cookie。
+- `ResourceResult<T>`：一次性 suspend 请求的**终态**结果（`Success / AuthRequired / CfChallenge / MatureBlocked / Error`）。
+- `QueryError`：4 个错误因子的值类型，全库唯一的错误编码；`ResourceResult.errorOrNull()` 是唯一的映射点，展示文案统一走 `QueryError.message()`。
+- `QueryState<T>`：可观察的查询状态（`Loading / Success(refreshing) / Failure(error)`），三个分支都携带 `data`（陈旧数据），实现 stale-while-revalidate。
 
-## 当前布局
+### data 层
 
-`ui` 按 app shell、复用组件和页面分组：
+每个 FA 资源切片（`data/remote/fa/{feed,browse,journal,...}`）只有两类文件：**Repository**（拼 URL → `fetchParsed` → 缓存）和 **Parser**（Ksoup 解析，配 fixture 测试）。不要恢复 Endpoint/DataSource/PageCache 这类纯转发层。
 
-- `ui/app`：应用入口、composition local、navigation、scaffold/top bar、challenge overlay、theme。
-- `ui/components`：真正跨页面复用的 UI 组件，按能力分组：feedback、forms、html、media、platform、state、user、waterfall。
-- `ui/pages`：页面自己的 screen、screen model、route screen 和页面专属组件。
-- `ui/pages/submission`：投稿查看器及其高内聚 OCR、翻译、附件与分页能力。
-- `ui/i18n`、`ui/utils`：少量 UI 支撑代码。
+共享基础设施在 `data/remote/fa/core`：
 
-`domain` 当前包含少量复杂/独立业务功能：
+- `PageQueryCache`：Room 支撑的查询缓存。`queryFlow`（观察式，SWR + 失效自动重取）、`queryOnce`（一次性 cache-first）、`invalidate(key|PageType)`（markStale，活跃 flow 经 `observeByKey` 感知并重取）。TTL 由 `PageType` enum 内联定义。跨资源失效直接调 `invalidate`（core 是各切片共享的叶子，无环约束天然满足）。
+- `fetchParsed`：`FaHtmlDataSource.get` → `HtmlResponseResult` 分类 → parse → `ResourceResult`，HTTP 到结果的转换只写在这一处。
+- `FaHttpClient → ChallengeAware → AuthAware` 装饰链承载 Cloudflare/登录检测；Cookie 只经 `data/remote/fa/session` 的凭据边界读写（`FaOriginPolicy`），不可信 origin 不得携带 FA Cookie。
 
-- `domain/attachmenttext`：附件文本提取、解析 service 和模型。
-- `domain/submissionseries`：submission 串联检测与解析。
-- `domain/watchrecommendation`：关注推荐算法，以及 blocklist/source 端口。
-- `domain/ocr`：平台文字识别 port 与几何合并算法。
+`data/remote/translation` 是翻译 provider（Google/Microsoft/OpenAI）与分块引擎 `SubmissionTextTranslationEngine`；`data/local` 是 Room/DataStore/KSafe 持久化。
 
-`data` 按具体实现和资源切片组织：
+### ui 层
 
-- `data/remote/fa/*`：FA 资源切片；简单切片默认只有 Repository + Parser。
-- `data/remote/fa/core`：FA HTTP、`PageQueryCache` 与查询状态支撑。
-- `data/remote/fa/session`：cookies、凭据 HTTP、auth session、Cloudflare challenge、user agent。
-- `data/remote/fa/listing`、`data/remote/fa/parsing`：多个资源切片复用的解析能力。
-- `data/local`：Room/DataStore/KSafe 本地持久化。
-- `data/model`：FA 页面和应用数据模型，例如终态 `ResourceResult`、`Submission`、`User`、分页结果。
-- `data/settings`：应用设置模型、枚举、读写 service 和 store contract；`data/local/settings` 提供持久化实现。
-- `data/remote/translation`：provider client 与单一 translation engine。
-- `data/local/taxonomy`：taxonomy resource 加载和查询。
+- 页面 = `RouteScreen`（Voyager Screen）+ `ScreenModel`（暴露 `StateFlow<QueryState<T>>`）+ 纯渲染 Composable。详情页直接 `repository.xxx(...).collect` 进状态；跨 feature 跳转直接 `navigator.push(...)`。
+- `PageStateWrapper` 统一渲染 `QueryState`：有 `data` 就展示内容（SWR），否则按 `QueryError` 分类硬回退（登录/CF/受限/错误）。
+- 列表页追加分页用 `ui/utils/PagedAppend.kt` 的 `appendTo()`（合并 + 按 key 去重 + typed 错误），页面自己只保留专属状态（如 watchlist 的随机打乱、gallery 的文件夹）。
+- `ui/components` 只放真正跨页复用的组件；`ui/app` 是入口、导航与 scaffold。
+
+### domain 层（仅存真实复杂逻辑）
+
+`attachmenttext`（多格式文档文本解析）、`watchrecommendation`（关注推荐算法）、`submissionseries`（系列检测）、`ocr`（平台识别 port + 几何合并）、`submissionviewer`（投稿查看器跨 8 种来源的分页适配）。不要在 domain 加纯转发/透传服务。
+
+### di 层
+
+Koin 装配（`AppModule/DataModule/DomainModule/UiModule`），screen model 用 `factory { params -> ... }`。DI 可引用所有层。
+
+### 边界规则（由 `desktopTest/architecture/ArchitectureBoundaryTest` 强制）
+
+1. 禁止项目内通配 import；
+2. data 不得依赖 domain/ui，domain 不得依赖 ui；
+3. `data/remote/fa/*` 资源包依赖图无环；
+4. FA feature 切片只能依赖共享基础设施包（core/parsing/listing/session/media/social）；
+5. 复用 UI 与 viewer api 不得依赖具体 feature 页面实现。
 
 # 开发说明
 

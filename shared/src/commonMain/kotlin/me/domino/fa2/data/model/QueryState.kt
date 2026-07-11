@@ -37,14 +37,7 @@ fun ResourceResult<*>.errorOrNull(): QueryError? =
       is ResourceResult.Error -> QueryError.Exception(exception)
     }
 
-fun ResourceResult<*>.errorMessageOrNull(): String? =
-    when (val error = errorOrNull()) {
-      null -> null
-      is QueryError.AuthRequired -> error.message
-      QueryError.CfChallenge -> "Cloudflare challenge"
-      is QueryError.MatureBlocked -> error.reason
-      is QueryError.Exception -> error.cause.message ?: error.cause::class.simpleName
-    }
+fun ResourceResult<*>.errorMessageOrNull(): String? = errorOrNull()?.message()
 
 fun <T : Any> ResourceResult<T>.toQueryState(stale: T? = null): QueryState<T> =
     when (this) {

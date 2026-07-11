@@ -11,10 +11,13 @@ import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
 import me.domino.fa2.data.model.errorMessageOrNull
+import me.domino.fa2.data.model.message
 import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.data.remote.fa.watchlist.WatchlistRepository
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.i18n.appStringOrFallback
+import me.domino.fa2.ui.utils.AppendOutcome
+import me.domino.fa2.ui.utils.appendTo
 import me.domino.fa2.utils.logging.FaLog
 
 private const val watchlistAutoLoadThreshold = 14
@@ -231,35 +234,31 @@ class UserWatchlistScreenModel(
     appendJob =
         screenModelScope.launch {
           val next = loadWatchlistPage(username, category, nextUrl)
-          val updated =
-              when (next) {
-                is ResourceResult.Success ->
-                    state.value.copy(
-                        users =
-                            (state.value.users + next.data.users).distinctBy {
-                              it.username.lowercase()
-                            },
-                        nextPageUrl = next.data.nextPageUrl,
-                        isLoadingMore = false,
-                    )
-                else ->
-                    state.value.copy(
-                        isLoadingMore = false,
-                        appendErrorMessage = next.errorMessageOrNull(),
-                    )
-              }
-          mutableState.value = updated
-          when (next) {
-            is ResourceResult.Success -> {
+          when (
+              val outcome =
+                  next.appendTo(state.value.users, { it.users }, { it.nextPageUrl }) {
+                    it.username.lowercase()
+                  }
+          ) {
+            is AppendOutcome.Appended -> {
+              mutableState.value =
+                  state.value.copy(
+                      users = outcome.items,
+                      nextPageUrl = outcome.nextPageUrl,
+                      isLoadingMore = false,
+                  )
               log.d {
-                "自动加载Watchlist页 -> ${summarizeResourceResult(next)}(count=${updated.users.size})"
+                "自动加载Watchlist页 -> ${summarizeResourceResult(next)}(count=${outcome.items.size})"
               }
             }
-
-            is ResourceResult.AuthRequired -> log.w { "自动加载Watchlist页 -> 需要重新登录" }
-            ResourceResult.CfChallenge -> log.w { "自动加载Watchlist页 -> Cloudflare验证" }
-            is ResourceResult.MatureBlocked -> log.w { "自动加载Watchlist页 -> 受限(${next.reason})" }
-            is ResourceResult.Error -> log.e(next.exception) { "自动加载Watchlist页 -> 失败" }
+            is AppendOutcome.Failed -> {
+              mutableState.value =
+                  state.value.copy(
+                      isLoadingMore = false,
+                      appendErrorMessage = outcome.error.message(),
+                  )
+              log.w { "自动加载Watchlist页 -> ${summarizeResourceResult(next)}" }
+            }
           }
         }
   }

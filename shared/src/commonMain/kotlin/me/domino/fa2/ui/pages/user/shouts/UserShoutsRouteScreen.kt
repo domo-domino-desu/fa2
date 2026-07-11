@@ -25,6 +25,7 @@ import fa2.shared.generated.resources.shouts
 import fa2.shared.generated.resources.shouts_count
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.QueryState
+import me.domino.fa2.data.model.message
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
 import me.domino.fa2.ui.components.html.PageCommentsCard
@@ -61,7 +62,7 @@ class UserShoutsRouteScreen(private val username: String) : Screen {
         is QueryState.Loading -> UserShoutsSkeleton()
         is QueryState.Failure ->
             UserShoutsError(
-                message = snapshot.error.toString(),
+                message = snapshot.error.message(),
                 onRetry = { screenModel.load(true) },
             )
         is QueryState.Success -> {

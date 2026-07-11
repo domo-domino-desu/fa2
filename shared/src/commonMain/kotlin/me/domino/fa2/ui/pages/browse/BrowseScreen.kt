@@ -56,8 +56,6 @@ import me.domino.fa2.ui.components.forms.toFilterOption
 import me.domino.fa2.ui.components.forms.toFilterOptionGroup
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.presentationOnlySemantics
-import me.domino.fa2.ui.components.state.StatusSurface
-import me.domino.fa2.ui.components.state.StatusSurfaceVariant
 import me.domino.fa2.ui.components.waterfall.SubmissionWaterfall
 import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallPageControls
 import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallViewportSnapshot
@@ -166,15 +164,6 @@ fun BrowseScreen(
       }
     } else {
       Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        state.errorMessage
-            ?.takeIf { message -> message.isNotBlank() && state.submissions.isNotEmpty() }
-            ?.let { inlineErrorMessage ->
-              BrowseStatusCard(
-                  title = stringResource(Res.string.load_failed),
-                  body = inlineErrorMessage,
-                  onRetry = onRetry,
-              )
-            }
         val waterfallContent: @Composable () -> Unit = {
           SubmissionWaterfall(
               items = state.submissions,
@@ -507,17 +496,6 @@ private fun RatingCheckbox(label: String, checked: Boolean, onCheckedChange: (Bo
     )
     Text(text = label, style = MaterialTheme.typography.bodyMedium)
   }
-}
-
-@Composable
-private fun BrowseStatusCard(title: String, body: String, onRetry: () -> Unit) {
-  StatusSurface(
-      title = title,
-      body = body,
-      modifier = Modifier.padding(horizontal = 12.dp),
-      onAction = onRetry,
-      variant = StatusSurfaceVariant.Section,
-  )
 }
 
 private fun buildBrowseGenderOptions(

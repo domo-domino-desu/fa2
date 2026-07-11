@@ -7,7 +7,10 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.JournalSummary
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.errorMessageOrNull
+import me.domino.fa2.data.model.message
 import me.domino.fa2.data.remote.fa.journal.JournalsRepository
+import me.domino.fa2.ui.utils.AppendOutcome
+import me.domino.fa2.ui.utils.appendTo
 
 private const val journalsAutoLoadThreshold = 6
 
@@ -77,20 +80,28 @@ class UserJournalsScreenModel(
     mutableState.value = current.copy(isLoadingMore = true, appendErrorMessage = null)
     appendJob =
         screenModelScope.launch {
-          when (val result = repository.loadJournalsPage(username, cursor)) {
-            is ResourceResult.Success ->
+          when (
+              val outcome =
+                  repository.loadJournalsPage(username, cursor).appendTo(
+                      state.value.journals,
+                      { it.journals },
+                      { it.nextPageUrl },
+                  ) {
+                    it.id
+                  }
+          ) {
+            is AppendOutcome.Appended ->
                 mutableState.value =
                     state.value.copy(
-                        journals =
-                            (state.value.journals + result.data.journals).distinctBy { it.id },
-                        nextPageUrl = result.data.nextPageUrl,
+                        journals = outcome.items,
+                        nextPageUrl = outcome.nextPageUrl,
                         isLoadingMore = false,
                     )
-            else ->
+            is AppendOutcome.Failed ->
                 mutableState.value =
                     state.value.copy(
                         isLoadingMore = false,
-                        appendErrorMessage = result.errorMessageOrNull(),
+                        appendErrorMessage = outcome.error.message(),
                     )
           }
         }

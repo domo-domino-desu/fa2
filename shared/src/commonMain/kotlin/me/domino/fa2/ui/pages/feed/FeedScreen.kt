@@ -3,25 +3,19 @@ package me.domino.fa2.ui.pages.feed
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import fa2.shared.generated.resources.Res
-import fa2.shared.generated.resources.load_failed
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.domain.submissionviewer.api.WaterfallScrollRequest
 import me.domino.fa2.ui.app.LocalAppSettings
-import me.domino.fa2.ui.components.state.StatusSurface
-import me.domino.fa2.ui.components.state.StatusSurfaceVariant
 import me.domino.fa2.ui.components.waterfall.SubmissionWaterfall
 import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallPageControls
 import me.domino.fa2.ui.components.waterfall.SubmissionWaterfallViewportSnapshot
 import me.domino.fa2.ui.components.waterfall.WaterfallLoadingSkeleton
 import me.domino.fa2.ui.components.waterfall.WaterfallRefreshBox
-import org.jetbrains.compose.resources.stringResource
 
 /** Feed 页面。 */
 @Composable
@@ -82,16 +76,6 @@ fun FeedScreen(
       return
     }
 
-    state.errorMessage
-        ?.takeIf { message -> message.isNotBlank() && state.submissions.isNotEmpty() }
-        ?.let { inlineErrorMessage ->
-          FeedStatusCard(
-              title = stringResource(Res.string.load_failed),
-              body = inlineErrorMessage,
-              onRetry = onRetry,
-          )
-        }
-
     val waterfallContent: @Composable () -> Unit = {
       SubmissionWaterfall(
           items = state.submissions,
@@ -128,16 +112,4 @@ fun FeedScreen(
       waterfallContent()
     }
   }
-}
-
-/** Feed 状态消息卡。 */
-@Composable
-private fun FeedStatusCard(title: String, body: String, onRetry: () -> Unit) {
-  StatusSurface(
-      title = title,
-      body = body,
-      modifier = Modifier.padding(horizontal = 12.dp),
-      onAction = onRetry,
-      variant = StatusSurfaceVariant.Section,
-  )
 }

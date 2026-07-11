@@ -9,11 +9,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.QueryState
-import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.data.model.errorOrNull
 import me.domino.fa2.data.model.mapData
+import me.domino.fa2.data.model.message
 import me.domino.fa2.data.remote.fa.browse.BrowseRepository
+import me.domino.fa2.ui.utils.AppendOutcome
+import me.domino.fa2.ui.utils.appendTo
 import me.domino.fa2.utils.FaUrls
 
 private const val browseAutoLoadThreshold = 10
@@ -40,7 +41,6 @@ data class BrowseUiState(
   val loading: Boolean
     get() = submissions.isEmpty()
 
-  val errorMessage: String? = null
   val hasMore: Boolean
     get() = nextPageUrl != null
 }
@@ -123,23 +123,28 @@ class BrowseScreenModel(
         QueryState.Success(current.copy(isLoadingMore = true, appendErrorMessage = null))
     appendJob =
         screenModelScope.launch {
-          when (val result = repository.loadPage(url)) {
-            is ResourceResult.Success -> {
-              val known = mutableState.value.data ?: current
-              mutableState.value =
-                  QueryState.Success(
-                      known.copy(
-                          submissions =
-                              (known.submissions + result.data.submissions).distinctBy { it.id },
-                          nextPageUrl = result.data.nextPageUrl,
-                          isLoadingMore = false,
-                      )
-                  )
-            }
-            else ->
-                update {
-                  copy(isLoadingMore = false, appendErrorMessage = result.errorOrNull().toString())
-                }
+          val known = mutableState.value.data ?: current
+          when (
+              val outcome =
+                  repository.loadPage(url).appendTo(
+                      known.submissions,
+                      { it.submissions },
+                      { it.nextPageUrl },
+                  ) {
+                    it.id
+                  }
+          ) {
+            is AppendOutcome.Appended ->
+                mutableState.value =
+                    QueryState.Success(
+                        known.copy(
+                            submissions = outcome.items,
+                            nextPageUrl = outcome.nextPageUrl,
+                            isLoadingMore = false,
+                        )
+                    )
+            is AppendOutcome.Failed ->
+                update { copy(isLoadingMore = false, appendErrorMessage = outcome.error.message()) }
           }
         }
   }

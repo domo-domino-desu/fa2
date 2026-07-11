@@ -9,9 +9,12 @@ import me.domino.fa2.data.model.GalleryPage
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.model.errorMessageOrNull
+import me.domino.fa2.data.model.message
 import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.data.remote.fa.favorites.FavoritesRepository
 import me.domino.fa2.data.remote.fa.gallery.GalleryRepository
+import me.domino.fa2.ui.utils.AppendOutcome
+import me.domino.fa2.ui.utils.appendTo
 import me.domino.fa2.utils.logging.FaLog
 
 private const val userAutoLoadThreshold = 10
@@ -230,33 +233,31 @@ class UserSubmissionSectionScreenModel(
     appendJob =
         screenModelScope.launch {
           val next = loadPage(nextPageUrl = nextUrl)
-          val updated =
-              when (next) {
-                is ResourceResult.Success ->
-                    state.value.copy(
-                        submissions =
-                            (state.value.submissions + next.data.submissions).distinctBy { it.id },
-                        nextPageUrl = next.data.nextPageUrl,
-                        isLoadingMore = false,
-                    )
-                else ->
-                    state.value.copy(
-                        isLoadingMore = false,
-                        appendErrorMessage = next.errorMessageOrNull(),
-                    )
-              }
-          mutableState.value = updated
-          when (next) {
-            is ResourceResult.Success -> {
+          when (
+              val outcome =
+                  next.appendTo(state.value.submissions, { it.submissions }, { it.nextPageUrl }) {
+                    it.id
+                  }
+          ) {
+            is AppendOutcome.Appended -> {
+              mutableState.value =
+                  state.value.copy(
+                      submissions = outcome.items,
+                      nextPageUrl = outcome.nextPageUrl,
+                      isLoadingMore = false,
+                  )
               log.d {
-                "自动加载用户投稿分区 -> ${summarizeResourceResult(next)}(count=${updated.submissions.size})"
+                "自动加载用户投稿分区 -> ${summarizeResourceResult(next)}(count=${outcome.items.size})"
               }
             }
-
-            is ResourceResult.AuthRequired -> log.w { "自动加载用户投稿分区 -> 需要重新登录" }
-            ResourceResult.CfChallenge -> log.w { "自动加载用户投稿分区 -> Cloudflare验证" }
-            is ResourceResult.MatureBlocked -> log.w { "自动加载用户投稿分区 -> 受限(${next.reason})" }
-            is ResourceResult.Error -> log.e(next.exception) { "自动加载用户投稿分区 -> 失败" }
+            is AppendOutcome.Failed -> {
+              mutableState.value =
+                  state.value.copy(
+                      isLoadingMore = false,
+                      appendErrorMessage = outcome.error.message(),
+                  )
+              log.w { "自动加载用户投稿分区 -> ${summarizeResourceResult(next)}" }
+            }
           }
         }
   }
