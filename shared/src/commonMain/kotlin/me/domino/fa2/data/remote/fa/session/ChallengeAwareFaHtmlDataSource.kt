@@ -4,7 +4,6 @@ import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
 import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
 import me.domino.fa2.data.remote.fa.core.summarizeHtmlResult
 import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
 
 /** 对 HTML 数据源增加 challenge 感知： 命中 challenge 时挂起等待用户完成验证，再自动重试一次原请求。 */
 class ChallengeAwareFaHtmlDataSource(
@@ -14,7 +13,7 @@ class ChallengeAwareFaHtmlDataSource(
   private val log = FaLog.withTag("ChallengeAwareFaHtmlDataSource")
 
   override suspend fun get(url: String): HtmlResponseResult {
-    val safeUrl = summarizeUrl(url)
+    val safeUrl = url.trim()
     val first = delegate.get(url)
     if (first !is HtmlResponseResult.CfChallenge) {
       log.d { "Challenge代理请求 -> ${summarizeHtmlResult(first)}(url=$safeUrl)" }

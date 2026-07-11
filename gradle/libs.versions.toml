@@ -7,7 +7,6 @@ androidx-activityCompose = "1.13.0"
 androidx-test-espresso = "3.7.0"
 androidx-test-ext-junit = "1.3.0"
 buildkonfig = "0.17.1"
-cache4k = "0.14.0"
 coil3 = "3.4.0"
 compose-material3 = "1.10.0-alpha05"
 compose-multiplatform = "1.10.2"
@@ -33,7 +32,6 @@ navigation = "2.9.2"
 room = "2.8.4"
 slf4j = "2.0.17"
 sqlite = "2.5.0"
-store = "5.1.0-alpha08"
 voyager = "1.1.0-beta03"
 zoomimage = "1.4.0"
 symbolcraft = "0.3.4"
@@ -49,7 +47,6 @@ androidx-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:life
 androidx-lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx-test-espresso" }
 androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-test-ext-junit" }
-cache4k = { module = "io.github.reactivecircus.cache4k:cache4k", version.ref = "cache4k" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil3" }
 coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coil3" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil3" }
@@ -84,7 +81,6 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
-store5 = { module = "org.mobilenativefoundation.store:store5", version.ref = "store" }
 voyager-core = { module = "cafe.adriel.voyager:voyager-core", version.ref = "voyager" }
 voyager-koin = { module = "cafe.adriel.voyager:voyager-koin", version.ref = "voyager" }
 voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }

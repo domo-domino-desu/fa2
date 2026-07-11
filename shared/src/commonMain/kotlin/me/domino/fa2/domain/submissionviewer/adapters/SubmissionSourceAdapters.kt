@@ -19,14 +19,14 @@ import me.domino.fa2.domain.submissionseries.SubmissionSeriesService
 import me.domino.fa2.domain.submissionseries.normalizeSubmissionSeriesUrl
 import me.domino.fa2.domain.submissionseries.toSubmissionThumbnail
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
 import me.domino.fa2.domain.submissionviewer.api.SubmissionPaginationKind
 import me.domino.fa2.domain.submissionviewer.api.SubmissionPaginationModel
 import me.domino.fa2.domain.submissionviewer.api.SubmissionSourceAdapter
 import me.domino.fa2.domain.submissionviewer.api.UserSubmissionSection
 
 internal class FeedSubmissionSourceAdapter(private val repository: FeedRepository) :
-    SubmissionSourceAdapter {
+    SubmissionSourceAdapter() {
   override val sourceKind: SubmissionContextSourceKind = SubmissionContextSourceKind.FEED
   override val paginationModel: SubmissionPaginationModel =
       SubmissionPaginationModel(
@@ -35,7 +35,7 @@ internal class FeedSubmissionSourceAdapter(private val repository: FeedRepositor
           knowsLastPage = false,
       )
 
-  override suspend fun loadInitialPage(): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadInitialPage(): ResourceResult<SubmissionPageSnapshot> =
       repository.loadFirstPage().mapLoadedPage { page ->
         page.toLoadedPage(
             requestKey = page.currentPageUrl,
@@ -43,17 +43,19 @@ internal class FeedSubmissionSourceAdapter(private val repository: FeedRepositor
         )
       }
 
-  override suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionPageSnapshot> =
       repository.loadPageByUrl(requestKey).mapLoadedPage { page ->
         page.toLoadedPage(requestKey = requestKey, pageId = requestKey)
       }
 
-  override suspend fun loadPreviousPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadPreviousPage(
+      requestKey: String
+  ): ResourceResult<SubmissionPageSnapshot> =
       repository.loadPageByUrl(requestKey).mapLoadedPage { page ->
         page.toLoadedPage(requestKey = requestKey, pageId = requestKey)
       }
 
-  override suspend fun loadFirstPage(): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadFirstPage(): ResourceResult<SubmissionPageSnapshot> =
       repository.loadPageByUrl(me.domino.fa2.utils.FaUrls.submissions()).mapLoadedPage { page ->
         page.toLoadedPage(
             requestKey = page.currentPageUrl ?: me.domino.fa2.utils.FaUrls.submissions(),
@@ -65,7 +67,7 @@ internal class FeedSubmissionSourceAdapter(private val repository: FeedRepositor
 internal class SearchSubmissionSourceAdapter(
     private val repository: SearchRepository,
     private val firstPageUrl: String,
-) : SubmissionSourceAdapter {
+) : SubmissionSourceAdapter() {
   override val sourceKind: SubmissionContextSourceKind = SubmissionContextSourceKind.SEARCH
   override val paginationModel: SubmissionPaginationModel =
       SubmissionPaginationModel(
@@ -74,19 +76,20 @@ internal class SearchSubmissionSourceAdapter(
           knowsLastPage = true,
       )
 
-  override suspend fun loadInitialPage(): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadInitialPage(): ResourceResult<SubmissionPageSnapshot> =
       loadByUrl(firstPageUrl)
 
-  override suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionPageSnapshot> =
       loadByUrl(requestKey)
 
-  override suspend fun loadPreviousPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
-      loadByUrl(requestKey)
+  override suspend fun loadPreviousPage(
+      requestKey: String
+  ): ResourceResult<SubmissionPageSnapshot> = loadByUrl(requestKey)
 
-  override suspend fun loadFirstPage(): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadFirstPage(): ResourceResult<SubmissionPageSnapshot> =
       loadByUrl(firstPageUrl)
 
-  override suspend fun loadLastPage(): ResourceResult<SubmissionLoadedPage> {
+  override suspend fun loadLastPage(): ResourceResult<SubmissionPageSnapshot> {
     val first = loadInitialPage()
     val page = (first as? ResourceResult.Success)?.data ?: return first
     val totalCount =
@@ -95,10 +98,10 @@ internal class SearchSubmissionSourceAdapter(
     return jumpToPage(lastPageNumber)
   }
 
-  override suspend fun jumpToPage(pageNumber: Int): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun jumpToPage(pageNumber: Int): ResourceResult<SubmissionPageSnapshot> =
       loadByUrl(replaceQueryParam(firstPageUrl, "page", pageNumber.toString()))
 
-  private suspend fun loadByUrl(url: String): ResourceResult<SubmissionLoadedPage> =
+  private suspend fun loadByUrl(url: String): ResourceResult<SubmissionPageSnapshot> =
       repository.loadPage(url).mapLoadedPage { page ->
         page.toLoadedPage(
             requestKey = url,
@@ -124,7 +127,7 @@ internal class SearchSubmissionSourceAdapter(
 internal class BrowseSubmissionSourceAdapter(
     private val repository: BrowseRepository,
     private val firstPageUrl: String,
-) : SubmissionSourceAdapter {
+) : SubmissionSourceAdapter() {
   override val sourceKind: SubmissionContextSourceKind = SubmissionContextSourceKind.BROWSE
   override val paginationModel: SubmissionPaginationModel =
       SubmissionPaginationModel(
@@ -133,22 +136,23 @@ internal class BrowseSubmissionSourceAdapter(
           knowsLastPage = false,
       )
 
-  override suspend fun loadInitialPage(): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadInitialPage(): ResourceResult<SubmissionPageSnapshot> =
       loadByUrl(firstPageUrl)
 
-  override suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionPageSnapshot> =
       loadByUrl(requestKey)
 
-  override suspend fun loadPreviousPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
-      loadByUrl(requestKey)
+  override suspend fun loadPreviousPage(
+      requestKey: String
+  ): ResourceResult<SubmissionPageSnapshot> = loadByUrl(requestKey)
 
-  override suspend fun loadFirstPage(): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadFirstPage(): ResourceResult<SubmissionPageSnapshot> =
       loadByUrl(firstPageUrl)
 
-  override suspend fun jumpToPage(pageNumber: Int): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun jumpToPage(pageNumber: Int): ResourceResult<SubmissionPageSnapshot> =
       loadByUrl(replaceQueryParam(firstPageUrl, "page", pageNumber.toString()))
 
-  private suspend fun loadByUrl(url: String): ResourceResult<SubmissionLoadedPage> =
+  private suspend fun loadByUrl(url: String): ResourceResult<SubmissionPageSnapshot> =
       repository.loadPage(url).mapLoadedPage { page ->
         page.toLoadedPage(
             requestKey = url,
@@ -166,7 +170,7 @@ internal class UserSubmissionSourceAdapter(
     private val initialPageUrl: String?,
     private val galleryRepository: GalleryRepository,
     private val favoritesRepository: FavoritesRepository,
-) : SubmissionSourceAdapter {
+) : SubmissionSourceAdapter() {
   private val lastPageCacheKey: String? =
       if (route == UserSubmissionSection.Gallery) {
         listOf(route.routeKey, username.lowercase(), initialPageUrl?.trim().orEmpty())
@@ -203,13 +207,15 @@ internal class UserSubmissionSourceAdapter(
         UserSubmissionSection.Journals -> SubmissionPaginationModel()
       }
 
-  override suspend fun loadInitialPage(): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadInitialPage(): ResourceResult<SubmissionPageSnapshot> =
       loadByUrl(initialPageUrl)
 
-  override suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionPageSnapshot> =
       loadByUrl(requestKey)
 
-  override suspend fun loadPreviousPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadPreviousPage(
+      requestKey: String
+  ): ResourceResult<SubmissionPageSnapshot> =
       if (route == UserSubmissionSection.Journals) {
         ResourceResult.Error(
             UnsupportedOperationException("Previous page is unsupported for $sourceKind")
@@ -218,7 +224,7 @@ internal class UserSubmissionSourceAdapter(
         loadByUrl(requestKey)
       }
 
-  override suspend fun loadFirstPage(): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadFirstPage(): ResourceResult<SubmissionPageSnapshot> =
       loadByUrl(
           when (route) {
             UserSubmissionSection.Gallery -> null
@@ -227,7 +233,7 @@ internal class UserSubmissionSourceAdapter(
           }
       )
 
-  override suspend fun jumpToPage(pageNumber: Int): ResourceResult<SubmissionLoadedPage> {
+  override suspend fun jumpToPage(pageNumber: Int): ResourceResult<SubmissionPageSnapshot> {
     if (route != UserSubmissionSection.Gallery) {
       return ResourceResult.Error(
           UnsupportedOperationException("Jump page is unsupported for $sourceKind")
@@ -251,7 +257,7 @@ internal class UserSubmissionSourceAdapter(
     }
   }
 
-  override suspend fun loadLastPage(): ResourceResult<SubmissionLoadedPage> {
+  override suspend fun loadLastPage(): ResourceResult<SubmissionPageSnapshot> {
     if (route != UserSubmissionSection.Gallery) {
       return ResourceResult.Error(
           UnsupportedOperationException("Last page is unsupported for $sourceKind")
@@ -263,7 +269,7 @@ internal class UserSubmissionSourceAdapter(
   private suspend fun loadByUrl(
       url: String?,
       lastPageNumberOverride: Int? = resolvedGalleryLastPageNumber,
-  ): ResourceResult<SubmissionLoadedPage> {
+  ): ResourceResult<SubmissionPageSnapshot> {
     val pageState =
         when (route) {
           UserSubmissionSection.Gallery -> galleryRepository.loadGalleryPage(username, url)
@@ -302,7 +308,7 @@ internal class UserSubmissionSourceAdapter(
   private suspend fun loadGalleryPageNumber(
       pageNumber: Int,
       lastPageNumberOverride: Int? = resolvedGalleryLastPageNumber,
-  ): ResourceResult<SubmissionLoadedPage> {
+  ): ResourceResult<SubmissionPageSnapshot> {
     val firstUrl = galleryFirstPageUrl()
     val targetUrl = if (pageNumber <= 1) firstUrl else buildGalleryPageUrl(firstUrl, pageNumber)
     return loadByUrl(targetUrl, lastPageNumberOverride = lastPageNumberOverride)
@@ -310,7 +316,7 @@ internal class UserSubmissionSourceAdapter(
 
   private suspend fun resolveGalleryLastPage(
       initialUpperBound: Int? = null
-  ): ResourceResult<SubmissionLoadedPage> {
+  ): ResourceResult<SubmissionPageSnapshot> {
     resolvedGalleryLastPageNumber?.let { lastPageNumber ->
       return resolveGalleryLastPageFromHint(lastPageNumber)
     }
@@ -361,9 +367,9 @@ internal class UserSubmissionSourceAdapter(
 
   private suspend fun finalizeGalleryLastPage(
       lowPageNumber: Int,
-      lowPage: SubmissionLoadedPage,
+      lowPage: SubmissionPageSnapshot,
       highPageNumber: Int,
-  ): ResourceResult<SubmissionLoadedPage> {
+  ): ResourceResult<SubmissionPageSnapshot> {
     val firstUrl = galleryFirstPageUrl()
     var low = lowPageNumber
     var lowLoadedPage = lowPage
@@ -386,7 +392,7 @@ internal class UserSubmissionSourceAdapter(
 
   private suspend fun resolveGalleryLastPageFromHint(
       hintPageNumber: Int
-  ): ResourceResult<SubmissionLoadedPage> {
+  ): ResourceResult<SubmissionPageSnapshot> {
     val safeHintPageNumber = hintPageNumber.coerceAtLeast(1)
     val hintResult = loadGalleryPageNumber(safeHintPageNumber, lastPageNumberOverride = null)
     val hintPage = (hintResult as? ResourceResult.Success)?.data ?: return hintResult
@@ -455,7 +461,7 @@ private object UserSubmissionLastPageHintCache {
 internal class SeriesSubmissionSourceAdapter(
     private val repository: SubmissionSeriesSubmissionSource,
     private val series: SubmissionSeriesResolvedSeries,
-) : SubmissionSourceAdapter {
+) : SubmissionSourceAdapter() {
   private val resolver = SubmissionSeriesService(repository = repository)
   private val loadedUrls =
       series.seedSubmissions
@@ -475,9 +481,9 @@ internal class SeriesSubmissionSourceAdapter(
           knowsLastPage = false,
       )
 
-  override suspend fun loadInitialPage(): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadInitialPage(): ResourceResult<SubmissionPageSnapshot> =
       ResourceResult.Success(
-          SubmissionLoadedPage(
+          SubmissionPageSnapshot(
               pageId = "series:${series.candidateKey}:seed",
               requestKey = series.firstSubmissionUrl,
               items = series.seedSubmissions,
@@ -490,13 +496,14 @@ internal class SeriesSubmissionSourceAdapter(
           )
       )
 
-  override suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionPageSnapshot> =
       loadSeriesPage(requestKey)
 
-  override suspend fun loadPreviousPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
-      loadSeriesPage(requestKey)
+  override suspend fun loadPreviousPage(
+      requestKey: String
+  ): ResourceResult<SubmissionPageSnapshot> = loadSeriesPage(requestKey)
 
-  private suspend fun loadSeriesPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
+  private suspend fun loadSeriesPage(requestKey: String): ResourceResult<SubmissionPageSnapshot> =
       when (val detailState = repository.loadSubmissionDetailByUrl(requestKey)) {
         is ResourceResult.Success -> ResourceResult.Success(detailState.data.toLoadedPage())
         is ResourceResult.AuthRequired ->
@@ -506,7 +513,7 @@ internal class SeriesSubmissionSourceAdapter(
         is ResourceResult.Error -> ResourceResult.Error(detailState.exception)
       }
 
-  private fun Submission.toLoadedPage(): SubmissionLoadedPage {
+  private fun Submission.toLoadedPage(): SubmissionPageSnapshot {
     val normalizedUrl = normalizeSubmissionSeriesUrl(submissionUrl)
     loadedUrls += normalizedUrl
     val previousRequestKey: String?
@@ -542,7 +549,7 @@ internal class SeriesSubmissionSourceAdapter(
       }
     }
 
-    return SubmissionLoadedPage(
+    return SubmissionPageSnapshot(
         pageId = "series:${series.candidateKey}:$normalizedUrl",
         requestKey = submissionUrl,
         items = listOf(toSubmissionThumbnail()),
@@ -559,18 +566,18 @@ internal class SeriesSubmissionSourceAdapter(
 internal class SeedSubmissionSourceAdapter(
     override val sourceKind: SubmissionContextSourceKind,
     private val items: List<SubmissionThumbnail>,
-) : SubmissionSourceAdapter {
+) : SubmissionSourceAdapter() {
   override val paginationModel: SubmissionPaginationModel =
       SubmissionPaginationModel(canJumpToCachedSubmission = true)
 
-  override suspend fun loadInitialPage(): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadInitialPage(): ResourceResult<SubmissionPageSnapshot> =
       ResourceResult.Success(
-          SubmissionLoadedPage(pageId = "seed:$sourceKind", requestKey = null, items = items)
+          SubmissionPageSnapshot(pageId = "seed:$sourceKind", requestKey = null, items = items)
       )
 }
 
-private fun FeedPage.toLoadedPage(requestKey: String?, pageId: String): SubmissionLoadedPage =
-    SubmissionLoadedPage(
+private fun FeedPage.toLoadedPage(requestKey: String?, pageId: String): SubmissionPageSnapshot =
+    SubmissionPageSnapshot(
         pageId = pageId,
         requestKey = requestKey,
         items = submissions,
@@ -588,9 +595,9 @@ private fun SubmissionListingPage.toLoadedPage(
     firstPageUrl: String?,
     lastPageNumber: Int?,
     lastPageUrl: String?,
-): SubmissionLoadedPage {
+): SubmissionPageSnapshot {
   val pageNumber = currentPageNumber ?: parseQueryParamInt(requestKey, "page") ?: 1
-  return SubmissionLoadedPage(
+  return SubmissionPageSnapshot(
       pageId = pageId,
       requestKey = requestKey,
       items = submissions,
@@ -612,7 +619,7 @@ private fun GalleryPage.toLoadedPage(
     firstPageUrl: String?,
     lastPageNumber: Int?,
     lastPageUrl: String?,
-): SubmissionLoadedPage {
+): SubmissionPageSnapshot {
   val normalizedFirstPageUrl = firstPageUrl?.trim()?.removeSuffix("/")
   val normalizedRequestKey = requestKey.trim().removeSuffix("/")
   val pageNumber =
@@ -624,7 +631,7 @@ private fun GalleryPage.toLoadedPage(
           } else {
             null
           }
-  return SubmissionLoadedPage(
+  return SubmissionPageSnapshot(
       pageId = pageId,
       requestKey = requestKey,
       items = submissions,
@@ -643,10 +650,10 @@ private fun GalleryPage.toLoadedPage(
   )
 }
 
-private fun SubmissionLoadedPage.withResolvedLastPage(
+private fun SubmissionPageSnapshot.withResolvedLastPage(
     lastPageNumber: Int?,
     firstPageUrl: String,
-): SubmissionLoadedPage =
+): SubmissionPageSnapshot =
     copy(
         lastPageNumber = lastPageNumber,
         lastRequestKey =
@@ -656,8 +663,8 @@ private fun SubmissionLoadedPage.withResolvedLastPage(
     )
 
 private inline fun <T> ResourceResult<T>.mapLoadedPage(
-    transform: (T) -> SubmissionLoadedPage
-): ResourceResult<SubmissionLoadedPage> =
+    transform: (T) -> SubmissionPageSnapshot
+): ResourceResult<SubmissionPageSnapshot> =
     when (this) {
       is ResourceResult.Success -> ResourceResult.Success(transform(data))
       is ResourceResult.AuthRequired -> ResourceResult.AuthRequired(requestUrl, message)

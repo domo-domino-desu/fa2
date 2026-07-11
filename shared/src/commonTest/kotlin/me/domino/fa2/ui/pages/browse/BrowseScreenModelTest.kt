@@ -10,12 +10,10 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import me.domino.fa2.data.remote.fa.browse.BrowseDataSource
-import me.domino.fa2.data.remote.fa.browse.BrowseEndpoint
-import me.domino.fa2.data.remote.fa.browse.BrowsePageCache
 import me.domino.fa2.data.remote.fa.browse.BrowseRepository
 import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
 import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
+import me.domino.fa2.data.remote.fa.core.PageQueryCache
 import me.domino.fa2.data.remote.fa.listing.SubmissionListingParser
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
@@ -55,22 +53,17 @@ class BrowseScreenModelTest {
                 ratingMature = initialFilter.ratingMature,
                 ratingAdult = initialFilter.ratingAdult,
             )
-        assertEquals(initialFilter, screenModel.state.value.draftFilter)
-        assertEquals(initialFilter, screenModel.state.value.appliedFilter)
-        assertEquals(expectedUrl, buildBrowseUrl(screenModel.state.value.appliedFilter))
+        assertEquals(initialFilter, screenModel.state.value.data?.draftFilter)
+        assertEquals(initialFilter, screenModel.state.value.data?.appliedFilter)
+        assertEquals(expectedUrl, buildBrowseUrl(screenModel.state.value.data!!.appliedFilter))
       }
 
   private fun buildRepository(source: FaHtmlDataSource): BrowseRepository {
-    val cache =
-        BrowsePageCache(
-            dataSource =
-                BrowseDataSource(
-                    endpoint = BrowseEndpoint(source),
-                    parser = SubmissionListingParser(),
-                ),
-            pageCacheDao = InMemoryPageCacheDao(),
-        )
-    return BrowseRepository(cache)
+    return BrowseRepository(
+        source,
+        SubmissionListingParser(),
+        PageQueryCache(InMemoryPageCacheDao()),
+    )
   }
 }
 

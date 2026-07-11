@@ -1,27 +1,27 @@
 package me.domino.fa2.ui.pages.search
 
 import co.touchlab.kermit.Logger
-import fa2.shared.generated.resources.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.local.taxonomy.FaTaxonomyRepository
+import me.domino.fa2.data.model.QueryState
 import me.domino.fa2.data.model.ResourceResult
-import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.data.model.errorMessageOrNull
+import me.domino.fa2.data.model.mapData
+import me.domino.fa2.data.model.message
 import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.data.remote.fa.search.SearchRepository
 import me.domino.fa2.data.remote.fa.user.ActivityHistoryRepository
 import me.domino.fa2.data.settings.AppI18nSnapshot
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.settings.SystemLanguageProvider
-import me.domino.fa2.ui.components.state.UiPageState
-import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.i18n.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.pages.search.util.SearchDateRangeShiftAction
 import me.domino.fa2.ui.pages.search.util.normalizeManualDateFields
 import me.domino.fa2.ui.pages.search.util.resolveSearchDateFields
 import me.domino.fa2.ui.pages.search.util.shiftSearchDateFields
-import me.domino.fa2.ui.utils.PaginationReducer
 
 internal data class SearchAppliedRequest(val applied: SearchFormState, val firstUrl: String)
 
@@ -189,86 +189,67 @@ internal class SearchHistoryCoordinator(
 internal class SearchPaginationCoordinator(
     private val repository: SearchRepository,
     private val log: Logger,
-    private val paginationStateMachine: PaginationReducer<SubmissionThumbnail, Int>,
     private val screenModelScope: CoroutineScope,
     private val stateProvider: () -> SearchUiState,
     private val stateSink: (SearchUiState) -> Unit,
-    private val pageStateSink: (UiPageState<SearchUiState>) -> Unit,
+    private val pageStateSink: (QueryState<SearchUiState>) -> Unit,
 ) {
   private var loadJob: Job? = null
   private var appendJob: Job? = null
 
   fun load(firstPageUrl: String, forceRefresh: Boolean) {
     log.i { "加载Search -> 开始(forceRefresh=$forceRefresh)" }
-    if (loadJob?.isActive == true) {
-      log.d { "加载Search -> 跳过(已有任务)" }
-      return
-    }
+    loadJob?.cancel()
     val snapshot = stateProvider()
     stateSink(
-        snapshot.applyPagination(
-            paginationStateMachine.beginLoad(
-                snapshot = snapshot.toPaginationSnapshot(),
-                forceRefresh = forceRefresh,
-            )
+        snapshot.copy(
+            loading = snapshot.submissions.isEmpty(),
+            refreshing = forceRefresh && snapshot.submissions.isNotEmpty(),
+            errorMessage = null,
         )
     )
     if (snapshot.submissions.isEmpty()) {
-      pageStateSink(UiPageState.Loading)
+      pageStateSink(QueryState.Loading())
     }
     loadJob =
         screenModelScope.launch {
-          val pageState =
-              if (forceRefresh) {
-                repository.refreshPage(firstPageUrl)
-              } else {
-                repository.loadPage(firstPageUrl)
-              }
-          val reduced =
-              paginationStateMachine.reduceFirstPage(
-                  snapshot = stateProvider().toPaginationSnapshot(),
-                  result = pageState,
-                  itemsOf = { page -> page.submissions },
-                  nextPageUrlOf = { page -> page.nextPageUrl },
-              )
-          val updated =
-              stateProvider()
-                  .applyPagination(reduced)
-                  .copy(
-                      totalCount =
-                          (pageState as? ResourceResult.Success)?.data?.totalCount
-                              ?: snapshot.totalCount
-                  )
-          stateSink(updated)
-          when (pageState) {
-            is ResourceResult.Success -> {
-              pageStateSink(UiPageState.Success(updated))
-              log.i {
-                "加载Search -> ${summarizeResourceResult(pageState)}(count=${updated.submissions.size})"
-              }
-            }
-
-            is ResourceResult.AuthRequired -> {
-              pageStateSink(UiPageState.AuthRequired(pageState.requestUrl, pageState.message))
-              log.w { "加载Search -> 需要重新登录" }
-            }
-
-            ResourceResult.CfChallenge -> {
-              pageStateSink(UiPageState.CfChallenge)
-              log.w { "加载Search -> Cloudflare验证" }
-            }
-
-            is ResourceResult.MatureBlocked -> {
-              pageStateSink(UiPageState.MatureBlocked(pageState.reason))
-              log.w { "加载Search -> 受限(${pageState.reason})" }
-            }
-
-            is ResourceResult.Error -> {
-              pageStateSink(UiPageState.Error(pageState.exception))
-              log.e(pageState.exception) { "加载Search -> 失败" }
-            }
+          repository.page(firstPageUrl).collect { query ->
+            val mapped =
+                query.mapData { page ->
+                  stateProvider()
+                      .copy(
+                          submissions = page.submissions,
+                          nextPageUrl = page.nextPageUrl,
+                          totalCount = page.totalCount ?: snapshot.totalCount,
+                          loading = false,
+                          refreshing = query is QueryState.Success && query.refreshing,
+                          errorMessage = null,
+                      )
+                }
+            val updated =
+                mapped.data
+                    ?: stateProvider()
+                        .copy(
+                            loading = mapped is QueryState.Loading,
+                            refreshing = false,
+                            errorMessage = (mapped as? QueryState.Failure)?.error?.message(),
+                        )
+            stateSink(updated)
+            pageStateSink(
+                when (mapped) {
+                  is QueryState.Loading ->
+                      QueryState.Loading(updated.takeIf { it.submissions.isNotEmpty() })
+                  is QueryState.Success -> QueryState.Success(updated, mapped.refreshing)
+                  is QueryState.Failure ->
+                      QueryState.Failure(
+                          mapped.error,
+                          updated.takeIf { it.submissions.isNotEmpty() },
+                      )
+                }
+            )
           }
         }
+    if (forceRefresh) screenModelScope.launch { repository.refreshPage(firstPageUrl) }
   }
 
   fun loadMore(force: Boolean) {
@@ -278,40 +259,40 @@ internal class SearchPaginationCoordinator(
       log.d { "自动加载Search -> 跳过(已有追加任务)" }
       return
     }
-    if (!paginationStateMachine.canLoadMore(snapshot.toPaginationSnapshot(), force = force)) {
+    if (!force && snapshot.appendErrorMessage != null) {
       log.d { "自动加载Search -> 跳过(条件未满足)" }
       return
     }
     log.d { "自动加载Search -> 开始(force=$force)" }
 
-    stateSink(
-        snapshot.applyPagination(
-            paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot())
-        )
-    )
+    stateSink(snapshot.copy(isLoadingMore = true, appendErrorMessage = null))
 
     appendJob =
         screenModelScope.launch {
           val pageState = repository.loadPage(nextUrl)
-          val reduced =
-              paginationStateMachine.reduceAppend(
-                  snapshot = stateProvider().toPaginationSnapshot(),
-                  result = pageState,
-                  itemsOf = { page -> page.submissions },
-                  nextPageUrlOf = { page -> page.nextPageUrl },
-              )
           val updated =
-              stateProvider()
-                  .applyPagination(reduced)
-                  .copy(
-                      totalCount =
-                          (pageState as? ResourceResult.Success)?.data?.totalCount
-                              ?: snapshot.totalCount
-                  )
+              when (pageState) {
+                is ResourceResult.Success ->
+                    stateProvider()
+                        .copy(
+                            submissions =
+                                (stateProvider().submissions + pageState.data.submissions)
+                                    .distinctBy { it.id },
+                            nextPageUrl = pageState.data.nextPageUrl,
+                            totalCount = pageState.data.totalCount ?: snapshot.totalCount,
+                            isLoadingMore = false,
+                        )
+                else ->
+                    stateProvider()
+                        .copy(
+                            isLoadingMore = false,
+                            appendErrorMessage = pageState.errorMessageOrNull(),
+                        )
+              }
           stateSink(updated)
           when (pageState) {
             is ResourceResult.Success -> {
-              pageStateSink(UiPageState.Success(updated))
+              pageStateSink(QueryState.Success(updated))
               log.d {
                 "自动加载Search -> ${summarizeResourceResult(pageState)}(count=${updated.submissions.size})"
               }
@@ -337,7 +318,7 @@ internal class SearchScreenWorkflow(
     private val log: Logger,
     private val stateProvider: () -> SearchUiState,
     private val stateSink: (SearchUiState) -> Unit,
-    private val pageStateSink: (UiPageState<SearchUiState>) -> Unit,
+    private val pageStateSink: (QueryState<SearchUiState>) -> Unit,
 ) {
   private val queryStateCoordinator =
       SearchQueryStateCoordinator(stateProvider = stateProvider, stateSink = stateSink)
@@ -353,11 +334,6 @@ internal class SearchScreenWorkflow(
       SearchPaginationCoordinator(
           repository = repository,
           log = log,
-          paginationStateMachine =
-              PaginationReducer<SubmissionThumbnail, Int>(
-                  keyOf = { item -> item.id },
-                  challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
-              ),
           screenModelScope = screenModelScope,
           stateProvider = stateProvider,
           stateSink = stateSink,
@@ -422,7 +398,7 @@ internal class SearchScreenWorkflow(
     }
     firstPageUrl = request.firstUrl
     queryStateCoordinator.applySubmittedSearch(request)
-    pageStateSink(UiPageState.Loading)
+    pageStateSink(QueryState.Loading())
     screenModelScope.launch { historyCoordinator.recordAppliedSearch(request) }
     log.i { "应用Search -> 已提交(keywordLen=${request.applied.query.length})" }
     paginationCoordinator.load(firstPageUrl = request.firstUrl, forceRefresh = true)
@@ -437,7 +413,7 @@ internal class SearchScreenWorkflow(
     log.i { "应用Search(历史) -> 开始" }
     firstPageUrl = normalizedUrl
     queryStateCoordinator.applyRestoredSearch(restored)
-    pageStateSink(UiPageState.Loading)
+    pageStateSink(QueryState.Loading())
     paginationCoordinator.load(firstPageUrl = normalizedUrl, forceRefresh = true)
   }
 

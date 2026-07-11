@@ -87,7 +87,6 @@ kotlin {
         implementation(libs.ktor.client.core)
         implementation(libs.materialyou)
         implementation(libs.room.runtime)
-        implementation(libs.store5)
         implementation(libs.voyager.core)
         implementation(libs.voyager.koin)
         implementation(libs.voyager.navigator)

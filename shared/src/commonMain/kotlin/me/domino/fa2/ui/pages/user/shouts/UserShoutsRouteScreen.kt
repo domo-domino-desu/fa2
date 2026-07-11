@@ -24,6 +24,7 @@ import fa2.shared.generated.resources.no_displayable_shouts
 import fa2.shared.generated.resources.shouts
 import fa2.shared.generated.resources.shouts_count
 import kotlinx.coroutines.launch
+import me.domino.fa2.data.model.QueryState
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
 import me.domino.fa2.ui.components.html.PageCommentsCard
@@ -57,10 +58,13 @@ class UserShoutsRouteScreen(private val username: String) : Screen {
       )
 
       when (val snapshot = state) {
-        UserShoutsUiState.Loading -> UserShoutsSkeleton()
-        is UserShoutsUiState.Error ->
-            UserShoutsError(message = snapshot.message, onRetry = { screenModel.load(true) })
-        is UserShoutsUiState.Success -> {
+        is QueryState.Loading -> UserShoutsSkeleton()
+        is QueryState.Failure ->
+            UserShoutsError(
+                message = snapshot.error.toString(),
+                onRetry = { screenModel.load(true) },
+            )
+        is QueryState.Success -> {
           LazyColumn(
               state = listState,
               modifier = Modifier.fillMaxSize(),
@@ -68,8 +72,8 @@ class UserShoutsRouteScreen(private val username: String) : Screen {
           ) {
             item {
               PageCommentsCard(
-                  commentCount = snapshot.user.shoutCount,
-                  comments = snapshot.user.shouts,
+                  commentCount = snapshot.data.shoutCount,
+                  comments = snapshot.data.shouts,
                   onOpenAuthor = { author ->
                     val normalized = author.trim()
                     if (normalized.isNotBlank()) {
@@ -82,7 +86,7 @@ class UserShoutsRouteScreen(private val username: String) : Screen {
                     }
                   },
                   title =
-                      stringResource(Res.string.shouts_count, snapshot.user.shoutCount.toString()),
+                      stringResource(Res.string.shouts_count, snapshot.data.shoutCount.toString()),
                   emptyText = stringResource(Res.string.no_displayable_shouts),
                   modifier = Modifier.padding(top = 10.dp),
               )

@@ -8,7 +8,6 @@ import me.domino.fa2.data.remote.fa.session.ChallengeResolver
 import me.domino.fa2.data.remote.fa.session.FaCookiesStorage
 import me.domino.fa2.data.remote.fa.session.UserAgentStorage
 import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
 
 /** 社交动作端点（Fav/Watch 等）。 */
 interface SocialActionSource {
@@ -57,10 +56,10 @@ class SocialActionEndpoint private constructor(private val backend: SocialAction
             allowedPathPrefixes = setOf("/fav/", "/unfav/", "/watch/", "/unwatch/"),
         )
     if (trustedUrl == null) {
-      log.w { "社交动作端点 -> 拒绝不受信任地址(url=${summarizeUrl(targetUrl)})" }
+      log.w { "社交动作端点 -> 拒绝不受信任地址(url=${targetUrl.trim()})" }
       return SocialActionResult.Failed(message = "Untrusted FA action URL")
     }
-    log.i { "社交动作端点 -> 执行(url=${summarizeUrl(targetUrl)})" }
+    log.i { "社交动作端点 -> 执行(url=${targetUrl.trim()})" }
     return try {
       backend.execute(trustedUrl).also { result ->
         log.i { "社交动作端点 -> ${summarizeSocialActionResult(result)}" }

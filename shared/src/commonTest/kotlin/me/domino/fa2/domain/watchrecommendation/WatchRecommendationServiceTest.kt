@@ -12,6 +12,8 @@ import me.domino.fa2.data.model.User
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
+import me.domino.fa2.data.remote.fa.user.WatchRecommendationUserSource
+import me.domino.fa2.data.remote.fa.watchlist.WatchRecommendationWatchlistSource
 import me.domino.fa2.utils.FaUrls
 
 class WatchRecommendationServiceTest {
@@ -415,16 +417,28 @@ class WatchRecommendationServiceTest {
       onLoadUser: (String) -> Unit = {},
   ): WatchRecommendationService =
       WatchRecommendationService(
-          loadWatchlistPage = { username, category, nextPageUrl ->
-            responses[LoaderKey(username.lowercase(), nextPageUrl, category)]
-                ?: ResourceResult.Error(
-                    IllegalStateException("missing response for $username::$category::$nextPageUrl")
-                )
-          },
-          loadUser = { username ->
-            onLoadUser(username)
-            userResponses[username.lowercase()] ?: ResourceResult.Success(testUser(username))
-          },
+          watchlistRepository =
+              object : WatchRecommendationWatchlistSource {
+                override suspend fun loadWatchlistPage(
+                    username: String,
+                    category: WatchlistCategory,
+                    nextPageUrl: String?,
+                ) =
+                    responses[LoaderKey(username.lowercase(), nextPageUrl, category)]
+                        ?: ResourceResult.Error(
+                            IllegalStateException(
+                                "missing response for $username::$category::$nextPageUrl"
+                            )
+                        )
+              },
+          userRepository =
+              object : WatchRecommendationUserSource {
+                override suspend fun loadUser(username: String): ResourceResult<User> {
+                  onLoadUser(username)
+                  return userResponses[username.lowercase()]
+                      ?: ResourceResult.Success(testUser(username))
+                }
+              },
           blocklistRepository = blocklistRepository,
           random = Random(0),
           requestThrottleMs = 0L,

@@ -20,7 +20,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
-import me.domino.fa2.data.remote.fa.user.UserResourceRepository
+import me.domino.fa2.data.remote.fa.user.UserRepository
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
 import me.domino.fa2.ui.pages.watchrecommendation.SimilarUsersRouteScreen
@@ -75,7 +75,7 @@ internal fun UserRouteBody(
     },
 ) {
   val parentNavigator = LocalNavigator.currentOrThrow
-  val repository = koinInject<UserResourceRepository>()
+  val repository = koinInject<UserRepository>()
   val blocklistRepository = koinInject<WatchRecommendationBlocklist>()
   val userScreenModel =
       parentNavigator.rememberNavigatorScreenModel<UserScreenModel>(

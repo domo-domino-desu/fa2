@@ -7,24 +7,14 @@ import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
 import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
-import me.domino.fa2.data.remote.fa.favorites.FavoritesDataSource
-import me.domino.fa2.data.remote.fa.favorites.FavoritesEndpoint
+import me.domino.fa2.data.remote.fa.core.PageQueryCache
 import me.domino.fa2.data.remote.fa.favorites.FavoritesRepository
-import me.domino.fa2.data.remote.fa.gallery.GalleryDataSource
-import me.domino.fa2.data.remote.fa.gallery.GalleryEndpoint
 import me.domino.fa2.data.remote.fa.gallery.GalleryRepository
-import me.domino.fa2.data.remote.fa.journal.JournalDataSource
-import me.domino.fa2.data.remote.fa.journal.JournalEndpoint
-import me.domino.fa2.data.remote.fa.journal.JournalPageCache
 import me.domino.fa2.data.remote.fa.journal.JournalParser
 import me.domino.fa2.data.remote.fa.journal.JournalRepository
-import me.domino.fa2.data.remote.fa.journal.JournalsDataSource
-import me.domino.fa2.data.remote.fa.journal.JournalsEndpoint
-import me.domino.fa2.data.remote.fa.journal.JournalsPageCache
 import me.domino.fa2.data.remote.fa.journal.JournalsParser
 import me.domino.fa2.data.remote.fa.journal.JournalsRepository
 import me.domino.fa2.data.remote.fa.listing.SubmissionListingParser
-import me.domino.fa2.data.remote.fa.listing.UserGalleryPageStore
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.utils.FaUrls
@@ -92,39 +82,14 @@ class UserSectionRepositoriesTest {
   }
 
   private fun buildStores(source: FaHtmlDataSource): StoreBundle {
-    val pageCacheDao = InMemoryPageCacheDao()
-    val galleryStore =
-        UserGalleryPageStore(
-            galleryDataSource =
-                GalleryDataSource(
-                    endpoint = GalleryEndpoint(source),
-                    parser = SubmissionListingParser(),
-                ),
-            favoritesDataSource =
-                FavoritesDataSource(
-                    endpoint = FavoritesEndpoint(source),
-                    parser = SubmissionListingParser(),
-                ),
-            pageCacheDao = pageCacheDao,
-        )
-    val journalsStore =
-        JournalsPageCache(
-            dataSource =
-                JournalsDataSource(endpoint = JournalsEndpoint(source), parser = JournalsParser()),
-            pageCacheDao = pageCacheDao,
-        )
-    val journalStore =
-        JournalPageCache(
-            dataSource =
-                JournalDataSource(endpoint = JournalEndpoint(source), parser = JournalParser()),
-            pageCacheDao = pageCacheDao,
-        )
+    val queries = PageQueryCache(InMemoryPageCacheDao())
+    val listingParser = SubmissionListingParser()
 
     return StoreBundle(
-        galleryRepository = GalleryRepository(galleryStore),
-        favoritesRepository = FavoritesRepository(galleryStore),
-        journalsRepository = JournalsRepository(journalsStore),
-        journalRepository = JournalRepository(journalStore),
+        galleryRepository = GalleryRepository(source, listingParser, queries),
+        favoritesRepository = FavoritesRepository(source, listingParser, queries),
+        journalsRepository = JournalsRepository(source, JournalsParser(), queries),
+        journalRepository = JournalRepository(source, JournalParser(), queries),
     )
   }
 }

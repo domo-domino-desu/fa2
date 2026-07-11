@@ -2,7 +2,6 @@ package me.domino.fa2.data.remote.fa.session
 
 import kotlinx.coroutines.delay
 import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
 
 private val challengeWebViewSyncLog = FaLog.withTag("ChallengeWebViewSync")
 
@@ -15,7 +14,7 @@ internal suspend fun captureCookieHeaderWithRetry(
 ): String {
   val distinctUrls = urls.map { url -> url.trim() }.filter { url -> url.isNotBlank() }.distinct()
   challengeWebViewSyncLog.d {
-    "抓取Challenge Cookie -> 开始(urls=${distinctUrls.joinToString { url -> summarizeUrl(url) }},maxAttempts=$maxAttempts)"
+    "抓取Challenge Cookie -> 开始(urls=${distinctUrls.joinToString { url -> url.trim() }},maxAttempts=$maxAttempts)"
   }
   repeat(maxAttempts) { attempt ->
     val mergedCookies = LinkedHashMap<String, String>()

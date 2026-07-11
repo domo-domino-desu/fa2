@@ -1,6 +1,6 @@
 package me.domino.fa2.ui.components.html
 
-import me.domino.fa2.domain.translation.SubmissionDescriptionBlock
+import me.domino.fa2.utils.html.HtmlTextBlock
 
 data class TranslationUiState(
     val sourceKey: String,
@@ -14,7 +14,7 @@ data class TranslationUiState(
   val isWrapped: Boolean
     get() = sourceMode == TranslationSourceMode.WRAPPED
 
-  val sourceBlocks: List<SubmissionDescriptionBlock>
+  val sourceBlocks: List<HtmlTextBlock>
     get() = variantOf(sourceMode).sourceBlocks
 
   val blocks: List<SubmissionDescriptionDisplayBlock>
@@ -41,7 +41,7 @@ enum class TranslationSourceMode {
 }
 
 data class TranslationVariantUiState(
-    val sourceBlocks: List<SubmissionDescriptionBlock>,
+    val sourceBlocks: List<HtmlTextBlock>,
     val blocks: List<SubmissionDescriptionDisplayBlock>,
     val translating: Boolean = false,
     val hasTriggered: Boolean = false,
@@ -77,7 +77,7 @@ internal fun TranslationVariantUiState.toIdleDisplayBlocks(
       )
     }
 
-internal fun SubmissionDescriptionBlock.toDisplayBlock(
+internal fun HtmlTextBlock.toDisplayBlock(
     translated: String?,
     status: SubmissionDescriptionTranslationStatus,
     useWrappedOriginalText: Boolean,

@@ -21,3 +21,8 @@ internal inline fun <T> HtmlResponseResult.toResourceResult(
       is HtmlResponseResult.MatureBlocked -> ResourceResult.MatureBlocked(reason)
       is HtmlResponseResult.Error -> ResourceResult.Error(IllegalStateException(message))
     }
+
+internal suspend inline fun <T> FaHtmlDataSource.fetchParsed(
+    url: String,
+    parse: (html: String, finalUrl: String) -> T,
+): ResourceResult<T> = get(url).toResourceResult { parse(it.body, it.url) }

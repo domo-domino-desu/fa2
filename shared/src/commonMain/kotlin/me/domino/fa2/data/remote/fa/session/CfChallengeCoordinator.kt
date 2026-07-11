@@ -4,7 +4,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.StateFlow
 import me.domino.fa2.utils.FaUrls
 import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
 
 class CfChallengeCoordinator(
     private val sessionStorage: ChallengeSessionStorage,
@@ -17,11 +16,11 @@ class CfChallengeCoordinator(
   override val state: StateFlow<CfChallengeUiState> = sessionStorage.state
 
   override suspend fun awaitResolution(challenge: CfChallengeSignal): Boolean {
-    val safeUrl = summarizeUrl(challenge.requestUrl)
+    val safeUrl = challenge.requestUrl.trim()
     val acquisition = sessionStorage.acquire(challenge)
     if (acquisition.created) {
       val ray = acquisition.session.cfRay?.takeIf { it.isNotBlank() } ?: "-"
-      log.i { "验证会话 -> 创建(url=${summarizeUrl(acquisition.session.triggerUrl)},cf-ray=$ray)" }
+      log.i { "验证会话 -> 创建(url=${acquisition.session.triggerUrl.trim()},cf-ray=$ray)" }
     }
     log.d { "验证会话 -> 等待(url=$safeUrl)" }
     val resolved = acquisition.session.deferred.await()
@@ -30,7 +29,7 @@ class CfChallengeCoordinator(
   }
 
   override suspend fun prepareWebViewSession(port: SessionWebViewPort, triggerUrl: String) {
-    log.d { "验证会话 -> 准备WebView(url=${summarizeUrl(triggerUrl)})" }
+    log.d { "验证会话 -> 准备WebView(url=${triggerUrl.trim()})" }
     val cookieHeader = cookiesStorage.loadRawCookieHeader().orEmpty()
     for (url in linkedSetOf(FaUrls.home, triggerUrl)) {
       port.injectCookieHeader(url = url, cookieHeader = cookieHeader)
@@ -48,7 +47,7 @@ class CfChallengeCoordinator(
   }
 
   override suspend fun confirmFromWebView(port: SessionWebViewPort, triggerUrl: String): Boolean {
-    log.i { "验证会话 -> 开始确认(url=${summarizeUrl(triggerUrl)})" }
+    log.i { "验证会话 -> 开始确认(url=${triggerUrl.trim()})" }
     val userAgent = readNonBlankUserAgent(port)
     if (userAgent.isNotBlank()) {
       userAgentStorage.saveOverride(userAgent)
@@ -78,7 +77,7 @@ class CfChallengeCoordinator(
     sessionStorage.markVerifying(session)
 
     if (!cookiePolicy.containsRequiredCookie(capturedCookieHeader)) {
-      log.w { "验证会话 -> 未捕获cf cookie(url=${summarizeUrl(triggerUrl)})" }
+      log.w { "验证会话 -> 未捕获cf cookie(url=${triggerUrl.trim()})" }
       sessionStorage.markVerificationFailed(session, cookiePolicy.missingCookieDetail)
       return false
     }
@@ -93,12 +92,12 @@ class CfChallengeCoordinator(
       log.d { "验证会话 -> 合并cookie(${if (mergedSnapshot.isBlank()) "空" else "已设置"})" }
       probeVerifier.verify(triggerUrl)
       completeActive(result = true)
-      log.i { "验证会话 -> 确认成功(url=${summarizeUrl(triggerUrl)})" }
+      log.i { "验证会话 -> 确认成功(url=${triggerUrl.trim()})" }
       true
     } catch (error: Throwable) {
       if (error is CancellationException) throw error
       cookiesStorage.saveRawCookieHeader(cookieSnapshot)
-      log.e(error) { "验证会话 -> 确认失败(url=${summarizeUrl(triggerUrl)})" }
+      log.e(error) { "验证会话 -> 确认失败(url=${triggerUrl.trim()})" }
       sessionStorage.markVerificationFailed(session, error.message ?: error::class.simpleName)
       false
     }

@@ -32,24 +32,22 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.data.remote.fa.media.KtorImageBytesSource
 import me.domino.fa2.data.remote.fa.submission.SubmissionRepository
 import me.domino.fa2.data.remote.fa.submission.deriveSubmissionThumbnailUrlFromFullImage
 import me.domino.fa2.data.remote.fa.user.ActivityHistoryRepository
+import me.domino.fa2.data.remote.translation.SubmissionTextTranslationEngine
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.domain.attachmenttext.AttachmentTextService
-import me.domino.fa2.domain.ocr.SubmissionImageOcrService
+import me.domino.fa2.domain.ocr.ImageTextRecognitionPort
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.domain.submissionviewer.adapters.SeriesSubmissionSourceAdapter
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
-import me.domino.fa2.domain.translation.SubmissionImageOcrTranslationService
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.navigation.openSubmissionSeries
 import me.domino.fa2.ui.components.feedback.LocalShowFeedback
 import me.domino.fa2.ui.components.feedback.LocalShowToast
-import me.domino.fa2.ui.components.navigation.AppNavigationRequest
-import me.domino.fa2.ui.components.navigation.LocalAppNavigation
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.platform.PlatformDownloadRequest
 import me.domino.fa2.ui.components.platform.PlatformDownloadResult
@@ -60,15 +58,21 @@ import me.domino.fa2.ui.components.platform.rememberPlatformTextCopier
 import me.domino.fa2.ui.components.platform.rememberPlatformTextFileWriter
 import me.domino.fa2.ui.components.platform.rememberPlatformUrlDownloader
 import me.domino.fa2.ui.components.platform.resolveDownloadRelativeDirectories
+import me.domino.fa2.ui.pages.browse.BrowseFilterState
+import me.domino.fa2.ui.pages.browse.BrowseRouteScreen
+import me.domino.fa2.ui.pages.search.SearchRouteScreen
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
 import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
-import me.domino.fa2.ui.pages.submission.pager.SubmissionPagerDetailSourceImpl
+import me.domino.fa2.ui.pages.submission.pager.SubmissionDetailSource
 import me.domino.fa2.ui.pages.submission.pager.SubmissionPagerUiState
 import me.domino.fa2.ui.pages.submission.pager.SubmissionScreenModel
 import me.domino.fa2.ui.pages.submission.pager.computeSubmissionPrefetchIndices
 import me.domino.fa2.ui.pages.submission.pager.pagerPrefetchDebounceMs
 import me.domino.fa2.ui.pages.submission.translation.buildSubmissionTranslationSidecarFiles
+import me.domino.fa2.ui.pages.user.UserChildRoute
+import me.domino.fa2.ui.pages.user.UserRouteScreen
 import me.domino.fa2.utils.FaUrls
+import me.domino.fa2.utils.concurrency.runSuspendCatching
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -90,12 +94,12 @@ class SubmissionRouteScreen(
   @Composable
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
-    val appNavigation = LocalAppNavigation.current
     val submissionRepository = koinInject<SubmissionRepository>()
     val attachmentTextService = koinInject<AttachmentTextService>()
-    val translationService = koinInject<SubmissionDescriptionTranslationService>()
-    val imageOcrService = koinInject<SubmissionImageOcrService>()
-    val imageOcrTranslationService = koinInject<SubmissionImageOcrTranslationService>()
+    val translationService = koinInject<SubmissionTextTranslationEngine>()
+    val imageBytes = koinInject<KtorImageBytesSource>()
+    val imageRecognition = koinInject<ImageTextRecognitionPort>()
+    val imageOcrTranslationService = translationService
     val settingsService = koinInject<AppSettingsService>()
     val contextScreenModel =
         navigator.rememberNavigatorScreenModel<SubmissionContextScreenModel>(
@@ -161,9 +165,19 @@ class SubmissionRouteScreen(
               contextId = contextId,
               contextScreenModel = contextScreenModel,
               submissionSource =
-                  SubmissionPagerDetailSourceImpl(submissionRepository, attachmentTextService),
+                  SubmissionDetailSource(
+                      loadBySid = submissionRepository::loadSubmissionDetailBySid,
+                      loadByUrl = submissionRepository::loadSubmissionDetailByUrl,
+                      loadAttachmentText = { url, fileName, progress ->
+                        runSuspendCatching { attachmentTextService.load(url, fileName, progress) }
+                            .getOrElse { ResourceResult.Error(it) }
+                      },
+                      toggleFavorite = submissionRepository::toggleFavorite,
+                      blockTag = submissionRepository::blockTag,
+                  ),
               translationService = translationService,
-              imageOcrService = imageOcrService,
+              loadImageBytes = imageBytes::fetch,
+              imageRecognition = imageRecognition,
               imageOcrTranslationService = imageOcrTranslationService,
               settingsService = settingsService,
           )
@@ -278,13 +292,13 @@ class SubmissionRouteScreen(
           onOpenAuthor = { author ->
             val normalized = author.trim()
             if (normalized.isNotBlank()) {
-              appNavigation(AppNavigationRequest.UserGallery(normalized))
+              navigator.push(UserRouteScreen(normalized, UserChildRoute.Gallery))
             }
           },
           onSearchKeyword = { query ->
             val normalized = query.trim()
             if (normalized.isNotBlank()) {
-              appNavigation(AppNavigationRequest.Search(normalized))
+              navigator.push(SearchRouteScreen(initialQuery = normalized))
             }
           },
           onKeywordLongPress = { tag ->
@@ -294,7 +308,11 @@ class SubmissionRouteScreen(
             }
           },
           onOpenBrowseFilter = { category, type, species ->
-            appNavigation(AppNavigationRequest.BrowseFilter(category, type, species))
+            navigator.push(
+                BrowseRouteScreen(
+                    BrowseFilterState(category = category, type = type, species = species)
+                )
+            )
           },
           onCopySubmissionUrl = { submissionUrl ->
             val normalizedUrl = submissionUrl.trim()

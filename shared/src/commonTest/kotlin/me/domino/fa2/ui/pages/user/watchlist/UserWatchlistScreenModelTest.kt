@@ -242,26 +242,14 @@ private fun createScreenModelFixture(
     WatchlistScreenModelFixture(
         repository =
             WatchlistRepository(
-                me.domino.fa2.data.remote.fa.watchlist.WatchlistPageCache(
-                    dataSource =
-                        me.domino.fa2.data.remote.fa.watchlist.WatchlistDataSource(
-                            endpoint =
-                                me.domino.fa2.data.remote.fa.watchlist.WatchlistEndpoint(
-                                    dataSource =
-                                        object :
-                                            me.domino.fa2.data.remote.fa.core.FaHtmlDataSource {
-                                          override suspend fun get(url: String) =
-                                              me.domino.fa2.data.remote.fa.core.HtmlResponseResult
-                                                  .Error(
-                                                      statusCode = 500,
-                                                      message = "unused",
-                                                  )
-                                        }
-                                ),
-                            parser = me.domino.fa2.data.remote.fa.watchlist.WatchlistParser(),
-                        ),
-                    pageCacheDao = me.domino.fa2.fake.InMemoryPageCacheDao(),
-                )
+                object : me.domino.fa2.data.remote.fa.core.FaHtmlDataSource {
+                  override suspend fun get(url: String) =
+                      me.domino.fa2.data.remote.fa.core.HtmlResponseResult.Error(500, "unused")
+                },
+                me.domino.fa2.data.remote.fa.watchlist.WatchlistParser(),
+                me.domino.fa2.data.remote.fa.core.PageQueryCache(
+                    me.domino.fa2.fake.InMemoryPageCacheDao()
+                ),
             ),
         random = random,
         initialPage = initialPage,

@@ -115,29 +115,9 @@ data class SubmissionContextSnapshot(
     get() = pages.firstOrNull()?.previousRequestKey != null
 }
 
-internal data class SubmissionLoadedPage(
-    val pageId: String,
-    val requestKey: String? = null,
-    val items: List<SubmissionThumbnail>,
-    val pageNumber: Int? = null,
-    val previousRequestKey: String? = null,
-    val nextRequestKey: String? = null,
-    val firstRequestKey: String? = null,
-    val lastRequestKey: String? = null,
-    val lastPageNumber: Int? = null,
-    val totalCount: Int? = null,
-) {
-  fun toSnapshot(): SubmissionPageSnapshot =
-      SubmissionPageSnapshot(
-          pageId = pageId,
-          requestKey = requestKey,
-          items = items,
-          pageNumber = pageNumber,
-          previousRequestKey = previousRequestKey?.takeUnless { key -> key == requestKey },
-          nextRequestKey = nextRequestKey?.takeUnless { key -> key == requestKey },
-          firstRequestKey = firstRequestKey,
-          lastRequestKey = lastRequestKey?.takeUnless { key -> key == requestKey },
-          lastPageNumber = lastPageNumber,
-          totalCount = totalCount,
-      )
-}
+internal fun SubmissionPageSnapshot.toSnapshot(): SubmissionPageSnapshot =
+    copy(
+        previousRequestKey = previousRequestKey?.takeUnless { it == requestKey },
+        nextRequestKey = nextRequestKey?.takeUnless { it == requestKey },
+        lastRequestKey = lastRequestKey?.takeUnless { it == requestKey },
+    )

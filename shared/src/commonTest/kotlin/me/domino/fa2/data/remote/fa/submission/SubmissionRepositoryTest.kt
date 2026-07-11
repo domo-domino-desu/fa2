@@ -7,12 +7,7 @@ import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
 import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
-import me.domino.fa2.data.remote.fa.favorites.FavoritesDataSource
-import me.domino.fa2.data.remote.fa.favorites.FavoritesEndpoint
-import me.domino.fa2.data.remote.fa.gallery.GalleryDataSource
-import me.domino.fa2.data.remote.fa.gallery.GalleryEndpoint
-import me.domino.fa2.data.remote.fa.listing.SubmissionListingParser
-import me.domino.fa2.data.remote.fa.listing.UserGalleryPageStore
+import me.domino.fa2.data.remote.fa.core.PageQueryCache
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.fake.UnusedSocialActionSource
@@ -72,34 +67,11 @@ class SubmissionRepositoryTest {
   }
 
   private fun buildRepository(source: FaHtmlDataSource): SubmissionRepository {
-    val pageCacheDao = InMemoryPageCacheDao()
-    val store =
-        SubmissionPageCache(
-            dataSource =
-                SubmissionDataSource(
-                    endpoint = SubmissionEndpoint(source),
-                    parser = SubmissionParser(),
-                ),
-            pageCacheDao = pageCacheDao,
-        )
-    val galleryStore =
-        UserGalleryPageStore(
-            galleryDataSource =
-                GalleryDataSource(
-                    endpoint = GalleryEndpoint(source),
-                    parser = SubmissionListingParser(),
-                ),
-            favoritesDataSource =
-                FavoritesDataSource(
-                    endpoint = FavoritesEndpoint(source),
-                    parser = SubmissionListingParser(),
-                ),
-            pageCacheDao = pageCacheDao,
-        )
     return SubmissionRepository(
-        submissionStore = store,
-        socialActionEndpoint = UnusedSocialActionSource,
-        favoritesCacheInvalidator = galleryStore,
+        html = source,
+        parser = SubmissionParser(),
+        queries = PageQueryCache(InMemoryPageCacheDao()),
+        actions = UnusedSocialActionSource,
     )
   }
 }

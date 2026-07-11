@@ -19,7 +19,6 @@ import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.domain.attachmenttext.AttachmentTextFormat
 import me.domino.fa2.domain.attachmenttext.AttachmentTextParagraph
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
-import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerDetailSource
 import me.domino.fa2.ui.pages.submission.attachmenttext.SubmissionAttachmentTextUiState
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
 import me.domino.fa2.ui.pages.submission.pager.SubmissionPagerUiState

@@ -10,12 +10,11 @@ import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
+import me.domino.fa2.data.model.errorMessageOrNull
 import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.data.remote.fa.watchlist.WatchlistRepository
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.i18n.appStringOrFallback
-import me.domino.fa2.ui.utils.PaginationReducer
-import me.domino.fa2.ui.utils.PaginationSnapshot
 import me.domino.fa2.utils.logging.FaLog
 
 private const val watchlistAutoLoadThreshold = 14
@@ -80,11 +79,6 @@ class UserWatchlistScreenModel(
         repository::loadAllWatchlistUsers,
 ) : StateScreenModel<UserWatchlistUiState>(UserWatchlistUiState()) {
   private val log = FaLog.withTag("UserWatchlistScreenModel")
-  private val paginationStateMachine =
-      PaginationReducer<WatchlistUser, String>(
-          keyOf = { item -> item.username.lowercase() },
-          challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
-      )
   private var loadJob: Job? = null
   private var appendJob: Job? = null
   private var shuffleJob: Job? = null
@@ -111,11 +105,10 @@ class UserWatchlistScreenModel(
     }
 
     mutableState.value =
-        snapshot.applyPagination(
-            paginationStateMachine.beginLoad(
-                snapshot = snapshot.toPaginationSnapshot(),
-                forceRefresh = forceRefresh,
-            )
+        snapshot.copy(
+            loading = snapshot.users.isEmpty(),
+            refreshing = forceRefresh && snapshot.users.isNotEmpty(),
+            errorMessage = null,
         )
 
     val firstPageUrl =
@@ -132,14 +125,22 @@ class UserWatchlistScreenModel(
               } else {
                 loadWatchlistPage(username, category, firstPageUrl)
               }
-          val reduced =
-              paginationStateMachine.reduceFirstPage(
-                  snapshot = state.value.toPaginationSnapshot(),
-                  result = next,
-                  itemsOf = { page -> page.users },
-                  nextPageUrlOf = { page -> page.nextPageUrl },
-              )
-          val updated = state.value.applyPagination(reduced)
+          val updated =
+              when (next) {
+                is ResourceResult.Success ->
+                    state.value.copy(
+                        users = next.data.users,
+                        nextPageUrl = next.data.nextPageUrl,
+                        loading = false,
+                        refreshing = false,
+                    )
+                else ->
+                    state.value.copy(
+                        loading = false,
+                        refreshing = false,
+                        errorMessage = next.errorMessageOrNull(),
+                    )
+              }
           mutableState.value =
               if (forceRefresh && next is ResourceResult.Success) {
                 updated.copy(
@@ -219,28 +220,34 @@ class UserWatchlistScreenModel(
       log.d { "自动加载Watchlist页 -> 跳过(已有追加任务)" }
       return
     }
-    if (!paginationStateMachine.canLoadMore(snapshot.toPaginationSnapshot(), force = force)) {
+    if (!force && snapshot.appendErrorMessage != null) {
       log.d { "自动加载Watchlist页 -> 跳过(条件未满足)" }
       return
     }
     log.d { "自动加载Watchlist页 -> 开始(force=$force)" }
 
-    mutableState.value =
-        snapshot.applyPagination(
-            paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot())
-        )
+    mutableState.value = snapshot.copy(isLoadingMore = true, appendErrorMessage = null)
 
     appendJob =
         screenModelScope.launch {
           val next = loadWatchlistPage(username, category, nextUrl)
-          val reduced =
-              paginationStateMachine.reduceAppend(
-                  snapshot = state.value.toPaginationSnapshot(),
-                  result = next,
-                  itemsOf = { page -> page.users },
-                  nextPageUrlOf = { page -> page.nextPageUrl },
-              )
-          val updated = state.value.applyPagination(reduced)
+          val updated =
+              when (next) {
+                is ResourceResult.Success ->
+                    state.value.copy(
+                        users =
+                            (state.value.users + next.data.users).distinctBy {
+                              it.username.lowercase()
+                            },
+                        nextPageUrl = next.data.nextPageUrl,
+                        isLoadingMore = false,
+                    )
+                else ->
+                    state.value.copy(
+                        isLoadingMore = false,
+                        appendErrorMessage = next.errorMessageOrNull(),
+                    )
+              }
           mutableState.value = updated
           when (next) {
             is ResourceResult.Success -> {
@@ -353,27 +360,3 @@ class UserWatchlistScreenModel(
         }
   }
 }
-
-private fun UserWatchlistUiState.toPaginationSnapshot(): PaginationSnapshot<WatchlistUser> =
-    PaginationSnapshot(
-        items = users,
-        nextPageUrl = nextPageUrl,
-        loading = loading,
-        refreshing = refreshing,
-        isLoadingMore = isLoadingMore,
-        errorMessage = errorMessage,
-        appendErrorMessage = appendErrorMessage,
-    )
-
-private fun UserWatchlistUiState.applyPagination(
-    snapshot: PaginationSnapshot<WatchlistUser>
-): UserWatchlistUiState =
-    copy(
-        users = snapshot.items,
-        nextPageUrl = snapshot.nextPageUrl,
-        loading = snapshot.loading,
-        refreshing = snapshot.refreshing,
-        isLoadingMore = snapshot.isLoadingMore,
-        errorMessage = snapshot.errorMessage,
-        appendErrorMessage = snapshot.appendErrorMessage,
-    )

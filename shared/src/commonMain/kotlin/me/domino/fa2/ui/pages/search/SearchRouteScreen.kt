@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.remote.fa.search.SearchRepository
 import me.domino.fa2.domain.submissionviewer.adapters.SearchSubmissionSourceAdapter
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
 import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.navigation.openSubmissionFromList
@@ -91,7 +91,7 @@ class SearchRouteScreen(
           sourceKind = SubmissionContextSourceKind.SEARCH,
           adapter = SearchSubmissionSourceAdapter(searchRepository, firstPageUrl = firstUrl),
           page =
-              SubmissionLoadedPage(
+              SubmissionPageSnapshot(
                   pageId = firstUrl,
                   requestKey = firstUrl,
                   items = state.submissions,
@@ -128,7 +128,6 @@ class SearchRouteScreen(
 
       PageStateWrapper(
           state = pageState,
-          hasContent = displayState.submissions.isNotEmpty(),
           onRetry = screenModel::refresh,
       ) {
         SearchScreen(

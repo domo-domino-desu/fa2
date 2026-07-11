@@ -1,61 +1,60 @@
 package me.domino.fa2.data.remote.fa.user
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import me.domino.fa2.data.model.QueryState
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.User
-import me.domino.fa2.data.model.summarizeResourceResult
+import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.remote.fa.core.PageQueryCache
+import me.domino.fa2.data.remote.fa.core.PageType
+import me.domino.fa2.data.remote.fa.core.cacheJson
+import me.domino.fa2.data.remote.fa.core.fetchParsed
 import me.domino.fa2.data.remote.fa.social.SocialActionResult
 import me.domino.fa2.data.remote.fa.social.SocialActionSource
-import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
+import me.domino.fa2.utils.FaUrls
 
-/** User 主页仓储。 */
 class UserRepository(
-    private val userStore: UserPageCache,
-    private val socialActionEndpoint: SocialActionSource,
-) : UserResourceRepository {
-  private val log = FaLog.withTag("UserRepository")
+    private val html: FaHtmlDataSource,
+    private val parser: UserParser,
+    private val queries: PageQueryCache,
+    private val actions: SocialActionSource,
+) : WatchRecommendationUserSource {
+  fun user(username: String): Flow<QueryState<User>> =
+      queries.queryFlow(key(username), PageType.User, { cacheJson.encodeToString(it) }, ::decode) {
+        fetch(username)
+      }
 
-  /** 加载用户头部信息。 */
-  override suspend fun loadUser(username: String): ResourceResult<User> {
-    log.d { "加载用户资料 -> user=$username" }
-    val state = userStore.loadOnce(username)
-    log.d { "加载用户资料 -> ${summarizeResourceResult(state)}" }
-    return state
+  override suspend fun loadUser(username: String): ResourceResult<User> =
+      queries.queryOnce(key(username), PageType.User, { cacheJson.encodeToString(it) }, ::decode) {
+        fetch(username)
+      }
+
+  suspend fun refreshUser(username: String): ResourceResult<User> {
+    queries.invalidate(key(username))
+    return loadUser(username)
   }
 
-  /** 强制刷新用户头部信息。 */
-  override suspend fun refreshUser(username: String): ResourceResult<User> {
-    log.i { "刷新用户资料 -> user=$username" }
-    userStore.invalidate(username)
-    val state = loadUser(username)
-    log.i { "刷新用户资料 -> ${summarizeResourceResult(state)}" }
-    return state
-  }
-
-  /** Watch / Unwatch 用户。 */
-  override suspend fun toggleWatch(username: String, actionUrl: String): ResourceResult<Unit> {
-    val normalizedUrl = actionUrl.trim()
-    if (normalizedUrl.isBlank()) {
-      log.w { "关注操作 -> 缺少actionUrl" }
-      return ResourceResult.Error(IllegalArgumentException("Missing watch action url"))
+  suspend fun toggleWatch(username: String, actionUrl: String): ResourceResult<Unit> {
+    if (actionUrl.isBlank())
+        return ResourceResult.Error(IllegalArgumentException("Missing action URL"))
+    return when (val result = actions.execute(actionUrl.trim())) {
+      is SocialActionResult.Completed -> {
+        queries.invalidate(key(username))
+        ResourceResult.Success(Unit)
+      }
+      is SocialActionResult.Challenge -> ResourceResult.CfChallenge
+      is SocialActionResult.Blocked -> ResourceResult.MatureBlocked(result.reason)
+      is SocialActionResult.Failed -> ResourceResult.Error(IllegalStateException(result.message))
     }
-    log.i { "关注操作 -> user=$username,url=${summarizeUrl(normalizedUrl)}" }
-
-    val state =
-        when (val response = socialActionEndpoint.execute(normalizedUrl)) {
-          is SocialActionResult.Completed -> {
-            userStore.invalidate(username)
-            ResourceResult.Success(Unit)
-          }
-
-          is SocialActionResult.Challenge ->
-              ResourceResult.Error(IllegalStateException("Cloudflare challenge unresolved"))
-
-          is SocialActionResult.Blocked -> ResourceResult.MatureBlocked(response.reason)
-          is SocialActionResult.Failed ->
-              ResourceResult.Error(IllegalStateException(response.message))
-        }
-    log.i { "关注操作 -> ${summarizeResourceResult(state)}" }
-    return state
   }
+
+  private suspend fun fetch(username: String) =
+      html.fetchParsed(FaUrls.user(username)) { body, finalUrl -> parser.parse(body, finalUrl) }
+
+  private fun key(username: String) = "user:username=${username.trim().lowercase()}"
+
+  private fun decode(json: String) =
+      runCatching { cacheJson.decodeFromString<User>(json) }.getOrNull()
 }

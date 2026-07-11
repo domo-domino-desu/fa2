@@ -1,71 +1,67 @@
 package me.domino.fa2.data.remote.fa.feed
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import me.domino.fa2.data.model.FeedPage
+import me.domino.fa2.data.model.QueryState
 import me.domino.fa2.data.model.ResourceResult
-import me.domino.fa2.data.model.summarizeResourceResult
+import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.remote.fa.core.PageQueryCache
+import me.domino.fa2.data.remote.fa.core.PageType
+import me.domino.fa2.data.remote.fa.core.cacheJson
+import me.domino.fa2.data.remote.fa.core.fetchParsed
 import me.domino.fa2.utils.FaUrls
-import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
+import me.domino.fa2.utils.parseSubmissionsFromSid
 
-/** Feed 仓储。 */
-class FeedRepository(private val feedStore: FeedPageCache) {
-  private val log = FaLog.withTag("FeedRepository")
+class FeedRepository(
+    private val html: FaHtmlDataSource,
+    private val parser: FeedParser,
+    private val queries: PageQueryCache,
+) {
+  fun streamFirstPage(): Flow<QueryState<FeedPage>> = streamPage(null)
 
-  /** 读取首页 feed 数据流。 */
-  fun streamFirstPage(): Flow<ResourceResult<FeedPage>> = feedStore.stream(fromSid = null)
+  fun streamPage(fromSid: Int?): Flow<QueryState<FeedPage>> =
+      queries.queryFlow(
+          key = key(fromSid),
+          type = PageType.Feed,
+          encode = { cacheJson.encodeToString(it) },
+          decode = { runCatching { cacheJson.decodeFromString<FeedPage>(it) }.getOrNull() },
+          fetch = { fetch(FaUrls.submissions(fromSid)) },
+      )
 
-  /** 读取指定分页游标的 feed 数据流。 */
-  fun streamPage(fromSid: Int?): Flow<ResourceResult<FeedPage>> =
-      feedStore.stream(fromSid = fromSid)
+  suspend fun loadFirstPage(): ResourceResult<FeedPage> = loadPage(null)
 
-  /** 单次读取首页。 */
-  suspend fun loadFirstPage(): ResourceResult<FeedPage> {
-    val requestUrl = FaUrls.submissions(fromSid = null)
-    log.d { "加载Feed首页 -> url=${summarizeUrl(requestUrl)}" }
-    val state = feedStore.loadPageOnce(fromSid = null)
-    log.d { "加载Feed首页 -> ${summarizeResourceResult(state)}" }
-    return state
-  }
-
-  /** 强制刷新首页。 */
   suspend fun refreshFirstPage(): ResourceResult<FeedPage> {
-    val requestUrl = FaUrls.submissions(fromSid = null)
-    log.i { "刷新Feed首页 -> url=${summarizeUrl(requestUrl)}" }
-    val state = feedStore.refreshPage(fromSid = null)
-    log.i { "刷新Feed首页 -> ${summarizeResourceResult(state)}" }
-    return state
+    queries.invalidate(key(null))
+    return loadPage(null)
   }
 
-  /** 单次读取分页。 */
-  suspend fun loadPage(fromSid: Int?): ResourceResult<FeedPage> {
-    val requestUrl = FaUrls.submissions(fromSid)
-    log.d { "加载Feed分页 -> fromSid=${fromSid ?: "first"},url=${summarizeUrl(requestUrl)}" }
-    val state = feedStore.loadPageOnce(fromSid = fromSid)
-    log.d { "加载Feed分页 -> ${summarizeResourceResult(state)}" }
-    return state
-  }
+  suspend fun loadPage(fromSid: Int?): ResourceResult<FeedPage> =
+      queries.queryOnce(
+          key = key(fromSid),
+          type = PageType.Feed,
+          encode = { cacheJson.encodeToString(it) },
+          decode = { runCatching { cacheJson.decodeFromString<FeedPage>(it) }.getOrNull() },
+          fetch = { fetch(FaUrls.submissions(fromSid)) },
+      )
 
-  /** 按下一页 URL 读取分页。 */
   suspend fun loadPageByNextUrl(nextPageUrl: String): ResourceResult<FeedPage> {
-    log.d { "加载Feed下一页 -> url=${summarizeUrl(nextPageUrl)}" }
-    val state = feedStore.loadPageByNextUrl(nextPageUrl)
-    log.d { "加载Feed下一页 -> ${summarizeResourceResult(state)}" }
-    return state
+    val fromSid =
+        parseSubmissionsFromSid(nextPageUrl)
+            ?: return ResourceResult.Error(IllegalArgumentException("Invalid feed URL"))
+    return loadPage(fromSid)
   }
 
-  /** 按完整 URL 读取分页。 */
-  suspend fun loadPageByUrl(url: String): ResourceResult<FeedPage> {
-    log.d { "加载Feed分页(url) -> url=${summarizeUrl(url)}" }
-    val state = feedStore.loadPageByUrl(url)
-    log.d { "加载Feed分页(url) -> ${summarizeResourceResult(state)}" }
-    return state
-  }
+  suspend fun loadPageByUrl(url: String): ResourceResult<FeedPage> =
+      parseSubmissionsFromSid(url)?.let { loadPage(it) } ?: fetch(url.trim())
 
-  /** 预取指定分页。 */
   suspend fun prefetchPage(fromSid: Int?) {
-    val requestUrl = FaUrls.submissions(fromSid)
-    log.d { "预取Feed分页 -> fromSid=${fromSid ?: "first"},url=${summarizeUrl(requestUrl)}" }
-    feedStore.prefetchPage(fromSid = fromSid)
+    loadPage(fromSid)
   }
+
+  private suspend fun fetch(url: String): ResourceResult<FeedPage> =
+      html.fetchParsed(url) { body, finalUrl -> parser.parse(body, finalUrl) }
+
+  private fun key(fromSid: Int?): String = "feed:fromSid=${fromSid ?: 0}"
 }

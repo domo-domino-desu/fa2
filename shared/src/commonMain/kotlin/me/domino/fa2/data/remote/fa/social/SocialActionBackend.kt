@@ -4,7 +4,6 @@ import kotlinx.coroutines.delay
 import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
 import me.domino.fa2.data.remote.fa.core.summarizeHtmlResult
 import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
 
 internal interface SocialActionBackend {
   suspend fun execute(actionUrl: String): SocialActionResult
@@ -20,13 +19,13 @@ internal class RawHttpSocialActionBackend(
   private val log = FaLog.withTag("RawHttpSocialActionBackend")
 
   override suspend fun execute(actionUrl: String): SocialActionResult {
-    log.i { "社交动作后端(RawHttp) -> 开始(url=${summarizeUrl(actionUrl)})" }
+    log.i { "社交动作后端(RawHttp) -> 开始(url=${actionUrl.trim()})" }
     var challengeRetryCount = 0
     while (true) {
       val response = transport.get(actionUrl)
       if (response.statusCode in REDIRECT_STATUS_CODES) {
         return SocialActionResult.Completed(redirected = true).also {
-          log.i { "社交动作后端(RawHttp) -> 重定向成功(url=${summarizeUrl(actionUrl)})" }
+          log.i { "社交动作后端(RawHttp) -> 重定向成功(url=${actionUrl.trim()})" }
         }
       }
 
@@ -43,23 +42,21 @@ internal class RawHttpSocialActionBackend(
         is HtmlResponseResult.Success ->
             return SocialActionResult.Completed(redirected = false).also {
               log.i {
-                "社交动作后端(RawHttp) -> 成功(url=${summarizeUrl(actionUrl)},result=${summarizeHtmlResult(classified)})"
+                "社交动作后端(RawHttp) -> 成功(url=${actionUrl.trim()},result=${summarizeHtmlResult(classified)})"
               }
             }
         is HtmlResponseResult.AuthRequired ->
             return SocialActionResult.Failed(classified.message).also {
-              log.w { "社交动作后端(RawHttp) -> 需要登录(url=${summarizeUrl(actionUrl)})" }
+              log.w { "社交动作后端(RawHttp) -> 需要登录(url=${actionUrl.trim()})" }
             }
         is HtmlResponseResult.MatureBlocked ->
             return SocialActionResult.Blocked(classified.reason).also {
-              log.w {
-                "社交动作后端(RawHttp) -> 受限(url=${summarizeUrl(actionUrl)},reason=${classified.reason})"
-              }
+              log.w { "社交动作后端(RawHttp) -> 受限(url=${actionUrl.trim()},reason=${classified.reason})" }
             }
         is HtmlResponseResult.Error ->
             return SocialActionResult.Failed(classified.message).also {
               log.w {
-                "社交动作后端(RawHttp) -> 失败(url=${summarizeUrl(actionUrl)},message=${classified.message})"
+                "社交动作后端(RawHttp) -> 失败(url=${actionUrl.trim()},message=${classified.message})"
               }
             }
         is HtmlResponseResult.CfChallenge ->
@@ -74,19 +71,19 @@ internal class RawHttpSocialActionBackend(
               SocialActionChallengeDecision.Retry -> {
                 challengeRetryCount += 1
                 log.w {
-                  "社交动作后端(RawHttp) -> Challenge重试(url=${summarizeUrl(actionUrl)},retry=$challengeRetryCount)"
+                  "社交动作后端(RawHttp) -> Challenge重试(url=${actionUrl.trim()},retry=$challengeRetryCount)"
                 }
               }
               is SocialActionChallengeDecision.Terminal ->
                   return decision.result.also {
                     log.w {
-                      "社交动作后端(RawHttp) -> Challenge终止(url=${summarizeUrl(actionUrl)},result=${summarizeSocialActionResult(it)})"
+                      "社交动作后端(RawHttp) -> Challenge终止(url=${actionUrl.trim()},result=${summarizeSocialActionResult(it)})"
                     }
                   }
             }
         HtmlResponseResult.ChallengeAborted ->
             return SocialActionResult.Failed("Cloudflare challenge aborted").also {
-              log.w { "社交动作后端(RawHttp) -> Challenge已取消(url=${summarizeUrl(actionUrl)})" }
+              log.w { "社交动作后端(RawHttp) -> Challenge已取消(url=${actionUrl.trim()})" }
             }
       }
     }

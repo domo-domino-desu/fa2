@@ -1,56 +1,27 @@
 package me.domino.fa2.domain.submissionviewer.api
 
-import me.domino.fa2.data.model.FeedPage
 import me.domino.fa2.data.model.ResourceResult
-import me.domino.fa2.data.model.Submission
-import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
-import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 
-interface SubmissionPagerFeedSource {
-  suspend fun loadPageByNextUrl(nextPageUrl: String): ResourceResult<FeedPage>
-}
+internal abstract class SubmissionSourceAdapter {
+  abstract val sourceKind: SubmissionContextSourceKind
+  abstract val paginationModel: SubmissionPaginationModel
 
-interface SubmissionPagerDetailSource {
-  suspend fun loadBySid(sid: Int): ResourceResult<Submission>
+  abstract suspend fun loadInitialPage(): ResourceResult<SubmissionPageSnapshot>
 
-  suspend fun loadByUrl(url: String): ResourceResult<Submission>
-
-  suspend fun loadAttachmentText(
-      downloadUrl: String,
-      downloadFileName: String,
-      onProgress: (AttachmentTextProgress) -> Unit = {},
-  ): ResourceResult<AttachmentTextDocument>
-
-  suspend fun toggleFavorite(sid: Int, actionUrl: String): ResourceResult<Unit>
-
-  suspend fun blockTag(
-      sid: Int,
-      tagName: String,
-      nonce: String,
-      toAdd: Boolean,
-  ): ResourceResult<Unit>
-}
-
-internal interface SubmissionSourceAdapter {
-  val sourceKind: SubmissionContextSourceKind
-  val paginationModel: SubmissionPaginationModel
-
-  suspend fun loadInitialPage(): ResourceResult<SubmissionLoadedPage>
-
-  suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
+  open suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionPageSnapshot> =
       unsupported("Next")
 
-  suspend fun loadPreviousPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
+  open suspend fun loadPreviousPage(requestKey: String): ResourceResult<SubmissionPageSnapshot> =
       unsupported("Previous")
 
-  suspend fun loadFirstPage(): ResourceResult<SubmissionLoadedPage> = unsupported("First")
+  open suspend fun loadFirstPage(): ResourceResult<SubmissionPageSnapshot> = unsupported("First")
 
-  suspend fun loadLastPage(): ResourceResult<SubmissionLoadedPage> = unsupported("Last")
+  open suspend fun loadLastPage(): ResourceResult<SubmissionPageSnapshot> = unsupported("Last")
 
-  suspend fun jumpToPage(pageNumber: Int): ResourceResult<SubmissionLoadedPage> =
+  open suspend fun jumpToPage(pageNumber: Int): ResourceResult<SubmissionPageSnapshot> =
       unsupported("Jump")
 
-  private fun unsupported(operation: String): ResourceResult<SubmissionLoadedPage> =
+  private fun unsupported(operation: String): ResourceResult<SubmissionPageSnapshot> =
       ResourceResult.Error(
           UnsupportedOperationException("$operation page is unsupported for $sourceKind")
       )

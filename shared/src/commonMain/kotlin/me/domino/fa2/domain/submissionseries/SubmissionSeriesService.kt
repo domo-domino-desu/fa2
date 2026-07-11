@@ -5,12 +5,10 @@ import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.remote.fa.submission.SubmissionSeriesSubmissionSource
-import me.domino.fa2.domain.translation.SubmissionDescriptionBlock
 import me.domino.fa2.utils.concurrency.SequentialRequestThrottle
 import me.domino.fa2.utils.html.HtmlTextBlock
 import me.domino.fa2.utils.html.HtmlTextBlockExtractor
 import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
 import me.domino.fa2.utils.normalizeFaSubmissionUrl
 
 /** 投稿串联请求节流时间间隔（毫秒）。 */
@@ -39,33 +37,33 @@ class SubmissionSeriesService(
   /** 从描述 HTML 中检测串联候选，返回候选对象或 null。 */
   fun detectCandidate(sourceHtml: String, baseUrl: String): SubmissionSeriesCandidate? =
       detectCandidate(
-              blockExtractor.extract(sourceHtml).map(HtmlTextBlock::toDescriptionBlock),
+              blockExtractor.extract(sourceHtml),
               baseUrl,
           )
           .also { candidate ->
-            log.d { "投稿串联 -> 解析候选(baseUrl=${summarizeUrl(baseUrl)},found=${candidate != null})" }
+            log.d { "投稿串联 -> 解析候选(baseUrl=${baseUrl.trim()},found=${candidate != null})" }
           }
 
   /** 从已提取的区块列表中检测串联候选。 */
   fun detectCandidate(
-      sourceBlocks: List<SubmissionDescriptionBlock>,
+      sourceBlocks: List<HtmlTextBlock>,
       baseUrl: String,
   ): SubmissionSeriesCandidate? {
     if (sourceBlocks.isEmpty()) {
-      log.d { "投稿串联 -> 跳过候选解析(空区块,baseUrl=${summarizeUrl(baseUrl)})" }
+      log.d { "投稿串联 -> 跳过候选解析(空区块,baseUrl=${baseUrl.trim()})" }
       return null
     }
     return (detectPrevNextCandidate(sourceBlocks, baseUrl)
             ?: detectNumberedBlocksCandidate(sourceBlocks, baseUrl))
         ?.also { candidate ->
-          log.d { "投稿串联 -> 命中候选(rule=${candidate.rule},baseUrl=${summarizeUrl(baseUrl)})" }
+          log.d { "投稿串联 -> 命中候选(rule=${candidate.rule},baseUrl=${baseUrl.trim()})" }
         }
   }
 
   /** 根据候选信息完整解析串联并返回结果，失败时返回 null。 */
   suspend fun resolveSeries(candidate: SubmissionSeriesCandidate): SubmissionSeriesResolvedSeries? {
     log.i {
-      "投稿串联 -> 开始解析(rule=${candidate.rule},currentUrl=${summarizeUrl(candidate.currentSubmissionUrl)})"
+      "投稿串联 -> 开始解析(rule=${candidate.rule},currentUrl=${candidate.currentSubmissionUrl.trim()})"
     }
     val loader =
         SubmissionSeriesRemoteLoader(
@@ -75,7 +73,7 @@ class SubmissionSeriesService(
     val firstPair =
         resolveFirstPage(candidate, loader)
             ?: return null.also {
-              log.w { "投稿串联 -> 首条解析失败(currentUrl=${summarizeUrl(candidate.currentSubmissionUrl)})" }
+              log.w { "投稿串联 -> 首条解析失败(currentUrl=${candidate.currentSubmissionUrl.trim()})" }
             }
     val (firstDetail, firstCandidate) = firstPair
 
@@ -339,7 +337,7 @@ private data class SubmissionSeriesSeedResult(
 
 /** 在描述区块中检测 prev/next 导航链接，识别 PREV_NEXT_BLOCK 串联候选。 */
 private fun detectPrevNextCandidate(
-    sourceBlocks: List<SubmissionDescriptionBlock>,
+    sourceBlocks: List<HtmlTextBlock>,
     baseUrl: String,
 ): SubmissionSeriesCandidate? {
   sourceBlocks.forEachIndexed { index, block ->
@@ -405,7 +403,7 @@ private fun detectPrevNextCandidate(
 
 /** 在描述区块中检测编号段落列表，识别 NUMBERED_BLOCKS 串联候选。 */
 private fun detectNumberedBlocksCandidate(
-    sourceBlocks: List<SubmissionDescriptionBlock>,
+    sourceBlocks: List<HtmlTextBlock>,
     baseUrl: String,
 ): SubmissionSeriesCandidate? {
   val matches =
@@ -454,7 +452,7 @@ private fun detectNumberedBlocksCandidate(
 /** 检测单个区块是否符合编号规则，返回匹配结果或 null。 */
 private fun detectNumberedBlockMatch(
     blockIndex: Int,
-    block: SubmissionDescriptionBlock,
+    block: HtmlTextBlock,
     baseUrl: String,
 ): NumberedBlockMatch? {
   val submissionUrl =
@@ -546,20 +544,17 @@ private class SubmissionSeriesRemoteLoader(
     throttle.awaitReady()
     return when (val state = repository.loadSubmissionDetailByUrl(url)) {
       is ResourceResult.Success ->
-          state.data.also { log.d { "投稿串联远程加载 -> 成功(url=${summarizeUrl(url)},sid=${it.id})" } }
+          state.data.also { log.d { "投稿串联远程加载 -> 成功(url=${url.trim()},sid=${it.id})" } }
       is ResourceResult.AuthRequired,
       ResourceResult.CfChallenge,
       is ResourceResult.MatureBlocked,
       is ResourceResult.Error ->
           null.also {
-            log.w { "投稿串联远程加载 -> 失败(url=${summarizeUrl(url)},state=${state::class.simpleName})" }
+            log.w { "投稿串联远程加载 -> 失败(url=${url.trim()},state=${state::class.simpleName})" }
           }
     }
   }
 }
-
-private fun HtmlTextBlock.toDescriptionBlock(): SubmissionDescriptionBlock =
-    SubmissionDescriptionBlock(originalHtml = originalHtml, sourceText = sourceText)
 
 internal fun Submission.toSubmissionThumbnail(): SubmissionThumbnail =
     SubmissionThumbnail(

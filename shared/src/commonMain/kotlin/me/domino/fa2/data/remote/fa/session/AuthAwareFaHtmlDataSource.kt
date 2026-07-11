@@ -4,7 +4,6 @@ import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
 import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
 import me.domino.fa2.data.remote.fa.core.summarizeHtmlResult
 import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
 
 /** 对业务 HTML 请求增加登录失效感知。 */
 class AuthAwareFaHtmlDataSource(
@@ -14,7 +13,7 @@ class AuthAwareFaHtmlDataSource(
   private val log = FaLog.withTag("AuthAwareFaHtmlDataSource")
 
   override suspend fun get(url: String): HtmlResponseResult {
-    val safeUrl = summarizeUrl(url)
+    val safeUrl = url.trim()
     val result = delegate.get(url)
     if (result is HtmlResponseResult.AuthRequired) {
       log.w { "认证代理请求 -> 命中需要登录(url=$safeUrl)" }

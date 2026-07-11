@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.remote.fa.browse.BrowseRepository
 import me.domino.fa2.domain.submissionviewer.adapters.BrowseSubmissionSourceAdapter
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
 import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.navigation.openSubmissionFromList
@@ -51,8 +51,8 @@ class BrowseRouteScreen(private val initialFilter: BrowseFilterState) : Screen {
     val screenModel = rememberScreenModel {
       BrowseScreenModel(repository = browseRepository, initialFilter = initialFilter)
     }
-    val state by screenModel.state.collectAsState()
-    val pageState by screenModel.pageState.collectAsState()
+    val query by screenModel.state.collectAsState()
+    val state = query.data ?: BrowseUiState(initialFilter, initialFilter)
     val contextState by contextScreenModel.state(holderTag).collectAsState()
     val initialViewport =
         remember(contextScreenModel, holderTag) {
@@ -82,7 +82,7 @@ class BrowseRouteScreen(private val initialFilter: BrowseFilterState) : Screen {
           sourceKind = SubmissionContextSourceKind.BROWSE,
           adapter = BrowseSubmissionSourceAdapter(browseRepository, firstPageUrl = firstUrl),
           page =
-              SubmissionLoadedPage(
+              SubmissionPageSnapshot(
                   pageId = firstUrl,
                   requestKey = firstUrl,
                   items = state.submissions,
@@ -112,8 +112,7 @@ class BrowseRouteScreen(private val initialFilter: BrowseFilterState) : Screen {
       )
 
       PageStateWrapper(
-          state = pageState,
-          hasContent = displayState.submissions.isNotEmpty(),
+          state = query,
           onRetry = screenModel::refresh,
       ) {
         BrowseScreen(

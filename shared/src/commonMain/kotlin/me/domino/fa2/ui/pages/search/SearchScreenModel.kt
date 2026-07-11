@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import me.domino.fa2.data.local.taxonomy.FaTaxonomyRepository
+import me.domino.fa2.data.model.QueryState
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.remote.fa.search.SearchRepository
 import me.domino.fa2.data.remote.fa.user.ActivityHistoryRepository
@@ -15,14 +16,12 @@ import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.settings.SystemLanguageProvider
 import me.domino.fa2.data.settings.uiText
 import me.domino.fa2.ui.components.forms.FilterOption
-import me.domino.fa2.ui.components.state.UiPageState
 import me.domino.fa2.ui.i18n.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.i18n.search.SearchUiMetadataKey
 import me.domino.fa2.ui.i18n.search.SearchUiOptionKey
 import me.domino.fa2.ui.i18n.search.SearchUiTextKey
 import me.domino.fa2.ui.pages.search.util.SearchDateRangeShiftAction
 import me.domino.fa2.ui.pages.search.util.normalizeManualDateFields
-import me.domino.fa2.ui.utils.PaginationSnapshot
 import me.domino.fa2.utils.FaUrls
 import me.domino.fa2.utils.logging.FaLog
 
@@ -91,8 +90,8 @@ class SearchScreenModel(
 ) : StateScreenModel<SearchUiState>(SearchUiState()) {
   private val log = FaLog.withTag("SearchScreenModel")
   private val mutablePageState =
-      MutableStateFlow<UiPageState<SearchUiState>>(UiPageState.Success(state.value))
-  val pageState: StateFlow<UiPageState<SearchUiState>> = mutablePageState.asStateFlow()
+      MutableStateFlow<QueryState<SearchUiState>>(QueryState.Success(state.value))
+  val pageState: StateFlow<QueryState<SearchUiState>> = mutablePageState.asStateFlow()
   private val workflow =
       SearchScreenWorkflow(
           repository = repository,
@@ -248,30 +247,6 @@ internal fun isSearchFormSubmittable(form: SearchFormState): Boolean {
   val normalized = normalizeManualDateFields(form.rangeFrom, form.rangeTo)
   return normalized.from.isNotBlank() && normalized.to.isNotBlank()
 }
-
-internal fun SearchUiState.toPaginationSnapshot(): PaginationSnapshot<SubmissionThumbnail> =
-    PaginationSnapshot(
-        items = submissions,
-        nextPageUrl = nextPageUrl,
-        loading = loading,
-        refreshing = refreshing,
-        isLoadingMore = isLoadingMore,
-        errorMessage = errorMessage,
-        appendErrorMessage = appendErrorMessage,
-    )
-
-internal fun SearchUiState.applyPagination(
-    snapshot: PaginationSnapshot<SubmissionThumbnail>
-): SearchUiState =
-    copy(
-        submissions = snapshot.items,
-        nextPageUrl = snapshot.nextPageUrl,
-        loading = snapshot.loading,
-        refreshing = snapshot.refreshing,
-        isLoadingMore = snapshot.isLoadingMore,
-        errorMessage = snapshot.errorMessage,
-        appendErrorMessage = snapshot.appendErrorMessage,
-    )
 
 internal fun parseGendersFromQuery(query: String): Set<SearchGender> {
   val tokens = query.split(Regex("\\s+")).filter { token -> token.isNotBlank() }

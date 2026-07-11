@@ -16,7 +16,6 @@ import kotlinx.coroutines.test.setMain
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
 import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
 import me.domino.fa2.domain.submissionviewer.api.SubmissionPaginationKind
 import me.domino.fa2.domain.submissionviewer.api.SubmissionPaginationModel
@@ -53,7 +52,7 @@ class SubmissionContextScreenModelTest {
             sourceKind = SubmissionContextSourceKind.FEED,
             adapter = adapter,
             page =
-                SubmissionLoadedPage(
+                SubmissionPageSnapshot(
                     pageId = "page-1",
                     requestKey = "page-1",
                     items = listOf(testThumbnail(1), testThumbnail(2)),
@@ -71,7 +70,7 @@ class SubmissionContextScreenModelTest {
             currentPageNumber = 1,
         )
         adapter.nextResults["page-2"] =
-            SubmissionLoadedPage(
+            SubmissionPageSnapshot(
                 pageId = "page-2",
                 requestKey = "page-2",
                 items = listOf(testThumbnail(3), testThumbnail(4)),
@@ -112,7 +111,7 @@ class SubmissionContextScreenModelTest {
             sourceKind = SubmissionContextSourceKind.SEARCH,
             adapter = adapter,
             page =
-                SubmissionLoadedPage(
+                SubmissionPageSnapshot(
                     pageId = "page-1",
                     requestKey = "page-1",
                     items = listOf(testThumbnail(10), testThumbnail(11)),
@@ -124,7 +123,7 @@ class SubmissionContextScreenModelTest {
             revisionKey = "search-1",
         )
         adapter.jumpResults[5] =
-            SubmissionLoadedPage(
+            SubmissionPageSnapshot(
                 pageId = "page-5",
                 requestKey = "page-5",
                 items = listOf(testThumbnail(50), testThumbnail(51)),
@@ -164,7 +163,7 @@ class SubmissionContextScreenModelTest {
             sourceKind = SubmissionContextSourceKind.SEARCH,
             adapter = adapter,
             page =
-                SubmissionLoadedPage(
+                SubmissionPageSnapshot(
                     pageId = "page-2",
                     requestKey = "page-2",
                     items = listOf(testThumbnail(20), testThumbnail(21)),
@@ -184,7 +183,7 @@ class SubmissionContextScreenModelTest {
             currentPageNumber = 2,
         )
         adapter.nextResults["page-3"] =
-            SubmissionLoadedPage(
+            SubmissionPageSnapshot(
                 pageId = "page-3",
                 requestKey = "page-3",
                 items = listOf(testThumbnail(30), testThumbnail(31)),
@@ -227,7 +226,7 @@ class SubmissionContextScreenModelTest {
             sourceKind = SubmissionContextSourceKind.BROWSE,
             adapter = adapter,
             page =
-                SubmissionLoadedPage(
+                SubmissionPageSnapshot(
                     pageId = "page-1",
                     requestKey = "page-1",
                     items = listOf(testThumbnail(10), testThumbnail(11)),
@@ -239,7 +238,7 @@ class SubmissionContextScreenModelTest {
             revisionKey = "browse-1",
         )
         adapter.nextResults["page-2"] =
-            SubmissionLoadedPage(
+            SubmissionPageSnapshot(
                 pageId = "page-2",
                 requestKey = "page-2",
                 items = listOf(testThumbnail(20), testThumbnail(21)),
@@ -248,7 +247,7 @@ class SubmissionContextScreenModelTest {
                 nextRequestKey = "page-3",
             )
         adapter.nextResults["page-3"] =
-            SubmissionLoadedPage(
+            SubmissionPageSnapshot(
                 pageId = "page-3",
                 requestKey = "page-3",
                 items = listOf(testThumbnail(30), testThumbnail(31)),
@@ -297,7 +296,7 @@ class SubmissionContextScreenModelTest {
             sourceKind = SubmissionContextSourceKind.SEARCH,
             adapter = adapter,
             page =
-                SubmissionLoadedPage(
+                SubmissionPageSnapshot(
                     pageId = "page-2",
                     requestKey = "page-2",
                     items = listOf(testThumbnail(20), testThumbnail(21)),
@@ -310,7 +309,7 @@ class SubmissionContextScreenModelTest {
             revisionKey = "search-2",
         )
         adapter.firstResult =
-            SubmissionLoadedPage(
+            SubmissionPageSnapshot(
                 pageId = "page-1",
                 requestKey = "page-1",
                 items = listOf(testThumbnail(10), testThumbnail(11)),
@@ -356,7 +355,7 @@ class SubmissionContextScreenModelTest {
             sourceKind = SubmissionContextSourceKind.SEARCH,
             adapter = adapter,
             page =
-                SubmissionLoadedPage(
+                SubmissionPageSnapshot(
                     pageId = "page-5",
                     requestKey = "page-5",
                     items = listOf(testThumbnail(50), testThumbnail(51)),
@@ -369,7 +368,7 @@ class SubmissionContextScreenModelTest {
             revisionKey = "search-5",
         )
         adapter.firstResult =
-            SubmissionLoadedPage(
+            SubmissionPageSnapshot(
                 pageId = "page-1",
                 requestKey = "page-1",
                 items = listOf(testThumbnail(10), testThumbnail(11)),
@@ -407,7 +406,7 @@ class SubmissionContextScreenModelTest {
             sourceKind = SubmissionContextSourceKind.BROWSE,
             adapter = adapter,
             page =
-                SubmissionLoadedPage(
+                SubmissionPageSnapshot(
                     pageId = "page-1",
                     requestKey = "page-1",
                     items = listOf(testThumbnail(10), testThumbnail(11)),
@@ -419,7 +418,7 @@ class SubmissionContextScreenModelTest {
             revisionKey = "browse-root",
         )
         adapter.jumpResults[10000] =
-            SubmissionLoadedPage(
+            SubmissionPageSnapshot(
                 pageId = "page-999",
                 requestKey = "page-999",
                 items = listOf(testThumbnail(9990), testThumbnail(9991)),
@@ -457,7 +456,7 @@ class SubmissionContextScreenModelTest {
             sourceKind = SubmissionContextSourceKind.BROWSE,
             adapter = adapter,
             page =
-                SubmissionLoadedPage(
+                SubmissionPageSnapshot(
                     pageId = "page-3",
                     requestKey = "page-3",
                     items = listOf(testThumbnail(30), testThumbnail(31)),
@@ -500,7 +499,7 @@ class SubmissionContextScreenModelTest {
             sourceKind = SubmissionContextSourceKind.FEED,
             adapter = adapter,
             page =
-                SubmissionLoadedPage(
+                SubmissionPageSnapshot(
                     pageId = "page-1",
                     requestKey = "page-1",
                     items = listOf(testThumbnail(10), testThumbnail(11)),
@@ -539,7 +538,7 @@ class SubmissionContextScreenModelTest {
             sourceKind = SubmissionContextSourceKind.FAVORITES,
             adapter = adapter,
             page =
-                SubmissionLoadedPage(
+                SubmissionPageSnapshot(
                     pageId = "page-1",
                     requestKey = "page-1",
                     items = listOf(testThumbnail(10), testThumbnail(11)),
@@ -551,7 +550,7 @@ class SubmissionContextScreenModelTest {
             revisionKey = "favorites-root",
         )
         adapter.nextResults["page-2-cursor"] =
-            SubmissionLoadedPage(
+            SubmissionPageSnapshot(
                 pageId = "page-2",
                 requestKey = "page-2-cursor",
                 items = listOf(testThumbnail(20), testThumbnail(21)),
@@ -589,7 +588,7 @@ class SubmissionContextScreenModelTest {
             sourceKind = SubmissionContextSourceKind.BROWSE,
             adapter = adapter,
             page =
-                SubmissionLoadedPage(
+                SubmissionPageSnapshot(
                     pageId = "page-998",
                     requestKey = "page-998",
                     items = listOf(testThumbnail(9980), testThumbnail(9981)),
@@ -601,7 +600,7 @@ class SubmissionContextScreenModelTest {
             revisionKey = "browse-last-page",
         )
         adapter.nextResults["page-999"] =
-            SubmissionLoadedPage(
+            SubmissionPageSnapshot(
                 pageId = "page-999",
                 requestKey = "page-999",
                 items = listOf(testThumbnail(9990), testThumbnail(9991)),
@@ -613,7 +612,7 @@ class SubmissionContextScreenModelTest {
         model.loadNextPageIfNeeded(contextId)
         runCurrent()
         adapter.nextResults["page-1000"] =
-            SubmissionLoadedPage(
+            SubmissionPageSnapshot(
                 pageId = "page-999-again",
                 requestKey = "page-1000",
                 items = listOf(testThumbnail(9990), testThumbnail(9991)),
@@ -654,7 +653,7 @@ class SubmissionContextScreenModelTest {
             sourceKind = SubmissionContextSourceKind.SEARCH,
             adapter = adapter,
             page =
-                SubmissionLoadedPage(
+                SubmissionPageSnapshot(
                     pageId = "page-1",
                     requestKey = "page-1",
                     items = listOf(testThumbnail(10), testThumbnail(11)),
@@ -666,7 +665,7 @@ class SubmissionContextScreenModelTest {
             revisionKey = "search-root",
         )
         adapter.jumpResults[5] =
-            SubmissionLoadedPage(
+            SubmissionPageSnapshot(
                 pageId = "page-5",
                 requestKey = "page-5",
                 items = listOf(testThumbnail(50), testThumbnail(51)),
@@ -683,7 +682,7 @@ class SubmissionContextScreenModelTest {
             sourceKind = SubmissionContextSourceKind.SEARCH,
             adapter = adapter,
             page =
-                SubmissionLoadedPage(
+                SubmissionPageSnapshot(
                     pageId = "page-1",
                     requestKey = "page-1",
                     items = listOf(testThumbnail(10), testThumbnail(11)),
@@ -705,41 +704,43 @@ class SubmissionContextScreenModelTest {
 private class FakeSubmissionSourceAdapter(
     override val paginationModel: SubmissionPaginationModel =
         SubmissionPaginationModel(kind = SubmissionPaginationKind.CURSOR)
-) : SubmissionSourceAdapter {
+) : SubmissionSourceAdapter() {
   override val sourceKind: SubmissionContextSourceKind = SubmissionContextSourceKind.SEARCH
-  val nextResults: MutableMap<String, SubmissionLoadedPage> = mutableMapOf()
-  val previousResults: MutableMap<String, SubmissionLoadedPage> = mutableMapOf()
-  val jumpResults: MutableMap<Int, SubmissionLoadedPage> = mutableMapOf()
-  var firstResult: SubmissionLoadedPage? = null
-  var lastResult: SubmissionLoadedPage? = null
+  val nextResults: MutableMap<String, SubmissionPageSnapshot> = mutableMapOf()
+  val previousResults: MutableMap<String, SubmissionPageSnapshot> = mutableMapOf()
+  val jumpResults: MutableMap<Int, SubmissionPageSnapshot> = mutableMapOf()
+  var firstResult: SubmissionPageSnapshot? = null
+  var lastResult: SubmissionPageSnapshot? = null
   var nextCalls: Int = 0
   var previousCalls: Int = 0
   var jumpCalls: Int = 0
   var firstCalls: Int = 0
   var lastCalls: Int = 0
 
-  override suspend fun loadInitialPage(): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadInitialPage(): ResourceResult<SubmissionPageSnapshot> =
       ResourceResult.Error(IllegalStateException("Unused in test"))
 
-  override suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionPageSnapshot> =
       nextResults[requestKey]?.also { nextCalls += 1 }?.let { page -> ResourceResult.Success(page) }
           ?: ResourceResult.Error(IllegalStateException("Missing next page for $requestKey"))
 
-  override suspend fun loadPreviousPage(requestKey: String): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadPreviousPage(
+      requestKey: String
+  ): ResourceResult<SubmissionPageSnapshot> =
       previousResults[requestKey]
           ?.also { previousCalls += 1 }
           ?.let { page -> ResourceResult.Success(page) }
           ?: ResourceResult.Error(IllegalStateException("Missing previous page for $requestKey"))
 
-  override suspend fun jumpToPage(pageNumber: Int): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun jumpToPage(pageNumber: Int): ResourceResult<SubmissionPageSnapshot> =
       jumpResults[pageNumber]?.also { jumpCalls += 1 }?.let { page -> ResourceResult.Success(page) }
           ?: ResourceResult.Error(IllegalStateException("Missing jump page for $pageNumber"))
 
-  override suspend fun loadFirstPage(): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadFirstPage(): ResourceResult<SubmissionPageSnapshot> =
       firstResult?.also { firstCalls += 1 }?.let { page -> ResourceResult.Success(page) }
           ?: ResourceResult.Error(IllegalStateException("Missing first page"))
 
-  override suspend fun loadLastPage(): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadLastPage(): ResourceResult<SubmissionPageSnapshot> =
       lastResult?.also { lastCalls += 1 }?.let { page -> ResourceResult.Success(page) }
           ?: ResourceResult.Error(IllegalStateException("Missing last page"))
 }

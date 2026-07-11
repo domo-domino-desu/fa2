@@ -19,7 +19,7 @@ import me.domino.fa2.data.remote.fa.favorites.FavoritesRepository
 import me.domino.fa2.data.remote.fa.gallery.GalleryRepository
 import me.domino.fa2.domain.submissionviewer.adapters.UserSubmissionSourceAdapter
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
 import me.domino.fa2.domain.submissionviewer.api.UserSubmissionSection
 import me.domino.fa2.ui.app.navigation.rootNavigator
 import me.domino.fa2.ui.pages.journal.JournalPagerContextScreenModel
@@ -206,7 +206,7 @@ class UserChildRouteScreen(
                         favoritesRepository = favoritesRepository,
                     ),
                 page =
-                    SubmissionLoadedPage(
+                    SubmissionPageSnapshot(
                         pageId = rootPageUrl,
                         requestKey = rootPageUrl,
                         items = s.submissions,

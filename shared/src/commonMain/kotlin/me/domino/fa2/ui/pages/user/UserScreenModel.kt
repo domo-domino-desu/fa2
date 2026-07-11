@@ -9,7 +9,7 @@ import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.User
 import me.domino.fa2.data.model.summarizeResourceResult
-import me.domino.fa2.data.remote.fa.user.UserResourceRepository
+import me.domino.fa2.data.remote.fa.user.UserRepository
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.utils.concurrency.runSuspendCatching
 import me.domino.fa2.utils.logging.FaLog
@@ -41,7 +41,7 @@ class UserScreenModel(
     /** 目标用户名。 */
     private val username: String,
     /** User 仓储。 */
-    private val repository: UserResourceRepository,
+    private val repository: UserRepository,
     /** 初始子路由。 */
     initialChildRoute: UserChildRoute = UserChildRoute.Gallery,
     /** 初始 folder URL（可选）。 */

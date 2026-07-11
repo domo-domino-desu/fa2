@@ -17,11 +17,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesService
-import me.domino.fa2.domain.translation.SubmissionDescriptionBlock
 import me.domino.fa2.ui.components.feedback.LocalShowToast
 import me.domino.fa2.ui.components.html.HtmlBlockTrailingAction
 import me.domino.fa2.ui.components.html.HtmlBlockTrailingActionState
 import me.domino.fa2.ui.components.html.TranslationUiState
+import me.domino.fa2.utils.html.HtmlTextBlock
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -29,7 +29,7 @@ internal const val submissionSeriesMinimumLoadingMs: Long = 500L
 
 internal data class SubmissionSeriesProbeConfig(
     val sourceKey: String = "",
-    val sourceBlocks: List<SubmissionDescriptionBlock> = emptyList(),
+    val sourceBlocks: List<HtmlTextBlock> = emptyList(),
     val baseUrl: String,
     val onOpenSeries: (SubmissionSeriesResolvedSeries) -> Unit,
 )

@@ -14,7 +14,6 @@ import me.domino.fa2.data.remote.fa.core.FaOriginPolicy
 import me.domino.fa2.data.remote.fa.session.FaCookiesStorage
 import me.domino.fa2.data.remote.fa.session.UserAgentStorage
 import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
 
 /** FA 标签屏蔽操作的接口端点 URL。 */
 internal const val TAG_BLOCKING_URL: String = "https://www.furaffinity.net/route/tag_blocking"
@@ -53,7 +52,7 @@ internal class DefaultSocialActionHttpTransport(
 
   override suspend fun get(url: String): SocialActionHttpResponse {
     require(FaOriginPolicy.isTrustedPageOrigin(url)) { "Untrusted FA action URL" }
-    log.d { "社交动作传输 -> GET(url=${summarizeUrl(url)})" }
+    log.d { "社交动作传输 -> GET(url=${url.trim()})" }
     val context = loadRequestContext()
     val response =
         client.get(url) {

@@ -5,7 +5,6 @@ import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
 import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
 import me.domino.fa2.utils.FaUrls
 import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
 
 class ChallengeProbeVerifier(
     private val rawHtmlDataSource: FaHtmlDataSource,
@@ -18,7 +17,7 @@ class ChallengeProbeVerifier(
     val probeUrl = triggerUrl.ifBlank { FaUrls.home }
     for ((index, delayMs) in retryDelaysMs.withIndex()) {
       if (delayMs > 0) delay(delayMs)
-      log.d { "验证探测 -> 第${index + 1}次(url=${summarizeUrl(probeUrl)})" }
+      log.d { "验证探测 -> 第${index + 1}次(url=${probeUrl.trim()})" }
       when (val response = rawHtmlDataSource.get(probeUrl)) {
         is HtmlResponseResult.Success -> return
         is HtmlResponseResult.AuthRequired -> return

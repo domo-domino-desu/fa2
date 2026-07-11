@@ -19,8 +19,7 @@ import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
-import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerDetailSource
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
 import me.domino.fa2.domain.submissionviewer.api.SubmissionPaginationKind
 import me.domino.fa2.domain.submissionviewer.api.SubmissionPaginationModel
 import me.domino.fa2.domain.submissionviewer.api.SubmissionSourceAdapter
@@ -212,7 +211,7 @@ private class RecordingSequenceAdapter(
     private val nextRequestKey: String?,
     private val minSid: Int = 1,
     private val maxSid: Int,
-) : SubmissionSourceAdapter {
+) : SubmissionSourceAdapter() {
   val nextRequests: MutableList<String> = mutableListOf()
   val previousRequests: MutableList<String> = mutableListOf()
   private val initialItems = initialItems
@@ -224,8 +223,8 @@ private class RecordingSequenceAdapter(
           knowsLastPage = false,
       )
 
-  fun initialPage(): SubmissionLoadedPage =
-      SubmissionLoadedPage(
+  fun initialPage(): SubmissionPageSnapshot =
+      SubmissionPageSnapshot(
           pageId = "initial",
           requestKey = initialItems.firstOrNull()?.submissionUrl,
           items = initialItems,
@@ -234,14 +233,14 @@ private class RecordingSequenceAdapter(
           firstRequestKey = initialItems.firstOrNull()?.submissionUrl,
       )
 
-  override suspend fun loadInitialPage(): ResourceResult<SubmissionLoadedPage> =
+  override suspend fun loadInitialPage(): ResourceResult<SubmissionPageSnapshot> =
       ResourceResult.Success(initialPage())
 
-  override suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionLoadedPage> {
+  override suspend fun loadNextPage(requestKey: String): ResourceResult<SubmissionPageSnapshot> {
     nextRequests += requestKey
     val sid = parseSubmissionSid(requestKey) ?: return invalidRequest(requestKey)
     return ResourceResult.Success(
-        SubmissionLoadedPage(
+        SubmissionPageSnapshot(
             pageId = "next:$sid",
             requestKey = requestKey,
             items = listOf(testThumbnail(sid)),
@@ -253,11 +252,13 @@ private class RecordingSequenceAdapter(
     )
   }
 
-  override suspend fun loadPreviousPage(requestKey: String): ResourceResult<SubmissionLoadedPage> {
+  override suspend fun loadPreviousPage(
+      requestKey: String
+  ): ResourceResult<SubmissionPageSnapshot> {
     previousRequests += requestKey
     val sid = parseSubmissionSid(requestKey) ?: return invalidRequest(requestKey)
     return ResourceResult.Success(
-        SubmissionLoadedPage(
+        SubmissionPageSnapshot(
             pageId = "previous:$sid",
             requestKey = requestKey,
             items = listOf(testThumbnail(sid)),

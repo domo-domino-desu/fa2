@@ -9,7 +9,7 @@ import me.domino.fa2.data.model.User
 import me.domino.fa2.data.remote.fa.auth.AuthRepository
 import me.domino.fa2.data.remote.fa.session.AuthSessionController
 import me.domino.fa2.data.remote.fa.user.ActivityHistoryRepository
-import me.domino.fa2.data.remote.fa.user.UserResourceRepository
+import me.domino.fa2.data.remote.fa.user.UserRepository
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.utils.concurrency.runSuspendCatching
 import me.domino.fa2.utils.logging.FaLog
@@ -21,7 +21,7 @@ class MoreScreenModel(
     private val authSessionController: AuthSessionController,
     /** 历史记录仓储。 */
     private val historyRepository: ActivityHistoryRepository,
-    private val userRepository: UserResourceRepository,
+    private val userRepository: UserRepository,
 ) : StateScreenModel<MoreUiState>(MoreUiState.Loading) {
   private val log = FaLog.withTag("MoreScreenModel")
 

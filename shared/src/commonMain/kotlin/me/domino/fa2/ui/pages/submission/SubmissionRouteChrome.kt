@@ -20,13 +20,13 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
+import me.domino.fa2.data.model.QueryState
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.ui.app.scaffold.SubmissionRouteTopBar
 import me.domino.fa2.ui.components.platform.PlatformDownloadRequest
 import me.domino.fa2.ui.components.state.PageStateWrapper
-import me.domino.fa2.ui.components.state.UiPageState
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
 import me.domino.fa2.ui.pages.submission.pager.SubmissionPager
@@ -37,7 +37,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun SubmissionRouteChrome(
     state: SubmissionPagerUiState,
-    pageState: UiPageState<SubmissionPagerUiState>,
+    pageState: QueryState<SubmissionPagerUiState>,
     topBarActions: SubmissionTopBarActions,
     zoomOverlayVisible: Boolean,
     blockedSubmissionMode: BlockedSubmissionPagerMode,
@@ -89,11 +89,6 @@ internal fun SubmissionRouteChrome(
     }
     PageStateWrapper(
         state = pageState,
-        hasContent =
-            when (state) {
-              SubmissionPagerUiState.Empty -> false
-              is SubmissionPagerUiState.Data -> state.submissions.isNotEmpty()
-            },
         onRetry = onRetryPage,
     ) {
       when (val snapshot = state) {

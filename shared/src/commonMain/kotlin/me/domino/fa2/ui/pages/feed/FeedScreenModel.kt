@@ -1,238 +1,104 @@
 package me.domino.fa2.ui.pages.feed
 
-import cafe.adriel.voyager.core.model.StateScreenModel
+import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import fa2.shared.generated.resources.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import me.domino.fa2.data.model.QueryState
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.data.model.summarizeResourceResult
+import me.domino.fa2.data.model.errorOrNull
+import me.domino.fa2.data.model.mapData
 import me.domino.fa2.data.remote.fa.feed.FeedRepository
-import me.domino.fa2.ui.components.state.UiPageState
-import me.domino.fa2.ui.i18n.appString
-import me.domino.fa2.ui.utils.PaginationReducer
-import me.domino.fa2.ui.utils.PaginationSnapshot
-import me.domino.fa2.utils.logging.FaLog
 
 private const val autoLoadThreshold = 10
 
-/** Feed 页 UI 状态。 */
 data class FeedUiState(
     val submissions: List<SubmissionThumbnail> = emptyList(),
     val nextPageUrl: String? = null,
-    val loading: Boolean = false,
     val refreshing: Boolean = false,
     val isLoadingMore: Boolean = false,
-    val errorMessage: String? = null,
     val appendErrorMessage: String? = null,
 ) {
+  val loading: Boolean
+    get() = submissions.isEmpty()
+
+  val errorMessage: String? = null
+
   val hasMore: Boolean
     get() = !nextPageUrl.isNullOrBlank()
 }
 
-/** Feed 页面状态模型。 负责分页聚合、加载状态管理与共享列表同步。 */
-class FeedScreenModel(
-    /** Feed 仓储。 */
-    private val repository: FeedRepository
-) : StateScreenModel<FeedUiState>(FeedUiState()) {
-  private val log = FaLog.withTag("FeedScreenModel")
-  private val paginationStateMachine =
-      PaginationReducer<SubmissionThumbnail, Int>(
-          keyOf = { item -> item.id },
-          challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
-      )
-
-  private val mutablePageState = MutableStateFlow<UiPageState<FeedUiState>>(UiPageState.Loading)
-  val pageState: StateFlow<UiPageState<FeedUiState>> = mutablePageState.asStateFlow()
-
-  /** 当前首页加载任务。 */
+class FeedScreenModel(private val repository: FeedRepository) : ScreenModel {
+  private val mutableState = MutableStateFlow<QueryState<FeedUiState>>(QueryState.Loading())
+  val state: StateFlow<QueryState<FeedUiState>> = mutableState.asStateFlow()
   private var loadJob: Job? = null
-
-  /** 当前追加任务。 */
   private var appendJob: Job? = null
 
-  /**
-   * 加载首页。
-   *
-   * @param forceRefresh 是否强制刷新。
-   */
   fun load(forceRefresh: Boolean = false) {
-    log.i { "加载Feed -> 开始(forceRefresh=$forceRefresh)" }
-    if (loadJob?.isActive == true) {
-      log.d { "加载Feed -> 跳过(已有任务)" }
-      return
-    }
-    val current = state.value
-    if (!forceRefresh && current.submissions.isNotEmpty()) {
-      log.d { "加载Feed -> 跳过(已有数据)" }
-      return
-    }
-
-    mutableState.value =
-        current.applyPagination(
-            paginationStateMachine.beginLoad(
-                snapshot = current.toPaginationSnapshot(),
-                forceRefresh = forceRefresh,
-            )
-        )
-    if (current.submissions.isEmpty()) {
-      mutablePageState.value = UiPageState.Loading
-    }
-
-    loadJob =
-        screenModelScope.launch {
-          val firstPageState =
-              if (forceRefresh) {
-                repository.refreshFirstPage()
-              } else {
-                repository.loadFirstPage()
-              }
-          val reduced =
-              paginationStateMachine.reduceFirstPage(
-                  snapshot = state.value.toPaginationSnapshot(),
-                  result = firstPageState,
-                  itemsOf = { page -> page.submissions },
-                  nextPageUrlOf = { page -> page.nextPageUrl },
-              )
-          val updated = state.value.applyPagination(reduced)
-          mutableState.value = updated
-          when (val next = firstPageState) {
-            is ResourceResult.Success -> {
-              mutablePageState.value = UiPageState.Success(updated)
-              log.i { "加载Feed -> 成功(count=${updated.submissions.size})" }
-            }
-
-            is ResourceResult.AuthRequired -> {
-              mutablePageState.value = UiPageState.AuthRequired(next.requestUrl, next.message)
-              log.w { "加载Feed -> 需要重新登录" }
-            }
-
-            ResourceResult.CfChallenge -> {
-              mutablePageState.value = UiPageState.CfChallenge
-              log.w { "加载Feed -> Cloudflare验证" }
-            }
-
-            is ResourceResult.MatureBlocked -> {
-              mutablePageState.value = UiPageState.MatureBlocked(next.reason)
-              log.w { "加载Feed -> 受限(${next.reason})" }
-            }
-
-            is ResourceResult.Error -> {
-              mutablePageState.value = UiPageState.Error(next.exception)
-              log.e(next.exception) { "加载Feed -> 失败" }
+    if (loadJob?.isActive != true) {
+      loadJob =
+          screenModelScope.launch {
+            repository.streamFirstPage().collect { query ->
+              mutableState.value =
+                  query.mapData { page ->
+                    FeedUiState(
+                        page.submissions,
+                        page.nextPageUrl,
+                        refreshing = query is QueryState.Success && query.refreshing,
+                    )
+                  }
             }
           }
-        }
+    }
+    if (forceRefresh) screenModelScope.launch { repository.refreshFirstPage() }
   }
 
-  /** 刷新首页。 */
-  fun refresh() {
-    load(forceRefresh = true)
-  }
+  fun refresh() = load(forceRefresh = true)
 
-  /**
-   * 触底回调：只负责上报当前可见位置，是否加载由 ViewModel 判断。
-   *
-   * @param lastVisibleIndex 当前最大可见项索引。
-   */
   fun onLastVisibleIndexChanged(lastVisibleIndex: Int) {
-    val snapshot = state.value
-    if (snapshot.submissions.isEmpty()) return
-    val thresholdIndex = snapshot.submissions.lastIndex - autoLoadThreshold
-    log.d {
-      "自动加载Feed -> 触发检查(last=$lastVisibleIndex,threshold=$thresholdIndex,total=${snapshot.submissions.size})"
-    }
-    if (lastVisibleIndex > snapshot.submissions.lastIndex - autoLoadThreshold) {
-      loadMore(force = false)
-    }
+    val current = mutableState.value.data ?: return
+    if (lastVisibleIndex > current.submissions.lastIndex - autoLoadThreshold) loadMore(false)
   }
 
-  /** 手动重试追加。 */
-  fun retryLoadMore() {
-    loadMore(force = true)
-  }
+  fun retryLoadMore() = loadMore(true)
 
-  /**
-   * 追加下一页。
-   *
-   * @param force 是否忽略 appendError 直接重试。
-   */
   private fun loadMore(force: Boolean) {
-    val snapshot = state.value
-    val nextUrl = snapshot.nextPageUrl
-    if (nextUrl.isNullOrBlank()) {
-      log.d { "自动加载Feed -> 跳过(无下一页)" }
-      return
-    }
-    if (appendJob?.isActive == true) {
-      log.d { "自动加载Feed -> 跳过(已有追加任务)" }
-      return
-    }
-    if (!paginationStateMachine.canLoadMore(snapshot.toPaginationSnapshot(), force = force)) {
-      log.d { "自动加载Feed -> 跳过(条件未满足)" }
-      return
-    }
-
-    log.d { "自动加载Feed -> 开始(force=$force)" }
-
+    val current = mutableState.value.data ?: return
+    val nextUrl = current.nextPageUrl ?: return
+    if (appendJob?.isActive == true || (!force && current.appendErrorMessage != null)) return
     mutableState.value =
-        snapshot.applyPagination(
-            paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot())
-        )
-
+        QueryState.Success(current.copy(isLoadingMore = true, appendErrorMessage = null))
     appendJob =
         screenModelScope.launch {
-          val pageState = repository.loadPageByNextUrl(nextUrl)
-          val reduced =
-              paginationStateMachine.reduceAppend(
-                  snapshot = state.value.toPaginationSnapshot(),
-                  result = pageState,
-                  itemsOf = { page -> page.submissions },
-                  nextPageUrlOf = { page -> page.nextPageUrl },
-              )
-          val updated = state.value.applyPagination(reduced)
-          mutableState.value = updated
-          when (val next = pageState) {
+          when (val result = repository.loadPageByNextUrl(nextUrl)) {
             is ResourceResult.Success -> {
-              mutablePageState.value = UiPageState.Success(updated)
-              log.d {
-                "自动加载Feed -> ${summarizeResourceResult(next)}(count=${updated.submissions.size})"
-              }
+              val known = mutableState.value.data ?: current
+              val items = (known.submissions + result.data.submissions).distinctBy { it.id }
+              mutableState.value =
+                  QueryState.Success(
+                      known.copy(
+                          submissions = items,
+                          nextPageUrl = result.data.nextPageUrl,
+                          isLoadingMore = false,
+                      )
+                  )
             }
-
-            is ResourceResult.AuthRequired -> log.w { "自动加载Feed -> 需要重新登录" }
-            ResourceResult.CfChallenge -> log.w { "自动加载Feed -> Cloudflare验证" }
-            is ResourceResult.MatureBlocked -> log.w { "自动加载Feed -> 受限(${next.reason})" }
-            is ResourceResult.Error -> log.e(next.exception) { "自动加载Feed -> 失败" }
+            else -> {
+              val known = mutableState.value.data ?: current
+              mutableState.value =
+                  QueryState.Success(
+                      known.copy(
+                          isLoadingMore = false,
+                          appendErrorMessage = result.errorOrNull().toString(),
+                      )
+                  )
+            }
           }
         }
   }
 }
-
-private fun FeedUiState.toPaginationSnapshot(): PaginationSnapshot<SubmissionThumbnail> =
-    PaginationSnapshot(
-        items = submissions,
-        nextPageUrl = nextPageUrl,
-        loading = loading,
-        refreshing = refreshing,
-        isLoadingMore = isLoadingMore,
-        errorMessage = errorMessage,
-        appendErrorMessage = appendErrorMessage,
-    )
-
-private fun FeedUiState.applyPagination(
-    snapshot: PaginationSnapshot<SubmissionThumbnail>
-): FeedUiState =
-    copy(
-        submissions = snapshot.items,
-        nextPageUrl = snapshot.nextPageUrl,
-        loading = snapshot.loading,
-        refreshing = snapshot.refreshing,
-        isLoadingMore = snapshot.isLoadingMore,
-        errorMessage = snapshot.errorMessage,
-        appendErrorMessage = snapshot.appendErrorMessage,
-    )

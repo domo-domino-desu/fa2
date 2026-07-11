@@ -6,20 +6,22 @@ import kotlin.random.Random
 import kotlinx.coroutines.runBlocking
 import me.domino.fa2.data.local.KeyValueStorage
 import me.domino.fa2.data.local.settings.AppSettingsStorage
+import me.domino.fa2.data.model.ResourceResult
+import me.domino.fa2.data.model.Submission
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.remote.translation.SubmissionTextTranslationEngine
 import me.domino.fa2.data.remote.translation.TranslationPort
 import me.domino.fa2.data.remote.translation.TranslationRequest
 import me.domino.fa2.data.settings.AppSettingsService
+import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
+import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.domain.ocr.ImageOcrResult
-import me.domino.fa2.domain.ocr.SubmissionImageOcrService
+import me.domino.fa2.domain.ocr.ImageTextRecognitionPort
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
-import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerDetailSource
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
 import me.domino.fa2.domain.submissionviewer.api.SubmissionSourceAdapter
-import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
-import me.domino.fa2.domain.translation.SubmissionImageOcrTranslationService
 import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
+import me.domino.fa2.ui.pages.submission.pager.SubmissionDetailSource
 import me.domino.fa2.ui.pages.submission.pager.SubmissionScreenModel
 import okio.FileSystem
 import okio.Path.Companion.toPath
@@ -27,25 +29,19 @@ import okio.Path.Companion.toPath
 internal suspend fun createTestSubmissionTranslationService(
     settingsService: AppSettingsService? = null,
     translate: suspend (TranslationRequest) -> String = { request -> request.sourceText },
-): SubmissionDescriptionTranslationService {
+): SubmissionTextTranslationEngine {
   val resolvedSettingsService = settingsService ?: createTestAppSettingsService()
   val translationPort = createTestTranslationPort(translate)
-  return SubmissionDescriptionTranslationService(
-      translationEngine = SubmissionTextTranslationEngine(translationPort),
-      settingsService = resolvedSettingsService,
-  )
+  return SubmissionTextTranslationEngine(translationPort, resolvedSettingsService)
 }
 
 internal suspend fun createTestSubmissionImageOcrTranslationService(
     settingsService: AppSettingsService? = null,
     translate: suspend (TranslationRequest) -> String = { request -> request.sourceText },
-): SubmissionImageOcrTranslationService {
+): SubmissionTextTranslationEngine {
   val resolvedSettingsService = settingsService ?: createTestAppSettingsService()
   val translationPort = createTestTranslationPort(translate)
-  return SubmissionImageOcrTranslationService(
-      translationEngine = SubmissionTextTranslationEngine(translationPort),
-      settingsService = resolvedSettingsService,
-  )
+  return SubmissionTextTranslationEngine(translationPort, resolvedSettingsService)
 }
 
 internal suspend fun createTestAppSettingsService(): AppSettingsService {
@@ -73,17 +69,64 @@ internal fun createTestTranslationPort(
       override suspend fun translate(request: TranslationRequest): String = translate(request)
     }
 
+internal interface SubmissionPagerDetailSource {
+  suspend fun loadBySid(sid: Int): ResourceResult<Submission>
+
+  suspend fun loadByUrl(url: String): ResourceResult<Submission>
+
+  suspend fun loadAttachmentText(
+      downloadUrl: String,
+      downloadFileName: String,
+      onProgress: (AttachmentTextProgress) -> Unit = {},
+  ): ResourceResult<AttachmentTextDocument>
+
+  suspend fun toggleFavorite(sid: Int, actionUrl: String): ResourceResult<Unit>
+
+  suspend fun blockTag(
+      sid: Int,
+      tagName: String,
+      nonce: String,
+      toAdd: Boolean,
+  ): ResourceResult<Unit>
+}
+
+private fun SubmissionPagerDetailSource.toProductionSource() =
+    SubmissionDetailSource(
+        loadBySid = ::loadBySid,
+        loadByUrl = ::loadByUrl,
+        loadAttachmentText = ::loadAttachmentText,
+        toggleFavorite = ::toggleFavorite,
+        blockTag = ::blockTag,
+    )
+
+internal data class TestImageOcr(
+    val bytes: suspend (String) -> ByteArray,
+    val recognition: ImageTextRecognitionPort,
+)
+
 internal fun createTestSubmissionImageOcrService(
     recognize: suspend (String) -> ImageOcrResult = { ImageOcrResult(emptyList()) }
-): SubmissionImageOcrService = SubmissionImageOcrService { imageUrl -> recognize(imageUrl) }
+): TestImageOcr {
+  var url = ""
+  return TestImageOcr(
+      bytes = { imageUrl ->
+        url = imageUrl
+        byteArrayOf()
+      },
+      recognition =
+          object : ImageTextRecognitionPort {
+            override suspend fun recognize(imageBytes: ByteArray): ImageOcrResult = recognize(url)
+          },
+  )
+}
 
 internal fun createSubmissionScreenModelForTest(
     initialSid: Int,
     items: List<SubmissionThumbnail>,
     submissionSource: SubmissionPagerDetailSource,
-    translationService: SubmissionDescriptionTranslationService,
-    imageOcrService: SubmissionImageOcrService = createTestSubmissionImageOcrService(),
-    imageOcrTranslationService: SubmissionImageOcrTranslationService = runBlocking {
+    translationService: SubmissionTextTranslationEngine,
+    imageOcrService: TestImageOcr = createTestSubmissionImageOcrService(),
+    imageOcrTranslationService: SubmissionTextTranslationEngine = runBlocking {
       createTestSubmissionImageOcrTranslationService()
     },
     settingsService: AppSettingsService? = null,
@@ -100,9 +143,10 @@ internal fun createSubmissionScreenModelForTest(
       initialSid = initialSid,
       contextId = contextId,
       contextScreenModel = contextScreenModel,
-      submissionSource = submissionSource,
+      submissionSource = submissionSource.toProductionSource(),
       translationService = translationService,
-      imageOcrService = imageOcrService,
+      loadImageBytes = imageOcrService.bytes,
+      imageRecognition = imageOcrService.recognition,
       imageOcrTranslationService = imageOcrTranslationService,
       settingsService = settingsService,
   )
@@ -111,11 +155,11 @@ internal fun createSubmissionScreenModelForTest(
 internal fun createSubmissionScreenModelForTest(
     initialSid: Int,
     adapter: SubmissionSourceAdapter,
-    initialPage: SubmissionLoadedPage,
+    initialPage: SubmissionPageSnapshot,
     submissionSource: SubmissionPagerDetailSource,
-    translationService: SubmissionDescriptionTranslationService,
-    imageOcrService: SubmissionImageOcrService = createTestSubmissionImageOcrService(),
-    imageOcrTranslationService: SubmissionImageOcrTranslationService = runBlocking {
+    translationService: SubmissionTextTranslationEngine,
+    imageOcrService: TestImageOcr = createTestSubmissionImageOcrService(),
+    imageOcrTranslationService: SubmissionTextTranslationEngine = runBlocking {
       createTestSubmissionImageOcrTranslationService()
     },
     settingsService: AppSettingsService? = null,
@@ -132,9 +176,10 @@ internal fun createSubmissionScreenModelForTest(
       initialSid = initialSid,
       contextId = contextId,
       contextScreenModel = contextScreenModel,
-      submissionSource = submissionSource,
+      submissionSource = submissionSource.toProductionSource(),
       translationService = translationService,
-      imageOcrService = imageOcrService,
+      loadImageBytes = imageOcrService.bytes,
+      imageRecognition = imageOcrService.recognition,
       imageOcrTranslationService = imageOcrTranslationService,
       settingsService = settingsService,
   )

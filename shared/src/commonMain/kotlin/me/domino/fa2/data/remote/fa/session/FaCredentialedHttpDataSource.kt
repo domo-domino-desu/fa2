@@ -16,7 +16,6 @@ import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
 import me.domino.fa2.data.remote.fa.core.summarizeHtmlResult
 import me.domino.fa2.data.remote.fa.core.toUserFacingRequestMessage
 import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
 
 /** Dedicated credentialed client. Redirect hops are checked before cookies can leave FA. */
 fun createFaPageHttpClient(): HttpClient =
@@ -44,7 +43,7 @@ class FaHttpClient(
   private val log = FaLog.withTag("FaHttpClient")
 
   override suspend fun get(url: String): HtmlResponseResult {
-    val safeUrl = summarizeUrl(url)
+    val safeUrl = url.trim()
     if (!FaOriginPolicy.isTrustedPageOrigin(url)) {
       log.w { "请求页面 -> 拒绝不受信任地址(url=$safeUrl)" }
       return HtmlResponseResult.Error(statusCode = 0, message = "Untrusted FA page URL")
@@ -74,7 +73,7 @@ class FaHttpClient(
       if (FaOriginPolicy.isTrustedCookieOrigin(finalUrl)) {
         cookiesStorage.mergeSetCookieValues(setCookieValues)
       } else {
-        log.w { "请求页面 -> 忽略跨域响应 Cookie(finalUrl=${summarizeUrl(finalUrl)})" }
+        log.w { "请求页面 -> 忽略跨域响应 Cookie(finalUrl=${finalUrl.trim()})" }
       }
 
       val classified =

@@ -10,6 +10,7 @@ import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistUser
 import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
 import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
+import me.domino.fa2.data.remote.fa.core.PageQueryCache
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.utils.FaUrls
@@ -188,16 +189,11 @@ class WatchlistRepositoryTest {
   }
 
   private fun buildRepository(source: FaHtmlDataSource): WatchlistRepository {
-    val store =
-        WatchlistPageCache(
-            dataSource =
-                WatchlistDataSource(
-                    endpoint = WatchlistEndpoint(source),
-                    parser = WatchlistParser(),
-                ),
-            pageCacheDao = InMemoryPageCacheDao(),
-        )
-    return WatchlistRepository(store)
+    return WatchlistRepository(
+        source,
+        WatchlistParser(),
+        PageQueryCache(InMemoryPageCacheDao()),
+    )
   }
 }
 

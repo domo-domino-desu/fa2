@@ -2,21 +2,17 @@ package me.domino.fa2.ui.pages.user
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import fa2.shared.generated.resources.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.GalleryFolderGroup
 import me.domino.fa2.data.model.GalleryPage
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.data.model.errorMessageOrNull
 import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.data.remote.fa.favorites.FavoritesRepository
 import me.domino.fa2.data.remote.fa.gallery.GalleryRepository
-import me.domino.fa2.ui.i18n.appString
-import me.domino.fa2.ui.utils.PaginationReducer
-import me.domino.fa2.ui.utils.PaginationSnapshot
 import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
 
 private const val userAutoLoadThreshold = 10
 
@@ -105,11 +101,6 @@ class UserSubmissionSectionScreenModel(
         ) ?: UserSubmissionSectionUiState()
     ) {
   private val log = FaLog.withTag("UserSubmissionSectionScreenModel")
-  private val paginationStateMachine =
-      PaginationReducer<SubmissionThumbnail, Int>(
-          keyOf = { item -> item.id },
-          challengeMessage = { appString(Res.string.cloudflare_challenge_title) },
-      )
   private var loadJob: Job? = null
   private var appendJob: Job? = null
   private var basePageUrlOverride: String? = initialFolderUrl?.trim()?.takeIf { it.isNotBlank() }
@@ -145,11 +136,10 @@ class UserSubmissionSectionScreenModel(
         }
 
     mutableState.value =
-        effectiveSnapshot.applyPagination(
-            paginationStateMachine.beginLoad(
-                snapshot = effectiveSnapshot.toPaginationSnapshot(),
-                forceRefresh = forceRefresh,
-            )
+        effectiveSnapshot.copy(
+            loading = effectiveSnapshot.submissions.isEmpty(),
+            refreshing = forceRefresh && effectiveSnapshot.submissions.isNotEmpty(),
+            errorMessage = null,
         )
 
     loadJob =
@@ -160,17 +150,23 @@ class UserSubmissionSectionScreenModel(
               } else {
                 loadPage(nextPageUrl = basePageUrl)
               }
-          val reduced =
-              paginationStateMachine.reduceFirstPage(
-                  snapshot = state.value.toPaginationSnapshot(),
-                  result = firstPageState,
-                  itemsOf = { page -> page.submissions },
-                  nextPageUrlOf = { page -> page.nextPageUrl },
-              )
-          var updated = state.value.applyPagination(reduced)
-          if (firstPageState is ResourceResult.Success) {
-            updated = updated.copy(folderGroups = firstPageState.data.folderGroups)
-          }
+          val updated =
+              when (firstPageState) {
+                is ResourceResult.Success ->
+                    state.value.copy(
+                        submissions = firstPageState.data.submissions,
+                        nextPageUrl = firstPageState.data.nextPageUrl,
+                        folderGroups = firstPageState.data.folderGroups,
+                        loading = false,
+                        refreshing = false,
+                    )
+                else ->
+                    state.value.copy(
+                        loading = false,
+                        refreshing = false,
+                        errorMessage = firstPageState.errorMessageOrNull(),
+                    )
+              }
           mutableState.value = updated
           when (val next = firstPageState) {
             is ResourceResult.Success -> {
@@ -210,7 +206,7 @@ class UserSubmissionSectionScreenModel(
         folderUrl.trim().ifBlank {
           return
         }
-    log.i { "打开文件夹 -> 开始(route=$route,url=${summarizeUrl(normalized)})" }
+    log.i { "打开文件夹 -> 开始(route=$route,url=${normalized.trim()})" }
     mutableState.value = state.value.prepareForFolderSwitch(normalized)
     basePageUrlOverride = normalized
     load(forceRefresh = true, clearExisting = true)
@@ -223,28 +219,32 @@ class UserSubmissionSectionScreenModel(
       log.d { "自动加载用户投稿分区 -> 跳过(已有追加任务)" }
       return
     }
-    if (!paginationStateMachine.canLoadMore(snapshot.toPaginationSnapshot(), force = force)) {
+    if (!force && snapshot.appendErrorMessage != null) {
       log.d { "自动加载用户投稿分区 -> 跳过(条件未满足)" }
       return
     }
     log.d { "自动加载用户投稿分区 -> 开始(route=$route,force=$force)" }
 
-    mutableState.value =
-        snapshot.applyPagination(
-            paginationStateMachine.beginAppend(snapshot.toPaginationSnapshot())
-        )
+    mutableState.value = snapshot.copy(isLoadingMore = true, appendErrorMessage = null)
 
     appendJob =
         screenModelScope.launch {
           val next = loadPage(nextPageUrl = nextUrl)
-          val reduced =
-              paginationStateMachine.reduceAppend(
-                  snapshot = state.value.toPaginationSnapshot(),
-                  result = next,
-                  itemsOf = { page -> page.submissions },
-                  nextPageUrlOf = { page -> page.nextPageUrl },
-              )
-          val updated = state.value.applyPagination(reduced)
+          val updated =
+              when (next) {
+                is ResourceResult.Success ->
+                    state.value.copy(
+                        submissions =
+                            (state.value.submissions + next.data.submissions).distinctBy { it.id },
+                        nextPageUrl = next.data.nextPageUrl,
+                        isLoadingMore = false,
+                    )
+                else ->
+                    state.value.copy(
+                        isLoadingMore = false,
+                        appendErrorMessage = next.errorMessageOrNull(),
+                    )
+              }
           mutableState.value = updated
           when (next) {
             is ResourceResult.Success -> {
@@ -289,28 +289,3 @@ class UserSubmissionSectionScreenModel(
     }
   }
 }
-
-private fun UserSubmissionSectionUiState.toPaginationSnapshot():
-    PaginationSnapshot<SubmissionThumbnail> =
-    PaginationSnapshot(
-        items = submissions,
-        nextPageUrl = nextPageUrl,
-        loading = loading,
-        refreshing = refreshing,
-        isLoadingMore = isLoadingMore,
-        errorMessage = errorMessage,
-        appendErrorMessage = appendErrorMessage,
-    )
-
-private fun UserSubmissionSectionUiState.applyPagination(
-    snapshot: PaginationSnapshot<SubmissionThumbnail>
-): UserSubmissionSectionUiState =
-    copy(
-        submissions = snapshot.items,
-        nextPageUrl = snapshot.nextPageUrl,
-        loading = snapshot.loading,
-        refreshing = snapshot.refreshing,
-        isLoadingMore = snapshot.isLoadingMore,
-        errorMessage = snapshot.errorMessage,
-        appendErrorMessage = snapshot.appendErrorMessage,
-    )

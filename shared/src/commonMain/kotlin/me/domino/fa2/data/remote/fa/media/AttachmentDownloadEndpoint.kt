@@ -10,7 +10,6 @@ import me.domino.fa2.data.remote.fa.core.summarizeHtmlResult
 import me.domino.fa2.data.remote.fa.session.CfChallengeSignal
 import me.domino.fa2.data.remote.fa.session.ChallengeResolver
 import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
 
 /** 附件下载端点。 */
 class AttachmentDownloadEndpoint(
@@ -32,12 +31,10 @@ class AttachmentDownloadEndpoint(
       return AttachmentDownloadResult.Failed("附件下载地址为空")
     }
     if (fileName.isBlank()) {
-      log.w { "下载附件 -> 失败(空文件名,url=${summarizeUrl(url)})" }
+      log.w { "下载附件 -> 失败(空文件名,url=${url.trim()})" }
       return AttachmentDownloadResult.Failed("附件文件名为空")
     }
-    log.i {
-      "下载附件 -> 开始(file=$fileName,url=${summarizeUrl(url)},challengeRetry=$challengeRetryCount)"
-    }
+    log.i { "下载附件 -> 开始(file=$fileName,url=${url.trim()},challengeRetry=$challengeRetryCount)" }
 
     val response = client.get(url) { header(HttpHeaders.Accept, "*/*") }
 

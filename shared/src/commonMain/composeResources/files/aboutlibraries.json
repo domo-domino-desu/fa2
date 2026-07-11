@@ -3941,25 +3941,6 @@
       "funding": []
     },
     {
-      "uniqueId": "org.mobilenativefoundation.store:store5",
-      "artifactVersion": "5.1.0-alpha08",
-      "name": "org.mobilenativefoundation.store",
-      "description": "Store5 is a Kotlin Multiplatform network-resilient repository layer",
-      "website": "https://github.com/MobileNativeFoundation/Store",
-      "developers": [
-        {
-          "name": "Dropbox"
-        }
-      ],
-      "scm": {
-        "connection": "scm:git:https://github.com/MobileNativeFoundation/Store.git",
-        "developerConnection": "scm:git:git@github.com:MobileNativeFoundation/Store.git",
-        "url": "https://github.com/MobileNativeFoundation/Store"
-      },
-      "licenses": ["Apache-2.0"],
-      "funding": []
-    },
-    {
       "uniqueId": "org.slf4j:slf4j-api",
       "artifactVersion": "2.0.16",
       "name": "SLF4J API Module",

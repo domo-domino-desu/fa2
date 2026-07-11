@@ -21,23 +21,16 @@ internal data class TranslationHttpRequest(
 
 internal data class TranslationHttpResponse(val statusCode: Int, val body: String)
 
-internal interface TranslationHttpTransport {
+internal class TranslationHttpTransport(private val client: HttpClient) {
   suspend fun get(
       url: String,
       request: TranslationHttpRequest = TranslationHttpRequest(),
-  ): TranslationHttpResponse
-
-  suspend fun post(url: String, request: TranslationHttpRequest): TranslationHttpResponse
-}
-
-internal class KtorTranslationHttpTransport(private val client: HttpClient) :
-    TranslationHttpTransport {
-  override suspend fun get(url: String, request: TranslationHttpRequest): TranslationHttpResponse {
+  ): TranslationHttpResponse {
     val response = client.get(url) { applyRequest(request) }
     return TranslationHttpResponse(statusCode = response.status.value, body = response.bodyAsText())
   }
 
-  override suspend fun post(url: String, request: TranslationHttpRequest): TranslationHttpResponse {
+  suspend fun post(url: String, request: TranslationHttpRequest): TranslationHttpResponse {
     val response =
         client.post(url) {
           applyRequest(request)

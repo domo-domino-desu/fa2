@@ -3,9 +3,7 @@ package me.domino.fa2.domain.watchrecommendation
 import kotlin.random.Random
 import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.data.model.ResourceResult
-import me.domino.fa2.data.model.User
 import me.domino.fa2.data.model.WatchlistCategory
-import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
 import me.domino.fa2.data.remote.fa.user.WatchRecommendationUserSource
 import me.domino.fa2.data.remote.fa.watchlist.WatchRecommendationWatchlistSource
@@ -34,55 +32,19 @@ internal const val watchRecommendationRequestThrottleMs: Long = 600L
 
 /** 基于共同关注分析，为当前用户推荐可关注的新用户。 */
 class WatchRecommendationService(
-    private val watchlistSampler: RandomWatchlistSampler,
-    private val loadWatchlistPage:
-        suspend (
-            username: String,
-            category: WatchlistCategory,
-            nextPageUrl: String?,
-        ) -> ResourceResult<WatchlistPage>,
+    private val watchlistRepository: WatchRecommendationWatchlistSource,
+    userRepository: WatchRecommendationUserSource,
     private val blocklistRepository: WatchRecommendationBlocklist,
     private val random: Random = Random.Default,
     private val requestThrottleMs: Long = watchRecommendationRequestThrottleMs,
 ) {
-  constructor(
-      loadWatchlistPage:
-          suspend (
-              username: String,
-              category: WatchlistCategory,
-              nextPageUrl: String?,
-          ) -> ResourceResult<WatchlistPage>,
-      loadUser: suspend (username: String) -> ResourceResult<User>,
-      blocklistRepository: WatchRecommendationBlocklist,
-      random: Random = Random.Default,
-      requestThrottleMs: Long = watchRecommendationRequestThrottleMs,
-  ) : this(
-      watchlistSampler =
-          RandomWatchlistSampler(
-              loadWatchlistPage = loadWatchlistPage,
-              loadUser = loadUser,
-              random = random,
-              requestThrottleMs = requestThrottleMs,
-          ),
-      blocklistRepository = blocklistRepository,
-      random = random,
-      loadWatchlistPage = loadWatchlistPage,
-      requestThrottleMs = requestThrottleMs,
-  )
-
-  constructor(
-      repository: WatchRecommendationWatchlistSource,
-      userRepository: WatchRecommendationUserSource,
-      blocklistRepository: WatchRecommendationBlocklist,
-      random: Random = Random.Default,
-      requestThrottleMs: Long = watchRecommendationRequestThrottleMs,
-  ) : this(
-      loadWatchlistPage = repository::loadWatchlistPage,
-      loadUser = userRepository::loadUser,
-      blocklistRepository = blocklistRepository,
-      random = random,
-      requestThrottleMs = requestThrottleMs,
-  )
+  private val watchlistSampler =
+      RandomWatchlistSampler(
+          loadWatchlistPage = watchlistRepository::loadWatchlistPage,
+          loadUser = userRepository::loadUser,
+          random = random,
+          requestThrottleMs = requestThrottleMs,
+      )
 
   /** 日志标签。 */
   private val log = FaLog.withTag("WatchRecommendationService")
@@ -276,7 +238,12 @@ class WatchRecommendationService(
           )
       )
       when (
-          val state = loadWatchlistPage(normalizedUsername, WatchlistCategory.Watching, nextPageUrl)
+          val state =
+              watchlistRepository.loadWatchlistPage(
+                  normalizedUsername,
+                  WatchlistCategory.Watching,
+                  nextPageUrl,
+              )
       ) {
         is ResourceResult.Success -> {
           state.data.users.forEach { user ->

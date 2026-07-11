@@ -1,113 +1,88 @@
 package me.domino.fa2.data.remote.fa.submission
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import me.domino.fa2.data.model.QueryState
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
-import me.domino.fa2.data.model.summarizeResourceResult
-import me.domino.fa2.data.remote.fa.listing.FavoritesCacheInvalidator
+import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
+import me.domino.fa2.data.remote.fa.core.PageQueryCache
+import me.domino.fa2.data.remote.fa.core.PageType
+import me.domino.fa2.data.remote.fa.core.cacheJson
+import me.domino.fa2.data.remote.fa.core.fetchParsed
 import me.domino.fa2.data.remote.fa.social.SocialActionResult
 import me.domino.fa2.data.remote.fa.social.SocialActionSource
-import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
+import me.domino.fa2.utils.FaUrls
+import me.domino.fa2.utils.parseSubmissionSid
 
-/** Submission 仓储。 */
 class SubmissionRepository(
-    private val submissionStore: SubmissionPageCache,
-    private val socialActionEndpoint: SocialActionSource,
-    private val favoritesCacheInvalidator: FavoritesCacheInvalidator,
+    private val html: FaHtmlDataSource,
+    private val parser: SubmissionParser,
+    private val queries: PageQueryCache,
+    private val actions: SocialActionSource,
 ) : SubmissionSeriesSubmissionSource {
-  private val log = FaLog.withTag("SubmissionRepository")
+  fun submission(sid: Int): Flow<QueryState<Submission>> =
+      queries.queryFlow(key(sid), PageType.Submission, { cacheJson.encodeToString(it) }, ::decode) {
+        fetch(FaUrls.submission(sid))
+      }
 
-  /** 按 sid 加载 submission 详情。 */
-  override suspend fun loadSubmissionDetailBySid(sid: Int): ResourceResult<Submission> {
-    log.d { "加载投稿详情 -> sid=$sid" }
-    val state = submissionStore.loadBySid(sid)
-    log.d { "加载投稿详情 -> ${summarizeResourceResult(state)}" }
-    return state
-  }
+  override suspend fun loadSubmissionDetailBySid(sid: Int): ResourceResult<Submission> =
+      queries.queryOnce(key(sid), PageType.Submission, { cacheJson.encodeToString(it) }, ::decode) {
+        fetch(FaUrls.submission(sid))
+      }
 
-  /** 按 URL 加载 submission 详情。 */
-  override suspend fun loadSubmissionDetailByUrl(url: String): ResourceResult<Submission> {
-    log.d { "加载投稿详情 -> url=${summarizeUrl(url)}" }
-    val state = submissionStore.loadByUrl(url)
-    log.d { "加载投稿详情 -> ${summarizeResourceResult(state)}" }
-    return state
-  }
+  override suspend fun loadSubmissionDetailByUrl(url: String): ResourceResult<Submission> =
+      parseSubmissionSid(url)?.let { loadSubmissionDetailBySid(it) } ?: fetch(url.trim())
 
-  /** 预取 submission 详情。 */
   suspend fun prefetchSubmissionDetailBySid(sid: Int) {
-    log.d { "预取投稿详情 -> sid=$sid" }
-    submissionStore.prefetchBySid(sid)
+    loadSubmissionDetailBySid(sid)
   }
 
-  /** 收藏/取消收藏投稿。 */
-  suspend fun toggleFavorite(sid: Int, actionUrl: String): ResourceResult<Unit> {
-    val normalizedUrl = actionUrl.trim()
-    if (normalizedUrl.isBlank()) {
-      log.w { "收藏操作 -> 缺少actionUrl" }
-      return ResourceResult.Error(IllegalArgumentException("Missing favorite action url"))
-    }
-    log.i { "收藏操作 -> sid=$sid,url=${summarizeUrl(normalizedUrl)}" }
+  suspend fun toggleFavorite(sid: Int, actionUrl: String): ResourceResult<Unit> =
+      execute(actionUrl) {
+        queries.invalidate(key(sid))
+        queries.invalidate(PageType.Favorites)
+      }
 
-    val state =
-        when (val response = socialActionEndpoint.execute(normalizedUrl)) {
-          is SocialActionResult.Completed -> {
-            submissionStore.invalidateBySid(sid)
-            favoritesCacheInvalidator.invalidateFavorites()
-            ResourceResult.Success(Unit)
-          }
-
-          is SocialActionResult.Challenge ->
-              ResourceResult.Error(IllegalStateException("Cloudflare challenge unresolved"))
-
-          is SocialActionResult.Blocked -> ResourceResult.MatureBlocked(response.reason)
-          is SocialActionResult.Failed ->
-              ResourceResult.Error(IllegalStateException(response.message))
-        }
-    log.i { "收藏操作 -> ${summarizeResourceResult(state)}" }
-    return state
-  }
-
-  /** 屏蔽标签。 */
   suspend fun blockTag(
       sid: Int,
       tagName: String,
       nonce: String,
       toAdd: Boolean,
   ): ResourceResult<Unit> {
-    val normalizedTagName = tagName.trim()
-    val normalizedNonce = nonce.trim()
-    if (normalizedTagName.isBlank()) {
-      log.w { "标签屏蔽 -> 缺少tagName" }
-      return ResourceResult.Error(IllegalArgumentException("Missing tag name"))
+    if (tagName.isBlank() || nonce.isBlank()) {
+      return ResourceResult.Error(IllegalArgumentException("Missing tag block arguments"))
     }
-    if (normalizedNonce.isBlank()) {
-      log.w { "标签屏蔽 -> 缺少nonce" }
-      return ResourceResult.Error(IllegalArgumentException("Missing tag block nonce"))
+    return mapAction(actions.updateTagBlocklist(tagName.trim(), nonce.trim(), toAdd)) {
+      queries.invalidate(key(sid))
     }
-    log.i { "标签屏蔽 -> sid=$sid,tag=$normalizedTagName,toAdd=$toAdd" }
-
-    val state =
-        when (
-            val response =
-                socialActionEndpoint.updateTagBlocklist(
-                    tagName = normalizedTagName,
-                    nonce = normalizedNonce,
-                    toAdd = toAdd,
-                )
-        ) {
-          is SocialActionResult.Completed -> {
-            submissionStore.invalidateBySid(sid)
-            ResourceResult.Success(Unit)
-          }
-
-          is SocialActionResult.Challenge ->
-              ResourceResult.Error(IllegalStateException("Cloudflare challenge unresolved"))
-
-          is SocialActionResult.Blocked -> ResourceResult.MatureBlocked(response.reason)
-          is SocialActionResult.Failed ->
-              ResourceResult.Error(IllegalStateException(response.message))
-        }
-    log.i { "标签屏蔽 -> ${summarizeResourceResult(state)}" }
-    return state
   }
+
+  private suspend fun execute(url: String, completed: suspend () -> Unit): ResourceResult<Unit> {
+    if (url.isBlank()) return ResourceResult.Error(IllegalArgumentException("Missing action URL"))
+    return mapAction(actions.execute(url.trim()), completed)
+  }
+
+  private suspend fun mapAction(
+      result: SocialActionResult,
+      completed: suspend () -> Unit,
+  ): ResourceResult<Unit> =
+      when (result) {
+        is SocialActionResult.Completed -> {
+          completed()
+          ResourceResult.Success(Unit)
+        }
+        is SocialActionResult.Challenge -> ResourceResult.CfChallenge
+        is SocialActionResult.Blocked -> ResourceResult.MatureBlocked(result.reason)
+        is SocialActionResult.Failed -> ResourceResult.Error(IllegalStateException(result.message))
+      }
+
+  private suspend fun fetch(url: String) =
+      html.fetchParsed(url) { body, finalUrl -> parser.parse(body, finalUrl) }
+
+  private fun key(sid: Int) = "submission:sid=$sid"
+
+  private fun decode(json: String) =
+      runCatching { cacheJson.decodeFromString<Submission>(json) }.getOrNull()
 }

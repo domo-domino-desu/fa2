@@ -17,9 +17,9 @@ internal constructor(
   constructor(
       client: HttpClient
   ) : this(
-      googleClient = GoogleTranslationClient(KtorTranslationHttpTransport(client)),
-      microsoftClient = MicrosoftTranslationClient(KtorTranslationHttpTransport(client)),
-      openAiClient = OpenAiCompatibleTranslationClient(KtorTranslationHttpTransport(client)),
+      googleClient = GoogleTranslationClient(TranslationHttpTransport(client)),
+      microsoftClient = MicrosoftTranslationClient(TranslationHttpTransport(client)),
+      openAiClient = OpenAiCompatibleTranslationClient(TranslationHttpTransport(client)),
   )
 
   /** 按请求中的 provider 字段选择对应客户端执行翻译。 */

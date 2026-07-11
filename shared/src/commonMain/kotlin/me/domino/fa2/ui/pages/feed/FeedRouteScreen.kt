@@ -14,7 +14,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import me.domino.fa2.data.remote.fa.feed.FeedRepository
 import me.domino.fa2.domain.submissionviewer.adapters.FeedSubmissionSourceAdapter
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
 import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
 import me.domino.fa2.ui.components.state.PageStateWrapper
 import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
@@ -39,8 +39,8 @@ class FeedRouteScreen : Screen {
         }
     val screenModel = koinScreenModel<FeedScreenModel>()
     val feedRepository = koinInject<FeedRepository>()
-    val state by screenModel.state.collectAsState()
-    val pageState by screenModel.pageState.collectAsState()
+    val query by screenModel.state.collectAsState()
+    val state = query.data ?: FeedUiState()
     val contextState by contextScreenModel.state(contextId).collectAsState()
     val initialViewport =
         remember(contextScreenModel, contextId) {
@@ -55,17 +55,18 @@ class FeedRouteScreen : Screen {
     LaunchedEffect(Unit) { screenModel.load() }
     LaunchedEffect(screenModel, contextId, feedRepository) {
       screenModel.state.collect { s ->
-        if (s.submissions.isEmpty()) return@collect
+        val data = s.data ?: return@collect
+        if (data.submissions.isEmpty()) return@collect
         contextScreenModel.syncRootPage(
             contextId = contextId,
             sourceKind = SubmissionContextSourceKind.FEED,
             adapter = FeedSubmissionSourceAdapter(feedRepository),
             page =
-                SubmissionLoadedPage(
+                SubmissionPageSnapshot(
                     pageId = FaUrls.submissions(),
                     requestKey = FaUrls.submissions(),
-                    items = s.submissions,
-                    nextRequestKey = s.nextPageUrl,
+                    items = data.submissions,
+                    nextRequestKey = data.nextPageUrl,
                     firstRequestKey = FaUrls.submissions(),
                 ),
             revisionKey = FaUrls.submissions(),
@@ -85,8 +86,7 @@ class FeedRouteScreen : Screen {
     val pageControls = contextState?.toWaterfallPageControls()
 
     PageStateWrapper(
-        state = pageState,
-        hasContent = displayState.submissions.isNotEmpty(),
+        state = query,
         onRetry = { screenModel.load(forceRefresh = true) },
     ) {
       FeedScreen(

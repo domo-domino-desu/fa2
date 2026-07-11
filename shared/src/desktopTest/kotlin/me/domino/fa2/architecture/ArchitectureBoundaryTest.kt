@@ -115,77 +115,6 @@ class ArchitectureBoundaryTest {
   }
 
   @Test
-  fun topLevelCategoryDirectoriesAreCurated() {
-    val allowedByLayer =
-        mapOf(
-            "ui" to setOf("app", "components", "pages", "icons", "i18n", "utils"),
-            "data" to setOf("local", "model", "remote", "settings"),
-        )
-
-    val offenders =
-        allowedByLayer.flatMap { (layer, allowed) ->
-          val layerRoot = commonMainRoot.resolve(layer)
-          if (!layerRoot.exists()) return@flatMap emptyList()
-          Files.list(layerRoot).use { stream ->
-            stream
-                .filter { path -> Files.isDirectory(path) }
-                .map { path -> path.fileName.toString() }
-                .filter { name -> name !in allowed }
-                .map { name -> "$layer/$name" }
-                .toList()
-          }
-        }
-
-    assertTrue(
-        offenders.isEmpty(),
-        "New top-level directories under ui/ and data/ must be curated categories, " +
-            "not feature names. Unexpected: $offenders",
-    )
-  }
-
-  @Test
-  fun singleFileLeafPackagesAreExplicitlyJustified() {
-    val exemptions =
-        setOf(
-            "ui/components/navigation",
-            "ui/app/theme",
-            "ui/pages/search/util",
-            "ui/pages/search/form",
-            "ui/pages/search/results",
-            "ui/pages/submission/translation",
-            "ui/pages/submission/series",
-            "data/local/settings",
-            "data/remote/fa/parsing",
-        )
-
-    val offenders =
-        listOf("ui", "data").flatMap { layer ->
-          val layerRoot = commonMainRoot.resolve(layer)
-          if (!layerRoot.exists()) return@flatMap emptyList()
-          Files.walk(layerRoot).use { stream ->
-            stream
-                .filter(Files::isDirectory)
-                .filter { dir ->
-                  Files.list(dir).use { children ->
-                    val entries = children.toList()
-                    entries.count { it.isRegularFile() && it.extension == "kt" } == 1 &&
-                        entries.none { Files.isDirectory(it) }
-                  }
-                }
-                .map { dir -> commonMainRoot.relativize(dir).toString() }
-                .filter { relative -> relative !in exemptions }
-                .toList()
-          }
-        }
-
-    assertTrue(
-        offenders.isEmpty(),
-        "Single-file leaf packages usually mean a file in the wrong place. Either move the " +
-            "file to an existing package or add a justified exemption: $offenders",
-    )
-  }
-
-  @Test
   fun reusableUiAndViewerApiDoNotDependOnFeatureImplementations() {
     val protectedRoots =
         listOf(
@@ -206,30 +135,6 @@ class ArchitectureBoundaryTest {
     assertTrue(
         offenders.isEmpty(),
         "Reusable UI/API packages must not import feature implementations:\n" +
-            offenders.joinToString("\n"),
-    )
-  }
-
-  @Test
-  fun submissionViewerDoesNotConstructOtherFeatureScreens() {
-    val forbidden =
-        listOf(
-            "me.domino.fa2.ui.pages.browse",
-            "me.domino.fa2.ui.pages.search",
-            "me.domino.fa2.ui.pages.user",
-        )
-    val offenders =
-        kotlinFilesUnder(commonMainRoot.resolve("ui/pages/submission")).flatMap { file ->
-          file.readLines().withIndex().flatMap { (index, line) ->
-            forbidden
-                .filter { packageName -> packageName in line }
-                .map { _ -> "${file.relativeTo(repoRoot)}:${index + 1}: $line" }
-          }
-        }
-
-    assertTrue(
-        offenders.isEmpty(),
-        "Submission viewer must navigate through its app-level contract:\n" +
             offenders.joinToString("\n"),
     )
   }

@@ -11,13 +11,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
+import me.domino.fa2.data.remote.translation.SubmissionTextTranslationEngine
+import me.domino.fa2.data.remote.translation.TextTranslationResult
+import me.domino.fa2.domain.ocr.ImageTextRecognitionPort
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.ocr.RecognizedTextBlock
-import me.domino.fa2.domain.ocr.SubmissionImageOcrService
 import me.domino.fa2.domain.ocr.collectRecognizedTextBlocksIntersectingRegion
 import me.domino.fa2.domain.ocr.mergeRecognizedTextBlocksForOverlay
-import me.domino.fa2.domain.translation.SubmissionImageOcrTranslationResult
-import me.domino.fa2.domain.translation.SubmissionImageOcrTranslationService
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrBlockUiState
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrDialogUiState
@@ -32,9 +32,10 @@ import me.domino.fa2.utils.logging.FaLog
 internal class SubmissionImageOcrController(
     private val scope: CoroutineScope,
     private val viewState: SubmissionViewStateStore,
-    private val contextController: SubmissionPagerContextController,
-    private val recognitionService: SubmissionImageOcrService,
-    private val translationService: SubmissionImageOcrTranslationService,
+    private val contextController: SubmissionPagerContext,
+    private val loadImageBytes: suspend (String) -> ByteArray,
+    private val recognitionPort: ImageTextRecognitionPort,
+    private val translationService: SubmissionTextTranslationEngine,
     private val translationRetry: SubmissionTranslationRetryCoordinator,
     private val publishState: () -> Unit,
 ) {
@@ -95,7 +96,7 @@ internal class SubmissionImageOcrController(
     recognitionJob =
         scope.launch {
           try {
-            val result = recognitionService.recognize(imageUrl)
+            val result = recognitionPort.recognize(loadImageBytes(imageUrl))
             if (viewState.zoomOverlayImageUrl != imageUrl) return@launch
             if (result.blocks.isEmpty()) {
               log.w { "原图 OCR 完成但没有识别到文本 -> imageUrl=$imageUrl" }
@@ -273,24 +274,24 @@ internal class SubmissionImageOcrController(
         scope.launch {
           try {
             when (val result = translationService.translateText(normalizedDraft)) {
-              is SubmissionImageOcrTranslationResult.Success ->
+              is TextTranslationResult.Success ->
                   finishDialogRefresh(
                       targetImageUrl,
                       targetBlockId,
                       normalizedDraft,
                       result.translatedText,
                   )
-              SubmissionImageOcrTranslationResult.Empty ->
+              TextTranslationResult.Empty ->
                   failDialogRefresh(
                       targetImageUrl,
                       targetBlockId,
                       imageOcrTranslationEmptyMessage(),
                   )
-              is SubmissionImageOcrTranslationResult.Failure ->
+              is TextTranslationResult.Failure ->
                   failDialogRefresh(
                       targetImageUrl,
                       targetBlockId,
-                      imageOcrTranslationFailedWithReasonMessage(result.message),
+                      imageOcrTranslationFailedWithReasonMessage(result.cause.message.orEmpty()),
                   )
             }
           } catch (cancelled: CancellationException) {
@@ -414,27 +415,21 @@ internal class SubmissionImageOcrController(
         } catch (cancelled: CancellationException) {
           throw cancelled
         } catch (error: Throwable) {
-          List(blocks.size) {
-            SubmissionImageOcrTranslationResult.Failure(
-                error.message?.takeIf { it.isNotBlank() } ?: error.toString()
-            )
-          }
+          List(blocks.size) { TextTranslationResult.Failure(error) }
         }
     return blocks.mapIndexed { index, block ->
-      when (
-          val result = translations.getOrNull(index) ?: SubmissionImageOcrTranslationResult.Empty
-      ) {
-        is SubmissionImageOcrTranslationResult.Success ->
+      when (val result = translations.getOrNull(index) ?: TextTranslationResult.Empty) {
+        is TextTranslationResult.Success ->
             block.copy(
                 translatedText = result.translatedText,
                 translationStatus = SubmissionImageOcrTranslationStatus.SUCCESS,
             )
-        SubmissionImageOcrTranslationResult.Empty ->
+        TextTranslationResult.Empty ->
             block.copy(
                 translatedText = null,
                 translationStatus = SubmissionImageOcrTranslationStatus.EMPTY,
             )
-        is SubmissionImageOcrTranslationResult.Failure ->
+        is TextTranslationResult.Failure ->
             block.copy(
                 translatedText = null,
                 translationStatus = SubmissionImageOcrTranslationStatus.FAILURE,
@@ -452,14 +447,14 @@ internal class SubmissionImageOcrController(
         scope.launch {
           try {
             when (val result = translationService.translateText(block.originalText)) {
-              is SubmissionImageOcrTranslationResult.Success ->
+              is TextTranslationResult.Success ->
                   updateMergedBlock(
                       blockId,
                       imageUrl,
                       result.translatedText,
                       SubmissionImageOcrTranslationStatus.SUCCESS,
                   )
-              SubmissionImageOcrTranslationResult.Empty -> {
+              TextTranslationResult.Empty -> {
                 updateMergedBlock(
                     blockId,
                     imageUrl,
@@ -468,7 +463,7 @@ internal class SubmissionImageOcrController(
                 )
                 translationRetry.emitToast(imageOcrTranslationEmptyMessage())
               }
-              is SubmissionImageOcrTranslationResult.Failure -> {
+              is TextTranslationResult.Failure -> {
                 updateMergedBlock(
                     blockId,
                     imageUrl,
@@ -476,7 +471,7 @@ internal class SubmissionImageOcrController(
                     SubmissionImageOcrTranslationStatus.FAILURE,
                 )
                 emitRetryFeedback(
-                    imageOcrTranslationFailedWithReasonMessage(result.message),
+                    imageOcrTranslationFailedWithReasonMessage(result.cause.message.orEmpty()),
                     imageUrl,
                 )
               }

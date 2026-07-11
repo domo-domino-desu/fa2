@@ -8,7 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
-import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.data.remote.translation.SubmissionTextTranslationEngine
 import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
 import me.domino.fa2.ui.components.html.TranslationSourceMode
 import me.domino.fa2.ui.components.html.TranslationUiState
@@ -31,8 +31,8 @@ private data class TranslationJobKey(val sid: Int, val target: SubmissionTransla
 internal class SubmissionTextTranslationController(
     private val scope: CoroutineScope,
     private val viewState: SubmissionViewStateStore,
-    private val contextController: SubmissionPagerContextController,
-    private val service: SubmissionDescriptionTranslationService,
+    private val contextController: SubmissionPagerContext,
+    private val service: SubmissionTextTranslationEngine,
     private val retryCoordinator: SubmissionTranslationRetryCoordinator,
     private val publishState: () -> Unit,
 ) {
@@ -72,12 +72,14 @@ internal class SubmissionTextTranslationController(
     jobs[key] =
         scope.launch {
           try {
-            service.translateBlocks(pendingVariant.sourceBlocks) { index, result ->
+            service.translateTexts(
+                pendingVariant.sourceBlocks.map { it.sourceText },
+            ) translation@{ index, result ->
               val latest =
                   viewState.detailBySid[sid] as? SubmissionDetailUiState.Success
-                      ?: return@translateBlocks
-              val latestState = latest.translationStateOf(target) ?: return@translateBlocks
-              if (latestState.sourceKey != pendingState.sourceKey) return@translateBlocks
+                      ?: return@translation
+              val latestState = latest.translationStateOf(target) ?: return@translation
+              if (latestState.sourceKey != pendingState.sourceKey) return@translation
               val updated =
                   latestState.withVariant(
                       sourceMode,

@@ -47,6 +47,12 @@ interface PageCacheDao {
    */
   @Query("DELETE FROM fa_page_cache WHERE cacheKey = :key") suspend fun delete(key: String)
 
+  @Query("UPDATE fa_page_cache SET cachedAtMs = 0 WHERE cacheKey = :key")
+  suspend fun markStale(key: String)
+
+  @Query("UPDATE fa_page_cache SET cachedAtMs = 0 WHERE pageType = :pageType")
+  suspend fun markTypeStale(pageType: String)
+
   /** 清空缓存表。 */
   @Query("DELETE FROM fa_page_cache") suspend fun deleteAll()
 }

@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
 
 data class AuthSessionUiState(
     val reloginRequestVersion: Long = 0L,
@@ -53,12 +52,12 @@ class DefaultAuthSessionController(
     val restoreUri = pendingFaRouteStore.peek()
     mutableState.value = mutableState.value.copy(pendingRestoreUri = restoreUri)
     log.i {
-      "完成登录 -> 成功(user=${normalizedUsername ?: "-"},pendingRestoreUri=${restoreUri?.let(::summarizeUrl) ?: "-"})"
+      "完成登录 -> 成功(user=${normalizedUsername ?: "-"},pendingRestoreUri=${restoreUri?.trim() ?: "-"})"
     }
   }
 
   override suspend fun markReloginRequired(restoreUri: String) {
-    log.w { "标记需要重登录 -> restoreUri=${summarizeUrl(restoreUri)}" }
+    log.w { "标记需要重登录 -> restoreUri=${restoreUri.trim()}" }
     pendingFaRouteStore.save(restoreUri)
     profileStore.saveNeedsRelogin(true)
     mutableState.value =
@@ -67,7 +66,7 @@ class DefaultAuthSessionController(
             pendingRestoreUri = pendingFaRouteStore.peek(),
         )
     log.w {
-      "标记需要重登录 -> 完成(version=${mutableState.value.reloginRequestVersion},pendingRestoreUri=${mutableState.value.pendingRestoreUri?.let(::summarizeUrl) ?: "-"})"
+      "标记需要重登录 -> 完成(version=${mutableState.value.reloginRequestVersion},pendingRestoreUri=${mutableState.value.pendingRestoreUri?.trim() ?: "-"})"
     }
   }
 

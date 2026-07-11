@@ -1,5 +1,12 @@
 package me.domino.fa2.data.remote.translation
 
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.client.request.HttpRequestData
+import io.ktor.http.HttpHeaders
+import io.ktor.http.content.TextContent
+import io.ktor.http.headersOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
@@ -11,18 +18,7 @@ class KtorTranslationPortTest {
   fun googleClientParsesJoinedSegments() = runTest {
     val client =
         GoogleTranslationClient(
-            transport =
-                FakeTranslationHttpTransport(
-                    getResponses =
-                        ArrayDeque(
-                            listOf(
-                                TranslationHttpResponse(
-                                    statusCode = 200,
-                                    body = """[[["你好","hello",null,null,1]],null,"en"]""",
-                                )
-                            )
-                        )
-                )
+            transport = mockTransport("""[[["你好","hello",null,null,1]],null,"en"]""")
         )
 
     val translated =
@@ -35,19 +31,9 @@ class KtorTranslationPortTest {
 
   @Test
   fun microsoftClientRequestsTokenThenTranslation() = runTest {
+    val requests = mutableListOf<HttpRequestData>()
     val transport =
-        FakeTranslationHttpTransport(
-            getResponses = ArrayDeque(listOf(TranslationHttpResponse(200, "token-123"))),
-            postResponses =
-                ArrayDeque(
-                    listOf(
-                        TranslationHttpResponse(
-                            statusCode = 200,
-                            body = """[{"translations":[{"text":"你好"}]}]""",
-                        )
-                    )
-                ),
-        )
+        mockTransport("token-123", """[{"translations":[{"text":"你好"}]}]""", requests = requests)
     val client = MicrosoftTranslationClient(transport)
 
     val translated =
@@ -56,41 +42,34 @@ class KtorTranslationPortTest {
         )
 
     assertEquals("你好", translated)
-    assertEquals("https://edge.microsoft.com/translate/auth", transport.getRequests.single().first)
+    assertEquals("https://edge.microsoft.com/translate/auth", requests[0].url.toString())
     assertEquals(
         "https://api-edge.cognitive.microsofttranslator.com/translate",
-        transport.postRequests.single().first,
+        requests[1].url.toString().substringBefore('?'),
     )
   }
 
   @Test
   fun openAiClientFlattensArrayContentAndStripsThinkTag() = runTest {
+    val requests = mutableListOf<HttpRequestData>()
     val transport =
-        FakeTranslationHttpTransport(
-            postResponses =
-                ArrayDeque(
-                    listOf(
-                        TranslationHttpResponse(
-                            statusCode = 200,
-                            body =
-                                """
-                                {
-                                  "choices": [
-                                    {
-                                      "message": {
-                                        "content": [
-                                          {"text": "<think>ignore</think>"},
-                                          {"text": "译文"}
-                                        ]
-                                      }
-                                    }
-                                  ]
-                                }
-                                """
-                                    .trimIndent(),
-                        )
-                    )
-                )
+        mockTransport(
+            """
+            {
+              "choices": [
+                {
+                  "message": {
+                    "content": [
+                      {"text": "<think>ignore</think>"},
+                      {"text": "译文"}
+                    ]
+                  }
+                }
+              ]
+            }
+            """
+                .trimIndent(),
+            requests = requests,
         )
     val client = OpenAiCompatibleTranslationClient(transport = transport)
 
@@ -104,7 +83,7 @@ class KtorTranslationPortTest {
         )
 
     assertEquals("译文", translated)
-    val requestBody = transport.postRequests.single().second.body.orEmpty()
+    val requestBody = (requests.single().body as TextContent).text
     assertEquals(true, requestBody.contains("hello"))
     assertEquals(true, requestBody.contains("简体中文"))
     assertEquals(true, requestBody.contains("%%"))
@@ -147,22 +126,22 @@ class KtorTranslationPortTest {
   }
 }
 
-private class FakeTranslationHttpTransport(
-    val getResponses: ArrayDeque<TranslationHttpResponse> = ArrayDeque(),
-    val postResponses: ArrayDeque<TranslationHttpResponse> = ArrayDeque(),
-) : TranslationHttpTransport {
-  val getRequests = mutableListOf<Pair<String, TranslationHttpRequest>>()
-  val postRequests = mutableListOf<Pair<String, TranslationHttpRequest>>()
-
-  override suspend fun get(url: String, request: TranslationHttpRequest): TranslationHttpResponse {
-    getRequests += url to request
-    return getResponses.removeFirst()
-  }
-
-  override suspend fun post(url: String, request: TranslationHttpRequest): TranslationHttpResponse {
-    postRequests += url to request
-    return postResponses.removeFirst()
-  }
+private fun mockTransport(
+    vararg bodies: String,
+    requests: MutableList<HttpRequestData> = mutableListOf(),
+): TranslationHttpTransport {
+  val responses = ArrayDeque(bodies.toList())
+  val client =
+      HttpClient(
+          MockEngine { request ->
+            requests += request
+            respond(
+                content = responses.removeFirst(),
+                headers = headersOf(HttpHeaders.ContentType, "application/json"),
+            )
+          }
+      )
+  return TranslationHttpTransport(client)
 }
 
 private class FakeProviderClient(private val result: String) : TranslationProviderClient {

@@ -1,16 +1,16 @@
 package me.domino.fa2.ui.components.html
 
-import me.domino.fa2.domain.translation.SubmissionDescriptionBlock
-import me.domino.fa2.domain.translation.SubmissionDescriptionBlockResult
-import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
+import me.domino.fa2.data.remote.translation.SubmissionTextTranslationEngine
+import me.domino.fa2.data.remote.translation.TextTranslationResult
+import me.domino.fa2.utils.html.HtmlTextBlock
 
 internal fun resolveTranslationState(
     sourceHtml: String,
     sourceFileName: String?,
     previous: TranslationUiState?,
-    translationService: SubmissionDescriptionTranslationService,
+    translationService: SubmissionTextTranslationEngine,
 ): TranslationUiState {
-  val rawSourceBlocks = translationService.extractBlocks(sourceHtml)
+  val rawSourceBlocks = translationService.extractDescriptionBlocks(sourceHtml)
   val wrappedSourceBlocks = rawSourceBlocks.toWrappedSourceBlocks()
   val sourceKey =
       buildTranslationSourceKey(sourceHtml = sourceHtml, sourceFileName = sourceFileName)
@@ -29,7 +29,7 @@ internal fun buildTranslationSourceKey(sourceHtml: String, sourceFileName: Strin
     listOfNotNull(sourceFileName?.trim()?.takeIf { it.isNotBlank() }, sourceHtml)
         .joinToString("\n@@\n")
 
-internal fun List<SubmissionDescriptionBlock>.toIdleVariant(
+internal fun List<HtmlTextBlock>.toIdleVariant(
     useWrappedOriginalText: Boolean
 ): TranslationVariantUiState =
     TranslationVariantUiState(
@@ -62,7 +62,7 @@ internal fun TranslationVariantUiState.toPendingState(
 
 internal fun TranslationVariantUiState.withBlockResult(
     index: Int,
-    result: SubmissionDescriptionBlockResult,
+    result: TextTranslationResult,
 ): TranslationVariantUiState =
     copy(
         blocks =
@@ -71,19 +71,19 @@ internal fun TranslationVariantUiState.withBlockResult(
                 block
               } else {
                 when (result) {
-                  is SubmissionDescriptionBlockResult.Success ->
+                  is TextTranslationResult.Success ->
                       block.copy(
                           translated = result.translatedText,
                           status = SubmissionDescriptionTranslationStatus.SUCCESS,
                       )
 
-                  SubmissionDescriptionBlockResult.EmptyResult ->
+                  TextTranslationResult.Empty ->
                       block.copy(
                           translated = null,
                           status = SubmissionDescriptionTranslationStatus.EMPTY,
                       )
 
-                  is SubmissionDescriptionBlockResult.Failure ->
+                  is TextTranslationResult.Failure ->
                       block.copy(
                           translated = null,
                           status = SubmissionDescriptionTranslationStatus.FAILURE,
@@ -106,8 +106,7 @@ internal fun TranslationVariantUiState.markPendingBlocksAsFailed(): TranslationV
         translating = false,
     )
 
-internal fun List<SubmissionDescriptionBlock>.toWrappedSourceBlocks():
-    List<SubmissionDescriptionBlock> = map { block ->
+internal fun List<HtmlTextBlock>.toWrappedSourceBlocks(): List<HtmlTextBlock> = map { block ->
   block.copy(sourceText = wrapBlockSourceText(block.sourceText))
 }
 

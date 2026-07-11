@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import me.domino.fa2.data.local.KeyValueStorage
-import me.domino.fa2.data.remote.fa.core.storeJson
+import me.domino.fa2.data.remote.fa.core.cacheJson
 import me.domino.fa2.utils.logging.FaLog
 
 class PersistedWatchRecommendationBlocklistRepository(
@@ -38,7 +38,7 @@ class PersistedWatchRecommendationBlocklistRepository(
         WatchRecommendationBlocklistSnapshot(
             blockedUsernames = current.blockedUsernames + normalized
         )
-    keyValueStorage.save(KEY_WATCH_RECOMMENDATION_BLOCKLIST, storeJson.encodeToString(next))
+    keyValueStorage.save(KEY_WATCH_RECOMMENDATION_BLOCKLIST, cacheJson.encodeToString(next))
     log.i { "推荐屏蔽名单仓储 -> 已添加(user=$normalized,count=${next.blockedUsernames.size})" }
   }
 
@@ -57,7 +57,7 @@ class PersistedWatchRecommendationBlocklistRepository(
         WatchRecommendationBlocklistSnapshot(
             blockedUsernames = current.blockedUsernames.filterNot { it == normalized }
         )
-    keyValueStorage.save(KEY_WATCH_RECOMMENDATION_BLOCKLIST, storeJson.encodeToString(next))
+    keyValueStorage.save(KEY_WATCH_RECOMMENDATION_BLOCKLIST, cacheJson.encodeToString(next))
     log.i { "推荐屏蔽名单仓储 -> 已移除(user=$normalized,count=${next.blockedUsernames.size})" }
   }
 
@@ -67,7 +67,7 @@ class PersistedWatchRecommendationBlocklistRepository(
       log.d { "推荐屏蔽名单仓储 -> 读取快照(空)" }
       return WatchRecommendationBlocklistSnapshot()
     }
-    return runCatching { storeJson.decodeFromString<WatchRecommendationBlocklistSnapshot>(raw) }
+    return runCatching { cacheJson.decodeFromString<WatchRecommendationBlocklistSnapshot>(raw) }
         .onFailure { error -> log.e(error) { "推荐屏蔽名单仓储 -> 反序列化失败,回退默认值" } }
         .getOrDefault(WatchRecommendationBlocklistSnapshot())
         .normalized()

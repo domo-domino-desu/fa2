@@ -33,8 +33,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.remote.fa.journal.JournalRepository
+import me.domino.fa2.data.remote.translation.SubmissionTextTranslationEngine
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
-import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.app.LocalAppI18n
 import me.domino.fa2.ui.app.LocalAppSettings
 import me.domino.fa2.ui.app.navigation.goBackHome
@@ -44,9 +44,8 @@ import me.domino.fa2.ui.components.html.DetailSectionCardSurface
 import me.domino.fa2.ui.components.html.HtmlText
 import me.domino.fa2.ui.components.html.TranslatableBlocksCard
 import me.domino.fa2.ui.components.media.AvatarImage
+import me.domino.fa2.ui.components.state.PageStateWrapper
 import me.domino.fa2.ui.components.state.SkeletonBlock
-import me.domino.fa2.ui.components.state.StatusSurface
-import me.domino.fa2.ui.components.state.StatusSurfaceVariant
 import me.domino.fa2.ui.pages.submission.series.rememberSubmissionSeriesTrailingActions
 import me.domino.fa2.ui.pages.user.UserChildRoute
 import me.domino.fa2.ui.pages.user.UserRouteScreen
@@ -74,14 +73,9 @@ class JournalDetailRouteScreen(
     val coroutineScope = rememberCoroutineScope()
     val state by screenModel.state.collectAsState()
     val shareUrl =
-        when (val snapshot = state) {
-          is JournalDetailUiState.Success -> snapshot.detail.journalUrl
-          JournalDetailUiState.Loading,
-          is JournalDetailUiState.Error -> {
-            journalUrl?.trim().takeUnless { it.isNullOrBlank() }
-                ?: if (journalId > 0) FaUrls.journal(journalId) else ""
-          }
-        }
+        state.data?.detail?.journalUrl
+            ?: journalUrl?.trim().takeUnless { it.isNullOrBlank() }
+            ?: if (journalId > 0) FaUrls.journal(journalId) else ""
 
     Column(modifier = Modifier.fillMaxSize()) {
       JournalDetailRouteTopBar(
@@ -91,21 +85,11 @@ class JournalDetailRouteScreen(
           onTitleClick = { coroutineScope.launch { listState.animateScrollToItem(0) } },
       )
 
-      when (val snapshot = state) {
-        JournalDetailUiState.Loading -> {
+      PageStateWrapper(state = state, onRetry = screenModel::load) {
+        val snapshot = state.data
+        if (snapshot == null) {
           JournalDetailSkeleton()
-        }
-
-        is JournalDetailUiState.Error -> {
-          JournalDetailErrorCard(
-              title = stringResource(Res.string.load_failed),
-              retryText = stringResource(Res.string.retry),
-              message = snapshot.message,
-              onRetry = screenModel::load,
-          )
-        }
-
-        is JournalDetailUiState.Success -> {
+        } else {
           JournalDetailContent(
               state = snapshot,
               listState = listState,
@@ -147,7 +131,7 @@ internal fun JournalDetailBody(
 ) {
   val navigator = LocalNavigator.currentOrThrow
   val repository = koinInject<JournalRepository>()
-  val translationService = koinInject<SubmissionDescriptionTranslationService>()
+  val translationService = koinInject<SubmissionTextTranslationEngine>()
   val screenModel =
       navigator.rememberNavigatorScreenModel<JournalDetailScreenModel>(
           tag = "journal-detail:$journalId:${journalUrl.orEmpty()}"
@@ -162,21 +146,11 @@ internal fun JournalDetailBody(
   val settings = LocalAppSettings.current
   val state by screenModel.state.collectAsState()
 
-  when (val snapshot = state) {
-    JournalDetailUiState.Loading -> {
+  PageStateWrapper(state = state, onRetry = screenModel::load) {
+    val snapshot = state.data
+    if (snapshot == null) {
       JournalDetailSkeleton()
-    }
-
-    is JournalDetailUiState.Error -> {
-      JournalDetailErrorCard(
-          title = stringResource(Res.string.load_failed),
-          retryText = stringResource(Res.string.retry),
-          message = snapshot.message,
-          onRetry = screenModel::load,
-      )
-    }
-
-    is JournalDetailUiState.Success -> {
+    } else {
       JournalDetailContent(
           state = snapshot,
           listState = listState,
@@ -223,25 +197,8 @@ private fun JournalDetailSkeleton() {
 }
 
 @Composable
-private fun JournalDetailErrorCard(
-    title: String,
-    retryText: String,
-    message: String,
-    onRetry: () -> Unit,
-) {
-  StatusSurface(
-      title = title,
-      body = message,
-      modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-      actionLabel = retryText,
-      onAction = onRetry,
-      variant = StatusSurfaceVariant.Section,
-  )
-}
-
-@Composable
 private fun JournalDetailContent(
-    state: JournalDetailUiState.Success,
+    state: JournalDetailUiState,
     listState: LazyListState,
     onTranslate: () -> Unit,
     onToggleWrapText: () -> Unit,

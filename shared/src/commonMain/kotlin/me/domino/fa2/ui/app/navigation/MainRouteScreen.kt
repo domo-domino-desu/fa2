@@ -19,6 +19,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import me.domino.fa2.data.model.QueryState
 import me.domino.fa2.data.remote.fa.browse.BrowseRepository
 import me.domino.fa2.data.remote.fa.feed.FeedRepository
 import me.domino.fa2.data.remote.fa.search.SearchRepository
@@ -28,10 +29,9 @@ import me.domino.fa2.domain.submissionviewer.adapters.FeedSubmissionSourceAdapte
 import me.domino.fa2.domain.submissionviewer.adapters.SearchSubmissionSourceAdapter
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSnapshot
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
+import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
 import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
 import me.domino.fa2.ui.components.state.PageStateWrapper
-import me.domino.fa2.ui.components.state.UiPageState
 import me.domino.fa2.ui.pages.about.AboutRouteScreen
 import me.domino.fa2.ui.pages.auth.AuthRouteScreen
 import me.domino.fa2.ui.pages.browse.BrowseScreen
@@ -87,11 +87,11 @@ class MainRouteScreen(
     val searchScreenModel = koinScreenModel<SearchScreenModel>()
     val moreScreenModel = koinScreenModel<MoreScreenModel>()
     val pendingFaRouteStore = koinInject<PendingFaRouteStore>()
-    val feedState by feedScreenModel.state.collectAsState()
-    val browseState by browseScreenModel.state.collectAsState()
+    val feedPageState by feedScreenModel.state.collectAsState()
+    val feedState = feedPageState.data ?: FeedUiState()
+    val browsePageState by browseScreenModel.state.collectAsState()
+    val browseState = browsePageState.data ?: BrowseUiState()
     val searchState by searchScreenModel.state.collectAsState()
-    val feedPageState by feedScreenModel.pageState.collectAsState()
-    val browsePageState by browseScreenModel.pageState.collectAsState()
     val searchPageState by searchScreenModel.pageState.collectAsState()
     val feedContextState by contextScreenModel.state(feedContextId).collectAsState()
     val browseContextState by contextScreenModel.state(browseContextId).collectAsState()
@@ -166,7 +166,7 @@ class MainRouteScreen(
           sourceKind = SubmissionContextSourceKind.FEED,
           adapter = FeedSubmissionSourceAdapter(feedRepository),
           page =
-              SubmissionLoadedPage(
+              SubmissionPageSnapshot(
                   pageId = FaUrls.submissions(),
                   requestKey = FaUrls.submissions(),
                   items = feedState.submissions,
@@ -193,7 +193,7 @@ class MainRouteScreen(
           sourceKind = SubmissionContextSourceKind.BROWSE,
           adapter = BrowseSubmissionSourceAdapter(browseRepository, firstPageUrl = firstUrl),
           page =
-              SubmissionLoadedPage(
+              SubmissionPageSnapshot(
                   pageId = firstUrl,
                   requestKey = firstUrl,
                   items = browseState.submissions,
@@ -220,7 +220,7 @@ class MainRouteScreen(
           sourceKind = SubmissionContextSourceKind.SEARCH,
           adapter = SearchSubmissionSourceAdapter(searchRepository, firstPageUrl = firstUrl),
           page =
-              SubmissionLoadedPage(
+              SubmissionPageSnapshot(
                   pageId = firstUrl,
                   requestKey = firstUrl,
                   items = searchState.submissions,
@@ -356,7 +356,7 @@ class MainRouteScreen(
 /** Feed 导航目标内容。 */
 @Composable
 private fun FeedDestinationContent(
-    feedPageState: UiPageState<FeedUiState>,
+    feedPageState: QueryState<FeedUiState>,
     feedDisplayState: FeedUiState,
     feedContextState: SubmissionContextSnapshot?,
     feedWaterfallState: LazyStaggeredGridState,
@@ -367,7 +367,6 @@ private fun FeedDestinationContent(
 ) {
   PageStateWrapper(
       state = feedPageState,
-      hasContent = feedDisplayState.submissions.isNotEmpty(),
       onRetry = { feedScreenModel.load(forceRefresh = true) },
   ) {
     FeedScreen(
@@ -418,7 +417,7 @@ private fun FeedDestinationContent(
 /** Browse 导航目标内容。 */
 @Composable
 private fun BrowseDestinationContent(
-    browsePageState: UiPageState<BrowseUiState>,
+    browsePageState: QueryState<BrowseUiState>,
     browseDisplayState: BrowseUiState,
     browseContextState: SubmissionContextSnapshot?,
     browseWaterfallState: LazyStaggeredGridState,
@@ -429,7 +428,6 @@ private fun BrowseDestinationContent(
 ) {
   PageStateWrapper(
       state = browsePageState,
-      hasContent = browseDisplayState.submissions.isNotEmpty(),
       onRetry = browseScreenModel::refresh,
   ) {
     BrowseScreen(
@@ -488,7 +486,7 @@ private fun BrowseDestinationContent(
 /** Search 导航目标内容。 */
 @Composable
 private fun SearchDestinationContent(
-    searchPageState: UiPageState<SearchUiState>,
+    searchPageState: QueryState<SearchUiState>,
     searchDisplayState: SearchUiState,
     searchContextState: SubmissionContextSnapshot?,
     searchWaterfallState: LazyStaggeredGridState,
@@ -500,7 +498,6 @@ private fun SearchDestinationContent(
 ) {
   PageStateWrapper(
       state = searchPageState,
-      hasContent = searchDisplayState.submissions.isNotEmpty(),
       onRetry = searchScreenModel::refresh,
   ) {
     SearchScreen(

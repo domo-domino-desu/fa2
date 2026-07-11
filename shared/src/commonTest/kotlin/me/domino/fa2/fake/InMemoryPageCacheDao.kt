@@ -31,6 +31,17 @@ class InMemoryPageCacheDao : PageCacheDao {
     entitiesFlow.value = entitiesByKey.toMap()
   }
 
+  override suspend fun markStale(key: String) {
+    entitiesByKey[key]?.let { upsert(it.copy(cachedAtMs = 0)) }
+  }
+
+  override suspend fun markTypeStale(pageType: String) {
+    entitiesByKey.values
+        .filter { it.pageType == pageType }
+        .forEach { entitiesByKey[it.cacheKey] = it.copy(cachedAtMs = 0) }
+    entitiesFlow.value = entitiesByKey.toMap()
+  }
+
   override suspend fun deleteAll() {
     entitiesByKey.clear()
     entitiesFlow.value = emptyMap()

@@ -6,10 +6,9 @@ import fa2.shared.generated.resources.unsupported_attachment_text_format
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.ResourceResult
+import me.domino.fa2.data.remote.translation.SubmissionTextTranslationEngine
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.domain.attachmenttext.UnsupportedAttachmentTextFormatException
-import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerDetailSource
-import me.domino.fa2.domain.translation.SubmissionDescriptionTranslationService
 import me.domino.fa2.ui.components.html.TranslationUiState
 import me.domino.fa2.ui.components.html.resolveTranslationState
 import me.domino.fa2.ui.i18n.appString
@@ -20,9 +19,9 @@ import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
 internal class SubmissionAttachmentTextController(
     private val scope: CoroutineScope,
     private val viewState: SubmissionViewStateStore,
-    private val contextController: SubmissionPagerContextController,
-    private val source: SubmissionPagerDetailSource,
-    private val translationService: SubmissionDescriptionTranslationService,
+    private val contextController: SubmissionPagerContext,
+    private val source: SubmissionDetailSource,
+    private val translationService: SubmissionTextTranslationEngine,
     private val textTranslationController: SubmissionTextTranslationController,
     private val publishState: () -> Unit,
 ) {
@@ -66,19 +65,19 @@ internal class SubmissionAttachmentTextController(
     scope.launch {
       val result =
           source.loadAttachmentText(
-              downloadUrl = downloadUrl,
-              downloadFileName = fileName,
-              onProgress = progressUpdate@{ progress ->
-                    val latest =
-                        viewState.detailBySid[sid] as? SubmissionDetailUiState.Success
-                            ?: return@progressUpdate
-                    val loading =
-                        latest.attachmentTextState as? SubmissionAttachmentTextUiState.Loading
-                            ?: return@progressUpdate
-                    viewState.detailBySid[sid] =
-                        latest.copy(attachmentTextState = loading.copy(progress = progress))
-                    publishState()
-                  },
+              downloadUrl,
+              fileName,
+              progressUpdate@{ progress ->
+                val latest =
+                    viewState.detailBySid[sid] as? SubmissionDetailUiState.Success
+                        ?: return@progressUpdate
+                val loading =
+                    latest.attachmentTextState as? SubmissionAttachmentTextUiState.Loading
+                        ?: return@progressUpdate
+                viewState.detailBySid[sid] =
+                    latest.copy(attachmentTextState = loading.copy(progress = progress))
+                publishState()
+              },
           )
 
       val latest = viewState.detailBySid[sid] as? SubmissionDetailUiState.Success ?: return@launch

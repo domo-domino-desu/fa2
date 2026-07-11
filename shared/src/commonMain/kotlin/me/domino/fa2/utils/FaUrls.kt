@@ -228,21 +228,8 @@ object FaUrls {
   private fun normalizeUsername(username: String): String = username.trim().trim('/').trim()
 
   private fun currentWeekMondayEpochSeconds(clock: Clock): Long {
-    val epochDay = floorDiv(clock.now().epochSeconds, secondsPerDay)
-    val mondayEpochDay = epochDay - floorMod(epochDay - epochMondayOffsetDays, daysPerWeek)
+    val epochDay = clock.now().epochSeconds / secondsPerDay
+    val mondayEpochDay = epochDay - (epochDay - epochMondayOffsetDays) % daysPerWeek
     return mondayEpochDay * secondsPerDay
-  }
-
-  private fun floorDiv(value: Long, divisor: Long): Long {
-    var result = value / divisor
-    if ((value xor divisor) < 0 && result * divisor != value) {
-      result -= 1
-    }
-    return result
-  }
-
-  private fun floorMod(value: Long, divisor: Long): Long {
-    val result = value % divisor
-    return if (result >= 0) result else result + divisor
   }
 }

@@ -20,7 +20,7 @@ import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.local.AppDatabase
 import me.domino.fa2.data.local.AppDatabaseBuilderFactory
 import me.domino.fa2.data.model.AuthProbeResult
-import me.domino.fa2.data.model.ResourceResult
+import me.domino.fa2.data.model.QueryState
 import me.domino.fa2.data.remote.fa.auth.AuthDataSource
 import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
 import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
@@ -91,8 +91,8 @@ class MinimalFlowIntegrationTest {
                   url = FaUrls.submissions(),
               ),
       )
-      val state = feedRepository.streamFirstPage().first()
-      assertTrue(state is ResourceResult.Success)
+      val state = feedRepository.streamFirstPage().first { it !is QueryState.Loading }
+      assertTrue(state is QueryState.Success)
     }
   }
 

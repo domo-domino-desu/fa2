@@ -6,6 +6,7 @@ import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.remote.fa.core.FaHtmlDataSource
 import me.domino.fa2.data.remote.fa.core.HtmlResponseResult
+import me.domino.fa2.data.remote.fa.core.PageQueryCache
 import me.domino.fa2.fake.InMemoryPageCacheDao
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.fake.UnusedSocialActionSource
@@ -51,12 +52,12 @@ class UserRepositoryTest {
   }
 
   private fun buildRepository(source: FaHtmlDataSource): UserRepository {
-    val store =
-        UserPageCache(
-            dataSource = UserDataSource(endpoint = UserEndpoint(source), parser = UserParser()),
-            pageCacheDao = InMemoryPageCacheDao(),
-        )
-    return UserRepository(userStore = store, socialActionEndpoint = UnusedSocialActionSource)
+    return UserRepository(
+        source,
+        UserParser(),
+        PageQueryCache(InMemoryPageCacheDao()),
+        UnusedSocialActionSource,
+    )
   }
 }
 

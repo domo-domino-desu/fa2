@@ -29,9 +29,9 @@ ui -> domain -> data
 
 - `data` 不得引用 `domain`/`ui`；domain 所需的资源 source contract 放在对应的 `data` 资源包，由 repository 实现。
 - `data/fa/*` 资源包的依赖图必须无环。共享 listing/parsing 能力下沉到专用叶子包，跨资源失效使用窄接口，由 DI 组装。
-- data 的 suspend API 只返回终态 `ResourceResult`，加载、刷新、追加等过程状态只存在于 UI 的 `UiPageState`/feature state。
+- 可观察资源暴露 `Flow<QueryState<T>>`，由查询流携带加载、刷新、错误和陈旧数据；一次性 suspend 操作返回终态 `ResourceResult`。
 - `ui/components`、`ui/navigation`、`ui/translation` 和 `ui/submissionviewer/api` 不得依赖 `ui/pages` 的实现。
-- feature 间跳转通过 `AppNavigationRequest`；feature 不直接构造另一个 feature 的 screen。
+- 页面导航直接使用 Voyager；只有真正跨宿主边界的深链请求才定义共享 contract。
 - suspend 路径捕获异常时必须重抛 `CancellationException`，统一使用 `runSuspendCatching` 或显式处理。
 - Cookie 只能由 `data/fa/session` 的凭据传输边界读写；裸媒体请求和不可信 origin 不得读取或污染 FA Cookie。
 
@@ -42,30 +42,27 @@ ui -> domain -> data
 - `ui/app`：应用入口、composition local、navigation、scaffold/top bar、challenge overlay、theme。
 - `ui/components`：真正跨页面复用的 UI 组件，按能力分组：feedback、forms、html、media、platform、state、user、waterfall。
 - `ui/pages`：页面自己的 screen、screen model、route screen 和页面专属组件。
-- `ui/navigation`：feature 无关的导航请求 contract；screen 构造只在 app navigation 中完成。
-- `ui/submissionviewer/api`：各资源页面调用投稿查看器时共享的上下文/source contract；`adapters` 提供 data 到 viewer API 的装配适配。
-- `ui/translation`：跨 feature 的翻译展示状态和 support。
-- `ui/metadata`、`ui/i18n`、`ui/state`、`ui/utils`：UI 支撑代码；`ui/state` 持有含 Loading 的 UI 状态。
+- `ui/pages/submission`：投稿查看器及其高内聚 OCR、翻译、附件与分页能力。
+- `ui/i18n`、`ui/utils`：少量 UI 支撑代码。
 
 `domain` 当前包含少量复杂/独立业务功能：
 
 - `domain/attachmenttext`：附件文本提取、解析 service 和模型。
 - `domain/submissionseries`：submission 串联检测与解析。
-- `domain/translation`：submission description 和 image OCR 翻译场景。
 - `domain/watchrecommendation`：关注推荐算法，以及 blocklist/source 端口。
-- `domain/i18n`、`domain/ocr`：小型业务/支撑 contract。
+- `domain/ocr`：平台文字识别 port 与几何合并算法。
 
 `data` 按具体实现和资源切片组织：
 
-- `data/fa/*`：FA 资源切片，例如 feed、submission、user、gallery、journal、search、watchlist、auth、session、media、social。
-- `data/fa/core`：FA HTTP、page resource、cache 支撑代码。
-- `data/fa/session`：cookies、凭据 HTTP、auth session、Cloudflare challenge、user agent。
-- `data/fa/listing`、`data/fa/parsing`：多个资源切片复用的 listing/card 解析和页面访问能力。
+- `data/remote/fa/*`：FA 资源切片；简单切片默认只有 Repository + Parser。
+- `data/remote/fa/core`：FA HTTP、`PageQueryCache` 与查询状态支撑。
+- `data/remote/fa/session`：cookies、凭据 HTTP、auth session、Cloudflare challenge、user agent。
+- `data/remote/fa/listing`、`data/remote/fa/parsing`：多个资源切片复用的解析能力。
 - `data/local`：Room/DataStore/KSafe 本地持久化。
 - `data/model`：FA 页面和应用数据模型，例如终态 `ResourceResult`、`Submission`、`User`、分页结果。
 - `data/settings`：应用设置模型、枚举、读写 service 和 store contract；`data/local/settings` 提供持久化实现。
-- `data/translation`：provider client、HTTP transport、request normalization、chunking/execution/alignment。
-- `data/taxonomy`：taxonomy resource 加载和查询。
+- `data/remote/translation`：provider client 与单一 translation engine。
+- `data/local/taxonomy`：taxonomy resource 加载和查询。
 
 # 开发说明
 

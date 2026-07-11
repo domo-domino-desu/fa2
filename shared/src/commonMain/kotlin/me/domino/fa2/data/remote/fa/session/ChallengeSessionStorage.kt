@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
 
 /** 管理 Cloudflare 挑战会话生命周期及 UI 状态的存储器。 */
 class ChallengeSessionStorage {
@@ -32,7 +31,7 @@ class ChallengeSessionStorage {
         val current = active
         if (current != null) {
           log.d {
-            "Challenge会话存储 -> 复用(triggerUrl=${summarizeUrl(current.triggerUrl)},cf-ray=${current.cfRay ?: "-"})"
+            "Challenge会话存储 -> 复用(triggerUrl=${current.triggerUrl.trim()},cf-ray=${current.cfRay ?: "-"})"
           }
           return@withLock ChallengeSessionAcquisition(session = current, created = false)
         }
@@ -51,7 +50,7 @@ class ChallengeSessionStorage {
                 status = CfChallengeStatus.AwaitingUserAction,
             )
         log.i {
-          "Challenge会话存储 -> 创建(triggerUrl=${summarizeUrl(created.triggerUrl)},cf-ray=${created.cfRay ?: "-"})"
+          "Challenge会话存储 -> 创建(triggerUrl=${created.triggerUrl.trim()},cf-ray=${created.cfRay ?: "-"})"
         }
         ChallengeSessionAcquisition(session = created, created = true)
       }
@@ -69,7 +68,7 @@ class ChallengeSessionStorage {
               cfRay = session.cfRay,
               status = CfChallengeStatus.Verifying,
           )
-      log.d { "Challenge会话存储 -> 标记验证中(triggerUrl=${summarizeUrl(session.triggerUrl)})" }
+      log.d { "Challenge会话存储 -> 标记验证中(triggerUrl=${session.triggerUrl.trim()})" }
     }
   }
 
@@ -84,7 +83,7 @@ class ChallengeSessionStorage {
               status = CfChallengeStatus.VerificationFailed(detail = detail),
           )
       log.w {
-        "Challenge会话存储 -> 标记验证失败(triggerUrl=${summarizeUrl(session.triggerUrl)},detail=${detail ?: "-"})"
+        "Challenge会话存储 -> 标记验证失败(triggerUrl=${session.triggerUrl.trim()},detail=${detail ?: "-"})"
       }
     }
   }
@@ -98,7 +97,7 @@ class ChallengeSessionStorage {
         session?.deferred?.complete(result)
         if (session != null) {
           log.i {
-            "Challenge会话存储 -> 完成(triggerUrl=${summarizeUrl(session.triggerUrl)},result=${if (result) "成功" else "失败"})"
+            "Challenge会话存储 -> 完成(triggerUrl=${session.triggerUrl.trim()},result=${if (result) "成功" else "失败"})"
           }
         }
         session

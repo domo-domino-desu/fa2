@@ -5,7 +5,6 @@ import me.domino.fa2.data.remote.fa.media.AttachmentDownloadResult
 import me.domino.fa2.data.remote.fa.media.AttachmentDownloadSource
 import me.domino.fa2.utils.concurrency.runSuspendCatching
 import me.domino.fa2.utils.logging.FaLog
-import me.domino.fa2.utils.logging.summarizeUrl
 
 class AttachmentTextService(private val attachmentDownloadSource: AttachmentDownloadSource) {
   private val log = FaLog.withTag("AttachmentTextService")
@@ -23,7 +22,7 @@ class AttachmentTextService(private val attachmentDownloadSource: AttachmentDown
       "Unsupported attachment format: $normalizedFileName"
     }
 
-    log.i { "加载附件文本 -> 开始(file=$normalizedFileName,url=${summarizeUrl(normalizedUrl)})" }
+    log.i { "加载附件文本 -> 开始(file=$normalizedFileName,url=${normalizedUrl.trim()})" }
     return when (
         val result =
             attachmentDownloadSource.fetch(url = normalizedUrl, fileName = normalizedFileName)

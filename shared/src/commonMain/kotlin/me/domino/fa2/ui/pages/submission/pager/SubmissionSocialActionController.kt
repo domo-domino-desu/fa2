@@ -14,7 +14,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.Submission
-import me.domino.fa2.domain.submissionviewer.api.SubmissionPagerDetailSource
 import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
@@ -24,9 +23,9 @@ import me.domino.fa2.utils.FaUrls
 internal class SubmissionSocialActionController(
     private val scope: CoroutineScope,
     private val viewState: SubmissionViewStateStore,
-    private val contextController: SubmissionPagerContextController,
-    private val source: SubmissionPagerDetailSource,
-    private val prefetchController: SubmissionDetailPrefetchController,
+    private val contextController: SubmissionPagerContext,
+    private val source: SubmissionDetailSource,
+    private val markLoaded: (Int) -> Unit,
     private val log: Logger,
     private val publishState: () -> Unit,
     private val feedbackSink: (AppFeedbackRequest) -> Unit,
@@ -97,7 +96,7 @@ internal class SubmissionSocialActionController(
       val targetUrl = current.submissionUrl.ifBlank { FaUrls.submission(sid) }
       when (val refreshed = source.loadByUrl(targetUrl)) {
         is ResourceResult.Success -> {
-          prefetchController.markLoaded(sid)
+          markLoaded(sid)
           val refreshedState =
               rebuildDetailState(sid, refreshed.data, state, toBlockedKeywordSet(refreshed.data))
           viewState.detailBySid[sid] = refreshedState
@@ -133,7 +132,7 @@ internal class SubmissionSocialActionController(
     val targetUrl = submissionUrl.ifBlank { FaUrls.submission(sid) }
     when (val refreshed = source.loadByUrl(targetUrl)) {
       is ResourceResult.Success -> {
-        prefetchController.markLoaded(sid)
+        markLoaded(sid)
         viewState.detailBySid[sid] =
             rebuildDetailState(
                 sid,

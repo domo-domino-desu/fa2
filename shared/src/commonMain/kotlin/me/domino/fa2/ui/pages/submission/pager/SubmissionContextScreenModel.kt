@@ -14,13 +14,13 @@ import me.domino.fa2.domain.submissionviewer.adapters.SeedSubmissionSourceAdapte
 import me.domino.fa2.domain.submissionviewer.api.ContextLoadingState
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSnapshot
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
-import me.domino.fa2.domain.submissionviewer.api.SubmissionLoadedPage
 import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
 import me.domino.fa2.domain.submissionviewer.api.SubmissionPaginationModel
 import me.domino.fa2.domain.submissionviewer.api.SubmissionSourceAdapter
 import me.domino.fa2.domain.submissionviewer.api.WaterfallScrollRequest
 import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
 import me.domino.fa2.domain.submissionviewer.api.matches
+import me.domino.fa2.domain.submissionviewer.api.toSnapshot
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.utils.logging.FaLog
 
@@ -63,7 +63,7 @@ class SubmissionContextScreenModel : ScreenModel {
   internal fun ensureSeedContext(
       contextId: String,
       adapter: SubmissionSourceAdapter,
-      initialPage: SubmissionLoadedPage,
+      initialPage: SubmissionPageSnapshot,
       selectedSid: Int?,
       revisionKey: String? = null,
   ) {
@@ -87,7 +87,7 @@ class SubmissionContextScreenModel : ScreenModel {
       contextId: String,
       sourceKind: SubmissionContextSourceKind,
       adapter: SubmissionSourceAdapter,
-      page: SubmissionLoadedPage,
+      page: SubmissionPageSnapshot,
       selectedSid: Int? = null,
       revisionKey: String? = null,
   ) {
@@ -468,7 +468,7 @@ class SubmissionContextScreenModel : ScreenModel {
                   SubmissionPageSnapshot
               >)? =
           null,
-      block: suspend () -> ResourceResult<SubmissionLoadedPage>,
+      block: suspend () -> ResourceResult<SubmissionPageSnapshot>,
   ) {
     val record = contexts[contextId] ?: return
     record.loadingJob?.cancel()
