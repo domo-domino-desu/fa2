@@ -13,5 +13,5 @@ fun Navigator.rootNavigator(): Navigator {
 
 /** 回到 Home（保留根页面）。 */
 fun Navigator.goBackHome() {
-  rootNavigator().popUntilRoot()
+  popUntilRoot()
 }

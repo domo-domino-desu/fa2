@@ -18,7 +18,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -28,7 +27,9 @@ import fa2.shared.generated.resources.following_recommendation_unblock
 import fa2.shared.generated.resources.load_failed
 import fa2.shared.generated.resources.no_content
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import me.domino.fa2.data.model.WatchlistUser
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.WatchRecommendationBlocklistRouteTopBar
 import me.domino.fa2.ui.components.ExpressiveIconButton
@@ -42,7 +43,8 @@ import me.domino.fa2.ui.pages.user.watchlist.WatchlistStatusCard
 import me.domino.fa2.utils.FaUrls
 import org.jetbrains.compose.resources.stringResource
 
-class WatchRecommendationBlocklistRouteScreen : Screen {
+@Serializable
+class WatchRecommendationBlocklistRouteScreen : AppScreen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {

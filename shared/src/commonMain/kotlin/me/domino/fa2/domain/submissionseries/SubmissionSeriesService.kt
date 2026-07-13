@@ -300,6 +300,7 @@ data class SubmissionSeriesCandidate(
 )
 
 /** 投稿串联检测规则枚举。 */
+@kotlinx.serialization.Serializable
 enum class SubmissionSeriesRule {
   /** 通过编号段落列表识别串联。 */
   NUMBERED_BLOCKS,

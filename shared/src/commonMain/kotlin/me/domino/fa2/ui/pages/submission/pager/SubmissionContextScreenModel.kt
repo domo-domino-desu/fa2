@@ -21,6 +21,7 @@ import me.domino.fa2.domain.submissionviewer.api.WaterfallScrollRequest
 import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
 import me.domino.fa2.domain.submissionviewer.api.matches
 import me.domino.fa2.domain.submissionviewer.api.toSnapshot
+import me.domino.fa2.ui.components.paging.PageWindowLoadKind
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.utils.logging.FaLog
 
@@ -110,6 +111,17 @@ class SubmissionContextScreenModel : ScreenModel {
       return
     }
 
+    // Returning from details recomposes the list and emits its cached first page again. Once the
+    // session has navigated away from that root page, that emission must not replace the active
+    // page window.
+    if (
+        current.revisionKey == revisionKey &&
+            current.pages.isNotEmpty() &&
+            current.pages.none { page -> page.matches(incomingPage) }
+    ) {
+      return
+    }
+
     val shouldKeepCachedTail =
         current.revisionKey == revisionKey &&
             current.pages.isNotEmpty() &&
@@ -174,7 +186,12 @@ class SubmissionContextScreenModel : ScreenModel {
                   firstVisibleItemIndex = firstVisibleItemIndex.coerceAtLeast(0),
                   firstVisibleItemScrollOffset = firstVisibleItemScrollOffset.coerceAtLeast(0),
                   anchorSid = anchorSid,
-                  currentPageNumber = currentPageNumber,
+                  currentPageNumber =
+                      if (current.loading.jumpLoading) {
+                        current.waterfallViewport.currentPageNumber
+                      } else {
+                        currentPageNumber
+                      },
               )
       )
     }
@@ -220,7 +237,7 @@ class SubmissionContextScreenModel : ScreenModel {
     val loading = snapshot.loading
     if (loading.appendLoading || loading.jumpLoading || loading.prependLoading) return
     if (!force && !loading.appendErrorMessage.isNullOrBlank()) return
-    startLoad(contextId = contextId, kind = SubmissionContextLoadKind.APPEND) {
+    startLoad(contextId = contextId, kind = PageWindowLoadKind.APPEND) {
       adapter.loadNextPage(nextKey)
     }
   }
@@ -233,7 +250,7 @@ class SubmissionContextScreenModel : ScreenModel {
     val loading = snapshot.loading
     if (loading.appendLoading || loading.jumpLoading || loading.prependLoading) return
     if (!force && !loading.prependErrorMessage.isNullOrBlank()) return
-    startLoad(contextId = contextId, kind = SubmissionContextLoadKind.PREPEND) {
+    startLoad(contextId = contextId, kind = PageWindowLoadKind.PREPEND) {
       adapter.loadPreviousPage(previousKey)
     }
   }
@@ -250,7 +267,7 @@ class SubmissionContextScreenModel : ScreenModel {
     val previousKey = currentTarget.page.previousRequestKey ?: return
     startLoad(
         contextId = contextId,
-        kind = SubmissionContextLoadKind.JUMP,
+        kind = PageWindowLoadKind.JUMP,
         scrollToLoadedPage = true,
         scrollAnimated = true,
         pageMerger = { existing, incoming ->
@@ -278,7 +295,7 @@ class SubmissionContextScreenModel : ScreenModel {
     val nextKey = currentTarget.page.nextRequestKey ?: return
     startLoad(
         contextId = contextId,
-        kind = SubmissionContextLoadKind.JUMP,
+        kind = PageWindowLoadKind.JUMP,
         scrollToLoadedPage = true,
         scrollAnimated = true,
         pageMerger = { existing, incoming ->
@@ -297,7 +314,7 @@ class SubmissionContextScreenModel : ScreenModel {
   fun loadFirstPage(contextId: String) {
     val adapter = contexts[contextId]?.adapter ?: return
     if (!adapter.paginationModel.hasFirstPage) return
-    startLoad(contextId = contextId, kind = SubmissionContextLoadKind.JUMP, replace = true) {
+    startLoad(contextId = contextId, kind = PageWindowLoadKind.JUMP, replace = true) {
       adapter.loadFirstPage()
     }
   }
@@ -314,7 +331,7 @@ class SubmissionContextScreenModel : ScreenModel {
         }
     startLoad(
         contextId = contextId,
-        kind = SubmissionContextLoadKind.JUMP,
+        kind = PageWindowLoadKind.JUMP,
         scrollToLoadedPage = true,
         pageMerger = { existing, incoming ->
           reducer.mergeBoundaryPage(
@@ -332,7 +349,7 @@ class SubmissionContextScreenModel : ScreenModel {
   fun loadLastPage(contextId: String) {
     val adapter = contexts[contextId]?.adapter ?: return
     if (!adapter.paginationModel.knowsLastPage) return
-    startLoad(contextId = contextId, kind = SubmissionContextLoadKind.JUMP, replace = true) {
+    startLoad(contextId = contextId, kind = PageWindowLoadKind.JUMP, replace = true) {
       adapter.loadLastPage()
     }
   }
@@ -350,7 +367,7 @@ class SubmissionContextScreenModel : ScreenModel {
         }
     startLoad(
         contextId = contextId,
-        kind = SubmissionContextLoadKind.JUMP,
+        kind = PageWindowLoadKind.JUMP,
         scrollToLoadedPage = true,
         pageMerger = { existing, incoming ->
           reducer.mergeBoundaryPage(
@@ -368,7 +385,13 @@ class SubmissionContextScreenModel : ScreenModel {
   fun jumpToPage(contextId: String, pageNumber: Int) {
     val adapter = contexts[contextId]?.adapter ?: return
     if (!adapter.paginationModel.supportsJumpToPage) return
-    startLoad(contextId = contextId, kind = SubmissionContextLoadKind.JUMP, replace = true) {
+    startLoad(
+        contextId = contextId,
+        kind = PageWindowLoadKind.JUMP,
+        replace = true,
+        targetPageNumber = pageNumber,
+        scrollToLoadedPage = true,
+    ) {
       adapter.jumpToPage(pageNumber)
     }
   }
@@ -392,7 +415,8 @@ class SubmissionContextScreenModel : ScreenModel {
             adapter.paginationModel.supportsAdjacentPaging ->
             startLoad(
                 contextId = contextId,
-                kind = SubmissionContextLoadKind.JUMP,
+                kind = PageWindowLoadKind.JUMP,
+                targetPageNumber = pageNumber,
                 scrollToLoadedPage = true,
                 pageMerger = { existing, incoming ->
                   reducer.mergeBoundaryPage(
@@ -411,7 +435,8 @@ class SubmissionContextScreenModel : ScreenModel {
             adapter.paginationModel.supportsAdjacentPaging ->
             startLoad(
                 contextId = contextId,
-                kind = SubmissionContextLoadKind.JUMP,
+                kind = PageWindowLoadKind.JUMP,
+                targetPageNumber = pageNumber,
                 scrollToLoadedPage = true,
                 pageMerger = { existing, incoming ->
                   reducer.mergeBoundaryPage(
@@ -428,8 +453,9 @@ class SubmissionContextScreenModel : ScreenModel {
         adapter.paginationModel.supportsJumpToPage ->
             startLoad(
                 contextId = contextId,
-                kind = SubmissionContextLoadKind.JUMP,
+                kind = PageWindowLoadKind.JUMP,
                 replace = true,
+                targetPageNumber = pageNumber,
                 scrollToLoadedPage = true,
             ) {
               adapter.jumpToPage(pageNumber)
@@ -440,8 +466,9 @@ class SubmissionContextScreenModel : ScreenModel {
     if (!adapter.paginationModel.supportsJumpToPage) return
     startLoad(
         contextId = contextId,
-        kind = SubmissionContextLoadKind.JUMP,
+        kind = PageWindowLoadKind.JUMP,
         replace = true,
+        targetPageNumber = pageNumber,
         scrollToLoadedPage = true,
     ) {
       adapter.jumpToPage(pageNumber)
@@ -459,10 +486,11 @@ class SubmissionContextScreenModel : ScreenModel {
 
   private fun startLoad(
       contextId: String,
-      kind: SubmissionContextLoadKind,
+      kind: PageWindowLoadKind,
       replace: Boolean = false,
       scrollToLoadedPage: Boolean = false,
       scrollAnimated: Boolean = false,
+      targetPageNumber: Int? = null,
       pageMerger:
           ((List<SubmissionPageSnapshot>, SubmissionPageSnapshot) -> List<
                   SubmissionPageSnapshot
@@ -472,17 +500,41 @@ class SubmissionContextScreenModel : ScreenModel {
   ) {
     val record = contexts[contextId] ?: return
     record.loadingJob?.cancel()
+    val rollback = record.state.value ?: return
     updateSnapshot(contextId) { current ->
+      val scrollRequest =
+          if (kind == PageWindowLoadKind.JUMP && targetPageNumber != null) {
+            current.pages.firstOrNull()?.items?.firstOrNull()?.id?.let { sid ->
+              WaterfallScrollRequest(
+                  sid = sid,
+                  version = (current.waterfallViewport.scrollRequest?.version ?: 0L) + 1L,
+              )
+            }
+          } else {
+            current.waterfallViewport.scrollRequest
+          }
       current.copy(
           loading =
               when (kind) {
-                SubmissionContextLoadKind.PREPEND ->
+                PageWindowLoadKind.PREPEND ->
                     current.loading.copy(prependLoading = true, prependErrorMessage = null)
-                SubmissionContextLoadKind.APPEND ->
+                PageWindowLoadKind.APPEND ->
                     current.loading.copy(appendLoading = true, appendErrorMessage = null)
-                SubmissionContextLoadKind.JUMP ->
+                PageWindowLoadKind.JUMP ->
                     current.loading.copy(jumpLoading = true, jumpErrorMessage = null)
-              }
+              },
+          waterfallViewport =
+              current.waterfallViewport.copy(
+                  firstVisibleItemIndex =
+                      if (targetPageNumber != null) 0
+                      else current.waterfallViewport.firstVisibleItemIndex,
+                  firstVisibleItemScrollOffset =
+                      if (targetPageNumber != null) 0
+                      else current.waterfallViewport.firstVisibleItemScrollOffset,
+                  currentPageNumber =
+                      targetPageNumber ?: current.waterfallViewport.currentPageNumber,
+                  scrollRequest = scrollRequest,
+              ),
       )
     }
     record.loadingJob =
@@ -501,19 +553,19 @@ class SubmissionContextScreenModel : ScreenModel {
                   duplicateBoundaryPages
                       ?: pageMerger?.invoke(current.pages, incomingPage)
                       ?: when (kind) {
-                        SubmissionContextLoadKind.PREPEND ->
+                        PageWindowLoadKind.PREPEND ->
                             reducer.mergePages(
                                 existing = current.pages,
                                 incoming = incomingPage,
                                 prepend = true,
                             )
-                        SubmissionContextLoadKind.APPEND ->
+                        PageWindowLoadKind.APPEND ->
                             reducer.mergePages(
                                 existing = current.pages,
                                 incoming = incomingPage,
                                 prepend = false,
                             )
-                        SubmissionContextLoadKind.JUMP ->
+                        PageWindowLoadKind.JUMP ->
                             if (replace) listOf(incomingPage)
                             else reducer.insertPage(current.pages, incomingPage)
                       }
@@ -547,15 +599,19 @@ class SubmissionContextScreenModel : ScreenModel {
                     contextId,
                     kind,
                     appString(Res.string.cloudflare_challenge_title),
+                    rollback,
                 )
 
-            is ResourceResult.AuthRequired -> updateLoadingError(contextId, kind, result.message)
-            is ResourceResult.MatureBlocked -> updateLoadingError(contextId, kind, result.reason)
+            is ResourceResult.AuthRequired ->
+                updateLoadingError(contextId, kind, result.message, rollback)
+            is ResourceResult.MatureBlocked ->
+                updateLoadingError(contextId, kind, result.reason, rollback)
             is ResourceResult.Error ->
                 updateLoadingError(
                     contextId,
                     kind,
                     result.exception.message ?: result.exception.toString(),
+                    rollback,
                 )
           }
         }
@@ -563,20 +619,34 @@ class SubmissionContextScreenModel : ScreenModel {
 
   private fun updateLoadingError(
       contextId: String,
-      kind: SubmissionContextLoadKind,
+      kind: PageWindowLoadKind,
       message: String?,
+      rollback: SubmissionContextSnapshot,
   ) {
     updateSnapshot(contextId) { current ->
-      current.copy(
+      val base = if (kind == PageWindowLoadKind.JUMP) rollback else current
+      val restoreRequest =
+          if (kind == PageWindowLoadKind.JUMP) {
+            rollback.waterfallViewport.anchorSid?.let { sid ->
+              WaterfallScrollRequest(
+                  sid = sid,
+                  version = (current.waterfallViewport.scrollRequest?.version ?: 0L) + 1L,
+              )
+            }
+          } else {
+            base.waterfallViewport.scrollRequest
+          }
+      base.copy(
           loading =
               when (kind) {
-                SubmissionContextLoadKind.PREPEND ->
-                    current.loading.copy(prependLoading = false, prependErrorMessage = message)
-                SubmissionContextLoadKind.APPEND ->
-                    current.loading.copy(appendLoading = false, appendErrorMessage = message)
-                SubmissionContextLoadKind.JUMP ->
-                    current.loading.copy(jumpLoading = false, jumpErrorMessage = message)
-              }
+                PageWindowLoadKind.PREPEND ->
+                    base.loading.copy(prependLoading = false, prependErrorMessage = message)
+                PageWindowLoadKind.APPEND ->
+                    base.loading.copy(appendLoading = false, appendErrorMessage = message)
+                PageWindowLoadKind.JUMP ->
+                    base.loading.copy(jumpLoading = false, jumpErrorMessage = message)
+              },
+          waterfallViewport = base.waterfallViewport.copy(scrollRequest = restoreRequest),
       )
     }
   }
@@ -621,7 +691,7 @@ class SubmissionContextScreenModel : ScreenModel {
 
   private fun logPageMerge(
       contextId: String,
-      kind: SubmissionContextLoadKind,
+      kind: PageWindowLoadKind,
       existing: List<SubmissionPageSnapshot>,
       incoming: SubmissionPageSnapshot,
       merged: List<SubmissionPageSnapshot>,

@@ -1,59 +1,26 @@
 package me.domino.fa2.ui.pages.submission
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
-import me.domino.fa2.data.model.SubmissionThumbnail
-import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
-import me.domino.fa2.domain.submissionseries.SubmissionSeriesRule
-import me.domino.fa2.utils.FaUrls
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class SubmissionRouteScreenKeyTest {
   @Test
-  fun keyDiffersBySeriesCandidateKey() {
-    val first =
-        SubmissionRouteScreen(
-            initialSid = 1,
-            contextId = "submission-series:test",
-            submissionSeries = testSeries(candidateKey = "series-a"),
-        )
-    val second =
-        SubmissionRouteScreen(
-            initialSid = 1,
-            contextId = "submission-series:test",
-            submissionSeries = testSeries(candidateKey = "series-b"),
-        )
+  fun repeatedRouteHasDistinctEntryKeys() {
+    val first = SubmissionRouteScreen(initialSid = 1, contextId = "same")
+    val second = SubmissionRouteScreen(initialSid = 1, contextId = "same")
 
     assertNotEquals(first.key, second.key)
   }
 
   @Test
-  fun keyDiffersByContextId() {
-    val first = SubmissionRouteScreen(initialSid = 1, contextId = "holder-a")
-    val second = SubmissionRouteScreen(initialSid = 1, contextId = "holder-b")
+  fun serializationKeepsEntryKey() {
+    val screen = SubmissionRouteScreen(initialSid = 1, contextId = "holder")
+    val restored = Json.decodeFromString<SubmissionRouteScreen>(Json.encodeToString(screen))
 
-    assertNotEquals(first.key, second.key)
+    assertEquals(screen.key, restored.key)
   }
 }
-
-private fun testSeedThumbnail(sid: Int): SubmissionThumbnail =
-    SubmissionThumbnail(
-        id = sid,
-        submissionUrl = FaUrls.submission(sid),
-        title = "title-$sid",
-        author = "author-$sid",
-        thumbnailUrl = "https://t.furaffinity.net/$sid@300-0.jpg",
-        thumbnailAspectRatio = 1f,
-        categoryTag = "",
-    )
-
-private fun testSeries(candidateKey: String): SubmissionSeriesResolvedSeries =
-    SubmissionSeriesResolvedSeries(
-        candidateKey = candidateKey,
-        firstSid = 1,
-        firstSubmissionUrl = FaUrls.submission(1),
-        seedSubmissions = listOf(testSeedThumbnail(1)),
-        previousRequestKey = null,
-        nextRequestKey = FaUrls.submission(2),
-        rule = SubmissionSeriesRule.PREV_NEXT_BLOCK,
-        orderedSubmissionUrls = emptyList(),
-    )

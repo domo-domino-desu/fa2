@@ -22,6 +22,7 @@ import me.domino.fa2.domain.submissionviewer.api.SubmissionPaginationModel
 import me.domino.fa2.domain.submissionviewer.api.SubmissionSourceAdapter
 import me.domino.fa2.ui.components.waterfall.WaterfallPaginationKind
 import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
+import me.domino.fa2.ui.pages.submission.pager.currentWaterfallPageNumber
 import me.domino.fa2.ui.pages.submission.pager.currentWaterfallPageTarget
 import me.domino.fa2.ui.pages.submission.pager.knownLastPageNumber
 import me.domino.fa2.ui.pages.submission.pager.toWaterfallPageControls
@@ -635,7 +636,7 @@ class SubmissionContextScreenModelTest {
       }
 
   @Test
-  fun syncRootPageDropsNonRootWindowAndStartsFromRootAgain() =
+  fun syncRootPagePreservesNavigatedWindowForSameRevision() =
       runTest(dispatcher.scheduler) {
         val contextId = "search-sync-root-context"
         val model = SubmissionContextScreenModel()
@@ -695,9 +696,10 @@ class SubmissionContextScreenModelTest {
         )
 
         val snapshot = assertNotNull(model.snapshot(contextId))
-        assertEquals(listOf("page-1"), snapshot.pages.map(SubmissionPageSnapshot::pageId))
-        assertEquals(listOf(10, 11), snapshot.flatItems.map(SubmissionThumbnail::id))
-        assertEquals(10, snapshot.selectedSid)
+        assertEquals(listOf("page-5"), snapshot.pages.map(SubmissionPageSnapshot::pageId))
+        assertEquals(listOf(50, 51), snapshot.flatItems.map(SubmissionThumbnail::id))
+        assertEquals(50, snapshot.selectedSid)
+        assertEquals(5, snapshot.currentWaterfallPageNumber())
       }
 }
 

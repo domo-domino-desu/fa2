@@ -16,11 +16,14 @@ internal fun SubmissionContextSnapshot.pageNumberForSid(sid: Int?): Int? {
 }
 
 internal fun SubmissionContextSnapshot.currentWaterfallPageNumber(): Int? =
-    waterfallViewport.anchorSid?.let { sid ->
-      pages.firstOrNull { page -> page.items.any { item -> item.id == sid } }?.pageNumber
-    }
-        ?: waterfallViewport.currentPageNumber
-        ?: if (pages.size == 1) pages.firstOrNull()?.pageNumber else null
+    if (loading.jumpLoading) {
+      waterfallViewport.currentPageNumber
+    } else
+        waterfallViewport.anchorSid?.let { sid ->
+          pages.firstOrNull { page -> page.items.any { item -> item.id == sid } }?.pageNumber
+        }
+            ?: waterfallViewport.currentPageNumber
+            ?: if (pages.size == 1) pages.firstOrNull()?.pageNumber else null
 
 internal fun SubmissionContextSnapshot.knownLastPageNumber(): Int? =
     pages.firstNotNullOfOrNull { page -> page.lastPageNumber }

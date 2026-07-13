@@ -11,19 +11,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.produceLibraries
 import fa2.shared.generated.resources.Res
 import fa2.shared.generated.resources.about_libraries_metadata_source
+import kotlinx.serialization.Serializable
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.AboutLibrariesRouteTopBar
 import org.jetbrains.compose.resources.stringResource
 
 /** 开源库页面。 */
-class AboutLibrariesRouteScreen : Screen {
+@Serializable
+class AboutLibrariesRouteScreen : AppScreen {
   override val key: String = "about-libraries-route"
 
   @Composable

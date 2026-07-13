@@ -14,7 +14,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -25,6 +24,8 @@ import fa2.shared.generated.resources.similar_users_description
 import fa2.shared.generated.resources.similar_users_empty
 import fa2.shared.generated.resources.similar_users_load_failed
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.SimilarUsersRouteTopBar
 import me.domino.fa2.ui.pages.user.pager.UserPagerContextScreenModel
@@ -34,8 +35,13 @@ import me.domino.fa2.ui.pages.user.watchlist.WatchlistStatusCard
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
 
-class SimilarUsersRouteScreen(private val username: String) : Screen {
-  override val key: String = "similar-users:${username.lowercase()}"
+@Serializable
+class SimilarUsersRouteScreen(
+    private val username: String,
+    private val entryId: String =
+        me.domino.fa2.ui.app.navigation.nextScreenEntryId("similar-users"),
+) : AppScreen {
+  override val key: String = entryId
 
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable

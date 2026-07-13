@@ -18,16 +18,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.remote.fa.user.ActivityHistoryRepository
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
 import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.navigation.rootNavigator
 import me.domino.fa2.ui.app.scaffold.SubmissionHistoryRouteTopBar
@@ -38,12 +39,13 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 /** 投稿浏览历史页面（瀑布流）。 */
-class SubmissionHistoryRouteScreen : Screen {
+@Serializable
+class SubmissionHistoryRouteScreen : AppScreen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
-    val rootNavigator = navigator.rootNavigator()
+    val rootNavigator = navigator
     val historyRepository = koinInject<ActivityHistoryRepository>()
     val settingsService = koinInject<AppSettingsService>()
     val settings by settingsService.settings.collectAsState()

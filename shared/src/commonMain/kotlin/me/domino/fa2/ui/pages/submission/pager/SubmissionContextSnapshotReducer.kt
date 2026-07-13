@@ -10,12 +10,7 @@ import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
 import me.domino.fa2.domain.submissionviewer.api.isDirectNextOf
 import me.domino.fa2.domain.submissionviewer.api.isDirectPreviousOf
 import me.domino.fa2.domain.submissionviewer.api.matches
-
-internal enum class SubmissionContextLoadKind {
-  PREPEND,
-  APPEND,
-  JUMP,
-}
+import me.domino.fa2.ui.components.paging.PageWindowLoadKind
 
 /** Pure state reducer for page ordering, selection and viewport invariants. */
 internal object SubmissionContextSnapshotReducer {
@@ -141,13 +136,13 @@ internal object SubmissionContextSnapshotReducer {
   fun resolveDuplicateBoundaryPages(
       existing: List<SubmissionPageSnapshot>,
       incoming: SubmissionPageSnapshot,
-      kind: SubmissionContextLoadKind,
+      kind: PageWindowLoadKind,
   ): List<SubmissionPageSnapshot>? {
     val pageNumber = incoming.pageNumber ?: return null
     val duplicateIndex = existing.indexOfFirst { it.pageNumber == pageNumber }
     if (duplicateIndex < 0) return null
     return when (kind) {
-      SubmissionContextLoadKind.APPEND -> {
+      PageWindowLoadKind.APPEND -> {
         val duplicate = existing[duplicateIndex]
         val lastRequestKey = duplicate.requestKey ?: incoming.requestKey
         existing.mapIndexed { index, page ->
@@ -162,7 +157,7 @@ internal object SubmissionContextSnapshotReducer {
           }
         }
       }
-      SubmissionContextLoadKind.PREPEND -> {
+      PageWindowLoadKind.PREPEND -> {
         val duplicate = existing[duplicateIndex]
         val firstRequestKey =
             duplicate.firstRequestKey ?: duplicate.requestKey ?: incoming.requestKey
@@ -174,7 +169,7 @@ internal object SubmissionContextSnapshotReducer {
           }
         }
       }
-      SubmissionContextLoadKind.JUMP -> null
+      PageWindowLoadKind.JUMP -> null
     }
   }
 

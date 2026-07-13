@@ -3,9 +3,13 @@ package me.domino.fa2.ui.app.navigation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -70,6 +74,7 @@ fun AppScaffold(
     currentTopLevelDestination: TopLevelDestination,
     /** 顶层导航点击回调。 */
     onTopLevelDestinationClick: (destination: TopLevelDestination, reselected: Boolean) -> Unit,
+    showNavigation: Boolean = true,
     /** 当前页内容。 */
     content: @Composable () -> Unit,
 ) {
@@ -78,43 +83,56 @@ fun AppScaffold(
     val destinations = topLevelDestinations()
 
     if (useRail) {
-      Row(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
-        WideNavigationRail(
-            modifier = Modifier.fillMaxHeight(),
-            state = rememberWideNavigationRailState(WideNavigationRailValue.Collapsed),
-            colors =
-                WideNavigationRailDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                ),
-        ) {
-          destinations.forEach { destination ->
-            val selected = currentTopLevelDestination == destination.destination
-            WideNavigationRailItem(
-                selected = selected,
-                onClick = { onTopLevelDestinationClick(destination.destination, selected) },
-                railExpanded = false,
-                modifier = Modifier.testTag(destination.testTag),
-                icon = { TopLevelDestinationIcon(destination, selected) },
-                label = { TopLevelDestinationLabel(destination) },
-            )
-          }
-        }
+      Row(
+          modifier =
+              Modifier.fillMaxSize()
+                  .then(if (showNavigation) Modifier.safeDrawingPadding() else Modifier)
+      ) {
+        if (showNavigation)
+            WideNavigationRail(
+                modifier = Modifier.fillMaxHeight(),
+                state = rememberWideNavigationRailState(WideNavigationRailValue.Collapsed),
+                colors =
+                    WideNavigationRailDefaults.colors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    ),
+            ) {
+              destinations.forEach { destination ->
+                val selected = currentTopLevelDestination == destination.destination
+                WideNavigationRailItem(
+                    selected = selected,
+                    onClick = { onTopLevelDestinationClick(destination.destination, selected) },
+                    railExpanded = false,
+                    modifier = Modifier.testTag(destination.testTag),
+                    icon = { TopLevelDestinationIcon(destination, selected) },
+                    label = { TopLevelDestinationLabel(destination) },
+                )
+              }
+            }
         Box(modifier = Modifier.fillMaxSize()) { content() }
       }
     } else {
       Scaffold(
           containerColor = MaterialTheme.colorScheme.background,
+          contentWindowInsets =
+              if (showNavigation) {
+                WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
+              } else {
+                WindowInsets(0.dp)
+              },
           bottomBar = {
-            ShortNavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
-              destinations.forEach { destination ->
-                val selected = currentTopLevelDestination == destination.destination
-                ShortNavigationBarItem(
-                    selected = selected,
-                    onClick = { onTopLevelDestinationClick(destination.destination, selected) },
-                    modifier = Modifier.testTag(destination.testTag),
-                    icon = { TopLevelDestinationIcon(destination, selected) },
-                    label = { TopLevelDestinationLabel(destination) },
-                )
+            if (showNavigation) {
+              ShortNavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
+                destinations.forEach { destination ->
+                  val selected = currentTopLevelDestination == destination.destination
+                  ShortNavigationBarItem(
+                      selected = selected,
+                      onClick = { onTopLevelDestinationClick(destination.destination, selected) },
+                      modifier = Modifier.testTag(destination.testTag),
+                      icon = { TopLevelDestinationIcon(destination, selected) },
+                      label = { TopLevelDestinationLabel(destination) },
+                  )
+                }
               }
             }
           },

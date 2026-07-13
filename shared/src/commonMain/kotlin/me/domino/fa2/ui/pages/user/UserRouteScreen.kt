@@ -14,13 +14,14 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.serialization.Serializable
 import me.domino.fa2.data.local.watchrecommendation.WatchRecommendationBlocklist
 import me.domino.fa2.data.remote.fa.user.UserRepository
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
 import me.domino.fa2.ui.pages.watchrecommendation.SimilarUsersRouteScreen
@@ -28,6 +29,7 @@ import me.domino.fa2.utils.FaUrls
 import org.koin.compose.koinInject
 
 /** User 父路由页面。 */
+@Serializable
 class UserRouteScreen(
     /** 目标用户名。 */
     private val username: String,
@@ -35,9 +37,9 @@ class UserRouteScreen(
     private val initialChildRoute: UserChildRoute = UserChildRoute.Gallery,
     /** 初始文件夹 URL（可选）。 */
     private val initialFolderUrl: String? = null,
-) : Screen {
-  override val key: String =
-      "user-route:${username.lowercase()}:${initialChildRoute.routeKey}:${initialFolderUrl.orEmpty()}"
+    private val entryId: String = me.domino.fa2.ui.app.navigation.nextScreenEntryId("user"),
+) : AppScreen {
+  override val key: String = entryId
 
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable

@@ -80,6 +80,8 @@ kotlin {
         implementation(libs.kermit)
         implementation(libs.koin.compose)
         implementation(libs.koin.core)
+        implementation(libs.androidx.lifecycle.viewmodel)
+        implementation(libs.androidx.lifecycle.viewmodel.compose)
         implementation(libs.kotlinx.coroutines.core)
         implementation(libs.kotlinx.serialization.json)
         implementation(libs.ksafe)
@@ -99,6 +101,7 @@ kotlin {
       dependencies {
         implementation(kotlin("test"))
         implementation(libs.koin.core)
+        implementation(libs.kotlinx.serialization.json)
         implementation(libs.kotlinx.coroutines.test)
         implementation(libs.ktor.client.mock)
         implementation(libs.room.runtime)

@@ -21,14 +21,15 @@ import org.koin.compose.koinInject
 /** 应用导航容器。 */
 @Composable
 fun AppNavigator(externalFaLinkEvents: Flow<String> = emptyFlow()) {
+  val tabNavigation = remember { FaTabNavigationController() }
   Navigator(screen = BootRouteScreen()) {
     val defaultUriHandler = LocalUriHandler.current
     val rootNavigator = LocalNavigator.currentOrThrow.rootNavigator()
     val pendingFaRouteStore = koinInject<PendingFaRouteStore>()
     val authSessionController = koinInject<AuthSessionController>()
     val faLinkUriHandler =
-        remember(rootNavigator, defaultUriHandler) {
-          FaLinkUriHandler(navigator = rootNavigator, fallback = defaultUriHandler)
+        remember(tabNavigation, defaultUriHandler) {
+          FaLinkUriHandler(openInternal = tabNavigation::pushCurrent, fallback = defaultUriHandler)
         }
     val currentRootScreen = rootNavigator.lastItem
     val pendingExternalUri by pendingFaRouteStore.pendingUri.collectAsState()
@@ -48,12 +49,19 @@ fun AppNavigator(externalFaLinkEvents: Flow<String> = emptyFlow()) {
       val nextUri = pendingExternalUri ?: return@LaunchedEffect
       if (currentRootScreen is AuthRouteScreen || currentRootScreen is BootRouteScreen)
           return@LaunchedEffect
-      faLinkUriHandler.openUri(nextUri)
+      val normalized = me.domino.fa2.utils.toAbsoluteUrl(me.domino.fa2.utils.FaUrls.home, nextUri)
+      val target = parseFaRouteTarget(normalized)
+      if (target == null) {
+        defaultUriHandler.openUri(normalized)
+      } else {
+        tabNavigation.openExternal(TopLevelDestination.FEED, target)
+      }
       pendingFaRouteStore.consume(nextUri)
     }
 
     CompositionLocalProvider(
         LocalUriHandler provides faLinkUriHandler,
+        LocalFaTabNavigationController provides tabNavigation,
     ) {
       CurrentScreen()
     }

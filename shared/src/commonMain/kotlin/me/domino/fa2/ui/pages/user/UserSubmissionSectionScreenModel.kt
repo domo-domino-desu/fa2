@@ -9,12 +9,12 @@ import me.domino.fa2.data.model.GalleryPage
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.model.errorMessageOrNull
+import me.domino.fa2.data.model.errorOrNull
 import me.domino.fa2.data.model.message
 import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.data.remote.fa.favorites.FavoritesRepository
 import me.domino.fa2.data.remote.fa.gallery.GalleryRepository
-import me.domino.fa2.ui.utils.AppendOutcome
-import me.domino.fa2.ui.utils.appendTo
+import me.domino.fa2.ui.components.paging.reduceAppendResult
 import me.domino.fa2.utils.logging.FaLog
 
 private const val userAutoLoadThreshold = 10
@@ -235,26 +235,29 @@ class UserSubmissionSectionScreenModel(
           val next = loadPage(nextPageUrl = nextUrl)
           when (
               val outcome =
-                  next.appendTo(state.value.submissions, { it.submissions }, { it.nextPageUrl }) {
-                    it.id
-                  }
+                  next.reduceAppendResult(
+                      state.value.submissions,
+                      { it.submissions },
+                      { it.nextPageUrl },
+                      keyOf = { it.id },
+                  )
           ) {
-            is AppendOutcome.Appended -> {
+            is ResourceResult.Success -> {
               mutableState.value =
                   state.value.copy(
-                      submissions = outcome.items,
-                      nextPageUrl = outcome.nextPageUrl,
+                      submissions = outcome.data.items,
+                      nextPageUrl = outcome.data.nextPageUrl,
                       isLoadingMore = false,
                   )
               log.d {
-                "自动加载用户投稿分区 -> ${summarizeResourceResult(next)}(count=${outcome.items.size})"
+                "自动加载用户投稿分区 -> ${summarizeResourceResult(next)}(count=${outcome.data.items.size})"
               }
             }
-            is AppendOutcome.Failed -> {
+            else -> {
               mutableState.value =
                   state.value.copy(
                       isLoadingMore = false,
-                      appendErrorMessage = outcome.error.message(),
+                      appendErrorMessage = outcome.errorOrNull()?.message(),
                   )
               log.w { "自动加载用户投稿分区 -> ${summarizeResourceResult(next)}" }
             }

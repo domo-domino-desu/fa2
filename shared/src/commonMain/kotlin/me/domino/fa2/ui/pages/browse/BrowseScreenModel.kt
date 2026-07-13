@@ -8,17 +8,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import me.domino.fa2.data.model.QueryState
+import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
+import me.domino.fa2.data.model.errorOrNull
 import me.domino.fa2.data.model.mapData
 import me.domino.fa2.data.model.message
 import me.domino.fa2.data.remote.fa.browse.BrowseRepository
-import me.domino.fa2.ui.utils.AppendOutcome
-import me.domino.fa2.ui.utils.appendTo
+import me.domino.fa2.ui.components.paging.reduceAppendResult
 import me.domino.fa2.utils.FaUrls
 
 private const val browseAutoLoadThreshold = 10
 
+@Serializable
 data class BrowseFilterState(
     val category: Int = 1,
     val type: Int = 1,
@@ -126,25 +129,28 @@ class BrowseScreenModel(
           val known = mutableState.value.data ?: current
           when (
               val outcome =
-                  repository.loadPage(url).appendTo(
-                      known.submissions,
-                      { it.submissions },
-                      { it.nextPageUrl },
-                  ) {
-                    it.id
-                  }
+                  repository
+                      .loadPage(url)
+                      .reduceAppendResult(
+                          known.submissions,
+                          { it.submissions },
+                          { it.nextPageUrl },
+                          keyOf = { it.id },
+                      )
           ) {
-            is AppendOutcome.Appended ->
+            is ResourceResult.Success ->
                 mutableState.value =
                     QueryState.Success(
                         known.copy(
-                            submissions = outcome.items,
-                            nextPageUrl = outcome.nextPageUrl,
+                            submissions = outcome.data.items,
+                            nextPageUrl = outcome.data.nextPageUrl,
                             isLoadingMore = false,
                         )
                     )
-            is AppendOutcome.Failed ->
-                update { copy(isLoadingMore = false, appendErrorMessage = outcome.error.message()) }
+            else ->
+                update {
+                  copy(isLoadingMore = false, appendErrorMessage = outcome.errorOrNull()?.message())
+                }
           }
         }
   }

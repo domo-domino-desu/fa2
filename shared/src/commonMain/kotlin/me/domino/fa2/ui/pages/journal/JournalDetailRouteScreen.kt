@@ -26,17 +26,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import me.domino.fa2.data.remote.fa.journal.JournalRepository
 import me.domino.fa2.data.remote.translation.SubmissionTextTranslationEngine
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.ui.app.LocalAppI18n
 import me.domino.fa2.ui.app.LocalAppSettings
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.navigation.openSubmissionSeries
 import me.domino.fa2.ui.app.scaffold.JournalDetailRouteTopBar
@@ -55,12 +56,16 @@ import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 /** Journal 详情路由页面。 */
+@Serializable
 class JournalDetailRouteScreen(
     /** Journal ID。 */
     private val journalId: Int,
     /** Journal URL 兜底。 */
     private val journalUrl: String? = null,
-) : Screen {
+    private val entryId: String = me.domino.fa2.ui.app.navigation.nextScreenEntryId("journal"),
+) : AppScreen {
+  override val key: String = entryId
+
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {

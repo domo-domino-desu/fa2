@@ -26,13 +26,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import me.domino.fa2.data.model.SearchHistoryRecord
 import me.domino.fa2.data.remote.fa.user.ActivityHistoryRepository
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.SearchHistoryRouteTopBar
 import me.domino.fa2.ui.components.accessibleClickableSummary
@@ -41,7 +42,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 /** 搜索历史页面（关键词 + 条件摘要）。 */
-class SearchHistoryRouteScreen : Screen {
+@Serializable
+class SearchHistoryRouteScreen : AppScreen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {

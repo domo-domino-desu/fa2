@@ -7,15 +7,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.serialization.Serializable
 import me.domino.fa2.data.remote.fa.feed.FeedRepository
 import me.domino.fa2.domain.submissionviewer.adapters.FeedSubmissionSourceAdapter
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
 import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
 import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.components.state.PageStateWrapper
 import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
 import me.domino.fa2.ui.pages.submission.pager.SubmissionContextScreenModel
@@ -25,7 +26,8 @@ import me.domino.fa2.utils.FaUrls
 import org.koin.compose.koinInject
 
 /** Feed 路由页面。 */
-class FeedRouteScreen : Screen {
+@Serializable
+class FeedRouteScreen : AppScreen {
   /** 路由页面内容。 */
   @Composable
   override fun Content() {

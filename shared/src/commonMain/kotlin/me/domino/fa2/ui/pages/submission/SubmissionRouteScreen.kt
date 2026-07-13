@@ -20,7 +20,6 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.SingletonImageLoader
@@ -30,6 +29,7 @@ import fa2.shared.generated.resources.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.SubmissionThumbnail
 import me.domino.fa2.data.remote.fa.media.KtorImageBytesSource
@@ -41,9 +41,10 @@ import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.domain.attachmenttext.AttachmentTextService
 import me.domino.fa2.domain.ocr.ImageTextRecognitionPort
-import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.domain.submissionviewer.adapters.SeriesSubmissionSourceAdapter
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
+import me.domino.fa2.ui.app.navigation.AppScreen
+import me.domino.fa2.ui.app.navigation.decodeSubmissionSeriesDescriptor
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.navigation.openSubmissionSeries
 import me.domino.fa2.ui.components.feedback.LocalShowFeedback
@@ -77,6 +78,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 /** 投稿详情浏览路由页面。 */
+@Serializable
 class SubmissionRouteScreen(
     /** 初始投稿 ID。 */
     private val initialSid: Int,
@@ -84,11 +86,11 @@ class SubmissionRouteScreen(
     private val contextId: String,
     /** 当 holder 不含 sid 时的占位链接。 */
     private val seedSubmissionUrl: String? = null,
-    /** 独立 submission 系列。 */
-    private val submissionSeries: SubmissionSeriesResolvedSeries? = null,
-) : Screen {
-  override val key: String =
-      "submission:$contextId:$initialSid:${seedSubmissionUrl.orEmpty()}:${submissionSeries?.candidateKey.orEmpty()}"
+    /** 可恢复的独立 submission 系列描述。 */
+    private val seriesDescriptorJson: String? = null,
+    private val entryId: String = me.domino.fa2.ui.app.navigation.nextScreenEntryId("submission"),
+) : AppScreen {
+  override val key: String = entryId
 
   /** 页面内容。 */
   @Composable
@@ -108,7 +110,13 @@ class SubmissionRouteScreen(
           SubmissionContextScreenModel()
         }
     val fallbackSubmissionTitle = stringResource(Res.string.submission_fallback_title, initialSid)
-    LaunchedEffect(contextId, initialSid, seedSubmissionUrl, submissionSeries?.candidateKey) {
+    val submissionSeries =
+        remember(seriesDescriptorJson, fallbackSubmissionTitle) {
+          seriesDescriptorJson
+              ?.let(::decodeSubmissionSeriesDescriptor)
+              ?.toResolvedSeries(fallbackSubmissionTitle)
+        }
+    LaunchedEffect(contextId, initialSid, seedSubmissionUrl, seriesDescriptorJson) {
       when {
         submissionSeries != null -> {
           val adapter =

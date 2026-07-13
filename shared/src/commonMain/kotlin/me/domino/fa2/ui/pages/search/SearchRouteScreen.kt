@@ -11,16 +11,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import me.domino.fa2.data.remote.fa.search.SearchRepository
 import me.domino.fa2.domain.submissionviewer.adapters.SearchSubmissionSourceAdapter
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
 import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
 import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.navigation.openSubmissionFromList
 import me.domino.fa2.ui.app.scaffold.SearchRouteTopBar
@@ -31,15 +32,17 @@ import me.domino.fa2.ui.pages.submission.pager.toWaterfallPageControls
 import org.koin.compose.koinInject
 
 /** 独立搜索路由页面（用于从投稿关键词跳转）。 */
+@Serializable
 class SearchRouteScreen(
     private val initialQuery: String,
     private val initialSearchUrl: String? = null,
-) : Screen {
+    private val showTopBar: Boolean = true,
+    private val entryId: String = me.domino.fa2.ui.app.navigation.nextScreenEntryId("search"),
+) : AppScreen {
   private val holderTag: String =
       "submission-list-holder:search-route:${initialQuery.hashCode()}:${initialSearchUrl.orEmpty().hashCode()}"
 
-  override val key: String =
-      "search-route:${initialQuery.trim().lowercase()}:${initialSearchUrl.orEmpty().trim().lowercase()}"
+  override val key: String = entryId
 
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
@@ -120,11 +123,12 @@ class SearchRouteScreen(
     val pageControls = contextState?.toWaterfallPageControls()
 
     Column(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
-      SearchRouteTopBar(
-          onBack = { navigator.pop() },
-          onGoHome = { navigator.goBackHome() },
-          onTitleClick = { coroutineScope.launch { waterfallState.animateScrollToItem(0) } },
-      )
+      if (showTopBar)
+          SearchRouteTopBar(
+              onBack = { navigator.pop() },
+              onGoHome = { navigator.goBackHome() },
+              onTitleClick = { coroutineScope.launch { waterfallState.animateScrollToItem(0) } },
+          )
 
       PageStateWrapper(
           state = pageState,

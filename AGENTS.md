@@ -64,6 +64,7 @@ Koin 装配（`AppModule/DataModule/DomainModule/UiModule`），screen model 用
 
 # 开发说明
 
+- 图标只用最合适的，不要只在已有图标里硬凑。请任意添加图标到 SymbolCraft。
 - 尽可能在 `nix develop` 环境中测试，否则可能报 skiko 相关错误。
 - gradle 的常用命令：`:desktopApp:……`、`:shared:……`。
 - perl 不在环境里，想用的话就 `nix run` 或者 `comma perl`。

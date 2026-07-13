@@ -7,10 +7,10 @@ import kotlinx.coroutines.launch
 import me.domino.fa2.data.model.JournalSummary
 import me.domino.fa2.data.model.ResourceResult
 import me.domino.fa2.data.model.errorMessageOrNull
+import me.domino.fa2.data.model.errorOrNull
 import me.domino.fa2.data.model.message
 import me.domino.fa2.data.remote.fa.journal.JournalsRepository
-import me.domino.fa2.ui.utils.AppendOutcome
-import me.domino.fa2.ui.utils.appendTo
+import me.domino.fa2.ui.components.paging.reduceAppendResult
 
 private const val journalsAutoLoadThreshold = 6
 
@@ -82,26 +82,27 @@ class UserJournalsScreenModel(
         screenModelScope.launch {
           when (
               val outcome =
-                  repository.loadJournalsPage(username, cursor).appendTo(
-                      state.value.journals,
-                      { it.journals },
-                      { it.nextPageUrl },
-                  ) {
-                    it.id
-                  }
+                  repository
+                      .loadJournalsPage(username, cursor)
+                      .reduceAppendResult(
+                          state.value.journals,
+                          { it.journals },
+                          { it.nextPageUrl },
+                          keyOf = { it.id },
+                      )
           ) {
-            is AppendOutcome.Appended ->
+            is ResourceResult.Success ->
                 mutableState.value =
                     state.value.copy(
-                        journals = outcome.items,
-                        nextPageUrl = outcome.nextPageUrl,
+                        journals = outcome.data.items,
+                        nextPageUrl = outcome.data.nextPageUrl,
                         isLoadingMore = false,
                     )
-            is AppendOutcome.Failed ->
+            else ->
                 mutableState.value =
                     state.value.copy(
                         isLoadingMore = false,
-                        appendErrorMessage = outcome.error.message(),
+                        appendErrorMessage = outcome.errorOrNull()?.message(),
                     )
           }
         }

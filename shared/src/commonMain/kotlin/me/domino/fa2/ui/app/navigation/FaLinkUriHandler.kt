@@ -1,8 +1,6 @@
 package me.domino.fa2.ui.app.navigation
 
 import androidx.compose.ui.platform.UriHandler
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.Navigator
 import kotlin.random.Random
 import me.domino.fa2.ui.pages.journal.JournalDetailRouteScreen
 import me.domino.fa2.ui.pages.submission.SubmissionRouteScreen
@@ -14,8 +12,10 @@ import me.domino.fa2.utils.parseSubmissionSid
 import me.domino.fa2.utils.toAbsoluteUrl
 
 /** FA 站内链接在应用内打开（push 新页面）； 其他链接透传给系统处理器。 */
-class FaLinkUriHandler(private val navigator: Navigator, private val fallback: UriHandler) :
-    UriHandler {
+class FaLinkUriHandler(
+    private val openInternal: (AppScreen) -> Unit,
+    private val fallback: UriHandler,
+) : UriHandler {
   override fun openUri(uri: String) {
     val normalized = toAbsoluteUrl(FaUrls.home, uri)
     val target = parseFaRouteTarget(normalized)
@@ -23,11 +23,11 @@ class FaLinkUriHandler(private val navigator: Navigator, private val fallback: U
       fallback.openUri(normalized)
       return
     }
-    navigator.push(target)
+    openInternal(target)
   }
 }
 
-internal fun parseFaRouteTarget(url: String): Screen? {
+internal fun parseFaRouteTarget(url: String): AppScreen? {
   if (!isFaUrl(url)) return null
   val path = extractPath(url)
 

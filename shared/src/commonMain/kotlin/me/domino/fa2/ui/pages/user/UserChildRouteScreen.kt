@@ -11,16 +11,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.serialization.Serializable
 import me.domino.fa2.data.remote.fa.favorites.FavoritesRepository
 import me.domino.fa2.data.remote.fa.gallery.GalleryRepository
 import me.domino.fa2.domain.submissionviewer.adapters.UserSubmissionSourceAdapter
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
 import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
 import me.domino.fa2.domain.submissionviewer.api.UserSubmissionSection
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.rootNavigator
 import me.domino.fa2.ui.pages.journal.JournalPagerContextScreenModel
 import me.domino.fa2.ui.pages.journal.JournalPagerRouteScreen
@@ -33,6 +34,7 @@ import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 /** User 子路由 screen。 */
+@Serializable
 class UserChildRouteScreen(
     /** 用户名。 */
     private val username: String,
@@ -40,9 +42,9 @@ class UserChildRouteScreen(
     val route: UserChildRoute,
     /** 初始文件夹 URL（仅首次创建时生效）。 */
     private val initialFolderUrl: String? = null,
-) : Screen {
-  override val key: String =
-      "user-child:${username.lowercase()}:${route.routeKey}:${initialFolderUrl.orEmpty()}"
+    private val entryId: String = me.domino.fa2.ui.app.navigation.nextScreenEntryId("user-child"),
+) : AppScreen {
+  override val key: String = entryId
 
   @Composable
   override fun Content() {
@@ -61,7 +63,7 @@ class UserChildRouteScreen(
     when (route) {
       UserChildRoute.Journals -> {
         val localNavigator = LocalNavigator.currentOrThrow
-        val rootNavigator = localNavigator.rootNavigator()
+        val rootNavigator = localNavigator.parent ?: localNavigator
         val pagerContextId = remember(username) { "journals:${username.lowercase()}" }
         val pagerContextScreenModel =
             rootNavigator.rememberNavigatorScreenModel<JournalPagerContextScreenModel>(
@@ -146,7 +148,7 @@ class UserChildRouteScreen(
 
       else -> {
         val localNavigator = LocalNavigator.currentOrThrow
-        val rootNavigator = localNavigator.rootNavigator()
+        val rootNavigator = localNavigator.parent ?: localNavigator
         val contextScreenModel =
             rootNavigator.rememberNavigatorScreenModel<SubmissionContextScreenModel>(
                 tag = "submission-context"

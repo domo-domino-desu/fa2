@@ -29,13 +29,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import me.domino.fa2.domain.watchrecommendation.RecommendedWatchUser
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.WatchRecommendationRouteTopBar
 import me.domino.fa2.ui.components.ExpressiveFilledTonalButton
@@ -50,8 +51,13 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
 
-class WatchRecommendationRouteScreen(private val username: String) : Screen {
-  override val key: String = "watch-recommendation:${username.lowercase()}"
+@Serializable
+class WatchRecommendationRouteScreen(
+    private val username: String,
+    private val entryId: String =
+        me.domino.fa2.ui.app.navigation.nextScreenEntryId("watch-recommendation"),
+) : AppScreen {
+  override val key: String = entryId
 
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable

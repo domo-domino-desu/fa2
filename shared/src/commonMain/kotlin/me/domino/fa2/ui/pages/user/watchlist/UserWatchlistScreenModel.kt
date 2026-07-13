@@ -11,13 +11,13 @@ import me.domino.fa2.data.model.WatchlistCategory
 import me.domino.fa2.data.model.WatchlistPage
 import me.domino.fa2.data.model.WatchlistUser
 import me.domino.fa2.data.model.errorMessageOrNull
+import me.domino.fa2.data.model.errorOrNull
 import me.domino.fa2.data.model.message
 import me.domino.fa2.data.model.summarizeResourceResult
 import me.domino.fa2.data.remote.fa.watchlist.WatchlistRepository
+import me.domino.fa2.ui.components.paging.reduceAppendResult
 import me.domino.fa2.ui.i18n.appString
 import me.domino.fa2.ui.i18n.appStringOrFallback
-import me.domino.fa2.ui.utils.AppendOutcome
-import me.domino.fa2.ui.utils.appendTo
 import me.domino.fa2.utils.logging.FaLog
 
 private const val watchlistAutoLoadThreshold = 14
@@ -236,26 +236,29 @@ class UserWatchlistScreenModel(
           val next = loadWatchlistPage(username, category, nextUrl)
           when (
               val outcome =
-                  next.appendTo(state.value.users, { it.users }, { it.nextPageUrl }) {
-                    it.username.lowercase()
-                  }
+                  next.reduceAppendResult(
+                      state.value.users,
+                      { it.users },
+                      { it.nextPageUrl },
+                      keyOf = { it.username.lowercase() },
+                  )
           ) {
-            is AppendOutcome.Appended -> {
+            is ResourceResult.Success -> {
               mutableState.value =
                   state.value.copy(
-                      users = outcome.items,
-                      nextPageUrl = outcome.nextPageUrl,
+                      users = outcome.data.items,
+                      nextPageUrl = outcome.data.nextPageUrl,
                       isLoadingMore = false,
                   )
               log.d {
-                "自动加载Watchlist页 -> ${summarizeResourceResult(next)}(count=${outcome.items.size})"
+                "自动加载Watchlist页 -> ${summarizeResourceResult(next)}(count=${outcome.data.items.size})"
               }
             }
-            is AppendOutcome.Failed -> {
+            else -> {
               mutableState.value =
                   state.value.copy(
                       isLoadingMore = false,
-                      appendErrorMessage = outcome.error.message(),
+                      appendErrorMessage = outcome.errorOrNull()?.message(),
                   )
               log.w { "自动加载Watchlist页 -> ${summarizeResourceResult(next)}" }
             }

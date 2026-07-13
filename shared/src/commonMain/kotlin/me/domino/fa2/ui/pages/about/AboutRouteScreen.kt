@@ -39,7 +39,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.Res
@@ -72,11 +71,13 @@ import kotlin.coroutines.resume
 import kotlin.time.Clock
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.serialization.Serializable
 import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.data.settings.LogLevelSetting
 import me.domino.fa2.generated.AboutMetadata
 import me.domino.fa2.ui.app.LocalAppSettings
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.AboutRouteTopBar
 import me.domino.fa2.ui.components.accessibilityHeading
@@ -101,7 +102,8 @@ private const val furAffinityAppUrl = "https://github.com/Ceylo/FurAffinityApp"
 private val aboutHeaderBackground = Color(0xFF12284F)
 
 /** 关于页面。 */
-class AboutRouteScreen : Screen {
+@Serializable
+class AboutRouteScreen : AppScreen {
   override val key: String = "about-route"
 
   @Composable

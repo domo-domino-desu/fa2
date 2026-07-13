@@ -12,15 +12,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.core.model.rememberScreenModel
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import me.domino.fa2.data.remote.fa.browse.BrowseRepository
 import me.domino.fa2.domain.submissionviewer.adapters.BrowseSubmissionSourceAdapter
 import me.domino.fa2.domain.submissionviewer.api.SubmissionContextSourceKind
 import me.domino.fa2.domain.submissionviewer.api.SubmissionPageSnapshot
 import me.domino.fa2.domain.submissionviewer.api.WaterfallViewportState
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.navigation.openSubmissionFromList
 import me.domino.fa2.ui.app.scaffold.BrowseRouteTopBar
@@ -32,10 +36,25 @@ import me.domino.fa2.utils.FaUrls
 import org.koin.compose.koinInject
 
 /** 独立 Browse 路由页面（用于从投稿详情跳转）。 */
-class BrowseRouteScreen(private val initialFilter: BrowseFilterState) : Screen {
+@Serializable
+class BrowseRouteScreen
+private constructor(
+    private val initialFilterJson: String,
+    private val showTopBar: Boolean = true,
+    private val entryId: String = me.domino.fa2.ui.app.navigation.nextScreenEntryId("browse"),
+) : AppScreen {
+  constructor(
+      initialFilter: BrowseFilterState,
+      showTopBar: Boolean = true,
+      entryId: String = me.domino.fa2.ui.app.navigation.nextScreenEntryId("browse"),
+  ) : this(Json.encodeToString(initialFilter), showTopBar, entryId)
+
+  private val initialFilter: BrowseFilterState
+    get() = Json.decodeFromString(initialFilterJson)
+
   private val holderTag: String = "submission-list-holder:browse-route:${initialFilter.hashCode()}"
 
-  override val key: String = "browse-route:${initialFilter.hashCode()}"
+  override val key: String = entryId
 
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
@@ -105,11 +124,12 @@ class BrowseRouteScreen(private val initialFilter: BrowseFilterState) : Screen {
     val pageControls = contextState?.toWaterfallPageControls()
 
     Column(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
-      BrowseRouteTopBar(
-          onBack = { navigator.pop() },
-          onGoHome = { navigator.goBackHome() },
-          onTitleClick = { coroutineScope.launch { waterfallState.animateScrollToItem(0) } },
-      )
+      if (showTopBar)
+          BrowseRouteTopBar(
+              onBack = { navigator.pop() },
+              onGoHome = { navigator.goBackHome() },
+              onTitleClick = { coroutineScope.launch { waterfallState.animateScrollToItem(0) } },
+          )
 
       PageStateWrapper(
           state = query,

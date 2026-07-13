@@ -14,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -24,8 +23,10 @@ import fa2.shared.generated.resources.no_displayable_shouts
 import fa2.shared.generated.resources.shouts
 import fa2.shared.generated.resources.shouts_count
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import me.domino.fa2.data.model.QueryState
 import me.domino.fa2.data.model.message
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
 import me.domino.fa2.ui.components.html.PageCommentsCard
@@ -38,8 +39,12 @@ import me.domino.fa2.utils.FaUrls
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
 
-class UserShoutsRouteScreen(private val username: String) : Screen {
-  override val key: String = "user-shouts:${username.lowercase()}"
+@Serializable
+class UserShoutsRouteScreen(
+    private val username: String,
+    private val entryId: String = me.domino.fa2.ui.app.navigation.nextScreenEntryId("user-shouts"),
+) : AppScreen {
+  override val key: String = entryId
 
   @Composable
   override fun Content() {

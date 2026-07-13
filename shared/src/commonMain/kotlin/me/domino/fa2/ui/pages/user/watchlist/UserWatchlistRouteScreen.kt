@@ -23,14 +23,15 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import me.domino.fa2.data.model.WatchlistCategory
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.UserWatchlistRouteTopBar
 import me.domino.fa2.ui.components.state.PaginationRetryBar
@@ -43,13 +44,15 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
 
 /** 用户关注列表路由页面。 */
+@Serializable
 class UserWatchlistRouteScreen(
     private val username: String,
     private val category: WatchlistCategory,
     private val initialUrl: String? = null,
-) : Screen {
-  override val key: String =
-      "user-watchlist:${username.lowercase()}:${category.name.lowercase()}:${initialUrl.orEmpty()}"
+    private val entryId: String =
+        me.domino.fa2.ui.app.navigation.nextScreenEntryId("user-watchlist"),
+) : AppScreen {
+  override val key: String = entryId
 
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable

@@ -27,14 +27,15 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fa2.shared.generated.resources.Res
 import fa2.shared.generated.resources.no_content
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import me.domino.fa2.data.remote.fa.watchlist.WatchlistRepository
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
 import me.domino.fa2.ui.pages.user.UserChildRoute
@@ -46,11 +47,13 @@ import org.koin.compose.koinInject
 
 private const val userPagerAppendThreshold = 3
 
+@Serializable
 internal class UserPagerRouteScreen(
     private val initialUsername: String,
     private val contextId: String,
-) : Screen {
-  override val key: String = "user-pager:$contextId:${initialUsername.lowercase()}"
+    private val entryId: String = me.domino.fa2.ui.app.navigation.nextScreenEntryId("user-pager"),
+) : AppScreen {
+  override val key: String = entryId
 
   @Composable
   override fun Content() {

@@ -5,18 +5,20 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.kdroidfilter.webview.web.LoadingState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.MainRouteScreen
 import me.domino.fa2.utils.FaUrls
 
 /** 认证路由页面。 */
-class AuthRouteScreen : Screen {
+@Serializable
+class AuthRouteScreen : AppScreen {
   /** 页面内容。 */
   @Composable
   override fun Content() {
