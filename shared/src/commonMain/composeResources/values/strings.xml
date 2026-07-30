@@ -65,12 +65,8 @@
   <string name="load_failed_please_retry">Load failed. Please retry.</string>
   <string name="loading_account_info">Loading account info...</string>
   <string name="account_center">Account Center</string>
-  <string name="no_records">No records yet</string>
-  <string name="settings_summary">Theme, download, waterfall width, and translation settings</string>
   <string name="following_more_summary">Open the users this account is following</string>
   <string name="following_recommendation">Follow Recommendation Features</string>
-  <string name="following_recommendation_summary">Discover new users from the people you already
-    follow</string>
   <string name="following_recommendation_description">Randomly sample people you follow, then find
     the users they commonly follow.</string>
   <string name="following_recommendation_action">Start recommending</string>
@@ -118,15 +114,11 @@
   <string name="following_recommendation_unblock">Unhide</string>
   <string name="recommendation_random_order">Random order</string>
   <string name="favorite_more_summary">Open this account's favorited submissions</string>
-  <string name="about_summary">View app info, project links, open-source libraries, and
-    acknowledgements</string>
   <string name="logout">Log Out</string>
   <string name="logout_failed">Log out failed</string>
   <string name="logout_confirm_title">Confirm log out</string>
   <string name="logout_confirm_body">This will clear the current session and sign you out.</string>
   <string name="logout_confirm_action">Log out</string>
-  <string name="clearing_cookie">Clearing cookies...</string>
-  <string name="clear_cookie">Clear cookies</string>
   <string name="loading_search_history">Loading search history...</string>
   <string name="empty_search_history">No search history yet.</string>
   <string name="loading_submission_history">Loading browsing history...</string>
@@ -366,7 +358,6 @@
   <string name="save_failed">Save failed: %1$s</string>
   <string name="challenge_awaiting_user_action">Complete the Cloudflare check in the WebView, then
     tap "I've completed verification".%1$s</string>
-  <string name="record_count">%1$d items. Tap to view</string>
   <string name="login_incomplete">Sign-in not completed: %1$s</string>
   <string name="translate_content_description">Translate %1$s</string>
   <string name="wrap_text_content_description">Rewrap %1$s</string>

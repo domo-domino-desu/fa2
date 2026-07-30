@@ -133,7 +133,6 @@ private fun MoreContent(
         SettingsListItem(
             icon = FaMaterialSymbols.Outlined.Troubleshoot,
             title = stringResource(Res.string.following_recommendation),
-            subtitle = stringResource(Res.string.following_recommendation_summary),
             onClick = { onOpenWatchRecommendations?.invoke() },
             enabled = onOpenWatchRecommendations != null,
             modifier = Modifier.testTag("more-following-recommendation"),
@@ -141,46 +140,26 @@ private fun MoreContent(
         SettingsListItem(
             icon = FaMaterialSymbols.Filled.History,
             title = stringResource(Res.string.submission_history),
-            subtitle =
-                if (state.submissionHistoryCount > 0) {
-                  stringResource(Res.string.record_count, state.submissionHistoryCount)
-                } else {
-                  stringResource(Res.string.no_records)
-                },
             onClick = onOpenSubmissionHistory,
         )
         SettingsListItem(
             icon = FaMaterialSymbols.Filled.Search,
             title = stringResource(Res.string.search_history),
-            subtitle =
-                if (state.searchHistoryCount > 0) {
-                  stringResource(Res.string.record_count, state.searchHistoryCount)
-                } else {
-                  stringResource(Res.string.no_records)
-                },
             onClick = onOpenSearchHistory,
         )
         SettingsListItem(
             icon = FaMaterialSymbols.Filled.Settings,
             title = stringResource(Res.string.settings),
-            subtitle = stringResource(Res.string.settings_summary),
             onClick = onOpenSettings,
         )
         SettingsListItem(
             icon = FaMaterialSymbols.Filled.Info,
             title = stringResource(Res.string.about),
-            subtitle = stringResource(Res.string.about_summary),
             onClick = onOpenAbout,
         )
         SettingsListItem(
             icon = FaMaterialSymbols.AutoMirrored.Filled.Logout,
             title = stringResource(Res.string.logout),
-            subtitle =
-                if (state.loggingOut) {
-                  stringResource(Res.string.clearing_cookie)
-                } else {
-                  stringResource(Res.string.clear_cookie)
-                },
             onClick = {
               if (!state.loggingOut) {
                 logoutDialogVisible = true

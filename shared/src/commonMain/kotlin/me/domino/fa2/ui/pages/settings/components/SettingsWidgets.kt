@@ -152,8 +152,6 @@ fun SettingsListItem(
     icon: ImageVector,
     /** 主标题。 */
     title: String,
-    /** 副标题。 */
-    subtitle: String,
     /** 点击回调。 */
     onClick: () -> Unit,
     /** 是否可点击。 */
@@ -169,7 +167,7 @@ fun SettingsListItem(
             modifier
                 .fillMaxWidth()
                 .clickable(enabled = enabled, onClick = onClick)
-                .accessibleClickableSummary(title = title, subtitle = subtitle)
+                .accessibleClickableSummary(title = title)
                 .padding(horizontal = 14.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -187,21 +185,15 @@ fun SettingsListItem(
           )
         }
       }
-      Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium,
-            color =
-                if (enabled) MaterialTheme.colorScheme.onSurface
-                else MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      }
+      Text(
+          text = title,
+          modifier = Modifier.weight(1f),
+          style = MaterialTheme.typography.bodyLarge,
+          fontWeight = FontWeight.Medium,
+          color =
+              if (enabled) MaterialTheme.colorScheme.onSurface
+              else MaterialTheme.colorScheme.onSurfaceVariant,
+      )
       Icon(
           imageVector = FaMaterialSymbols.AutoMirrored.Filled.KeyboardArrowRight,
           contentDescription = null,
