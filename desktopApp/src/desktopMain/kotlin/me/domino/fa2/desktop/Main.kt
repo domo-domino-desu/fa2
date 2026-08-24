@@ -1,11 +1,12 @@
 package me.domino.fa2.desktop
 
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
+import dev.nucleusframework.application.DecoratedWindow
+import dev.nucleusframework.application.NucleusBackend
+import dev.nucleusframework.application.nucleusApplication
 import io.ktor.client.HttpClient
 import me.domino.fa2.data.remote.fa.media.installCoilImageProgressSupport
 import me.domino.fa2.data.settings.AppSettingsService
@@ -23,44 +24,45 @@ private const val coilDiskCacheMaxBytes = 1024L * 1024L * 1024L
 private const val desktopLogLevelProp: String = "fa2.log.level"
 
 /** Desktop 应用入口。 */
-fun main() = application {
-  val severity = FaLog.parseDesktopSeverity(System.getProperty(desktopLogLevelProp))
-  FaLog.init(severity)
-  FaLog.withTag("DesktopMain").i { "桌面启动 -> 日志级别=${severity.name}" }
-  val koin = startAppKoin(desktopPlatformModule())
-  Window(
-      onCloseRequest = {
-        FaLog.withTag("DesktopMain").i { "窗口关闭 -> 释放资源" }
-        stopAppKoin()
-        exitApplication()
-      },
-      title = "fa2",
-  ) {
-    LaunchedEffect(koin) {
-      runCatching {
-            val settingsService = koin.get<AppSettingsService>()
-            settingsService.ensureLoaded()
-            FaLog.setMinSeverity(settingsService.settings.value.logLevel.severity)
-          }
-          .onFailure { error -> FaLog.withTag("DesktopMain").e(error) { "应用读取日志级别失败" } }
+fun main() =
+    nucleusApplication(backend = NucleusBackend.Tao) {
+      val severity = FaLog.parseDesktopSeverity(System.getProperty(desktopLogLevelProp))
+      FaLog.init(severity)
+      FaLog.withTag("DesktopMain").i { "桌面启动 -> 日志级别=${severity.name}" }
+      val koin = startAppKoin(desktopPlatformModule())
+      DecoratedWindow(
+          onCloseRequest = {
+            FaLog.withTag("DesktopMain").i { "窗口关闭 -> 释放资源" }
+            stopAppKoin()
+            exitApplication()
+          },
+          title = "fa2",
+      ) {
+        LaunchedEffect(koin) {
+          runCatching {
+                val settingsService = koin.get<AppSettingsService>()
+                settingsService.ensureLoaded()
+                FaLog.setMinSeverity(settingsService.settings.value.logLevel.severity)
+              }
+              .onFailure { error -> FaLog.withTag("DesktopMain").e(error) { "应用读取日志级别失败" } }
+        }
+        setSingletonImageLoaderFactory { platformContext ->
+          val cachedDownloadClient =
+              GlobalContext.get()
+                  .get<HttpClient>(qualifier = named(KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT))
+          ImageLoader.Builder(platformContext)
+              .installCoilImageProgressSupport(cachedDownloadClient = cachedDownloadClient)
+              .diskCache {
+                DiskCache.Builder()
+                    .directory(desktopCoilDiskCachePath())
+                    .maxSizeBytes(coilDiskCacheMaxBytes)
+                    .build()
+              }
+              .build()
+        }
+        Fa2App()
+      }
     }
-    setSingletonImageLoaderFactory { platformContext ->
-      val cachedDownloadClient =
-          GlobalContext.get()
-              .get<HttpClient>(qualifier = named(KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT))
-      ImageLoader.Builder(platformContext)
-          .installCoilImageProgressSupport(cachedDownloadClient = cachedDownloadClient)
-          .diskCache {
-            DiskCache.Builder()
-                .directory(desktopCoilDiskCachePath())
-                .maxSizeBytes(coilDiskCacheMaxBytes)
-                .build()
-          }
-          .build()
-    }
-    Fa2App()
-  }
-}
 
 private fun desktopCoilDiskCachePath(): Path {
   val userHome = System.getProperty("user.home").orEmpty().ifBlank { "." }

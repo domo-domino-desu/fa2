@@ -8,8 +8,8 @@ plugins {
 
 android {
   namespace = "me.domino.fa2.android"
-  compileSdk = 36
-  buildToolsVersion = "36.0.0"
+  compileSdk = 37
+  buildToolsVersion = "37.0.0"
 
   val appVersionName = providers.gradleProperty("APP_VERSION_NAME").get()
   val appVersionCode = providers.gradleProperty("APP_VERSION_CODE").map(String::toInt).get()

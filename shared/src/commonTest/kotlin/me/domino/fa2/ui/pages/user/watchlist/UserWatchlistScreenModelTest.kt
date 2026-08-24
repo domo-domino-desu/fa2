@@ -9,7 +9,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -71,7 +73,7 @@ class UserWatchlistScreenModelTest {
         assertEquals(listOf("alpha", "beta"), screenModel.state.value.users.map { it.username })
 
         screenModel.shuffleAllWatchingUsers()
-        runCurrent()
+        advanceUntilIdle()
 
         val state = screenModel.state.value
         assertFalse(state.isShuffling)
@@ -160,9 +162,8 @@ class UserWatchlistScreenModelTest {
         val initialUsers = screenModel.state.value.users.map { it.username }
 
         screenModel.shuffleAllWatchingUsers()
-        runCurrent()
+        val state = screenModel.state.first { it.errorMessage.isNullOrBlank().not() }
 
-        val state = screenModel.state.value
         assertEquals(initialUsers, state.users.map { it.username })
         assertFalse(state.isShuffling)
         assertFalse(state.hasShuffledAllUsers)

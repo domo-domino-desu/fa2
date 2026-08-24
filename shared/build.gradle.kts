@@ -52,7 +52,7 @@ kotlin {
 
   android {
     namespace = "me.domino.fa2.shared"
-    compileSdk = 36
+    compileSdk = 37
     minSdk = 29
     androidResources { enable = true }
     withHostTestBuilder { sourceSetTreeName = "androidHostTest" }
@@ -148,6 +148,10 @@ tasks.register("test") {
   group = "verification"
   dependsOn("desktopTest")
 }
+
+tasks
+    .matching { it.name.contains("AndroidHostTest") && it.name.contains("lint", ignoreCase = true) }
+    .configureEach { dependsOn("kspAndroidHostTest") }
 
 aboutLibraries {
   export { outputFile = file("src/commonMain/composeResources/files/aboutlibraries.json") }

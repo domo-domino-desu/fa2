@@ -9,10 +9,11 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -28,7 +29,6 @@ import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
 import me.domino.fa2.domain.ocr.ImageOcrResult
 import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.ocr.RecognizedTextBlock
-import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrTranslationMode
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrTranslationStatus
@@ -311,8 +311,6 @@ class SubmissionScreenModelImageOcrTest {
       runTest(dispatcher.scheduler) {
         val settingsService = createTestAppSettingsService()
         val requestedProviders = mutableListOf<TranslationProvider>()
-        val feedbackEvents =
-            mutableListOf<me.domino.fa2.ui.components.feedback.AppFeedbackRequest>()
         val model =
             createSubmissionScreenModelForTest(
                 initialSid = 1,
@@ -338,9 +336,8 @@ class SubmissionScreenModelImageOcrTest {
                 settingsService = settingsService,
             )
 
-        val feedbackJob = launch {
-          model.feedbackEvents.collect { request -> feedbackEvents += request }
-        }
+        val feedbackEvent =
+            async(start = CoroutineStart.UNDISPATCHED) { model.feedbackEvents.first() }
 
         runCurrent()
         model.openImageZoom("https://example.com/ocr-retry.jpg")
@@ -350,7 +347,7 @@ class SubmissionScreenModelImageOcrTest {
         model.translateImageOcrCurrent()
         advanceUntilIdle()
 
-        val feedback = assertNotNull(feedbackEvents.firstOrNull())
+        val feedback = feedbackEvent.await()
         assertEquals(TranslationProvider.GOOGLE, requestedProviders.single())
 
         feedback.onAction?.invoke()
@@ -370,8 +367,6 @@ class SubmissionScreenModelImageOcrTest {
         )
         assertEquals(SubmissionImageOcrTranslationMode.APPLIED, showingState.translationMode)
         assertEquals("HELLO", showingState.blocks.single().translatedText)
-
-        feedbackJob.cancel()
       }
 
   @Test

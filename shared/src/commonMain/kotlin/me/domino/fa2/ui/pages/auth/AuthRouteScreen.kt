@@ -8,7 +8,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import io.github.kdroidfilter.webview.web.LoadingState
+import dev.nucleusframework.webview.web.LoadingState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable

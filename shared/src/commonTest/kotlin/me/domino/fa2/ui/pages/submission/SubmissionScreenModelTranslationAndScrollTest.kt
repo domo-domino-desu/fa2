@@ -7,10 +7,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -25,7 +26,6 @@ import me.domino.fa2.domain.attachmenttext.AttachmentTextDocument
 import me.domino.fa2.domain.attachmenttext.AttachmentTextFormat
 import me.domino.fa2.domain.attachmenttext.AttachmentTextParagraph
 import me.domino.fa2.domain.attachmenttext.AttachmentTextProgress
-import me.domino.fa2.ui.components.feedback.AppFeedbackRequest
 import me.domino.fa2.ui.components.html.SubmissionDescriptionTranslationStatus
 import me.domino.fa2.ui.components.html.TranslationSourceMode
 import me.domino.fa2.ui.pages.submission.attachmenttext.SubmissionAttachmentTextUiState
@@ -363,8 +363,6 @@ class SubmissionScreenModelTranslationAndScrollTest {
                     )
             )
         val requestedProviders = mutableListOf<TranslationProvider>()
-        val feedbackEvents =
-            mutableListOf<me.domino.fa2.ui.components.feedback.AppFeedbackRequest>()
         val model =
             createSubmissionScreenModelForTest(
                 initialSid = 1,
@@ -386,15 +384,14 @@ class SubmissionScreenModelTranslationAndScrollTest {
                     ),
                 settingsService = settingsService,
             )
-        val feedbackJob = launch {
-          model.feedbackEvents.collect { request -> feedbackEvents += request }
-        }
+        val feedbackEvent =
+            async(start = CoroutineStart.UNDISPATCHED) { model.feedbackEvents.first() }
 
         runCurrent()
         model.translateDescriptionCurrent()
         advanceUntilIdle()
 
-        val feedback = assertNotNull(feedbackEvents.firstOrNull())
+        val feedback = feedbackEvent.await()
         feedback.onAction?.invoke()
         advanceUntilIdle()
 
@@ -415,8 +412,6 @@ class SubmissionScreenModelTranslationAndScrollTest {
             retriedState.blocks.single().status,
         )
         assertEquals("HELLO", retriedState.blocks.single().translated)
-
-        feedbackJob.cancel()
       }
 
   @Test
@@ -441,8 +436,6 @@ class SubmissionScreenModelTranslationAndScrollTest {
                     ),
             )
         val requestedProviders = mutableListOf<TranslationProvider>()
-        val feedbackEvents =
-            mutableListOf<me.domino.fa2.ui.components.feedback.AppFeedbackRequest>()
         val model =
             createSubmissionScreenModelForTest(
                 initialSid = 1,
@@ -464,9 +457,8 @@ class SubmissionScreenModelTranslationAndScrollTest {
                     ),
                 settingsService = settingsService,
             )
-        val feedbackJob = launch {
-          model.feedbackEvents.collect { request -> feedbackEvents += request }
-        }
+        val feedbackEvent =
+            async(start = CoroutineStart.UNDISPATCHED) { model.feedbackEvents.first() }
 
         runCurrent()
         model.loadAttachmentTextCurrent()
@@ -474,7 +466,7 @@ class SubmissionScreenModelTranslationAndScrollTest {
         model.translateAttachmentCurrent()
         advanceUntilIdle()
 
-        val feedback = assertNotNull(feedbackEvents.firstOrNull())
+        val feedback = feedbackEvent.await()
         feedback.onAction?.invoke()
         advanceUntilIdle()
 
@@ -496,8 +488,6 @@ class SubmissionScreenModelTranslationAndScrollTest {
             retriedState.blocks.single().status,
         )
         assertEquals("HELLO", retriedState.blocks.single().translated)
-
-        feedbackJob.cancel()
       }
 
   @Test

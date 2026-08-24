@@ -26,6 +26,7 @@ private val supportedFaHosts = setOf("furaffinity.net", "www.furaffinity.net")
 /** Android 入口 Activity。 */
 class MainActivity : ComponentActivity() {
   private val externalFaLinkEvents = MutableSharedFlow<String>(replay = 1, extraBufferCapacity = 1)
+  private val externalFaLinks = externalFaLinkEvents.asSharedFlow()
 
   /**
    * 生命周期创建回调。
@@ -54,7 +55,7 @@ class MainActivity : ComponentActivity() {
             }
             .build()
       }
-      Fa2App(externalFaLinkEvents = externalFaLinkEvents.asSharedFlow())
+      Fa2App(externalFaLinkEvents = externalFaLinks)
     }
   }
 

@@ -4,7 +4,7 @@ import java.io.ByteArrayInputStream
 import java.io.FilterInputStream
 import java.io.InputStream
 import java.util.zip.ZipInputStream
-import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.Loader
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.text.PDFTextStripper
 import org.apache.pdfbox.text.TextPosition
@@ -55,7 +55,7 @@ internal actual fun extractPdfLines(
     reporter: AttachmentTextProgressReporter,
 ): List<PdfLine> {
   reporter.report(stageId = "open_document", stageFraction = 0f, message = "正在打开 PDF")
-  PDDocument.load(bytes).use { document ->
+  Loader.loadPDF(bytes).use { document ->
     reporter.report(
         stageId = "open_document",
         stageFraction = 1f,

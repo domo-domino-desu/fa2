@@ -1,10 +1,11 @@
+import dev.nucleusframework.desktop.application.dsl.TargetFormat
 import org.gradle.api.tasks.testing.Test
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
   alias(libs.plugins.composeMultiplatform)
   alias(libs.plugins.composeCompiler)
+  alias(libs.plugins.nucleus)
 }
 
 val appVersionName = providers.gradleProperty("APP_VERSION_NAME").get()
@@ -32,6 +33,9 @@ kotlin {
         implementation(libs.room.runtime)
         implementation(libs.sqlite.bundled)
         implementation(libs.slf4j.simple)
+        implementation(libs.nucleus.application)
+        implementation(libs.nucleus.core.runtime)
+        implementation(libs.nucleus.decorated.window.tao)
       }
     }
 
@@ -45,19 +49,18 @@ kotlin {
   }
 }
 
-compose.desktop {
-  application {
-    mainClass = "me.domino.fa2.desktop.MainKt"
+nucleus.application {
+  mainClass = "me.domino.fa2.desktop.MainKt"
 
-    nativeDistributions {
-      targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-      packageName = "fa2"
-      packageVersion = desktopPackageVersion
+  nativeDistributions {
+    targetFormats(TargetFormat.Dmg, TargetFormat.Nsis, TargetFormat.Deb)
+    appName = "fa2"
+    packageName = "fa2"
+    packageVersion = desktopPackageVersion
 
-      linux { iconFile.set(project.file("src/desktopMain/resources/icon/icon.png")) }
-      windows { iconFile.set(project.file("src/desktopMain/resources/icon/icon.ico")) }
-      macOS { iconFile.set(project.file("src/desktopMain/resources/icon/icon.icns")) }
-    }
+    linux { iconFile.set(project.file("src/desktopMain/resources/icon/icon.png")) }
+    windows { iconFile.set(project.file("src/desktopMain/resources/icon/icon.ico")) }
+    macOS { iconFile.set(project.file("src/desktopMain/resources/icon/icon.icns")) }
   }
 }
 

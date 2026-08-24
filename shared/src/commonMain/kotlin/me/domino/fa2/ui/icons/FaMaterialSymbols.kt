@@ -2,39 +2,39 @@ package me.domino.fa2.ui.icons
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import me.domino.fa2.generated.symbols.icons.materialsymbols.Icons as GeneratedIcons
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.AddW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.AddW400OutlinedFill
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.AppBadgingW400Outlined
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.AppBadgingW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.AppBadgingW400OutlinedFill
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ArrowBackW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ArrowCircleRightW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ArrowDownwardAltW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ArrowUpwardAltW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.AttributionW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.CategoryW400Outlined
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.CloseW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.CloseW400OutlinedFill
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.CodeW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.CommentW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ContentCopyW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.DateRangeW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.DocumentScannerW400Outlined
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.DoneW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.DoneW400OutlinedFill
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.DownloadW400Outlined
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.DownloadW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.DownloadW400OutlinedFill
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ExpandLessW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ExpandMoreW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ExploreW400Outlined
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ExploreW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ExploreW400OutlinedFill
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.FavoriteW400Outlined
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.FavoriteW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.FavoriteW400OutlinedFill
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.FilePresentW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.FilterAltW400Outlined
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.HistoryW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.HistoryW400OutlinedFill
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.HomeW400Outlined
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.HomeW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.HomeW400OutlinedFill
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ImageW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.InboxW400Outlined
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.InboxW400Outlinedfill1
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.InfoW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.InboxW400OutlinedFill
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.InfoW400OutlinedFill
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.Inventory2W400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.KeyboardArrowDownW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.KeyboardArrowRightW400Outlined
@@ -43,19 +43,19 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.KeyboardDoubl
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.KeyboardDoubleArrowUpW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.LogoutW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.MenuW400Outlined
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.MenuW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.MenuW400OutlinedFill
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.MovieW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.MusicNoteW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.NotificationsW400Outlined
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.NotificationsW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.NotificationsW400OutlinedFill
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.OutputCircleW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ReceiptLongW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.RefreshW400Outlined
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.RestartAltW400Outlinedfill1
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SaveW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.RestartAltW400OutlinedFill
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SaveW400OutlinedFill
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SearchW400Outlined
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SearchW400Outlinedfill1
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SettingsW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SearchW400OutlinedFill
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SettingsW400OutlinedFill
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ShareW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ShuffleW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.SubjectW400Outlined
@@ -65,31 +65,31 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.TroubleshootW
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VerticalAlignBottomW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VerticalAlignTopW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VisibilityOffW400Outlined
-import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VisibilityOffW400Outlinedfill1
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VisibilityOffW400OutlinedFill
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.VisibilityW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.WrapTextW400Outlined
 
 object FaMaterialSymbols {
   object Filled {
-    val Add: ImageVector = GeneratedIcons.AddW400Outlinedfill1
-    val AppBadging: ImageVector = GeneratedIcons.AppBadgingW400Outlinedfill1
-    val Close: ImageVector = GeneratedIcons.CloseW400Outlinedfill1
-    val Done: ImageVector = GeneratedIcons.DoneW400Outlinedfill1
-    val Download: ImageVector = GeneratedIcons.DownloadW400Outlinedfill1
-    val Explore: ImageVector = GeneratedIcons.ExploreW400Outlinedfill1
-    val Favorite: ImageVector = GeneratedIcons.FavoriteW400Outlinedfill1
+    val Add: ImageVector = GeneratedIcons.AddW400OutlinedFill
+    val AppBadging: ImageVector = GeneratedIcons.AppBadgingW400OutlinedFill
+    val Close: ImageVector = GeneratedIcons.CloseW400OutlinedFill
+    val Done: ImageVector = GeneratedIcons.DoneW400OutlinedFill
+    val Download: ImageVector = GeneratedIcons.DownloadW400OutlinedFill
+    val Explore: ImageVector = GeneratedIcons.ExploreW400OutlinedFill
+    val Favorite: ImageVector = GeneratedIcons.FavoriteW400OutlinedFill
     val FavoriteBorder: ImageVector = GeneratedIcons.FavoriteW400Outlined
-    val History: ImageVector = GeneratedIcons.HistoryW400Outlinedfill1
-    val Home: ImageVector = GeneratedIcons.HomeW400Outlinedfill1
-    val Inbox: ImageVector = GeneratedIcons.InboxW400Outlinedfill1
-    val Info: ImageVector = GeneratedIcons.InfoW400Outlinedfill1
-    val Menu: ImageVector = GeneratedIcons.MenuW400Outlinedfill1
-    val Notifications: ImageVector = GeneratedIcons.NotificationsW400Outlinedfill1
-    val RestartAlt: ImageVector = GeneratedIcons.RestartAltW400Outlinedfill1
-    val Save: ImageVector = GeneratedIcons.SaveW400Outlinedfill1
-    val Search: ImageVector = GeneratedIcons.SearchW400Outlinedfill1
-    val Settings: ImageVector = GeneratedIcons.SettingsW400Outlinedfill1
-    val VisibilityOff: ImageVector = GeneratedIcons.VisibilityOffW400Outlinedfill1
+    val History: ImageVector = GeneratedIcons.HistoryW400OutlinedFill
+    val Home: ImageVector = GeneratedIcons.HomeW400OutlinedFill
+    val Inbox: ImageVector = GeneratedIcons.InboxW400OutlinedFill
+    val Info: ImageVector = GeneratedIcons.InfoW400OutlinedFill
+    val Menu: ImageVector = GeneratedIcons.MenuW400OutlinedFill
+    val Notifications: ImageVector = GeneratedIcons.NotificationsW400OutlinedFill
+    val RestartAlt: ImageVector = GeneratedIcons.RestartAltW400OutlinedFill
+    val Save: ImageVector = GeneratedIcons.SaveW400OutlinedFill
+    val Search: ImageVector = GeneratedIcons.SearchW400OutlinedFill
+    val Settings: ImageVector = GeneratedIcons.SettingsW400OutlinedFill
+    val VisibilityOff: ImageVector = GeneratedIcons.VisibilityOffW400OutlinedFill
   }
 
   object Outlined {
