@@ -1,12 +1,18 @@
 package me.domino.fa2.desktop
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
 import dev.nucleusframework.application.DecoratedWindow
 import dev.nucleusframework.application.NucleusBackend
 import dev.nucleusframework.application.nucleusApplication
+import dev.nucleusframework.window.TitleBar
 import io.ktor.client.HttpClient
 import me.domino.fa2.data.remote.fa.media.installCoilImageProgressSupport
 import me.domino.fa2.data.settings.AppSettingsService
@@ -60,7 +66,10 @@ fun main() =
               }
               .build()
         }
-        Fa2App()
+        Column(modifier = Modifier.fillMaxSize()) {
+          TitleBar { Text("fa2") }
+          Box(modifier = Modifier.weight(1f)) { Fa2App() }
+        }
       }
     }
 
