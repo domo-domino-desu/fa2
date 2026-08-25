@@ -9,17 +9,18 @@ import androidx.compose.ui.Modifier
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
-import dev.nucleusframework.application.DecoratedWindow
 import dev.nucleusframework.application.NucleusBackend
 import dev.nucleusframework.application.nucleusApplication
-import dev.nucleusframework.window.TitleBar
+import dev.nucleusframework.window.material.MaterialDecoratedWindow
+import dev.nucleusframework.window.material.MaterialTitleBar
 import io.ktor.client.HttpClient
 import me.domino.fa2.data.remote.fa.media.installCoilImageProgressSupport
 import me.domino.fa2.data.settings.AppSettingsService
 import me.domino.fa2.di.KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT
 import me.domino.fa2.di.startAppKoin
 import me.domino.fa2.di.stopAppKoin
-import me.domino.fa2.ui.app.Fa2App
+import me.domino.fa2.ui.app.Fa2AppContent
+import me.domino.fa2.ui.app.Fa2AppEnvironment
 import me.domino.fa2.utils.logging.FaLog
 import okio.Path
 import okio.Path.Companion.toPath
@@ -36,39 +37,41 @@ fun main() =
       FaLog.init(severity)
       FaLog.withTag("DesktopMain").i { "桌面启动 -> 日志级别=${severity.name}" }
       val koin = startAppKoin(desktopPlatformModule())
-      DecoratedWindow(
-          onCloseRequest = {
-            FaLog.withTag("DesktopMain").i { "窗口关闭 -> 释放资源" }
-            stopAppKoin()
-            exitApplication()
-          },
-          title = "fa2",
-      ) {
-        LaunchedEffect(koin) {
-          runCatching {
-                val settingsService = koin.get<AppSettingsService>()
-                settingsService.ensureLoaded()
-                FaLog.setMinSeverity(settingsService.settings.value.logLevel.severity)
-              }
-              .onFailure { error -> FaLog.withTag("DesktopMain").e(error) { "应用读取日志级别失败" } }
-        }
-        setSingletonImageLoaderFactory { platformContext ->
-          val cachedDownloadClient =
-              GlobalContext.get()
-                  .get<HttpClient>(qualifier = named(KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT))
-          ImageLoader.Builder(platformContext)
-              .installCoilImageProgressSupport(cachedDownloadClient = cachedDownloadClient)
-              .diskCache {
-                DiskCache.Builder()
-                    .directory(desktopCoilDiskCachePath())
-                    .maxSizeBytes(coilDiskCacheMaxBytes)
-                    .build()
-              }
-              .build()
-        }
-        Column(modifier = Modifier.fillMaxSize()) {
-          TitleBar { Text("fa2") }
-          Box(modifier = Modifier.weight(1f)) { Fa2App() }
+      Fa2AppEnvironment {
+        MaterialDecoratedWindow(
+            onCloseRequest = {
+              FaLog.withTag("DesktopMain").i { "窗口关闭 -> 释放资源" }
+              stopAppKoin()
+              exitApplication()
+            },
+            title = "fa2",
+        ) {
+          LaunchedEffect(koin) {
+            runCatching {
+                  val settingsService = koin.get<AppSettingsService>()
+                  settingsService.ensureLoaded()
+                  FaLog.setMinSeverity(settingsService.settings.value.logLevel.severity)
+                }
+                .onFailure { error -> FaLog.withTag("DesktopMain").e(error) { "应用读取日志级别失败" } }
+          }
+          setSingletonImageLoaderFactory { platformContext ->
+            val cachedDownloadClient =
+                GlobalContext.get()
+                    .get<HttpClient>(qualifier = named(KOIN_QUALIFIER_CACHED_DOWNLOAD_CLIENT))
+            ImageLoader.Builder(platformContext)
+                .installCoilImageProgressSupport(cachedDownloadClient = cachedDownloadClient)
+                .diskCache {
+                  DiskCache.Builder()
+                      .directory(desktopCoilDiskCachePath())
+                      .maxSizeBytes(coilDiskCacheMaxBytes)
+                      .build()
+                }
+                .build()
+          }
+          Column(modifier = Modifier.fillMaxSize()) {
+            MaterialTitleBar { Text("fa2") }
+            Box(modifier = Modifier.weight(1f)) { Fa2AppContent() }
+          }
         }
       }
     }

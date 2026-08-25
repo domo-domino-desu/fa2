@@ -35,6 +35,7 @@ kotlin {
         implementation(libs.slf4j.simple)
         implementation(libs.nucleus.application)
         implementation(libs.nucleus.core.runtime)
+        implementation(libs.nucleus.decorated.window.material3)
         implementation(libs.nucleus.decorated.window.tao)
       }
     }

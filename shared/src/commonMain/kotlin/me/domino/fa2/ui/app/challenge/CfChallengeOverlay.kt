@@ -97,11 +97,8 @@ fun CfChallengeOverlay(
 @Composable
 private fun challengeStatusMessage(state: CfChallengeUiState.Active): String =
     when (val status = state.status) {
-      CfChallengeStatus.AwaitingUserAction -> {
-        val rayText =
-            state.cfRay?.trim()?.takeIf(String::isNotBlank)?.let { "\nCF-Ray: $it" }.orEmpty()
-        stringResource(Res.string.challenge_awaiting_user_action, rayText)
-      }
+      CfChallengeStatus.AwaitingUserAction ->
+          stringResource(Res.string.challenge_awaiting_user_action)
       CfChallengeStatus.Verifying -> stringResource(Res.string.challenge_validating_result)
       is CfChallengeStatus.VerificationFailed ->
           stringResource(Res.string.challenge_verification_failed, status.detail?.trim().orEmpty())

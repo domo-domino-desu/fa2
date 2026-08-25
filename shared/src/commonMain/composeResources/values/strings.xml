@@ -356,8 +356,8 @@
   <string name="unfavorite">Unfavorite</string>
   <string name="list_delimiter">, </string>
   <string name="save_failed">Save failed: %1$s</string>
-  <string name="challenge_awaiting_user_action">Complete the Cloudflare check in the WebView, then
-    tap "I've completed verification".%1$s</string>
+  <string name="challenge_awaiting_user_action">Complete the Cloudflare check, then tap "I've completed
+    verification"</string>
   <string name="login_incomplete">Sign-in not completed: %1$s</string>
   <string name="translate_content_description">Translate %1$s</string>
   <string name="wrap_text_content_description">Rewrap %1$s</string>

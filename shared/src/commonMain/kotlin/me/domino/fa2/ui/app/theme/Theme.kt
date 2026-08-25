@@ -18,6 +18,23 @@ fun Fa2Theme(
     /** 主题包裹的页面内容。 */
     content: @Composable () -> Unit,
 ) {
+  ProvideFa2Theme(themeMode = themeMode) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onBackground,
+        content = content,
+    )
+  }
+}
+
+/** 只提供应用主题，不绘制界面节点；用于需要让窗口装饰读取主题的桌面入口。 */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun ProvideFa2Theme(
+    themeMode: ThemeMode = ThemeMode.SYSTEM,
+    content: @Composable () -> Unit,
+) {
   val forceDarkMode =
       when (themeMode) {
         ThemeMode.SYSTEM -> null
@@ -27,15 +44,7 @@ fun Fa2Theme(
 
   MaterialExpressiveTheme(
       colorScheme = rememberPlatformColorScheme(forceDarkMode),
-      content = {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background,
-            contentColor = MaterialTheme.colorScheme.onBackground,
-        ) {
-          content()
-        }
-      },
+      content = content,
   )
 }
 

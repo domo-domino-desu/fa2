@@ -320,7 +320,7 @@
   <string name="unfavorite">取消收藏</string>
   <string name="list_delimiter">、</string>
   <string name="save_failed">保存失败：%1$s</string>
-  <string name="challenge_awaiting_user_action">请在 WebView 中完成 Cloudflare 验证后点击“我已完成验证”。%1$s</string>
+  <string name="challenge_awaiting_user_action">请完成 Cloudflare 验证后点击“我已完成验证”</string>
   <string name="login_incomplete">登录未完成：%1$s</string>
   <string name="translate_content_description">翻译%1$s</string>
   <string name="wrap_text_content_description">重新换行%1$s</string>
