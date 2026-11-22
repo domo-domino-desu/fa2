@@ -374,4 +374,7 @@
   <string name="jump_to_page">跳页</string>
   <string name="target_page_number">目标页码</string>
   <string name="target_page_number_with_range">目标页码（1-%1$d）</string>
+  <string name="translation_provider_index_translate">IndexTranslate</string>
+  <string name="index_translate_model">IndexTranslate 模型</string>
+  <string name="index_translate_model_desc">用于 IndexTranslate 翻译，以及谷歌翻译失败时的自动兜底。</string>
 </resources>

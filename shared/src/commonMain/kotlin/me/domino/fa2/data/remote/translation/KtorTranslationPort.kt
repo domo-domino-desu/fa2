@@ -1,6 +1,7 @@
 package me.domino.fa2.data.remote.translation
 
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.CancellationException
 import me.domino.fa2.data.settings.TranslationProvider
 
 /** 基于 Ktor 的翻译端口实现，按 TranslationProvider 分发到对应客户端。 */
@@ -12,6 +13,7 @@ internal constructor(
     private val microsoftClient: TranslationProviderClient,
     /** OpenAI 兼容翻译客户端。 */
     private val openAiClient: TranslationProviderClient,
+    private val indexTranslateClient: TranslationProviderClient,
 ) : TranslationPort {
   /** 使用单个 Ktor HttpClient 构建所有翻译客户端的便捷构造函数。 */
   constructor(
@@ -20,13 +22,24 @@ internal constructor(
       googleClient = GoogleTranslationClient(TranslationHttpTransport(client)),
       microsoftClient = MicrosoftTranslationClient(TranslationHttpTransport(client)),
       openAiClient = OpenAiCompatibleTranslationClient(TranslationHttpTransport(client)),
+      indexTranslateClient = IndexTranslateTranslationClient(client),
   )
 
   /** 按请求中的 provider 字段选择对应客户端执行翻译。 */
   override suspend fun translate(request: TranslationRequest): String {
     val normalized = request.normalized()
     return when (normalized.provider) {
-      TranslationProvider.GOOGLE -> googleClient.translate(normalized)
+      TranslationProvider.GOOGLE ->
+          try {
+            googleClient.translate(normalized)
+          } catch (cancelled: CancellationException) {
+            throw cancelled
+          } catch (_: Exception) {
+            indexTranslateClient.translate(
+                normalized.copy(provider = TranslationProvider.INDEX_TRANSLATE)
+            )
+          }
+      TranslationProvider.INDEX_TRANSLATE -> indexTranslateClient.translate(normalized)
       TranslationProvider.MICROSOFT -> microsoftClient.translate(normalized)
       TranslationProvider.OPENAI_COMPATIBLE -> openAiClient.translate(normalized)
     }

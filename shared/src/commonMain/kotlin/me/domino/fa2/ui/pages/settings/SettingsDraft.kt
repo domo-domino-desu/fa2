@@ -5,6 +5,7 @@ import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
 import me.domino.fa2.data.settings.DownloadFileNameMode
 import me.domino.fa2.data.settings.DownloadSubfolderMode
+import me.domino.fa2.data.settings.IndexTranslateModel
 import me.domino.fa2.data.settings.MetadataDisplayMode
 import me.domino.fa2.data.settings.OpenAiTranslationConfig
 import me.domino.fa2.data.settings.ThemeMode
@@ -96,6 +97,7 @@ internal data class SettingsDraft(
     val openAiModel: String,
     /** OpenAI 兼容接口的翻译提示词模板。 */
     val openAiPromptTemplate: String,
+    val indexTranslateModel: IndexTranslateModel = IndexTranslateModel.default,
 ) {
   /** 将草稿转换为 AppSettings，输入值不合法时返回 null。 */
   fun toAppSettingsOrNull(): AppSettings? {
@@ -110,6 +112,7 @@ internal data class SettingsDraft(
         translationTargetLanguage = translationTargetLanguage,
         metadataDisplayMode = metadataDisplayMode,
         translationProvider = translationProvider,
+        indexTranslateModel = indexTranslateModel,
         themeMode = themeMode,
         blockedSubmissionWaterfallMode = blockedSubmissionWaterfallMode,
         blockedSubmissionPagerMode = blockedSubmissionPagerMode,
@@ -254,6 +257,7 @@ internal data class SettingsDraft(
             translationTargetLanguage = settings.translationTargetLanguage,
             metadataDisplayMode = settings.metadataDisplayMode,
             translationProvider = settings.translationProvider,
+            indexTranslateModel = settings.indexTranslateModel,
             themeMode = settings.themeMode,
             blockedSubmissionWaterfallMode = settings.blockedSubmissionWaterfallMode,
             blockedSubmissionPagerMode = settings.blockedSubmissionPagerMode,

@@ -16,6 +16,26 @@ import okio.Path.Companion.toPath
 
 class AppSettingsStorageTest {
   @Test
+  fun indexTranslateModelDefaultsAndRoundTripsWithoutApiKey() = runTest {
+    val test = createTestStorage()
+    assertEquals(IndexTranslateModel.NINE_B, test.storage.load().indexTranslateModel)
+    for (model in IndexTranslateModel.entries) {
+      test.storage.save(
+          AppSettings(
+              translationProvider = TranslationProvider.INDEX_TRANSLATE,
+              indexTranslateModel = model,
+          )
+      )
+      val restored = test.storage.load()
+      assertEquals(model, restored.indexTranslateModel)
+      assertEquals(TranslationProvider.INDEX_TRANSLATE, restored.translationProvider)
+      assertEquals("", restored.openAiTranslationConfig.apiKey)
+    }
+    test.keyValueStorage.save(AppSettingsStorage.KEY_INDEX_TRANSLATE_MODEL, "unknown-model")
+    assertEquals(IndexTranslateModel.NINE_B, test.storage.load().indexTranslateModel)
+  }
+
+  @Test
   fun watchRecommendationPageSizeUsesDefaultAndNormalization() = runTest {
     val randomSuffix = Random.nextLong().toString().replace('-', '0')
     val tempPath =

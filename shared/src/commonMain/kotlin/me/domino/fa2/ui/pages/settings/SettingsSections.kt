@@ -16,6 +16,7 @@ import me.domino.fa2.data.settings.AppSettings
 import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
 import me.domino.fa2.data.settings.DownloadFileNameMode
+import me.domino.fa2.data.settings.IndexTranslateModel
 import me.domino.fa2.data.settings.MetadataDisplayMode
 import me.domino.fa2.data.settings.OpenAiTranslationConfig
 import me.domino.fa2.data.settings.TranslationProvider
@@ -114,6 +115,17 @@ internal fun TranslationSettingsSection(
             optionLabel = { option -> translationProviderLabel(option) },
             onSelect = { selected -> onDraftChange(draft.copy(translationProvider = selected)) },
         )
+
+        if (draft.translationProvider == TranslationProvider.INDEX_TRANSLATE) {
+          SettingsDropdownField(
+              label = stringResource(Res.string.index_translate_model),
+              supportingText = stringResource(Res.string.index_translate_model_desc),
+              selected = draft.indexTranslateModel,
+              options = IndexTranslateModel.entries,
+              optionLabel = { it.label },
+              onSelect = { onDraftChange(draft.copy(indexTranslateModel = it)) },
+          )
+        }
 
         SettingsDropdownField(
             label = stringResource(Res.string.translation_target_language),

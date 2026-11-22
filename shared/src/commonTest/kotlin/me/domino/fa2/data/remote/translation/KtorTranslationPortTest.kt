@@ -99,6 +99,7 @@ class KtorTranslationPortTest {
             googleClient = FakeProviderClient("google"),
             microsoftClient = FakeProviderClient("microsoft"),
             openAiClient = FakeProviderClient("openai"),
+            indexTranslateClient = FakeProviderClient("index_translate"),
         )
 
     assertEquals(

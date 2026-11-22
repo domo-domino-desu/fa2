@@ -414,4 +414,7 @@
   <string name="jump_to_page">Jump to page</string>
   <string name="target_page_number">Target page number</string>
   <string name="target_page_number_with_range">Target page number (1-%1$d)</string>
+  <string name="translation_provider_index_translate">IndexTranslate</string>
+  <string name="index_translate_model">IndexTranslate model</string>
+  <string name="index_translate_model_desc">Used for IndexTranslate and when Google translation fails.</string>
 </resources>

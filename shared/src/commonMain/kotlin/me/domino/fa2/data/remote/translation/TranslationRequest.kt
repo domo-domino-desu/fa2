@@ -1,5 +1,6 @@
 package me.domino.fa2.data.remote.translation
 
+import me.domino.fa2.data.settings.IndexTranslateModel
 import me.domino.fa2.data.settings.OpenAiTranslationConfig
 import me.domino.fa2.data.settings.TranslationProvider
 
@@ -10,6 +11,7 @@ data class TranslationRequest(
     val sourceLanguageCode: String = defaultSourceLanguageCode,
     val targetLanguageCode: String = defaultTargetLanguageCode,
     val openAiConfig: OpenAiTranslationConfig? = null,
+    val indexTranslateModel: IndexTranslateModel = IndexTranslateModel.default,
 ) {
   init {
     require(sourceText.isNotBlank()) { "Translation source text must not be blank." }

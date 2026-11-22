@@ -75,6 +75,7 @@ class SubmissionTextTranslationEngine(
               port.translate(
                   TranslationRequest(
                       provider = settings.translationProvider,
+                      indexTranslateModel = settings.indexTranslateModel,
                       sourceText = texts.joinToString(separator),
                       targetLanguageCode = settings.translationTargetLanguage.languageCode,
                       openAiConfig =

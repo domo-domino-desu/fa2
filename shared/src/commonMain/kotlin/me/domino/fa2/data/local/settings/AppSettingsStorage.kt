@@ -8,6 +8,7 @@ import me.domino.fa2.data.settings.BlockedSubmissionPagerMode
 import me.domino.fa2.data.settings.BlockedSubmissionWaterfallMode
 import me.domino.fa2.data.settings.DownloadFileNameMode
 import me.domino.fa2.data.settings.DownloadSubfolderMode
+import me.domino.fa2.data.settings.IndexTranslateModel
 import me.domino.fa2.data.settings.LogLevelSetting
 import me.domino.fa2.data.settings.MetadataDisplayMode
 import me.domino.fa2.data.settings.OpenAiTranslationConfig
@@ -101,6 +102,8 @@ class AppSettingsStorage(private val kv: KeyValueStorage, private val secretVaul
             translationTargetLanguage = translationTargetLanguage,
             metadataDisplayMode = metadataDisplayMode,
             translationProvider = provider,
+            indexTranslateModel =
+                IndexTranslateModel.fromPersistedValue(kv.load(KEY_INDEX_TRANSLATE_MODEL)),
             openAiTranslationConfig = rawOpenAiConfig,
             translationChunkWordLimit = rawChunkWordLimit,
             translationMaxConcurrency = rawMaxConcurrency,
@@ -131,6 +134,7 @@ class AppSettingsStorage(private val kv: KeyValueStorage, private val secretVaul
             KEY_TRANSLATION_TARGET_LANGUAGE to normalized.translationTargetLanguage.persistedValue,
             KEY_METADATA_DISPLAY_MODE to normalized.metadataDisplayMode.persistedValue,
             KEY_TRANSLATION_PROVIDER to normalized.translationProvider.persistedValue,
+            KEY_INDEX_TRANSLATE_MODEL to normalized.indexTranslateModel.modelId,
             KEY_OPENAI_BASE_URL to normalized.openAiTranslationConfig.baseUrl,
             KEY_OPENAI_MODEL to normalized.openAiTranslationConfig.model,
             KEY_OPENAI_PROMPT to normalized.openAiTranslationConfig.promptTemplate,
@@ -178,6 +182,8 @@ class AppSettingsStorage(private val kv: KeyValueStorage, private val secretVaul
     const val KEY_TRANSLATION_ENABLED: String = "settings.translation.enabled"
     const val KEY_TRANSLATION_TARGET_LANGUAGE: String = "settings.translation.targetLanguage"
     const val KEY_METADATA_DISPLAY_MODE: String = "settings.translation.metadataDisplayMode"
+    const val KEY_INDEX_TRANSLATE_MODEL: String =
+        "settings.submission.translation.indexTranslateModel"
     const val KEY_TRANSLATION_PROVIDER: String = "settings.submission.translation.provider"
     const val KEY_OPENAI_BASE_URL: String = "settings.submission.translation.openai.baseUrl"
     const val KEY_OPENAI_API_KEY: String = "settings.submission.translation.openai.apiKey"

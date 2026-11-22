@@ -29,6 +29,8 @@ internal fun translationTargetLanguageLabel(language: TranslationTargetLanguage)
 @Composable
 internal fun translationProviderLabel(provider: TranslationProvider): String =
     when (provider) {
+      TranslationProvider.INDEX_TRANSLATE ->
+          stringResource(Res.string.translation_provider_index_translate)
       TranslationProvider.GOOGLE -> stringResource(Res.string.translation_provider_google)
       TranslationProvider.MICROSOFT -> stringResource(Res.string.translation_provider_microsoft)
       TranslationProvider.OPENAI_COMPATIBLE ->

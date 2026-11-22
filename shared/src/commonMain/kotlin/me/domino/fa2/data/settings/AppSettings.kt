@@ -9,6 +9,7 @@ data class AppSettings(
     val translationTargetLanguage: TranslationTargetLanguage = defaultTranslationTargetLanguage,
     val metadataDisplayMode: MetadataDisplayMode = defaultMetadataDisplayMode,
     val translationProvider: TranslationProvider = defaultTranslationProvider,
+    val indexTranslateModel: IndexTranslateModel = IndexTranslateModel.default,
     val openAiTranslationConfig: OpenAiTranslationConfig = OpenAiTranslationConfig(),
     val translationChunkWordLimit: Int = defaultTranslationChunkWordLimit,
     val translationMaxConcurrency: Int = defaultTranslationMaxConcurrency,
@@ -41,6 +42,7 @@ data class AppSettings(
     val supportedTranslationProviders: List<TranslationProvider> =
         listOf(
             TranslationProvider.GOOGLE,
+            TranslationProvider.INDEX_TRANSLATE,
             TranslationProvider.MICROSOFT,
             TranslationProvider.OPENAI_COMPATIBLE,
         )
@@ -206,6 +208,7 @@ enum class MetadataDisplayMode(val persistedValue: String) {
 /** 描述翻译 Provider。 */
 enum class TranslationProvider(val persistedValue: String) {
   GOOGLE("google"),
+  INDEX_TRANSLATE("index_translate"),
   MICROSOFT("microsoft"),
   OPENAI_COMPATIBLE("openai_compatible");
 
