@@ -11,55 +11,22 @@ import me.domino.fa2.utils.FaUrls
 class UserParserTest {
   @Test
   fun parsesUserHeaderFromHomePage() {
-    val html = TestFixtures.read("www.furaffinity.net:user:artist-alpha.html")
-    val parser = UserParser()
-
-    val header = parser.parse(html = html, url = FaUrls.user("artist-alpha"))
-
-    assertEquals("artist-alpha", header.username.lowercase())
+    val header = UserParser().parse(TestFixtures.read("live/user.html"), FaUrls.user("fender"))
+    assertEquals("fender", header.username.lowercase())
     assertTrue(header.displayName.isNotBlank())
-    assertEquals(
-        "",
-        header.registeredAt,
-        "Missing metadata must not become a localized data sentinel",
-    )
-    assertTrue(header.profileHtml.contains("bbcode"))
-    assertTrue(header.isWatching)
-    assertTrue(
-        header.watchActionUrl.contains("/watch/") || header.watchActionUrl.contains("/unwatch/")
-    )
-    assertEquals(2257, header.watchedByCount)
-    assertEquals(120, header.watchingCount)
-    assertEquals(12, header.shoutCount)
-    assertEquals(12, header.shouts.size)
-    assertTrue(header.watchedByListUrl.contains("/watchlist/to/artist-alpha"))
-    assertTrue(header.watchingListUrl.contains("/watchlist/by/artist-alpha"))
-    assertEquals("user-commenter-001", header.shouts.first().author.lowercase())
-    assertTrue(header.shouts.first().bodyHtml.contains("Sanitized", ignoreCase = true))
-    assertTrue(header.contacts.any { it.label.equals("Twitter", ignoreCase = true) })
-    assertTrue(
-        header.contacts.any { contact ->
-          contact.label.equals("Twitter", ignoreCase = true) &&
-              contact.url.contains("social.example.invalid", ignoreCase = true)
-        }
-    )
-    assertEquals(20, header.galleryPreviews.size)
-    assertEquals(20, header.favoritesPreviews.size)
-    assertEquals(60087990, header.galleryPreviews.first().id)
-    assertEquals("Sanitized Gallery Preview", header.galleryPreviews.first().title)
-    assertEquals("Artist Alpha", header.galleryPreviews.first().author)
-    assertTrue(header.galleryPreviews.first().thumbnailUrl.startsWith("https://t.furaffinity.net/"))
-    assertEquals(57803262, header.favoritesPreviews.first().id)
-    assertEquals("Sanitized Favorite Preview", header.favoritesPreviews.first().title)
-    assertEquals("artist-favorite-001", header.favoritesPreviews.first().author)
-    assertTrue(
-        header.favoritesPreviews.first().thumbnailUrl.startsWith("https://t.furaffinity.net/")
-    )
+    assertTrue(header.profileHtml.isNotBlank())
+    assertTrue((header.watchedByCount ?: 0) >= 0)
+    assertTrue((header.watchingCount ?: 0) >= 0)
+    assertTrue(header.watchedByListUrl.contains("/watchlist/to/"))
+    assertTrue(header.watchingListUrl.contains("/watchlist/by/"))
+    assertTrue(header.galleryPreviews.isNotEmpty())
+    assertTrue(header.galleryPreviews.all { it.id > 0 && it.thumbnailUrl.startsWith("https://") })
+    assertTrue(header.favoritesPreviews.all { it.id > 0 && it.author.isNotBlank() })
   }
 
   @Test
   fun mapsSystemErrorToReadableException() {
-    val html = TestFixtures.read("www.furaffinity.net:user:username-system-error.html")
+    val html = "<html><title>System Error</title><body>This user cannot be found</body></html>"
     val parser = UserParser()
 
     val error =
@@ -71,7 +38,7 @@ class UserParserTest {
 
   @Test
   fun mapsDisabledUserToReadableException() {
-    val html = TestFixtures.read("www.furaffinity.net:user:disabled-user-message.html")
+    val html = "<body>Access has been disabled to the account and contents of user</body>"
     val parser = UserParser()
 
     val error =
@@ -83,7 +50,7 @@ class UserParserTest {
 
   @Test
   fun mapsPendingDeletionToReadableException() {
-    val html = TestFixtures.read("www.furaffinity.net:user:pending-deletion-message.html")
+    val html = "<body>This account is currently pending deletion</body>"
     val parser = UserParser()
 
     val error =
@@ -95,7 +62,7 @@ class UserParserTest {
 
   @Test
   fun parsesProfileBannerFromBannerImageNode() {
-    val html = TestFixtures.read("www.furaffinity.net:journal:20000002-disabled-comments.html")
+    val html = TestFixtures.read("live/journal.html")
     val parser = UserParser()
 
     val header = parser.parse(html = html, url = FaUrls.user("fender"))

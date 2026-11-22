@@ -319,3 +319,8 @@ tasks.configureEach {
     dependsOn(generateAboutMetadata)
   }
 }
+
+// Export updates the checked-in resource snapshot; order it before resource copying when requested.
+tasks
+    .matching { it.name == "copyNonXmlValueResourcesForCommonMain" }
+    .configureEach { mustRunAfter("exportLibraryDefinitions") }

@@ -30,7 +30,7 @@ class UserSectionRepositoriesTest {
         url = FaUrls.gallery("artist-alpha"),
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:gallery:artist-alpha:.html"),
+                body = TestFixtures.read("live/gallery.html"),
                 url = FaUrls.gallery("artist-alpha"),
             ),
     )
@@ -42,7 +42,7 @@ class UserSectionRepositoriesTest {
         url = FaUrls.favorites("artist-alpha"),
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:favorites:artist-alpha:.html"),
+                body = TestFixtures.read("live/favorites.html"),
                 url = FaUrls.favorites("artist-alpha"),
             ),
     )
@@ -60,7 +60,7 @@ class UserSectionRepositoriesTest {
         url = FaUrls.journals("artist-alpha"),
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:journals:artist-alpha:.html"),
+                body = TestFixtures.read("live/journals.html"),
                 url = FaUrls.journals("artist-alpha"),
             ),
     )
@@ -69,16 +69,16 @@ class UserSectionRepositoriesTest {
     assertTrue(journalsState.data.journals.isNotEmpty())
 
     source.enqueue(
-        url = FaUrls.journal(20000001),
+        url = FaUrls.journal(11377368),
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:journal:20000001-withcomments.html"),
-                url = FaUrls.journal(20000001),
+                body = TestFixtures.read("live/journal.html"),
+                url = FaUrls.journal(11377368),
             ),
     )
-    val detailState = stores.journalRepository.loadJournalDetail(20000001)
+    val detailState = stores.journalRepository.loadJournalDetail(11377368)
     assertTrue(detailState is ResourceResult.Success)
-    assertEquals(20000001, detailState.data.id)
+    assertEquals(11377368, detailState.data.id)
   }
 
   private fun buildStores(source: FaHtmlDataSource): StoreBundle {

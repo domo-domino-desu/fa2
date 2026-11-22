@@ -6,7 +6,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import me.domino.fa2.fake.TestFixtures
 
 class HtmlTextTest {
   @Test
@@ -88,11 +87,16 @@ class HtmlTextTest {
   }
 
   @Test
-  fun parsesUserAndAvatarPlaceholdersFromFixture() {
-    val html = TestFixtures.read("www.furaffinity.net:journals:artist-alpha:.html")
+  fun parsesMixedUserAndAvatarPlaceholders() {
+    val html =
+        """<p>
+      <a class="iconusername" href="/user/unit"><img src="//a.furaffinity.net/unit.gif" alt="unit"></a>
+      <a class="iconusername" href="/user/unit"><img src="//a.furaffinity.net/unit.gif" alt="unit">Unit label</a>
+    </p>"""
 
     val result = preprocessHtmlForFaInlinePlaceholders(html)
 
+    assertEquals(2, result.placeholders.size)
     assertTrue(result.placeholders.any { it.kind == HtmlInlinePlaceholderKind.Avatar })
     assertTrue(result.placeholders.any { it.kind == HtmlInlinePlaceholderKind.User })
   }

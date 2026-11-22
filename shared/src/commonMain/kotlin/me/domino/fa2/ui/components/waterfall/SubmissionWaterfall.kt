@@ -71,6 +71,7 @@ import me.domino.fa2.ui.components.media.AvatarImage
 import me.domino.fa2.ui.components.media.ThumbnailImage
 import me.domino.fa2.ui.components.state.PaginationRetryBar
 import me.domino.fa2.ui.components.state.PaginationRetryDirection
+import me.domino.fa2.ui.components.uiTestState
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import org.jetbrains.compose.resources.stringResource
 
@@ -126,6 +127,7 @@ data class SubmissionWaterfallViewportSnapshot(
 )
 
 private data class SubmissionWaterfallFabAction(
+    val testTag: String,
     val icon: ImageVector? = null,
     val label: String? = null,
     val contentDescription: String,
@@ -243,10 +245,7 @@ fun SubmissionWaterfall(
                 val key = info.key as? Int ?: return@mapNotNull null
                 key to info.offset.y
               }
-          val anchorSid =
-              (visibleAnchors.filter { (_, top) -> top >= 0 }.minByOrNull { (_, top) -> top }
-                      ?: visibleAnchors.maxByOrNull { (_, top) -> top })
-                  ?.first
+          val anchorSid = resolveWaterfallViewportAnchorSid(visibleAnchors, sourceIndexById)
           SubmissionWaterfallViewportSnapshot(
               firstVisibleItemIndex = state.firstVisibleItemIndex,
               firstVisibleItemScrollOffset = state.firstVisibleItemScrollOffset,
@@ -299,7 +298,11 @@ fun SubmissionWaterfall(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalItemSpacing = 12.dp,
         contentPadding = contentPadding,
-        modifier = Modifier.fillMaxSize(),
+        modifier =
+            Modifier.fillMaxSize().testTag("browse-list").semantics {
+              uiTestState =
+                  "index=${state.firstVisibleItemIndex};offset=${state.firstVisibleItemScrollOffset};scrolling=${state.isScrollInProgress}"
+            },
     ) {
       if (headerContent != null) {
         item(span = StaggeredGridItemSpan.FullLine) { headerContent() }
@@ -378,11 +381,12 @@ fun SubmissionWaterfall(
                   )
                 },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().testTag("page-input"),
             )
           },
           confirmButton = {
             ExpressiveButton(
+                modifier = Modifier.testTag("page-confirm"),
                 onClick = {
                   parsedPageNumber?.let { pageNumber ->
                     onJumpToPage?.invoke(pageNumber)
@@ -423,6 +427,7 @@ private fun SubmissionWaterfallPageFab(
       add(
           SubmissionWaterfallFabAction(
               icon = FaMaterialSymbols.Outlined.VerticalAlignTop,
+              testTag = "page-first",
               contentDescription = stringResource(Res.string.waterfall_first_page),
               enabled = effectiveControls.canLoadFirstPage && !effectiveControls.loading,
               onClick = { onLoadFirstPage?.invoke() },
@@ -433,6 +438,7 @@ private fun SubmissionWaterfallPageFab(
       add(
           SubmissionWaterfallFabAction(
               icon = FaMaterialSymbols.Outlined.ArrowUpwardAlt,
+              testTag = "page-previous",
               contentDescription = stringResource(Res.string.waterfall_previous_page),
               enabled = effectiveControls.canLoadPreviousPage && !effectiveControls.loading,
               onClick = { onLoadPreviousPage?.invoke() },
@@ -462,6 +468,7 @@ private fun SubmissionWaterfallPageFab(
                         stringResource(Res.string.waterfall_page_number, currentPageNumber)
                     else -> stringResource(Res.string.waterfall_page_number_unknown)
                   },
+              testTag = "page-current",
               contentDescription = description,
               enabled =
                   effectiveControls.showJumpToPage &&
@@ -475,6 +482,7 @@ private fun SubmissionWaterfallPageFab(
       add(
           SubmissionWaterfallFabAction(
               icon = FaMaterialSymbols.Outlined.ArrowDownwardAlt,
+              testTag = "page-next",
               contentDescription = stringResource(Res.string.waterfall_next_page),
               enabled = effectiveControls.canLoadNextPage && !effectiveControls.loading,
               onClick = { onLoadNextPage?.invoke() },
@@ -485,6 +493,7 @@ private fun SubmissionWaterfallPageFab(
       add(
           SubmissionWaterfallFabAction(
               icon = FaMaterialSymbols.Outlined.VerticalAlignBottom,
+              testTag = "page-last",
               contentDescription = stringResource(Res.string.waterfall_last_page),
               enabled = effectiveControls.canLoadLastPage && !effectiveControls.loading,
               onClick = { onLoadLastPage?.invoke() },
@@ -494,9 +503,17 @@ private fun SubmissionWaterfallPageFab(
   }
   FloatingActionButtonMenu(
       expanded = expanded,
-      modifier = modifier,
+      modifier =
+          modifier.testTag("page-menu").semantics {
+            uiTestState =
+                "page=${effectiveControls.currentPageNumber};last=${effectiveControls.lastPageNumber};loading=${effectiveControls.loading};expanded=$expanded"
+          },
       button = {
-        ToggleFloatingActionButton(checked = expanded, onCheckedChange = onExpandedChange) {
+        ToggleFloatingActionButton(
+            modifier = Modifier.testTag("page-toggle"),
+            checked = expanded,
+            onCheckedChange = onExpandedChange,
+        ) {
           Icon(
               imageVector =
                   if (checkedProgress >= 0.5f) FaMaterialSymbols.Filled.Close
@@ -531,7 +548,7 @@ private fun SubmissionWaterfallPageFab(
               onClick = { action.onClick() },
               enabled = action.enabled,
               modifier =
-                  Modifier.size(waterfallFabMenuButtonHeight).semantics {
+                  Modifier.testTag(action.testTag).size(waterfallFabMenuButtonHeight).semantics {
                     contentDescription = action.contentDescription
                   },
               shape = CircleShape,
@@ -554,7 +571,10 @@ private fun SubmissionWaterfallPageFab(
           Surface(
               onClick = { action.onClick() },
               enabled = action.enabled,
-              modifier = Modifier.semantics { contentDescription = action.contentDescription },
+              modifier =
+                  Modifier.testTag(action.testTag).semantics {
+                    contentDescription = action.contentDescription
+                  },
               shape = RoundedCornerShape(waterfallFabMenuButtonHeight / 2),
               color = containerColor,
               contentColor = contentColor,
@@ -602,6 +622,7 @@ private fun SubmissionWaterfallItem(
       modifier =
           Modifier.fillMaxWidth()
               .testTag("submission-waterfall-card")
+              .semantics { uiTestState = "blocked=$blockedMaskActive" }
               .clickable(onClick = onClick)
               .accessibleClickableSummary(title = item.title, subtitle = item.author),
   ) {
@@ -692,6 +713,22 @@ private fun categoryBadgeIcon(iconToken: String): ImageVector =
       "category" -> FaMaterialSymbols.Outlined.Category
       else -> FaMaterialSymbols.Outlined.Category
     }
+
+/** At a page boundary, an aligned card from the later page owns the viewport. */
+internal fun resolveWaterfallViewportAnchorSid(
+    visibleAnchors: List<Pair<Int, Int>>,
+    sourceIndexById: Map<Int, Int>,
+): Int? =
+    (visibleAnchors
+            .filter { (_, top) -> top >= 0 }
+            .minWithOrNull(
+                compareBy<Pair<Int, Int>> { it.second }
+                    .thenByDescending { sourceIndexById[it.first] ?: -1 }
+            )
+            ?: visibleAnchors.maxWithOrNull(
+                compareBy<Pair<Int, Int>> { it.second }.thenBy { sourceIndexById[it.first] ?: -1 }
+            ))
+        ?.first
 
 internal fun resolveWaterfallScrollTargetSid(
     request: me.domino.fa2.domain.submissionviewer.api.WaterfallScrollRequest,

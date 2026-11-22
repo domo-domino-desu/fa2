@@ -10,12 +10,12 @@ import me.domino.fa2.utils.FaUrls
 class JournalParserTest {
   @Test
   fun parsesJournalWithComments() {
-    val html = TestFixtures.read("www.furaffinity.net:journal:20000001-withcomments.html")
+    val html = TestFixtures.read("live/journal.html")
     val parser = JournalParser()
 
-    val detail = parser.parse(html = html, url = FaUrls.journal(20000001))
+    val detail = parser.parse(html = html, url = FaUrls.journal(11377368))
 
-    assertEquals(20000001, detail.id)
+    assertEquals(11377368, detail.id)
     assertTrue(detail.title.isNotBlank())
     assertTrue(detail.timestampNatural.isNotBlank())
     assertTrue(detail.rating.isNotBlank())
@@ -24,13 +24,13 @@ class JournalParserTest {
   }
 
   @Test
-  fun parsesJournalWithDisabledComments() {
-    val html = TestFixtures.read("www.furaffinity.net:journal:20000002-disabled-comments.html")
+  fun parsesJournalBody() {
+    val html = TestFixtures.read("live/journal.html")
     val parser = JournalParser()
 
-    val detail = parser.parse(html = html, url = FaUrls.journal(20000002))
+    val detail = parser.parse(html = html, url = FaUrls.journal(11377368))
 
-    assertEquals(20000002, detail.id)
+    assertEquals(11377368, detail.id)
     assertTrue(detail.title.isNotBlank())
     assertTrue(detail.bodyHtml.contains("bbcode"))
     assertTrue(detail.commentCount >= 0)

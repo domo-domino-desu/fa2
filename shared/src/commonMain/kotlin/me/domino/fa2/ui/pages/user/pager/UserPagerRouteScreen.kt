@@ -25,6 +25,8 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -38,6 +40,7 @@ import me.domino.fa2.data.remote.fa.watchlist.WatchlistRepository
 import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
+import me.domino.fa2.ui.components.uiTestState
 import me.domino.fa2.ui.pages.user.UserChildRoute
 import me.domino.fa2.ui.pages.user.UserRouteBody
 import me.domino.fa2.ui.pages.watchrecommendation.SimilarUsersRouteScreen
@@ -167,7 +170,14 @@ internal class UserPagerRouteScreen(
       }
 
       Box(modifier = Modifier.fillMaxSize()) {
-        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+        HorizontalPager(
+            state = pagerState,
+            modifier =
+                Modifier.fillMaxSize().testTag("user-pager").semantics {
+                  uiTestState =
+                      "page=${pagerState.currentPage};count=${pagerState.pageCount};settled=${pagerState.settledPage};scrolling=${pagerState.isScrollInProgress}"
+                },
+        ) { page ->
           val user = users[page]
           val userKey = user.username.lowercase()
           key(userKey) {

@@ -11,6 +11,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
@@ -182,6 +183,7 @@ internal fun UserChildRouteTabs(
     ) {
       UserChildRoute.entries.forEachIndexed { index, route ->
         SegmentedButton(
+            modifier = Modifier.testTag("user-${route.routeKey}"),
             selected = route == currentRoute,
             onClick = { onSelectRoute(route) },
             shape =

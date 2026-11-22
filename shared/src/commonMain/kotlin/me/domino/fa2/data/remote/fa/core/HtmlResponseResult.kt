@@ -110,13 +110,6 @@ sealed interface HtmlResponseResult {
       }
 
       if (
-          normalizedBody.contains("this submission contains mature") ||
-              normalizedBody.contains("registered and enabled")
-      ) {
-        return MatureBlocked(reason = "Mature content is blocked")
-      }
-
-      if (
           isAuthRequiredResponse(
               requestUrl = requestUrl,
               finalUrl = finalUrl,
@@ -128,6 +121,13 @@ sealed interface HtmlResponseResult {
             finalUrl = finalUrl,
             message = "Authentication required for $requestUrl",
         )
+      }
+
+      if (
+          normalizedBody.contains("this submission contains mature") ||
+              normalizedBody.contains("registered and enabled")
+      ) {
+        return MatureBlocked(reason = "Mature content is blocked")
       }
 
       if (statusCode in 200..299) {
@@ -162,9 +162,11 @@ sealed interface HtmlResponseResult {
         return true
       }
       val loggedOutHome =
-          "data-user-logged-in=\"0\"" in normalizedBody &&
-              normalizedBody.contains("href=\"/login\"") &&
-              normalizedBody.contains("href=\"/register\"")
+          (loggedOutAttribute.containsMatchIn(normalizedBody) ||
+              (!loggedInAttribute.containsMatchIn(normalizedBody) &&
+                  !loggedInAvatar.containsMatchIn(normalizedBody))) &&
+              loginLink.containsMatchIn(normalizedBody) &&
+              registerLink.containsMatchIn(normalizedBody)
       if (!loggedOutHome) return false
 
       val normalizedRequestUrl = requestUrl.trim().substringBefore('?').removeSuffix("/")
@@ -174,5 +176,12 @@ sealed interface HtmlResponseResult {
           normalizedFinalUrl != normalizedHomeUrl ||
           requestUrl.contains("/msg/", ignoreCase = true)
     }
+
+    private val loggedOutAttribute = Regex("""data-user-logged-in\s*=\s*["']0["']""")
+    private val loggedInAttribute = Regex("""data-user-logged-in\s*=\s*["']1["']""")
+    private val loggedInAvatar =
+        Regex("""<img\b[^>]*\bclass\s*=\s*["'][^"']*\bloggedin_user_avatar\b""")
+    private val loginLink = Regex("""href\s*=\s*["']/login/?(?:\?[^"']*)?["']""")
+    private val registerLink = Regex("""href\s*=\s*["']/register/?(?:\?[^"']*)?["']""")
   }
 }

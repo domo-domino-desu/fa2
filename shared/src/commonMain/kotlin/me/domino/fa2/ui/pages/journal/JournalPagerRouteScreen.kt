@@ -24,6 +24,8 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -37,6 +39,7 @@ import me.domino.fa2.data.remote.fa.journal.JournalsRepository
 import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.JournalDetailRouteTopBar
+import me.domino.fa2.ui.components.uiTestState
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -164,7 +167,14 @@ internal class JournalPagerRouteScreen(
         return@Column
       }
 
-      HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+      HorizontalPager(
+          state = pagerState,
+          modifier =
+              Modifier.fillMaxSize().testTag("journal-pager").semantics {
+                uiTestState =
+                    "page=${pagerState.currentPage};count=${pagerState.pageCount};settled=${pagerState.settledPage};scrolling=${pagerState.isScrollInProgress}"
+              },
+      ) { page ->
         val journal = journals[page]
         key(journal.id) {
           val listState = rememberLazyListState()

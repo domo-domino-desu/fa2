@@ -28,6 +28,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
@@ -278,6 +279,7 @@ private fun JournalSummaryCard(item: JournalSummary, onClick: () -> Unit) {
       modifier =
           Modifier.fillMaxWidth()
               .padding(horizontal = 12.dp)
+              .testTag("journal-card")
               .clickable(onClick = onClick)
               .accessibleClickableSummary(
                   title = item.title,

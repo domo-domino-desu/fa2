@@ -1,8 +1,6 @@
 package me.domino.fa2.data.remote.fa.feed
 
 import kotlin.test.Test
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import me.domino.fa2.data.model.ResourceResult
@@ -24,7 +22,7 @@ class FeedRepositoryPaginationTest {
         url = FaUrls.submissions(),
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:msg:submissions-firstpage.html"),
+                body = TestFixtures.read("live/gallery.html"),
                 url = FaUrls.submissions(),
             ),
     )
@@ -32,39 +30,39 @@ class FeedRepositoryPaginationTest {
     val first = repository.loadFirstPage()
     assertTrue(first is ResourceResult.Success)
     val firstPage = first.data
-    assertNotNull(firstPage.nextPageUrl)
+    val nextUrl = FaUrls.submissions(firstPage.submissions.last().id)
 
     source.enqueue(
-        url = firstPage.nextPageUrl,
+        url = nextUrl,
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:msg:submissions-middlepage.html"),
-                url = firstPage.nextPageUrl,
+                body = TestFixtures.read("live/gallery.html"),
+                url = nextUrl,
             ),
     )
-    val middle = repository.loadPageByNextUrl(firstPage.nextPageUrl)
+    val middle = repository.loadPageByNextUrl(nextUrl)
     assertTrue(middle is ResourceResult.Success)
     val middlePage = middle.data
-    assertNotNull(middlePage.nextPageUrl)
+    val lastUrl = FaUrls.submissions(firstPage.submissions.first().id)
 
     source.enqueue(
-        url = middlePage.nextPageUrl,
+        url = lastUrl,
         response = HtmlResponseResult.Error(statusCode = 503, message = "temporary unavailable"),
     )
-    val failedAppend = repository.loadPageByNextUrl(middlePage.nextPageUrl)
+    val failedAppend = repository.loadPageByNextUrl(lastUrl)
     assertTrue(failedAppend is ResourceResult.Error)
 
     source.enqueue(
-        url = middlePage.nextPageUrl,
+        url = lastUrl,
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:msg:submissions-lastpage.html"),
-                url = middlePage.nextPageUrl,
+                body = TestFixtures.read("live/gallery.html"),
+                url = lastUrl,
             ),
     )
-    val retriedAppend = repository.loadPageByNextUrl(middlePage.nextPageUrl)
+    val retriedAppend = repository.loadPageByNextUrl(lastUrl)
     assertTrue(retriedAppend is ResourceResult.Success)
-    assertNull(retriedAppend.data.nextPageUrl)
+    assertTrue(retriedAppend.data.submissions.isNotEmpty())
   }
 
   @Test

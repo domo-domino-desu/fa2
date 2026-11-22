@@ -27,8 +27,7 @@ class HtmlResponseResultTest {
   /** mature 提示页不应误判为 challenge。 */
   @Test
   fun doesNotMisclassifyMaturePageAsChallenge() {
-    val matureHtml =
-        TestFixtures.read("www.furaffinity.net:view:10000008-mature-content-message.html")
+    val matureHtml = "<body>This submission contains mature content.</body>"
     val result =
         HtmlResponseResult.classify(
             statusCode = 200,
@@ -44,7 +43,7 @@ class HtmlResponseResultTest {
 
   @Test
   fun detectsAuthRequiredWhenBusinessPageFallsBackToLoggedOutHome() {
-    val loggedOutHtml = TestFixtures.read("www.furaffinity.net:loggedout.html")
+    val loggedOutHtml = TestFixtures.read("live/home-guest.html")
 
     val result =
         HtmlResponseResult.classify(

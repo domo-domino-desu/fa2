@@ -14,6 +14,45 @@
 - OpenAI ChatGPT / Codex
 - Anthropic Claude
 
+## 开发与线上 E2E
+
+在 `nix develop` 中运行：
+
+```bash
+./gradlew :desktopApp:run
+./gradlew :desktopApp:onlineE2e
+# 单独验证一个场景：
+./gradlew :desktopApp:onlineE2e -Pe2e.case=nav-feed
+```
+
+E2E 全部使用 Kotlin，在生产 Tao 窗口的同一个 ComposeScene 中执行，访问真实线上网站。
+没有 fixture、MockEngine 或 AWT 测试窗口路径。普通 parser/repository 单元测试仍保留真实下载的 fixture。
+
+每个一级导航（连同它的搜索、分页和列表返回恢复）各一个场景；艺术家页和投稿详情页各一个完整场景。
+数字分页验证前进、后退、跳到第 3 页、再次后退；游标分页只验证真实支持的前进与后退。
+滑动通过 Compose 指针事件执行，图片平移使用鼠标，Pager 使用触摸滑动。测试读取实际语义树和实际视口状态。
+
+默认使用 `desktopApp/build/onlineE2e/profile` 隔离设置、历史、数据库和会话。
+首次登录或遇到 Cloudflare 时，控制台输出 `HUMAN_REQUIRED`，测试保持真实 WebView 等待人工完成，随后自动继续。
+验证超时、取消后无法恢复、数据不足或业务断言失败都不会算通过。
+人工验证等待默认 900 秒，可用 `-Pe2e.humanTimeoutSeconds=1800` 调整；常规操作超时用 `-Pe2e.timeoutSeconds=90` 调整。
+需要复用现有桌面登录时可加 `-Pe2e.useLocalProfile=true`，此时浏览和搜索会写入现有历史。
+
+在 KDE 上，先准备第二个虚拟桌面。任务自动给专用的 `FA2 E2E` / `KC E2E` 窗口设置 KWin 规则：固定到最后一个桌面、禁止自动抢焦点。
+也可用 `-Pe2e.desktopId=<UUID>` 选择桌面，或 `-Pe2e.kdeDesktop=false` 关闭该集成。
+普通应用窗口不匹配这条规则；测试不会主动切换当前桌面。
+专用测试窗口固定为 1280×900，保证翻页和滚动断言在一致的可视区域内执行。
+当后台窗口被 compositor 节流时，测试只推进同一个真实场景的帧，不创建另一套测试 UI。
+检测到人工验证后会放开该窗口的焦点限制；切到测试桌面，在真实 WebView 中操作即可。测试结束也会恢复焦点限制设置。
+
+脱敏的结果保存在 `desktopApp/build/reports/onlineE2e/report.json`，人工操作提示为同目录的 `human-required.txt`。
+报告只记录固定场景名、步骤、耗时和结果，不保存账号、Cookie、页面正文或签名 URL。
+局部运行会明确标记 `fullCoveragePassed=false`；失败或未生成本次报告会使 Gradle 任务失败。
+
+`TaoSceneAdapter` 仅存在于 `desktopTest`，当前适配 CMP 1.11.1 / Nucleus 2.4.7。
+Nucleus 尚未暴露测试根注册接口，因此版本相关的根节点访问被集中在这个适配器；同时收集主窗口和 Popup/Dialog 的根。
+升级这些库后先运行 `-Pe2e.case=tao-adapter-smoke`，确认真实弹窗输入、确认和分页链路。
+
 ## LICENSE
 
     测试中的部分文件并不属于本项目，其他部分采用 Unlicense 许可证。

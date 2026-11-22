@@ -19,6 +19,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -28,6 +30,7 @@ import me.domino.fa2.domain.ocr.NormalizedImagePoint
 import me.domino.fa2.domain.submissionseries.SubmissionSeriesResolvedSeries
 import me.domino.fa2.ui.components.platform.PlatformBackHandler
 import me.domino.fa2.ui.components.platform.PlatformVerticalScrollbar
+import me.domino.fa2.ui.components.uiTestState
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailContent
 import me.domino.fa2.ui.pages.submission.content.SubmissionDetailUiState
 import me.domino.fa2.ui.pages.submission.imageocr.SubmissionImageOcrUiState
@@ -141,7 +144,14 @@ fun SubmissionPager(
 
   Box(modifier = Modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-      HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+      HorizontalPager(
+          state = pagerState,
+          modifier =
+              Modifier.fillMaxSize().testTag("detail-pager").semantics {
+                uiTestState =
+                    "page=${pagerState.currentPage};count=${pagerState.pageCount};settled=${pagerState.settledPage};scrolling=${pagerState.isScrollInProgress}"
+              },
+      ) { page ->
         val item = submissions[page]
         val scrollState = rememberScrollState(initial = scrollOffsetOfSid(item.id))
         LaunchedEffect(item.id, scrollState) {
@@ -157,7 +167,16 @@ fun SubmissionPager(
           }
         }
         Box(modifier = Modifier.fillMaxSize()) {
-          Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
+          Column(
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .testTag("detail-scroll")
+                      .semantics {
+                        uiTestState =
+                            "offset=${scrollState.value};max=${scrollState.maxValue};scrolling=${scrollState.isScrollInProgress}"
+                      }
+                      .verticalScroll(scrollState)
+          ) {
             SubmissionDetailContent(
                 item = item,
                 detailState = detailBySid[item.id],

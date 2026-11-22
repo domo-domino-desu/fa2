@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import me.domino.fa2.domain.submissionviewer.api.WaterfallScrollRequest
@@ -186,6 +187,7 @@ private fun SearchBarShell(query: String, overlayVisible: Boolean, onToggleOverl
         Box(
             modifier =
                 Modifier.fillMaxWidth()
+                    .testTag("search-open")
                     .height(56.dp)
                     .accessibleReadOnlyFieldTrigger(
                         label = queryLabel,

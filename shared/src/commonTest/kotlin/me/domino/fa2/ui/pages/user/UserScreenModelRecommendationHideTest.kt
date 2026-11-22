@@ -34,7 +34,7 @@ import me.domino.fa2.utils.FaUrls
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserScreenModelRecommendationHideTest {
   private val dispatcher = StandardTestDispatcher()
-  private val username = "artist-alpha"
+  private val username = "fender"
 
   @BeforeTest
   fun setUp() {
@@ -145,19 +145,11 @@ class UserScreenModelRecommendationHideTest {
           blocklistRepository = blocklist,
       )
 
-  /**
-   * The `artist-alpha` fixture captures a "currently watching" profile page (its watch button links
-   * to `/unwatch/...`). Flipping `/unwatch/` -> `/watch/` and the button label reproduces a "not
-   * watching" profile deterministically, without hand-authoring a second full fixture.
-   */
   private fun scriptedSource(watching: Boolean, responseCount: Int = 1): FaHtmlDataSource {
-    val rawBody = TestFixtures.read("www.furaffinity.net:user:artist-alpha.html")
+    val rawBody = TestFixtures.read("live/user.html")
     val body =
-        if (watching) rawBody
-        else
-            rawBody
-                .replace("/unwatch/artist-alpha/", "/watch/artist-alpha/")
-                .replace(">-Watch<", ">+Watch<")
+        if (watching) rawBody.replace("/watch/fender/", "/unwatch/fender/")
+        else rawBody.replace("/unwatch/fender/", "/watch/fender/").replace(">-Watch<", ">+Watch<")
     val source = ScriptedHtmlDataSource()
     repeat(responseCount) {
       source.enqueue(

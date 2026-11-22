@@ -50,7 +50,7 @@ class DefaultAuthSessionController(
     }
     profileStore.saveNeedsRelogin(false)
     val restoreUri = pendingFaRouteStore.peek()
-    mutableState.value = mutableState.value.copy(pendingRestoreUri = restoreUri)
+    mutableState.value = AuthSessionUiState(pendingRestoreUri = restoreUri)
     log.i {
       "完成登录 -> 成功(user=${normalizedUsername ?: "-"},pendingRestoreUri=${restoreUri?.trim() ?: "-"})"
     }

@@ -48,6 +48,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -68,6 +69,7 @@ import me.domino.fa2.ui.components.media.AvatarImage
 import me.domino.fa2.ui.components.media.CenterCircularWavyImageLoadingProgress
 import me.domino.fa2.ui.components.media.ImageLoadLifecycleState
 import me.domino.fa2.ui.components.media.rememberImageLoadProgressState
+import me.domino.fa2.ui.components.uiTestState
 import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.utils.isGifUrl
 import me.domino.fa2.utils.logging.FaLog
@@ -137,7 +139,11 @@ internal fun SubmissionZoomImageOverlay(
       CoilZoomAsyncImage(
           model = normalizedUrl,
           contentDescription = stringResource(Res.string.original_image),
-          modifier = Modifier.fillMaxSize(),
+          modifier =
+              Modifier.fillMaxSize().testTag("zoom-image").semantics {
+                uiTestState =
+                    "load=$loadLifecycleState;scale=${zoomState.zoomable.transform.scaleX};x=${zoomState.zoomable.transform.offsetX};y=${zoomState.zoomable.transform.offsetY}"
+              },
           contentScale = ContentScale.Fit,
           filterQuality = FilterQuality.High,
           zoomState = zoomState,
@@ -244,7 +250,7 @@ internal fun SubmissionZoomImageOverlay(
           }
         }
       }
-      ExpressiveIconButton(onClick = onDismiss) {
+      ExpressiveIconButton(modifier = Modifier.testTag("image-close"), onClick = onDismiss) {
         Icon(
             imageVector = FaMaterialSymbols.Filled.Close,
             contentDescription = stringResource(Res.string.close_preview),
@@ -787,7 +793,7 @@ internal fun SubmissionAuthorRow(
               .padding(horizontal = 16.dp)
               .then(
                   if (normalizedAuthor.isNotBlank()) {
-                    Modifier.clickable { onOpenAuthor(normalizedAuthor) }
+                    Modifier.testTag("detail-author").clickable { onOpenAuthor(normalizedAuthor) }
                   } else {
                     Modifier
                   }

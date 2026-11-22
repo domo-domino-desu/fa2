@@ -141,21 +141,25 @@ private fun MoreContent(
             icon = FaMaterialSymbols.Filled.History,
             title = stringResource(Res.string.submission_history),
             onClick = onOpenSubmissionHistory,
+            modifier = Modifier.testTag("more-history"),
         )
         SettingsListItem(
             icon = FaMaterialSymbols.Filled.Search,
             title = stringResource(Res.string.search_history),
             onClick = onOpenSearchHistory,
+            modifier = Modifier.testTag("more-search-history"),
         )
         SettingsListItem(
             icon = FaMaterialSymbols.Filled.Settings,
             title = stringResource(Res.string.settings),
             onClick = onOpenSettings,
+            modifier = Modifier.testTag("more-settings"),
         )
         SettingsListItem(
             icon = FaMaterialSymbols.Filled.Info,
             title = stringResource(Res.string.about),
             onClick = onOpenAbout,
+            modifier = Modifier.testTag("more-about"),
         )
         SettingsListItem(
             icon = FaMaterialSymbols.AutoMirrored.Filled.Logout,

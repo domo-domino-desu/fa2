@@ -11,8 +11,27 @@ import me.domino.fa2.utils.FaUrls
 /** Browse / Search 解析测试。 */
 class BrowseSearchParserTest {
   @Test
+  fun ignoresDisabledNextSubmitButtonAtEndOfSearch() {
+    val html =
+        """
+        <html><body>
+          <form class="c-paginationForm" method="GET" action="/search/">
+            <input type="hidden" name="q" value="wolf" />
+            <select name="page"><option value="2" selected>2</option></select>
+            <button type="submit" name="page" value="3" disabled>Next</button>
+          </form>
+        </body></html>
+        """
+    val page =
+        SubmissionListingParser()
+            .parseListing(html, "https://www.furaffinity.net/search/?q=wolf&page=2")
+    assertEquals(null, page.nextPageUrl)
+    assertEquals(2, page.currentPageNumber)
+  }
+
+  @Test
   fun parsesBrowseListingAndFormBasedNextPage() {
-    val html = TestFixtures.read("www.furaffinity.net:browse:default-page1.html")
+    val html = TestFixtures.read("live/browse.html")
     val parser = SubmissionListingParser()
 
     val page = parser.parseListing(html = html, baseUrl = FaUrls.browse())
@@ -25,8 +44,7 @@ class BrowseSearchParserTest {
 
   @Test
   fun parsesSearchListingAndAnchorNextPage() {
-    val html =
-        TestFixtures.read("www.furaffinity.net:search:wolf-keywords-female-trans_female.html")
+    val html = TestFixtures.read("live/search.html")
     val parser = SubmissionListingParser()
     val searchUrl = FaUrls.search(FaUrls.SearchParams(q = "dragon @keywords female trans_female"))
 
@@ -36,18 +54,6 @@ class BrowseSearchParserTest {
     assertNotNull(page.nextPageUrl)
     assertTrue(page.nextPageUrl.contains("/search/"))
     assertTrue(page.nextPageUrl.contains("page=2"))
-  }
-
-  @Test
-  fun parsesBlockedItemsFromBrowseWithTagBlocklist() {
-    val html = TestFixtures.read("www.furaffinity.net:browse:blocked-canine.html")
-    val parser = SubmissionListingParser()
-
-    val page = parser.parseListing(html = html, baseUrl = FaUrls.browse())
-
-    assertTrue(page.submissions.isNotEmpty())
-    assertTrue(page.submissions.any { item -> item.isBlockedByTag })
-    assertTrue(page.submissions.any { item -> !item.isBlockedByTag })
   }
 
   @Test

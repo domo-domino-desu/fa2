@@ -10,7 +10,7 @@ import me.domino.fa2.fake.TestFixtures
 class ParserUtilsTest {
   @Test
   fun skipsAvatarUrlsWhenAvatarMtimeIsMissing() {
-    val html = TestFixtures.read("www.furaffinity.net:gallery:artist-alpha:.html")
+    val html = TestFixtures.read("live/gallery.html")
 
     val avatars = parseSubmissionAvatarUrls(html)
 

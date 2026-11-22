@@ -23,7 +23,7 @@ class UserRepositoryTest {
         url = FaUrls.user("artist-alpha"),
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:user:artist-alpha.html"),
+                body = TestFixtures.read("live/user.html"),
                 url = FaUrls.user("artist-alpha"),
             ),
     )
@@ -42,7 +42,8 @@ class UserRepositoryTest {
         url = FaUrls.user("unknown"),
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:user:username-system-error.html"),
+                body =
+                    "<html><title>System Error</title><body>This user cannot be found</body></html>",
                 url = FaUrls.user("unknown"),
             ),
     )

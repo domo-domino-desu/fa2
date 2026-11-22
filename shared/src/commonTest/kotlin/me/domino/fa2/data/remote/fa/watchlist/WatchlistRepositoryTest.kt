@@ -27,7 +27,7 @@ class WatchlistRepositoryTest {
         url = watchedByUrl,
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:watchlist:to:user-alpha.html"),
+                body = TestFixtures.read("live/watchers.html"),
                 url = watchedByUrl,
             ),
     )
@@ -54,7 +54,7 @@ class WatchlistRepositoryTest {
         url = watchedByUrl,
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:watchlist:to:user-beta.html"),
+                body = TestFixtures.read("live/watchers.html"),
                 url = watchedByUrl,
             ),
     )
@@ -79,7 +79,7 @@ class WatchlistRepositoryTest {
         url = watchedByUrl,
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:watchlist:to:user-alpha.html"),
+                body = TestFixtures.read("live/watchers.html"),
                 url = watchedByUrl,
             ),
     )
@@ -87,7 +87,7 @@ class WatchlistRepositoryTest {
         url = watchingUrl,
         response =
             HtmlResponseResult.Success(
-                body = TestFixtures.read("www.furaffinity.net:watchlist:by:user-alpha.html"),
+                body = TestFixtures.read("live/watching.html"),
                 url = watchingUrl,
             ),
     )

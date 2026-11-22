@@ -11,6 +11,7 @@ import io.ktor.client.plugins.onDownload
 import io.ktor.client.plugins.plugin
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -135,6 +136,8 @@ private fun HttpClient.installCachedDownloadInterceptors(
           cachedDownloadLog.d { message }
         }
         call
+      } catch (cancelled: CancellationException) {
+        throw cancelled
       } catch (error: Throwable) {
         cachedDownloadLog.e(error) { "缓存下载请求异常 -> url=$progressKey" }
         throw error

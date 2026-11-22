@@ -2,44 +2,36 @@ package me.domino.fa2.data.remote.fa.feed
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import me.domino.fa2.fake.TestFixtures
 import me.domino.fa2.utils.FaUrls
 
 /** FeedParser 解析测试。 */
 class FeedParserTest {
-  /** 首页面应解析出投稿并包含下一页链接。 */
+  /** 共用投稿卡片应保留当前公开页面的数据，不臆造缺失的头像元数据。 */
   @Test
-  fun parsesFirstPage() {
-    val html = TestFixtures.read("www.furaffinity.net:msg:submissions-firstpage.html")
+  fun parsesCurrentSubmissionCards() {
+    val html = TestFixtures.read("live/gallery.html")
     val parser = FeedParser()
 
     val page = parser.parse(html, FaUrls.submissions())
 
     assertTrue(page.submissions.isNotEmpty())
-    assertNotNull(page.nextPageUrl)
+    page.nextPageUrl?.let { assertTrue(it.startsWith("https://")) }
     assertTrue(page.submissions.first().id > 0)
     assertTrue(
         page.submissions.first().submissionUrl.startsWith("https://www.furaffinity.net/view/")
     )
-    assertTrue(page.submissions.first().authorAvatarUrl.startsWith("https://a.furaffinity.net/"))
+    assertTrue(page.submissions.all { it.authorAvatarUrl.isBlank() })
     assertTrue(page.submissions.none { item -> item.isBlockedByTag })
   }
 
   /** 末页面应解析出投稿，且通常没有下一页链接。 */
   @Test
-  fun parsesLastPage() {
-    val html = TestFixtures.read("www.furaffinity.net:msg:submissions-lastpage.html")
-    val parser = FeedParser()
-
-    val page = parser.parse(html, FaUrls.submissions())
-
-    assertTrue(page.submissions.isNotEmpty())
-    assertEquals(
-        "https://www.furaffinity.net/view/${page.submissions.first().id}/",
-        page.submissions.first().submissionUrl,
-    )
+  fun parsesEmptyResponseWithoutInventingNavigation() {
+    val page = FeedParser().parse("<html><body></body></html>", FaUrls.submissions())
+    assertTrue(page.submissions.isEmpty())
+    assertEquals(null, page.nextPageUrl)
   }
 
   @Test

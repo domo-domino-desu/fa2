@@ -63,7 +63,7 @@ class MinimalFlowIntegrationTest {
           url = FaUrls.home,
           response =
               HtmlResponseResult.Success(
-                  body = TestFixtures.read("www.furaffinity.net:loggedout.html"),
+                  body = TestFixtures.read("live/home-guest.html"),
                   url = FaUrls.home,
               ),
       )
@@ -76,7 +76,7 @@ class MinimalFlowIntegrationTest {
           url = FaUrls.home,
           response =
               HtmlResponseResult.Success(
-                  body = TestFixtures.read("www.furaffinity.net:loggedin.html"),
+                  body = TestFixtures.read("live/home.html"),
                   url = FaUrls.home,
               ),
       )
@@ -87,7 +87,7 @@ class MinimalFlowIntegrationTest {
           url = FaUrls.submissions(),
           response =
               HtmlResponseResult.Success(
-                  body = TestFixtures.read("www.furaffinity.net:msg:submissions-firstpage.html"),
+                  body = TestFixtures.read("live/gallery.html"),
                   url = FaUrls.submissions(),
               ),
       )

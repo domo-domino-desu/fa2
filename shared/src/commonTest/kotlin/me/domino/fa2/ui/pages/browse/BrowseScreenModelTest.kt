@@ -70,7 +70,7 @@ class BrowseScreenModelTest {
 private class RecordingBrowseHtmlDataSource : FaHtmlDataSource {
   override suspend fun get(url: String): HtmlResponseResult {
     return HtmlResponseResult.Success(
-        body = TestFixtures.read("www.furaffinity.net:browse:default-page1.html"),
+        body = TestFixtures.read("live/browse.html"),
         url = url,
     )
   }

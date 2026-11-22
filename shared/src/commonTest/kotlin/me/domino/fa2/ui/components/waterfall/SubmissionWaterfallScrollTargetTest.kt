@@ -6,6 +6,22 @@ import me.domino.fa2.domain.submissionviewer.api.WaterfallScrollRequest
 
 class SubmissionWaterfallScrollTargetTest {
   @Test
+  fun alignedPageBoundaryUsesLaterPageRegardlessOfVisibleNodeOrder() {
+    val indices = mapOf(10 to 59, 20 to 60, 30 to 61)
+    val visible = listOf(10 to 0, 20 to 0, 30 to 220)
+    assertEquals(20, resolveWaterfallViewportAnchorSid(visible, indices))
+    assertEquals(20, resolveWaterfallViewportAnchorSid(visible.reversed(), indices))
+  }
+
+  @Test
+  fun pageAnchorFollowsNearestFullyVisibleCardAndFallsBackForTallCards() {
+    val indices = mapOf(10 to 59, 20 to 60)
+    assertEquals(10, resolveWaterfallViewportAnchorSid(listOf(10 to 8, 20 to 100), indices))
+    assertEquals(20, resolveWaterfallViewportAnchorSid(listOf(10 to -500, 20 to -10), indices))
+    assertEquals(null, resolveWaterfallViewportAnchorSid(emptyList(), indices))
+  }
+
+  @Test
   fun prefersLowestVisibleLeadingCandidateAcrossFullWindow() {
     val targetSid =
         resolveWaterfallScrollTargetSid(

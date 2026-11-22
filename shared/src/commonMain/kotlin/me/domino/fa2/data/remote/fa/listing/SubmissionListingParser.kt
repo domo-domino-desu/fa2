@@ -2,7 +2,7 @@ package me.domino.fa2.data.remote.fa.listing
 
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Element
-import io.ktor.http.encodeURLParameter
+import io.ktor.http.URLBuilder
 import me.domino.fa2.data.model.GalleryFolder
 import me.domino.fa2.data.model.GalleryFolderGroup
 import me.domino.fa2.data.model.GalleryPage
@@ -266,6 +266,8 @@ class SubmissionListingParser {
       url.trim().lowercase().substringBefore('#').substringBefore('?').removeSuffix("/")
 
   private fun isNextButton(node: Element): Boolean {
+    if (node.hasAttr("disabled") || node.attr("aria-disabled").equals("true", ignoreCase = true))
+        return false
     val label = node.text().trim().lowercase()
     val rel = node.attr("rel").trim().lowercase()
     val aria = node.attr("aria-label").trim().lowercase()
@@ -284,9 +286,14 @@ class SubmissionListingParser {
       document: com.fleeksoft.ksoup.nodes.Document,
       baseUrl: String,
   ): String? {
-    val nextNode = document.select("a, form").firstOrNull(::isNextButton) ?: return null
+    val nextNode =
+        document.select("a, form, button, input[type=submit]").firstOrNull(::isNextButton)
+            ?: return null
     return if (nextNode.tagName().equals("form", ignoreCase = true)) {
       buildGetFormUrl(formNode = nextNode, baseUrl = baseUrl)
+    } else if (nextNode.tagName() in setOf("button", "input")) {
+      val form = nextNode.closest("form") ?: return null
+      buildGetFormUrl(formNode = form, baseUrl = baseUrl, submitter = nextNode)
     } else {
       nextNode
           .attr("href")
@@ -296,7 +303,11 @@ class SubmissionListingParser {
     }
   }
 
-  private fun buildGetFormUrl(formNode: Element, baseUrl: String): String? {
+  private fun buildGetFormUrl(
+      formNode: Element,
+      baseUrl: String,
+      submitter: Element? = null,
+  ): String? {
     val method = formNode.attr("method").trim().lowercase()
     if (method.isNotBlank() && method != "get") return null
     val actionRaw = formNode.attr("action").trim()
@@ -307,32 +318,56 @@ class SubmissionListingParser {
           toAbsoluteUrl(baseUrl, actionRaw)
         }
     val params =
-        formNode.select("input[name], select[name], textarea[name]").mapNotNull { input ->
-          val name = input.attr("name").trim()
-          if (name.isBlank()) return@mapNotNull null
+        formNode
+            .select("input[name], select[name], textarea[name]")
+            .mapNotNull { input ->
+              val name = input.attr("name").trim()
+              if (name.isBlank() || input.hasAttr("disabled")) return@mapNotNull null
+              if (submitter != null && name == submitter.attr("name")) return@mapNotNull null
 
-          val type = input.attr("type").trim().lowercase()
-          if (type == "submit" || type == "button") return@mapNotNull null
-          if ((type == "checkbox" || type == "radio") && !input.hasAttr("checked"))
-              return@mapNotNull null
+              val type = input.attr("type").trim().lowercase()
+              if (type == "submit" || type == "button") return@mapNotNull null
+              if ((type == "checkbox" || type == "radio") && !input.hasAttr("checked"))
+                  return@mapNotNull null
 
-          val value = input.attr("value").trim()
-          name to value
-        }
+              val value =
+                  when (input.tagName()) {
+                    "select" -> {
+                      val option =
+                          input.selectFirst("option[selected]") ?: input.selectFirst("option")
+                      option?.let { it.attr("value").ifBlank { it.text() } }.orEmpty()
+                    }
+                    "textarea" -> input.text()
+                    else -> input.attr("value")
+                  }.trim()
+              name to value
+            }
+            .toMutableList()
+    submitter
+        ?.attr("name")
+        ?.takeIf { it.isNotBlank() }
+        ?.let { name -> params += name to submitter.attr("value") }
 
     if (params.isEmpty()) return actionUrl
-    val query =
-        params.joinToString("&") { (name, value) ->
-          "${name.encodeURLParameter()}=${value.encodeURLParameter()}"
+    return URLBuilder(actionUrl)
+        .apply {
+          params.map { it.first }.distinct().forEach { parameters.remove(it) }
+          params.forEach { (name, value) -> parameters.append(name, value) }
         }
-    val separator = if ('?' in actionUrl) '&' else '?'
-    return "$actionUrl$separator$query"
+        .buildString()
   }
 
   private fun parseCurrentPageNumber(
       document: com.fleeksoft.ksoup.nodes.Document,
       baseUrl: String,
   ): Int? {
+    document
+        .selectFirst(".c-paginationForm select[name=page] option[selected]")
+        ?.attr("value")
+        ?.toIntOrNull()
+        ?.let {
+          return it
+        }
     val textCandidates =
         listOfNotNull(
             document.selectFirst(".page-number strong")?.text(),

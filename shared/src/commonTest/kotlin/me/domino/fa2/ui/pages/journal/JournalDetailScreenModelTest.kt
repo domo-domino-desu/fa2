@@ -34,7 +34,7 @@ import me.domino.fa2.utils.FaUrls
 @OptIn(ExperimentalCoroutinesApi::class)
 class JournalDetailScreenModelTest {
   private val dispatcher = StandardTestDispatcher()
-  private val journalId = 20000001
+  private val journalId = 11377368
 
   @BeforeTest
   fun setUp() {
@@ -174,7 +174,7 @@ private class ScriptedHtmlDataSource : FaHtmlDataSource {
     enqueue(
         url,
         HtmlResponseResult.Success(
-            body = TestFixtures.read("www.furaffinity.net:journal:20000001-withcomments.html"),
+            body = TestFixtures.read("live/journal.html"),
             url = url,
         ),
     )

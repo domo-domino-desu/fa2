@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
@@ -116,6 +117,7 @@ fun UserHeaderSummaryCard(
                               Res.string.followers_count,
                               (user.watchedByCount ?: "--").toString(),
                           ),
+                      testTag = "user-followers",
                       onClick = onOpenWatchedBy,
                       enabled = onOpenWatchedBy != null,
                   )
@@ -125,6 +127,7 @@ fun UserHeaderSummaryCard(
                               Res.string.following_count,
                               (user.watchingCount ?: "--").toString(),
                           ),
+                      testTag = "user-watching",
                       onClick = onOpenWatching,
                       enabled = onOpenWatching != null,
                   )
@@ -143,13 +146,18 @@ fun UserHeaderSummaryCard(
 }
 
 @Composable
-private fun UserHeaderStatPill(text: String, onClick: (() -> Unit)?, enabled: Boolean = true) {
+private fun UserHeaderStatPill(
+    text: String,
+    onClick: (() -> Unit)?,
+    enabled: Boolean = true,
+    testTag: String = "user-stat",
+) {
   Surface(
       color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.92f),
       shape = CircleShape,
       modifier =
           if (onClick != null) {
-            Modifier.clickable(enabled = enabled, onClick = onClick)
+            Modifier.testTag(testTag).clickable(enabled = enabled, onClick = onClick)
           } else {
             Modifier
           },
