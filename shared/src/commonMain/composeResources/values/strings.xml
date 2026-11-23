@@ -417,4 +417,14 @@
   <string name="translation_provider_index_translate">IndexTranslate</string>
   <string name="index_translate_model">IndexTranslate model</string>
   <string name="index_translate_model_desc">Used for IndexTranslate and when Google translation fails.</string>
+  <string name="search_syntax_help">Search syntax</string>
+  <string name="fa_search_syntax_and">AND: every term must match. Spaces between words also mean AND.</string>
+  <string name="fa_search_syntax_or">OR: match either term.</string>
+  <string name="fa_search_syntax_not">NOT: exclude a term using - or !.</string>
+  <string name="fa_search_syntax_grouping">Use parentheses to group expressions.</string>
+  <string name="fa_search_syntax_fields">Search the title, description, artist URL name or keywords.</string>
+  <string name="fa_search_syntax_phrase">Match an exact phrase enclosed in quotes.</string>
+  <string name="fa_search_syntax_proximity">Limit the distance between quoted words with ~.</string>
+  <string name="fa_search_syntax_quorum">Require a minimum number of quoted words with /.</string>
+  <string name="fa_search_syntax_example">Combine operators and fields in one query.</string>
 </resources>

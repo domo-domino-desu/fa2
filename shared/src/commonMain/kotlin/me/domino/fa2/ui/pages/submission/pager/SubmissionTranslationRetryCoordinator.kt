@@ -2,6 +2,7 @@ package me.domino.fa2.ui.pages.submission.pager
 
 import fa2.shared.generated.resources.Res
 import fa2.shared.generated.resources.translation_provider_google
+import fa2.shared.generated.resources.translation_provider_index_translate
 import fa2.shared.generated.resources.translation_provider_microsoft
 import fa2.shared.generated.resources.translation_provider_openai_compatible
 import fa2.shared.generated.resources.translation_provider_switched
@@ -49,6 +50,10 @@ internal class SubmissionTranslationRetryCoordinator(
 
   private suspend fun providerLabel(provider: TranslationProvider): String =
       when (provider) {
+        TranslationProvider.INDEX_TRANSLATE ->
+            safeAppStringOrFallback(Res.string.translation_provider_index_translate) {
+              "IndexTranslate"
+            }
         TranslationProvider.GOOGLE ->
             safeAppStringOrFallback(Res.string.translation_provider_google) { "Google Translate" }
         TranslationProvider.MICROSOFT ->
@@ -81,7 +86,8 @@ internal class SubmissionTranslationRetryCoordinator(
 
 private fun TranslationProvider.nextRetryProvider(): TranslationProvider =
     when (this) {
-      TranslationProvider.GOOGLE -> TranslationProvider.MICROSOFT
+      TranslationProvider.GOOGLE -> TranslationProvider.INDEX_TRANSLATE
+      TranslationProvider.INDEX_TRANSLATE,
       TranslationProvider.MICROSOFT,
       TranslationProvider.OPENAI_COMPATIBLE -> TranslationProvider.GOOGLE
     }

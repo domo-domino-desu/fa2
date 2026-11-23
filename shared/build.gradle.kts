@@ -212,6 +212,7 @@ symbolCraft {
       "home",
       "image",
       "inbox",
+      "info",
       "inventory_2",
       "keyboard_arrow_down",
       "keyboard_arrow_right",

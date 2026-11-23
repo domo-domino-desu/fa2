@@ -8,19 +8,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,8 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import fa2.shared.generated.resources.*
 import kotlinx.coroutines.launch
@@ -51,7 +41,6 @@ import me.domino.fa2.ui.i18n.search.SearchUiLabelsRepository
 import me.domino.fa2.ui.i18n.search.SearchUiMetadataKey
 import me.domino.fa2.ui.i18n.search.SearchUiOptionKey
 import me.domino.fa2.ui.i18n.search.SearchUiTextKey
-import me.domino.fa2.ui.icons.FaMaterialSymbols
 import me.domino.fa2.ui.pages.search.SearchFormState
 import me.domino.fa2.ui.pages.search.SearchScreenActions
 import me.domino.fa2.ui.pages.search.orderByOptions
@@ -60,7 +49,6 @@ import me.domino.fa2.ui.pages.search.rangeOptions
 import me.domino.fa2.ui.pages.search.util.SearchDateRangeShiftAction
 import me.domino.fa2.ui.pages.search.util.canShiftSearchDateFields
 import me.domino.fa2.ui.pages.search.util.resolveSearchDateFields
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -91,40 +79,11 @@ internal fun SearchOverlayContent(
           modifier = Modifier.fillMaxSize().verticalScroll(bodyScrollState).padding(12.dp),
           verticalArrangement = Arrangement.spacedBy(10.dp),
       ) {
-        OutlinedTextField(
+        SearchQueryInput(
             value = form.query,
             onValueChange = actions.onUpdateQuery,
-            label = { Text(stringResource(Res.string.query)) },
-            placeholder = { Text(stringResource(Res.string.search_query_example)) },
-            trailingIcon = {
-              if (form.query.isNotBlank()) {
-                IconButton(
-                    onClick = { actions.onUpdateQuery("") },
-                    modifier = Modifier.size(32.dp),
-                    colors =
-                        IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        ),
-                ) {
-                  Icon(
-                      imageVector = FaMaterialSymbols.Filled.Close,
-                      contentDescription = stringResource(Res.string.clear_search_query),
-                      modifier = Modifier.size(18.dp),
-                  )
-                }
-              }
-            },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions =
-                KeyboardActions(
-                    onSearch = {
-                      if (canSearch) {
-                        actions.onApplySearch()
-                      }
-                    }
-                ),
-            modifier = Modifier.fillMaxWidth().testTag("search-input"),
+            onSubmit = actions.onApplySearch,
+            canSubmit = canSearch,
         )
 
         SearchTopFilterGrid(

@@ -329,7 +329,8 @@ class SubmissionScreenModelImageOcrTest {
                       requestedProviders += request.provider
                       when (request.provider) {
                         TranslationProvider.GOOGLE -> error("boom")
-                        TranslationProvider.MICROSOFT -> request.sourceText.uppercase()
+                        TranslationProvider.INDEX_TRANSLATE -> request.sourceText.uppercase()
+                        TranslationProvider.MICROSOFT,
                         TranslationProvider.OPENAI_COMPATIBLE -> error("unexpected provider")
                       }
                     },
@@ -358,11 +359,11 @@ class SubmissionScreenModelImageOcrTest {
                 (model.state.value as SubmissionPagerUiState.Data).zoomImageOcrState
             )
         assertEquals(
-            listOf(TranslationProvider.GOOGLE, TranslationProvider.MICROSOFT),
+            listOf(TranslationProvider.GOOGLE, TranslationProvider.INDEX_TRANSLATE),
             requestedProviders,
         )
         assertEquals(
-            TranslationProvider.MICROSOFT,
+            TranslationProvider.INDEX_TRANSLATE,
             settingsService.settings.value.translationProvider,
         )
         assertEquals(SubmissionImageOcrTranslationMode.APPLIED, showingState.translationMode)

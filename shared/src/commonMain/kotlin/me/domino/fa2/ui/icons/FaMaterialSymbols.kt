@@ -34,6 +34,7 @@ import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.HomeW400Outli
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.ImageW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.InboxW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.InboxW400OutlinedFill
+import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.InfoW400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.InfoW400OutlinedFill
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.Inventory2W400Outlined
 import me.domino.fa2.generated.symbols.icons.materialsymbols.icons.KeyboardArrowDownW400Outlined
@@ -112,6 +113,7 @@ object FaMaterialSymbols {
     val FilterAlt: ImageVector = GeneratedIcons.FilterAltW400Outlined
     val Home: ImageVector = GeneratedIcons.HomeW400Outlined
     val Inbox: ImageVector = GeneratedIcons.InboxW400Outlined
+    val Info: ImageVector = GeneratedIcons.InfoW400Outlined
     val Image: ImageVector = GeneratedIcons.ImageW400Outlined
     val Inventory2: ImageVector = GeneratedIcons.Inventory2W400Outlined
     val KeyboardArrowDown: ImageVector = GeneratedIcons.KeyboardArrowDownW400Outlined

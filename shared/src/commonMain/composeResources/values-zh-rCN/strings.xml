@@ -377,4 +377,14 @@
   <string name="translation_provider_index_translate">IndexTranslate</string>
   <string name="index_translate_model">IndexTranslate 模型</string>
   <string name="index_translate_model_desc">用于 IndexTranslate 翻译，以及谷歌翻译失败时的自动兜底。</string>
+  <string name="search_syntax_help">搜索语法</string>
+  <string name="fa_search_syntax_and">AND：所有关键词都须匹配；关键词之间留空格也表示 AND。</string>
+  <string name="fa_search_syntax_or">OR：匹配其中任意一个关键词。</string>
+  <string name="fa_search_syntax_not">NOT：使用 - 或 ! 排除关键词。</string>
+  <string name="fa_search_syntax_grouping">使用括号对表达式分组。</string>
+  <string name="fa_search_syntax_fields">分别搜索标题、描述、艺术家主页 URL 中的名称或关键词。</string>
+  <string name="fa_search_syntax_phrase">用双引号精确匹配整个短语。</string>
+  <string name="fa_search_syntax_proximity">用 ~ 限制引号中各个单词之间的距离。</string>
+  <string name="fa_search_syntax_quorum">用 / 指定引号中至少需要匹配的单词数量。</string>
+  <string name="fa_search_syntax_example">可在同一查询中组合运算符和字段。</string>
 </resources>

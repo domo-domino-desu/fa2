@@ -374,7 +374,8 @@ class SubmissionScreenModelTranslationAndScrollTest {
                       requestedProviders += request.provider
                       when (request.provider) {
                         TranslationProvider.GOOGLE -> error("boom")
-                        TranslationProvider.MICROSOFT -> request.sourceText.uppercase()
+                        TranslationProvider.INDEX_TRANSLATE -> request.sourceText.uppercase()
+                        TranslationProvider.MICROSOFT,
                         TranslationProvider.OPENAI_COMPATIBLE -> error("unexpected provider")
                       }
                     },
@@ -400,11 +401,11 @@ class SubmissionScreenModelTranslationAndScrollTest {
                     as SubmissionDetailUiState.Success)
                 .descriptionTranslationState
         assertEquals(
-            listOf(TranslationProvider.GOOGLE, TranslationProvider.MICROSOFT),
+            listOf(TranslationProvider.GOOGLE, TranslationProvider.INDEX_TRANSLATE),
             requestedProviders,
         )
         assertEquals(
-            TranslationProvider.MICROSOFT,
+            TranslationProvider.INDEX_TRANSLATE,
             settingsService.settings.value.translationProvider,
         )
         assertEquals(
@@ -447,7 +448,8 @@ class SubmissionScreenModelTranslationAndScrollTest {
                       requestedProviders += request.provider
                       when (request.provider) {
                         TranslationProvider.GOOGLE -> error("boom")
-                        TranslationProvider.MICROSOFT -> request.sourceText.uppercase()
+                        TranslationProvider.INDEX_TRANSLATE -> request.sourceText.uppercase()
+                        TranslationProvider.MICROSOFT,
                         TranslationProvider.OPENAI_COMPATIBLE -> error("unexpected provider")
                       }
                     },
@@ -476,11 +478,11 @@ class SubmissionScreenModelTranslationAndScrollTest {
                 .attachmentTranslationState
         assertNotNull(retriedState)
         assertEquals(
-            listOf(TranslationProvider.GOOGLE, TranslationProvider.MICROSOFT),
+            listOf(TranslationProvider.GOOGLE, TranslationProvider.INDEX_TRANSLATE),
             requestedProviders,
         )
         assertEquals(
-            TranslationProvider.MICROSOFT,
+            TranslationProvider.INDEX_TRANSLATE,
             settingsService.settings.value.translationProvider,
         )
         assertEquals(
