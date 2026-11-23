@@ -24,6 +24,7 @@ import me.domino.fa2.data.remote.fa.user.UserRepository
 import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
+import me.domino.fa2.ui.pages.search.SearchRouteScreen
 import me.domino.fa2.ui.pages.watchrecommendation.SimilarUsersRouteScreen
 import me.domino.fa2.utils.FaUrls
 import org.koin.compose.koinInject
@@ -53,6 +54,7 @@ class UserRouteScreen(
           onBack = { parentNavigator.pop() },
           onGoHome = { parentNavigator.goBackHome() },
           shareUrl = FaUrls.user(username),
+          onSearch = { parentNavigator.push(SearchRouteScreen(initialQuery = "@lower $username")) },
           onExploreSimilarUsers = { parentNavigator.push(SimilarUsersRouteScreen(username)) },
           onTitleClick = { scrollToTopVersion.longValue++ },
       )

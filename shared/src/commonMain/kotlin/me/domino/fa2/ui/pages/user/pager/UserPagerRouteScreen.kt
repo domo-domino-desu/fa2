@@ -41,6 +41,7 @@ import me.domino.fa2.ui.app.navigation.AppScreen
 import me.domino.fa2.ui.app.navigation.goBackHome
 import me.domino.fa2.ui.app.scaffold.UserRouteTopBar
 import me.domino.fa2.ui.components.uiTestState
+import me.domino.fa2.ui.pages.search.SearchRouteScreen
 import me.domino.fa2.ui.pages.user.UserChildRoute
 import me.domino.fa2.ui.pages.user.UserRouteBody
 import me.domino.fa2.ui.pages.watchrecommendation.SimilarUsersRouteScreen
@@ -160,6 +161,9 @@ internal class UserPagerRouteScreen(
           onBack = { navigator.pop() },
           onGoHome = { navigator.goBackHome() },
           shareUrl = FaUrls.user(currentUsername),
+          onSearch = {
+            navigator.push(SearchRouteScreen(initialQuery = "@lower $currentUsername"))
+          },
           onExploreSimilarUsers = { navigator.push(SimilarUsersRouteScreen(currentUsername)) },
           onTitleClick = { scrollVersions[currentUsername.lowercase()]?.longValue++ },
       )

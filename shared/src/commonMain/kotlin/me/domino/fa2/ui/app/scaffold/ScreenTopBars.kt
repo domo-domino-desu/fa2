@@ -222,10 +222,19 @@ fun UserRouteTopBar(
     onBack: () -> Unit,
     onGoHome: () -> Unit,
     shareUrl: String,
+    onSearch: (() -> Unit)? = null,
     onExploreSimilarUsers: (() -> Unit)? = null,
     onTitleClick: (() -> Unit)? = null,
 ) {
   RouteTopBar(title = title, onBack = onBack, onGoHome = onGoHome, onTitleClick = onTitleClick) {
+    if (onSearch != null) {
+      ExpressiveIconButton(onClick = onSearch, modifier = Modifier.testTag("user-search")) {
+        Icon(
+            imageVector = FaMaterialSymbols.Filled.Search,
+            contentDescription = stringResource(Res.string.search),
+        )
+      }
+    }
     if (onExploreSimilarUsers != null) {
       ExpressiveIconButton(onClick = onExploreSimilarUsers) {
         Icon(
